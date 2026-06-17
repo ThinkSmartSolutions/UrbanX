@@ -427,7 +427,10 @@ G._CinemaEngine={
         const hFinal=Math.max(3,base*(1.8+hub*0.6));
         const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':pr>0.20?'#22c55e':'#15803d';
         const wphase=Math.max(0,Math.min(1,(_flon(f.geometry)-_mnLon)/_spanLon));
-        features.push({...f,properties:{...f.properties,hFinal,h:0.5,c,pr,wphase}});
+        // #5: inaltimea EXISTENTA (fond actual) vs hFinal (dupa crestere) — ca sa
+        // distingem vizual "ce era" (gri) de "ce a crescut" (color).
+        const hExist=pr>0.20?hFinal*(0.30+pr*0.18):hFinal*0.10;
+        features.push({...f,properties:{...f.properties,hFinal,hExist,h:0.5,c,pr,wphase}});
       });
     }else{
       // Fallback geometric realist — mai multe zone cu densitati diferite
@@ -488,7 +491,11 @@ G._CinemaEngine={
         const ph=f.properties.wphase||0;
         const lt=Math.max(0,Math.min(1,(t-ph*0.45)/0.55)); // fereastra de crestere locala
         const te=eo(lt);
-        return {...f,properties:{...f.properties,h:Math.max(0.5,(f.properties.hFinal||20)*te)}};
+        const h=Math.max(0.5,(f.properties.hFinal||20)*te);
+        // #5: cat timp inaltimea <= fondul EXISTENT -> gri (ce era); peste -> color (ce creste)
+        const hx=f.properties.hExist||0;
+        const c=(h<=hx*1.05)?'#64748b':f.properties.c;
+        return {...f,properties:{...f.properties,h,c}};
       })});
     }catch(e){}
   },
@@ -587,6 +594,33 @@ G._CinemaEngine={
       paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':['coalesce',['get','_op'],0.06],'line-blur':0.5},
       layout:{'line-cap':'round','line-join':'round'}
     });
+    // #6: PARTICULE (vehicule) care curg pe arterele majore — trafic realist.
+    // Pe arterele aglomerate (rosu/portocaliu) sunt MULTE si LENTE (ambuteiaj);
+    // pe cele libere (verde) putine si rapide.
+    const parts=[];
+    artere.forEach((f,fi)=>{
+      const co=f.geometry.coordinates; if(!co||co.length<2) return;
+      const major=f.properties.major, prim=f.properties.c==='#ea580c';
+      const dense = major?7:prim?5:2;                 // densitate vehicule
+      const spd = major?0.45:prim?0.7:1.1;            // viteza (aglomerat=lent)
+      for(let k=0;k<dense;k++) parts.push({fi:fi, base:k/dense, spd:spd, c:f.properties.c});
+    });
+    this._trParts=parts;
+    this._safeAdd(map,'v8-trp',{type:'geojson',data:{type:'FeatureCollection',features:[]}},{
+      id:'v8-trp-l',type:'circle',source:'v8-trp',
+      paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,1.6,14,3.6],'circle-color':['get','c'],'circle-opacity':0.95,'circle-stroke-width':0.4,'circle-stroke-color':'#fff7e6'}
+    });
+  },
+
+  // interpoleaza un punct la fractiunea p (0..1) de-a lungul unei polilinii
+  _ptAlong(coords, p){
+    if(!coords||coords.length<2) return coords&&coords[0];
+    let total=0; const seg=[];
+    for(let i=1;i<coords.length;i++){ const d=Math.hypot(coords[i][0]-coords[i-1][0],coords[i][1]-coords[i-1][1]); seg.push(d); total+=d; }
+    if(total<=0) return coords[0];
+    let target=p*total, acc=0;
+    for(let i=0;i<seg.length;i++){ if(acc+seg[i]>=target){ const f=(target-acc)/(seg[i]||1); return [coords[i][0]+(coords[i+1][0]-coords[i][0])*f, coords[i][1]+(coords[i+1][1]-coords[i][1])*f]; } acc+=seg[i]; }
+    return coords[coords.length-1];
   },
 
   // Update puls trafic — reteaua apare PE RAND (front din centru) + pulseaza arterele majore
@@ -601,6 +635,20 @@ G._CinemaEngine={
         const op=!appeared?0.05:(f.properties.major?(0.5+pulse*0.45):0.5);
         return{...f,properties:{...f.properties,_op:op,w:f.properties.major&&appeared?f.properties.w*(0.85+pulse*0.4):f.properties.w}};
       })});
+      // #6: misca particulele (vehicule) de-a lungul arterelor aparute
+      const psrc=map.getSource('v8-trp');
+      if(psrc && this._trParts){
+        const N=this._gfTr.length||1; const front2=t*N*1.25;
+        const feats=[];
+        this._trParts.forEach(pt=>{
+          if(pt.fi>=front2) return; // doar pe arterele deja aparute
+          const co=this._gfTr[pt.fi] && this._gfTr[pt.fi].geometry.coordinates;
+          let p=(pt.base + t*pt.spd*3.0)%1;
+          const c=this._ptAlong(co,p);
+          if(c&&c.length>=2) feats.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{c:pt.c}});
+        });
+        psrc.setData({type:'FeatureCollection',features:feats});
+      }
     }catch(e){}
   },
 
@@ -1274,7 +1322,7 @@ G._CinemaEngine={
     const map=this._map;if(!map)return;
     if(this._clearCinLabels) this._clearCinLabels(); // sterge etichetele HTML la schimbarea scenei
     ['v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
-     'v8-tr-l','v8-tr','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
+     'v8-tr-l','v8-tr','v8-trp-l','v8-trp','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
      'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
      'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
      'v8-mp-zone-line','v8-mp-zone-l','v8-mp-zone','v8-mp-green-l','v8-mp-green','v8-mp-pass-l','v8-mp-pass',

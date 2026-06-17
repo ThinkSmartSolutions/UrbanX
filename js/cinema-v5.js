@@ -1969,6 +1969,17 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           cifra2(N2(pred.auth||300)+'/an','Autorizatii','#60a5fa');
         } else {
           titlu('Coridoare Dezvoltare '+_E(),'Bare 3D PUG cresc animat: '+_S()+' \u2192 '+_E()); linie();
+          // #5: legenda etape \u2014 gri = fond EXISTENT, color = CRESTEREA propusa
+          if(tE>0.1){
+            ctx.save(); ctx.globalAlpha=sA*0.9; ctx.textAlign='left';
+            ctx.fillStyle='#64748b'; ctx.fillRect(W*0.04,H*0.155,12,12);
+            ctx.fillStyle='rgba(220,228,255,0.85)'; ctx.font='600 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
+            ctx.fillText('FOND EXISTENT (ce era)',W*0.04+18,H*0.165);
+            ctx.fillStyle='#ff8c00'; ctx.fillRect(W*0.30,H*0.155,12,12);
+            ctx.fillStyle='rgba(220,228,255,0.85)';
+            ctx.fillText('CRESTERE PROPUSA (ce creste)',W*0.30+18,H*0.165);
+            ctx.restore();
+          }
           ctx.globalAlpha=sA*tE;
           ctx.fillStyle='#ef4444';
           ctx.font='900 '+FD+'px "Space Grotesk",sans-serif';
