@@ -63,7 +63,7 @@ SCENES = [
   {id:'b1s3',dur:18000,label:'RETEA NATIONALA',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b1s4',dur:18000,label:'EVOLUTIE ISTORICA',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s1',dur:22000,label:'DEMOGRAFIE LIVE',       bloc:1,blabel:'INTELEGEREA ORASULUI'},
-  {id:'b2s2',dur:20000,label:'CRIZA IMBATRANIRE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b2s2',dur:24000,label:'CRIZA IMBATRANIRE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',   bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s4',dur:18000,label:'PROFIL LOCUITOR',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b17s1',dur:26000,label:'CARTIERE — NIVEL STRADA',bloc:1,blabel:'INTELEGEREA ORASULUI'},
@@ -793,10 +793,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b2s2':
         lp('dusk');
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#14532d',5,'#166534',10,'#f59e0b',20,'#dc2626',35,'#7f1d1d']);}catch(e){}
+        // #1: heatmap concentratie varstnici + ZOOM pe cartierul cel mai imbatranit
+        onIdle(function(){try{SE._addAgingHeat&&SE._addAgingHeat(map);}catch(e){}});
         fly(Z.C,13,50,0,4000,0,'dusk');
         fly(Z.NE,14.5,62,30,6000,9000,'dusk');
-        fly(Z.SV,14,58,-25,6000,17000,'dusk');
+        setTimeout(function(){ if(SE._playing&&SE._agingPeak){ try{map.flyTo({center:SE._agingPeak,zoom:15,pitch:62,bearing:-20,duration:5500,essential:true});}catch(e){} } },16500);
         break;
 
       case 'b2s3':
@@ -979,6 +980,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#166534',8,'#854d0e',15,'#b91c1c',25,'#dc2626',40,'#ef4444']);}catch(e){}
         onIdle(function(){try{SE._addSeismicHeat&&SE._addSeismicHeat(map);}catch(e){}});
+        // #2: clustere de fond vulnerabil comasat + unde de soc (simulare) + zoom
+        onIdle(function(){try{SE._addSeismicClusters&&SE._addSeismicClusters(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing&&SE._seismicEpi){ try{map.flyTo({center:SE._seismicEpi,zoom:14.5,pitch:60,bearing:25,duration:5000,essential:true});}catch(e){} } },13500);
         // Restrictii aeroporturi ROMARTSA
         setTimeout(function(){
           if(!SE._playing) return;
@@ -1015,11 +1019,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b5s3':
         lp('night');
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#ef4444'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.75);}catch(e){}
-        fly(Z.C,14,62,15,4000,0,'night');
-        rot(25,0.007);
-        fly(Z.NV,14.5,66,80,7000,11000,'night');
-        fly(Z.C,13.5,58,-10,6000,20000,'dusk');
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#ef4444'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.7);}catch(e){}
+        // #4: zonele de impact ale inactiunii (seism/inundatii/congestie/exod) cu pierderi
+        onIdle(function(){try{SE._addCostInaction&&SE._addCostInaction(map);}catch(e){}});
+        fly(Z.C,13,58,15,4000,0,'night');
+        rot(20,0.006);
+        fly(Z.C,13.4,62,70,7000,11000,'night');
+        fly(Z.C,12.9,56,-10,6000,20000,'dusk');
         break;
 
       // BLOC 6 ───────────────────────────────────────────────────────────
@@ -1099,17 +1105,22 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b7s3':
         lp('day');
-        rot(15,0.008);
-        fly(Z.C,13.5,52,0,4000,0,'day');
-        fly(Z.NV,14,60,30,6000,11000,'day');
-        fly(Z.SE2,13.5,55,-22,5500,19000,'day');
+        // #3: modal split desenat ca coridoare radiale (latime ∝ cota modala)
+        onIdle(function(){try{SE._addModalSplit&&SE._addModalSplit(map,(SE._city&&SE._city.tp)||60);}catch(e){}});
+        rot(12,0.005);
+        fly(Z.C,13,48,0,4000,0,'day');
+        fly(Z.C,13.4,54,40,6000,11000,'day');
+        fly(Z.C,13,50,-20,5500,19000,'day');
         break;
 
       // BLOC 8 ───────────────────────────────────────────────────────────
       case 'b8s1':
         lp('day');
-        // Proiectele DESENATE ca zone/propuneri (poligoane + retea), nu doar pin-uri
-        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },2400);
+        // #7: PROIECTE PNRR REALE desenate pe harta (pini + zone + coridoare) din
+        // _UrbanProjects, plus propunerile de masterplan. Nu mai e static.
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },2200);
+        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },3200);
         // Vedere larga ca sa se vada propunerile pe tot orasul, apoi push-in
         fly(Z.C,12.8,56,15,4500,0,'day');
         rot(10,0.006);

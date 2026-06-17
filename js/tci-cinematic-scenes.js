@@ -1071,6 +1071,117 @@ G._CinemaEngine={
     if(this._cinLabels) this._cinLabels(map, f.labels||[]);
   },
 
+  // ── #1 CRIZA IMBATRANIRE — heatmap concentratie varstnici (fond colectiv vechi
+  // = pondere 65+ mare; periferie noua = tineri). Localizeaza cartierul-varf.
+  _addAgingHeat(map){
+    const cx=this._city?.lon||27, cy=this._city?.lat||47;
+    const fs=(this._pugGeo&&this._pugGeo.features)||[]; const pts=[]; let peak=[cx,cy], pw=0;
+    if(fs.length){
+      const step=Math.max(1,Math.floor(fs.length/650));
+      for(let i=0;i<fs.length;i+=step){
+        const c=this._cheapCentroid(fs[i].geometry); if(!c)continue;
+        const u=String((fs[i].properties||{}).zf||(fs[i].properties||{}).utr||'').toUpperCase();
+        let w=0.30;
+        if(u.indexOf('LA')===0||u.indexOf('LL')===0) w=1.0;       // colectiv interbelic/vechi = varstnici
+        else if(u.indexOf('CC')===0||u.indexOf('CP')===0) w=0.85; // centru vechi
+        else if(u.indexOf('LC')===0||u.indexOf('LB')===0) w=0.7;
+        else if(u.indexOf('L')===0) w=0.32;                       // periferie noua = tineri
+        pts.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{w}});
+        if(w>pw){pw=w;peak=c;}
+      }
+    } else { for(let i=0;i<160;i++){const a=Math.random()*6.283,r=Math.random()*0.02;pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*r,cy+Math.sin(a)*r]},properties:{w:1-r/0.03}});} }
+    this._safeAdd(map,'v8-age',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
+      id:'v8-age-l',type:'heatmap',source:'v8-age',
+      paint:{'heatmap-weight':['get','w'],'heatmap-intensity':['interpolate',['linear'],['zoom'],10,1,15,2.4],
+        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.3,'rgba(96,165,250,0.40)',0.6,'rgba(245,158,11,0.65)',1,'rgba(168,85,247,0.88)'],
+        'heatmap-radius':['interpolate',['linear'],['zoom'],10,20,15,44],'heatmap-opacity':0.82}
+    });
+    this._agingPeak=peak;
+    this._cinLabels(map,[
+      {lon:peak[0],lat:peak[1],color:'#a855f7',icon:'👵',title:'CARTIER ÎMBĂTRÂNIT',sub:'pondere 65+ ridicată · fond colectiv vechi'},
+      {lon:cx,lat:cy-0.03,color:'#60a5fa',icon:'👶',title:'PERIFERIE TÂNĂRĂ',sub:'familii tinere · cerere creșe/școli'}
+    ]);
+    return peak;
+  },
+
+  // ── #2 RISC SEISMIC — clustere de fond vulnerabil (colectiv vechi comasat) +
+  // hull rosu + "unde de soc" concentrice (simulare) la cel mai dens cluster.
+  _addSeismicClusters(map){
+    const cx=this._city?.lon||27, cy=this._city?.lat||47;
+    const fs=(this._pugGeo&&this._pugGeo.features)||[]; const hi=[];
+    if(fs.length){
+      const step=Math.max(1,Math.floor(fs.length/700));
+      for(let i=0;i<fs.length;i+=step){
+        const c=this._cheapCentroid(fs[i].geometry); if(!c)continue;
+        const u=String((fs[i].properties||{}).zf||(fs[i].properties||{}).utr||'').toUpperCase();
+        if(u.indexOf('LA')===0||u.indexOf('LL')===0||u.indexOf('LC')===0||u.indexOf('CC')===0||u.indexOf('CP')===0) hi.push(c);
+      }
+    }
+    if(!hi.length){ for(let i=0;i<40;i++){const a=Math.random()*6.283,r=Math.random()*0.012;hi.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);} }
+    // punctele de fond vulnerabil — patrate rosii
+    this._safeAdd(map,'v8-sc',{type:'geojson',data:{type:'FeatureCollection',features:hi.map(c=>({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}}))}},{
+      id:'v8-sc-l',type:'circle',source:'v8-sc',
+      paint:{'circle-radius':5,'circle-color':'#ef4444','circle-opacity':0.7,'circle-stroke-width':1,'circle-stroke-color':'#7f1d1d'}
+    });
+    // centrul clusterului (medie) — epicentru pt undele de soc
+    let ex=0,ey=0; hi.forEach(c=>{ex+=c[0];ey+=c[1];}); ex/=hi.length; ey/=hi.length;
+    this._seismicEpi=[ex,ey];
+    // hull rosu transparent (zona comasata)
+    try{
+      if(typeof turf!=='undefined' && hi.length>=3){
+        const hull=turf.convex(turf.featureCollection(hi.map(c=>turf.point(c))));
+        if(hull) this._safeAdd(map,'v8-sc-h',{type:'geojson',data:hull},{id:'v8-sc-h-l',type:'fill',source:'v8-sc-h',paint:{'fill-color':'#ef4444','fill-opacity':0.14,'fill-outline-color':'#ef4444'}});
+      }
+    }catch(e){}
+    // unde de soc concentrice (cercuri) — simulare miscare seismica
+    const rings=[0.006,0.012,0.018].map(rad=>{ const ring=[]; for(let i=0;i<=48;i++){const a=i/48*6.283;ring.push([ex+Math.cos(a)*rad/Math.cos(ey*Math.PI/180),ey+Math.sin(a)*rad]);} return {type:'Feature',geometry:{type:'LineString',coordinates:ring},properties:{}}; });
+    this._safeAdd(map,'v8-sc-w',{type:'geojson',data:{type:'FeatureCollection',features:rings}},{
+      id:'v8-sc-w-l',type:'line',source:'v8-sc-w',paint:{'line-color':'#fca5a5','line-width':1.5,'line-opacity':0.55}
+    });
+    this._cinLabels(map,[{lon:ex,lat:ey,color:'#ef4444',icon:'🏚',title:'FOND VULNERABIL COMASAT',sub:'consolidare prioritară · PNRR C10-I2'}]);
+  },
+
+  // ── #3 MODAL SPLIT — coridoare radiale colorate, latime ∝ cota modala +
+  // sageti de flux. Transmite vizual repartitia deplasarilor.
+  _addModalSplit(map, tp){
+    const cx=this._city?.lon||27, cy=this._city?.lat||47;
+    const ptShare=Math.max(14,Math.min(34, Math.round((tp||60)*0.4)));
+    const car=Math.max(40, 92-ptShare-26);
+    const modes=[
+      {c:'#ef4444',pct:car,    label:'AUTO',           ang:35,  icon:'🚗'},
+      {c:'#a78bfa',pct:ptShare,label:'TRANSPORT PUBLIC',ang:135, icon:'🚌'},
+      {c:'#3b82f6',pct:20,     label:'PIETONAL',        ang:225, icon:'🚶'},
+      {c:'#22c55e',pct:6,      label:'BICICLETA',       ang:315, icon:'🚲'},
+    ];
+    const latC=Math.cos(cy*Math.PI/180)||0.7, R=0.05, feats=[];
+    modes.forEach(m=>{ const a=m.ang*Math.PI/180; const tip=[cx+Math.cos(a)*R/latC, cy+Math.sin(a)*R];
+      feats.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],tip]},properties:{c:m.c,w:Math.max(2,m.pct/4)}}); });
+    this._safeAdd(map,'v8-modal',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+      id:'v8-modal-l',type:'line',source:'v8-modal',
+      paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.85,'line-blur':0.4},layout:{'line-cap':'round'}
+    });
+    this._cinLabels(map, modes.map(m=>({lon:cx+Math.cos(m.ang*Math.PI/180)*R/latC, lat:cy+Math.sin(m.ang*Math.PI/180)*R, color:m.c, icon:m.icon, title:m.label, sub:m.pct+'% din deplasări'})));
+  },
+
+  // ── #4 COSTUL INACTIUNII — zone de impact (seismic/inundatii/congestie/exod)
+  // cu pierderi estimate, cercuri rosii care "ard" (simulare degradare).
+  _addCostInaction(map){
+    const cx=this._city?.lon||27, cy=this._city?.lat||47;
+    const latC=Math.cos(cy*Math.PI/180)||0.7;
+    const impacts=[
+      {dx: 0.0,  dy: 0.0,  c:'#ef4444', icon:'🏚', t:'SEISM — fond neconsolidat', loss:'−180 M€'},
+      {dx:-0.03, dy:-0.02, c:'#3b82f6', icon:'🌊', t:'INUNDAȚII — lunca neamenajată', loss:'−45 M€/eveniment'},
+      {dx: 0.035,dy: 0.01, c:'#f59e0b', icon:'🚗', t:'CONGESTIE — fără mobilitate', loss:'−2.400 ore/loc/an'},
+      {dx: 0.0,  dy: 0.035,c:'#a855f7', icon:'📉', t:'EXOD — fără investiții', loss:'−12% populație 2055'},
+    ];
+    const pts=impacts.map(im=>({type:'Feature',geometry:{type:'Point',coordinates:[cx+im.dx/latC,cy+im.dy]},properties:{c:im.c}}));
+    this._safeAdd(map,'v8-cost',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
+      id:'v8-cost-l',type:'circle',source:'v8-cost',
+      paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,14,15,40],'circle-color':['get','c'],'circle-opacity':0.28,'circle-stroke-width':2,'circle-stroke-color':['get','c']}
+    });
+    this._cinLabels(map, impacts.map(im=>({lon:cx+im.dx/latC, lat:cy+im.dy, color:im.c, icon:im.icon, title:im.t, sub:'pierdere estimată: '+im.loss})));
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1160,6 +1271,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
+     'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-cost-l','v8-cost',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
      'v7-gr-l','v7-gr','v7-bld-l','v7-bld','v7-den-l','v7-den','v7-tr-l','v7-tr',
