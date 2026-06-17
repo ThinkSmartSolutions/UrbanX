@@ -44,6 +44,9 @@ function _pdfText(pdf, text, x, y, opts) {
     lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {align:'center', maxWidth:maxW}));
   } else if(opts.align === 'right') {
     lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {align:'right'}));
+  } else if(opts.justify !== false && window._jPdfLine && lines.length > 1) {
+    // JUSTIFY implicit pe text de corp multi-linie (aliniat la ambele margini)
+    lines.forEach((l,i) => window._jPdfLine(pdf, l, x, y + i*lh, maxW, i===lines.length-1));
   } else {
     lines.forEach((l,i) => pdf.text(l, x, y + i*lh, {maxWidth:maxW}));
   }
@@ -813,7 +816,7 @@ G._TCIMasterplanPDF = {
       pdf.setTextColor(...r.color); pdf.setFont('helvetica','bold'); pdf.setFontSize(8.5);
       pdf.text(S2(r.label), 20, y+6);
       pdf.setTextColor(200,215,235); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
-      pdf.text(lines, 20, y+12);
+      lines.forEach((l,i)=>{ if(window._jPdfLine) window._jPdfLine(pdf,l,20,y+12+i*4,W-46,i===lines.length-1); else pdf.text(l,20,y+12+i*4); });
       y += bh+4;
     });
 
@@ -1393,7 +1396,7 @@ G._TCIMasterplanPDF = {
     pdf.rect(14,y,W-28,bh,'F');
     pdf.setFillColor(...color); pdf.rect(14,y,2,bh,'F');
     pdf.setTextColor(...color); pdf.setFont('helvetica','italic'); pdf.setFontSize(7);
-    pdf.text(lines, 19, y+4);
+    lines.forEach((l,i)=>{ if(window._jPdfLine && lines.length>1) window._jPdfLine(pdf,l,19,y+4+i*4,W-34,i===lines.length-1); else pdf.text(l,19,y+4+i*4); });
     return y+bh+2;
   },
 

@@ -2050,7 +2050,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   pdf.setTextColor(180,200,230);pdf.setFontSize(6.5);pdf.setFont('helvetica','italic');
   _narrative.slice(0,2).forEach(para=>{
     const lines=pdf.splitTextToSize(para,W-32);
-    lines.forEach(l=>{pdf.text(l,16,cy);cy+=5;});
+    lines.forEach((l,i)=>{ if(window._jPdfLine) window._jPdfLine(pdf,l,16,cy,W-32,i===lines.length-1); else pdf.text(l,16,cy); cy+=5;});
     cy+=2;
   });
   cy+=2;

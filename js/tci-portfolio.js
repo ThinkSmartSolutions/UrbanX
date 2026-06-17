@@ -392,9 +392,9 @@ G._Portfolio = {
         pdf.text(p.cost_mil_eur+' mil. €', W-16,y+5.5,{align:'right'});
         y+=10;
         pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
-        const desc = pdf.splitTextToSize(p.descriere, W-30);
-        pdf.text(desc.slice(0,3), 17,y);
-        y+=desc.slice(0,3).length*4+2;
+        const desc = pdf.splitTextToSize(p.descriere, W-30).slice(0,3);
+        desc.forEach((l,i)=>{ if(window._jPdfLine && desc.length>1) window._jPdfLine(pdf,l,17,y+i*4,W-30,i===desc.length-1); else pdf.text(l,17,y+i*4); });
+        y+=desc.length*4+2;
         // Surse
         pdf.setTextColor(96,165,250); pdf.setFontSize(7);
         pdf.text('Finanțare: '+p.surse.map(s=>s.sursa.split(' — ')[0]+' '+s.pct+'%').join(' · '), 17,y);

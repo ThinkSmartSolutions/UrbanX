@@ -1,6 +1,21 @@
 // UrbanX — State global, variabile si constante
 // Modul extras din index_v4.html
 
+// ── JUSTIFY global pt PDF — randeaza O LINIE aliniata la ambele margini
+// (distribuie spatiul intre cuvinte). Folosit de toate studiile/rapoartele.
+// isLast=true -> linie normala (ultima dintr-un paragraf nu se justifiaza).
+window._jPdfLine = function(pdf, line, x, y, maxW, isLast){
+  try{
+    if(isLast || !line || String(line).indexOf(' ')<=0){ pdf.text(line, x, y); return; }
+    var words=String(line).split(' ').filter(function(w){return w.length;});
+    if(words.length<2){ pdf.text(line, x, y); return; }
+    var wW=0; words.forEach(function(w){ wW+=pdf.getTextWidth(w); });
+    var gap=(maxW-wW)/(words.length-1), sp=pdf.getTextWidth(' ');
+    if(gap<=0 || gap>sp*4.5){ pdf.text(line, x, y); return; }
+    var cx=x; words.forEach(function(w){ pdf.text(w, cx, y); cx+=pdf.getTextWidth(w)+gap; });
+  }catch(e){ try{pdf.text(line,x,y);}catch(e2){} }
+};
+
 // ── State objects (moved to top for hoisting) ──────────────────────
 var FLOOR_COLORS=[
   '#22d3ee','#34d399','#86efac','#fde68a','#fcd34d','#fb923c',
