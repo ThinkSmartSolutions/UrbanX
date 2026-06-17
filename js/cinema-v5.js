@@ -515,6 +515,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     SV: [cx-0.017, cy-0.020],
     NE: [cx+0.022, cy+0.019],
   };
+  // VARIETATE CAMERA (#7): aliasurile periferice -> cartiere REALE diferite,
+  // amestecate per rulare. Camera nu mai merge mereu in aceleasi puncte/ordine.
+  try{
+    if(SE._pugGeo && SE._pugGeo.features && SE._pugGeo.features.length>8){
+      var _fs=SE._pugGeo.features;
+      var _cheap=function(g){try{var c=g.coordinates;while(Array.isArray(c)&&Array.isArray(c[0])&&Array.isArray(c[0][0]))c=c[0];var sx=0,sy=0,n=0;for(var i=0;i<c.length;i++){if(Array.isArray(c[i])&&typeof c[i][0]==='number'){sx+=c[i][0];sy+=c[i][1];n++;}}return n?[sx/n,sy/n]:null;}catch(e){return null;}};
+      var _pool=[], _step=Math.max(1,Math.floor(_fs.length/45));
+      for(var _i=0;_i<_fs.length;_i+=_step){var _c=_cheap(_fs[_i].geometry); if(_c){var _d=Math.hypot(_c[0]-cx,_c[1]-cy); if(_d>0.004&&_d<0.085)_pool.push(_c);}}
+      for(var _i=_pool.length-1;_i>0;_i--){var _j=Math.floor(Math.random()*(_i+1)); var _t=_pool[_i]; _pool[_i]=_pool[_j]; _pool[_j]=_t;}
+      ['NV','NE','SE2','SV','RES','PER','UNI','IND','VERDE'].forEach(function(k,idx){ if(_pool[idx]) Z[k]=_pool[idx]; });
+      console.log('[v9] Camera variata: '+_pool.length+' cartiere reale in pool');
+    }
+  }catch(e){ console.warn('[v9] camera variety:',e.message); }
   console.log('[v9] Zone camera:', 'CBD='+Z.CBD[0].toFixed(3)+','+Z.CBD[1].toFixed(3),
     'UNI='+Z.UNI[0].toFixed(3)+','+Z.UNI[1].toFixed(3),
     'IND='+Z.IND[0].toFixed(3)+','+Z.IND[1].toFixed(3));
