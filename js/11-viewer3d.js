@@ -418,6 +418,8 @@ function aedisOpen3DViewer(){
           style="background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:5px 13px;font-size:16px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">－</button>
         <button id="v3d-dist-btn" onclick="_v3dToggleDistances()" title="Distanțe vecini"
           style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">📏</button>
+        <button id="v3d-crane-btn" onclick="_v3dToggleCrane()" title="Macara / șantier construcție"
+          style="background:rgba(242,177,52,.12);color:#f2b134;border:1px solid rgba(242,177,52,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">🏗</button>
         <!-- View presets rapide -->
         <div style="display:flex;gap:3px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.1);padding-left:5px;margin-left:2px">
           <button onclick="V3D.th=Math.PI;V3D.ph=Math.PI/3.2;_v3dUpdateCam()" title="Vedere perspectivă (Sud→Nord)"
@@ -988,6 +990,31 @@ function _v3dBuild(ap){
     }catch(e){ console.warn('AEDIS mesh:',e.message); }
   });
 
+  // ── MACARA TURN / SANTIER (item #8) — semnal vizual de constructie ────────
+  // Plasata langa cea mai inalta cladire AEDIS propusa, dimensionata dupa
+  // inaltimea ei. Vizibilitate comutabila cu butonul 🏗 din bara de unelte.
+  try{
+    V3D.crane=null;
+    let _maxTop=0, _minX=1e9,_maxX=-1e9,_minZ=1e9,_maxZ=-1e9, _has=false;
+    (S.vol._lastFeats||[]).forEach(f=>{
+      if(!f.geometry || f.properties?.isExistent || f.properties?.floor<0) return;
+      const t=f.properties?.top||0; if(t>_maxTop)_maxTop=t;
+      try{
+        const cc=(f.geometry.type==='Polygon'?f.geometry.coordinates[0]:f.geometry.coordinates[0][0]);
+        cc.forEach(c=>{const p=toLoc(c); if(p[0]<_minX)_minX=p[0]; if(p[0]>_maxX)_maxX=p[0]; if(p[1]<_minZ)_minZ=p[1]; if(p[1]>_maxZ)_maxZ=p[1]; _has=true;});
+      }catch(e){}
+    });
+    if(_has && _maxTop>1){
+      const span=Math.max(_maxX-_minX,_maxZ-_minZ);
+      const crane=_v3dBuildCrane(THREE, _maxTop+8, Math.max(12, span*0.7+6));
+      // langa coltul cladirii, in afara amprentei
+      crane.group.position.set(_maxX+3.5, 0, _maxZ+3.5);
+      crane.group.visible = (V3D._showCrane!==false); // default ON
+      scene.add(crane.group);
+      V3D.crane=crane;
+    }
+  }catch(e){ console.warn('[V3D] macara:',e.message); }
+
   // ── Afiseaza butonul de legenda lotizare + auto-show la prima deschidere ──
   try{
     const _hasLot=(S.vol._lastFeats||[]).some(f=>f.properties?.isLotizare);
@@ -1126,6 +1153,13 @@ function _v3dBuild(ap){
       V3D.ph+=(_phT-V3D.ph)*DAMP;
       V3D.rad+=(_radT-V3D.rad)*DAMP;
       _v3dUpdateCam();
+    }
+    // ── Animatie macara: rotire lenta brat + ridicare/coborare carlig ──
+    if(V3D.crane && V3D.crane.group && V3D.crane.group.visible){
+      V3D.crane.t=(V3D.crane.t||0)+0.004;
+      V3D.crane.slew.rotation.y=V3D.crane.t;
+      const bob=(Math.sin(V3D.crane.t*2.3)*0.5+0.5); // 0..1 — ridicare/coborare sarcina
+      V3D.crane.hoist.position.y=V3D.crane._base - bob*(V3D.crane._amp||4);
     }
     V3D.r.render(V3D.scene,V3D.cam);
   };
@@ -1753,6 +1787,18 @@ function _v3dClearDistLines(){
 }
 
 // Toggle distanțe: afișează dacă ascunse, ascunde dacă afișate
+function _v3dToggleCrane(){
+  V3D._showCrane = (V3D._showCrane===false); // flip; default era ON
+  const btn=document.getElementById('v3d-crane-btn');
+  if(V3D.crane && V3D.crane.group) V3D.crane.group.visible = V3D._showCrane;
+  if(btn){
+    const on=V3D._showCrane;
+    btn.style.background = on?'rgba(242,177,52,.22)':'rgba(255,255,255,.06)';
+    btn.style.color = on?'#f2b134':'#94a3b8';
+  }
+  if(typeof ss==='function') ss(V3D._showCrane?'🏗 Macara / șantier: ON':'🏗 Macara: OFF');
+}
+
 function _v3dToggleDistances(){
   if(!V3D.scene||!V3D.r||!V3D.cam){ ss('⚠️ Viewer 3D nu e activ.'); return; }
 
@@ -2959,6 +3005,54 @@ function _v3dAddEdges(THREE, mesh, scene, color='#ffffff', opacity=0.3){
     line.rotation.copy(mesh.rotation);
     scene.add(line);
   }catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// _v3dBuildCrane — MACARA TURN + SANTIER (item #8). Construieste o macara turn
+// realista din primitive Three.js: catarg zabrelit, brat (jib) + contra-brat cu
+// contragreutate, troliu + carlig pe cablu. Returneaza {group, slew, hoist} —
+// slew = partea rotitoare (brat), hoist = troliul+carligul (ridicare/coborare).
+// Animatia (rotire brat + bob carlig) ruleaza in bucla de render.
+// ═══════════════════════════════════════════════════════════════════════════
+function _v3dBuildCrane(THREE, height, reach){
+  const H=Math.max(14, height||24), R=Math.max(10, reach||16);
+  const yellow=new THREE.MeshStandardMaterial({color:new THREE.Color('#f2b134'),roughness:0.55,metalness:0.45});
+  const steel =new THREE.MeshStandardMaterial({color:new THREE.Color('#37424f'),roughness:0.6,metalness:0.6});
+  const grp=new THREE.Group();
+  const S=1.4; // sectiune catarg (m)
+  // ── CATARG ZABRELIT: 4 picioare + rigle orizontale ──
+  const leg=new THREE.BoxGeometry(0.18,H,0.18);
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(c=>{
+    const m=new THREE.Mesh(leg,yellow); m.position.set(c[0]*S/2,H/2,c[1]*S/2); m.castShadow=true; grp.add(m);
+  });
+  const rungN=Math.min(10,Math.max(4,Math.round(H/3)));
+  for(let i=1;i<rungN;i++){
+    const y=H*i/rungN;
+    const rx=new THREE.Mesh(new THREE.BoxGeometry(S,0.10,0.10),yellow); rx.position.set(0,y,S/2); grp.add(rx);
+    const rx2=rx.clone(); rx2.position.set(0,y,-S/2); grp.add(rx2);
+    const rz=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.10,S),yellow); rz.position.set(S/2,y,0); grp.add(rz);
+    const rz2=rz.clone(); rz2.position.set(-S/2,y,0); grp.add(rz2);
+  }
+  // ── PARTE ROTITOARE (slew) la varful catargului ──
+  const slew=new THREE.Group(); slew.position.y=H; grp.add(slew);
+  // cabina operator
+  const cab=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.6,1.6),steel); cab.position.set(1.4,0.3,0); cab.castShadow=true; slew.add(cab);
+  // BRAT DE LUCRU (jib) — spre +X
+  const jib=new THREE.Mesh(new THREE.BoxGeometry(R,0.5,0.5),yellow); jib.position.set(R/2,1.1,0); jib.castShadow=true; slew.add(jib);
+  // CONTRA-BRAT + contragreutate — spre -X
+  const cj=new THREE.Mesh(new THREE.BoxGeometry(R*0.4,0.5,0.6),yellow); cj.position.set(-R*0.2,1.1,0); slew.add(cj);
+  const cw=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.8,1.6),steel); cw.position.set(-R*0.4,0.6,0); cw.castShadow=true; slew.add(cw);
+  // A-frame (pilon) + tiranti
+  const apex=new THREE.Mesh(new THREE.BoxGeometry(0.2,3,0.2),yellow); apex.position.set(0,2.6,0); slew.add(apex);
+  const tie1=new THREE.Mesh(new THREE.BoxGeometry(R*0.9,0.06,0.06),steel); tie1.position.set(R*0.42,2.4,0); tie1.rotation.z=-0.18; slew.add(tie1);
+  const tie2=new THREE.Mesh(new THREE.BoxGeometry(R*0.45,0.06,0.06),steel); tie2.position.set(-R*0.2,2.4,0); tie2.rotation.z=0.28; slew.add(tie2);
+  // TROLIU + CABLU + CARLIG (hoist) — pe jib, la ~0.7*reach
+  const hoist=new THREE.Group(); hoist.position.set(R*0.7,0.85,0); slew.add(hoist);
+  const trolley=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.3,0.6),steel); hoist.add(trolley);
+  const cableLen=H*0.5;
+  const cable=new THREE.Mesh(new THREE.BoxGeometry(0.05,cableLen,0.05),steel); cable.position.y=-cableLen/2; hoist.add(cable);
+  const hook=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5),steel); hook.position.y=-cableLen; hoist.add(hook);
+  return {group:grp, slew:slew, hoist:hoist, _base:0.85, _amp:Math.min(6,cableLen*0.4)};
 }
 
 // Ferestre stilizate direct pe prismă — corelate cu STIL + FUNCȚIUNE + PERETE CORTINĂ
