@@ -36,9 +36,16 @@ function gradeOf(s){
   if(s>=55)return 'C+'; if(s>=50)return 'C'; if(s>=45)return 'C-';
   if(s>=40)return 'D+'; return 'D';
 }
+// Legenda calificativelor — semnificatie (pt MP/PMUD + cinematic)
+var GRADES = [
+  {g:'A (80–100)', d:'oraș de referință europeană — calitate, economie și reziliență ridicate', c:'#22c55e'},
+  {g:'B (65–79)',  d:'oraș competitiv, cu potențial clar — câteva dimensiuni de întărit', c:'#84cc16'},
+  {g:'C (50–64)',  d:'oraș median — decalaje pe mai multe dimensiuni, necesită strategie', c:'#f59e0b'},
+  {g:'D (<50)',    d:'oraș sub presiune — intervenții prioritare pe economie/demografie/risc', c:'#ef4444'},
+];
 
 G._UrbanRank = {
-  EU_PEERS:EU_PEERS,
+  EU_PEERS:EU_PEERS, GRADES:GRADES,
   // pred = _PredEngine.calc ; city = _RO_CITIES_DB[key]/_EXTRA_UATS
   compute: function(pred, city){
     pred = pred||{}; city = city||{};
@@ -100,7 +107,10 @@ G._UrbanRank = {
     if(!D || !D.pdf) return;
     var R = this.compute(pred, city);
     D.chapter('Nota UrbanX — clasament și benchmark european');
-    D.P('UrbanX sintetizează toți indicatorii reali analizați într-o notă unică (0–100), transparentă și reproductibilă. Spre deosebire de clasamentele de imagine, fiecare sub-scor provine din date oficiale și are formulă explicită. Nota poate deveni un standard de evaluare comparabilă a orașelor.');
+    D.h2('Ce reprezintă nota UrbanX');
+    D.P('Nota UrbanX este un indice compozit (0–100) care exprimă, într-o singură cifră reproductibilă, performanța globală a unui UAT pe dimensiunile cheie ale dezvoltării urbane durabile. Spre deosebire de clasamentele de imagine, fiecare sub-scor provine din date oficiale și are formulă explicită — deci nota poate fi recalculată și verificată oricând. Scopul: un standard transparent de evaluare comparabilă a orașelor.');
+    D.h2('Legenda calificativelor');
+    D.bullets(GRADES.map(function(x){ return [x.g, x.d]; }));
     if(D.kpis) D.kpis([
       {val:R.score+'/100', label:'Nota UrbanX', sub:'index compozit'},
       {val:R.grade, label:'Calificativ', sub:'scala A+..D'},

@@ -2637,6 +2637,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             ctx.fillText(R.score+'/100', W*0.79, H*0.475);
             ctx.fillStyle='rgba(148,163,184,0.82)'; ctx.font='600 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.letterSpacing='0.05em';
             ctx.fillText('NOTA URBANX', W*0.79, H*0.515); ctx.letterSpacing='0';
+            // legenda calificativelor (A/B/C/D)
+            var GR=(window._UrbanRank&&window._UrbanRank.GRADES)||[];
+            ctx.textAlign='left'; ctx.font='600 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
+            GR.forEach(function(x,i){ var ly=H*(0.55+i*0.026);
+              ctx.fillStyle=x.c; ctx.fillRect(W*0.69,ly-7,8,8);
+              ctx.fillStyle='rgba(200,210,224,0.8)'; ctx.fillText(x.g,W*0.705,ly); });
             ctx.globalAlpha=1;
           }
           // benchmark european (tier echivalent)
