@@ -1395,13 +1395,16 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b19s1': // CULTURA & TURISM — obiective + Via Transilvanica + street-view
         lp('day');
         try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
+        // cladiri 3D reale din PUG ca sa existe masa construita in jurul monumentului principal
+        onIdle(function(){ try{ SE._addBuildings && SE._addBuildings(map); }catch(e){} });
         setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
         // ZOOM pe clusterul de obiective (centru) — ca etichetele sa incapa, nu la margini
         fly([cx,cy],14.4,58,0,4500,0,'day');
         rot(10,0.004);
         fly([cx,cy],14.8,60,35,7000,9000,'day');
-        // STREET-VIEW pe obiectivul cultural principal (nivel pieton, aproape de sol)
-        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:17,pitch:84,bearing:25,duration:6500,essential:true});}catch(e){} } },15800);
+        // STREET-VIEW pe obiectivul cultural principal (ex. Palatul Culturii la Iasi) — nivel pieton
+        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:17.4,pitch:84,bearing:25,duration:6500,essential:true});}catch(e){} } },15800);
+        setTimeout(function(){ try{ if(SE._playing && SE._tourMain){ rot(25,0.0016); } }catch(e){} }, 22500);
         break;
       case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi)
         lp('day');
@@ -1412,13 +1415,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,45,7000,9000,'day');
         fly(Z.NV,13.4,54,-20,6000,16000,'day');
         break;
-      case 'b17s1': // CARTIERE la nivel de strada — STREET EXPERIENCE real pe Mapbox
+      case 'b17s1': // CARTIERE la nivel de strada — COBORARE REALA pe Mapbox in cladirile 3D
         lp('day');
-        // FOLOSIM modulul dedicat _TCIStreetView: zoom 17.5 + pitch 82 pe Mapbox,
-        // cladirile cadastrale 3D reale + pietoni + MACARALE + mers (exact ce ai cerut).
-        try{ if(window._TCIStreetView){ window._TCIStreetView.activate(SE._city, _S()); } }catch(e){ console.warn('[street]',e.message); }
-        // fallback daca modulul lipseste: zoom manual la nivel strada
-        if(!window._TCIStreetView){ fly([cx,cy],17.4,82,20,5000,0,'day'); rot(6,0.003); fly([cx,cy],17.6,84,70,9000,6000,'day'); }
+        // NU mai folosim overlay-ul cu macarale/pietoni desenat pe canvas (parea fals).
+        // Coboram efectiv camera Mapbox in cladirile 3D reale construite din PUG (footprints + inaltimi).
+        try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
+        onIdle(function(){ try{ SE._addBuildings && SE._addBuildings(map); }catch(e){} });
+        try{ map.setLayoutProperty('building-extrusion','visibility','visible'); }catch(e){}
+        try{ map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']); }catch(e){}
+        // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
+        fly([cx,cy],14.6,55,0,3500,0,'day');
+        fly([cx,cy],16.6,80,30,5500,3600,'day');
+        rot(8,0.0014);
+        fly([cx,cy],17.5,84,-35,9000,9300,'day');
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -2736,7 +2745,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         if(sa2>0){
           ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
           ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
-          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · pietoni · macarale · pitch 82°', W*0.04, H*0.30);
+          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri 3D reale din PUG · scara pietonului', W*0.04, H*0.30);
           ctx.globalAlpha=1;
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');

@@ -420,6 +420,8 @@ function aedisOpen3DViewer(){
           style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">📏</button>
         <button id="v3d-crane-btn" onclick="_v3dToggleCrane()" title="Macara / șantier construcție"
           style="background:rgba(242,177,52,.12);color:#f2b134;border:1px solid rgba(242,177,52,.3);border-radius:8px;padding:5px 11px;font-size:14px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation">🏗</button>
+        <button id="v3d-tur-btn" onclick="if(window.VTour&&window.VTour.start){window.VTour.start();}else{ss&&ss('Turul virtual se încarcă...');}" title="Tur Virtual 3D + Dollhouse (orbital / first-person WASD + touch)"
+          style="background:rgba(99,102,241,.18);color:#a78bfa;border:1px solid rgba(139,92,246,.45);border-radius:8px;padding:5px 11px;font-size:13px;cursor:pointer;flex-shrink:0;min-height:36px;touch-action:manipulation;display:flex;align-items:center;gap:3px">🥽<span style="font-size:10px;font-weight:700">Tur</span></button>
         <!-- View presets rapide -->
         <div style="display:flex;gap:3px;flex-shrink:0;border-left:1px solid rgba(255,255,255,.1);padding-left:5px;margin-left:2px">
           <button onclick="V3D.th=Math.PI;V3D.ph=Math.PI/3.2;_v3dUpdateCam()" title="Vedere perspectivă (Sud→Nord)"
