@@ -21,7 +21,7 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 JSPDF = "/tmp/jspdf.js"
 PORT = 9470
 
-MODULES = ['urbanx-indices','urbanx-projects','urbanx-riskmaps','urbanx-regio-infra',
+MODULES = ['urbanx-pdfmap','urbanx-indices','urbanx-projects','urbanx-riskmaps','urbanx-regio-infra',
            'urbanx-fauna','urbanx-tourism','urbanx-vitality','urbanx-services',
            'urbanx-housing','urbanx-energy','urbanx-resources',
            'urbanx-public-participation','urbanx-rank']
@@ -54,6 +54,7 @@ AUDIT_JS = r'''(function(){
       return ot(t,x,y,o);
     };
     var D=window._makeStratDoc(pdf,{docTitle:'AUDIT',cityName:C.city.name});
+    if(window._PdfMap) window._PdfMap.setPug(pug);
     var ctx={city:C.city,cityKey:C.city.key,pugGeo:pug,reguli:{},risk:{seismic:{ag:C.pred.ag}}};
     var steps=[['indici',function(){window._UrbanIndices.renderChapter(D,C.pred,C.city);}],['proiecte',function(){window._UrbanProjects.renderChapter(D,C.city.key,C.city);}],['risc',function(){window._RiskMaps.renderChapter(D,ctx);}],['regio',function(){window._RegioInfra.renderChapter(D,C.city.key,C.city);}],['turism',function(){window._UrbanTourism.renderChapter(D,C.city.key,C.city);}],['vitality',function(){window._UrbanVitality.renderChapter(D,C.city.key,C.city);}],['servicii',function(){window._UrbanServices.renderChapter(D,C.city.key,C.city);}],['locuire',function(){window._UrbanHousing.renderChapter(D,C.city,C.pred);}],['energie',function(){window._UrbanEnergy.renderChapter(D,C.city,C.pred);}],['resurse',function(){window._UrbanResources.renderChapter(D,C.city);}],['fauna',function(){window._UrbanFauna.renderChapter(D,C.city);}],['participare',function(){window._PublicParticipation.renderChapter(D,C.city);}],['rank',function(){window._UrbanRank.renderChapter(D,C.pred,C.city);}]];
     var thrown=[]; steps.forEach(function(s){try{s[1]();}catch(e){thrown.push(s[0]+':'+e.message);}});

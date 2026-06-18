@@ -133,6 +133,14 @@ G._UrbanTourism = {
     ]);
     D.h2('Benchmark — orașe-model de succes turistic');
     D.bullets(MODELS.map(function(m){ return [m.n, m.note]; }));
+    // HARTA: obiective culturale + Via Transilvanica
+    try{ if(window._PdfMap && D.ensure){ var ff=this.buildFeatures(cityKey, city);
+      var mp=(ff.pts||[]).map(function(f){var c=f.geometry.coordinates;return {lon:c[0],lat:c[1],c:(f.properties&&f.properties.c)||'#e879f9',r:1.8};});
+      var ml=(ff.lines||[]).map(function(f){return {coords:f.geometry.coordinates,c:(f.properties&&f.properties.c)||'#f59e0b',w:1.2};});
+      D.h2('Hartă — cultură și turism');
+      D.ensure(80); window._PdfMap.draw(D.pdf,{x:D.dims.ML,y:D.y+2,w:Math.min(D.dims.CW,160),h:66,title:'Obiective culturale · Via Transilvanica',points:mp,lines:ml,cx:city.lon,cy:city.lat,legend:[[[232,121,249],'obiectiv cultural'],[[245,158,11],'Via Transilvanica']]});
+      D.setY(D.y+80);
+    } }catch(e){ console.warn('[Tourism] harta:',e.message); }
     if(D.sourceBadges) D.sourceBadges(['INS (turism)','Min. Culturii / LMI','UNESCO','Via Transilvanica (Tășuleasa Social)','Eurostat tourism']);
   }
 };

@@ -215,6 +215,14 @@ G._RegioInfra = {
         ['Rol regional', g.note],
       ]);
     }
+    // HARTA: autostrazi (status pe culori) + aeroporturi + puncte modale
+    try{ if(window._PdfMap && D.ensure){ var ff=this.buildFeatures(city);
+      var mp=(ff.airportPts||[]).map(function(f){var c=f.geometry.coordinates;return {lon:c[0],lat:c[1],c:(f.properties&&f.properties.c)||'#22d3ee',r:1.8};});
+      var ml=(ff.lines||[]).map(function(f){return {coords:f.geometry.coordinates,c:(f.properties&&f.properties.c)||'#f97316',w:1.2};});
+      D.h2('Hartă — infrastructură regională');
+      D.ensure(80); window._PdfMap.draw(D.pdf,{x:D.dims.ML,y:D.y+2,w:Math.min(D.dims.CW,160),h:66,title:'Autostrăzi (status) · aeroporturi · puncte modale',points:mp,lines:ml,cx:city.lon,cy:city.lat,legend:[[[249,115,22],'execuție'],[[59,130,246],'proiectare'],[[34,197,94],'finalizat'],[[34,211,238],'aeroport/modal']]});
+      D.setY(D.y+80);
+    } }catch(e){ console.warn('[RegioInfra] harta:',e.message); }
     if(D.sourceBadges) D.sourceBadges(['CNAIR','PNRR','AACR / ROMATSA','Metrou Cluj SA','Metrorex','MApN / context public']);
   }
 };

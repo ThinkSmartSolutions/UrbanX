@@ -130,6 +130,13 @@ G._UrbanFauna = {
     } else {
       D.P('Nu există prezență semnificativă a ursului brun în acest UAT. Riscul faunistic sălbatic este redus; atenția se concentrează pe fauna urbană (câini/pisici fără stăpân).');
     }
+    // HARTA: hotspot-uri caini + padocuri + risc ursi
+    try{ if(window._PdfMap && D.ensure){ var ff=this.buildFeatures(city);
+      var mp=(ff.pts||[]).map(function(f){var c=f.geometry.coordinates;return {lon:c[0],lat:c[1],c:(f.properties&&f.properties.c)||'#f59e0b',r:1.8};});
+      D.h2('Hartă — faună urbană');
+      D.ensure(80); window._PdfMap.draw(D.pdf,{x:D.dims.ML,y:D.y+2,w:Math.min(D.dims.CW,160),h:66,title:'Hotspot-uri câini fără stăpân · padocuri · risc urși',points:mp,cx:city.lon,cy:city.lat,legend:[[[245,158,11],'hotspot câini'],[[34,197,94],'padoc public'],[[185,28,28],'risc urși']]});
+      D.setY(D.y+80);
+    } }catch(e){ console.warn('[Fauna] harta:',e.message); }
     if(D.sourceBadges) D.sourceBadges(['Min. Mediului (recensământ urși 2023)','Romsilva','RO-Alert','Legea 258/2013','OUG 155/2001','ASPA']);
   }
 };

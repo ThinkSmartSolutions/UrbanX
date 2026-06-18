@@ -167,6 +167,14 @@ G._UrbanProjects = {
       D.P(p.desc);
       D.callout('Impact urbanistic', p.impact, p.color ? undefined : undefined);
     });
+    // HARTA: localizarea proiectelor structurante (poli + coridoare)
+    try{ if(window._PdfMap && D.ensure){ var ff=this.buildFeatures(cityKey, city);
+      var mp=(ff.pts||[]).map(function(f){var c=f.geometry.coordinates;return {lon:c[0],lat:c[1],c:(f.properties&&f.properties.c)||'#D4AF37',r:2};});
+      var ml=(ff.lines||[]).map(function(f){return {coords:f.geometry.coordinates,c:(f.properties&&f.properties.c)||'#22c55e',w:1.2};});
+      D.h2('Hartă — proiecte structurante');
+      D.ensure(80); window._PdfMap.draw(D.pdf,{x:D.dims.ML,y:D.y+2,w:Math.min(D.dims.CW,160),h:66,title:'Poli de dezvoltare · coridoare · tren metropolitan',points:mp,lines:ml,cx:city.lon,cy:city.lat,legend:[[[212,175,55],'pol/proiect'],[[34,197,94],'coridor/tren']]});
+      D.setY(D.y+80);
+    } }catch(e){ console.warn('[Projects] harta:',e.message); }
     D.sourceBadges(['PNRR','FEDR','CNAIR','SICAP','PMUD','primării']);
   }
 };
