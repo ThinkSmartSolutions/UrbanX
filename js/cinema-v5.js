@@ -570,6 +570,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
   function stopAll(){
     SE._playing=false; SE._paused=false; _clrIvs();
+    try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
     try{if(SE._cinKeyHandler)document.removeEventListener('keydown',SE._cinKeyHandler);}catch(e){}
     var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove();
     try{if(window._CinemaRec&&window._CinemaRec._active)window._CinemaRec.stop();}catch(e){}
@@ -1411,21 +1412,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,45,7000,9000,'day');
         fly(Z.NV,13.4,54,-20,6000,16000,'day');
         break;
-      case 'b17s1': // CARTIERE la nivel de strada — CLADIRI NATIVE Mapbox (amprente reale)
+      case 'b17s1': // CARTIERE la nivel de strada — STREET EXPERIENCE real pe Mapbox
         lp('day');
-        // FOLOSIM cladirile native Mapbox (footprint-uri reale OSM), NU zonele PUG
-        // (care sunt slab-uri colorate de cartier, nu cladiri). Ascundem zonele.
-        try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.96);}catch(e){}
-        ['utr-fill','utr-line','utr-lbl','v8-gr-l'].forEach(function(id){try{if(map.getLayer(id))map.setLayoutProperty(id,'visibility','none');}catch(e){}});
-        setTimeout(function(){
-          if(!SE._playing||!SE._cinLabels) return;
-          SE._cinLabels(map,[{lon:cx,lat:cy,color:'#22d3ee',icon:'🚶',title:'CENTRU · NIVEL STRADA',sub:'cladiri reale · ochi de pieton'}]);
-        },2500);
-        // dive la nivel de pieton: zoom 17.5, pitch 85 (aproape orizontal), centru dens
-        fly([cx,cy],16.5,80,15,5000,0,'day');
-        fly([cx,cy],17.6,85,60,9000,5500,'day');
-        fly([cx,cy],17.2,84,130,8000,15500,'dusk');
+        // FOLOSIM modulul dedicat _TCIStreetView: zoom 17.5 + pitch 82 pe Mapbox,
+        // cladirile cadastrale 3D reale + pietoni + MACARALE + mers (exact ce ai cerut).
+        try{ if(window._TCIStreetView){ window._TCIStreetView.activate(SE._city, _S()); } }catch(e){ console.warn('[street]',e.message); }
+        // fallback daca modulul lipseste: zoom manual la nivel strada
+        if(!window._TCIStreetView){ fly([cx,cy],17.4,82,20,5000,0,'day'); rot(6,0.003); fly([cx,cy],17.6,84,70,9000,6000,'day'); }
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -2743,10 +2736,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         if(sa2>0){
           ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
           ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
-          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · pitch '+(84+Math.round(Math.sin(t*6)*1))+'°', W*0.04, H*0.30);
-          // hint: tur 3D pieton imersiv (hand-off catre Urban3D + VTour)
-          ctx.fillStyle='rgba(212,175,55,0.9)'; ctx.font='600 '+Math.min(W*0.0095,13)+'px "IBM Plex Mono",monospace';
-          ctx.fillText('→ apasa  🚶 Tur 3D  (dreapta-jos) pentru tur de pieton imersiv 3D', W*0.04, H*0.335);
+          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · pietoni · macarale · pitch 82°', W*0.04, H*0.30);
           ctx.globalAlpha=1;
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');
@@ -3001,6 +2991,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     if(SE._paused){ SE._paused=false; var _pb=document.getElementById('c8-pause'); if(_pb){_pb.textContent='⏸ Pauza';_pb.style.background='rgba(0,0,0,.6)';} var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove(); }
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
+    // dezactiveaza street experience daca a fost activ (scena b17s1) la schimbare scena
+    try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
     // Restaureaza cladirile Mapbox standard pentru scenele fara bare 3D PUG
     if(sc.id!=='b6s2'&&sc.id!=='b11s2'){
       try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
