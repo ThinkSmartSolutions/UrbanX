@@ -3229,6 +3229,21 @@ const _TCIShare = {
   },
 };
 
+// ── TCI CLASIC accesibil din panou (butonul '📊 TCI Clasic') ──────────────
+// openTCI a fost suprascris de cinematic; expunem deschiderea CLASICULUI direct.
+window._switchToTCIClassic = function(){
+  try{
+    // inchide cinematicul daca ruleaza
+    try{ if(window._CinemaEngine && window._CinemaEngine._playing && window._CinemaEngine.stop) window._CinemaEngine.stop(); }catch(e){}
+    _ProjectionEngine.open();
+    var ck = window.TCI?.cityKey || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    var city = window._RO_CITIES_DB?.[ck];
+    if(city && _ProjectionEngine.setFullCity) _ProjectionEngine.setFullCity(ck, city.name);
+    try{ window._closeAllMenusAndOverlay && window._closeAllMenusAndOverlay(); }catch(e){}
+  }catch(e){ window.ss && window.ss('TCI Clasic indisponibil: '+e.message); }
+};
+window._switchToCinemaV2 = window._switchToCinemaV2 || function(){ /* launch via _launchCinemaV2 */ };
+
 // ── 6. PARCEL RISK CARD (sync cu parcela activa) ──────────────────────────
 const _ParcelRiskCard = {
   render(parcelData) {

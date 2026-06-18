@@ -241,6 +241,7 @@ G._CinemaEngine={
     const d=document.createElement('div');d.id='tci-c8-ctrl';
     d.style.cssText='position:fixed;bottom:28px;right:20px;z-index:96000;display:flex;gap:8px;';
     d.innerHTML=`
+      <button id="c8-share" title="Copiază link de share — deschide direct filmul cinematic" style="background:rgba(59,130,246,.18);border:1px solid rgba(59,130,246,.4);color:#93c5fd;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">🔗 Share</button>
       <button id="c8-prev" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 16px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">◀</button>
       <button id="c8-skip" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 18px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">▶</button>
       <button id="c8-stop" style="background:rgba(180,0,0,.45);border:1px solid rgba(255,80,80,.3);color:#ff9999;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">✕</button>`;
@@ -248,6 +249,8 @@ G._CinemaEngine={
     document.getElementById('c8-prev').onclick=()=>{if(this._si>0){this._cleanLayers();if(this._raf)cancelAnimationFrame(this._raf);this._runScene(this._si-1);}};
     document.getElementById('c8-skip').onclick=()=>{if(this._si<this.SCENES.length-1){this._cleanLayers();if(this._raf)cancelAnimationFrame(this._raf);this._runScene(this._si+1);}};
     document.getElementById('c8-stop').onclick=()=>this.stop();
+    var _sh=document.getElementById('c8-share');
+    if(_sh) _sh.onclick=()=>{ try{ if(window._ShareManager&&window._ShareManager.generateCinema){ window._ShareManager.generateCinema(); } else { window.ss&&window.ss('Share indisponibil'); } }catch(e){} };
   },
 
   _hideUI(){

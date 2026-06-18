@@ -221,9 +221,34 @@ G._ShareManager = {
     return url;
   },
 
+  // Share LINK pt FILM CINEMATIC — deschide platforma si porneste cinematicul
+  generateCinema() {
+    const cityKey = window.TCI?.cityKey || window._ProjectionEngine?.currentCity || localStorage.getItem('ux_last_city') || 'RO-IS-01';
+    const params = new URLSearchParams();
+    params.set('uat', cityKey);
+    params.set('film', '1');
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(()=>{ ss?.('🎬 Link film cinematic copiat! Cine îl deschide vede filmul.'); this._showShareToast(url); }).catch(()=>this._showShareModal(url));
+    } else { this._showShareModal(url); }
+    return url;
+  },
+
   // Restaurează starea din URL la încărcare
   restore() {
     const params = new URLSearchParams(window.location.search);
+    // FILM CINEMATIC din link: ?uat=...&film=1 -> porneste automat cinematicul
+    if(params.get('film')==='1'){
+      const fuat = params.get('uat');
+      let tries=0;
+      const waitFilm=setInterval(()=>{
+        tries++;
+        if(typeof window._startCinema==='function' && window.map){
+          clearInterval(waitFilm);
+          try{ window._startCinema(fuat||undefined); }catch(e){ console.warn('[Share film]',e.message); }
+        } else if(tries>40){ clearInterval(waitFilm); }
+      }, 600);
+    }
     if(!params.has('uat') && !params.has('sc') && !params.has('lat')) return false;
 
     console.log('[Share] Restaurare stare din URL...');
