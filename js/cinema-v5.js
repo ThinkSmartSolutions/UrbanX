@@ -452,6 +452,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   }
 
   SE._map=map; SE._playing=true; SE._si=0; SE.SCENES=SCENES;
+  SE._curBase='custom'; // urmarim stilul de baza activ (custom intunecat vs Standard 3D luminos)
   SE._guardCanvas&&SE._guardCanvas();
 
   // ── ZONE REALE DIN PUG pentru camera ──────────────────────────────────
@@ -546,6 +547,33 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     }catch(e){ try{ SE._addBuildings && SE._addBuildings(map); }catch(_){} }
   }
 
+  // ── BAZA STANDARD 3D (harta Mapbox luminoasa cu cladiri reale + cer + POI, ca pe platforma) ──
+  // Scenele "umane" (nivel strada, cultura, fauna) ruleaza pe stilul Standard, fiecare cu alt
+  // moment al zilei (lightPreset) pt variatie de culoare/fundal. Restul raman pe baza intunecata.
+  var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
+  function _cinApplyBase(id, afterReady){
+    var wantStd = !!STD_SCENES[id];
+    var wantKey = wantStd ? 'standard' : 'custom';
+    function ready(){
+      if(!SE._playing) return;
+      if(wantStd){
+        try{ map.setConfigProperty('basemap','show3dObjects',true); }catch(e){}
+        try{ map.setConfigProperty('basemap','showPointOfInterestLabels',true); }catch(e){}
+        try{ lp(STD_SCENES[id]); }catch(e){}
+        // ascundem overlay-urile hartii principale (parcele/UTR/context OSM) ca scena Standard sa fie curata
+        ['parcel-fill','parcel-line','utr-fill','utr-line','utr-lbl','ctx-3d','vol-3d','vol-3d-outline','zone-fill','zone-line']
+          .forEach(function(lid){ try{ if(map.getLayer(lid)) map.setLayoutProperty(lid,'visibility','none'); }catch(e){} });
+      }
+      try{ afterReady(); }catch(e){}
+    }
+    if(SE._curBase===wantKey){ ready(); return; }
+    SE._curBase=wantKey;
+    try{
+      map.setStyle((typeof STYLES!=='undefined' && STYLES[wantKey]) || (typeof STYLES!=='undefined'?STYLES.custom:undefined));
+      map.once('style.load', function(){ setTimeout(ready, 550); });
+    }catch(e){ ready(); }
+  }
+
   // Zone REALE din PUG — nu offset-uri fixe
   // pugZones calculat din UTR-urile PUG reale ale UAT-ului
   var pz = pugZones || {};
@@ -608,6 +636,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
   function stopAll(){
     SE._playing=false; SE._paused=false; _clrIvs();
+    // revenim la baza intunecata custom daca am ramas pe Standard
+    try{ if(SE._curBase && SE._curBase!=='custom' && typeof STYLES!=='undefined'){ map.setStyle(STYLES.custom); SE._curBase='custom'; } }catch(e){}
     try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
     try{if(SE._cinKeyHandler)document.removeEventListener('keydown',SE._cinKeyHandler);}catch(e){}
     var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove();
@@ -1430,37 +1460,35 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,50,7000,9000,'day');
         fly(Z.CBD,14.2,58,-25,6000,15500,'day');
         break;
-      case 'b19s1': // CULTURA & TURISM — obiective + Via Transilvanica + street-view
-        lp('day');
-        // cladiri REALE (footprints) ca sa existe masa construita reala in jurul monumentului principal
-        onIdle(function(){ _cinRealBuildings(map); });
+      case 'b19s1': // CULTURA & TURISM — pe Standard 3D (apus); street-view pe monumentul principal
+        // pe baza intunecata aducem footprints; pe Standard cladirile reale exista deja
+        if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
         setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
         // ZOOM pe clusterul de obiective (centru) — ca etichetele sa incapa, nu la margini
-        fly([cx,cy],14.4,58,0,4500,0,'day');
+        fly([cx,cy],14.4,58,0,4500,0);
         rot(10,0.004);
-        fly([cx,cy],14.8,60,35,7000,9000,'day');
+        fly([cx,cy],14.8,60,35,7000,9000);
         // STREET-VIEW pe obiectivul cultural principal (ex. Palatul Culturii la Iasi) — nivel pieton
         setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:17.4,pitch:84,bearing:25,duration:6500,essential:true});}catch(e){} } },15800);
         setTimeout(function(){ try{ if(SE._playing && SE._tourMain){ rot(25,0.0016); } }catch(e){} }, 22500);
         break;
-      case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi)
-        lp('day');
-        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+      case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi) — pe Standard 3D (zori)
+        if(SE._curBase!=='standard'){ onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); }
         setTimeout(function(){ if(SE._playing){ try{SE._addFauna&&SE._addFauna(map, SE._city);}catch(e){} } },1800);
-        fly(Z.C,13,52,0,4000,0,'day');
+        fly(Z.C,13,52,0,4000,0);
         rot(12,0.004);
-        fly(Z.C,13.6,56,45,7000,9000,'day');
-        fly(Z.NV,13.4,54,-20,6000,16000,'day');
+        fly(Z.C,13.6,56,45,7000,9000);
+        fly(Z.NV,13.4,54,-20,6000,16000);
         break;
-      case 'b17s1': // CARTIERE la nivel de strada — CLADIRI REALE (footprints OSM/Mapbox), nu sloturi de zonare
-        lp('day');
+      case 'b17s1': // CARTIERE la nivel de strada — pe Standard 3D (cladiri reale + cer + POI, ca in harta platformei)
         try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
-        onIdle(function(){ _cinRealBuildings(map); });
+        // pe Standard avem deja cladiri 3D reale; pe baza intunecata folosim footprints composite
+        if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
         // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
-        fly([cx,cy],14.6,55,0,3500,0,'day');
-        fly([cx,cy],16.6,80,30,5500,3600,'day');
+        fly([cx,cy],14.6,55,0,3500,0);
+        fly([cx,cy],16.6,80,30,5500,3600);
         rot(8,0.0014);
-        fly([cx,cy],17.6,84,-35,9000,9300,'day');
+        fly([cx,cy],17.6,84,-35,9000,9300);
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -3053,7 +3081,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     });
     try{if(map.getLayer('tci-tp-layer'))map.setLayoutProperty('tci-tp-layer','visibility','none');}catch(e){}
     updateLegend(sc);
-    setup(sc.id);
+    // comuta baza (Standard 3D luminos vs custom intunecat) si abia apoi ruleaza camera scenei
+    _cinApplyBase(sc.id, function(){ if(SE._playing && SE._si===idx) setup(sc.id); });
     _loop(sc,idx);
     console.log('[v9]',(idx+1)+'/'+SCENES.length,'B'+sc.bloc,sc.id,name);
   }
