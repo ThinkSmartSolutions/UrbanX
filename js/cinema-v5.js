@@ -765,6 +765,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // MONUMENTE + ZONE DE PROTECTIE ~100m (OSM historic / LMI · Legea 422/2001)
         // reperele in jurul carora s-a construit orasul + servitutile de protectie.
         onIdle(function(){try{SE._addMonuments&&SE._addMonuments(map, D.monuments);}catch(e){}});
+        // ZOOM pe centrul istoric (clusterul de monumente) — clar UNDE, nu imprastiat
+        setTimeout(function(){ if(SE._playing){ try{map.flyTo({center:[cx,cy],zoom:14.5,pitch:58,bearing:25,duration:6000,essential:true});}catch(e){} } },10000);
         fly(Z.C,13.5,52,0,4000,0,'dawn');
         fly(Z.NV,14,60,40,6000,10000,'dawn');
         fly(Z.C,13,50,-10,5000,17000,'day');
@@ -1409,26 +1411,21 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,45,7000,9000,'day');
         fly(Z.NV,13.4,54,-20,6000,16000,'day');
         break;
-      case 'b17s1': // CARTIERE la nivel de strada (street-view / pieton)
+      case 'b17s1': // CARTIERE la nivel de strada — CLADIRI NATIVE Mapbox (amprente reale)
         lp('day');
-        // TESUT URBAN REAL: barele 3D PUG colorate (la inaltime maxima) — bogat,
-        // ca in viewerul Urban3D; NU ne bazam pe cladirile native rare/intunecate.
-        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
+        // FOLOSIM cladirile native Mapbox (footprint-uri reale OSM), NU zonele PUG
+        // (care sunt slab-uri colorate de cartier, nu cladiri). Ascundem zonele.
         try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.96);}catch(e){}
+        ['utr-fill','utr-line','utr-lbl','v8-gr-l'].forEach(function(id){try{if(map.getLayer(id))map.setLayoutProperty(id,'visibility','none');}catch(e){}});
         setTimeout(function(){
           if(!SE._playing||!SE._cinLabels) return;
-          var c=SE._city||{};
-          SE._cinLabels(map,[
-            {lon:(c.lon||27),lat:(c.lat||47)+0.004,color:'#22d3ee',icon:'🏘',title:'CARTIER CENTRAL',sub:'nivel pieton · acces 15 min'},
-            {lon:Z.RES[0],lat:Z.RES[1],color:'#34d399',icon:'🚶',title:'CARTIER REZIDENTIAL',sub:'tesut urban · strazi locale'},
-          ]);
-        },1500);
-        // STREET LEVEL real: pitch 84-85 (aproape orizontal, ochi de pieton),
-        // zoom 17 pe CENTRUL DENS (Z.CBD) — barele 3D PUG dau cladiri bogate.
-        fly(Z.CBD,16.8,84,15,5500,0,'day');
-        rot(8,0.004);
-        fly(Z.CBD,17.2,85,75,9000,6000,'day');
-        fly(Z.C,16.9,83,150,8000,16000,'dusk');
+          SE._cinLabels(map,[{lon:cx,lat:cy,color:'#22d3ee',icon:'🚶',title:'CENTRU · NIVEL STRADA',sub:'cladiri reale · ochi de pieton'}]);
+        },2500);
+        // dive la nivel de pieton: zoom 17.5, pitch 85 (aproape orizontal), centru dens
+        fly([cx,cy],16.5,80,15,5000,0,'day');
+        fly([cx,cy],17.6,85,60,9000,5500,'day');
+        fly([cx,cy],17.2,84,130,8000,15500,'dusk');
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -2746,7 +2743,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         if(sa2>0){
           ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
           ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
-          ctx.fillText('\u{1F6B6} NIVEL STRADA · pitch '+(78+Math.round(Math.sin(t*6)*2))+'°', W*0.04, H*0.30);
+          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · pitch '+(84+Math.round(Math.sin(t*6)*1))+'°', W*0.04, H*0.30);
           ctx.globalAlpha=1;
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');

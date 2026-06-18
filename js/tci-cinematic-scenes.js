@@ -1244,12 +1244,14 @@ G._CinemaEngine={
   // ~100m (servitute Legea 422/2001). Sursa: OSM historic; CIMEC/LMI = registru oficial.
   _addMonuments(map, monuments){
     var cx=this._city?.lon||27, cy=this._city?.lat||47;
-    var mon=(monuments&&monuments.length)?monuments.slice(0,60):null;
-    if(!mon){ mon=[]; var latC0=Math.cos(cy*Math.PI/180)||0.7; for(var i=0;i<6;i++){var a=i/6*6.283;mon.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.008/latC0,cy+Math.sin(a)*0.006]},properties:{n:'Monument'}});} }
-    // ZONA DE PROTECTIE ~100m (cerc interpolat pe zoom ca sa aproximeze metri)
+    // DOAR cele mai apropiate ~8 monumente de centru (altfel cercuri imprastiate, confuz)
+    var mon=(monuments&&monuments.length)?monuments.slice():null;
+    if(mon){ mon.sort(function(a,b){var ca=a.geometry.coordinates,cb=b.geometry.coordinates;return (Math.hypot(ca[0]-cx,ca[1]-cy))-(Math.hypot(cb[0]-cx,cb[1]-cy));}); mon=mon.slice(0,8); }
+    if(!mon){ mon=[]; var latC0=Math.cos(cy*Math.PI/180)||0.7; for(var i=0;i<5;i++){var a=i/5*6.283;mon.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*0.004/latC0,cy+Math.sin(a)*0.003]},properties:{n:'Monument'}});} }
+    // ZONA DE PROTECTIE ~100m — cerc MIC (nu blob urias suprapus)
     this._safeAdd(map,'v8-monz',{type:'geojson',data:{type:'FeatureCollection',features:mon}},{
       id:'v8-monz-l',type:'circle',source:'v8-monz',
-      paint:{'circle-radius':['interpolate',['exponential',2],['zoom'],10,5,13,22,15,90,17,300],'circle-color':'#f59e0b','circle-opacity':0.12,'circle-stroke-width':1,'circle-stroke-color':'#fbbf24'}
+      paint:{'circle-radius':['interpolate',['exponential',2],['zoom'],11,4,14,12,16,40],'circle-color':'#f59e0b','circle-opacity':0.14,'circle-stroke-width':1,'circle-stroke-color':'#fbbf24'}
     });
     // MONUMENTELE (puncte aurii)
     this._safeAdd(map,'v8-mon2',{type:'geojson',data:{type:'FeatureCollection',features:mon}},{
