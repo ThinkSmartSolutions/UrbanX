@@ -1119,8 +1119,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b8s1':
         lp('day');
         // #7: PROIECTE PNRR REALE desenate pe harta (pini + zone + coridoare) din
-        // _UrbanProjects, plus propunerile de masterplan. Nu mai e static.
+        // _UrbanProjects. Cladirile ESTOMPATE ca pinii de proiect sa iasa in evidenta.
         onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        setTimeout(function(){ try{map.setPaintProperty('v8-bld-l','fill-extrusion-opacity',0.35);}catch(e){} },1800);
         setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },2200);
         setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },3200);
         // Vedere larga ca sa se vada propunerile pe tot orasul, apoi push-in
@@ -1362,14 +1363,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.9,60,45,7000,9000,'dusk');
         fly(Z.RES,13.6,56,-25,6000,15500,'day');
         break;
-      case 'b22s1': // PARTICIPARE PUBLICA (transparenta decizionala)
-        lp('day');
-        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
-        setTimeout(function(){ if(SE._playing){ try{SE._addParticipation&&SE._addParticipation(map);}catch(e){} } },1600);
-        fly(Z.C,13.2,52,0,4500,0,'day');
-        rot(10,0.004);
-        fly(Z.C,13.8,56,40,7000,9000,'day');
-        fly(Z.NE,13.5,54,-20,6000,15500,'day');
+      case 'b22s1': // PARTICIPARE PUBLICA — scena de DATE: baza curata + comentarii clare
+        lp('night');
+        try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
+        setTimeout(function(){ if(SE._playing){ try{SE._addParticipation&&SE._addParticipation(map);}catch(e){} } },1400);
+        fly([cx,cy],12.6,40,0,4500,0,'night');
+        rot(7,0.003);
+        fly([cx,cy],13.0,44,22,16000,5000,'night');
         break;
       case 'b21s1': // SANATATE & ORAS DIGITAL
         lp('day');
@@ -1393,11 +1393,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
         setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
-        fly(Z.C,13.2,54,0,4500,0,'day');
-        rot(12,0.004);
-        fly(Z.C,13.8,58,45,7000,9000,'day');
-        // STREET-VIEW pe obiectivul cultural principal (nivel pieton)
-        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:16.6,pitch:80,bearing:30,duration:6000,essential:true});}catch(e){} } },16000);
+        // ZOOM pe clusterul de obiective (centru) — ca etichetele sa incapa, nu la margini
+        fly([cx,cy],14.4,58,0,4500,0,'day');
+        rot(10,0.004);
+        fly([cx,cy],14.8,60,35,7000,9000,'day');
+        // STREET-VIEW pe obiectivul cultural principal (nivel pieton, aproape de sol)
+        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:17,pitch:84,bearing:25,duration:6500,essential:true});}catch(e){} } },15800);
         break;
       case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi)
         lp('day');
@@ -1422,18 +1423,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             {lon:Z.RES[0],lat:Z.RES[1],color:'#34d399',icon:'🚶',title:'CARTIER REZIDENTIAL',sub:'tesut urban · strazi locale'},
           ]);
         },1500);
-        // dive la nivel de strada IN CENTRU DENS (nu camp gol periferic)
-        fly(Z.CBD,16.2,78,10,5000,0,'day');
-        rot(14,0.005);
-        fly(Z.C,16.5,80,80,8500,5500,'day');
-        fly(Z.RES,16.1,76,160,8500,15500,'dusk');
+        // STREET LEVEL real: pitch 84-85 (aproape orizontal, ochi de pieton),
+        // zoom 17 pe CENTRUL DENS (Z.CBD) — barele 3D PUG dau cladiri bogate.
+        fly(Z.CBD,16.8,84,15,5500,0,'day');
+        rot(8,0.004);
+        fly(Z.CBD,17.2,85,75,9000,6000,'day');
+        fly(Z.C,16.9,83,150,8000,16000,'dusk');
         break;
-      case 'b16s1': // NOTA UrbanX (clasament)
-        lp('dusk');
-        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
-        rot(12,0.004);
-        fly(Z.C,12.6,56,0,4500,0,'dusk');
-        fly(Z.C,13.2,60,40,16000,5000,'night');
+      case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
+        lp('night');
+        try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
+        rot(6,0.0025);
+        fly([cx,cy],12.2,38,0,4500,0,'night');
+        fly([cx,cy],12.6,42,18,16000,5000,'night');
         break;
       case 'b15s1': // Proiecte structurante reale
         lp('day');
@@ -2854,11 +2856,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           var top=PS.comments.slice().sort(function(a,b){return ((b.vote_up||0)-(b.vote_down||0))-((a.vote_up||0)-(a.vote_down||0));}).slice(0,4);
           top.forEach(function(c,i){
             var al=Math.min(1,(t-0.16-i*0.06)/0.18)*sA; if(al<=0)return; ctx.globalAlpha=al;
-            ctx.fillStyle='rgba(4,10,24,0.74)'; ctx.fillRect(W*0.04,H*(0.40+i*0.066),W*0.54,H*0.056);
-            ctx.fillStyle='#93c5fd'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
-            ctx.fillText('💬 '+(c.comment||'').slice(0,48),W*0.055,H*(0.40+i*0.066)+H*0.024);
-            ctx.fillStyle='rgba(148,163,184,0.75)'; ctx.font='600 '+Math.min(W*0.0085,11)+'px "IBM Plex Mono",monospace';
-            ctx.fillText('Cetatean · +'+((c.vote_up||0)-(c.vote_down||0))+' voturi',W*0.055,H*(0.40+i*0.066)+H*0.046);
+            ctx.fillStyle='rgba(4,10,24,0.82)'; ctx.fillRect(W*0.04,H*(0.40+i*0.072),W*0.66,H*0.06);
+            ctx.fillStyle='#93c5fd'; ctx.font='700 '+Math.min(W*0.0105,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            // comentariu COMPLET (fara taiere) — auto-shrink daca e prea lung
+            var _ct='💬 '+(c.comment||''), _cf=Math.min(W*0.0105,14);
+            while(ctx.measureText(_ct).width>W*0.63 && _cf>8){ _cf-=0.5; ctx.font='700 '+_cf+'px "Space Grotesk",sans-serif'; }
+            ctx.fillText(_ct,W*0.055,H*(0.40+i*0.072)+H*0.025);
+            ctx.fillStyle='rgba(148,163,184,0.78)'; ctx.font='600 '+Math.min(W*0.0085,11)+'px "IBM Plex Mono",monospace';
+            ctx.fillText('Cetatean · +'+((c.vote_up||0)-(c.vote_down||0))+' voturi · '+(c.category||'general'),W*0.055,H*(0.40+i*0.072)+H*0.05);
             ctx.globalAlpha=1;
           });
         }
