@@ -508,6 +508,44 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     },dly||0);
   }
 
+  // CLADIRI REALE pentru scenele de nivel-strada: footprints OSM/Mapbox (sursa 'composite'
+  // / source-layer 'building') — cladiri individuale cu strazi intre ele, ca pe harta principala
+  // (NU sloturi de zonare PUG, care arata ca niste lespezi colorate gigantice).
+  // Daca stilul nu are sursa composite -> revine la barele 3D din PUG.
+  function _cinRealBuildings(map){
+    try{
+      var ok=false;
+      if(map.getSource&&map.getSource('composite')){
+        if(!(map.getLayer&&map.getLayer('cin-osm-bld'))){
+          map.addLayer({
+            id:'cin-osm-bld',type:'fill-extrusion',source:'composite','source-layer':'building',
+            filter:['==','extrude','true'],minzoom:13.5,
+            paint:{
+              'fill-extrusion-color':['interpolate',['linear'],['get','height'],
+                0,'#d7e0f0',8,'#b7c5e0',18,'#94a8cd',35,'#7088b3',70,'#52699c'],
+              'fill-extrusion-height':['get','height'],
+              'fill-extrusion-base':['get','min_height'],
+              'fill-extrusion-opacity':0.97,
+              'fill-extrusion-vertical-gradient':true,
+              'fill-extrusion-ambient-occlusion-intensity':0.6,
+              'fill-extrusion-ambient-occlusion-radius':3.2
+            }
+          });
+        }
+        ok = !!(map.getLayer&&map.getLayer('cin-osm-bld'));
+      }
+      if(ok){
+        // cladiri reale prezente -> ascundem lespezile de zonare colorate (par false la nivel strada)
+        ['v8-bld-l','v8-gr-l'].forEach(function(id){ try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){} });
+        try{ map.setLayoutProperty('building-extrusion','visibility','visible'); }catch(e){}
+        try{ map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']); }catch(e){}
+      } else {
+        // fallback: stilul nu are cladiri reale -> barele 3D din PUG
+        try{ SE._addBuildings && SE._addBuildings(map); }catch(e){}
+      }
+    }catch(e){ try{ SE._addBuildings && SE._addBuildings(map); }catch(_){} }
+  }
+
   // Zone REALE din PUG — nu offset-uri fixe
   // pugZones calculat din UTR-urile PUG reale ale UAT-ului
   var pz = pugZones || {};
@@ -1394,9 +1432,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
       case 'b19s1': // CULTURA & TURISM — obiective + Via Transilvanica + street-view
         lp('day');
-        try{map.setLayoutProperty('building-extrusion','visibility','visible');}catch(e){}
-        // cladiri 3D reale din PUG ca sa existe masa construita in jurul monumentului principal
-        onIdle(function(){ try{ SE._addBuildings && SE._addBuildings(map); }catch(e){} });
+        // cladiri REALE (footprints) ca sa existe masa construita reala in jurul monumentului principal
+        onIdle(function(){ _cinRealBuildings(map); });
         setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
         // ZOOM pe clusterul de obiective (centru) — ca etichetele sa incapa, nu la margini
         fly([cx,cy],14.4,58,0,4500,0,'day');
@@ -1415,19 +1452,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,45,7000,9000,'day');
         fly(Z.NV,13.4,54,-20,6000,16000,'day');
         break;
-      case 'b17s1': // CARTIERE la nivel de strada — COBORARE REALA pe Mapbox in cladirile 3D
+      case 'b17s1': // CARTIERE la nivel de strada — CLADIRI REALE (footprints OSM/Mapbox), nu sloturi de zonare
         lp('day');
-        // NU mai folosim overlay-ul cu macarale/pietoni desenat pe canvas (parea fals).
-        // Coboram efectiv camera Mapbox in cladirile 3D reale construite din PUG (footprints + inaltimi).
         try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
-        onIdle(function(){ try{ SE._addBuildings && SE._addBuildings(map); }catch(e){} });
-        try{ map.setLayoutProperty('building-extrusion','visibility','visible'); }catch(e){}
-        try{ map.setPaintProperty('building-extrusion','fill-extrusion-height',['get','height']); }catch(e){}
+        onIdle(function(){ _cinRealBuildings(map); });
         // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
         fly([cx,cy],14.6,55,0,3500,0,'day');
         fly([cx,cy],16.6,80,30,5500,3600,'day');
         rot(8,0.0014);
-        fly([cx,cy],17.5,84,-35,9000,9300,'day');
+        fly([cx,cy],17.6,84,-35,9000,9300,'day');
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -2745,7 +2778,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         if(sa2>0){
           ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
           ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
-          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri 3D reale din PUG · scara pietonului', W*0.04, H*0.30);
+          ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · scara pietonului', W*0.04, H*0.30);
           ctx.globalAlpha=1;
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');

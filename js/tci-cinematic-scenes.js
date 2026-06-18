@@ -1462,7 +1462,7 @@ G._CinemaEngine={
   _cleanLayers(){
     const map=this._map;if(!map)return;
     if(this._clearCinLabels) this._clearCinLabels(); // sterge etichetele HTML la schimbarea scenei
-    ['v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
+    ['cin-osm-bld','v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
      'v8-tr-l','v8-tr','v8-trp-l','v8-trp','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
      'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
      'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
