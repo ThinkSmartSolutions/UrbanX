@@ -2744,6 +2744,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.globalAlpha=sa2*0.9; ctx.fillStyle='rgba(34,211,238,0.92)';
           ctx.font='700 '+Math.min(W*0.011,15)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
           ctx.fillText('\u{1F6B6} NIVEL STRADA · cladiri reale · pitch '+(84+Math.round(Math.sin(t*6)*1))+'°', W*0.04, H*0.30);
+          // hint: tur 3D pieton imersiv (hand-off catre Urban3D + VTour)
+          ctx.fillStyle='rgba(212,175,55,0.9)'; ctx.font='600 '+Math.min(W*0.0095,13)+'px "IBM Plex Mono",monospace';
+          ctx.fillText('→ apasa  🚶 Tur 3D  (dreapta-jos) pentru tur de pieton imersiv 3D', W*0.04, H*0.335);
           ctx.globalAlpha=1;
         }
         narativ('Camera coboara la nivelul pietonului — asa isi traieste orasul un locuitor. Calitatea tesutului urban (strazi la scara umana, fronturi continue, parter activ, verde de proximitate) decide daca un cartier este viu sau dormitor. Orasul de 15 minute: locuire, munca, scoala, sanatate, cumparaturi si recreere accesibile pe jos sau cu bicicleta.');

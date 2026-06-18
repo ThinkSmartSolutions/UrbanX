@@ -241,6 +241,7 @@ G._CinemaEngine={
     const d=document.createElement('div');d.id='tci-c8-ctrl';
     d.style.cssText='position:fixed;bottom:28px;right:20px;z-index:96000;display:flex;gap:8px;';
     d.innerHTML=`
+      <button id="c8-tour" title="Tur 3D pieton (Urban3D + Tur Virtual)" style="background:rgba(34,211,238,.18);border:1px solid rgba(34,211,238,.4);color:#67e8f9;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">🚶 Tur 3D</button>
       <button id="c8-prev" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 16px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">◀</button>
       <button id="c8-skip" style="background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);padding:10px 18px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">▶</button>
       <button id="c8-stop" style="background:rgba(180,0,0,.45);border:1px solid rgba(255,80,80,.3);color:#ff9999;padding:10px 14px;border-radius:10px;cursor:pointer;font:600 12px/1 monospace;backdrop-filter:blur(8px)">✕</button>`;
@@ -248,6 +249,28 @@ G._CinemaEngine={
     document.getElementById('c8-prev').onclick=()=>{if(this._si>0){this._cleanLayers();if(this._raf)cancelAnimationFrame(this._raf);this._runScene(this._si-1);}};
     document.getElementById('c8-skip').onclick=()=>{if(this._si<this.SCENES.length-1){this._cleanLayers();if(this._raf)cancelAnimationFrame(this._raf);this._runScene(this._si+1);}};
     document.getElementById('c8-stop').onclick=()=>this.stop();
+    document.getElementById('c8-tour').onclick=()=>this._to3DTour();
+  },
+
+  // Hand-off din cinematic -> TUR 3D PIETON (Urban3D viewer + Tur Virtual first-person).
+  // Cinematicul (Mapbox) si turul 3D (Three.js) sunt motoare separate; VTour are nevoie
+  // de viewer-ul Urban3D deschis + o cladire AEDIS generata. Aici facem legatura.
+  _to3DTour(){
+    try{
+      var S = window.S;
+      var hasViewerBld = window.V3D && Array.isArray(window.V3D.aedis) && window.V3D.aedis.length>0;
+      var hasGenerated = S && S.vol && S.vol._lastFeats && S.vol._lastFeats.length;
+      // pune cinematicul pe pauza ca sa nu ruleze in spate
+      try{ this._paused = true; }catch(e){}
+      if(window.VTour && window.VTour.start && hasViewerBld){ window.VTour.start(); return; }
+      if(typeof window.aedisOpen3DViewer==='function' && hasGenerated){
+        window.aedisOpen3DViewer();
+        // dupa ce viewer-ul s-a construit, pornim turul virtual first-person
+        setTimeout(function(){ try{ if(window.VTour && window.VTour.start) window.VTour.start(); }catch(e){} }, 2800);
+        return;
+      }
+      window.ss && window.ss('🚶 Tur 3D pieton: selectează o parcelă pe hartă → Urban3D → „Generează AEDIS", apoi apasă din nou 🚶 Tur 3D');
+    }catch(e){ window.ss && window.ss('Tur 3D indisponibil: '+e.message); }
   },
 
   _hideUI(){
