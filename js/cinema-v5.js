@@ -426,9 +426,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // schimbat, NU mai rulam callback-ul (altfel layere vechi — trafic/seismic/
   // inundatii — se re-adauga in scena urmatoare si raman pana la final).
   function onIdle(fn){
-    var _si=SE._si;
-    var g=function(){ if(!SE._playing||SE._si!==_si) return; try{fn();}catch(e){} };
-    try{map.once('idle',g);}catch(e){setTimeout(g,1200);}
+    var _si=SE._si, done=false;
+    var g=function(){ if(done)return; done=true; if(!SE._playing||SE._si!==_si) return; try{fn();}catch(e){} };
+    try{map.once('idle',g);}catch(e){}
+    // FALLBACK GARANTAT: pe scenele cu camera in miscare continua harta NU devine niciodata 'idle',
+    // deci callback-ul (ex. barele de crestere, heatmap) nu rula niciodata. Il fortam dupa 1.8s.
+    setTimeout(g,1800);
   }
 
   var cv = SE._mkCanvas ? SE._mkCanvas() : _mkFallbackCanvas();
@@ -1251,32 +1254,37 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         onIdle(function(){
           if(!SE._playing) return;
           var coslat=Math.cos(cy*Math.PI/180)||0.7;
-          function ring(ctr,radKm){ var pts=[],n=64,rd=radKm/111; for(var i=0;i<=n;i++){var a=i/n*Math.PI*2; pts.push([ctr[0]+Math.cos(a)*rd/coslat, ctr[1]+Math.sin(a)*rd]);} return [pts]; }
+          function circle(ctr,radKm){ var pts=[],n=72,rd=radKm/111; for(var i=0;i<=n;i++){var a=i/n*Math.PI*2; pts.push([ctr[0]+Math.cos(a)*rd/coslat, ctr[1]+Math.sin(a)*rd]);} return pts; }
           var nodes=[];
-          // spitale OSM = pol de dezvoltare (rosu)
-          (D.amenity||[]).forEach(function(a){ try{ var t=a.properties&&(a.properties.t||a.properties.amenity)||''; if(/hospital|clinic/.test(t)){ var c=a.geometry&&a.geometry.coordinates; if(c&&typeof c[0]==='number') nodes.push({c:c,col:'#ef4444',km:[5,2.2,0.9]}); } }catch(e){} });
-          // nodul de autostrada/centura cel mai apropiat de oras (portocaliu)
+          // poli REALI de dezvoltare (spital, zone) din proiecte + nodul de autostrada
+          var pr=(window._UrbanProjects&&window._UrbanProjects.data&&window._UrbanProjects.data[SE._cityKey])||[];
+          pr.filter(function(p){return typeof p.lat==='number'&&(p.tip==='pol'||p.tip==='zona');}).slice(0,3).forEach(function(p){ nodes.push({c:[p.lon,p.lat],col:p.color||'#ef4444',rk:4.2}); });
           var best=null,bd=1e9;
           (D.roads||[]).forEach(function(r){ if(!(r.properties&&(r.properties.t==='motorway'||r.properties.t==='trunk')))return; var cs=r.geometry&&r.geometry.coordinates; if(!cs)return; var flat=Array.isArray(cs[0])&&Array.isArray(cs[0][0])?[].concat.apply([],cs):cs; flat.forEach(function(p){ if(!p||typeof p[0]!=='number')return; var d=Math.hypot(p[0]-cx,p[1]-cy); if(d<bd){bd=d;best=p;} }); });
-          if(best) nodes.push({c:best,col:'#f59e0b',km:[8,4,1.6]});
-          // fallback: poli offset in intravilan daca nu sunt date OSM
-          if(!nodes.length){ nodes.push({c:[cx+0.018,cy+0.010],col:'#ef4444',km:[5,2.2,0.9]}); nodes.push({c:[cx-0.014,cy-0.012],col:'#f59e0b',km:[7,3.4,1.4]}); }
-          var feats=[];
-          nodes.forEach(function(nd){ [[nd.km[0],0.10],[nd.km[1],0.22],[nd.km[2],0.42]].forEach(function(b){ feats.push({type:'Feature',properties:{c:nd.col,o:b[1]},geometry:{type:'Polygon',coordinates:ring(nd.c,b[0])}}); }); });
+          if(best) nodes.push({c:best,col:'#f59e0b',rk:6});
+          if(!nodes.length){ nodes.push({c:[cx+0.016,cy+0.010],col:'#ef4444',rk:4.2}); nodes.push({c:[cx-0.014,cy-0.012],col:'#f59e0b',rk:6}); }
+          // umplere FOARTE slaba (reach) + inele-contur cu glow (camp gravitational citibil — NU spalare rosie)
+          var fillF=[], ringF=[];
+          nodes.forEach(function(nd){
+            fillF.push({type:'Feature',properties:{c:nd.col},geometry:{type:'Polygon',coordinates:[circle(nd.c,nd.rk)]}});
+            [1,0.72,0.46,0.24].forEach(function(f,i){ ringF.push({type:'Feature',properties:{c:nd.col,o:0.28+i*0.16,w:1.4+i*0.9},geometry:{type:'LineString',coordinates:circle(nd.c,nd.rk*f)}}); });
+          });
           try{
-            if(map.getLayer('v9-infl-l'))map.removeLayer('v9-infl-l');
+            ['v9-infl-l','v9-infl-ring'].forEach(function(id){if(map.getLayer(id))map.removeLayer(id);});
             if(map.getSource('v9-infl'))map.removeSource('v9-infl');
-            map.addSource('v9-infl',{type:'geojson',data:{type:'FeatureCollection',features:feats}});
+            if(map.getSource('v9-inflr'))map.removeSource('v9-inflr');
+            map.addSource('v9-infl',{type:'geojson',data:{type:'FeatureCollection',features:fillF}});
             map.addLayer({id:'v9-infl-l',type:'fill',source:'v9-infl',paint:{'fill-color':['get','c'],'fill-opacity':0}});
-            var io=0,iv=setInterval(function(){ if(!map.getLayer('v9-infl-l')){clearInterval(iv);return;} io=Math.min(1,io+0.05); try{map.setPaintProperty('v9-infl-l','fill-opacity',['*',['get','o'],io]);}catch(e){clearInterval(iv);} if(io>=1)clearInterval(iv); },70); _ivs.push(iv);
+            map.addSource('v9-inflr',{type:'geojson',data:{type:'FeatureCollection',features:ringF}});
+            map.addLayer({id:'v9-infl-ring',type:'line',source:'v9-inflr',paint:{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0,'line-blur':1.4},layout:{'line-cap':'round'}});
+            var io=0,iv=setInterval(function(){ if(!map.getLayer('v9-infl-l')){clearInterval(iv);return;} io=Math.min(1,io+0.05); try{map.setPaintProperty('v9-infl-l','fill-opacity',0.07*io); map.setPaintProperty('v9-infl-ring','line-opacity',['*',['get','o'],io]);}catch(e){clearInterval(iv);} if(io>=1)clearInterval(iv); },70); _ivs.push(iv);
           }catch(e){}
-          // reteaua rapida (autostrada/centura) luminoasa peste inele
           if(D.roads&&D.roads.length){ addLine('v9-hw',D.roads,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.92}); }
         });
-        // camera ramane pe ORAS (intravilan) — analizam un UAT, nu extravilan
-        fly([cx,cy],12.4,42,0,4500,0,'day');
-        fly(Z.SE2,13.4,56,28,6000,9000,'day');
-        fly(Z.C,13,52,-16,6000,17000,'dusk');
+        // camera LARGA ca inelele de influenta sa incapa si sa se citeasca (nu spalare rosie)
+        fly([cx,cy],11.6,40,0,4500,0,'day');
+        fly(Z.C,12.6,52,25,7000,9000,'day');
+        fly([cx,cy],11.9,46,-15,6000,17500,'dusk');
         break;
 
       // BLOC 9 ───────────────────────────────────────────────────────────
@@ -1402,7 +1410,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       // BLOC 11 — INOVATII & MODELE INTERNATIONALE ─────────────────────────
       case 'b12s1': // Superblocks Barcelona
         lp('day');
-        onIdle(function(){ try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){} });
+        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} }); // full (nu unda) — scena nu cheama _updateGrowth
         fly(Z.CBD,15,60,0,4000,0,'day');
         fly(Z.CBD,15.6,66,90,16000,4500,'day');
         break;
@@ -1556,34 +1564,51 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,45,7000,9000);
         fly(Z.NV,13.4,54,-20,6000,16000);
         break;
-      case 'b17s1': // CARTIERE la nivel de strada — pe Standard 3D (cladiri reale + cer + POI, ca in harta platformei)
+      case 'b17s1': // CARTIERE la nivel de strada — Standard 3D, plimbare LENTA + trafic auto/pietoni animat
         try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
-        // pe Standard avem deja cladiri 3D reale; pe baza intunecata folosim footprints composite
         if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
-        // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
-        // cladiri reale (composite) pe stilul curent — fara comutare de stil (care reseta camera)
         onIdle(function(){ _cinRealBuildings(map); });
-        // CHEIA: map.stop() opreste animatia ramasa din scena anterioara, apoi pornim turul.
         try{ map.stop(); }catch(e){}
-        // TUR la nivel de strada: avanseaza prin cartiere + intoarce camera (bearing) + glisare.
-        // Puncte reale daca exista landmark-uri (ex. Iasi), altfel offset-uri din centru ca sa
-        // ramana in tesutul urban dens. Fiecare flyTo schimba centru+bearing = "plimbare".
-        var _P=function(dx,dy){ return [cx+dx, cy+dy]; };
+        // ── TRAFIC ANIMAT (auto + pietoni) — reia motorul _addTrafficPulse/_updateTraffic + animator propriu
+        onIdle(function(){
+          if(!SE._playing) return;
+          try{ SE._addTrafficPulse && SE._addTrafficPulse(map, (D.roads&&D.roads.length)?D.roads:null); }catch(e){}
+          // vehiculele mai mari la nivel de strada
+          try{ map.setPaintProperty('v8-trp-l','circle-radius',['interpolate',['linear'],['zoom'],13,2.4,16,5,17.5,8,18.5,11]); }catch(e){}
+          // PIETONI: puncte albe mici care se plimba lent in tesutul dens din jurul camerei
+          var peds=[]; for(var pi=0;pi<70;pi++){ var pa=Math.random()*6.283, prr=Math.random()*0.010; peds.push({lon:cx+Math.cos(pa)*prr, lat:cy+Math.sin(pa)*prr*0.7, vx:(Math.random()-0.5)*0.000018, vy:(Math.random()-0.5)*0.000014}); }
+          try{
+            if(map.getLayer('v9-ped'))map.removeLayer('v9-ped'); if(map.getSource('v9-ped'))map.removeSource('v9-ped');
+            map.addSource('v9-ped',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+            map.addLayer({id:'v9-ped',type:'circle',source:'v9-ped',minzoom:15,paint:{'circle-radius':['interpolate',['linear'],['zoom'],15,1.5,17,3,18.5,4.5],'circle-color':'#e8eefc','circle-opacity':0.92,'circle-stroke-width':0.5,'circle-stroke-color':'#1a2236'}});
+          }catch(e){}
+          var t0=null, iv=setInterval(function(){
+            var cur=SE.SCENES&&SE.SCENES[SE._si]&&SE.SCENES[SE._si].id;
+            if(!SE._playing || cur!=='b17s1'){ clearInterval(iv); return; }
+            var now=(window.performance&&performance.now)?performance.now():(+new Date()); if(t0===null)t0=now;
+            try{ if(SE._updateTraffic) SE._updateTraffic((now-t0)/8000); }catch(e){}
+            try{ var c=map.getCenter(); peds.forEach(function(p){ p.lon+=p.vx; p.lat+=p.vy; if(Math.random()<0.02){p.vx=(Math.random()-0.5)*0.000018;p.vy=(Math.random()-0.5)*0.000014;} if(Math.hypot(p.lon-c.lng,p.lat-c.lat)>0.006){ p.lon=c.lng+(Math.random()-0.5)*0.006; p.lat=c.lat+(Math.random()-0.5)*0.005; } });
+              var s=map.getSource('v9-ped'); if(s) s.setData({type:'FeatureCollection',features:peds.map(function(p){return {type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},properties:{}};})});
+            }catch(e){}
+          }, 60);
+          _ivs.push(iv);
+        });
+        // ── PLIMBARE LENTA: 3 OPRIRI cu dwell (te opresti, privesti) + IESIRE ELEGANTA (fara taietura brusca)
         var _IS = (SE._cityKey==='RO-IS-01');
         var WP = _IS ? [
-          {c:[27.5779,47.1740], z:17.2, p:83, b:20},   // Copou / Universitate
-          {c:[27.5874,47.1585], z:17.5, p:84, b:-25},  // Palatul Culturii (centru istoric)
-          {c:[27.6010,47.1620], z:17.0, p:84, b:45},   // Tatarasi
-          {c:[27.5700,47.1500], z:16.9, p:83, b:-40}   // Nicolina / sud-vest
+          {c:[27.5779,47.1740], z:17.0, p:82, b:20},   // Copou / Universitate
+          {c:[27.5874,47.1585], z:17.3, p:83, b:-22},  // Palatul Culturii (centru istoric)
+          {c:[27.6010,47.1620], z:17.0, p:83, b:40}    // Tatarasi
         ] : [
-          {c:_P(0.004,0.004), z:17.1, p:84, b:45},
-          {c:_P(-0.004,0.003),z:17.4, p:85, b:-30},
-          {c:_P(-0.006,-0.004),z:16.9,p:83, b:35},
-          {c:_P(0.005,-0.004),z:17.2, p:85, b:-50}
+          {c:[cx+0.004,cy+0.004], z:17.0, p:83, b:40},
+          {c:[cx-0.004,cy+0.003], z:17.3, p:84, b:-28},
+          {c:[cx-0.006,cy-0.004], z:16.9, p:83, b:30}
         ];
-        try{ map.jumpTo({center:WP[0].c, zoom:17.4, pitch:82, bearing:WP[0].b-30}); }catch(e){}
-        var _acc=600;
-        WP.forEach(function(w,wi){ var dur=(wi===0?5200:6200); fly(w.c,w.z,w.p,w.b,dur,_acc); _acc+=dur; });
+        try{ map.jumpTo({center:WP[0].c, zoom:16.6, pitch:80, bearing:WP[0].b-22}); }catch(e){}
+        fly(WP[0].c, WP[0].z, WP[0].p, WP[0].b, 4000, 400);   // sosire lina la oprirea 1 (dwell ~3s)
+        fly(WP[1].c, WP[1].z, WP[1].p, WP[1].b, 6000, 7500);  // glisare lenta la oprirea 2 (dwell ~2s)
+        fly(WP[2].c, WP[2].z, WP[2].p, WP[2].b, 5500, 15500); // glisare lenta la oprirea 3 (dwell ~1.5s)
+        fly(WP[2].c, 15.8, 68, WP[2].b+24, 3800, 22000, 'dusk'); // IESIRE ELEGANTA: ridicare lina + privire larga
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -3816,7 +3841,7 @@ function _drawInfluence(ctx,W,H,a,t){
   var cx=W*0.64, cy=H*0.50;
   var zones=[[Math.min(W*0.20,260),'+3%','#3b82f6'],[Math.min(W*0.155,200),'+10%','#22c55e'],[Math.min(W*0.105,135),'+20%','#f59e0b'],[Math.min(W*0.06,78),'+35% valoare','#ff3366']];
   zones.forEach(function(z,i){ var pr=Math.min(1,(t-i*0.06)/0.4); if(pr<=0)return;
-    ctx.globalAlpha=a*0.30*pr; ctx.fillStyle=z[2]; ctx.beginPath(); ctx.arc(cx,cy,z[0]*pr,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=a*0.13*pr; ctx.fillStyle=z[2]; ctx.beginPath(); ctx.arc(cx,cy,z[0]*pr,0,Math.PI*2); ctx.fill();
     ctx.globalAlpha=a*0.8*pr; ctx.strokeStyle=z[2]; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(cx,cy,z[0]*pr,0,Math.PI*2); ctx.stroke();
     ctx.globalAlpha=a*pr; ctx.fillStyle=z[2]; ctx.font='800 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillText(z[1],cx,cy-z[0]*pr+Math.min(W*0.012,15)); });
   ctx.globalAlpha=a; ctx.fillStyle='#fff'; ctx.font='900 '+Math.min(W*0.011,14)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText('AUTOSTRADA /',cx,cy-3); ctx.fillText('PROIECT MAJOR',cx,cy+12);

@@ -404,41 +404,32 @@ G._CinemaEngine={
 
   // Bare 3D din PUG — cresc animat cu t
   _add3DGrowth(map){
-    // PREFERAM cladiri reale individuale (footprints OSM/Mapbox) — coloane 3D ca niste cladiri
-    // care CRESC, colorate pe potential (verde mic / galben mediu / rosu major), exact ca referinta
-    // "DEZVOLTARE URBANA". NU lespezi de zonare care acopera tot orasul.
+    // EXISTENT vs PROPUS, cinematic:
+    //  • cladirile REALE (composite OSM) raman ca fond GRI static = "ce este azi" (contextul).
+    //  • peste ele, bare colorate pe zonele PUG se inalta IN UNDA (V->E), UNA CATE UNA, colorate pe
+    //    potentialul de crestere = "ce se construieste". Animatia o face _updateGrowth(t) la fiecare frame.
+    // (Inainte calea composite crestea uniform si instant + seta _gf=null -> unda nu rula niciodata.)
     if(map.getSource && map.getSource('composite')){
       try{
         var hExpr=['coalesce',['to-number',['get','height']],['*',['coalesce',['to-number',['get','levels']],3],3],8];
-        if(!(map.getLayer && map.getLayer('cin-grow-bld'))){
+        if(!(map.getLayer && map.getLayer('cin-grow-base'))){
           map.addLayer({
-            id:'cin-grow-bld',type:'fill-extrusion',source:'composite','source-layer':'building',
-            filter:['==','extrude','true'],minzoom:11.5,
+            id:'cin-grow-base',type:'fill-extrusion',source:'composite','source-layer':'building',
+            filter:['==','extrude','true'],minzoom:11,
             paint:{
-              'fill-extrusion-color':['interpolate',['linear'],hExpr,
-                0,'#15803d',8,'#22c55e',16,'#a3c520',24,'#f0c000',36,'#ff8c00',55,'#ff3366'],
-              'fill-extrusion-height':['*',hExpr,0.05],
+              // GRI rece, gradat pe inaltime = fondul construit existent (neutru, nu concureaza barele color)
+              'fill-extrusion-color':['interpolate',['linear'],hExpr,0,'#39434f',12,'#49566a',30,'#5d6e88'],
+              'fill-extrusion-height':hExpr,
               'fill-extrusion-base':['coalesce',['to-number',['get','min_height']],0],
-              'fill-extrusion-opacity':0.96,
+              'fill-extrusion-opacity':0.80,
               'fill-extrusion-vertical-gradient':true,
-              'fill-extrusion-ambient-occlusion-intensity':0.6,
-              'fill-extrusion-ambient-occlusion-radius':3
+              'fill-extrusion-ambient-occlusion-intensity':0.5
             }
           });
         }
-        // ramane DOAR campul de coloane reale: ascundem lespezile de zonare + cladirile de baza
-        ['v8-gr-l','v8-bld-l','utr-fill','utr-line','building-extrusion'].forEach(function(id){ try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){} });
-        // animatie de CRESTERE: inaltimea urca de la 5% -> 130% (orasul "creste")
-        var _m=this; var g=0.05;
-        try{ if(_m._growInt) clearInterval(_m._growInt); }catch(e){}
-        _m._growInt=setInterval(function(){
-          g=Math.min(1.3,g+0.05);
-          try{ map.setPaintProperty('cin-grow-bld','fill-extrusion-height',['*',hExpr,g]); }catch(e){}
-          if(g>=1.3){ clearInterval(_m._growInt); _m._growInt=null; }
-        },70);
-        this._gf=null;
-        return;
-      }catch(e){ /* cade in extrudarea de zone (fallback orase fara cladiri reale) */ }
+        // cladirile default + lespezile vechi ascunse (cin-grow-base le inlocuieste ca fond)
+        ['v8-bld-l','utr-fill','utr-line','building-extrusion'].forEach(function(id){ try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){} });
+      }catch(e){ /* fara composite -> doar barele de zona */ }
     }
     const geo=this._pugGeo,reg=this._reguli||{},pred=this._pred;
     const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
