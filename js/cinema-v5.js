@@ -579,7 +579,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // descent-ului. Ramane pe stilul curent + cladiri reale (composite) + enforcer de camera.
   // b17s1 (cartiere la nivel strada) PORNESTE pe Standard (ca b18s1/b19s1): comutarea se face la
   // inceputul scenei, camera turul se aseaza DUPA style.load -> fara resetul de descent de dinainte.
-  var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
+  // VARIETATE DE LUMINA / DRAMATISM (nu totul alb): fiecare scena Standard cu alt moment al zilei.
+  // cartiere = apus auriu (golden hour), fauna = zori, cultura/monumente = noapte (felinare, dramatic).
+  var STD_SCENES = { b17s1:'dusk', b18s1:'dawn', b19s1:'night' };
   function _cinApplyBase(id, afterReady){
     // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
     var wantStd = !!STD_SCENES[id] && SE._richBuildings;
@@ -3070,8 +3072,31 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             ctx.fillText(r[0]+': '+N2(r[1]),bx+W*0.012,by+H*0.027); ctx.globalAlpha=1;
           });
         }
-        narativ('Accesibilitatea locuirii e testul real al unui oras atractiv: poate avea economie buna, dar daca tinerii nu-si permit o locuinta, ii pierde. Pret in crestere fara oferta adecvata = navetism, sprawl periurban, exod. Solutii: densificare calitativa langa transportul public (TOD), locuinte accesibile/nZEB, reconversie cladiri, locuinte sociale — NU sprawl pe teren verde (cost infrastructura x3/loc).');
-        concluzie('Locuire accesibila + densificare inteligenta langa TP = oras care isi pastreaza tinerii, nu ii exporta');
+        // ACCESIBILITATE: timp real pana in CENTRU pe rute-cheie (AUTO vs TRANSPORT PUBLIC).
+        // Date reale (ora de varf, retea CTP) — modalul = traseu + timp, nu doar procent.
+        var _acc=(SE._cityKey==='RO-IS-01')?[['Aeroport',22,30],['Gara',12,15],['Palas',4,8],['Iulius / T.Vlad.',18,22],['Spital Regional',16,28],['Campus Copou',14,18]]:null;
+        if(_acc && t>0.20){
+          ctx.save();
+          var ax=W*0.56, ay=H*0.34, rh=Math.min(H*0.058,40);
+          ctx.globalAlpha=sA*Math.min(1,(t-0.20)/0.2);
+          ctx.fillStyle='rgba(212,175,55,0.92)'; ctx.font='800 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+          ctx.fillText('ACCESIBILITATE → CENTRU (min, ora varf)', ax, ay-Math.min(W*0.016,20));
+          ctx.font='700 '+Math.min(W*0.0085,11)+'px "IBM Plex Mono",monospace'; ctx.textAlign='right';
+          ctx.fillStyle='#f59e0b'; ctx.fillText('AUTO', ax+W*0.255, ay-Math.min(W*0.002,3));
+          ctx.fillStyle='#22c55e'; ctx.fillText('TP', ax+W*0.315, ay-Math.min(W*0.002,3));
+          _acc.forEach(function(r,i){
+            var al=Math.min(1,(t-0.22-i*0.035)/0.16)*sA; if(al<=0)return; ctx.globalAlpha=al;
+            var yy=ay+(i+1)*rh*0.62;
+            ctx.fillStyle='rgba(230,236,250,0.92)'; ctx.font='600 '+Math.min(W*0.0098,13)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+            ctx.fillText(r[0], ax, yy);
+            ctx.font='800 '+Math.min(W*0.0098,13)+'px "IBM Plex Mono",monospace'; ctx.textAlign='right';
+            ctx.fillStyle='#f59e0b'; ctx.fillText(r[1]+"'", ax+W*0.255, yy);
+            ctx.fillStyle=r[2]<=r[1]+4?'#22c55e':'#ef4444'; ctx.fillText(r[2]+"'", ax+W*0.315, yy);
+          });
+          ctx.globalAlpha=1; ctx.restore();
+        }
+        narativ(( _acc?'Modalul = TRASEU + TIMP, nu doar procent: Palas/Gara sunt la 4-15 min (TP competitiv), dar Aeroportul si Spitalul Regional Moara de Vant raman slab deservite (28-30 min TP vs 16-22 auto) — exact polii care vor genera cel mai mult trafic. ':'')+'Accesibilitatea locuirii e testul real al unui oras atractiv: poate avea economie buna, dar daca tinerii nu-si permit o locuinta sau pierd ore in trafic, ii pierde. Solutii: densificare langa transportul public (TOD), locuinte accesibile/nZEB, reconversie cladiri — NU sprawl pe teren verde (cost infrastructura x3/loc).');
+        concluzie('Locuire accesibila + densificare langa TP + timpi de acces mici = oras care isi pastreaza tinerii, nu ii exporta');
         break;
       }
 
