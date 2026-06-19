@@ -404,6 +404,42 @@ G._CinemaEngine={
 
   // Bare 3D din PUG — cresc animat cu t
   _add3DGrowth(map){
+    // PREFERAM cladiri reale individuale (footprints OSM/Mapbox) — coloane 3D ca niste cladiri
+    // care CRESC, colorate pe potential (verde mic / galben mediu / rosu major), exact ca referinta
+    // "DEZVOLTARE URBANA". NU lespezi de zonare care acopera tot orasul.
+    if(map.getSource && map.getSource('composite')){
+      try{
+        var hExpr=['coalesce',['to-number',['get','height']],['*',['coalesce',['to-number',['get','levels']],3],3],8];
+        if(!(map.getLayer && map.getLayer('cin-grow-bld'))){
+          map.addLayer({
+            id:'cin-grow-bld',type:'fill-extrusion',source:'composite','source-layer':'building',
+            filter:['==','extrude','true'],minzoom:11.5,
+            paint:{
+              'fill-extrusion-color':['interpolate',['linear'],hExpr,
+                0,'#15803d',8,'#22c55e',16,'#a3c520',24,'#f0c000',36,'#ff8c00',55,'#ff3366'],
+              'fill-extrusion-height':['*',hExpr,0.05],
+              'fill-extrusion-base':['coalesce',['to-number',['get','min_height']],0],
+              'fill-extrusion-opacity':0.96,
+              'fill-extrusion-vertical-gradient':true,
+              'fill-extrusion-ambient-occlusion-intensity':0.6,
+              'fill-extrusion-ambient-occlusion-radius':3
+            }
+          });
+        }
+        // ramane DOAR campul de coloane reale: ascundem lespezile de zonare + cladirile de baza
+        ['v8-gr-l','v8-bld-l','utr-fill','utr-line','building-extrusion'].forEach(function(id){ try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','none'); }catch(e){} });
+        // animatie de CRESTERE: inaltimea urca de la 5% -> 130% (orasul "creste")
+        var _m=this; var g=0.05;
+        try{ if(_m._growInt) clearInterval(_m._growInt); }catch(e){}
+        _m._growInt=setInterval(function(){
+          g=Math.min(1.3,g+0.05);
+          try{ map.setPaintProperty('cin-grow-bld','fill-extrusion-height',['*',hExpr,g]); }catch(e){}
+          if(g>=1.3){ clearInterval(_m._growInt); _m._growInt=null; }
+        },70);
+        this._gf=null;
+        return;
+      }catch(e){ /* cade in extrudarea de zone (fallback orase fara cladiri reale) */ }
+    }
     const geo=this._pugGeo,reg=this._reguli||{},pred=this._pred;
     const cx=this._city?.lon||25,cy=this._city?.lat||45.5;
     let features=[];
@@ -1462,7 +1498,8 @@ G._CinemaEngine={
   _cleanLayers(){
     const map=this._map;if(!map)return;
     if(this._clearCinLabels) this._clearCinLabels(); // sterge etichetele HTML la schimbarea scenei
-    ['cin-osm-bld','v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
+    try{ if(this._growInt){ clearInterval(this._growInt); this._growInt=null; } }catch(e){}
+    ['cin-grow-bld','cin-osm-bld','v8-gr-l','v8-gr','v8-bld-l','v8-bld','v8-ht-l','v8-ht',
      'v8-tr-l','v8-tr','v8-trp-l','v8-trp','v8-tp-l','v8-tp','v8-sei-l','v8-sei','v8-risc-l','v8-risc',
      'v8-fl-l','v8-fl','v8-aut-l','v8-aut','v8-ex-line','v8-ex-l','v8-ex','v8-inf-l','v8-inf',
      'v8-mp-ring-l','v8-mp-ring','v8-mp-rail-l','v8-mp-rail','v8-mp-stn-l','v8-mp-stn',
