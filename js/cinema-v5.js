@@ -629,9 +629,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // descent-ului. Ramane pe stilul curent + cladiri reale (composite) + enforcer de camera.
   // b17s1 (cartiere la nivel strada) PORNESTE pe Standard (ca b18s1/b19s1): comutarea se face la
   // inceputul scenei, camera turul se aseaza DUPA style.load -> fara resetul de descent de dinainte.
-  // VARIETATE DE LUMINA / DRAMATISM (nu totul alb): fiecare scena Standard cu alt moment al zilei.
-  // cartiere = apus auriu (golden hour), fauna = zori, cultura/monumente = noapte (felinare, dramatic).
-  var STD_SCENES = { b17s1:'dusk', b18s1:'dawn', b19s1:'night' };
+  // VARIETATE DE LUMINA pe Standard 3D: NOAPTEA pe Standard face harta ilizibila (cladirile devin
+  // pete negre — confirmat). Folosim doar momente luminoase dramatice: apus auriu (golden) si zori.
+  var STD_SCENES = { b17s1:'dusk', b18s1:'dawn', b19s1:'dusk' };
   function _cinApplyBase(id, afterReady){
     // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
     var wantStd = !!STD_SCENES[id] && SE._richBuildings;
@@ -1217,15 +1217,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // zona Pacurari (hoteluri/blocuri), coridor centura->A8. Acolo CRESTE orasul concret.
         setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },3400);
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#14532d',6,'#15803d',15,'#f59e0b',28,'#ef4444']);}catch(e){}
-        // CAMERA VIZITEAZA POLII REALI: vedere larga -> Spital Regional -> coridor Pacurari/centura
+        // CAMERA: ALTERNARE SCOPE — WIDE (tot sistemul de coridoare, ca "scena 7") <-> CLOSE-UP pe
+        // zona de dezvoltare (restrans, ca "scena 5"), cu ORBITARE lenta pe close-up (ramai, rotesti
+        // camera in jurul zonei — nu taietura brusca). Vizitam polii reali (Spital, Pacurari).
         (function(){
           var pr=(window._UrbanProjects&&window._UrbanProjects.data&&window._UrbanProjects.data[SE._cityKey])||[];
           var pts=pr.filter(function(p){return typeof p.lat==='number'&&typeof p.lon==='number';});
           var A=pts[0]?[pts[0].lon,pts[0].lat]:Z.NV;
           var B=pts[1]?[pts[1].lon,pts[1].lat]:Z.SE2;
-          fly(Z.C,12.6,52,0,4500,0,'night');         // tot orasul proiectat (centura + retea)
-          fly(A,14.6,62,30,6500,7200,'night');        // push-in pe pol 1 (cresc cladirile)
-          fly(B,14.3,60,-25,6500,15800,'dusk');       // glisare la pol 2
+          fly(Z.C, 12.2, 50,   0, 4200,     0, 'night'); // WIDE: tot orasul proiectat (centura+retea)
+          fly(A,   15.6, 66,  25, 5200,  4800, 'night'); // CLOSE-UP pol 1 (zona restransa, bare cresc)
+          fly(A,   15.7, 67,  72, 5000, 10200, 'night'); // ORBITARE lenta pe pol 1 (linger + rotire)
+          fly(Z.C, 12.6, 52, -10, 4500, 15500, 'dusk');  // WIDE: revenim la sistemul de coridoare
+          fly(B,   15.4, 65, -30, 5200, 20200, 'dusk');  // CLOSE-UP pol 2 (alta zona)
         })();
         break;
 

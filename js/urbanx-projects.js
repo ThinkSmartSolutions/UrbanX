@@ -141,6 +141,34 @@ G._UrbanProjects = {
       { tip:'tren', icon:'🚆', color:'#a855f7', traseu:[[27.700,46.655],[27.725,46.642],[27.740,46.630],[27.755,46.618]], nume:'Transport public electric Vaslui', desc:'13 autobuze electrice (autonomie ~480 km) prin PNRR; primul livrat 2026.', impact:'Decarbonizează mobilitatea urbană pe axele principale ale orașului.', sursa:'PNRR — înnoire parc transport public' },
       { tip:'zona', icon:'🏗', color:'#f59e0b', lat:46.642, lon:27.726, nume:'Regenerare urbană educațională Vaslui', desc:'Reabilitare PNRR a școlilor „Mihail Sadoveanu” și „Elena Cuza”, centre de zi pentru vârstnici (>65 mil. lei).', impact:'Modernizează infrastructura socială și educațională din intravilan.', sursa:'PNRR' },
     ],
+
+    // ── COMUNE METROPOLITANE (proiecte reale: parcuri industriale, ansambluri, centuri, PNRR) ──
+    'RO-IS-95042': [ // Miroslava
+      { tip:'pol', icon:'🏭', color:'#9ca3af', lat:47.118, lon:27.518, nume:'Parc Industrial Miroslava I', desc:'Primul parc industrial comunal din Moldova (~46 ha, 100% ocupat), model replicat în județ.', impact:'Peste 1000 locuri de muncă — a transformat comuna din dormitor în pol economic propriu.', sursa:'Miroslava Industrial Park / Economedia' },
+      { tip:'pol', icon:'🏭', color:'#9ca3af', lat:47.125, lon:27.535, nume:'Parc industrial nou (~40 mil. €)', desc:'Nou parc industrial privat anunțat 2023-2024, investiție ~40 mil. euro.', impact:'Extinde baza industrială — Miroslava, hub de producție lângă Iași.', sursa:'News Moldova / Apix (2024)' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[27.518,47.118],[27.530,47.128],[27.545,47.140]], nume:'Drum legătură E583 – centura sud Iași', desc:'Arteră cu 4 benzi ce leagă parcurile industriale de centura sudică (E583).', impact:'Scoate traficul greu din sat + acces direct la rețeaua majoră spre Iași.', sursa:'CL Miroslava (viziune 2024-2028)' },
+      { tip:'zona', icon:'🏗', color:'#f59e0b', lat:47.145, lon:27.548, nume:'Expansiune rezidențială Valea Adâncă', desc:'Front rezidențial accelerat (Valea Adâncă/Horpaz) cu vile și blocuri spre Iași.', impact:'Cea mai dinamică zonă de locuire suburbană — presiune pe utilități și școli.', sursa:'presă imobiliară Iași (BLITZ/Apix)' },
+    ],
+    'RO-IS-95087': [ // Rediu
+      { tip:'zona', icon:'🏗', color:'#f59e0b', lat:47.228, lon:27.560, nume:'Don Residence (lacul Rediu)', desc:'Ansamblu de 19 vile duplex P+1 (finalizat 2024), vedere la lacul Rediu, 8 km de centrul Iași.', impact:'Confirmă malul lacului Rediu ca zonă rezidențială premium suburbană.', sursa:'cauta-imobiliare.ro / Apix (2024)' },
+      { tip:'zona', icon:'🏗', color:'#f59e0b', lat:47.218, lon:27.540, nume:'Ansamblu 24 vile (limita Valea Lupului)', desc:'Nou ansamblu de 24 de locuințe la limita cu Valea Lupului.', impact:'Densificare rezidențială pe direcția vest, spre coridorul Iași–Valea Lupului.', sursa:'Apix (2024)' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[27.500,47.235],[27.555,47.240],[27.610,47.232]], nume:'Centura ușoară nord (tronson Rediu)', desc:'Tronson din varianta de centură ușoară a CJ Iași ce tranzitează comuna Rediu.', impact:'Ar prelua traficul de tranzit dinspre nord și ar debloca dezvoltarea zonei.', sursa:'CJ Iași (traseu centură) / Apix' },
+    ],
+    'RO-IS-94951': [ // Holboca
+      { tip:'pol', icon:'🏭', color:'#9ca3af', lat:47.158, lon:27.692, nume:'Parc Industrial Holboca (CJ Iași)', desc:'Parc industrial al CJ Iași pe ~6 ha, până la 50 de hale (~100 mil. lei).', impact:'Pol major de producție est de Iași; investiție inițială ~10 mil. euro.', sursa:'CJ Iași / Apix' },
+      { tip:'zona', icon:'🏭', color:'#9ca3af', lat:47.170, lon:27.705, nume:'Hub logistic Industra Park (Oresa)', desc:'Extindere centru logistic Oresa Industra cu +15.000 mp (~50.000 mp total).', impact:'Consolidează Holboca/Dancu ca principal nod logistic regional al Moldovei.', sursa:'Apix / DepozitInfo' },
+      { tip:'zona', icon:'🏭', color:'#9ca3af', lat:47.165, lon:27.680, nume:'Coridor mixt Holboca–Dancu–Calea Dacilor', desc:'Zonă de masterplan pentru funcțiuni mixte: producție, logistică, servicii, locuire.', impact:'Potențial hub intermodal (rutier + feroviar) la est de Iași.', sursa:'Apix (zone strategice Iași)' },
+    ],
+    'RO-IS-94889': [ // Aroneanu
+      { tip:'zona', icon:'🌳', color:'#22c55e', lat:47.225, lon:27.615, nume:'Zona de agrement lacul Aroneanu', desc:'PUZ pentru agrement (piscine, plaje, faleze) prin concesionări pe malul lacului.', impact:'Transformă fostul iaz piscicol în pol regional de recreere pentru Iași.', sursa:'Apix (PUZ agrement Aroneanu)' },
+      { tip:'zona', icon:'🏗', color:'#f59e0b', lat:47.232, lon:27.625, nume:'Ansamblu rezidențial Brizo Lake', desc:'Complex cu până la 27 corpuri (vile S+P+2) pe dealurile cu vedere la lac.', impact:'Marchează lacul Aroneanu ca nou pol imobiliar al Iașului.', sursa:'Apix (2024)' },
+      { tip:'pol', icon:'🌳', color:'#22c55e', lat:47.228, lon:27.620, nume:'Bază sportivă & agrement Brizo', desc:'Bază privată de sport și agrement cu noi facilități de recreere.', impact:'Diversifică oferta de loisir și atrage vizitatori din municipiul Iași.', sursa:'Apix' },
+    ],
+    'RO-BT-18073': [ // Bălușeni
+      { tip:'pol', icon:'💧', color:'#0ea5e9', lat:47.655, lon:26.695, nume:'Rețea apă-canal (Zaicești/Coșuleni/Buzeni)', desc:'PNRR: extindere distribuție apă + pompare/stocare + canalizare în satele comunei (finalizare 2026).', impact:'Aduce utilități de bază în satele componente.', sursa:'PNRR / BotosaniNews' },
+      { tip:'pol', icon:'🏫', color:'#3b82f6', lat:47.660, lon:26.700, nume:'Școală nouă Bălușeni', desc:'Construire școală nouă prin Măsura 5.1 (PNRR educație).', impact:'Crește capacitatea și calitatea infrastructurii școlare.', sursa:'PNRR / Strategia CJ Botoșani' },
+      { tip:'coridor', icon:'🛣', color:'#dc2626', traseu:[[26.690,47.665],[26.700,47.660],[26.715,47.650]], nume:'Modernizare drumuri comunale spre Botoșani', desc:'Asfaltare drumuri locale ce leagă satele de DN29/DN29D către municipiul Botoșani.', impact:'Reduce izolarea satelor + întărește legătura de dormitor cu orașul.', sursa:'PNDR/PNRR Botoșani' },
+    ],
   },
 
   // proiecte pentru un UAT; daca nu avem date reale -> set generic derivat din centru
