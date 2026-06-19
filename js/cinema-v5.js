@@ -76,6 +76,7 @@ SCENES = [
   {id:'b4s3',dur:18000,label:'TRANSPORT PUBLIC',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s4',dur:18000,label:'RETELE UTILITATI',      bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b27s1',dur:20000,label:'VIATA PIERDUTA IN TRAFIC',bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s2',dur:20000,label:'SOLUTII MOBILITATE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s3',dur:18000,label:'MODAL SPLIT',           bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b26s1',dur:22000,label:'INFLUENTA METROPOLITANA',bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -159,6 +160,31 @@ var _METRO = {
     edu:'Linii metropolitane OTL spre Sanmartin, Osorhei, Bors; integrare in viitoarea retea tram-train.',
     cong:'Varf de trafic dupa-amiaza (16-17); solutie planificata: tram-train Oradea ↔ Sanmartin / Baile Felix / Bors.'}
 };
+// ── VIATA PIERDUTA IN TRAFIC — transpune congestia in ani de viata + cost economic + echivalente ──
+// Metodologie: ore pierdute/sofer (estimare pe marime oras + motorizare) × nr soferi; ani = ore/8760;
+// cost = ore × valoarea timpului (VOT ~30 lei/h, ordin INS/Eurostat); combustibil+CO2 din ralanti.
+function _trafficLife(city, pred){
+  city=city||{}; pred=pred||{};
+  var pop=city.pop2021||city.pop||100000;
+  var mot=pred.mot24||380;                                   // vehicule/1000 loc
+  // ore pierdute/sofer/an: baza 38h + crestere cu marimea orasului si motorizarea (plafon realist)
+  var orePerSofer=Math.round(Math.min(170, 38 + (pop/100000)*20 + Math.max(0,(mot-300))*0.07));
+  var nrSoferi=Math.round(pop*0.45);                         // soferi activi ~45% din populatie
+  var oreTotal=orePerSofer*nrSoferi;
+  var aniViataSofer=+(orePerSofer/8760).toFixed(2);
+  var aniViataOras=Math.round(oreTotal/8760);
+  var generatii=Math.round(aniViataOras/75);
+  var VOT=30;                                                // lei/ora (valoarea timpului)
+  var costLei=oreTotal*VOT;
+  var litri=Math.round(oreTotal*1.5);                        // ~1.5 l/h ralanti
+  var toneCO2=Math.round(litri*2.31/1000);                  // 2.31 kg CO2/l benzina
+  // echivalente cost (orientativ): scoala ~12 mil lei, spital mic ~120 mil, km tramvai ~25 mil
+  var eScoli=Math.round(costLei/12e6), eSpitale=Math.round(costLei/120e6), eKmTramvai=Math.round(costLei/25e6);
+  return {orePerSofer:orePerSofer,nrSoferi:nrSoferi,oreTotal:oreTotal,aniViataSofer:aniViataSofer,
+    aniViataOras:aniViataOras,generatii:generatii,costLei:costLei,litri:litri,toneCO2:toneCO2,
+    eScoli:eScoli,eSpitale:eSpitale,eKmTramvai:eKmTramvai,zileSofer:+(orePerSofer/24).toFixed(1)};
+}
+
 // fallback generic: 4 sateliti derivati din centru daca UAT-ul nu are date dedicate
 function _metroFor(cityKey,cx,cy,pred){
   if(_METRO[cityKey]) return _METRO[cityKey];
@@ -1257,6 +1283,27 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         },1500);
         fly(Z.C,13.5,55,15,6000,9000,'night');
         fly(Z.SE2,13,50,-20,6000,17000,'night');
+        break;
+
+      case 'b27s1': // VIATA PIERDUTA IN TRAFIC — scena-erou (DATE): fond intunecat + trafic estompat
+        lp('night');
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#0f1420'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.45);}catch(e){}
+        // trafic real pulsand discret in fundal (context), dar scena e despre CIFRA-erou
+        onIdle(function(){
+          if(!SE._playing) return;
+          try{ SE._addTrafficPulse && SE._addTrafficPulse(map, (D.roads&&D.roads.length)?D.roads:null); }catch(e){}
+          try{ map.setPaintProperty('v8-tr-l','line-opacity',0.10); }catch(e){}
+          var t0=null, iv=setInterval(function(){
+            var cur=SE.SCENES&&SE.SCENES[SE._si]&&SE.SCENES[SE._si].id;
+            if(!SE._playing || cur!=='b27s1'){ clearInterval(iv); return; }
+            var now=(window.performance&&performance.now)?performance.now():(+new Date()); if(t0===null)t0=now;
+            try{ if(SE._updateTraffic) SE._updateTraffic((now-t0)/9000); }catch(e){}
+          },70); _ivs.push(iv);
+        });
+        // camera lenta, contemplativa (privim orasul care isi pierde timpul)
+        fly([cx,cy],12.4,46,0,5000,0,'night');
+        rot(7,0.004);
+        fly([cx,cy],12.8,50,18,14000,6000,'night');
         break;
 
       case 'b7s2':
@@ -2385,6 +2432,43 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         concluzie('Investitia '+N2(Math.round((pred.pasaje||5)*15+(pred.kmOcol||20)*4))+' M EUR in pasaje+centura = decongestionare + +15-25% valoare imobiliara zona');
         negativ('Congestie zilnica = -210h/an/persoana + '+Math.round((pop21/1000)*0.9)+' M EUR/an cost economic + poluare crescuta');
         break;
+
+      case 'b27s1': { // VIATA PIERDUTA IN TRAFIC — scena-erou emotionala
+        var TL=_trafficLife(city,pred); var cxC=W/2;
+        ctx.save(); ctx.textAlign='center';
+        // eticheta sus
+        ctx.globalAlpha=sA*rE(0.02,0.1); ctx.fillStyle='rgba(239,68,68,0.92)';
+        ctx.font='800 '+Math.min(W*0.013,18)+'px "IBM Plex Mono",monospace'; ctx.letterSpacing='.16em';
+        ctx.fillText('⏱  TRAFICUL CONSUMA VIATA', cxC, H*0.15); ctx.letterSpacing='0';
+        // CIFRA-EROU (numara crescator) + un mic increment "live"
+        var gr=Math.max(0,Math.min(1,(t-0.06)/0.4)); var eg=gr<0.5?2*gr*gr:1-Math.pow(-2*gr+2,2)/2;
+        var live=Math.round(TL.oreTotal/8760/31536000*Math.max(0,t)*20*8760); // ani acumulati cat privesti (mic)
+        var heroN=Math.round(TL.aniViataOras*eg);
+        ctx.globalAlpha=sA; ctx.fillStyle='#ef4444'; ctx.font='900 '+Math.min(W*0.135,184)+'px "Space Grotesk",sans-serif';
+        ctx.fillText(N2(heroN), cxC, H*0.42);
+        ctx.fillStyle='rgba(255,255,255,0.94)'; ctx.font='800 '+Math.min(W*0.027,36)+'px "Space Grotesk",sans-serif';
+        ctx.fillText('ANI DE VIATA PIERDUTI IN TRAFIC', cxC, H*0.515);
+        ctx.fillStyle='rgba(148,163,184,0.85)'; ctx.font='500 '+Math.min(W*0.0125,16)+'px "IBM Plex Mono",monospace';
+        ctx.fillText('in ultimele 12 luni · '+(city.name||'')+' · echivalentul a '+TL.generatii+' generatii', cxC, H*0.57);
+        ctx.restore();
+        // 3 KPI
+        if(t>0.42){
+          var kp=[['⏱ '+N2(TL.oreTotal),'ore pierdute/an','#f59e0b'],['💰 '+N2(Math.round(TL.costLei/1e6))+' mil lei','cost economic/an','#fbbf24'],['🌍 '+N2(TL.toneCO2)+' t CO₂','emisii suplimentare','#ef4444']];
+          kp.forEach(function(k,i){ var al=Math.min(1,(t-0.42-i*0.05)/0.14)*sA; if(al<=0)return; ctx.save(); ctx.globalAlpha=al; ctx.textAlign='center';
+            var kx=W*(0.22+i*0.28);
+            ctx.fillStyle=k[2]; ctx.font='900 '+Math.min(W*0.019,25)+'px "Space Grotesk",sans-serif'; ctx.fillText(k[0],kx,H*0.685);
+            ctx.fillStyle='rgba(200,210,230,0.7)'; ctx.font='500 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.fillText(k[1],kx,H*0.72); ctx.restore();
+          });
+        }
+        // echivalente cost
+        if(t>0.6){ ctx.save(); ctx.globalAlpha=Math.min(1,(t-0.6)/0.16)*sA; ctx.textAlign='center';
+          ctx.fillStyle='rgba(34,197,94,0.92)'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif';
+          ctx.fillText('Costul anual = '+TL.eScoli+' scoli · '+TL.eSpitale+' spitale · '+TL.eKmTramvai+' km tramvai construite', cxC, H*0.79);
+          ctx.restore();
+        }
+        narativ('Congestia nu inseamna minute — inseamna ANI DE VIATA. Formula: '+TL.orePerSofer+' ore/sofer/an × '+N2(TL.nrSoferi)+' soferi = '+N2(TL.oreTotal)+' ore = '+N2(TL.aniViataOras)+' ani consumati anual ('+TL.generatii+' generatii). Cost ~'+N2(Math.round(TL.costLei/1e6))+' mil lei/an (valoarea timpului ~30 lei/h, ordin INS/Eurostat) + '+N2(TL.litri)+' l combustibil + '+N2(TL.toneCO2)+' t CO₂/an. Fiecare proiect de mobilitate (BRT, pasaje, centura, tren metropolitan) = ani de viata redati comunitatii.');
+        break;
+      }
 
       case 'b7s2':
         titlu('Solutii Mobilitate','Pasaje \u00b7 Centura \u00b7 BRT \u00b7 Pietonal \u00b7 Velo'); linie();
