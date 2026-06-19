@@ -4851,6 +4851,9 @@ window._CinemaExplain={
 
 window._launchCinemaV2=function(){ window._startCinema(); };
 window._launchCinema=function(k){ window._startCinema(k); };
+// expune datele reutilizate de PDF (Masterplan/PMUD) — cinema-v5 e IIFE, deci _METRO/_trafficLife
+// nu erau pe window -> capitolul metropolitan din PMUD se sarea silentios.
+try{ window._METRO=_METRO; window._trafficLife=_trafficLife; window._metroFor=_metroFor; }catch(e){}
 
 console.log('[TCI Cinematic v9.0 Master] LOADED \u2014 '+SCENES.length+' scene \u00b7 11 blocuri \u00b7 ~50-60 min \u00b7 date live INSE+OSM+Wikipedia+ANAR');
 
