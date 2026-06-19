@@ -130,7 +130,10 @@ var D = {wiki:null,inse:null,roads:null,rail:null,airports:null,
 
 // ── ANIMATII PULSANTE ─────────────────────────────────────────────────────
 var _ivs = [];
-function _clrIvs(){ _ivs.forEach(clearInterval); _ivs=[]; }
+var _flyTos = []; // ID-urile setTimeout din fly() — TREBUIE oprite la schimbarea scenei,
+                  // altfel camera scenei anterioare (ex. zoom wide la +5s/+16s) se declanseaza
+                  // peste scena curenta si o reseteaza (bug-ul "nu coboara la nivel strada").
+function _clrIvs(){ _ivs.forEach(clearInterval); _ivs=[]; _flyTos.forEach(clearTimeout); _flyTos=[]; }
 
 function _pulse(map,id,prop,min,max,spd){
   if(!map.getLayer||!map.getLayer(id)) return;
@@ -511,12 +514,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     },50);
   }
   function fly(ctr,z,pt,br,dur,dly,pr){
-    setTimeout(function(){
+    var _ft=setTimeout(function(){
       if(!SE._playing) return;
       if(pr) lp(pr);
       try{map.flyTo({center:ctr,zoom:z,pitch:pt,bearing:br,duration:dur||6000,essential:true,
         easing:function(t){return t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);}});}catch(e){}
     },dly||0);
+    _flyTos.push(_ft); // ca sa-l putem opri la schimbarea scenei (vezi _clrIvs)
   }
 
   // CLADIRI REALE pentru scenele de nivel-strada: footprints OSM/Mapbox (sursa 'composite'
@@ -3085,6 +3089,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     if(SE._paused){ SE._paused=false; var _pb=document.getElementById('c8-pause'); if(_pb){_pb.textContent='⏸ Pauza';_pb.style.background='rgba(0,0,0,.6)';} var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove(); }
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
+    // OPRESTE imediat camera scenei anterioare (fly-uri intarziate) ca sa nu reseteze scena noua
+    try{ _flyTos.forEach(clearTimeout); _flyTos=[]; }catch(e){}
+    if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
     // dezactiveaza street experience daca a fost activ (scena b17s1) la schimbare scena
     try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
     // Restaureaza cladirile Mapbox standard pentru scenele fara bare 3D PUG
