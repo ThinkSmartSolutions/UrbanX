@@ -571,7 +571,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // moment al zilei (lightPreset) pt variatie de culoare/fundal. Restul raman pe baza intunecata.
   // NU punem b17s1 (street-level) pe Standard: comutarea de stil reseteaza camera in timpul
   // descent-ului. Ramane pe stilul curent + cladiri reale (composite) + enforcer de camera.
-  var STD_SCENES = { b18s1:'dawn', b19s1:'dusk' };
+  // b17s1 (cartiere la nivel strada) PORNESTE pe Standard (ca b18s1/b19s1): comutarea se face la
+  // inceputul scenei, camera turul se aseaza DUPA style.load -> fara resetul de descent de dinainte.
+  var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
   function _cinApplyBase(id, afterReady){
     // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
     var wantStd = !!STD_SCENES[id] && SE._richBuildings;
