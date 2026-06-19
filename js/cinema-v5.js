@@ -1151,17 +1151,24 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b6s2':
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-height',0.5);}catch(e){}
+        // SCENA 5 PE TOT UAT-UL: cladirile reale cresc colorate pe potential (verde->rosu)
         onIdle(function(){try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){}});
-        // PRESIUNE DENSITATE (heatmap proiectat) — apare progresiv sub masterplan
         onIdle(function(){try{SE._addDensityPressure&&SE._addDensityPressure(map);}catch(e){}});
-        // MASTERPLAN PROIECTAT desenat pe harta: centura, tren metropolitan,
-        // cartiere noi, parc, reconversie, pasaje — peste fondul construit.
         setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map);}catch(e){} } },2800);
+        // POLI REALI DE DEZVOLTARE etichetati pe harta: Spital Regional (Moara de Vant),
+        // zona Pacurari (hoteluri/blocuri), coridor centura->A8. Acolo CRESTE orasul concret.
+        setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },3400);
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color',['interpolate',['linear'],['get','height'],0,'#14532d',6,'#15803d',15,'#f59e0b',28,'#ef4444']);}catch(e){}
-        // Vedere larga — sa se vada TOT orasul proiectat (centura + retea), apoi push-in
-        fly(Z.C,12.6,54,0,4500,0,'night');
-        rot(10,0.006);
-        fly(Z.C,13.4,60,45,9000,12000,'night');
+        // CAMERA VIZITEAZA POLII REALI: vedere larga -> Spital Regional -> coridor Pacurari/centura
+        (function(){
+          var pr=(window._UrbanProjects&&window._UrbanProjects.data&&window._UrbanProjects.data[SE._cityKey])||[];
+          var pts=pr.filter(function(p){return typeof p.lat==='number'&&typeof p.lon==='number';});
+          var A=pts[0]?[pts[0].lon,pts[0].lat]:Z.NV;
+          var B=pts[1]?[pts[1].lon,pts[1].lat]:Z.SE2;
+          fly(Z.C,12.6,52,0,4500,0,'night');         // tot orasul proiectat (centura + retea)
+          fly(A,14.6,62,30,6500,7200,'night');        // push-in pe pol 1 (cresc cladirile)
+          fly(B,14.3,60,-25,6500,15800,'dusk');       // glisare la pol 2
+        })();
         break;
 
       case 'b6s3':
