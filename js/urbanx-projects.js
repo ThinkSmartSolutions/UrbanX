@@ -35,6 +35,14 @@ G._UrbanProjects = {
         nume:'Amenajarea râului Bahlui (parc liniar)',
         desc:'Reamenajarea malurilor Bahluiului în parc liniar continuu: alei pietonale/velo, oaze de verdeață, retenție apă.',
         impact:'Coridor verde-albastru major — racorire urbană, conectivitate pietonală, calitatea vieții.', sursa:'Primăria Iași / fonduri climă UE' },
+      { tip:'zona', icon:'🏙', color:'#f59e0b', lat:47.1605, lon:27.6210,
+        nume:'Bulevardul Aurel Vlaicu — pol birouri & rezidențial',
+        desc:'Aglomerare de clădiri de birouri clasa A (Palas-extins, United Business Center), rezidențial înalt și retail de-a lungul axei Aurel Vlaicu / Bulevardul Tudor Vladimirescu.',
+        impact:'Pol terțiar (birouri IT/servicii) + densificare verticală — cerere mare de parcaje și transport public.', sursa:'autorizații ANCPI / dezvoltatori (Iulius, Prime Kapital)' },
+      { tip:'zona', icon:'🏭', color:'#9ca3af', lat:47.1430, lon:27.6320,
+        nume:'Reconversie industrială Fortus / CUG (Tutora–Fortus)',
+        desc:'Reconversia platformelor industriale CUG/Fortus (brownfield est) în zonă mixtă: rezidențial, comerț, parcuri logistice ușoare și birouri — pol terțiar secundar din PUG.',
+        impact:'Brownfield → oraș: regenerare urbană majoră est, evită sprawl-ul prin reciclarea terenului central.', sursa:'PUG Iași (CM — pol terțiar Tutora/Fortus) / FEDR regenerare urbană' },
     ],
 
     // ── MUNICIPIUL SUCEAVA ──

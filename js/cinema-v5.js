@@ -463,8 +463,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     var nm  = ((SE._city&&SE._city.name)||'').toLowerCase();
     var RICH = ['bucuresti','bucurești','cluj','iasi','iași','timisoara','timișoara','brasov','brașov',
       'constanta','constanța','craiova','sibiu','oradea','arad','ploiesti','ploiești','galati','galați',
-      'pitesti','pitești','braila','brăila','bacau','bacău','targu mures','târgu mureș','baia mare','buzau','buzău','satu mare'];
-    SE._richBuildings = pop>=150000 || RICH.some(function(c){ return nm.indexOf(c)>=0; });
+      'pitesti','pitești','braila','brăila','bacau','bacău','targu mures','târgu mureș','baia mare','buzau','buzău','satu mare',
+      'botosani','botoșani','suceava','vaslui','piatra','focsani','focșani','barlad','bârlad','roman','dorohoi','pascani','pașcani'];
+    // Mapbox Standard are cladiri OSM GLOBAL (vezi captura Botosani — 3D complet). Activam Standard 3D
+    // pentru toate orasele/municipiile (>=10k). Doar satele/comunele mici raman pe baza PUG colorata.
+    SE._richBuildings = pop>=10000 || RICH.some(function(c){ return nm.indexOf(c)>=0; });
   })();
   SE._guardCanvas&&SE._guardCanvas();
 
