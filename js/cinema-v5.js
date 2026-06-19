@@ -886,7 +886,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b2s3':
         lp('night');
-        fly([cx,cy],11,40,0,4000,0,'night');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); // backdrop oras (nu harta goala)
+        fly([cx,cy],12.4,48,0,4000,0,'night');
         setTimeout(function(){
           if(!SE._playing) return;
           if(D.roads&&D.roads.length){ addLine('v9-hw',D.roads); _pulse(map,'v9-hw','line-opacity',0.3,0.9,10); }
@@ -897,6 +898,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b2s4':
         lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); // backdrop oras
         fly(Z.CBD,15,65,-15,4000,0,'day');
         fly(Z.UNI,15.5,68,30,6000,10000,'day');
         fly(Z.IND,14.5,60,-40,6000,17000,'dusk');
@@ -1248,6 +1250,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b9s2':
         lp('dusk');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); // backdrop oras
         fly(Z.C,13,50,-15,4000,0,'dusk');
         fly(Z.NV,14,58,30,6000,10000,'dusk');
         fly(Z.SE2,13.5,54,-20,5500,18000,'dusk');
@@ -1380,6 +1383,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
       case 'b13s3': // Oras prietenos seniori
         lp('day');
+        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); // backdrop oras
         fly(Z.RES,14,54,0,4000,0,'day');
         fly(Z.C,13.6,52,40,13000,4500,'day');
         break;
