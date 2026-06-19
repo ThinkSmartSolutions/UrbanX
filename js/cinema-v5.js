@@ -564,7 +564,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // ── BAZA STANDARD 3D (harta Mapbox luminoasa cu cladiri reale + cer + POI, ca pe platforma) ──
   // Scenele "umane" (nivel strada, cultura, fauna) ruleaza pe stilul Standard, fiecare cu alt
   // moment al zilei (lightPreset) pt variatie de culoare/fundal. Restul raman pe baza intunecata.
-  var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
+  // NU punem b17s1 (street-level) pe Standard: comutarea de stil reseteaza camera in timpul
+  // descent-ului. Ramane pe stilul curent + cladiri reale (composite) + enforcer de camera.
+  var STD_SCENES = { b18s1:'dawn', b19s1:'dusk' };
   function _cinApplyBase(id, afterReady){
     // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
     var wantStd = !!STD_SCENES[id] && SE._richBuildings;
@@ -1510,13 +1512,18 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // pe Standard avem deja cladiri 3D reale; pe baza intunecata folosim footprints composite
         if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
         // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
-        // DESCENT GARANTAT: jumpTo direct la nivel strada (instant, fara ambiguitate de tranzitie),
-        // apoi glisare lenta pe artera — vedere de pieton reala, nu aeriana.
+        // cladiri reale (composite) pe stilul curent — fara comutare de stil (care reseta camera)
+        onIdle(function(){ _cinRealBuildings(map); });
         var _sa = (SE._tourMain && SE._tourMain.lon) ? [SE._tourMain.lon, SE._tourMain.lat] : [cx,cy];
-        try{ map.jumpTo({center:_sa, zoom:16.8, pitch:76, bearing:18}); }catch(e){}
-        fly(_sa,17.9,85,18,4000,300);     // coboara la nivelul ochilor
-        rot(22,0.0016);
-        fly(_sa,18.1,85,-28,13000,5500);  // mers lent printre fronturi
+        try{ map.jumpTo({center:_sa, zoom:17.4, pitch:82, bearing:15}); }catch(e){}
+        // ENFORCER: orice ar reseta camera la vedere larga, o readucem la nivel strada (<16.4 => snap)
+        var _streetEnf=setInterval(function(){
+          if(!SE._playing){clearInterval(_streetEnf);return;}
+          try{ if(map.getZoom()<16.4){ map.jumpTo({center:_sa,zoom:17.6,pitch:84,bearing:map.getBearing()}); } }catch(e){}
+        },200);
+        _ivs.push(_streetEnf);
+        rot(20,0.0016);                  // drift lent de bearing = senzatie de mers
+        fly(_sa,18.0,85,-25,14000,1800); // push-in lent printre fronturi
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -3089,8 +3096,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     if(SE._paused){ SE._paused=false; var _pb=document.getElementById('c8-pause'); if(_pb){_pb.textContent='⏸ Pauza';_pb.style.background='rgba(0,0,0,.6)';} var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove(); }
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
-    // OPRESTE imediat camera scenei anterioare (fly-uri intarziate) ca sa nu reseteze scena noua
+    // OPRESTE imediat camera scenei anterioare (fly-uri + intervale, ex. enforcer street) ca sa nu reseteze scena noua
     try{ _flyTos.forEach(clearTimeout); _flyTos=[]; }catch(e){}
+    try{ _ivs.forEach(clearInterval); _ivs=[]; }catch(e){}
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
     // dezactiveaza street experience daca a fost activ (scena b17s1) la schimbare scena
     try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
