@@ -267,11 +267,19 @@ function wrap(ctx,txt,x,y,maxW,lh,maxL){
 function preload(city,siruta,done){
   var cx=city.lon||27.601, cy=city.lat||47.158, ps=[];
 
-  ps.push(fetch('https://ro.wikipedia.org/api/rest_v1/page/summary/'+
-    encodeURIComponent((city.name||'').replace(/ /g,'_')),
+  // extract LUNG (nu summary-ul scurt) ca textul de istorie sa aiba ce DERULA pe scena
+  var _wtitle=(city.name||'').replace(/^(Municipiul|Comuna|Orasul|Orașul)\s+/i,'').replace(/ /g,'_');
+  ps.push(fetch('https://ro.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&exchars=3500&redirects=1&titles='+
+    encodeURIComponent(_wtitle)+'&format=json&origin=*',
     {signal:AbortSignal.timeout(7000)})
     .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){if(d&&d.extract)D.wiki={extract:d.extract,title:d.title};})
+    .then(function(d){ var pg=d&&d.query&&d.query.pages, ex=''; if(pg){Object.keys(pg).forEach(function(k){ if(pg[k]&&pg[k].extract) ex=pg[k].extract; });}
+      if(ex && ex.length>40){ D.wiki={extract:ex,title:city.name||'UAT'}; }
+      else { // fallback summary scurt
+        return fetch('https://ro.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent((city.name||'').replace(/ /g,'_')),{signal:AbortSignal.timeout(5000)})
+          .then(function(r){return r.ok?r.json():null;}).then(function(s){ D.wiki={extract:(s&&s.extract)||'Date indisponibile.',title:city.name||'UAT'}; });
+      }
+    })
     .catch(function(){D.wiki={extract:'Date indisponibile.',title:city.name||'UAT'};}));
 
   if(window._PredEngine&&window._PredEngine.fetchINSE){
@@ -2078,7 +2086,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           // TEXT CARE SE DERULEAZA (ca la film) \u2014 text integral, clip in cutie, scroll vertical pe durata scenei
           var fsW=Math.min(W*0.0112,14), lhW=fsW*1.55, maxWW=bw2-24;
           ctx.font='400 '+fsW+'px "Space Grotesk",sans-serif';
-          var wds=D.wiki.extract.slice(0,1200).split(/\s+/), lns=[], curL='';
+          var wds=D.wiki.extract.slice(0,3000).split(/\s+/), lns=[], curL='';
           for(var wj=0;wj<wds.length;wj++){ var tst=curL?curL+' '+wds[wj]:wds[wj]; if(ctx.measureText(tst).width>maxWW && curL){ lns.push(curL); curL=wds[wj]; } else curL=tst; }
           if(curL)lns.push(curL);
           var topP=by2+32, botP=by2+bh2-10, viewH=botP-topP, totalH=lns.length*lhW;
