@@ -389,6 +389,7 @@ window._startCinema = function(cityKey){
   if(!city&&window.TCI&&window.TCI._EXTRA_UATS) city=window.TCI._EXTRA_UATS[cityKey];
   if(!city&&window._RO_CITIES_DB) city=Object.values(window._RO_CITIES_DB)[0];
   if(!city){console.error('[v9] city negasit');return;}
+  try{ _cinLoadEmblem(city.name); }catch(e){}
 
   var pred=null;
   try{if(window._PredEngine&&typeof window._PredEngine.calc==='function') pred=window._PredEngine.calc(city);}catch(e){}
@@ -646,6 +647,28 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         try{ SE._addBuildings && SE._addBuildings(map); }catch(e){}
       }
     }catch(e){ try{ SE._addBuildings && SE._addBuildings(map); }catch(_){} }
+  }
+
+  // ICOANE TRAFIC — masina (vedere laterala) + pieton (silueta), ca SDF (coloram cu icon-color).
+  // Asa traficul SE INTELEGE (masini/oameni), nu "buline care joaca pe harta".
+  function _cinMakeTrafficIcons(map){
+    function mk(id,w,h,draw){
+      try{ if(map.hasImage&&map.hasImage(id)) return; }catch(e){}
+      var c=document.createElement('canvas'); c.width=w; c.height=h; var g=c.getContext('2d');
+      g.clearRect(0,0,w,h); g.fillStyle='#fff'; draw(g);
+      try{ var im=g.getImageData(0,0,w,h); map.addImage(id,{width:w,height:h,data:im.data},{sdf:true}); }catch(e){}
+    }
+    mk('cin-car',40,22,function(g){
+      g.beginPath(); g.moveTo(3,16); g.lineTo(8,16); g.quadraticCurveTo(11,8,18,8); g.lineTo(27,8);
+      g.quadraticCurveTo(31,8,33,12); g.lineTo(37,13); g.quadraticCurveTo(39,14,38,17); g.lineTo(3,17); g.closePath(); g.fill();
+      g.beginPath(); g.arc(12,18,4,0,7); g.fill(); g.beginPath(); g.arc(30,18,4,0,7); g.fill();
+    });
+    mk('cin-ped-ico',14,30,function(g){
+      g.beginPath(); g.arc(7,5,3.3,0,7); g.fill();           // cap
+      g.fillRect(5.3,8.5,3.4,11);                            // trunchi
+      g.beginPath(); g.moveTo(5.4,19); g.lineTo(3,29); g.lineTo(5,29); g.lineTo(7,22); g.lineTo(9,29); g.lineTo(11,29); g.lineTo(8.6,19); g.closePath(); g.fill(); // picioare
+      g.fillRect(2.5,9.5,9,2.4);                             // brate
+    });
   }
 
   // ── BAZA STANDARD 3D (harta Mapbox luminoasa cu cladiri reale + cer + POI, ca pe platforma) ──
@@ -1737,15 +1760,28 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // ── TRAFIC ANIMAT (auto + pietoni) — reia motorul _addTrafficPulse/_updateTraffic + animator propriu
         onIdle(function(){
           if(!SE._playing) return;
+          _cinMakeTrafficIcons(map);
           try{ SE._addTrafficPulse && SE._addTrafficPulse(map, (D.roads&&D.roads.length)?D.roads:null); }catch(e){}
-          // vehiculele mai mari la nivel de strada
-          try{ map.setPaintProperty('v8-trp-l','circle-radius',['interpolate',['linear'],['zoom'],13,2.4,16,5,17.5,8,18.5,11]); }catch(e){}
-          // PIETONI: puncte albe mici care se plimba lent in tesutul dens din jurul camerei
+          // MASINI ca icoane (vedere laterala), colorate pe congestie — nu "buline"
+          try{
+            if(map.getLayer('v8-trp-l')) map.setLayoutProperty('v8-trp-l','visibility','none');
+            if(!map.getLayer('cin-cars') && map.getSource('v8-trp')){
+              map.addLayer({id:'cin-cars',type:'symbol',source:'v8-trp',
+                layout:{'icon-image':'cin-car','icon-allow-overlap':true,'icon-ignore-placement':true,'icon-rotation-alignment':'viewport',
+                  'icon-size':['interpolate',['linear'],['zoom'],13,0.35,16,0.72,17.5,1.05,18.5,1.4]},
+                paint:{'icon-color':['coalesce',['get','c'],'#fbbf24'],'icon-opacity':0.98,'icon-halo-color':'#06101f','icon-halo-width':0.8}});
+            }
+          }catch(e){}
+          // PIETONI ca silueta (om in picioare) — nu puncte
           var peds=[]; for(var pi=0;pi<70;pi++){ var pa=Math.random()*6.283, prr=Math.random()*0.010; peds.push({lon:cx+Math.cos(pa)*prr, lat:cy+Math.sin(pa)*prr*0.7, vx:(Math.random()-0.5)*0.000018, vy:(Math.random()-0.5)*0.000014}); }
           try{
-            if(map.getLayer('v9-ped'))map.removeLayer('v9-ped'); if(map.getSource('v9-ped'))map.removeSource('v9-ped');
+            ['v9-ped','v9-ped-sym'].forEach(function(id){if(map.getLayer(id))map.removeLayer(id);});
+            if(map.getSource('v9-ped'))map.removeSource('v9-ped');
             map.addSource('v9-ped',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-            map.addLayer({id:'v9-ped',type:'circle',source:'v9-ped',minzoom:15,paint:{'circle-radius':['interpolate',['linear'],['zoom'],15,1.8,17,3.4,18.5,5],'circle-color':'#0ea5e9','circle-opacity':0.95,'circle-stroke-width':0.8,'circle-stroke-color':'#ffffff'}});
+            map.addLayer({id:'v9-ped-sym',type:'symbol',source:'v9-ped',minzoom:15,
+              layout:{'icon-image':'cin-ped-ico','icon-allow-overlap':true,'icon-ignore-placement':true,'icon-rotation-alignment':'viewport',
+                'icon-size':['interpolate',['linear'],['zoom'],15,0.32,17,0.55,18.5,0.8]},
+              paint:{'icon-color':'#22d3ee','icon-opacity':0.96,'icon-halo-color':'#06283d','icon-halo-width':0.9}});
           }catch(e){}
           var t0=null, iv=setInterval(function(){
             var cur=SE.SCENES&&SE.SCENES[SE._si]&&SE.SCENES[SE._si].id;
@@ -3982,6 +4018,25 @@ function _drawCarbon(ctx,W,H,a,pred){
 // PROLOG — "orasul respira": glow pulsant + text poetic (deschidere emotionala).
 // EMBLEMA UAT — stema reala (imagine preincarcata _cinEmblems[name]) daca exista, altfel scut heraldic
 // stilizat cu monograma + coroana (auriu subtil). Desenata in spatele/deasupra numelui la inceput.
+// Incarca STEMA REALA a UAT-ului de pe Wikipedia (pageimage de pe pagina "Stema municipiului X")
+// -> window._cinEmblems[name] = Image; _drawEmblem o foloseste daca exista, altfel scutul stilizat.
+window._cinEmblems = window._cinEmblems || {};
+function _cinLoadEmblem(name){
+  if(!name || window._cinEmblems[name]) return;
+  var clean = String(name).replace(/^(Municipiul|Comuna|Orasul|Orașul)\s+/i,'').trim();
+  var titles = ['Stema municipiului '+clean, 'Stema orașului '+clean, 'Stema comunei '+clean, clean];
+  function tryNext(i){
+    if(i>=titles.length) return;
+    var api='https://ro.wikipedia.org/w/api.php?action=query&titles='+encodeURIComponent(titles[i])+'&prop=pageimages&piprop=thumbnail&pithumbsize=256&format=json&origin=*';
+    fetch(api).then(function(r){return r.json();}).then(function(j){
+      var pages=(j&&j.query&&j.query.pages)||{}, thumb=null;
+      Object.keys(pages).forEach(function(k){ if(pages[k].thumbnail&&pages[k].thumbnail.source) thumb=pages[k].thumbnail.source; });
+      if(thumb){ var img=new Image(); img.crossOrigin='anonymous'; img.onload=function(){ window._cinEmblems[name]=img; }; img.onerror=function(){ tryNext(i+1); }; img.src=thumb; }
+      else tryNext(i+1);
+    }).catch(function(){ tryNext(i+1); });
+  }
+  tryNext(0);
+}
 function _drawEmblem(ctx,cx,cy,R,a,name){
   ctx.save();
   var img=(window._cinEmblems&&window._cinEmblems[name]);

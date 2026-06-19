@@ -530,35 +530,33 @@ G._CinemaEngine={
     }catch(e){}
   },
 
-  // Cladiri standard Mapbox colorate pe tip UTR
+  // FOND ORAS = cladirile REALE ale stilului (NU lespezi de zonare PUG — acelea erau "mash-ul" gri
+  // gratuit peste harta, pe care Florin il ura). Folosim building-extrusion (footprints reale) ca
+  // textura discreta de oras; pe stiluri fara el, cladirile composite reale.
   _addBuildings(map){
-    if(!this._pugGeo?.features?.length)return;
-    const reg=this._reguli||{};
-    const features=this._pugGeo.features.slice(0,700).map(f=>{
-      const p=f.properties||{};
-      // FIX: campul real e 'utr' (CM/CC/LL...), nu utr_cod -> altfel toate ies albe.
-      const u=String(p.zf||p.utr||p.utr_cod||'').trim().toUpperCase();
-      const rv=(reg.subzone&&reg.subzone[u])||reg[u]||{};
-      const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
-      const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
-      const h=Math.max(4, hmax>0?hmax*1.4:(cut>0?cut*9:12));
-      return{...f,properties:{...f.properties,h}};
-    });
-    // BACKDROP NEUTRU: masa urbana slate gradata pe inaltime — NU curcubeu pe functiune.
-    // (Coloratul pe functiune confunda si acopera textul scenei; cresterea colorata e in _add3DGrowth.)
-    this._safeAdd(map,'v8-bld',{type:'geojson',data:{type:'FeatureCollection',features}},{
-      id:'v8-bld-l',type:'fill-extrusion',source:'v8-bld',
-      paint:{
-        'fill-extrusion-color':['interpolate',['linear'],['coalesce',['get','h'],4],
-          4,'#28304a', 12,'#3a4666', 24,'#50608a', 42,'#6b80b0'],
-        'fill-extrusion-height':['coalesce',['get','h'],4],
-        'fill-extrusion-base':0,
-        'fill-extrusion-opacity':0.78,
-        'fill-extrusion-vertical-gradient':true,
-        'fill-extrusion-ambient-occlusion-intensity':0.5,
-        'fill-extrusion-ambient-occlusion-radius':3
+    // sterge orice lespede veche
+    try{ if(map.getLayer('v8-bld-l')) map.removeLayer('v8-bld-l'); if(map.getSource('v8-bld')) map.removeSource('v8-bld'); }catch(e){}
+    var hExpr=['coalesce',['to-number',['get','height']],['*',['coalesce',['to-number',['get','levels']],3],3],10];
+    var colExpr=['interpolate',['linear'],hExpr,0,'#2a3346',12,'#3a4660',28,'#4e5e7e',50,'#64769a'];
+    try{
+      if(map.getLayer('building-extrusion')){
+        map.setLayoutProperty('building-extrusion','visibility','visible');
+        map.setPaintProperty('building-extrusion','fill-extrusion-color',colExpr);
+        map.setPaintProperty('building-extrusion','fill-extrusion-height',hExpr);
+        map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.85);
+        return;
       }
-    });
+    }catch(e){}
+    // fallback: cladiri composite reale (footprints OSM) daca stilul nu are building-extrusion
+    try{
+      if(map.getSource('composite') && !map.getLayer('cin-bld-real')){
+        map.addLayer({id:'cin-bld-real',type:'fill-extrusion',source:'composite','source-layer':'building',
+          filter:['==','extrude','true'],minzoom:11.5,
+          paint:{'fill-extrusion-color':colExpr,'fill-extrusion-height':hExpr,
+            'fill-extrusion-base':['coalesce',['to-number',['get','min_height']],0],
+            'fill-extrusion-opacity':0.85,'fill-extrusion-vertical-gradient':true}});
+      }
+    }catch(e){}
   },
 
   // Heatmap densitate — 2D dar animat
