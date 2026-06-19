@@ -579,10 +579,16 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     }
     if(SE._curBase===wantKey){ ready(); return; }
     SE._curBase=wantKey;
+    // ready() TREBUIE sa ruleze (el cheama setup() = camera scenei). Daca style.load nu se
+    // declanseaza (stil ce nu se incarca, token etc.), un fallback il ruleaza oricum -> camera
+    // nu mai ramane blocata pe pozitia scenei anterioare (bug-ul "nu coboara la nivel strada").
+    var _fired=false;
+    function _go(){ if(_fired)return; _fired=true; ready(); }
     try{
       map.setStyle((typeof STYLES!=='undefined' && STYLES[wantKey]) || (typeof STYLES!=='undefined'?STYLES.custom:undefined));
-      map.once('style.load', function(){ setTimeout(ready, 550); });
-    }catch(e){ ready(); }
+      map.once('style.load', function(){ setTimeout(_go, 450); });
+      setTimeout(_go, 2500); // fallback garantat
+    }catch(e){ _go(); }
   }
 
   // Zone REALE din PUG — nu offset-uri fixe
@@ -1500,10 +1506,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // pe Standard avem deja cladiri 3D reale; pe baza intunecata folosim footprints composite
         if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
         // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
-        fly([cx,cy],14.6,55,0,3500,0);
-        fly([cx,cy],16.6,80,30,5500,3600);
-        rot(8,0.0014);
-        fly([cx,cy],17.6,84,-35,9000,9300);
+        // DESCENT GARANTAT: jumpTo direct la nivel strada (instant, fara ambiguitate de tranzitie),
+        // apoi glisare lenta pe artera — vedere de pieton reala, nu aeriana.
+        var _sa = (SE._tourMain && SE._tourMain.lon) ? [SE._tourMain.lon, SE._tourMain.lat] : [cx,cy];
+        try{ map.jumpTo({center:_sa, zoom:16.8, pitch:76, bearing:18}); }catch(e){}
+        fly(_sa,17.9,85,18,4000,300);     // coboara la nivelul ochilor
+        rot(22,0.0016);
+        fly(_sa,18.1,85,-28,13000,5500);  // mers lent printre fronturi
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');

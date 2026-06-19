@@ -12,7 +12,7 @@ G._UrbanProjects = {
   data: {
     // ── MUNICIPIUL IAȘI (date reale, in derulare/programate) ──
     'RO-IS-01': [
-      { tip:'pol', icon:'🏥', color:'#ef4444', lat:47.1830, lon:27.6080,
+      { tip:'pol', icon:'🏥', color:'#ef4444', lat:47.1875178844981, lon:27.587306526594542,
         nume:'Spital Regional de Urgență Iași (Moara de Vânt)',
         desc:'Investiție majoră (BEI/PNRR, ~150.000 mp). Va deveni pol de dezvoltare: locuințe, hoteluri, comerț, clinici private, smart-city în jur.',
         impact:'Pol medical + rezidențial nou — presiune mare de densificare și mobilitate pe Moara de Vânt / Tătărași.', sursa:'PNRR / BEI / CNI' },
