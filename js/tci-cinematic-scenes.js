@@ -1143,9 +1143,9 @@ G._CinemaEngine={
     } else { for(let i=0;i<160;i++){const a=Math.random()*6.283,r=Math.random()*0.02;pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+Math.cos(a)*r,cy+Math.sin(a)*r]},properties:{w:1-r/0.03}});} }
     this._safeAdd(map,'v8-age',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{
       id:'v8-age-l',type:'heatmap',source:'v8-age',
-      paint:{'heatmap-weight':['get','w'],'heatmap-intensity':['interpolate',['linear'],['zoom'],10,1,15,2.4],
-        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.3,'rgba(96,165,250,0.40)',0.6,'rgba(245,158,11,0.65)',1,'rgba(168,85,247,0.88)'],
-        'heatmap-radius':['interpolate',['linear'],['zoom'],10,20,15,44],'heatmap-opacity':0.82}
+      paint:{'heatmap-weight':['get','w'],'heatmap-intensity':['interpolate',['linear'],['zoom'],10,1.6,15,4],
+        'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.15,'rgba(96,165,250,0.55)',0.45,'rgba(245,158,11,0.80)',1,'rgba(168,85,247,0.95)'],
+        'heatmap-radius':['interpolate',['linear'],['zoom'],10,28,15,70],'heatmap-opacity':0.9}
     });
     this._agingPeak=peak;
     this._cinLabels(map,[
@@ -1378,7 +1378,7 @@ G._CinemaEngine={
     if(f.pts && f.pts.length){
       this._safeAdd(map,'v8-fauna',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
         id:'v8-fauna-l',type:'circle',source:'v8-fauna',
-        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,8,15,22],'circle-color':['get','c'],'circle-opacity':0.35,'circle-stroke-width':2,'circle-stroke-color':['get','c']}
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,8,15,22],'circle-color':['get','c'],'circle-opacity':0.55,'circle-blur':0.4,'circle-stroke-width':2.5,'circle-stroke-color':['get','c']}
       });
     }
     if(this._cinLabels) this._cinLabels(map, f.labels||[]);

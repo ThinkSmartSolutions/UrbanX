@@ -453,6 +453,16 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
   SE._map=map; SE._playing=true; SE._si=0; SE.SCENES=SCENES;
   SE._curBase='custom'; // urmarim stilul de baza activ (custom intunecat vs Standard 3D luminos)
+  // Standard 3D are cladiri reale doar pe orasele mari (acoperire Mapbox); pe orasele mici e gri/gol,
+  // deci acolo ramanem pe baza intunecata cu volume colorate din PUG (care au continut real).
+  (function(){
+    var pop = (SE._city&&(SE._city.pop2021||SE._city.pop))||0;
+    var nm  = ((SE._city&&SE._city.name)||'').toLowerCase();
+    var RICH = ['bucuresti','bucurești','cluj','iasi','iași','timisoara','timișoara','brasov','brașov',
+      'constanta','constanța','craiova','sibiu','oradea','arad','ploiesti','ploiești','galati','galați',
+      'pitesti','pitești','braila','brăila','bacau','bacău','targu mures','târgu mureș','baia mare','buzau','buzău','satu mare'];
+    SE._richBuildings = pop>=150000 || RICH.some(function(c){ return nm.indexOf(c)>=0; });
+  })();
   SE._guardCanvas&&SE._guardCanvas();
 
   // ── ZONE REALE DIN PUG pentru camera ──────────────────────────────────
@@ -552,7 +562,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // moment al zilei (lightPreset) pt variatie de culoare/fundal. Restul raman pe baza intunecata.
   var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
   function _cinApplyBase(id, afterReady){
-    var wantStd = !!STD_SCENES[id];
+    // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
+    var wantStd = !!STD_SCENES[id] && SE._richBuildings;
     var wantKey = wantStd ? 'standard' : 'custom';
     function ready(){
       if(!SE._playing) return;
