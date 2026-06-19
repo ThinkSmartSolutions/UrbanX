@@ -152,6 +152,21 @@
       D.P('Congestia se măsoară prin nivelul de serviciu (Level of Service, LOS), o scară de la A (flux liber) la F (blocaj), în funcție de raportul volum/capacitate al arterelor. Arterele principale ale ' + city.name + ' înregistrează în orele de varf valori LOS D-E pe coridoarele radiale către centru, indicând saturarea capacității. Costul economic al congestiei (timp pierdut, combustibil, întârzieri marfă) este estimat la cca. ' + N(Math.round(pop * 0.12)) + ' mil. EUR/an.');
       D.formula('Nivelul de serviciu (raport volum/capacitate)', 'V/C = volum orar / capacitate arterială', 'V/C < 0.6 -> LOS A-B (fluid); 0.6-0.8 -> C-D (stabil); 0.8-1.0 -> E (instabil); > 1.0 -> F (blocaj). Orele de varf depășesc 0.85 pe radialele principale.');
       D.barChart([['07-09 (varf AM)', 88, trafColor], ['09-12', 54, PAL[5]], ['12-15', 61, PAL[5]], ['15-19 (varf PM)', 92, trafColor], ['19-22', 47, PAL[2]]], { title: 'Profil orar al traficului (% din capacitate, zi lucrătoare)', h: 46, vfmt: v => v + '%', source: 'Profil tipic urban (model). Două vârfuri pronuntate AM/PM — argument pentru managementul cererii și TP.' });
+      D.h2('Costul real al congestiei — viață pierdută în trafic');
+      var _ops = Math.round(Math.min(170, 38 + (pop / 100000) * 20 + Math.max(0, (m.motoriz - 300)) * 0.07));
+      var _ns = Math.round(pop * 0.45), _ot = _ops * _ns, _ani = Math.round(_ot / 8760), _gen = Math.round(_ani / 75);
+      var _costL = _ot * 30, _co2t = Math.round(_ot * 1.5 * 2.31 / 1000), _lit = Math.round(_ot * 1.5);
+      var _scoli = Math.round(_costL / 12e6), _spit = Math.round(_costL / 120e6), _tram = Math.round(_costL / 25e6);
+      D.P('Dincolo de cifre tehnice, congestia se poate exprima în termenul cel mai uman: timp de viață consumat. Fiecare șofer din ' + city.name + ' pierde cca. ' + _ops + ' ore/an în trafic (≈ ' + (_ops / 24).toFixed(1) + ' zile). Cumulat pe cei cca. ' + N(_ns) + ' șoferi, orașul consumă anual echivalentul a ' + N(_ani) + ' ani de viață (≈ ' + _gen + ' generații), cu un cost economic de cca. ' + N(Math.round(_costL / 1e6)) + ' mil. lei/an și ' + N(_co2t) + ' tone CO2 suplimentare. Acest indicator transformă mobilitatea într-un argument de sănătate publică și economic — esential pentru prioritizarea investitiilor și prezentarea în consiliul local.');
+      D.formula('Ani de viață pierduți în trafic (anual)', 'AV = (h_sofer × N_soferi) / 8760', 'h_sofer = ore pierdute/șofer/an (estimat din mărimea orasului și gradul de motorizare); N_soferi ≈ 45% din populație; 8760 = ore într-un an. Cost = ore × valoarea timpului (VOT ≈ 30 lei/h, ordin de mărime INS/Eurostat).');
+      D.table(['Indicator', 'Valoare', 'Echivalent'], [
+        ['Timp pierdut', N(_ot) + ' ore/an', _ops + ' h/șofer ≈ ' + (_ops / 24).toFixed(1) + ' zile'],
+        ['Viață consumată', N(_ani) + ' ani/an', '≈ ' + _gen + ' generații'],
+        ['Cost economic', N(Math.round(_costL / 1e6)) + ' mil. lei/an', _scoli + ' școli / ' + _spit + ' spitale / ' + _tram + ' km tramvai'],
+        ['Emisii + combustibil', N(_co2t) + ' t CO2/an', N(_lit) + ' litri/an'],
+      ], [40, 48, 86], { boldFirst: true, fs: 7 });
+      D.callout('De ce contează', 'Fiecare proiect de mobilitate (BRT, pasaje, centură, tren metropolitan) recuperează ani de viață redați comunității. Indicatorul „ani de viață pierduți" comunică mult mai puternic decât minutele de întârziere — același indicator apare și în prezentarea cinematică UrbanX, pentru consecvență între analiză și comunicare.');
+      D.sourceBadges(['INS — parc auto', 'Eurostat — value of time', 'Model congestie UrbanX', 'INRIX/TomTom (metodologie)']);
       D.h2('Accesibilitate și izocrone');
       D.P('Accesibilitatea măsoară cât de usor pot fi atinse destinatiile esențiale (locuri de muncă, școli, sănătate, comerț) cu fiecare mod de transport. Analiză izocrone determină zonele atinse în 15 și 30 de minute. Dezechilibrele de accesibilitate (zone periferice slab conectate la TP) generează dependență de autoturism și inechitate socială.');
       D.table(['Mod de transport', 'Acces în 15 min', 'Acces în 30 min'], [
