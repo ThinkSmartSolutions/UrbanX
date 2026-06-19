@@ -168,6 +168,15 @@
 
       var _ag = parseFloat(seism.ag || 0.2), _sl = _ag >= 0.3 ? 5 : _ag >= 0.25 ? 4 : _ag >= 0.2 ? 3 : 2;
       D.barChart([['Seismic', _sl, [239, 68, 68]], ['Inundății', /mediu|ridicat|mare/i.test(apa.risc_inundabil || '') ? 3 : 2, [59, 130, 246]], ['Alunecari', 2, [245, 158, 11]], ['Climatic', 3, [168, 85, 247]], ['Tehnologic', 1, [120, 120, 132]]], { title: 'Profil de risc pe categorii (1=scăzut ... 5=ridicat)', h: 46, max: 5, source: 'Scor compozit UrbanX (orientativ). Categoriile cu nivel ridicat necesită studii de specialitate.' });
+      // HARTĂ — situarea amplasamentului fata de risc seismic (silueta UAT + zona seismica reala)
+      try {
+        if (window._PdfMap && D.ensure && D.pdf && city && city.lon) {
+          D.h2('Hartă — expunere seismică a amplasamentului');
+          D.ensure(80); window._PdfMap.draw(D.pdf, { x: D.dims.ML, y: D.y + 2, w: Math.min(D.dims.CW, 160), h: 66, title: 'Amplasament UAT — zona seismică ' + (seism.zona || '') + ' (ag=' + (seism.ag || '-') + 'g, ' + (seism.MSK || '') + ')', points: [{ lon: city.lon, lat: city.lat, c: '#ef4444', label: city.name + ' — fond central', r: 2.6 }], cx: city.lon, cy: city.lat, legend: [[[239, 68, 68], 'amplasament în zona seismică P100']] });
+          D.setY(D.y + 80);
+          D.P('Întregul teritoriu administrativ se află în zona seismică ' + (seism.zona || '') + ' (P100-1/2013), cu accelerația ag=' + (seism.ag || '-') + 'g. Inundabilitatea și alunecarile se delimiteaza punctual prin hărțile de hazard (ABA / studii geotehnice) la fază de PUZ/autorizare.', { gap: 1.2 });
+        }
+      } catch (e) { console.warn('[MP] harta risc:', e.message); }
 
       D.chapter('Analiză demografică și proiecții');
       D.h2('Evoluția populației');

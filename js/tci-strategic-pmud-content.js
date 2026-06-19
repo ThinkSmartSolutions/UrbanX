@@ -177,6 +177,24 @@
       ], [44, 65, 65], { boldFirst: true, fs: 7 });
       D.h2('Navetă și zonă urbană funcțională');
       D.P('Fluxurile zilnice de navetă între ' + city.name + ' și localitatile periurbane sunt semnificative și predominant auto, în absența unui transport public metropolitan integrat. Estimarea navetei nete (întrări minus ieșiri) indică rolul de pol de locuri de muncă al orașului. Gestionarea navetei prin transport public metropolitan și park&ride este esențială pentru decongestionarea intrarilor în oraș.');
+      // DETALIU METROPOLITAN (consecvent cu scena cinematica "Influenta metropolitana") — date _METRO
+      try {
+        var _MM = (window._METRO && ctx && window._METRO[ctx.cityKey]);
+        if (_MM && _MM.comune && _MM.comune.length) {
+          var _totN = _MM.comune.reduce(function (s, c) { return s + (c.nav || 0); }, 0);
+          D.P('Estimarea fluxului de navetă către ' + city.name + ': cca. ' + N(_totN) + ' navetiști/zi din comunele-satelit, timp mediu de deplasare ~' + _MM.timp + ' min. ' + _MM.ec + ' ' + _MM.edu);
+          D.table(['Comună-satelit', 'Navetiști/zi (estimare)'], _MM.comune.map(function (c) { return [c.n, N(c.nav) + '/zi']; }), [95, 65], { boldFirst: true, fs: 7 });
+          if (window._PdfMap && D.ensure) {
+            var _mpts = _MM.comune.map(function (c) { return { lon: c.lon, lat: c.lat, c: '#f59e0b', label: c.n, r: 1.8 }; });
+            _mpts.push({ lon: city.lon, lat: city.lat, c: '#ef4444', label: city.name, r: 2.6 });
+            var _mlines = _MM.comune.map(function (c) { return { coords: [[c.lon, c.lat], [city.lon, city.lat]], c: '#fbbf24', w: 0.9 }; });
+            D.h2('Hartă — fluxuri de navetă metropolitană');
+            D.ensure(80); window._PdfMap.draw(D.pdf, { x: D.dims.ML, y: D.y + 2, w: Math.min(D.dims.CW, 160), h: 66, title: 'Navetă: comune-satelit → oraș-pol', points: _mpts, lines: _mlines, cx: city.lon, cy: city.lat, legend: [[[245, 158, 11], 'comună-satelit'], [[239, 68, 68], 'oraș-pol']] });
+            D.setY(D.y + 80);
+          }
+          D.callout('Soluție', _MM.cong + ' Transport metropolitan integrat (tren/tram metropolitan + park&ride la intrari) = decongestionarea arterelor de acces.');
+        }
+      } catch (e) { console.warn('[PMUD] metro:', e.message); }
       D.h2('Grupuri vulnerabile și echitate în mobilitate');
       D.P('Mobilitatea echitabilă asigură acces pentru toti: persoane cu mobilitate redusă, vârstnici, copii, persoane fără autoturism și cu venituri reduse. Accesibilitatea universală (rampe, stații adaptate, informare accesibilă), siguranță și tariful accesibil al transportului public sunt condiții ale incluziunii. Aproximativ o treime din populație nu conduce (copii, vârstnici, persoane fără permis), depinzând de alternative la autoturism.');
       D.sourceBadges(['INS — navetă', 'OSM — rețea', 'Analiză izocrone UrbanX', 'HCM (LOS)']);
