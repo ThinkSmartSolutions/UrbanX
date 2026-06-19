@@ -69,7 +69,7 @@ for _ in range(20):
 print("oras:",ev("window._CinemaEngine._city&&window._CinemaEngine._city.name"),"curBaseInit:",ev("window._CinemaEngine._curBase"))
 # scurteaza scenele care nu sunt tinta; tintele raman lungi
 js=json.dumps(SCENES)
-ev(f"(function(){{var SE=window._CinemaEngine,T={js};window.__M=SE._map;if(SE.SCENES)SE.SCENES.forEach(function(s){{s.dur=(T.indexOf(s.id)>=0?22000:4000);}});return 'ok';}})()")
+ev(f"(function(){{var SE=window._CinemaEngine,T={js};window.__M=SE._map;if(SE.SCENES)SE.SCENES.forEach(function(s){{s.dur=(T.indexOf(s.id)>=0?20000:900);}});return 'ok';}})()")
 
 done=set()
 for i in range(300):

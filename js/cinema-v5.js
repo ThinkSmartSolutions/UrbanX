@@ -984,8 +984,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // #1: heatmap concentratie varstnici + ZOOM pe cartierul cel mai imbatranit
         onIdle(function(){try{SE._addAgingHeat&&SE._addAgingHeat(map);}catch(e){}});
         fly(Z.C,13,50,0,4000,0,'dusk');
-        fly(Z.NE,14.5,62,30,6000,9000,'dusk');
-        setTimeout(function(){ if(SE._playing&&SE._agingPeak){ try{map.flyTo({center:SE._agingPeak,zoom:15,pitch:62,bearing:-20,duration:5500,essential:true});}catch(e){} } },16500);
+        fly(Z.NE,14.2,60,30,5500,6500,'dusk');
+        // ZOOM APROAPE pe cartierul cel mai imbatranit + LINGER cu orbitare lenta (nu taietura brusca)
+        setTimeout(function(){ if(SE._playing){ var pk=SE._agingPeak||Z.NE; try{map.flyTo({center:pk,zoom:16,pitch:66,bearing:-18,duration:5000,essential:true});}catch(e){} } },12500);
+        setTimeout(function(){ if(SE._playing){ var pk=SE._agingPeak||Z.NE; try{map.flyTo({center:pk,zoom:16.1,pitch:67,bearing:34,duration:5800,essential:true});}catch(e){} } },18000);
         break;
 
       case 'b2s3':
@@ -1633,12 +1635,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.SV,13.5,52,10,4000,0,'dawn');
         fly(Z.C,13.8,55,45,13000,4500,'day');
         break;
-      case 'b14s2': // Metabolism urban
-        lp('day');
-        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
-        fly(Z.C,13,58,0,4000,0,'day');
-        rot(16,0.005);
-        fly(Z.C,13.4,60,60,13000,4500,'day');
+      case 'b14s2': // Metabolism urban — diagrama "orasul ca organism" pe BAZA CURATA (fara mash gri)
+        lp('night');
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#0e1320'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.42);}catch(e){}
+        fly([cx,cy],12.4,42,0,4000,0,'night');
+        rot(7,0.003);
+        fly([cx,cy],12.8,46,16,14000,4500,'night');
         break;
       case 'b14s3': // Orasul ca sistem viu (City OS)
         lp('night');
@@ -1656,14 +1658,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.8,58,45,7000,9000,'day');
         fly(Z.IND,13.6,56,-25,6000,15500,'dusk');
         break;
-      case 'b25s1': // APA & ECONOMIE CIRCULARA
+      case 'b25s1': // APA & ECONOMIE CIRCULARA — bucla circulara + puncte reale, baza curata (fara mash gri)
         lp('dawn');
-        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#10182a'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.4);}catch(e){}
         setTimeout(function(){ if(SE._playing){ try{SE._addResources&&SE._addResources(map, SE._city);}catch(e){} } },1700);
-        fly(Z.SV,13.2,52,0,4500,0,'dawn');
-        rot(11,0.004);
-        fly(Z.C,13.7,56,45,7000,9000,'day');
-        fly(Z.SE2,13.5,55,-25,6000,15500,'day');
+        fly([cx,cy],12.6,46,0,4500,0,'dawn');
+        rot(7,0.003);
+        fly([cx,cy],13.0,50,20,14000,9000,'day');
         break;
       case 'b23s1': // LOCUIRE & ACCESIBILITATE
         lp('dusk');
@@ -3342,7 +3343,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             ctx.fillStyle='rgba(230,236,250,0.95)'; ctx.font='700 '+Math.min(W*0.011,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
             ctx.fillText(r[0]+': '+r[1]+'%',bx+W*0.012,by+H*0.026); ctx.globalAlpha=1; });
         }
-        narativ('Securitatea resurselor devine critica cu schimbarile climatice. Romania pierde enorm pe retelele de apa invechite, are cea mai mica rata de reciclare din UE (dependenta de gropi) si seceta tot mai severa in sud/est. Economia circulara (colectare separata, sortare, compostare) reduce costuri, riscul de amenzi UE si amprenta de mediu. Apa: retentie tip sponge city + modernizare retele.');
+        // BUCLA CIRCULARA (concept vizibil): resurse->productie->consum->reciclare, inchisa ∝ % reciclat,
+        // + scurgerea LINEARA spre groapa. Asa se INTELEGE economia circulara, nu doar din text.
+        if(t>0.16) _drawCircular(ctx,W,H,Math.min(1,(t-0.16)/0.2)*sA,t,RM);
+        narativ('Economia CIRCULARA = bucla inchisa: resurse → productie → consum → RECICLARE → inapoi in resurse (dreapta). Ce nu se inchide se pierde la GROAPA (sageata gri). Romania: cea mai mica rata de reciclare din UE — bucla aproape deschisa. Pentru un UAT inseamna concret: colectare separata, statie de sortare/compostare, reutilizarea apei epurate, deseuri→energie. Reduce costuri, amenzi UE si amprenta de mediu.');
         concluzie('Apa gestionata + reciclare reala + economie circulara = reziliența climatica si costuri mai mici');
         break;
       }
@@ -3988,6 +3992,31 @@ function _drawSponge(ctx,W,H,a,t){
   ctx.globalAlpha=1; ctx.restore();
 }
 // URBAN METABOLISM — orasul ca organism: intrari (apa/energie/oameni/marfuri) -> iesiri.
+// ECONOMIE CIRCULARA — bucla resurse->productie->consum->reciclare (inchisa) + scurgere la groapa
+function _drawCircular(ctx,W,H,a,t,RM){
+  if(a<=0)return; ctx.save();
+  var cx=W*0.67, cy=H*0.50, R=Math.min(W*0.12,155);
+  var rec=(RM&&RM.recycling)||10, land=(RM&&RM.landfill)||80;
+  var loop=Math.min(0.84, 0.30+rec/100*1.0); // cat de "inchisa" e bucla ∝ reciclare
+  ctx.globalAlpha=a*0.85; ctx.strokeStyle='#22c55e'; ctx.lineWidth=Math.min(W*0.006,8); ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx,cy,R,-Math.PI/2, -Math.PI/2 + Math.PI*2*loop); ctx.stroke();
+  var st=[['\u{1F30D}','Resurse',-90],['\u{1F3ED}','Productie',0],['\u{1F5D1}','Consum',90],['♻','Reciclare',180]];
+  st.forEach(function(s){ var ang=s[2]*Math.PI/180, x=cx+Math.cos(ang)*R, y=cy+Math.sin(ang)*R;
+    ctx.globalAlpha=a; ctx.fillStyle='#0a1426'; ctx.beginPath(); ctx.arc(x,y,Math.min(W*0.021,27),0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#22c55e'; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font=Math.min(W*0.015,19)+'px sans-serif'; ctx.textAlign='center'; ctx.fillText(s[0],x,y+6);
+    ctx.fillStyle='rgba(220,235,220,0.9)'; ctx.font='700 '+Math.min(W*0.009,12)+'px "IBM Plex Mono",monospace'; ctx.fillText(s[1],x,y+Math.min(W*0.033,42)); });
+  for(var k=0;k<8;k++){ var p=((k/8)+t*0.4)%loop; var ang2=(-90+p*360)*Math.PI/180; var x2=cx+Math.cos(ang2)*R, y2=cy+Math.sin(ang2)*R;
+    ctx.globalAlpha=a; ctx.fillStyle='#4ade80'; ctx.beginPath(); ctx.arc(x2,y2,4,0,Math.PI*2); ctx.fill(); }
+  // scurgere LINEARA spre groapa (ce NU se inchide) — grosime ∝ % groapa
+  ctx.globalAlpha=a*0.85; ctx.strokeStyle='#9ca3af'; ctx.lineWidth=2+land/100*9;
+  var lx=cx+R*0.55, ly=cy+R+Math.min(W*0.055,66);
+  ctx.beginPath(); ctx.moveTo(cx+R*0.2,cy+R*0.95); ctx.lineTo(lx,ly); ctx.stroke();
+  ctx.fillStyle='#9ca3af'; ctx.font='700 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillText('→ GROAPA '+land+'%',lx+6,ly+4);
+  ctx.globalAlpha=a; ctx.fillStyle=rec>=20?'#22c55e':'#ef4444'; ctx.font='900 '+Math.min(W*0.03,40)+'px "Space Grotesk",sans-serif'; ctx.textAlign='center'; ctx.fillText(rec+'%',cx,cy+4);
+  ctx.fillStyle='rgba(180,200,190,0.8)'; ctx.font='600 '+Math.min(W*0.0088,11)+'px "IBM Plex Mono",monospace'; ctx.fillText('RECICLAT',cx,cy+Math.min(W*0.019,24));
+  ctx.globalAlpha=1; ctx.restore();
+}
 function _drawMetabolism(ctx,W,H,a,t){
   if(a<=0)return; ctx.save();
   var cx=W/2, cy=H*0.50, R=Math.min(W*0.13,170), cr=Math.min(W*0.03,40);
