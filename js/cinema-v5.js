@@ -1566,11 +1566,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       // BLOC 11 — INOVATII & MODELE INTERNATIONALE ─────────────────────────
-      case 'b12s1': // Superblocks Barcelona
+      case 'b12s1': // Superblocks Barcelona — cladiri REALE (nu bare colorate) + zoom pe o intersectie
         lp('day');
-        onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} }); // full (nu unda) — scena nu cheama _updateGrowth
-        fly(Z.CBD,15,60,0,4000,0,'day');
-        fly(Z.CBD,15.6,66,90,16000,4500,'day');
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#3a4660'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.85);}catch(e){}
+        onIdle(function(){ _cinRealBuildings(map); }); // tesut urban real (model superbloc se explica pe canvas)
+        fly(Z.CBD,15.2,62,0,4000,0,'day');
+        rot(8,0.004);
+        fly(Z.CBD,16.0,68,55,16000,4500,'day'); // zoom pe o intersectie/cvartal (scara superblocului)
         break;
       case 'b12s2': // 3-30-300 — verde, oaze de racoare, aer (model Singapore)
         lp('day');
@@ -1683,19 +1685,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(7,0.003);
         fly([cx,cy],13.0,44,22,16000,5000,'night');
         break;
-      case 'b21s1': // SANATATE & ORAS DIGITAL
+      case 'b21s1': // SANATATE & ORAS DIGITAL — POI reale (spitale/clinici) pe baza curata
         lp('day');
-        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
-        setTimeout(function(){ if(SE._playing){ try{SE._addServices&&SE._addServices(map, SE._cityKey, SE._city);}catch(e){} } },1600);
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#1a2236'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.5);}catch(e){}
+        setTimeout(function(){ if(SE._playing){ try{SE._addServices&&SE._addServices(map, SE._cityKey, SE._city);}catch(e){} } },1400);
         fly(Z.C,13.4,54,0,4500,0,'day');
         rot(11,0.004);
         fly(Z.C,13.9,58,45,7000,9000,'day');
         fly(Z.RES,13.6,55,-25,6000,15500,'day');
         break;
-      case 'b20s1': // EDUCATIE & SPORT
+      case 'b20s1': // EDUCATIE & SPORT — POI reale (campusuri) pe baza curata, zoom pe pol universitar
         lp('day');
-        onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
-        setTimeout(function(){ if(SE._playing){ try{SE._addVitality&&SE._addVitality(map, SE._cityKey, SE._city);}catch(e){} } },1600);
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#1a2236'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.5);}catch(e){}
+        setTimeout(function(){ if(SE._playing){ try{SE._addVitality&&SE._addVitality(map, SE._cityKey, SE._city);}catch(e){} } },1400);
         fly(Z.UNI,14.5,60,0,4500,0,'day');
         rot(12,0.005);
         fly(Z.C,13.6,56,50,7000,9000,'day');
