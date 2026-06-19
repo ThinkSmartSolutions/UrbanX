@@ -1515,15 +1515,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // cladiri reale (composite) pe stilul curent — fara comutare de stil (care reseta camera)
         onIdle(function(){ _cinRealBuildings(map); });
         var _sa = (SE._tourMain && SE._tourMain.lon) ? [SE._tourMain.lon, SE._tourMain.lat] : [cx,cy];
-        try{ map.jumpTo({center:_sa, zoom:17.4, pitch:82, bearing:15}); }catch(e){}
-        // ENFORCER: orice ar reseta camera la vedere larga, o readucem la nivel strada (<16.4 => snap)
-        var _streetEnf=setInterval(function(){
-          if(!SE._playing){clearInterval(_streetEnf);return;}
-          try{ if(map.getZoom()<16.4){ map.jumpTo({center:_sa,zoom:17.6,pitch:84,bearing:map.getBearing()}); } }catch(e){}
-        },200);
-        _ivs.push(_streetEnf);
+        // CHEIA: map.stop() opreste animatia de camera ramasa din scena anterioara (un flyTo de 6s
+        // pornit chiar inainte de finalul scenei precedente continua sa traga camera spre wide —
+        // clearTimeout NU il opreste, doar map.stop()). Apoi jumpTo direct la nivel strada.
+        try{ map.stop(); }catch(e){}
+        try{ map.jumpTo({center:_sa, zoom:17.5, pitch:83, bearing:15}); }catch(e){}
+        // re-asezari (NU interval continuu — ca sa nu flambeze) ca sa invinga orice fly intarziat
+        [400,1000,1800].forEach(function(d){ var ft=setTimeout(function(){ if(!SE._playing)return; try{ if(map.getZoom()<16.5){ map.stop(); map.jumpTo({center:_sa,zoom:17.5,pitch:84,bearing:map.getBearing()}); } }catch(e){} },d); _flyTos.push(ft); });
         rot(20,0.0016);                  // drift lent de bearing = senzatie de mers
-        fly(_sa,18.0,85,-25,14000,1800); // push-in lent printre fronturi
+        fly(_sa,18.0,85,-25,15000,2600); // push-in lent printre fronturi
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');
@@ -3096,10 +3096,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     if(SE._paused){ SE._paused=false; var _pb=document.getElementById('c8-pause'); if(_pb){_pb.textContent='⏸ Pauza';_pb.style.background='rgba(0,0,0,.6)';} var _pi=document.getElementById('cin-pause-ind'); if(_pi)_pi.remove(); }
     SE._cleanLayers&&SE._cleanLayers();
     _cleanV9(map);
-    // OPRESTE imediat camera scenei anterioare (fly-uri + intervale, ex. enforcer street) ca sa nu reseteze scena noua
+    // OPRESTE imediat camera scenei anterioare (fly-uri + intervale + animatia flyTo IN CURS)
+    // ca sa nu reseteze scena noua. map.stop() e cheia: clearTimeout nu opreste un flyTo deja pornit.
     try{ _flyTos.forEach(clearTimeout); _flyTos=[]; }catch(e){}
     try{ _ivs.forEach(clearInterval); _ivs=[]; }catch(e){}
     if(SE._rotInt){clearInterval(SE._rotInt);SE._rotInt=null;}
+    try{ map.stop(); }catch(e){}
     // dezactiveaza street experience daca a fost activ (scena b17s1) la schimbare scena
     try{ if(window._TCIStreetView && window._TCIStreetView._active) window._TCIStreetView.deactivate(); }catch(e){}
     // Restaureaza cladirile Mapbox standard pentru scenele fara bare 3D PUG
