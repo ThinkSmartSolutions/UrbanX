@@ -69,7 +69,7 @@ for _ in range(20):
 print("oras:",ev("window._CinemaEngine._city&&window._CinemaEngine._city.name"),"curBaseInit:",ev("window._CinemaEngine._curBase"))
 # scurteaza scenele care nu sunt tinta; tintele raman lungi
 js=json.dumps(SCENES)
-ev(f"(function(){{var SE=window._CinemaEngine,T={js};window.__M=SE._map;if(SE.SCENES)SE.SCENES.forEach(function(s){{s.dur=(T.indexOf(s.id)>=0?20000:1000);}});return 'ok';}})()")
+ev(f"(function(){{var SE=window._CinemaEngine,T={js};window.__M=SE._map;if(SE.SCENES)SE.SCENES.forEach(function(s){{s.dur=(T.indexOf(s.id)>=0?22000:4000);}});return 'ok';}})()")
 
 done=set()
 for i in range(300):
@@ -77,10 +77,11 @@ for i in range(300):
     if sid in SCENES and sid not in done:
         # asteapta ~8s in scena ca sa se deseneze layerele+animatia, apoi 2 cadre
         print(f"[{sid}] intru, astept randarea...")
-        time.sleep(8)
+        time.sleep(11)
         lays=ev("(function(){var s=window.__M.getStyle();return (s&&s.layers||[]).map(function(L){return L.id}).filter(function(id){return /^v8-|^v9-|^cin-/.test(id)});})()")
         z=ev("+window.__M.getZoom().toFixed(1)"); cb=ev("window._CinemaEngine._curBase")
-        print(f"   layere={lays} zoom={z} curBase={cb}")
+        mp=ev("(window._CinemaEngine._metroPaths||[]).length")
+        print(f"   layere={lays} zoom={z} curBase={cb} _metroPaths={mp}")
         shot(f"{CITY}_{sid}_a")
         time.sleep(5); shot(f"{CITY}_{sid}_b")
         done.add(sid)

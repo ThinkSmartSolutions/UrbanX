@@ -78,6 +78,7 @@ SCENES = [
   {id:'b7s1',dur:22000,label:'TRAFIC & CONGESTIE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s2',dur:20000,label:'SOLUTII MOBILITATE',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b7s3',dur:18000,label:'MODAL SPLIT',           bloc:2,blabel:'ORASUL SUB PRESIUNE'},
+  {id:'b26s1',dur:22000,label:'INFLUENTA METROPOLITANA',bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s1',dur:20000,label:'RISC SEISMIC',          bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s2',dur:20000,label:'INUNDATII & CLIMA',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b5s3',dur:18000,label:'COSTUL INACTIUNII',     bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -122,6 +123,55 @@ SCENES = [
   {id:'b11s2',dur:28000,label:'VIZIUNEA',             bloc:7,blabel:'AGENDA & VIZIUNEA'},
 ];
 var _ACT_ROMAN={1:'I',2:'II',3:'III',4:'IV',5:'V',6:'VI',7:'VII'};
+
+// ── INFLUENTA METROPOLITANA — naveta comune-satelit -> oras (date reale: INS 2021, PMUD, presa) ──
+// nav = navetisti/zi (estimare); coordonate aproximative reale ale comunelor.
+var _METRO = {
+  'RO-CJ-01':{total:'~20.000–60.000',timp:25,comune:[
+    {n:'Florești',lon:23.490,lat:46.745,nav:7800},{n:'Apahida',lon:23.740,lat:46.808,nav:2600},
+    {n:'Baciu',lon:23.495,lat:46.787,nav:2800},{n:'Gilău',lon:23.365,lat:46.745,nav:1500}],
+    ec:'Florești: 52% din activi lucreaza in alt UAT (cel mai mare procent din tara), Baciu ~42%, Apahida ~34% — comune-dormitor dependente economic de Cluj.',
+    edu:'Naveta scolara satureaza scolile/gradinitele din oras; comunele nu tin pasul cu cresterea populatiei (Florești ×2,3 intr-un deceniu).',
+    cong:'Blocaje severe pe DN1 / Florești; solutii: tren metropolitan + centura metropolitana.'},
+  'RO-IS-01':{total:'~18.000',timp:30,comune:[
+    {n:'Miroslava',lon:27.500,lat:47.135,nav:3500},{n:'Valea Lupului',lon:27.500,lat:47.185,nav:2500},
+    {n:'Rediu',lon:27.555,lat:47.230,nav:1800},{n:'Tomești',lon:27.690,lat:47.130,nav:2200},
+    {n:'Holboca',lon:27.700,lat:47.180,nav:1700}],
+    ec:'Zona metropolitana ~520.000 loc.; comunele cresc exploziv (Miroslava +50%, Valea Lupului ~+80% intr-un deceniu) — dependente de locurile de munca din municipiu.',
+    edu:'Naveta scolara din comune sufoca Iasul — flux mare de elevi spre scolile din oras, peste capacitatea infrastructurii.',
+    cong:'Coloane de km dimineata/seara pe Miroslava, Valea Lupului, Bucium, Tomesti; inca fara tren metropolitan functional.'},
+  'RO-TM-01':{total:'~15.000–25.000',timp:25,comune:[
+    {n:'Dumbrăvița',lon:21.245,lat:45.795,nav:5000},{n:'Giroc',lon:21.235,lat:45.700,nav:3500},
+    {n:'Moșnița Nouă',lon:21.310,lat:45.745,nav:2500},{n:'Ghiroda',lon:21.300,lat:45.760,nav:2000}],
+    ec:'Dumbravita, Giroc, Mosnita — printre cele mai bogate comune din tara, dormitoare ale Timisoarei; ADI Zona Metropolitana (2026) creata pentru trafic.',
+    edu:'Trasee metropolitane STPT dedicate elevilor; ~9.050 elevi navetisti la nivel de judet, 124 microbuze scolare.',
+    cong:'Aglomerare cronica pe iesirile spre Dumbravita (DN6) si Giroc; solutie: transport public integrat metropolitan.'},
+  'RO-BV-01':{total:'~10.000–20.000',timp:30,comune:[
+    {n:'Sânpetru',lon:25.620,lat:45.715,nav:3000},{n:'Hărman',lon:25.665,lat:45.730,nav:2000},
+    {n:'Ghimbav',lon:25.520,lat:45.665,nav:3000},{n:'Cristian',lon:25.470,lat:45.640,nav:2000}],
+    ec:'Coroana Brasovului (Sanpetru, Harman, Ghimbav-aeroport/logistica, Cristian) — zone rezidentiale si industriale cu naveta masiva spre municipiu.',
+    edu:'Decontare naveta elevi RATBV; linii metropolitane dedicate (Cristian, Ghimbav, Sanpetru, Harman).',
+    cong:'Blocaje pe iesirile spre Ghimbav/Cristian si intrarea Sanpetru/Harman; solutie: tren metropolitan cu linii feeder.'},
+  'RO-BH-01':{total:'~7.000',timp:20,comune:[
+    {n:'Sânmartin',lon:21.985,lat:46.995,nav:3000},{n:'Oșorhei',lon:22.000,lat:47.030,nav:2000},
+    {n:'Borș',lon:21.830,lat:47.115,nav:2000}],
+    ec:'7.000 navetisti/zi: Bors (parc industrial + vama), Sanmartin (Baile Felix — turism), Osorhei — sursa de forta de munca.',
+    edu:'Linii metropolitane OTL spre Sanmartin, Osorhei, Bors; integrare in viitoarea retea tram-train.',
+    cong:'Varf de trafic dupa-amiaza (16-17); solutie planificata: tram-train Oradea ↔ Sanmartin / Baile Felix / Bors.'}
+};
+// fallback generic: 4 sateliti derivati din centru daca UAT-ul nu are date dedicate
+function _metroFor(cityKey,cx,cy,pred){
+  if(_METRO[cityKey]) return _METRO[cityKey];
+  var base=Math.max(1500,Math.round((pred&&pred.pop55?pred.pop55:60000)*0.02));
+  return {total:'~'+N2(base*4)+' (estimare)',timp:25,_generic:true,comune:[
+    {n:'Comuna N',lon:cx+0.005,lat:cy+0.045,nav:Math.round(base*1.3)},
+    {n:'Comuna E',lon:cx+0.060,lat:cy+0.005,nav:base},
+    {n:'Comuna S',lon:cx-0.005,lat:cy-0.045,nav:Math.round(base*0.8)},
+    {n:'Comuna V',lon:cx-0.060,lat:cy-0.005,nav:Math.round(base*0.7)}],
+    ec:'Comunele-satelit functioneaza ca dormitoare: populatia activa lucreaza in oras, dar locuieste si plateste taxe in comuna.',
+    edu:'Naveta scolara dinspre comune incarca scolile orasului peste capacitate.',
+    cong:'Navetismul auto satureaza arterele de intrare la orele de varf — argument pentru transport metropolitan.'};
+}
 
 // ── DATE LIVE ─────────────────────────────────────────────────────────────
 var D = {wiki:null,inse:null,roads:null,rail:null,airports:null,
@@ -1234,6 +1284,59 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13,50,-20,5500,19000,'day');
         break;
 
+      case 'b26s1': // INFLUENTA METROPOLITANA — fluxuri de naveta comune-satelit -> oras
+        lp('day');
+        onIdle(function(){
+         try{
+          if(!SE._playing) return;
+          var _fmt=function(n){return (''+Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}; // N2 nu e in scope in setup()
+          var M=_metroFor(SE._cityKey,cx,cy,pred);
+          var maxNav=1; M.comune.forEach(function(c){ if(c.nav>maxNav)maxNav=c.nav; });
+          var lineF=[], nodeF=[], labels=[], paths=[];
+          M.comune.forEach(function(c){
+            // curba Bezier (arc) comuna -> centru, cu offset perpendicular
+            var mx=(c.lon+cx)/2, my=(c.lat+cy)/2, dx=cx-c.lon, dy=cy-c.lat, ox=-dy*0.16, oy=dx*0.16;
+            var pts=[]; for(var s=0;s<=24;s++){ var u=s/24, iu=1-u; pts.push([iu*iu*c.lon+2*iu*u*(mx+ox)+u*u*cx, iu*iu*c.lat+2*iu*u*(my+oy)+u*u*cy]); }
+            var w=2+(c.nav/maxNav)*8;
+            lineF.push({type:'Feature',properties:{w:w},geometry:{type:'LineString',coordinates:pts}});
+            nodeF.push({type:'Feature',properties:{r:5+(c.nav/maxNav)*8},geometry:{type:'Point',coordinates:[c.lon,c.lat]}});
+            paths.push({co:pts, nav:c.nav, maxNav:maxNav});
+            labels.push({lon:c.lon,lat:c.lat,color:'#f59e0b',icon:'🚗',title:c.n,sub:_fmt(c.nav)+' navetisti/zi'});
+          });
+          SE._metroPaths=paths;
+          try{
+            ['v9-metro-glow','v9-metro-line','v9-metro-node','v9-metro-car'].forEach(function(id){if(map.getLayer(id))map.removeLayer(id);});
+            ['v9-metro','v9-metron','v9-metroc'].forEach(function(id){if(map.getSource(id))map.removeSource(id);});
+            map.addSource('v9-metro',{type:'geojson',data:{type:'FeatureCollection',features:lineF}});
+            map.addLayer({id:'v9-metro-glow',type:'line',source:'v9-metro',paint:{'line-color':'#f59e0b','line-width':['*',['get','w'],2.4],'line-opacity':0.18,'line-blur':6},layout:{'line-cap':'round'}});
+            map.addLayer({id:'v9-metro-line',type:'line',source:'v9-metro',paint:{'line-color':'#fbbf24','line-width':['get','w'],'line-opacity':0.7,'line-blur':0.5},layout:{'line-cap':'round'}});
+            map.addSource('v9-metron',{type:'geojson',data:{type:'FeatureCollection',features:nodeF}});
+            map.addLayer({id:'v9-metro-node',type:'circle',source:'v9-metron',paint:{'circle-radius':['get','r'],'circle-color':'#f59e0b','circle-opacity':0.85,'circle-stroke-width':2,'circle-stroke-color':'#fff7e6'}});
+            map.addSource('v9-metroc',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+            map.addLayer({id:'v9-metro-car',type:'circle',source:'v9-metroc',paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,1.8,13,3.4],'circle-color':'#ffffff','circle-opacity':0.95}});
+          }catch(e){}
+          try{ if(SE._cinLabels) SE._cinLabels(map, labels); }catch(e){}
+          // ANIMATIE: masini care curg DINSPRE comune SPRE centru (naveta de dimineata)
+          function ptAlong(co,p){ var tot=0,seg=[]; for(var i=1;i<co.length;i++){var d=Math.hypot(co[i][0]-co[i-1][0],co[i][1]-co[i-1][1]);seg.push(d);tot+=d;} if(tot<=0)return co[0]; var tg=p*tot,acc=0; for(var i=0;i<seg.length;i++){ if(acc+seg[i]>=tg){var f=(tg-acc)/(seg[i]||1);return [co[i][0]+(co[i+1][0]-co[i][0])*f,co[i][1]+(co[i+1][1]-co[i][1])*f];} acc+=seg[i];} return co[co.length-1]; }
+          var t0=null, iv=setInterval(function(){
+            var cur=SE.SCENES&&SE.SCENES[SE._si]&&SE.SCENES[SE._si].id;
+            if(!SE._playing || cur!=='b26s1'){ clearInterval(iv); return; }
+            var now=(window.performance&&performance.now)?performance.now():(+new Date()); if(t0===null)t0=now;
+            var tt=(now-t0)/1000, feats=[];
+            (SE._metroPaths||[]).forEach(function(pp){
+              var cars=Math.max(2,Math.round((pp.nav/pp.maxNav)*7));
+              for(var k=0;k<cars;k++){ var p=((k/cars)+tt*0.14)%1; var c=ptAlong(pp.co,p); if(c&&c.length>=2) feats.push({type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}}); }
+            });
+            try{ var s=map.getSource('v9-metroc'); if(s) s.setData({type:'FeatureCollection',features:feats}); }catch(e){}
+          },60); _ivs.push(iv);
+         }catch(err){ try{window.__b26err=String(err&&err.stack||err);}catch(e){} }
+        });
+        // camera LARGA: orasul + comunele-satelit din jur (vedem fluxurile convergand)
+        fly([cx,cy],10.5,38,0,4500,0,'day');
+        fly([cx,cy],11.0,46,18,9000,9000,'day');
+        fly([cx,cy],10.7,42,-14,6000,17500,'dusk');
+        break;
+
       // BLOC 8 ───────────────────────────────────────────────────────────
       case 'b8s1':
         lp('day');
@@ -2311,6 +2414,27 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         narativ('MODAL SPLIT azi: auto '+_ms3.auto+'% | TP '+_ms3.tp+'% | pieton '+_ms3.pieton+'% | velo '+_ms3.velo+'% (suma 100%). Acoperire retea TP: '+(pred.tp||62)+'% (alta metrica). TARGET SUMP '+_P1()+': auto 45% | TP 35% | pieton 15% | velo 5%. Necesita: BRT '+(pred.kmBRT||30)+' km + piste velo 30km + pasaje pietonale '+(pred.pasaje||5)+'. Beneficii: -35% congestie + -18% CO2 + +20% calitate aer.');
         concluzie('Fiecare pp mutat de la auto la TP/activ = economie '+N2(Math.round(pop21*0.01*210*25/1000000))+' M EUR/an costuri sociale');
         negativ('Fara schimbare modal split: auto 82% in '+_P2()+' = oras complet dependent de masina = excludere populatie fara auto');
+        break;
+
+      case 'b26s1': // INFLUENTA METROPOLITANA \u2014 naveta comune -> oras
+        titlu('Influenta Metropolitana',name+' + comunele-satelit \u00b7 naveta zilnica \u00b7 presiune pe oras'); linie();
+        var MM=_metroFor(SE._cityKey,cx,cy,pred);
+        var totNav=MM.comune.reduce(function(s,c){return s+c.nav;},0);
+        cifra(N2(totNav)+(MM._generic?' est.':''),'Navetisti/zi catre oras','#f59e0b');
+        cifra2('~'+MM.timp+' min','Timp mediu de naveta');
+        [
+          ['\u{1F4B6} ECONOMIC: '+MM.ec,'#fbbf24'],
+          ['\u{1F393} INVATAMANT: '+MM.edu,'#60a5fa'],
+          ['\u{1F697} CONGESTIE: '+MM.cong,'#ef4444'],
+        ].forEach(function(it,i){
+          ctx.globalAlpha=sA*rE(0.20+i*0.06,0.18); ctx.fillStyle=it[1];
+          ctx.font='500 '+Math.min(W*0.011,13)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left'; ctx.letterSpacing='0';
+          wrap(ctx,it[0],W*0.04,H*(0.57+i*0.092),W*0.56,Math.min(W*0.013,16)*1.4,3);
+        });
+        ctx.globalAlpha=1;
+        narativ('Masinile portocalii curg dinspre comunele-satelit (noduri) catre oras = naveta zilnica de ~'+N2(totNav)+' persoane. Comunele cresc rezidential, dar locurile de munca, scolile bune si serviciile raman in municipiu -> presiune pe artere, scoli si infrastructura. Naveta schimba realitatea: populatia ziua >> populatia inregistrata; taxe platite in comuna dar servicii folosite in oras; elevi navetisti. Solutia dovedita: TREN / TRAM METROPOLITAN + transport public integrat la scara zonei metropolitane, nu doar in interiorul orasului.');
+        concluzie('Orasul real este zona metropolitana, nu limita administrativa \u2014 planificarea se face la scara navetei, nu a granitei UAT');
+        negativ('Fara transport metropolitan, naveta auto creste exponential cu sprawl-ul periurban = colaps al arterelor de intrare + poluare + ore pierdute');
         break;
 
       case 'b8s1':
