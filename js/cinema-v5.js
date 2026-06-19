@@ -657,7 +657,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   // inceputul scenei, camera turul se aseaza DUPA style.load -> fara resetul de descent de dinainte.
   // VARIETATE DE LUMINA pe Standard 3D: NOAPTEA pe Standard face harta ilizibila (cladirile devin
   // pete negre — confirmat). Folosim doar momente luminoase dramatice: apus auriu (golden) si zori.
-  var STD_SCENES = { b17s1:'dusk', b18s1:'dawn', b19s1:'dusk' };
+  // b17s1 (cartiere) = 'day': scopul e sa VEZI strazile+traficul+sa te plimbi -> claritate maxima
+  // (dusk era prea intunecat, traficul nu se distingea). Variatia golden/zori ramane pe fauna/cultura.
+  var STD_SCENES = { b17s1:'day', b18s1:'dawn', b19s1:'dusk' };
   function _cinApplyBase(id, afterReady){
     // Standard doar pe orase mari (altfel harta Standard e gri/goala — vezi Botosani)
     var wantStd = !!STD_SCENES[id] && SE._richBuildings;
@@ -1743,7 +1745,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           try{
             if(map.getLayer('v9-ped'))map.removeLayer('v9-ped'); if(map.getSource('v9-ped'))map.removeSource('v9-ped');
             map.addSource('v9-ped',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-            map.addLayer({id:'v9-ped',type:'circle',source:'v9-ped',minzoom:15,paint:{'circle-radius':['interpolate',['linear'],['zoom'],15,1.5,17,3,18.5,4.5],'circle-color':'#e8eefc','circle-opacity':0.92,'circle-stroke-width':0.5,'circle-stroke-color':'#1a2236'}});
+            map.addLayer({id:'v9-ped',type:'circle',source:'v9-ped',minzoom:15,paint:{'circle-radius':['interpolate',['linear'],['zoom'],15,1.8,17,3.4,18.5,5],'circle-color':'#0ea5e9','circle-opacity':0.95,'circle-stroke-width':0.8,'circle-stroke-color':'#ffffff'}});
           }catch(e){}
           var t0=null, iv=setInterval(function(){
             var cur=SE.SCENES&&SE.SCENES[SE._si]&&SE.SCENES[SE._si].id;
