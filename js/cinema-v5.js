@@ -2024,21 +2024,27 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b1s4':
         titlu('Evolutie Istorica','Fondare \u00b7 Populatie '+(_NOW-30)+'\u2192'+_NOW+' \u00b7 Momente cheie'); linie();
-        if(D.wiki&&t>0.15){
-          ctx.globalAlpha=sA*rE(0.15,0.20)*0.88;
-          var bx2=W*0.04,by2=H*0.58,bw2=Math.min(W*0.52,490),bh2=H*0.28;
-          ctx.fillStyle='rgba(4,10,24,0.80)';
+        if(D.wiki&&D.wiki.extract&&t>0.15){
+          var bx2=W*0.04,by2=H*0.50,bw2=Math.min(W*0.52,490),bh2=H*0.36;
+          ctx.save(); ctx.globalAlpha=sA*rE(0.15,0.20)*0.92;
+          ctx.fillStyle='rgba(4,10,24,0.82)';
           ctx.beginPath(); ctx.roundRect&&ctx.roundRect(bx2,by2,bw2,bh2,7); ctx.fill();
           ctx.strokeStyle='rgba(212,175,55,0.15)'; ctx.lineWidth=1; ctx.stroke();
-          ctx.fillStyle='rgba(148,163,184,0.48)';
-          ctx.font='700 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
+          ctx.fillStyle='rgba(148,163,184,0.5)'; ctx.font='700 '+Math.min(W*0.008,10)+'px "IBM Plex Mono",monospace';
           ctx.textAlign='left'; ctx.letterSpacing='.06em';
-          ctx.fillText('\u{1F4DA} CONTEXT ISTORIC \u2014 WIKIPEDIA',bx2+12,by2+16);
-          ctx.fillStyle='rgba(210,225,255,0.84)';
-          ctx.font='400 '+Math.min(W*0.0112,14)+'px "Space Grotesk",sans-serif';
-          ctx.letterSpacing='0';
-          wrap(ctx,D.wiki.extract?D.wiki.extract.slice(0,300)+'...':'Date indisponibile.',bx2+12,by2+34,bw2-24,Math.min(W*0.013,17)*1.5,7);
-          ctx.globalAlpha=1;
+          ctx.fillText('\u{1F4DA} CONTEXT ISTORIC \u2014 WIKIPEDIA',bx2+12,by2+16); ctx.letterSpacing='0';
+          // TEXT CARE SE DERULEAZA (ca la film) \u2014 text integral, clip in cutie, scroll vertical pe durata scenei
+          var fsW=Math.min(W*0.0112,14), lhW=fsW*1.55, maxWW=bw2-24;
+          ctx.font='400 '+fsW+'px "Space Grotesk",sans-serif';
+          var wds=D.wiki.extract.slice(0,1200).split(/\s+/), lns=[], curL='';
+          for(var wj=0;wj<wds.length;wj++){ var tst=curL?curL+' '+wds[wj]:wds[wj]; if(ctx.measureText(tst).width>maxWW && curL){ lns.push(curL); curL=wds[wj]; } else curL=tst; }
+          if(curL)lns.push(curL);
+          var topP=by2+32, botP=by2+bh2-10, viewH=botP-topP, totalH=lns.length*lhW;
+          var sc = totalH<=viewH ? 0 : Math.max(0, Math.min(totalH-viewH, (t-0.20)/0.72*(totalH-viewH)));
+          ctx.beginPath(); ctx.rect(bx2,topP-fsW-2,bw2,viewH+fsW+4); ctx.clip();
+          ctx.fillStyle='rgba(212,226,255,0.9)'; ctx.textAlign='left';
+          lns.forEach(function(ln,li){ var y=topP+li*lhW-sc; if(y>topP-lhW && y<botP+lhW) ctx.fillText(ln,bx2+12,y); });
+          ctx.restore();
         }
         if(t>0.30) _drawPopHist(ctx,W,H,Math.min(1,(t-0.30)/0.25)*sA,pred);
         cifra(N2(pop21),'Populatie actuala 2021');
