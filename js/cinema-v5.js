@@ -1283,8 +1283,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           try{SE._addTrafficPressure&&SE._addTrafficPressure(map, (D.roads&&D.roads.length)?D.roads:null);}catch(e){}
           if(D.urban&&D.urban.length){ addLine('v9-urb',D.urban); _pulse(map,'v9-urb','line-opacity',0.3,0.9,10); }
         },1500);
-        fly(Z.C,13.5,55,15,6000,9000,'night');
-        fly(Z.SE2,13,50,-20,6000,17000,'night');
+        // ZOOM in pe artere — se vad STRAZILE reale + masinile/congestia (nu doar vedere de sus)
+        fly(Z.C,15.3,66,15,6500,8000,'night');
+        fly(Z.SE2,15.0,64,-30,6000,16000,'night');
         break;
 
       case 'b27s1': // VIATA PIERDUTA IN TRAFIC — scena-erou (DATE): fond intunecat + trafic estompat
@@ -1703,17 +1704,20 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,13.6,56,50,7000,9000,'day');
         fly(Z.CBD,14.2,58,-25,6000,15500,'day');
         break;
-      case 'b19s1': // CULTURA & TURISM — pe Standard 3D (apus); street-view pe monumentul principal
-        // pe baza intunecata aducem footprints; pe Standard cladirile reale exista deja
+      case 'b19s1': // CULTURA & TURISM — Standard 3D (apus): TUR pe obiectivele REALE cu zoom apropiat
         if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
         setTimeout(function(){ if(SE._playing){ try{SE._addTourism&&SE._addTourism(map, SE._cityKey, SE._city);}catch(e){} } },1600);
-        // ZOOM pe clusterul de obiective (centru) — ca etichetele sa incapa, nu la margini
-        fly([cx,cy],14.4,58,0,4500,0);
-        rot(10,0.004);
-        fly([cx,cy],14.8,60,35,7000,9000);
-        // STREET-VIEW pe obiectivul cultural principal (ex. Palatul Culturii la Iasi) — nivel pieton
-        setTimeout(function(){ if(SE._playing && SE._tourMain){ try{map.flyTo({center:[SE._tourMain.lon,SE._tourMain.lat],zoom:17.4,pitch:84,bearing:25,duration:6500,essential:true});}catch(e){} } },15800);
-        setTimeout(function(){ try{ if(SE._playing && SE._tourMain){ rot(25,0.0016); } }catch(e){} }, 22500);
+        // vizitam efectiv obiectivele (Palatul Culturii, Trei Ierarhi, teatru...) — zoom aproape, nu vedere depărtată statică
+        (function(){
+          var to=(window._UrbanTourism&&window._UrbanTourism.data&&window._UrbanTourism.data[SE._cityKey]&&window._UrbanTourism.data[SE._cityKey].obiective)||[];
+          var O=to.filter(function(o){return typeof o.lat==='number'&&typeof o.lon==='number';});
+          var A=O[0]?[O[0].lon,O[0].lat]:[cx,cy], B=O[1]?[O[1].lon,O[1].lat]:[cx+0.006,cy+0.004], C=O[2]?[O[2].lon,O[2].lat]:[cx-0.005,cy+0.005];
+          try{ map.jumpTo({center:A,zoom:15.4,pitch:68,bearing:-10}); }catch(e){}
+          fly(A,17.0,82,18,5200,400);          // zoom APROAPE pe obiectiv 1 (ex. Palatul Culturii)
+          fly(B,16.8,80,-26,5600,7000);         // obiectiv 2
+          fly(C,16.6,78,34,5600,14000);         // obiectiv 3
+          fly([cx,cy],14.6,62,5,4200,20500);    // pull-back elegant la final
+        })();
         break;
       case 'b18s1': // FAUNA URBANA & SIGURANTA (#8 strays, #9 ursi) — pe Standard 3D (zori)
         if(SE._curBase!=='standard'){ onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); }
@@ -3974,6 +3978,38 @@ function _drawCarbon(ctx,W,H,a,pred){
 }
 
 // PROLOG — "orasul respira": glow pulsant + text poetic (deschidere emotionala).
+// EMBLEMA UAT — stema reala (imagine preincarcata _cinEmblems[name]) daca exista, altfel scut heraldic
+// stilizat cu monograma + coroana (auriu subtil). Desenata in spatele/deasupra numelui la inceput.
+function _drawEmblem(ctx,cx,cy,R,a,name){
+  ctx.save();
+  var img=(window._cinEmblems&&window._cinEmblems[name]);
+  if(img && img.complete && img.naturalWidth>0){
+    var s=R*2; try{ ctx.globalAlpha=a; ctx.drawImage(img,cx-s/2,cy-s/2,s,s); }catch(e){}
+    ctx.restore(); return;
+  }
+  // scut heraldic stilizat
+  var gold='rgba(212,175,55,'+(0.9*a)+')';
+  ctx.globalAlpha=a;
+  // coroana (3 varfuri)
+  ctx.strokeStyle=gold; ctx.fillStyle='rgba(212,175,55,'+(0.16*a)+')'; ctx.lineWidth=Math.max(1.5,R*0.045);
+  var cw=R*0.9, cy0=cy-R*0.92;
+  ctx.beginPath(); ctx.moveTo(cx-cw/2,cy0); ctx.lineTo(cx-cw/2,cy0-R*0.12); ctx.lineTo(cx-cw/4,cy0-R*0.02);
+  ctx.lineTo(cx,cy0-R*0.20); ctx.lineTo(cx+cw/4,cy0-R*0.02); ctx.lineTo(cx+cw/2,cy0-R*0.12); ctx.lineTo(cx+cw/2,cy0);
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // scut
+  ctx.beginPath();
+  ctx.moveTo(cx-R*0.78,cy-R*0.78); ctx.lineTo(cx+R*0.78,cy-R*0.78);
+  ctx.lineTo(cx+R*0.78,cy+R*0.18);
+  ctx.quadraticCurveTo(cx+R*0.78,cy+R*0.78, cx,cy+R*1.05);
+  ctx.quadraticCurveTo(cx-R*0.78,cy+R*0.78, cx-R*0.78,cy+R*0.18);
+  ctx.closePath();
+  ctx.fillStyle='rgba(10,18,36,'+(0.55*a)+')'; ctx.fill(); ctx.lineWidth=Math.max(2,R*0.05); ctx.strokeStyle=gold; ctx.stroke();
+  // monograma (1-2 litere)
+  var mono=((name||'?').replace(/^(Municipiul|Comuna|Orasul|Orașul)\s+/i,'').trim().slice(0,2)).toUpperCase();
+  ctx.fillStyle=gold; ctx.textAlign='center'; ctx.font='900 '+(R*0.78)+'px "Space Grotesk",serif';
+  ctx.fillText(mono,cx,cy+R*0.28);
+  ctx.restore();
+}
 function _drawBreathing(ctx,W,H,a,t,name){
   ctx.save();
   var br=0.5+0.5*Math.sin(t*Math.PI*2.2);
@@ -3982,6 +4018,8 @@ function _drawBreathing(ctx,W,H,a,t,name){
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
   ctx.textAlign='center';
   if(t>0.18){ ctx.globalAlpha=Math.min(1,(t-0.18)/0.25)*a; ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.font='300 '+Math.min(W*0.026,34)+'px "Space Grotesk",sans-serif'; ctx.fillText('Fiecare oras spune o poveste.',W/2,H*0.45); }
+  // EMBLEMA UAT deasupra numelui (apare odata cu intrebarea finala)
+  if(t>0.42){ _drawEmblem(ctx,W/2,H*0.30,Math.min(W*0.05,64),Math.min(1,(t-0.42)/0.22)*a,name); }
   if(t>0.46){ ctx.globalAlpha=Math.min(1,(t-0.46)/0.2)*a; ctx.fillStyle='#D4AF37'; ctx.font='800 '+Math.min(W*0.03,40)+'px "Space Grotesk",sans-serif'; ctx.fillText('Unde va fi '+((name||'orasul').toUpperCase())+' peste 30 de ani?',W/2,H*0.54); }
   ctx.globalAlpha=1; ctx.restore();
 }
