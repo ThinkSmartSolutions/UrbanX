@@ -612,8 +612,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     IND:[pz.IND?pz.IND.lon:cx-0.020,     pz.IND?pz.IND.lat:cy-0.012],
     RES:[pz.RES?pz.RES.lon:cx+0.008,     pz.RES?pz.RES.lat:cy-0.005],
     VERDE:[pz.VERDE?pz.VERDE.lon:cx-0.015, pz.VERDE?pz.VERDE.lat:cy+0.010],
-    PER:[pz.PER?pz.PER.lon:cx+0.045,     pz.PER?pz.PER.lat:cy-0.030],
-    FAR:[cx+0.090,cy-0.060],
+    PER:[pz.PER?pz.PER.lon:cx+0.026,     pz.PER?pz.PER.lat:cy-0.018],
+    FAR:[cx+0.040,cy-0.026],
     NV: [cx-0.024, cy+0.018],
     SE2:[cx+0.026, cy-0.015],
     SV: [cx-0.017, cy-0.020],
@@ -626,7 +626,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       var _fs=SE._pugGeo.features;
       var _cheap=function(g){try{var c=g.coordinates;while(Array.isArray(c)&&Array.isArray(c[0])&&Array.isArray(c[0][0]))c=c[0];var sx=0,sy=0,n=0;for(var i=0;i<c.length;i++){if(Array.isArray(c[i])&&typeof c[i][0]==='number'){sx+=c[i][0];sy+=c[i][1];n++;}}return n?[sx/n,sy/n]:null;}catch(e){return null;}};
       var _pool=[], _step=Math.max(1,Math.floor(_fs.length/45));
-      for(var _i=0;_i<_fs.length;_i+=_step){var _c=_cheap(_fs[_i].geometry); if(_c){var _d=Math.hypot(_c[0]-cx,_c[1]-cy); if(_d>0.004&&_d<0.085)_pool.push(_c);}}
+      // ANALIZAM UN UAT: ramai in tesutul urban (max ~0.032 ≈ 3.5km de centru), NU extravilan.
+      for(var _i=0;_i<_fs.length;_i+=_step){var _c=_cheap(_fs[_i].geometry); if(_c){var _d=Math.hypot(_c[0]-cx,_c[1]-cy); if(_d>0.004&&_d<0.032)_pool.push(_c);}}
       for(var _i=_pool.length-1;_i>0;_i--){var _j=Math.floor(Math.random()*(_i+1)); var _t=_pool[_i]; _pool[_i]=_pool[_j]; _pool[_j]=_t;}
       ['NV','NE','SE2','SV','RES','PER','UNI','IND','VERDE'].forEach(function(k,idx){ if(_pool[idx]) Z[k]=_pool[idx]; });
       console.log('[v9] Camera variata: '+_pool.length+' cartiere reale in pool');
@@ -1233,27 +1234,37 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b8s2':
         lp('day');
-        setTimeout(function(){
+        // CORIDOARE DE INFLUENTA — proiectate PE HARTA: inele gravitationale (val. teren ∝ proximitate
+        // infrastructura) in jurul polilor reali: spital(e) OSM + nodul de autostrada cel mai apropiat.
+        onIdle(function(){
           if(!SE._playing) return;
-          if(D.roads&&D.roads.length){
-            addLine('v9-hw',D.roads,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0});
-            var op=0, fiv=setInterval(function(){
-              if(!map.getLayer('v9-hw')){clearInterval(fiv);return;}
-              op=Math.min(0.95,op+0.03);
-              try{map.setPaintProperty('v9-hw','line-opacity',op);}catch(er){clearInterval(fiv);}
-              if(op>=0.95) clearInterval(fiv);
-            },60);
-            _ivs.push(fiv);
-            // Buffer vizual autostrada
-            var mots=D.roads.filter(function(r){return r.properties&&r.properties.t==='motorway';});
-            if(mots.length){
-              addLine('v9-hw-buf',mots,{'line-color':'#dc2626','line-width':60,'line-opacity':0.06,'line-blur':25});
-            }
-          }
-        },1000);
-        fly([cx,cy],11,35,0,4000,0,'day');
-        fly(Z.C,13.5,55,20,6000,9000,'day');
-        fly(Z.PER,12.5,48,60,6000,17000,'dusk');
+          var coslat=Math.cos(cy*Math.PI/180)||0.7;
+          function ring(ctr,radKm){ var pts=[],n=64,rd=radKm/111; for(var i=0;i<=n;i++){var a=i/n*Math.PI*2; pts.push([ctr[0]+Math.cos(a)*rd/coslat, ctr[1]+Math.sin(a)*rd]);} return [pts]; }
+          var nodes=[];
+          // spitale OSM = pol de dezvoltare (rosu)
+          (D.amenity||[]).forEach(function(a){ try{ var t=a.properties&&(a.properties.t||a.properties.amenity)||''; if(/hospital|clinic/.test(t)){ var c=a.geometry&&a.geometry.coordinates; if(c&&typeof c[0]==='number') nodes.push({c:c,col:'#ef4444',km:[5,2.2,0.9]}); } }catch(e){} });
+          // nodul de autostrada/centura cel mai apropiat de oras (portocaliu)
+          var best=null,bd=1e9;
+          (D.roads||[]).forEach(function(r){ if(!(r.properties&&(r.properties.t==='motorway'||r.properties.t==='trunk')))return; var cs=r.geometry&&r.geometry.coordinates; if(!cs)return; var flat=Array.isArray(cs[0])&&Array.isArray(cs[0][0])?[].concat.apply([],cs):cs; flat.forEach(function(p){ if(!p||typeof p[0]!=='number')return; var d=Math.hypot(p[0]-cx,p[1]-cy); if(d<bd){bd=d;best=p;} }); });
+          if(best) nodes.push({c:best,col:'#f59e0b',km:[8,4,1.6]});
+          // fallback: poli offset in intravilan daca nu sunt date OSM
+          if(!nodes.length){ nodes.push({c:[cx+0.018,cy+0.010],col:'#ef4444',km:[5,2.2,0.9]}); nodes.push({c:[cx-0.014,cy-0.012],col:'#f59e0b',km:[7,3.4,1.4]}); }
+          var feats=[];
+          nodes.forEach(function(nd){ [[nd.km[0],0.10],[nd.km[1],0.22],[nd.km[2],0.42]].forEach(function(b){ feats.push({type:'Feature',properties:{c:nd.col,o:b[1]},geometry:{type:'Polygon',coordinates:ring(nd.c,b[0])}}); }); });
+          try{
+            if(map.getLayer('v9-infl-l'))map.removeLayer('v9-infl-l');
+            if(map.getSource('v9-infl'))map.removeSource('v9-infl');
+            map.addSource('v9-infl',{type:'geojson',data:{type:'FeatureCollection',features:feats}});
+            map.addLayer({id:'v9-infl-l',type:'fill',source:'v9-infl',paint:{'fill-color':['get','c'],'fill-opacity':0}});
+            var io=0,iv=setInterval(function(){ if(!map.getLayer('v9-infl-l')){clearInterval(iv);return;} io=Math.min(1,io+0.05); try{map.setPaintProperty('v9-infl-l','fill-opacity',['*',['get','o'],io]);}catch(e){clearInterval(iv);} if(io>=1)clearInterval(iv); },70); _ivs.push(iv);
+          }catch(e){}
+          // reteaua rapida (autostrada/centura) luminoasa peste inele
+          if(D.roads&&D.roads.length){ addLine('v9-hw',D.roads,{'line-color':['get','c'],'line-width':['get','w'],'line-opacity':0.92}); }
+        });
+        // camera ramane pe ORAS (intravilan) — analizam un UAT, nu extravilan
+        fly([cx,cy],12.4,42,0,4500,0,'day');
+        fly(Z.SE2,13.4,56,28,6000,9000,'day');
+        fly(Z.C,13,52,-16,6000,17000,'dusk');
         break;
 
       // BLOC 9 ───────────────────────────────────────────────────────────
@@ -1299,11 +1310,32 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b10s2':
         lp('night');
-        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#1e293b'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.5);}catch(e){}
-        fly(Z.C,13.5,58,10,4000,0,'night');
-        rot(15,0.009);
-        fly(Z.NV,14.5,66,80,8000,12000,'night');
-        fly(Z.C,13,52,-10,7000,22000,'night');
+        // SCENARIUL NEGRU — proiectat cinematic PE HARTA: orasul se stinge. Focare de abandon
+        // pe inelul periferic care se extind progresiv spre interior (intunericul inghite tesutul),
+        // peste un fond construit stins. NU doar spirala pe canvas.
+        try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#12161f'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.72);}catch(e){}
+        onIdle(function(){
+          if(!SE._playing) return;
+          var coslat=Math.cos(cy*Math.PI/180)||0.7;
+          function ring(ctr,radKm){ var pts=[],n=44,rd=radKm/111; for(var i=0;i<=n;i++){var a=i/n*Math.PI*2; pts.push([ctr[0]+Math.cos(a)*rd/coslat, ctr[1]+Math.sin(a)*rd]);} return [pts]; }
+          var foci=[]; for(var k=0;k<8;k++){ var aa=k/8*Math.PI*2; foci.push([cx+Math.cos(aa)*0.030/coslat, cy+Math.sin(aa)*0.030]); }
+          var grow=0.4;
+          function rebuild(){ var fs=foci.map(function(c){ return {type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:ring(c,grow)}}; }); try{ var s=map.getSource('v9-decay'); if(s)s.setData({type:'FeatureCollection',features:fs}); }catch(e){} }
+          try{
+            if(map.getLayer('v9-decay-l'))map.removeLayer('v9-decay-l');
+            if(map.getLayer('v9-decay-edge'))map.removeLayer('v9-decay-edge');
+            if(map.getSource('v9-decay'))map.removeSource('v9-decay');
+            map.addSource('v9-decay',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+            map.addLayer({id:'v9-decay-l',type:'fill',source:'v9-decay',paint:{'fill-color':'#05070c','fill-opacity':0.62}});
+            map.addLayer({id:'v9-decay-edge',type:'line',source:'v9-decay',paint:{'line-color':'#7f1d1d','line-width':2,'line-opacity':0.5,'line-blur':2}});
+            rebuild();
+            var gv=setInterval(function(){ if(!map.getLayer('v9-decay-l')){clearInterval(gv);return;} grow=Math.min(3.4,grow+0.06); rebuild(); if(grow>=3.4)clearInterval(gv); },120); _ivs.push(gv);
+          }catch(e){}
+        });
+        // camera ramane pe oras si priveste cum se stinge — rotire lenta, fara fuga in extravilan
+        fly(Z.C,13.6,60,10,4000,0,'night');
+        rot(14,0.008);
+        fly(Z.C,13,52,-16,9000,12000,'night');
         break;
 
       case 'b10s3':

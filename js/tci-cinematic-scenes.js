@@ -551,18 +551,21 @@ G._CinemaEngine={
       const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
       const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
       const h=Math.max(4, hmax>0?hmax*1.4:(cut>0?cut*9:12));
-      // culori pe functiune economica/densitate (nu alb): central, mixt/comercial, colectiv, rezidential, verde/industrial
-      const c=u.startsWith('CC')||u.startsWith('CP')?'#ff3366':u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')?'#f59e0b':u.startsWith('LC')||u.startsWith('LB')?'#4a90d9':u.startsWith('LA')||u.startsWith('LL')?'#22c55e':u.startsWith('A')?'#a855f7':(u.startsWith('V')||u.startsWith('S'))?'#16a34a':'#94a3b8';
-      return{...f,properties:{...f.properties,h,c}};
+      return{...f,properties:{...f.properties,h}};
     });
+    // BACKDROP NEUTRU: masa urbana slate gradata pe inaltime — NU curcubeu pe functiune.
+    // (Coloratul pe functiune confunda si acopera textul scenei; cresterea colorata e in _add3DGrowth.)
     this._safeAdd(map,'v8-bld',{type:'geojson',data:{type:'FeatureCollection',features}},{
       id:'v8-bld-l',type:'fill-extrusion',source:'v8-bld',
       paint:{
-        'fill-extrusion-color':['get','c'],
+        'fill-extrusion-color':['interpolate',['linear'],['coalesce',['get','h'],4],
+          4,'#28304a', 12,'#3a4666', 24,'#50608a', 42,'#6b80b0'],
         'fill-extrusion-height':['coalesce',['get','h'],4],
         'fill-extrusion-base':0,
-        'fill-extrusion-opacity':0.9,
-        'fill-extrusion-ambient-occlusion-intensity':0.4
+        'fill-extrusion-opacity':0.78,
+        'fill-extrusion-vertical-gradient':true,
+        'fill-extrusion-ambient-occlusion-intensity':0.5,
+        'fill-extrusion-ambient-occlusion-radius':3
       }
     });
   },
