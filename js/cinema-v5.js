@@ -1519,16 +1519,27 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // descent progresiv: oras -> nivelul pietonului in centrul dens -> glisare lenta printre fronturi
         // cladiri reale (composite) pe stilul curent — fara comutare de stil (care reseta camera)
         onIdle(function(){ _cinRealBuildings(map); });
-        var _sa = (SE._tourMain && SE._tourMain.lon) ? [SE._tourMain.lon, SE._tourMain.lat] : [cx,cy];
-        // CHEIA: map.stop() opreste animatia de camera ramasa din scena anterioara (un flyTo de 6s
-        // pornit chiar inainte de finalul scenei precedente continua sa traga camera spre wide —
-        // clearTimeout NU il opreste, doar map.stop()). Apoi jumpTo direct la nivel strada.
+        // CHEIA: map.stop() opreste animatia ramasa din scena anterioara, apoi pornim turul.
         try{ map.stop(); }catch(e){}
-        try{ map.jumpTo({center:_sa, zoom:17.5, pitch:83, bearing:15}); }catch(e){}
-        // re-asezari (NU interval continuu — ca sa nu flambeze) ca sa invinga orice fly intarziat
-        [400,1000,1800].forEach(function(d){ var ft=setTimeout(function(){ if(!SE._playing)return; try{ if(map.getZoom()<16.5){ map.stop(); map.jumpTo({center:_sa,zoom:17.5,pitch:84,bearing:map.getBearing()}); } }catch(e){} },d); _flyTos.push(ft); });
-        rot(20,0.0016);                  // drift lent de bearing = senzatie de mers
-        fly(_sa,18.0,85,-25,15000,2600); // push-in lent printre fronturi
+        // TUR la nivel de strada: avanseaza prin cartiere + intoarce camera (bearing) + glisare.
+        // Puncte reale daca exista landmark-uri (ex. Iasi), altfel offset-uri din centru ca sa
+        // ramana in tesutul urban dens. Fiecare flyTo schimba centru+bearing = "plimbare".
+        var _P=function(dx,dy){ return [cx+dx, cy+dy]; };
+        var _IS = (SE._cityKey==='RO-IS-01');
+        var WP = _IS ? [
+          {c:[27.5779,47.1740], z:17.2, p:83, b:20},   // Copou / Universitate
+          {c:[27.5874,47.1585], z:17.5, p:84, b:-25},  // Palatul Culturii (centru istoric)
+          {c:[27.6010,47.1620], z:17.0, p:84, b:45},   // Tatarasi
+          {c:[27.5700,47.1500], z:16.9, p:83, b:-40}   // Nicolina / sud-vest
+        ] : [
+          {c:_P(0.004,0.004), z:17.1, p:84, b:45},
+          {c:_P(-0.004,0.003),z:17.4, p:85, b:-30},
+          {c:_P(-0.006,-0.004),z:16.9,p:83, b:35},
+          {c:_P(0.005,-0.004),z:17.2, p:85, b:-50}
+        ];
+        try{ map.jumpTo({center:WP[0].c, zoom:17.4, pitch:82, bearing:WP[0].b-30}); }catch(e){}
+        var _acc=600;
+        WP.forEach(function(w,wi){ var dur=(wi===0?5200:6200); fly(w.c,w.z,w.p,w.b,dur,_acc); _acc+=dur; });
         break;
       case 'b16s1': // NOTA UrbanX (clasament) — scena de DATE: baza curata, nu harta colorata
         lp('night');

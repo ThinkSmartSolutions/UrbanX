@@ -3,7 +3,7 @@
 # si logheaza zoom/pitch + ce reseteaza camera. Observatie reala, nu ghicit.
 import json, subprocess, time, threading, urllib.request, websocket, os, signal, sys
 
-URL = "https://thinksmartsolutions.github.io/UrbanX/"
+URL = "http://localhost:8765/"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 PORT = 9333
 prof = "/tmp/urbanx-probe-prof"
