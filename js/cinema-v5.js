@@ -474,18 +474,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
   console.log('[v9] Zone PUG detectate:', Object.keys(pugZones).join(', '));
 
   var _oFly=map.flyTo.bind(map), _oJump=map.jumpTo.bind(map);
+  // BUG FIX (confirmat runtime): setBearing()/rotire cheama intern jumpTo({bearing}) FARA zoom/pitch.
+  // Vechiul clamp citea pitch lipsa ca 0 (<45) si reseta camera la zoom 13.5/pitch 60 de 20x/sec
+  // -> de aceea scena de strada nu cobora niciodata (rot() o smucea inapoi la wide).
+  // Acum clamp-ul se aplica DOAR cand zoom/pitch sunt date EXPLICIT si mici.
+  function _lowCam(o){ return ((o.zoom!=null&&o.zoom<10)||(o.pitch!=null&&o.pitch<45)); }
   map.flyTo=function(o){
     if(!SE._playing){map.flyTo=_oFly;map.jumpTo=_oJump;return _oFly(o);}
     var sid=SCENES[SE._si]&&SCENES[SE._si].id;
     var big=(sid==='b1s1'||sid==='b1s2'||sid==='b1s3');
-    if(!big&&((o.pitch||0)<45||(o.zoom||20)<10)) return map;
+    if(!big && o && _lowCam(o)) return map;
     return _oFly(o);
   };
   map.jumpTo=function(o){
     if(!SE._playing){map.flyTo=_oFly;map.jumpTo=_oJump;return _oJump(o);}
     var sid=SCENES[SE._si]&&SCENES[SE._si].id;
     var big=(sid==='b1s1'||sid==='b1s2'||sid==='b1s3');
-    if(!big&&((o.pitch||0)<45||(o.zoom||20)<10))
+    if(!big && o && _lowCam(o))
       return _oJump(Object.assign({},o,{pitch:60,zoom:13.5}));
     return _oJump(o);
   };
