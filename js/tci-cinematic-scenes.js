@@ -16,12 +16,18 @@ const INSE_PASS='7Jpu!m.2NiNFiVQ';
 
 // ── CARTIERE REALE per UAT (centre aproximative) — ca sa NUMIM clusterele (imbatranire, parcuri) ──
 const _NBHD={
-  'RO-IS-01':[{n:'Centru',lat:47.1585,lon:27.5875},{n:'Copou',lat:47.1900,lon:27.5750},{n:'Tătărași',lat:47.1720,lon:27.6050},{n:'Păcurari',lat:47.1660,lon:27.5560},{n:'Nicolina',lat:47.1450,lon:27.5790},{n:'Alexandru cel Bun',lat:47.1480,lon:27.5680},{n:'Dacia',lat:47.1530,lon:27.5980},{n:'Galata',lat:47.1380,lon:27.5650},{n:'Bucium',lat:47.1300,lon:27.6000},{n:'CUG / Mircea',lat:47.1380,lon:27.6180},{n:'Tudor Vladimirescu',lat:47.1600,lon:27.6150},{n:'Canta',lat:47.1650,lon:27.5660}],
-  'RO-SV-01':[{n:'Centru',lat:47.6510,lon:26.2550},{n:'Burdujeni',lat:47.6720,lon:26.2750},{n:'Ițcani',lat:47.6650,lon:26.2480},{n:'George Enescu',lat:47.6420,lon:26.2480},{n:'Obcini',lat:47.6480,lon:26.2300},{n:'Areni',lat:47.6470,lon:26.2580}],
-  'RO-GL-01':[{n:'Centru',lat:45.4350,lon:28.0480},{n:'Mazepa',lat:45.4470,lon:28.0420},{n:'Țiglina I',lat:45.4280,lon:28.0350},{n:'Țiglina II',lat:45.4200,lon:28.0300},{n:'Micro 19',lat:45.4150,lon:28.0500},{n:'Dunărea',lat:45.4250,lon:28.0600}],
-  'RO-BT-01':[{n:'Centru',lat:47.7480,lon:26.6650},{n:'Primăverii',lat:47.7400,lon:26.6550},{n:'Bucovina',lat:47.7550,lon:26.6720},{n:'Grivița',lat:47.7420,lon:26.6800}],
-  'RO-VS-01':[{n:'Centru',lat:46.6400,lon:27.7300},{n:'1 Decembrie',lat:46.6450,lon:27.7250},{n:'Gara',lat:46.6350,lon:27.7400}],
-  'RO-NT-01':[{n:'Centru',lat:46.9280,lon:26.3700},{n:'Dărmănești',lat:46.9350,lon:26.3550},{n:'Mărăței',lat:46.9180,lon:26.3850},{n:'Precista',lat:46.9230,lon:26.3650}]
+  'RO-IS-01':[{n:'Centru',lat:47.1585,lon:27.5875},{n:'Copou',lat:47.1900,lon:27.5750},{n:'Tătărași',lat:47.1720,lon:27.6050},{n:'Păcurari',lat:47.1660,lon:27.5560},{n:'Nicolina',lat:47.1450,lon:27.5790},{n:'Alexandru cel Bun',lat:47.1480,lon:27.5680},{n:'Dacia',lat:47.1530,lon:27.5980},{n:'Galata',lat:47.1380,lon:27.5650},{n:'Bucium',lat:47.1300,lon:27.6000},{n:'CUG',lat:47.1380,lon:27.6180},{n:'Tudor Vladimirescu',lat:47.1600,lon:27.6150},{n:'Canta',lat:47.1650,lon:27.5660},{n:'Sărărie',lat:47.1730,lon:27.5900},{n:'Podu Roș',lat:47.1500,lon:27.5950},{n:'Frumoasa',lat:47.1420,lon:27.5880},{n:'Bularga',lat:47.1560,lon:27.6230},{n:'Moara de Vânt',lat:47.1870,lon:27.5980},{n:'Aurel Vlaicu',lat:47.1620,lon:27.6210},{n:'Ciric',lat:47.1820,lon:27.6120},{n:'Mircea cel Bătrân',lat:47.1410,lon:27.6080},{n:'Zona Industrială',lat:47.1480,lon:27.6300},{n:'Gară',lat:47.1700,lon:27.5760}],
+  'RO-SV-01':[{n:'Centru',lat:47.6510,lon:26.2550},{n:'Burdujeni',lat:47.6720,lon:26.2750},{n:'Ițcani',lat:47.6650,lon:26.2480},{n:'George Enescu',lat:47.6420,lon:26.2480},{n:'Obcini',lat:47.6480,lon:26.2300},{n:'Areni',lat:47.6470,lon:26.2580},{n:'Zamca',lat:47.6560,lon:26.2400},{n:'Cuza Vodă',lat:47.6440,lon:26.2620}],
+  'RO-GL-01':[{n:'Centru',lat:45.4350,lon:28.0480},{n:'Mazepa',lat:45.4470,lon:28.0420},{n:'Țiglina I',lat:45.4280,lon:28.0350},{n:'Țiglina II',lat:45.4200,lon:28.0300},{n:'Micro 19',lat:45.4150,lon:28.0500},{n:'Dunărea',lat:45.4250,lon:28.0600},{n:'Siderurgiștilor',lat:45.4380,lon:28.0250},{n:'Aurel Vlaicu',lat:45.4320,lon:28.0560},{n:'Port',lat:45.4180,lon:28.0450}],
+  'RO-BT-01':[{n:'Centru',lat:47.7480,lon:26.6650},{n:'Primăverii',lat:47.7400,lon:26.6550},{n:'Bucovina',lat:47.7550,lon:26.6720},{n:'Grivița',lat:47.7420,lon:26.6800},{n:'Parcul Tineretului',lat:47.7510,lon:26.6580},{n:'Săvenilor',lat:47.7560,lon:26.6500}],
+  'RO-VS-01':[{n:'Centru',lat:46.6400,lon:27.7300},{n:'1 Decembrie',lat:46.6450,lon:27.7250},{n:'Gara',lat:46.6350,lon:27.7400},{n:'Traian',lat:46.6480,lon:27.7350},{n:'Bahlui',lat:46.6320,lon:27.7250}],
+  'RO-NT-01':[{n:'Centru',lat:46.9280,lon:26.3700},{n:'Dărmănești',lat:46.9350,lon:26.3550},{n:'Mărăței',lat:46.9180,lon:26.3850},{n:'Precista',lat:46.9230,lon:26.3650},{n:'Vânători',lat:46.9120,lon:26.3680},{n:'Speranța',lat:46.9320,lon:26.3780}],
+  'RO-CJ-01':[{n:'Centru',lat:46.7700,lon:23.5900},{n:'Mănăștur',lat:46.7560,lon:23.5560},{n:'Mărăști',lat:46.7780,lon:23.6080},{n:'Gheorgheni',lat:46.7640,lon:23.6160},{n:'Grigorescu',lat:46.7700,lon:23.5560},{n:'Zorilor',lat:46.7560,lon:23.5900},{n:'Andrei Mureșanu',lat:46.7600,lon:23.6020},{n:'Bună Ziua',lat:46.7470,lon:23.6160},{n:'Iris',lat:46.7920,lon:23.6080},{n:'Someșeni',lat:46.7850,lon:23.6450},{n:'Gruia',lat:46.7760,lon:23.5680},{n:'Dâmbul Rotund',lat:46.7880,lon:23.5900}],
+  'RO-TM-01':[{n:'Cetate (Centru)',lat:45.7560,lon:21.2270},{n:'Iosefin',lat:45.7470,lon:21.2130},{n:'Fabric',lat:45.7600,lon:21.2480},{n:'Elisabetin',lat:45.7440,lon:21.2280},{n:'Mehala',lat:45.7650,lon:21.2100},{n:'Circumvalațiunii',lat:45.7640,lon:21.2330},{n:'Soarelui',lat:45.7350,lon:21.2350},{n:'Dâmbovița',lat:45.7380,lon:21.2150},{n:'Girocului',lat:45.7280,lon:21.2430},{n:'Aradului',lat:45.7720,lon:21.2330},{n:'Lipovei',lat:45.7720,lon:21.2480},{n:'Freidorf',lat:45.7280,lon:21.1900}],
+  'RO-BV-01':[{n:'Centrul Istoric',lat:45.6420,lon:25.5890},{n:'Bartolomeu',lat:45.6680,lon:25.5800},{n:'Tractorul',lat:45.6620,lon:25.6050},{n:'Astra',lat:45.6300,lon:25.6120},{n:'Răcădău',lat:45.6230,lon:25.5950},{n:'Noua',lat:45.6120,lon:25.6300},{n:'Schei',lat:45.6330,lon:25.5780},{n:'Florilor',lat:45.6520,lon:25.6080},{n:'Valea Cetății',lat:45.6450,lon:25.6020},{n:'Stupini',lat:45.6900,lon:25.6050}],
+  'RO-CT-01':[{n:'Centru / Peninsulă',lat:44.1730,lon:28.6580},{n:'Tomis Nord',lat:44.1950,lon:28.6380},{n:'Faleză Nord',lat:44.1880,lon:28.6500},{n:'Km 4-5',lat:44.1700,lon:28.6300},{n:'Coiciu',lat:44.1850,lon:28.6200},{n:'Anadalchioi',lat:44.2000,lon:28.6150},{n:'Inel I',lat:44.1780,lon:28.6250},{n:'Inel II',lat:44.1830,lon:28.6100},{n:'Mamaia',lat:44.2550,lon:28.6180}],
+  'RO-DJ-01':[{n:'Centru',lat:44.3170,lon:23.7960},{n:'Brazda lui Novac',lat:44.3380,lon:23.7980},{n:'Rovine',lat:44.3300,lon:23.8200},{n:'Craiovița Nouă',lat:44.3180,lon:23.7600},{n:'Valea Roșie',lat:44.3260,lon:23.7780},{n:'1 Mai',lat:44.3420,lon:23.8050},{n:'Calea București',lat:44.3120,lon:23.8250}],
+  'RO-B-01':[{n:'Centru',lat:44.4350,lon:26.1020},{n:'Drumul Taberei',lat:44.4180,lon:26.0350},{n:'Berceni',lat:44.3850,lon:26.1180},{n:'Titan',lat:44.4180,lon:26.1500},{n:'Pantelimon',lat:44.4420,lon:26.1480},{n:'Rahova',lat:44.4050,lon:26.0700},{n:'Militari',lat:44.4350,lon:26.0250},{n:'Băneasa',lat:44.5050,lon:26.0850},{n:'Aviației',lat:44.4800,lon:26.0950},{n:'Floreasca',lat:44.4700,lon:26.1050},{n:'Colentina',lat:44.4650,lon:26.1350},{n:'Crângași',lat:44.4530,lon:26.0500},{n:'Dristor',lat:44.4180,lon:26.1300},{n:'Giulești',lat:44.4500,lon:26.0350},{n:'Tei',lat:44.4600,lon:26.1150}]
 };
 function _nbhdName(cityKey, lon, lat){
   var list=_NBHD[cityKey]; if(!list||!list.length) return null;
@@ -545,6 +551,23 @@ G._CinemaEngine={
       }
     });
     ['utr-fill','utr-line'].forEach(id=>{try{if(map.getLayer(id))map.setLayoutProperty(id,'visibility','none');}catch(e){}});
+    // NUMESTE zonele de crestere pe CARTIER (unde se densifica cel mai mult) — detaliu ancorat
+    try{
+      const _ck3=this._cityKey||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
+      if(_NBHD[_ck3] && this._cinLabels){
+        const fs2=features.slice().sort((a,b)=>(b.properties.pr||0)-(a.properties.pr||0));
+        const dcl=[];
+        for(let di=0; di<fs2.length && dcl.length<3; di++){
+          if((fs2[di].properties.pr||0)<0.6) break;
+          let gg=fs2[di].geometry.coordinates; while(Array.isArray(gg)&&Array.isArray(gg[0])) gg=gg[0];
+          if(!gg||gg.length<2) continue;
+          const nm=_nbhdName(_ck3,gg[0],gg[1]);
+          if(dcl.every(c=>Math.hypot(c.lon-gg[0],c.lat-gg[1])>0.014) && (!nm||dcl.every(c=>c.n!==nm))) dcl.push({lon:gg[0],lat:gg[1],n:nm});
+        }
+        if(dcl.length) this._cinLabels(map, dcl.map((c,i)=>({lon:c.lon,lat:c.lat,color:'#ff8c00',icon:'🏗',
+          title:(c.n?c.n.toUpperCase():'POL CREȘTERE'),sub:(i===0?'densificare maximă · ':'densificare · ')+'potențial ridicat'})));
+      }
+    }catch(e){}
   },
 
   // Varianta la h maxim (pentru scena finala)
