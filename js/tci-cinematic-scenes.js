@@ -27,7 +27,15 @@ const _NBHD={
   'RO-BV-01':[{n:'Centrul Istoric',lat:45.6420,lon:25.5890},{n:'Bartolomeu',lat:45.6680,lon:25.5800},{n:'Tractorul',lat:45.6620,lon:25.6050},{n:'Astra',lat:45.6300,lon:25.6120},{n:'Răcădău',lat:45.6230,lon:25.5950},{n:'Noua',lat:45.6120,lon:25.6300},{n:'Schei',lat:45.6330,lon:25.5780},{n:'Florilor',lat:45.6520,lon:25.6080},{n:'Valea Cetății',lat:45.6450,lon:25.6020},{n:'Stupini',lat:45.6900,lon:25.6050}],
   'RO-CT-01':[{n:'Centru / Peninsulă',lat:44.1730,lon:28.6580},{n:'Tomis Nord',lat:44.1950,lon:28.6380},{n:'Faleză Nord',lat:44.1880,lon:28.6500},{n:'Km 4-5',lat:44.1700,lon:28.6300},{n:'Coiciu',lat:44.1850,lon:28.6200},{n:'Anadalchioi',lat:44.2000,lon:28.6150},{n:'Inel I',lat:44.1780,lon:28.6250},{n:'Inel II',lat:44.1830,lon:28.6100},{n:'Mamaia',lat:44.2550,lon:28.6180}],
   'RO-DJ-01':[{n:'Centru',lat:44.3170,lon:23.7960},{n:'Brazda lui Novac',lat:44.3380,lon:23.7980},{n:'Rovine',lat:44.3300,lon:23.8200},{n:'Craiovița Nouă',lat:44.3180,lon:23.7600},{n:'Valea Roșie',lat:44.3260,lon:23.7780},{n:'1 Mai',lat:44.3420,lon:23.8050},{n:'Calea București',lat:44.3120,lon:23.8250}],
-  'RO-B-01':[{n:'Centru',lat:44.4350,lon:26.1020},{n:'Drumul Taberei',lat:44.4180,lon:26.0350},{n:'Berceni',lat:44.3850,lon:26.1180},{n:'Titan',lat:44.4180,lon:26.1500},{n:'Pantelimon',lat:44.4420,lon:26.1480},{n:'Rahova',lat:44.4050,lon:26.0700},{n:'Militari',lat:44.4350,lon:26.0250},{n:'Băneasa',lat:44.5050,lon:26.0850},{n:'Aviației',lat:44.4800,lon:26.0950},{n:'Floreasca',lat:44.4700,lon:26.1050},{n:'Colentina',lat:44.4650,lon:26.1350},{n:'Crângași',lat:44.4530,lon:26.0500},{n:'Dristor',lat:44.4180,lon:26.1300},{n:'Giulești',lat:44.4500,lon:26.0350},{n:'Tei',lat:44.4600,lon:26.1150}]
+  'RO-B-01':[{n:'Centru',lat:44.4350,lon:26.1020},{n:'Drumul Taberei',lat:44.4180,lon:26.0350},{n:'Berceni',lat:44.3850,lon:26.1180},{n:'Titan',lat:44.4180,lon:26.1500},{n:'Pantelimon',lat:44.4420,lon:26.1480},{n:'Rahova',lat:44.4050,lon:26.0700},{n:'Militari',lat:44.4350,lon:26.0250},{n:'Băneasa',lat:44.5050,lon:26.0850},{n:'Aviației',lat:44.4800,lon:26.0950},{n:'Floreasca',lat:44.4700,lon:26.1050},{n:'Colentina',lat:44.4650,lon:26.1350},{n:'Crângași',lat:44.4530,lon:26.0500},{n:'Dristor',lat:44.4180,lon:26.1300},{n:'Giulești',lat:44.4500,lon:26.0350},{n:'Tei',lat:44.4600,lon:26.1150}],
+  // COMUNE metropolitane — sate componente (pt cinematic rulat pe comuna + naveta)
+  'RO-IS-95042':[{n:'Miroslava',lat:47.1350,lon:27.5000},{n:'Valea Adâncă',lat:47.1450,lon:27.5480},{n:'Horpaz',lat:47.1500,lon:27.5350},{n:'Uricani',lat:47.1280,lon:27.4900},{n:'Vorovești',lat:47.1180,lon:27.4750},{n:'Cornești',lat:47.1550,lon:27.4850},{n:'Ciurbești',lat:47.1050,lon:27.5100},{n:'Proselnici',lat:47.1100,lon:27.5300}],
+  'RO-IS-95087':[{n:'Rediu',lat:47.2300,lon:27.5550},{n:'Breazu',lat:47.2400,lon:27.5450},{n:'Horlești',lat:47.2200,lon:27.5300},{n:'Tăutești',lat:47.2450,lon:27.5650}],
+  'RO-IS-94951':[{n:'Holboca',lat:47.1650,lon:27.7000},{n:'Dancu',lat:47.1700,lon:27.6700},{n:'Cristești',lat:47.1450,lon:27.7300},{n:'Orzeni',lat:47.1550,lon:27.7450},{n:'Ruseni',lat:47.1380,lon:27.7150}],
+  'RO-IS-94889':[{n:'Aroneanu',lat:47.2200,lon:27.6100},{n:'Șorogari',lat:47.2050,lon:27.6050},{n:'Dorobanț',lat:47.2350,lon:27.6250},{n:'Rediu Aldei',lat:47.2450,lon:27.6400}],
+  'RO-BT-18073':[{n:'Bălușeni',lat:47.6600,lon:26.7000},{n:'Coșuleni',lat:47.6750,lon:26.7150},{n:'Buzeni',lat:47.6450,lon:26.6850},{n:'Zăicești',lat:47.6700,lon:26.6750},{n:'Draxini',lat:47.6850,lon:26.7000}],
+  'RO-CJ-FLORESTI':[{n:'Florești',lat:46.7450,lon:23.4900},{n:'Luna de Sus',lat:46.7550,lon:23.4500},{n:'Tăuți',lat:46.7650,lon:23.4200}],
+  'RO-CJ-APAHIDA':[{n:'Apahida',lat:46.8080,lon:23.7400},{n:'Dezmir',lat:46.7950,lon:23.7150},{n:'Sânnicoară',lat:46.7880,lon:23.6900},{n:'Câmpenești',lat:46.8200,lon:23.7600}]
 };
 function _nbhdName(cityKey, lon, lat){
   var list=_NBHD[cityKey]; if(!list||!list.length) return null;
@@ -1094,6 +1102,20 @@ G._CinemaEngine={
       paint:{'heatmap-weight':['get','w'],'heatmap-intensity':1.4,'heatmap-radius':40,'heatmap-opacity':0,
         'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.3,'rgba(59,130,246,0.4)',0.55,'rgba(245,158,11,0.7)',0.8,'rgba(239,68,68,0.9)',1,'rgba(255,0,51,0.95)']}
     });
+    // NUMESTE nodurile de congestie pe cartier (in ce cartier e blocajul)
+    try{
+      const _ckT=this._cityKey||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
+      if(_NBHD[_ckT] && this._cinLabels){
+        const hp=pts.filter(p=>p.properties.w>=0.55).sort((a,b)=>b.properties.w-a.properties.w);
+        const cn=[];
+        for(let i=0;i<hp.length && cn.length<3;i++){
+          const c=hp[i].geometry.coordinates, nm=_nbhdName(_ckT,c[0],c[1]);
+          if(cn.every(x=>Math.hypot(x.lon-c[0],x.lat-c[1])>0.013) && (!nm||cn.every(x=>x.n!==nm))) cn.push({lon:c[0],lat:c[1],n:nm});
+        }
+        if(cn.length) this._cinLabels(map, cn.map(c=>({lon:c.lon,lat:c.lat,color:'#ef4444',icon:'🚦',
+          title:(c.n?c.n.toUpperCase():'NOD CONGESTIE'),sub:'congestie recurentă · oră de vârf'})));
+      }
+    }catch(e){}
   },
 
   // ── LIMITA INTRAVILAN: actual (hull din PUG) vs PROIECTAT 2055 (buffer extins) ──
