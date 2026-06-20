@@ -1286,11 +1286,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           var pts=pr.filter(function(p){return typeof p.lat==='number'&&typeof p.lon==='number';});
           var A=pts[0]?[pts[0].lon,pts[0].lat]:Z.NV;
           var B=pts[1]?[pts[1].lon,pts[1].lat]:Z.SE2;
-          fly(Z.C, 12.2, 50,   0, 4200,     0, 'night'); // WIDE: tot orasul proiectat (centura+retea)
-          fly(A,   15.6, 66,  25, 5200,  4800, 'night'); // CLOSE-UP pol 1 (zona restransa, bare cresc)
-          fly(A,   15.7, 67,  72, 5000, 10200, 'night'); // ORBITARE lenta pe pol 1 (linger + rotire)
-          fly(Z.C, 12.6, 52, -10, 4500, 15500, 'dusk');  // WIDE: revenim la sistemul de coridoare
-          fly(B,   15.4, 65, -30, 5200, 20200, 'dusk');  // CLOSE-UP pol 2 (alta zona)
+          // unghi OBLIC + zoom mediu peste tot -> se vede PADUREA de bare verticale crescand, nu doar 2-3
+          fly(Z.C, 13.4, 61,  12, 4500,     0, 'night'); // panorama oblica: padurea de bare pe tot orasul
+          fly(A,   14.8, 64,  30, 5200,  5000, 'night'); // apropiere pol 1 (barele cresc in unda)
+          fly(A,   14.9, 65,  74, 5000, 10500, 'night'); // ORBITARE lenta pe pol 1 (linger + rotire)
+          fly(Z.C, 13.6, 60, -12, 4500, 16000, 'dusk');  // revenire oblica peste sistemul de coridoare
+          fly(B,   14.7, 64, -28, 5200, 20800, 'dusk');  // apropiere pol 2 (alta zona)
         })();
         break;
 

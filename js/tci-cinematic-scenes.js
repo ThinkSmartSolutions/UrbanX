@@ -441,27 +441,42 @@ G._CinemaEngine={
     const _spanLon=Math.max(1e-6,_mxLon-_mnLon);
     const _flon=(g)=>{ try{ let c=g.coordinates; while(Array.isArray(c[0])) c=c[0]; return c[0]; }catch(e){ return cx; } };
     if(geo?.features?.length>0){
+      // BARE VERTICALE (coloane), NU lespezi de zona: in fiecare zona PUG asezam un mini-grid de
+      // bare patrate; inaltimea ∝ potential de dezvoltare, culoarea verde->rosu. Asa apar "barele
+      // de crestere" ca in storyboard (padure de coloane), nu poligoane colorate plate.
+      const coslat=Math.cos(cy*Math.PI/180)||0.7;
+      const STEP=0.0017;       // pas grid ~130m (bare mai distincte)
+      const BS=0.00062;        // jumatate latura bara ~48m (vizibile clar ca turnuri)
       geo.features.slice(0,800).forEach(f=>{
         const p=f.properties||{};
-        // FIX: campul real din PUG e 'utr' (ex. CM, CC, CP, LL), NU utr_cod/cod_utr.
-        // Inainte toate zonele ieseau verzi joase (nediferentiate) — masa verde uniforma.
         const u=String(p.zf||p.utr||p.utr_cod||p.cod_utr||'').trim().toUpperCase();
-        // reguli.json are structura {subzone:{COD:{...}}} — citim si forma plata.
         const rv=(reg.subzone&&reg.subzone[u])||reg[u]||{};
         const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
         const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
         const hub=(pred&&pred.hub)||0.7;
         const pr=u.startsWith('CC')||u.startsWith('CP')?0.95:u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')?0.75:u.startsWith('LC')||u.startsWith('LB')?0.58:u.startsWith('LA')||u.startsWith('LL')?0.42:u.startsWith('A')?0.62:(u.startsWith('V')||u.startsWith('S'))?0.12:0.30;
-        // Inaltime REALA din regulament (hmax_m / CUT) daca exista, scalata cinematic
         const base=hmax>0?hmax:(cut>0?cut*9:pr*40);
-        const hFinal=Math.max(3,base*(1.8+hub*0.6));
+        const hFinal=Math.max(12,base*(3.4+hub*1.4));   // TURNURI inalte, clar vizibile ca bare verticale
         const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':pr>0.20?'#22c55e':'#15803d';
-        const wphase=Math.max(0,Math.min(1,(_flon(f.geometry)-_mnLon)/_spanLon));
-        // #5: inaltimea EXISTENTA (fond actual) vs hFinal (dupa crestere) — ca sa
-        // distingem vizual "ce era" (gri) de "ce a crescut" (color).
         const hExist=pr>0.20?hFinal*(0.30+pr*0.18):hFinal*0.10;
-        features.push({...f,properties:{...f.properties,hFinal,hExist,h:0.5,c,pr,wphase}});
+        // bbox + centroid zonei
+        let cc=f.geometry&&f.geometry.coordinates; while(Array.isArray(cc)&&Array.isArray(cc[0])&&Array.isArray(cc[0][0])) cc=cc[0];
+        if(!Array.isArray(cc)||cc.length<3) return;
+        let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9,sx=0,sy=0,nn=0;
+        cc.forEach(pt=>{ if(pt&&typeof pt[0]==='number'){ if(pt[0]<mnx)mnx=pt[0]; if(pt[0]>mxx)mxx=pt[0]; if(pt[1]<mny)mny=pt[1]; if(pt[1]>mxy)mxy=pt[1]; sx+=pt[0]; sy+=pt[1]; nn++; } });
+        if(!nn) return;
+        const ctrx=sx/nn, ctry=sy/nn;
+        const w=(mxx-mnx)*0.62, h=(mxy-mny)*0.62;                 // grid restrans (sta in zona)
+        const nx=Math.max(1,Math.min(5,Math.round(w/STEP))), ny=Math.max(1,Math.min(5,Math.round(h/STEP)));
+        for(let ix=0;ix<nx;ix++) for(let iy=0;iy<ny;iy++){
+          const bx=ctrx+(nx>1?(ix/(nx-1)-0.5)*w:0), by=ctry+(ny>1?(iy/(ny-1)-0.5)*h:0);
+          const wphase=Math.max(0,Math.min(1,(bx-_mnLon)/_spanLon));
+          const sq=[[bx-BS/coslat,by-BS],[bx+BS/coslat,by-BS],[bx+BS/coslat,by+BS],[bx-BS/coslat,by+BS],[bx-BS/coslat,by-BS]];
+          features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[sq]},properties:{hFinal,hExist,h:0.5,c,pr,wphase}});
+        }
       });
+      // plafon perf (bare totale)
+      if(features.length>1400){ const stp=Math.ceil(features.length/1400); features=features.filter((_,i)=>i%stp===0); }
     }else{
       // Fallback geometric realist — mai multe zone cu densitati diferite
       const zones=[
