@@ -242,13 +242,9 @@
       '<div style="font-size:10px;color:#64748b;margin-top:8px">⚠ Pre-analiză orientativă — necesită validarea arhitectului șef și date de infrastructură verificate.</div></div>';
   }
 
-  function mountButton() {
-    if (document.getElementById('uxi-cap-btn')) return;
-    var b = el('button', { id: 'uxi-cap-btn', title: 'UrbanX Intelligence — Capacitate UAT' }, '🏗️ Capacitate UAT');
-    b.style.cssText = 'position:fixed;bottom:248px;right:10px;z-index:3200;background:linear-gradient(180deg,#2563eb,#1d4ed8);color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);font-family:system-ui,sans-serif';
-    b.onclick = openModal; document.body.appendChild(b);
-  }
+  // Butonul flotant a fost ÎNLOCUIT cu intrarea din meniul „Intelligence & Date Live".
+  function cleanupFloating() { var b = document.getElementById('uxi-cap-btn'); if (b) b.remove(); }
   G.UXI = G.UXI || {}; G.UXI.openDashboard = openModal;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountButton); else mountButton();
-  console.log('[UXI] dashboard UI încărcat');
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cleanupFloating); else cleanupFloating();
+  console.log('[UXI] dashboard UI încărcat (meniu: window.UXI.openDashboard)');
 })(window);

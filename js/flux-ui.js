@@ -257,13 +257,10 @@
       '<div style="font-size:10px;color:#64748b;margin-top:8px">⚠ Pre-analiză orientativă — nu substituie studiul de trafic al unui proiectant atestat.</div>';
   }
 
-  function mountButton() {
-    if (document.getElementById('flux-traffic-btn')) return;
-    var b = el('button', { id: 'flux-traffic-btn', title: 'UrbanX Flux — Studiu de trafic' },
-      '📊 Studiu trafic');
-    b.style.cssText = 'position:fixed;bottom:170px;right:10px;z-index:3200;background:linear-gradient(180deg,#16a34a,#0f7a37);color:#fff;border:0;border-radius:10px;padding:9px 12px;font-weight:700;font-size:12px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4);font-family:system-ui,sans-serif';
-    b.onclick = openModal;
-    document.body.appendChild(b);
+  // Butonul flotant a fost ÎNLOCUIT cu intrarea din meniul „Intelligence & Date Live"
+  // (index.html, tci-adv-menu). Curățăm orice buton vechi rămas din versiuni cache.
+  function cleanupFloating() {
+    var b = document.getElementById('flux-traffic-btn'); if (b) b.remove();
   }
 
   // ── OVERLAY PE HARTĂ ─────────────────────────────────────────────────────
@@ -331,7 +328,7 @@
   G.Flux.openStudiu = openModal;
   G.Flux.drawOverlay = drawOverlay;
   G.Flux.clearOverlay = clearOverlay;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountButton);
-  else mountButton();
-  console.log('[Flux] UI încărcat (buton + window.Flux.openStudiu)');
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cleanupFloating);
+  else cleanupFloating();
+  console.log('[Flux] UI încărcat (meniu: window.Flux.openStudiu)');
 })(window);

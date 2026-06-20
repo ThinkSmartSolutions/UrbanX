@@ -3141,6 +3141,28 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">INSE · Eurostat · OSM · GHSL · Cohort-Component</div>
   </button>
 
+  <button onclick="window.UXI&&window.UXI.openDashboard?window.UXI.openDashboard():ss?.('Intelligence se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
+      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(96,165,250,.18)'"
+    onmouseout="this.style.background='rgba(96,165,250,.08)'"
+    title="UrbanX Intelligence — bilanț capacitate infrastructură cumulativă + verdict PUZ + alerte">
+    🏗️ Capacitate &amp; Conformitate UAT
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">apă·școli·verde vs tot ce e aprobat · registru PUZ · alerte · capitol PDF</div>
+  </button>
+
+  <button onclick="window.Flux&&window.Flux.openStudiu?window.Flux.openStudiu():ss?.('Flux se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
+      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(52,211,153,.18)'"
+    onmouseout="this.style.background='rgba(52,211,153,.08)'"
+    title="UrbanX Flux — studiu preliminar de impact de trafic pentru PUZ/PUD (parcela selectată)">
+    🚦 Studiu Trafic (PUZ/PUD)
+    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">generare·distribuție·intersecții v/c·parcare·CO₂ · PDF + hartă</div>
+  </button>
+
   <button onclick="(function(){const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';if(window._GHSLLayer){_GHSLLayer.init(m,k);_GHSLLayer.toggle(m);}else{ss?.('GHSL: module se inițializează');}; _closeAllMenusAndOverlay();})()"
     style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
       border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
@@ -5864,11 +5886,11 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <!-- UrbanX Flux — modul mobilitate Faza 1 (studiu impact trafic PUZ/PUD) -->
     <script src="js/flux-engine.js?v=20260620a"></script>
     <script src="js/flux-report.js?v=20260620b"></script>
-    <script src="js/flux-ui.js?v=20260620c"></script>
+    <script src="js/flux-ui.js?v=20260620d"></script>
     <script src="js/flux-pdf-chapter.js?v=20260620a"></script>
     <!-- UrbanX Intelligence — capacitate cumulativă UAT (Faza 1, client-side) -->
     <script src="js/urbanx-intelligence-engine.js?v=20260620c"></script>
-    <script src="js/urbanx-intelligence-ui.js?v=20260620d"></script>
+    <script src="js/urbanx-intelligence-ui.js?v=20260620e"></script>
     <script src="js/urbanx-intelligence-chapter.js?v=20260620a"></script>
 </body>
 </html>
