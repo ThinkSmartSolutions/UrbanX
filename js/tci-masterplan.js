@@ -1428,6 +1428,7 @@ G._TCIMasterplanPDF = {
     if(city) {
       // Clonăm ca să nu mutăm originalul
       city = Object.assign({}, city);
+      if(!city.key) city.key = cityKey;   // pt bonusuri _UrbanRank consecvente (cinematic == PDF)
 
       // PIB din DataEngine dacă lipsește sau e 0
       if((!city.pib_eur_cap || city.pib_eur_cap < 1) && window._DataEngine?._cache?.[cityKey]) {

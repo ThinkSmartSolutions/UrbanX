@@ -28,6 +28,10 @@ const _NBHD={
   'RO-CT-01':[{n:'Centru / Peninsulă',lat:44.1730,lon:28.6580},{n:'Tomis Nord',lat:44.1950,lon:28.6380},{n:'Faleză Nord',lat:44.1880,lon:28.6500},{n:'Km 4-5',lat:44.1700,lon:28.6300},{n:'Coiciu',lat:44.1850,lon:28.6200},{n:'Anadalchioi',lat:44.2000,lon:28.6150},{n:'Inel I',lat:44.1780,lon:28.6250},{n:'Inel II',lat:44.1830,lon:28.6100},{n:'Mamaia',lat:44.2550,lon:28.6180}],
   'RO-DJ-01':[{n:'Centru',lat:44.3170,lon:23.7960},{n:'Brazda lui Novac',lat:44.3380,lon:23.7980},{n:'Rovine',lat:44.3300,lon:23.8200},{n:'Craiovița Nouă',lat:44.3180,lon:23.7600},{n:'Valea Roșie',lat:44.3260,lon:23.7780},{n:'1 Mai',lat:44.3420,lon:23.8050},{n:'Calea București',lat:44.3120,lon:23.8250}],
   'RO-B-01':[{n:'Centru',lat:44.4350,lon:26.1020},{n:'Drumul Taberei',lat:44.4180,lon:26.0350},{n:'Berceni',lat:44.3850,lon:26.1180},{n:'Titan',lat:44.4180,lon:26.1500},{n:'Pantelimon',lat:44.4420,lon:26.1480},{n:'Rahova',lat:44.4050,lon:26.0700},{n:'Militari',lat:44.4350,lon:26.0250},{n:'Băneasa',lat:44.5050,lon:26.0850},{n:'Aviației',lat:44.4800,lon:26.0950},{n:'Floreasca',lat:44.4700,lon:26.1050},{n:'Colentina',lat:44.4650,lon:26.1350},{n:'Crângași',lat:44.4530,lon:26.0500},{n:'Dristor',lat:44.4180,lon:26.1300},{n:'Giulești',lat:44.4500,lon:26.0350},{n:'Tei',lat:44.4600,lon:26.1150}],
+  'RO-BH-01':[{n:'Centru',lat:47.0560,lon:21.9290},{n:'Rogerius',lat:47.0700,lon:21.9100},{n:'Nufărul',lat:47.0380,lon:21.9450},{n:'Ioșia',lat:47.0480,lon:21.9050},{n:'Velența',lat:47.0500,lon:21.9450},{n:'Olosig',lat:47.0620,lon:21.9350},{n:'Calea Aradului',lat:47.0400,lon:21.9200}],
+  'RO-AR-01':[{n:'Centru',lat:46.1750,lon:21.3120},{n:'Aurel Vlaicu',lat:46.1900,lon:21.3050},{n:'Micălaca',lat:46.1680,lon:21.3450},{n:'Alfa',lat:46.1820,lon:21.3300},{n:'Grădiște',lat:46.1620,lon:21.3050},{n:'Bujac',lat:46.1850,lon:21.2850},{n:'Gai',lat:46.1950,lon:21.2950},{n:'Șega',lat:46.1700,lon:21.2900}],
+  'RO-SB-01':[{n:'Centru istoric',lat:45.7970,lon:24.1520},{n:'Terezian',lat:45.7900,lon:24.1350},{n:'Hipodrom',lat:45.7820,lon:24.1450},{n:'Țiglari',lat:45.8050,lon:24.1400},{n:'Vasile Aaron',lat:45.7780,lon:24.1620},{n:'Turnișor',lat:45.7950,lon:24.1180},{n:'Strand',lat:45.8000,lon:24.1620},{n:'Gușterița',lat:45.8080,lon:24.1700}],
+  'RO-PH-01':[{n:'Centru',lat:44.9410,lon:26.0240},{n:'Vest',lat:44.9380,lon:25.9950},{n:'Nord',lat:44.9650,lon:26.0150},{n:'Sud',lat:44.9180,lon:26.0300},{n:'Bariera București',lat:44.9200,lon:26.0450},{n:'Mihai Bravu',lat:44.9450,lon:26.0500},{n:'Malu Roșu',lat:44.9520,lon:25.9900},{n:'Democrației',lat:44.9300,lon:26.0100}],
   // COMUNE metropolitane — sate componente (pt cinematic rulat pe comuna + naveta)
   'RO-IS-95042':[{n:'Miroslava',lat:47.1350,lon:27.5000},{n:'Valea Adâncă',lat:47.1450,lon:27.5480},{n:'Horpaz',lat:47.1500,lon:27.5350},{n:'Uricani',lat:47.1280,lon:27.4900},{n:'Vorovești',lat:47.1180,lon:27.4750},{n:'Cornești',lat:47.1550,lon:27.4850},{n:'Ciurbești',lat:47.1050,lon:27.5100},{n:'Proselnici',lat:47.1100,lon:27.5300}],
   'RO-IS-95087':[{n:'Rediu',lat:47.2300,lon:27.5550},{n:'Breazu',lat:47.2400,lon:27.5450},{n:'Horlești',lat:47.2200,lon:27.5300},{n:'Tăutești',lat:47.2450,lon:27.5650}],
@@ -43,6 +47,7 @@ function _nbhdName(cityKey, lon, lat){
   for(var i=0;i<list.length;i++){ var d=Math.hypot(list[i].lon-lon, list[i].lat-lat); if(d<bd){bd=d; best=list[i];} }
   return best? best.n : null;
 }
+try{ G._nbhdName=_nbhdName; G._NBHD=_NBHD; }catch(e){}  // expus pt cinema-v5 (numire coridoare/noduri)
 
 // ── MOTOR PREDICTII v8 ──────────────────────────────────────────────────────
 const _PRED={

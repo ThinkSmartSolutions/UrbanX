@@ -189,7 +189,7 @@
             _mpts.push({ lon: city.lon, lat: city.lat, c: '#ef4444', label: city.name, r: 2.6 });
             var _mlines = _MM.comune.map(function (c) { return { coords: [[c.lon, c.lat], [city.lon, city.lat]], c: '#fbbf24', w: 0.9 }; });
             D.h2('Hartă — fluxuri de navetă metropolitană');
-            D.ensure(80); window._PdfMap.draw(D.pdf, { x: D.dims.ML, y: D.y + 2, w: Math.min(D.dims.CW, 160), h: 66, title: 'Navetă: comune-satelit → oraș-pol', points: _mpts, lines: _mlines, cx: city.lon, cy: city.lat, legend: [[[245, 158, 11], 'comună-satelit'], [[239, 68, 68], 'oraș-pol']] });
+            D.ensure(80); window._PdfMap.draw(D.pdf, { x: D.dims.ML, y: D.y + 2, w: Math.min(D.dims.CW, 160), h: 66, pug: ctx.pugGeo, title: 'Navetă: comune-satelit → oraș-pol', points: _mpts, lines: _mlines, cx: city.lon, cy: city.lat, legend: [[[245, 158, 11], 'comună-satelit'], [[239, 68, 68], 'oraș-pol']] });
             D.setY(D.y + 80);
           }
           D.callout('Soluție', _MM.cong + ' Transport metropolitan integrat (tren/tram metropolitan + park&ride la intrari) = decongestionarea arterelor de acces.');

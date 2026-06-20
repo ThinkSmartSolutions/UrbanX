@@ -1457,6 +1457,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           (D.roads||[]).forEach(function(r){ if(!(r.properties&&(r.properties.t==='motorway'||r.properties.t==='trunk')))return; var cs=r.geometry&&r.geometry.coordinates; if(!cs)return; var flat=Array.isArray(cs[0])&&Array.isArray(cs[0][0])?[].concat.apply([],cs):cs; flat.forEach(function(p){ if(!p||typeof p[0]!=='number')return; var d=Math.hypot(p[0]-cx,p[1]-cy); if(d<bd){bd=d;best=p;} }); });
           if(best) nodes.push({c:best,col:'#f59e0b',rk:6});
           if(!nodes.length){ nodes.push({c:[cx+0.016,cy+0.010],col:'#ef4444',rk:4.2}); nodes.push({c:[cx-0.014,cy-0.012],col:'#f59e0b',rk:6}); }
+          // NUMESTE nodurile de influenta pe cartierul real (coridorul traverseaza cartierul X)
+          try{ if(SE._cinLabels && window._nbhdName){ SE._cinLabels(map, nodes.map(function(nd){ var nm=window._nbhdName(SE._cityKey,nd.c[0],nd.c[1]); return {lon:nd.c[0],lat:nd.c[1],color:nd.col,icon:'📈',title:(nm?nm.toUpperCase():'POL INFLUENȚĂ'),sub:'creștere valoare teren ∝ proximitate'}; })); } }catch(e){}
           // umplere FOARTE slaba (reach) + inele-contur cu glow (camp gravitational citibil — NU spalare rosie)
           var fillF=[], ringF=[];
           nodes.forEach(function(nd){
@@ -3141,7 +3143,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b16s1': { // NOTA UrbanX — clasament transparent + benchmark european
         titlu('Nota UrbanX','Index transparent · toti indicatorii reali · benchmark european'); linie();
-        var R=(window._UrbanRank&&window._UrbanRank.compute)?window._UrbanRank.compute(pred,city):null;
+        // CONSECVENTA cinematic == PDF: aceeasi rezolvare de city (cu key + pib imbogatit) + acelasi pred
+        var _ncity=city, _npred=pred;
+        try{ if(window._TCIMasterplanPDF&&window._TCIMasterplanPDF._resolveCity){ _ncity=window._TCIMasterplanPDF._resolveCity(SE._cityKey)||city; if(_ncity&&!_ncity.key)_ncity.key=SE._cityKey; if(window._PredEngine&&_PredEngine.calc)_npred=_PredEngine.calc(_ncity); } }catch(e){}
+        var R=(window._UrbanRank&&window._UrbanRank.compute)?window._UrbanRank.compute(_npred,_ncity):null;
         if(R){
           // dimensiunile notei — bare orizontale cu pondere si scor
           R.dims.forEach(function(d,i){
