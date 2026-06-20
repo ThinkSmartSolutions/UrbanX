@@ -37,6 +37,39 @@
     return '';
   }
 
+  // ── PREFILL din parcela activă (click pe hartă) ──────────────────────────
+  // Citește S.parcels[S.activeParcel]: area (mp), params.pot/cut, utr -> deduce
+  // funcțiunea dominantă și ADC ≈ area × CUT. Întoarce null dacă nu există parcelă.
+  function prefillFromParcel() {
+    try {
+      var S = G.S; if (!S || !S.parcels || S.parcels[S.activeParcel == null ? 0 : S.activeParcel] == null) return null;
+      var ap = S.parcels[S.activeParcel == null ? 0 : S.activeParcel];
+      var area = ap.area || 0; if (area <= 0) return null;
+      var cut = (ap.params && ap.params.cut) || (G.REGULI && G.REGULI[ap.utr] && G.REGULI[ap.utr].cut) || 1.0;
+      var adc = Math.round(area * cut);                         // mp arie desfășurată estimată
+      var desc = ((G.REGULI && G.REGULI[ap.utr] && G.REGULI[ap.utr].d) || ap.zoneLabel || ap.utr || '').toLowerCase();
+      var type = guessFunction(desc, ap.utr);
+      var lu;
+      if (type === 'residential') lu = { land_use: 'residential', units: Math.max(1, Math.round(adc / 75)) }; // ~75 mp/loc.
+      else lu = { land_use: type, gross_floor_area_sqm: adc };
+      var centroid = null;
+      try { if (ap.geo && G.turf) centroid = G.turf.centerOfMass(ap.geo).geometry.coordinates; } catch (e) {}
+      return {
+        site_name: 'PUZ ' + (ap.nrcad && ap.nrcad !== '—' ? ('CF ' + ap.nrcad + ' · ') : '') + (cityName() || ''),
+        land_uses: [lu], centroid: centroid, area: area, cut: cut, utr: ap.utr
+      };
+    } catch (e) { console.warn('[Flux] prefill esuat', e); return null; }
+  }
+  function guessFunction(desc, utr) {
+    var u = (utr || '').toUpperCase();
+    if (/centr|mixt|CM|CMX|ZCP|ZM/.test(u) || /central|mixt/.test(desc)) return 'mixed_use';
+    if (/birou|servicii|tert/.test(desc)) return 'office';
+    if (/comer|comert|retail/.test(desc)) return 'retail';
+    if (/indus|product|depozit|logist/.test(desc) || /^I/.test(u)) return 'industrial';
+    if (/locui|reziden|^L/.test(desc) || /^L/.test(u)) return 'residential';
+    return 'mixed_use';
+  }
+
   var ST = {
     overlay: 'position:fixed;inset:0;background:rgba(2,6,16,.72);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)',
     modal: 'background:#0b1424;color:#e6edf7;width:min(680px,94vw);max-height:92vh;overflow:auto;border:1px solid rgba(34,160,90,.4);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:system-ui,Segoe UI,sans-serif',
@@ -83,18 +116,31 @@
     m.appendChild(head);
 
     var body = el('div', { style: ST.body });
+    var pre = prefillFromParcel();   // null dacă nu e nicio parcelă selectată
 
     // meta
     body.appendChild(el('div', { style: ST.label }, 'Identificare'));
     var siteName = el('input', { style: ST.inp, placeholder: 'Denumire sit / PUZ' });
-    siteName.value = 'Sit PUZ ' + (cityName() || '');
+    siteName.value = (pre && pre.site_name) || ('Sit PUZ ' + (cityName() || ''));
     body.appendChild(siteName);
+    if (pre) {
+      body.appendChild(el('div', { style: 'font-size:11px;color:#34d399;margin-top:6px' },
+        '✓ Precompletat din parcela selectată · ' + Math.round(pre.area).toLocaleString('ro-RO') +
+        ' mp teren · CUT ' + pre.cut + ' · UTR ' + (pre.utr || '—') + ' → ' +
+        Math.round(pre.area * pre.cut).toLocaleString('ro-RO') + ' mp ADC estimat'));
+    }
 
     // land uses
     body.appendChild(el('div', { style: ST.label }, 'Funcțiuni propuse'));
     var luWrap = el('div');
-    luWrap.appendChild(luRow('residential', 200));
-    luWrap.appendChild(luRow('office', 6000));
+    if (pre && pre.land_uses.length) {
+      pre.land_uses.forEach(function (lu) {
+        luWrap.appendChild(luRow(lu.land_use, lu.units != null ? lu.units : lu.gross_floor_area_sqm));
+      });
+    } else {
+      luWrap.appendChild(luRow('residential', 200));
+      luWrap.appendChild(luRow('office', 6000));
+    }
     body.appendChild(luWrap);
     var addLu = el('button', { style: ST.btnGhost }, '+ Adaugă funcțiune');
     addLu.onclick = function () { luWrap.appendChild(luRow('retail', '')); };
@@ -130,14 +176,16 @@
     body.appendChild(result);
 
     // actions
-    var actions = el('div', { style: 'display:flex;gap:10px;margin-top:18px' });
+    var actions = el('div', { style: 'display:flex;gap:10px;margin-top:18px;flex-wrap:wrap' });
     var runBtn = el('button', { style: ST.btn }, '▶ Calculează');
+    var mapBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#0891b2,#0e7490)' }, '🗺 Arată pe hartă');
     var pdfBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '⬇ Generează PDF');
-    actions.appendChild(runBtn); actions.appendChild(pdfBtn);
+    actions.appendChild(runBtn); actions.appendChild(mapBtn); actions.appendChild(pdfBtn);
     body.appendChild(actions);
     m.appendChild(body);
 
     var lastResult = null, lastMeta = null;
+    var centroid = (pre && pre.centroid) || null;
 
     function gather() {
       var land_uses = [];
@@ -171,11 +219,14 @@
       if (!g.scenario.land_uses.length) { result.innerHTML = '<div style="color:#fca5a5;font-size:13px">Adaugă cel puțin o funcțiune cu cantitate > 0.</div>'; return; }
       var res = G.Flux.compute(g.scenario, g.params);
       lastResult = res;
-      lastMeta = { site_name: siteName.value, city_name: cityName(), land_uses: g.scenario.land_uses };
+      lastMeta = { site_name: siteName.value, city_name: cityName(), land_uses: g.scenario.land_uses, centroid: centroid };
+      G.Flux._lastStudy = { result: res, meta: lastMeta };   // pt capitolul Mobilitate din Masterplan/PMUD
       result.innerHTML = summaryHTML(res);
       pdfBtn.style.display = '';
+      mapBtn.style.display = centroid ? '' : 'none';
     };
     pdfBtn.onclick = function () { if (lastResult) G.Flux.generatePDF(lastResult, lastMeta); };
+    mapBtn.onclick = function () { if (lastResult && centroid) { G.Flux.drawOverlay(lastResult, centroid); ov.remove(); } };
 
     ov.appendChild(m);
     document.body.appendChild(ov);
@@ -215,8 +266,71 @@
     document.body.appendChild(b);
   }
 
+  // ── OVERLAY PE HARTĂ ─────────────────────────────────────────────────────
+  var OV_SRC = 'flux-overlay-src', OV_GLOW = 'flux-ov-glow', OV_CORE = 'flux-ov-core', OV_LBL = 'flux-ov-lbl';
+  function clearOverlay() {
+    var map = G.map; if (!map) return;
+    [OV_LBL, OV_CORE, OV_GLOW].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} });
+    try { if (map.getSource(OV_SRC)) map.removeSource(OV_SRC); } catch (e) {}
+    var b = document.getElementById('flux-ov-hide'); if (b) b.remove();
+  }
+  function drawOverlay(res, centroid) {
+    var map = G.map; if (!map || !centroid) return;
+    clearOverlay();
+    var over = (res.intersections || []).some(function (i) { return i.over_capacity; });
+    var color = over ? '#ef4444' : (res.modal_split.auto > 0.55 ? '#f59e0b' : '#22c55e');
+    var worst = (res.intersections || []).reduce(function (a, i) { return i.vc_ratio > a ? i.vc_ratio : a; }, 0);
+    var feats = [{
+      type: 'Feature', geometry: { type: 'Point', coordinates: centroid },
+      properties: {
+        kind: 'site', color: color,
+        label: Math.round(res.trips.pm).toLocaleString('ro-RO') + ' depl/h vârf PM' +
+          (worst > 0 ? (' · v/c max ' + worst.toFixed(2)) : '')
+      }
+    }];
+    // intersecții cu coordonate (dacă există)
+    (res.intersections || []).forEach(function (i) {
+      if (i.lon == null || i.lat == null) return;
+      feats.push({
+        type: 'Feature', geometry: { type: 'Point', coordinates: [i.lon, i.lat] },
+        properties: { kind: 'ix', color: i.over_capacity ? '#ef4444' : (i.vc_ratio > 0.75 ? '#f59e0b' : '#22c55e'), label: i.name + ' · LOS ' + i.los }
+      });
+    });
+    map.addSource(OV_SRC, { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+    map.addLayer({
+      id: OV_GLOW, type: 'circle', source: OV_SRC,
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 22, 16, 60],
+        'circle-color': ['get', 'color'], 'circle-opacity': 0.18, 'circle-blur': 0.6
+      }
+    });
+    map.addLayer({
+      id: OV_CORE, type: 'circle', source: OV_SRC,
+      paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 5, 16, 11],
+        'circle-color': ['get', 'color'], 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5, 'circle-opacity': 0.95
+      }
+    });
+    map.addLayer({
+      id: OV_LBL, type: 'symbol', source: OV_SRC,
+      layout: { 'text-field': ['get', 'label'], 'text-size': 12, 'text-offset': [0, 1.6], 'text-anchor': 'top', 'text-allow-overlap': true },
+      paint: { 'text-color': '#fff', 'text-halo-color': '#06101f', 'text-halo-width': 1.5 }
+    });
+    try { map.flyTo({ center: centroid, zoom: Math.max(map.getZoom(), 14), essential: true }); } catch (e) {}
+    // buton de ascundere
+    if (!document.getElementById('flux-ov-hide')) {
+      var b = el('button', { id: 'flux-ov-hide' }, '✕ Ascunde trafic Flux');
+      b.style.cssText = 'position:fixed;bottom:210px;right:10px;z-index:3200;background:rgba(8,15,35,.92);color:#e6edf7;border:1px solid rgba(34,160,90,.4);border-radius:9px;padding:8px 11px;font-size:12px;cursor:pointer;font-family:system-ui,sans-serif';
+      b.onclick = clearOverlay;
+      document.body.appendChild(b);
+    }
+    window.ss && ss('🗺 Impact de trafic afișat pe hartă');
+  }
+
   G.Flux = G.Flux || {};
   G.Flux.openStudiu = openModal;
+  G.Flux.drawOverlay = drawOverlay;
+  G.Flux.clearOverlay = clearOverlay;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountButton);
   else mountButton();
   console.log('[Flux] UI încărcat (buton + window.Flux.openStudiu)');
