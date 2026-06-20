@@ -1,0 +1,193 @@
+/* ============================================================================
+ * UrbanX CAU — Comisia de Acorduri Unice (motor client-side, Faza 1 funcțională)
+ * Determină automat avizele necesare pentru un Certificat de Urbanism, din:
+ * parcela selectată + tipul lucrării + zona PUG + rețelele din jur (OSM).
+ * Include: motor de reguli (9 reguli, Legea 50/1991), registru CU persistent,
+ * calcul „aviz tacit favorabil" la 30 zile, fetch rețele OSM (best-effort).
+ *
+ * window.CAU.computeNotices(ctx) · fetchNetworks(centroid) · registry · tacitCheck
+ *
+ * ONEST: rețelele din OSM = data_quality 'estimat'; unde lipsesc date → 'verificare
+ * manuală'. NU substituie avizarea oficială — vezi disclaimerul din CU.
+ * Backend (Faza 2): dispecerizare email către deținători + portal deținători + multi-user.
+ * ========================================================================== */
+(function (G) {
+  'use strict';
+
+  // ── Zone de protecție rețele (m) — legislație RO ─────────────────────────
+  var PROTECTION = {
+    gaz_redusa: { prot: 1, safety: 3, holder: 'Operator distribuție gaze (Delgaz/Distrigaz)', label: 'Gaze presiune redusă' },
+    gaz_medie: { prot: 3, safety: 10, holder: 'Operator distribuție gaze', label: 'Gaze presiune medie' },
+    gaz_inalta: { prot: 5, safety: 20, holder: 'Transgaz', label: 'Gaze presiune înaltă' },
+    electric_jt: { prot: 0.6, safety: 1, holder: 'Operator distribuție energie (Delgaz/E-Distribuție)', label: 'Electric JT 0.4kV' },
+    electric_mt: { prot: 1, safety: 3, holder: 'Operator distribuție energie', label: 'Electric MT 6-20kV' },
+    electric_it: { prot: 6, safety: 20, holder: 'Transelectrica / operator', label: 'Electric ÎT 110kV' },
+    apa: { prot: 3, safety: 10, holder: 'Operator apă-canal (RAJA/ApaVital/etc.)', label: 'Apă potabilă' },
+    canal: { prot: 3, safety: 3, holder: 'Operator apă-canal', label: 'Canalizare' },
+    termoficare: { prot: 2, safety: 5, holder: 'Operator termoficare', label: 'Termoficare' },
+    telecom: { prot: 0.5, safety: 0.5, holder: 'Operator telecomunicații', label: 'Telecomunicații' }
+  };
+
+  // ── Mapare tag OSM -> tip rețea CAU ───────────────────────────────────────
+  function osmToType(tags) {
+    if (!tags) return null;
+    if (tags.power === 'line') return 'electric_it';
+    if (tags.power === 'minor_line') return 'electric_mt';
+    if (tags.power === 'cable') return 'electric_jt';
+    if (tags.man_made === 'pipeline' && /gas/i.test(tags.substance || tags.type || '')) return 'gaz_medie';
+    if (tags.man_made === 'pipeline' && /water/i.test(tags.substance || '')) return 'apa';
+    if (tags.pipeline === 'substation' || tags.power === 'substation') return 'electric_it';
+    return null;
+  }
+
+  // ── Fetch rețele OSM în jurul parcelei (best-effort, prin proxy Overpass) ──
+  function fetchNetworks(centroid, radiusM) {
+    radiusM = radiusM || 120;
+    var proxy = G._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    var lat = centroid[1], lon = centroid[0];
+    var q = '[out:json][timeout:20];(' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[power];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[man_made=pipeline];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[railway~"rail|light_rail|tram"];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[highway~"motorway|trunk|primary|secondary|tertiary|residential|unclassified"];' +
+      'way(around:200,' + lat + ',' + lon + ')[waterway~"river|stream|canal"];' +
+      ');out geom;';
+    return fetch(proxy + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout ? AbortSignal.timeout(22000) : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) { return parseOsm(j, centroid); });
+  }
+
+  function parseOsm(j, centroid) {
+    var out = { networks: [], railway_m: null, road_m: null, water_m: null };
+    var pt = G.turf && G.turf.point(centroid);
+    (j.elements || []).forEach(function (e) {
+      if (!e.geometry || !e.geometry.length || !pt) return;
+      var line = G.turf.lineString(e.geometry.map(function (p) { return [p.lon, p.lat]; }));
+      var d = G.turf.pointToLineDistance(pt, line, { units: 'meters' });
+      var t = e.tags || {};
+      var nt = osmToType(t);
+      if (nt) out.networks.push({ type: nt, distance_m: Math.round(d), operator: PROTECTION[nt].holder, data_quality: 'estimat' });
+      else if (t.railway) out.railway_m = out.railway_m == null ? Math.round(d) : Math.min(out.railway_m, Math.round(d));
+      else if (t.highway) out.road_m = out.road_m == null ? Math.round(d) : Math.min(out.road_m, Math.round(d));
+      else if (t.waterway) out.water_m = out.water_m == null ? Math.round(d) : Math.min(out.water_m, Math.round(d));
+    });
+    out.networks.sort(function (a, b) { return a.distance_m - b.distance_m; });
+    return out;
+  }
+
+  // ── Tipuri de utilizare ────────────────────────────────────────────────────
+  var USE_LABELS = {
+    locuire: 'Locuire', comercial: 'Comerț', birouri: 'Birouri', industrial: 'Industrial',
+    hotelier: 'Hotelier', depozitare: 'Depozitare', gradinita: 'Grădiniță', scoala: 'Școală',
+    spital: 'Spital', clinica: 'Clinică', cresa: 'Creșă', centru_social: 'Centru social', mixt: 'Mixt'
+  };
+
+  // ── MOTORUL DE REGULI (9 reguli, Legea 50/1991) ───────────────────────────
+  function computeNotices(ctx) {
+    var w = ctx.work || {}, pug = ctx.pug || {}, risks = ctx.risks || {};
+    var nets = ctx.networks || [];
+    var area = +w.area_m2 || 0, floors = +w.floors || 0, use = w.use || 'locuire';
+    var notices = [];
+    function add(n) { notices.push(Object.assign({ is_mandatory: false, recommended: false, data_quality_flag: 'regula', network_proximity_m: null }, n)); }
+
+    // Regula 1 — proximitate rețele (din OSM)
+    nets.forEach(function (n) {
+      var p = PROTECTION[n.type]; if (!p) return;
+      if (n.distance_m <= p.prot) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, is_mandatory: true, legal_basis: 'Legea 50/1991 · zona de protecție ' + p.label + ' (' + p.prot + 'm)', data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (în zona de protecție)' });
+      else if (n.distance_m <= 50) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, recommended: true, legal_basis: 'Legea 50/1991 · racordare posibilă ' + p.label, data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (probabil necesar la racordare)' });
+    });
+
+    // Regula 2 — ISU
+    var isu = floors >= 2 || area >= 600 || ['comercial', 'birouri', 'industrial', 'hotelier'].indexOf(use) >= 0 || (use === 'locuire' && area >= 2000);
+    if (isu) add({ notice_type: 'isu', holder_name: 'Inspectoratul pentru Situații de Urgență (ISU)', is_mandatory: true, legal_basis: 'Legea 307/2006 · HG 571/2016 (securitate la incendiu)', label: 'Aviz/Autorizație securitate la incendiu (ISU)' });
+
+    // Regula 3 — Cultura (patrimoniu)
+    if (pug.in_protected_zone) add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', is_mandatory: true, legal_basis: 'Legea 422/2001 (monumente istorice)', label: 'Aviz Cultură — zonă protejată / monument' });
+    else add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', recommended: true, data_quality_flag: 'no_data', legal_basis: 'Legea 422/2001', label: 'Verificare manuală — proximitate monumente/zonă protejată (LMI)' });
+
+    // Regula 4 — Apele Române
+    var flood = risks.flood_q1 || risks.flood_q10 || risks.flood_q100;
+    var nearWater = (risks.near_water_m != null && risks.near_water_m <= 200) || (ctx.water_m != null && ctx.water_m <= 200);
+    if (flood || nearWater) add({ notice_type: 'apele', holder_name: 'Administrația Bazinală de Apă (ANAR)', is_mandatory: true, legal_basis: 'Legea 107/1996 (legea apelor)', data_quality_flag: flood ? 'estimat' : 'estimat', network_proximity_m: ctx.water_m || risks.near_water_m || null, label: 'Aviz de gospodărire a apelor (ANAR)' });
+    else add({ notice_type: 'apele', holder_name: 'Administrația Bazinală de Apă (ANAR)', recommended: true, data_quality_flag: 'no_data', legal_basis: 'Legea 107/1996', label: 'Verificare manuală — risc inundații / proximitate ape' });
+
+    // Regula 5 — Drumuri
+    if (ctx.road_m != null && ctx.road_m <= 8) add({ notice_type: 'drumuri', holder_name: 'Administratorul drumului (CNAIR/CJ/Primărie)', is_mandatory: true, legal_basis: 'OG 43/1997 (regimul drumurilor)', data_quality_flag: 'estimat', network_proximity_m: ctx.road_m, label: 'Aviz acces la drumul public (la ' + ctx.road_m + 'm)' });
+
+    // Regula 6 — CFR
+    if (ctx.railway_m != null && ctx.railway_m <= 100) add({ notice_type: 'cfr', holder_name: 'CNCF CFR SA', is_mandatory: true, legal_basis: 'OUG 12/1998 (zona de siguranță CF, 100m)', data_quality_flag: 'estimat', network_proximity_m: ctx.railway_m, label: 'Aviz CFR — cale ferată la ' + ctx.railway_m + 'm' });
+
+    // Regula 7 — Mediu
+    var mediu = area > 5000 || (['industrial', 'depozitare'].indexOf(use) >= 0 && area > 1000) || risks.natura2000;
+    if (mediu) add({ notice_type: 'mediu', holder_name: 'Agenția pentru Protecția Mediului (APM)', is_mandatory: true, legal_basis: 'Legea 292/2018 (evaluarea impactului asupra mediului)', label: 'Aviz/Acord de mediu (APM)' });
+
+    // Regula 8 — DSP
+    if (['gradinita', 'scoala', 'spital', 'clinica', 'cresa', 'centru_social'].indexOf(use) >= 0) add({ notice_type: 'dsp', holder_name: 'Direcția de Sănătate Publică (DSP)', is_mandatory: true, legal_basis: 'Legea 95/2006 · Ord. MS 119/2014', label: 'Aviz/Notificare sanitară (DSP)' });
+
+    // Regula 9 — ANRE electric (stație/LEA ÎT < 500m)
+    var hv = nets.some(function (n) { return n.type === 'electric_it' && n.distance_m <= 500; });
+    if (hv && !notices.some(function (x) { return x.notice_type === 'retea_electric_it'; })) add({ notice_type: 'anre_electric', holder_name: 'Operator transport energie / ANRE', recommended: true, data_quality_flag: 'estimat', legal_basis: 'Legea 123/2012 (energiei electrice)', label: 'Aviz energetic — LEA ÎT / stație în zonă' });
+
+    var mandatory = notices.filter(function (n) { return n.is_mandatory; });
+    return {
+      notices: notices, count: notices.length,
+      mandatory_count: mandatory.length,
+      recommended_count: notices.length - mandatory.length,
+      has_estimated: notices.some(function (n) { return n.data_quality_flag === 'estimat'; }),
+      has_no_data: notices.some(function (n) { return n.data_quality_flag === 'no_data'; })
+    };
+  }
+
+  // ── REGISTRU CU + aviz tacit favorabil (Legea 50/1991, Art. 7) ─────────────
+  var RKEY = 'cau_registry_v1';
+  var DAY = 86400000;
+  function regAll() { try { return JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) { return []; } }
+  function regSave(a) { try { localStorage.setItem(RKEY, JSON.stringify(a)); } catch (e) {} }
+
+  function tacitCheck(cu) {
+    // marchează avizele „trimise" cu termen depășit ca favorabil_tacit (calcul, nu cron)
+    var now = Date.now(), changed = false;
+    (cu.notices || []).forEach(function (n) {
+      if (n.status === 'trimis' && n.deadline && now > n.deadline && !n.tacit) {
+        n.status = 'favorabil_tacit'; n.tacit = true;
+        n.tacit_log = 'Aviz tacit favorabil conform Legii 50/1991, Art. 7, alin. (2): termenul de 30 zile a expirat fără răspuns';
+        changed = true;
+      }
+    });
+    return changed;
+  }
+  function daysLeft(n) {
+    if (!n.deadline) return null;
+    return Math.ceil((n.deadline - Date.now()) / DAY);
+  }
+
+  var registry = {
+    list: function () { var a = regAll(); var ch = false; a.forEach(function (cu) { if (tacitCheck(cu)) ch = true; }); if (ch) regSave(a); return a; },
+    add: function (cu) {
+      var a = regAll();
+      cu.id = 'cu' + Date.now() + '_' + Math.round(Math.random() * 1e4);
+      cu.registration_number = 'CU-' + new Date().getFullYear() + '-' + (a.length + 1);
+      cu.created_at = Date.now(); cu.status = 'depus';
+      a.push(cu); regSave(a); return cu;
+    },
+    // marchează toate avizele ca „trimise" (pornește termenul de 30 zile)
+    dispatch: function (id) {
+      var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu) return null;
+      var dl = Date.now() + 30 * DAY;
+      (cu.notices || []).forEach(function (n) { if (!n.status || n.status === 'in_asteptare') { n.status = 'trimis'; n.sent_at = Date.now(); n.deadline = dl; } });
+      cu.status = 'avize_trimise'; regSave(a); return cu;
+    },
+    setNotice: function (id, idx, status) {
+      var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu || !cu.notices[idx]) return null;
+      cu.notices[idx].status = status; regSave(a); return cu;
+    },
+    remove: function (id) { regSave(regAll().filter(function (c) { return c.id !== id; })); },
+    daysLeft: daysLeft
+  };
+
+  G.CAU = {
+    computeNotices: computeNotices, fetchNetworks: fetchNetworks,
+    registry: registry, PROTECTION: PROTECTION, USE_LABELS: USE_LABELS, tacitCheck: tacitCheck, daysLeft: daysLeft
+  };
+  console.log('[CAU] motor Acorduri Unice încărcat (window.CAU)');
+})(window);
