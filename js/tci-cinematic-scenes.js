@@ -445,8 +445,20 @@ G._CinemaEngine={
       // bare patrate; inaltimea ∝ potential de dezvoltare, culoarea verde->rosu. Asa apar "barele
       // de crestere" ca in storyboard (padure de coloane), nu poligoane colorate plate.
       const coslat=Math.cos(cy*Math.PI/180)||0.7;
-      const STEP=0.0017;       // pas grid ~130m (bare mai distincte)
-      const BS=0.00062;        // jumatate latura bara ~48m (vizibile clar ca turnuri)
+      const STEP=0.0017;       // pas grid ~130m
+      // FUNCTIUNE -> forma+culoare distincte (nu toate la fel): central=lat&foarte inalt rosu,
+      // comercial/mixt=portocaliu, colectiv=albastru subtire-inalt, individual=verde-albastrui SUBTIRE scund,
+      // industrial=gri LAT scund, verde=verde plat. Asa se "citeste" functiunea din silueta.
+      function _fnOf(u){
+        if(u.startsWith('CC')||u.startsWith('CP')) return {w:0.00072,hm:1.7,c:'#ff3366'};
+        if(u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')) return {w:0.00058,hm:1.35,c:'#ff8c00'};
+        if(u.startsWith('LC')||u.startsWith('LB')) return {w:0.00040,hm:1.15,c:'#4a90d9'};
+        if(u.startsWith('LA')||u.startsWith('LL')) return {w:0.00028,hm:0.70,c:'#67c2a3'};
+        if(u.startsWith('A')||u.startsWith('I')) return {w:0.00088,hm:0.45,c:'#9ca3af'};
+        if(u.startsWith('V')||u.startsWith('S')) return {w:0.00090,hm:0.18,c:'#22c55e'};
+        return {w:0.00044,hm:0.9,c:'#60a5fa'};
+      }
+      let _bi=0;
       geo.features.slice(0,800).forEach(f=>{
         const p=f.properties||{};
         const u=String(p.zf||p.utr||p.utr_cod||p.cod_utr||'').trim().toUpperCase();
@@ -454,11 +466,11 @@ G._CinemaEngine={
         const hmax=parseFloat(rv.hmax_m||rv.hmax||0)||0;
         const cut=parseFloat(rv.cut_baza||rv.CUT||rv.cut||0)||0;
         const hub=(pred&&pred.hub)||0.7;
+        const fn=_fnOf(u);
         const pr=u.startsWith('CC')||u.startsWith('CP')?0.95:u.startsWith('CM')||u.startsWith('CB')||u.startsWith('CA')?0.75:u.startsWith('LC')||u.startsWith('LB')?0.58:u.startsWith('LA')||u.startsWith('LL')?0.42:u.startsWith('A')?0.62:(u.startsWith('V')||u.startsWith('S'))?0.12:0.30;
         const base=hmax>0?hmax:(cut>0?cut*9:pr*40);
-        const hFinal=Math.max(12,base*(3.4+hub*1.4));   // TURNURI inalte, clar vizibile ca bare verticale
-        const c=pr>0.80?'#ff3366':pr>0.65?'#ff8c00':pr>0.45?'#4a90d9':pr>0.20?'#22c55e':'#15803d';
-        const hExist=pr>0.20?hFinal*(0.30+pr*0.18):hFinal*0.10;
+        const hBaseFinal=Math.max(8,base*(2.6+hub*1.0)*fn.hm); // inaltime pe FUNCTIUNE + regulament
+        const c=fn.c;
         // bbox + centroid zonei
         let cc=f.geometry&&f.geometry.coordinates; while(Array.isArray(cc)&&Array.isArray(cc[0])&&Array.isArray(cc[0][0])) cc=cc[0];
         if(!Array.isArray(cc)||cc.length<3) return;
@@ -466,12 +478,17 @@ G._CinemaEngine={
         cc.forEach(pt=>{ if(pt&&typeof pt[0]==='number'){ if(pt[0]<mnx)mnx=pt[0]; if(pt[0]>mxx)mxx=pt[0]; if(pt[1]<mny)mny=pt[1]; if(pt[1]>mxy)mxy=pt[1]; sx+=pt[0]; sy+=pt[1]; nn++; } });
         if(!nn) return;
         const ctrx=sx/nn, ctry=sy/nn;
-        const w=(mxx-mnx)*0.62, h=(mxy-mny)*0.62;                 // grid restrans (sta in zona)
+        const w=(mxx-mnx)*0.62, h=(mxy-mny)*0.62;
         const nx=Math.max(1,Math.min(5,Math.round(w/STEP))), ny=Math.max(1,Math.min(5,Math.round(h/STEP)));
         for(let ix=0;ix<nx;ix++) for(let iy=0;iy<ny;iy++){
-          const bx=ctrx+(nx>1?(ix/(nx-1)-0.5)*w:0), by=ctry+(ny>1?(iy/(ny-1)-0.5)*h:0);
+          // jitter pseudo-aleator (determinist) ca sa nu fie grid perfect + variatie de inaltime per bara
+          _bi++; const j1=((_bi*131)%100)/100-0.5, j2=((_bi*197)%100)/100-0.5, jh=0.7+(((_bi*73)%100)/100)*0.6;
+          const bx=ctrx+(nx>1?(ix/(nx-1)-0.5)*w:0)+j1*STEP*0.4, by=ctry+(ny>1?(iy/(ny-1)-0.5)*h:0)+j2*STEP*0.4;
+          const BSx=fn.w/coslat, BSy=fn.w;
+          const hFinal=hBaseFinal*jh;                              // inaltimi diferite, nu uniforme
+          const hExist=pr>0.20?hFinal*(0.28+pr*0.18):hFinal*0.10;
           const wphase=Math.max(0,Math.min(1,(bx-_mnLon)/_spanLon));
-          const sq=[[bx-BS/coslat,by-BS],[bx+BS/coslat,by-BS],[bx+BS/coslat,by+BS],[bx-BS/coslat,by+BS],[bx-BS/coslat,by-BS]];
+          const sq=[[bx-BSx,by-BSy],[bx+BSx,by-BSy],[bx+BSx,by+BSy],[bx-BSx,by+BSy],[bx-BSx,by-BSy]];
           features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[sq]},properties:{hFinal,hExist,h:0.5,c,pr,wphase}});
         }
       });

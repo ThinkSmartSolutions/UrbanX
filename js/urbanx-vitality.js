@@ -12,11 +12,14 @@ function cl(v,lo,hi){ return Math.max(lo==null?2:lo,Math.min(hi==null?99:hi,Math
 
 // Poli universitari reali (selecție publică) — studenți (ordin de mărime).
 var EDU = {
-  'RO-IS-01': {studenti:55000, univ:['UAIC (1860 — cea mai veche univ. modernă din RO)','Univ. Tehnică „Gh. Asachi"','UMF „Gr. T. Popa"','USAMV','Univ. de Arte'], pol:'major (#2–3 național)'},
-  'RO-SV-01': {studenti:10000, univ:['Univ. „Ștefan cel Mare" Suceava (USV)'], pol:'regional'},
-  'RO-GL-01': {studenti:13000, univ:['Univ. „Dunărea de Jos" Galați (UDJ)'], pol:'regional'},
+  // campus = coordonatele REALE ale polului universitar principal (NU offset inventat din centru)
+  'RO-IS-01': {studenti:55000, univ:['UAIC (1860 — cea mai veche univ. modernă din RO)','Univ. Tehnică „Gh. Asachi"','UMF „Gr. T. Popa"','USAMV','Univ. de Arte'], pol:'major (#2–3 național)', campus:{lat:47.1903, lon:27.5753, n:'UAIC — Copou'}},
+  'RO-SV-01': {studenti:10000, univ:['Univ. „Ștefan cel Mare" Suceava (USV)'], pol:'regional', campus:{lat:47.6420, lon:26.2880, n:'USV'}},
+  'RO-GL-01': {studenti:13000, univ:['Univ. „Dunărea de Jos" Galați (UDJ)'], pol:'regional', campus:{lat:45.4500, lon:28.0350, n:'UDJ'}},
   'RO-NT-01': {studenti:3000,  univ:['extensii universitare'], pol:'redus'},
-  'RO-B-01':  {studenti:160000,univ:['Univ. București','Politehnica','ASE','UMF Carol Davila','+ zeci'], pol:'capital — cel mai mare'},
+  'RO-B-01':  {studenti:160000,univ:['Univ. București','Politehnica','ASE','UMF Carol Davila','+ zeci'], pol:'capital — cel mai mare', campus:{lat:44.4355, lon:26.1010, n:'Univ. București'}},
+  'RO-CJ-01': {studenti:75000, univ:['UBB','UMF','USAMV','UTCN'], pol:'major (#2 național)', campus:{lat:46.7677, lon:23.5908, n:'UBB'}},
+  'RO-TM-01': {studenti:40000, univ:['UVT','Politehnica','UMF','USAMVT'], pol:'major regional', campus:{lat:45.7471, lon:21.2317, n:'UVT'}},
 };
 // Stadioane / arene majore reale (coord aproximative).
 var SPORT = {
@@ -59,9 +62,10 @@ G._UrbanVitality = {
   buildFeatures: function(cityKey, city){
     city=city||{}; var e=this.edu(cityKey,city), s=this.sport(cityKey,city), pts=[], labels=[];
     var cx=city.lon||27, cy=city.lat||47, latC=Math.cos(cy*Math.PI/180)||0.7;
-    // campus universitar (un marker langa centru) + eticheta cu studenti
-    pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+0.012/latC,cy+0.008]},properties:{c:'#38bdf8',k:'edu'}});
-    labels.push({lon:cx+0.012/latC,lat:cy+0.008,color:'#38bdf8',icon:'🎓',title:'POL UNIVERSITAR',sub:N(e.studenti)+' studenți · '+e.pol});
+    // campus universitar la coordonatele REALE (daca exista); altfel fallback langa centru
+    var _cu = e.campus, _clon = _cu? _cu.lon : (cx+0.012/latC), _clat = _cu? _cu.lat : (cy+0.008);
+    pts.push({type:'Feature',geometry:{type:'Point',coordinates:[_clon,_clat]},properties:{c:'#38bdf8',k:'edu'}});
+    labels.push({lon:_clon,lat:_clat,color:'#38bdf8',icon:'🎓',title:(_cu&&_cu.n?_cu.n.toUpperCase():'POL UNIVERSITAR'),sub:N(e.studenti)+' studenți · '+e.pol});
     (s.arene||[]).forEach(function(ar){
       pts.push({type:'Feature',geometry:{type:'Point',coordinates:[ar.lon,ar.lat]},properties:{c:'#22c55e',k:'sport'}});
       labels.push({lon:ar.lon,lat:ar.lat,color:'#22c55e',icon:'🏟',title:ar.n.slice(0,28),sub:N(ar.cap)+' locuri'});

@@ -1733,10 +1733,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#1a2236'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.5);}catch(e){}
         setTimeout(function(){ if(SE._playing){ try{SE._addVitality&&SE._addVitality(map, SE._cityKey, SE._city);}catch(e){} } },1400);
-        fly(Z.UNI,14.5,60,0,4500,0,'day');
-        rot(12,0.005);
-        fly(Z.C,13.6,56,50,7000,9000,'day');
-        fly(Z.CBD,14.2,58,-25,6000,15500,'day');
+        // ZOOM pe campusul universitar REAL (din _UrbanVitality), nu pe o zona random
+        (function(){
+          var camp=[cx,cy];
+          try{ var vf=window._UrbanVitality&&window._UrbanVitality.buildFeatures(SE._cityKey,SE._city); if(vf&&vf.pts){ var ed=vf.pts.filter(function(p){return p.properties&&p.properties.k==='edu';})[0]; if(ed&&ed.geometry) camp=ed.geometry.coordinates; } }catch(e){}
+          var arena=null; try{ var vf2=window._UrbanVitality&&window._UrbanVitality.buildFeatures(SE._cityKey,SE._city); if(vf2&&vf2.pts){ var sp=vf2.pts.filter(function(p){return p.properties&&p.properties.k==='sport';})[0]; if(sp&&sp.geometry) arena=sp.geometry.coordinates; } }catch(e){}
+          fly(camp,15.2,62,10,4500,400,'day');          // campus universitar real (zoom)
+          fly(camp,15.4,64,55,5500,7000,'day');          // orbitare campus
+          fly(arena||Z.C,15.0,60,-25,6000,15000,'day');  // stadion/arena reala
+        })();
         break;
       case 'b19s1': // CULTURA & TURISM — Standard 3D (apus): TUR pe obiectivele REALE cu zoom apropiat
         if(SE._curBase!=='standard'){ onIdle(function(){ _cinRealBuildings(map); }); }
