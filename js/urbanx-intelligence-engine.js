@@ -199,9 +199,44 @@
     return { uat: uat, capacity: cap, impact: impact, fiscal: fisc };
   }
 
+  // ── REGISTRU PUZ (persistent local) + ALERTE ─────────────────────────────
+  // Trackingul cumulativ real: arhitectul înregistrează fiecare PUZ; sistemul
+  // urmărește agregatul per UAT. Persistat în localStorage (fără backend).
+  var RKEY = 'uxi_puz_registry_v1';
+  function regAll() { try { return JSON.parse(localStorage.getItem(RKEY) || '{}'); } catch (e) { return {}; } }
+  function regSave(a) { try { localStorage.setItem(RKEY, JSON.stringify(a)); } catch (e) {} }
+  var registry = {
+    list: function (uat) { return regAll()[uat] || []; },
+    add: function (uat, puz) {
+      var a = regAll(); a[uat] = a[uat] || [];
+      puz.id = 'p' + Date.now() + '_' + Math.round(Math.random() * 1e4);
+      a[uat].push(puz); regSave(a); return puz;
+    },
+    remove: function (uat, id) { var a = regAll(); a[uat] = (a[uat] || []).filter(function (p) { return p.id !== id; }); regSave(a); },
+    clear: function (uat) { var a = regAll(); delete a[uat]; regSave(a); }
+  };
+  // Alerte din bilanțul de capacitate (indicatori la/peste prag)
+  function alerts(cap) {
+    var out = [];
+    if (!cap || !cap.indicators) return out;
+    Object.keys(cap.indicators).forEach(function (k) {
+      var ind = cap.indicators[k];
+      if (ind.status === 'ok') return;
+      var sev = ind.status, msg;
+      if (ind.utilization_pct > 100) msg = ind.label + ' DEPĂȘIT — utilizare ' + ind.utilization_pct + '% (infrastructură fizic insuficientă)';
+      else if (ind.status === 'critic') msg = ind.label + ' la limită — ' + ind.utilization_pct + '% (peste pragul critic 90%)';
+      else msg = ind.label + ' în avertizare — ' + ind.utilization_pct + '%';
+      out.push({ indicator: k, label: ind.label, severity: sev, utilization_pct: ind.utilization_pct, message: msg });
+    });
+    var sevOrder = { blocat: 3, critic: 2, avertizare: 1 };
+    out.sort(function (a, b) { return (sevOrder[b.severity] || 0) - (sevOrder[a.severity] || 0); });
+    return out;
+  }
+
   G.UXI = {
     capacity: capacity, cumulativeImpact: cumulativeImpact, fiscal: fiscal,
     estimateInfra: estimateInfra, demoFloresti: demoFloresti, statusOf: statusOf,
+    registry: registry, alerts: alerts,
     CONST: { HOUSEHOLD: HOUSEHOLD, WATER_LPD: WATER_LPD, SCHOOL_PER_DWELL: SCHOOL_PER_DWELL, GREEN_PER_CAP: GREEN_PER_CAP }
   };
   console.log('[UXI] motor Intelligence încărcat (window.UXI)');

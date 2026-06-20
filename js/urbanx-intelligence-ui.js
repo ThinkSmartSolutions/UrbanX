@@ -60,8 +60,55 @@
     [npDwell, npPot, npPotMax, npCut].forEach(function (i) { pgrid.appendChild(i); });
     body.appendChild(pgrid);
 
+    // ── Registru PUZ (persistent local) ──
+    body.appendChild(el('div', { style: ST.label }, 'Registru PUZ (salvat local pe UAT)'));
+    var regList = el('div', { style: 'max-height:140px;overflow:auto;margin-bottom:6px' });
+    body.appendChild(regList);
+    var rgrid = el('div', { style: 'display:grid;grid-template-columns:1.4fr .8fr .9fr 34px;gap:6px' });
+    var rName = el('input', { style: ST.inp, placeholder: 'denumire PUZ' });
+    var rDwell = el('input', { style: ST.inp, type: 'number', placeholder: 'locuințe' });
+    var rStatus = el('select', { style: ST.inp });
+    [['aprobat', 'aprobat'], ['in_analiza', 'în analiză'], ['depus', 'depus']].forEach(function (o) { rStatus.appendChild(el('option', { value: o[0] }, o[1])); });
+    var rAdd = el('button', { style: ST.ghost }, '+');
+    [rName, rDwell, rStatus, rAdd].forEach(function (e) { rgrid.appendChild(e); });
+    body.appendChild(rgrid);
+    var regCalc = el('button', { style: ST.ghost + ';margin-top:6px' }, '📊 Calculează din registru (cumulat)');
+    body.appendChild(regCalc);
+
     var result = el('div', { style: 'margin-top:14px' }); body.appendChild(result);
-    var run = el('button', { style: ST.btn + ';margin-top:16px' }, '▶ Calculează bilanț'); body.appendChild(run);
+    var run = el('button', { style: ST.btn + ';margin-top:16px' }, '▶ Calculează bilanț (din total manual)'); body.appendChild(run);
+
+    function regKey() { return (inputs.name.value || '').trim() || (G.TCI && G.TCI.cityKey) || 'UAT'; }
+    function refreshReg() {
+      var items = G.UXI.registry.list(regKey());
+      if (!items.length) { regList.innerHTML = '<div style="font-size:11px;color:#64748b">Niciun PUZ înregistrat pentru „' + regKey() + '". Adaugă mai jos sau folosește totalul manual.</div>'; return; }
+      regList.innerHTML = '';
+      var tot = 0;
+      items.forEach(function (p) {
+        tot += +p.dwelling_units || 0;
+        var row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)' });
+        row.appendChild(el('span', null, (p.name || 'PUZ') + ' · <b>' + (+p.dwelling_units || 0) + '</b> loc · <span style="color:#94a3b8">' + p.status + '</span>'));
+        var del = el('button', { style: ST.ghost + ';padding:2px 7px' }, '✕');
+        del.onclick = function () { G.UXI.registry.remove(regKey(), p.id); refreshReg(); };
+        row.appendChild(del); regList.appendChild(row);
+      });
+      regList.appendChild(el('div', { style: 'font-size:11px;color:#34d399;margin-top:4px;font-weight:700' }, 'Total: ' + items.length + ' PUZ · ' + tot.toLocaleString('ro-RO') + ' locuințe'));
+    }
+    rAdd.onclick = function () {
+      if (!(+rDwell.value > 0)) return;
+      G.UXI.registry.add(regKey(), { name: rName.value || 'PUZ', dwelling_units: +rDwell.value, built_footprint_m2: (+rDwell.value) * 30, status: rStatus.value });
+      rName.value = ''; rDwell.value = ''; refreshReg();
+    };
+    regCalc.onclick = function () {
+      var uat = readUat();
+      var puz = G.UXI.registry.list(regKey());
+      if (!puz.length) { result.innerHTML = '<div style="color:#fca5a5;font-size:13px">Registrul e gol — adaugă PUZ-uri sau folosește totalul manual.</div>'; return; }
+      var cap = G.UXI.capacity(uat, puz, { include: ['aprobat', 'in_analiza'] });
+      var al = G.UXI.alerts(cap);
+      result.innerHTML = renderCapacity(cap) + renderAlerts(al);
+      G.UXI._last = { uat: uat, puz: puz, capacity: cap, impact: null };
+    };
+    refreshReg();
 
     uatBtn.onclick = function () {
       var c = null;
@@ -86,12 +133,15 @@
       inputs.built_footprint_m2.value = 342000; npDwell.value = 600; npPot.value = 45; npPotMax.value = 40; npCut.value = 1.4;
     };
 
-    run.onclick = function () {
-      var uat = {
+    function readUat() {
+      return {
         name: inputs.name.value, area_ha: +inputs.area_ha.value || 0,
         infra_water_m3day: +inputs.infra_water_m3day.value || 0, infra_schools_seats: +inputs.infra_schools_seats.value || 0,
         infra_kinder_seats: +inputs.infra_kinder_seats.value || 0, infra_green_m2: +inputs.infra_green_m2.value || 0
       };
+    }
+    run.onclick = function () {
+      var uat = readUat();
       var puz = [{ dwelling_units: +inputs.dwelling_units.value || 0, built_footprint_m2: +inputs.built_footprint_m2.value || 0, status: 'aprobat' }];
       var cap = G.UXI.capacity(uat, puz);
       var html = renderCapacity(cap);
@@ -121,6 +171,15 @@
       '<span style="font-weight:800">Populație aprobată cumulat: ' + cap.population_approved.toLocaleString('ro-RO') + ' loc.</span>' +
       '<span style="background:' + c + ';color:#06101f;padding:3px 10px;border-radius:20px;font-weight:800;font-size:12px;text-transform:uppercase">' + cap.overall_status + '</span></div>' +
       bars + '</div>';
+  }
+  function renderAlerts(al) {
+    if (!al || !al.length) return '<div style="margin-top:10px;font-size:12px;color:#34d399">✓ Niciun indicator peste prag.</div>';
+    return '<div style="margin-top:12px"><div style="font-size:11px;color:#93c5fd;font-weight:700;margin-bottom:6px">ALERTE (' + al.length + ')</div>' +
+      al.map(function (a) {
+        var c = COL[a.severity] || '#64748b';
+        return '<div style="display:flex;gap:8px;align-items:center;font-size:12px;padding:5px 8px;margin-bottom:4px;background:#0a1120;border-left:3px solid ' + c + ';border-radius:5px">' +
+          '<span style="color:' + c + ';font-weight:800;text-transform:uppercase;font-size:10px">' + a.severity + '</span><span>' + a.message + '</span></div>';
+      }).join('') + '</div>';
   }
   function renderImpact(imp) {
     var recCol = imp.recommendation === 'blocat' ? '#ef4444' : imp.recommendation === 'in_analiza' ? '#f59e0b' : '#22c55e';
