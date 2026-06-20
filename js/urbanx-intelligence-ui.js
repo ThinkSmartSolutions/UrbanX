@@ -152,7 +152,54 @@
       result.innerHTML = html;
       G.UXI._last = { uat: uat, puz: puz, capacity: cap, impact: (+npDwell.value > 0 ? imp : null) };
     };
+    // ── Asistent AI (răspunde din datele live, fără să inventeze) ──
+    body.appendChild(el('div', { style: ST.label }, '💬 Asistent AI urbanistic'));
+    var aiRow = el('div', { style: 'display:flex;gap:8px' });
+    var aiInp = el('input', { style: ST.inp, placeholder: 'ex: Câte locuri de școală mai pot aproba?' });
+    var aiSend = el('button', { style: ST.ghost }, 'Întreabă');
+    aiRow.appendChild(aiInp); aiRow.appendChild(aiSend); body.appendChild(aiRow);
+    var aiOut = el('div', { style: 'margin-top:8px;font-size:13px;color:#cbd5e1;white-space:pre-wrap;line-height:1.5' });
+    body.appendChild(aiOut);
+    function buildContext() {
+      var uat = readUat(); var puz = G.UXI.registry.list(regKey());
+      var cap = puz.length ? G.UXI.capacity(uat, puz, { include: ['aprobat', 'in_analiza'] }) : (G.UXI._last && G.UXI._last.capacity) || null;
+      var ind = {}; if (cap) Object.keys(cap.indicators).forEach(function (k) { ind[k] = { utilizare_pct: cap.indicators[k].utilization_pct, stare: cap.indicators[k].status, necesar: cap.indicators[k].needed, capacitate: cap.indicators[k].capacity, unit: cap.indicators[k].unit }; });
+      return {
+        uat: uat.name, capacitati_estimate: true,
+        populatie_aprobata_cumulat: cap ? cap.population_approved : null,
+        stare_generala: cap ? cap.overall_status : null,
+        indicatori: cap ? ind : null,
+        alerte: cap ? G.UXI.alerts(cap).map(function (a) { return a.message; }) : [],
+        puz_in_registru: puz.length
+      };
+    }
+    aiSend.onclick = function () {
+      var q = aiInp.value.trim(); if (!q) return;
+      aiOut.textContent = '⏳ Analizez datele UAT-ului...';
+      askAI(q, buildContext()).then(function (txt) { aiOut.textContent = txt; })
+        .catch(function (e) { aiOut.textContent = '⚠ Asistentul AI e indisponibil momentan (' + (e.message || e) + '). Datele din bilanț rămân valabile.'; });
+    };
+    aiInp.addEventListener('keydown', function (e) { if (e.key === 'Enter') aiSend.onclick(); });
+
     ov.appendChild(m); document.body.appendChild(ov);
+  }
+
+  var AI_SYSTEM = 'Ești asistentul AI al platformei UrbanX Intelligence pentru planificare urbanistică în România. ' +
+    'Ajuți primarii și arhitecții șefi să înțeleagă capacitatea infrastructurii UAT-ului. Reguli: vorbești în română, ' +
+    'clar și accesibil; când dai cifre le explici în context (nu "118%" ci "depășit cu 18%, risc pene de presiune"); ' +
+    'folosești DOAR datele din contextul JSON primit — NU inventezi; dacă o informație lipsește, spui că nu e disponibilă ' +
+    'și ce date ar fi necesare; citezi baza legală când e relevant (Legea 350/2001, NTPA 013/2002, Legea 24/2007, MEN). ' +
+    'Atenționezi mereu că datele de infrastructură sunt ESTIMATE și necesită confirmare de la operatori. Max 180 cuvinte.';
+
+  function askAI(question, ctx) {
+    var proxy = window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    var prompt = 'Date live UAT (JSON):\n' + JSON.stringify(ctx, null, 1) + '\n\nÎntrebare: ' + question;
+    return fetch(proxy + '/proxy?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 700, system: AI_SYSTEM, messages: [{ role: 'user', content: prompt }] }),
+      signal: AbortSignal.timeout ? AbortSignal.timeout(25000) : undefined
+    }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) { var t = d && d.content && d.content[0] && d.content[0].text; if (!t) throw new Error('răspuns gol'); return t; });
   }
 
   function bar(ind) {
