@@ -650,11 +650,30 @@ G._MasterplanVisualPatch = {
         pdf.text(s(val), lx, 205.5);
       });
 
-      // Disclaimer
+      // ── DISCLAIMER LEGAL PROEMINENT (commune-aware) ──
+      const _isCom = String(city.tip || '').toLowerCase() === 'comuna';
+      pdf.setFillColor(60, 20, 18);
+      pdf.rect(14, 214, W - 28, 30, 'F');
+      pdf.setDrawColor(220, 80, 60); pdf.setLineWidth(0.6);
+      pdf.rect(14, 214, W - 28, 30, 'S');
+      pdf.setFillColor(220, 80, 60); pdf.rect(14, 214, W - 28, 7, 'F');
+      pdf.setTextColor(255, 255, 255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5);
+      pdf.text(s('AVERTISMENT — INSTRUMENT DE PRE-ANALIZA'), W / 2, 219, { align: 'center' });
+      const _dl = _isCom
+        ? ['Document generat ALGORITMIC din date publice — CADRU ORIENTATIV de pre-analiza la scara de COMUNA.',
+           'NU constituie si NU substituie un Masterplan / PUG / Strategie de Dezvoltare Locala elaborate de',
+           'proiectant atestat RUR si aprobate de Consiliul Local (Legea 350/2001). Cifre estimate — necesita',
+           'validare profesionala, anchete de teren si avize de specialitate.']
+        : ['Document generat ALGORITMIC din date publice — instrument de PRE-ANALIZA si comunicare.',
+           'NU constituie si NU substituie un Masterplan / PUG / PUZ / PUD elaborat de proiectant atestat RUR',
+           'si aprobat conform Legii 350/2001. Cifrele sunt orientative si necesita validare profesionala,',
+           'studii de specialitate si anchete de teren.'];
+      pdf.setTextColor(245, 225, 225); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8);
+      _dl.forEach((ln, i) => { pdf.text(s(ln), W / 2, 226 + i * 4.4, { align: 'center', maxWidth: W - 34 }); });
+      // Surse
       pdf.setTextColor(...V.C.gray);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(6);
-      pdf.text('Document orientativ. Nu inlocuieste documentatiile PUG/PUZ/PUD autorizate conform Legii 350/2001.', W / 2, H - 11, { align: 'center' });
       pdf.text('Surse date: INSE · Eurostat · BNR · INFP · ANAR · ANM · Copernicus · OSM', W / 2, H - 5.5, { align: 'center' });
     };
 

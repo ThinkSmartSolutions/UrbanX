@@ -697,6 +697,13 @@ G._CinemaEngine={
       });
       artere.sort((a,b)=>a.properties.d-b.properties.d); // din centru spre periferie
     }
+    if(!artere.length && this._isComuna){
+      // COMUNA fara retea OSM: NU fabricam artere radiale (ar cadea peste lacuri/campuri). Nu desenam trafic.
+      this._gfTr=[]; this._trN=0; this._trParts=[];
+      this._safeAdd(map,'v8-trp',{type:'geojson',data:{type:'FeatureCollection',features:[]}},{
+        id:'v8-trp-l',type:'circle',source:'v8-trp',paint:{'circle-radius':2,'circle-color':'#fbbf24','circle-opacity':0}});
+      return;
+    }
     if(!artere.length){
       // Fallback schematic DOAR cand OSM e jos (de evitat pozitii fixe altfel)
       [0,45,90,135,180,225,270,315].forEach((deg,i)=>{const rad=deg*Math.PI/180,r=0.055;artere.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx,cy],[cx+Math.cos(rad)*r*1.6,cy+Math.sin(rad)*r]]},properties:{c:i<3?'#ef4444':i<5?'#f59e0b':'#22c55e',w:i<3?7:i<5?5:3,major:i<3,d:i}});});
@@ -1093,6 +1100,12 @@ G._CinemaEngine={
         }
       });
     }
+    if(!pts.length && this._isComuna){
+      // COMUNA fara retea OSM: NU fabricam noduri de congestie radiale (ar cadea peste lacuri). Nimic.
+      this._safeAdd(map,'v8-tp2',{type:'geojson',data:{type:'FeatureCollection',features:[]}},{
+        id:'v8-tp2-l',type:'heatmap',source:'v8-tp2',paint:{'heatmap-opacity':0}});
+      return;
+    }
     if(!pts.length){
       // Fallback: noduri critice radiale × centura
       pts=[{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{w:1}}];
@@ -1107,10 +1120,10 @@ G._CinemaEngine={
       paint:{'heatmap-weight':['get','w'],'heatmap-intensity':1.4,'heatmap-radius':40,'heatmap-opacity':0,
         'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.3,'rgba(59,130,246,0.4)',0.55,'rgba(245,158,11,0.7)',0.8,'rgba(239,68,68,0.9)',1,'rgba(255,0,51,0.95)']}
     });
-    // NUMESTE nodurile de congestie pe cartier (in ce cartier e blocajul)
+    // NUMESTE nodurile de congestie pe cartier — DOAR pe orase (comuna mica nu are congestie urbana = fabricat)
     try{
       const _ckT=this._cityKey||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
-      if(_NBHD[_ckT] && this._cinLabels){
+      if(_NBHD[_ckT] && this._cinLabels && !this._isComuna){
         const hp=pts.filter(p=>p.properties.w>=0.55).sort((a,b)=>b.properties.w-a.properties.w);
         const cn=[];
         for(let i=0;i<hp.length && cn.length<3;i++){

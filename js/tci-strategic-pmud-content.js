@@ -67,8 +67,17 @@
        ['Rețea stradală:', N(m.strRet) + ' km'], ['Emisii CO2 transport:', m.co2cap + ' t/cap/an']
       ].forEach((r, i) => { pdf.setTextColor(150, 190, 170); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(8); pdf.text(S2(r[0]), 24, 122 + i * 11);
         pdf.setTextColor(255, 255, 255); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9.5); pdf.text(S2(String(r[1])), 118, 122 + i * 11); });
+      // ── DISCLAIMER LEGAL PROEMINENT ──
+      const _isCom = String(city.tip || '').toLowerCase() === 'comuna';
+      pdf.setFillColor(58, 20, 18); pdf.rect(18, 192, W - 36, 9, 'F');
+      pdf.setDrawColor(220, 80, 60); pdf.setLineWidth(0.5); pdf.rect(18, 192, W - 36, 9, 'S');
+      pdf.setTextColor(255, 210, 205); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(6.4);
+      pdf.text(S2(_isCom
+        ? '⚠ INSTRUMENT DE PRE-ANALIZA generat algoritmic la scara de comuna · NU substituie un PMUD/Strategie elaborat de consultant atestat'
+        : '⚠ INSTRUMENT DE PRE-ANALIZA generat algoritmic · NU substituie PMUD-ul oficial (model de trafic calibrat, anchete, aviz CTATU, validare MDLPA)'),
+        W / 2, 197.5, { align: 'center', maxWidth: W - 42 });
       // strip surse
-      pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(6.5); pdf.text('SURSE OFICIALE INTEGRATE', W / 2, 205, { align: 'center' });
+      pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(6.5); pdf.text('SURSE OFICIALE INTEGRATE', W / 2, 207, { align: 'center' });
       const srcs = ['INS TEMPO', 'Eurostat', 'EEA', 'OpenStreetMap', 'OpenAQ', 'INFP', 'Ghid SUMP/ELTIS', 'MDLPA']; let bx = 0; pdf.setFontSize(7);
       const widths = srcs.map(s => pdf.getTextWidth(S2(s)) + 8); const totalW = widths.reduce((a, b) => a + b + 3, 0); bx = (W - totalW) / 2;
       srcs.forEach((s, i) => { pdf.setFillColor(15, 45, 32); pdf.setDrawColor(34, 160, 90); pdf.setLineWidth(0.2); pdf.roundedRect(bx, 209, widths[i], 6, 1.2, 1.2, 'FD'); pdf.setTextColor(160, 220, 185); pdf.setFont('DejaVuRO', 'normal'); pdf.text(S2(s), bx + 4, 213); bx += widths[i] + 3; });

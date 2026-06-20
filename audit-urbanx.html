@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit onest — UrbanX vs PMUD oficial Iași</title>
+<style>
+  :root{--bg:#0d1320;--card:#161f30;--line:#28344a;--gold:#d4af37;--green:#34d399;--amber:#fbbf24;--red:#f87171;--blue:#60a5fa;--tx:#e6ecf7;--mut:#94a3b8}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+  .wrap{max-width:920px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:clamp(24px,5vw,34px);line-height:1.15;margin:.2em 0 .1em;letter-spacing:-.01em}
+  .sub{color:var(--mut);font-size:15px;margin-bottom:22px}
+  h2{font-size:clamp(19px,3.5vw,23px);margin:34px 0 12px;padding-top:18px;border-top:1px solid var(--line)}
+  h3{font-size:16px;margin:20px 0 8px;color:var(--gold);letter-spacing:.02em}
+  p{margin:.5em 0}
+  .verdict{background:linear-gradient(180deg,#1a2741,#141d2e);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:18px 20px;margin:18px 0}
+  .grades{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}
+  .g{flex:1 1 200px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .g .n{font-size:30px;font-weight:800}
+  .g .l{color:var(--mut);font-size:13px;margin-top:2px}
+  .g.good{border-top:3px solid var(--green)} .g.mid{border-top:3px solid var(--amber)} .g.low{border-top:3px solid var(--red)}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#1c2740;color:var(--gold);font-weight:600}
+  td.ok{color:var(--green)} td.no{color:var(--red)} td.part{color:var(--amber)}
+  ul{margin:.4em 0 .4em 0;padding-left:22px} li{margin:.3em 0}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;vertical-align:middle}
+  .tag.r{background:rgba(248,113,113,.16);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+  .tag.g{background:rgba(52,211,153,.16);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+  .risk{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:16px 18px;margin:16px 0}
+  .src{font-size:12px;color:var(--mut);word-break:break-word}
+  .src a{color:var(--blue)}
+  b{color:#fff}
+  .foot{margin-top:30px;font-size:13px;color:var(--mut);border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Audit onest: UrbanX vs PMUD-ul oficial al Iașului</h1>
+  <div class="sub">Evaluare tehnică, sinceră, cu note — și ce trebuie făcut pentru a nu avea probleme juridice. 20 iunie 2026.</div>
+
+  <div class="verdict">
+    <b>Concluzia, fără menajamente:</b> nu suntem nici „de râs", nici „peste ei" — pentru că <b>nu jucăm în aceeași categorie</b>. PMUD-ul oficial Iași este un document de planificare legal, cu model de transport calibrat pe măsurători reale. UrbanX este un instrument de <b>pre-analiză, screening și comunicare</b>, generat algoritmic. Ca <b>instrument de comunicare/screening</b> suntem foarte buni — chiar peste ei la viteză, vizual și acoperire. Ca <b>document legal de planificare</b> NU suntem și nu trebuie să pretindem că suntem. Iar frica ta e <b>justificată</b>: pe comune mici (ex. Aroneanu) inventăm date de oraș — asta trebuie oprit înainte de orice prezentare publică.
+  </div>
+
+  <div class="grades">
+    <div class="g good"><div class="n">9/10</div><div class="l">PMUD oficial Iași — document legal de planificare</div></div>
+    <div class="g low"><div class="n">3–4/10</div><div class="l">UrbanX ca <b>substitut</b> de PMUD/Masterplan legal</div></div>
+    <div class="g mid"><div class="n">7–8/10</div><div class="l">UrbanX ca <b>instrument de screening + comunicare</b></div></div>
+  </div>
+
+  <h2>1. Ce este PMUD-ul oficial Iași (reperul)</h2>
+  <p>Un document „de manual", serios și public:</p>
+  <ul>
+    <li><b>~400 pagini</b>, orizont 2017–2031, buget de investiții <b>~350 mil. EUR</b>.</li>
+    <li>Elaborat de consorțiul <b>PTV Group – Search Corporation – TTK</b> (PTV = chiar producătorul software-ului standard de modelare a traficului, Visum).</li>
+    <li><b>Model de transport în PTV Visum</b>, calibrat pe <b>57 de stații reale de numărătoare a traficului</b>, validat independent pe 5 secțiuni.</li>
+    <li><b>Anchete Origine-Destinație reale</b> pe teren (scopul deplasării, grad de ocupare, venit, socio-economic).</li>
+    <li>3 scenarii evaluate cantitativ, plan de acțiune prioritizat, capitol de monitorizare, planșe GIS.</li>
+    <li>Publicat pe primaria-iasi.ro și pe portalul interactiv pmud.apix.ro; conform Ghidului <b>JASPERS</b>.</li>
+  </ul>
+
+  <h2>2. Ce este UrbanX (sincer)</h2>
+  <p>Un produs <b>generat algoritmic</b>: predicții (Monte Carlo), extrudări din PUG, narativ AI, date estimate + date live (OSM, INS). Arată ca un PMUD/Masterplan și acoperă vizual multe teme — dar <b>nu are</b> componentele care fac un PMUD legal: anchetă de mobilitate pe teren, model de transport calibrat pe trafic măsurat, scenarii evaluate cantitativ, indicatori SMART cu ținte, fezabilitate financiară reală, consultare publică, certificat de elaborator și înregistrare la MDLPA.</p>
+
+  <h2>3. Comparație pe criteriile de calitate (grila oficială)</h2>
+  <table>
+    <tr><th>Criteriu</th><th>PMUD oficial Iași</th><th>UrbanX azi</th></tr>
+    <tr><td>Numărători de trafic măsurate</td><td class="ok">DA — 57 stații</td><td class="no">NU — flux estimat din OSM</td></tr>
+    <tr><td>Anchetă O-D pe teren</td><td class="ok">DA</td><td class="no">NU</td></tr>
+    <tr><td>Model de transport calibrat (Visum)</td><td class="ok">DA, validat</td><td class="no">NU — model gravitațional simplu</td></tr>
+    <tr><td>Scenarii evaluate cantitativ</td><td class="ok">3 scenarii</td><td class="part">parțial — proiecții demografice, nu de trafic</td></tr>
+    <tr><td>Indicatori SMART + ținte + monitorizare</td><td class="ok">DA</td><td class="part">indicatori da, ținte/monitorizare nu</td></tr>
+    <tr><td>Fezabilitate financiară / buget</td><td class="ok">350 mil. EUR, prioritizat</td><td class="part">estimări orientative</td></tr>
+    <tr><td>Consultare publică</td><td class="ok">DA, documentată</td><td class="no">NU</td></tr>
+    <tr><td>GIS / planșe predabile MDLPA</td><td class="ok">DA</td><td class="part">hărți da, nu predabile oficial</td></tr>
+    <tr><td>Certificat elaborator + Registru MDLPA</td><td class="ok">DA</td><td class="no">NU</td></tr>
+    <tr><td>Viteză de generare</td><td class="no">luni / sute mii €</td><td class="ok">secunde, orice UAT</td></tr>
+    <tr><td>Comunicare vizuală / cinematic</td><td class="no">PDF static 400 pag</td><td class="ok">documentar interactiv</td></tr>
+    <tr><td>Acoperire multi-temă + comparabilitate UAT</td><td class="part">doar mobilitate</td><td class="ok">demografie, economie, risc, mediu, 320 UAT</td></tr>
+  </table>
+
+  <h2>4. Ce ne LIPSEȘTE vs oficial</h2>
+  <ul>
+    <li>Model de transport calibrat pe date măsurate (Visum) + numărători reale + anchetă O-D.</li>
+    <li>Scenarii de trafic evaluate cantitativ (nu doar demografice).</li>
+    <li>Indicatori SMART cu ținte + cadru de monitorizare instituțională.</li>
+    <li>Fezabilitate financiară reală + prioritizare bugetată.</li>
+    <li>Consultare publică, certificat de elaborator atestat, înregistrare MDLPA.</li>
+  </ul>
+
+  <h2>5. Ce avem ÎN PLUS (real)</h2>
+  <ul>
+    <li><b>Viteză</b>: raport generat în secunde pentru orice UAT din țară (oficial = luni + sute de mii €).</li>
+    <li><b>Comunicare</b>: documentar cinematic + hărți interactive — un PMUD de 400 pagini nu „spune o poveste".</li>
+    <li><b>Acoperire</b>: nu doar mobilitate — demografie, economie, risc seismic/inundații, mediu, locuire, turism.</li>
+    <li><b>Comparabilitate</b>: clasament/benchmark pe 320 UAT cu aceeași metodologie.</li>
+    <li><b>Date live</b> (OSM, INS) + indicatori cu formulă transparentă, recalculabili.</li>
+    <li>Indicatori emoționali puternici pentru decizie politică (ex. „ani de viață pierduți în trafic").</li>
+  </ul>
+
+  <div class="risk">
+    <h3 style="color:var(--red);margin-top:0">6. Riscul juridic — frica ta e justificată <span class="tag r">DE REZOLVAT URGENT</span></h3>
+    <p>Pe <b>comune mici</b> (ex. <b>Aroneanu</b>, 5.840 loc.) aplicăm aparatul de ORAȘ și <b>inventăm</b> ceea ce nu există:</p>
+    <ul>
+      <li><b>Congestie „la oră de vârf"</b> și noduri de trafic — o comună de 5.840 oameni nu are congestie urbană; iar nodurile apar <b>peste lacuri</b>.</li>
+      <li><b>„Sinteza Masterplan · 6 axe strategice", „tren metropolitan", „reconversie industrială"</b> — apanaj de municipiu, fals pentru o comună.</li>
+      <li><b>Coridoare de dezvoltare / proiecție de creștere</b> care par a fi peste teritoriul Iașului (infrastructura Iașului afișată ca dezvoltarea comunei).</li>
+      <li><b>Stema</b> căutată ca „Stema municipiului Aroneanu" — e <b>comună</b>, nu municipiu.</li>
+      <li>Etichetare „oraș" în loc de „comună".</li>
+    </ul>
+    <p><b>Datele REALE</b> (PUG-ul Aroneanu, proiectele locale reale, demografia, poziția, naveta către Iași) sunt corecte. Problema e <b>extrapolarea fabricată de tip oraș</b> peste o comună. Asta, prezentat unei primării ca „analiza voastră", poate atrage reclamații.</p>
+  </div>
+
+  <h2>7. Plan de acțiune (ca să fim corecți și acoperiți legal)</h2>
+  <ul>
+    <li><b>A. Disclaimer prominent</b>, pe cinematic și pe prima pagină a fiecărui PDF: „Instrument de PRE-ANALIZĂ și suport decizional, generat algoritmic. <b>NU substituie</b> PMUD/PUG/Masterplan elaborat de proiectant atestat și validat MDLPA. Date orientative — necesită validare profesională și anchete de teren."</li>
+    <li><b>B. Mod „comună" onest</b>: la <code>tip:'comuna'</code> / populație mică — oprim scenele fabricate de oraș (congestie urbană, 6 axe, tren metropolitan, coridoare de creștere) și arătăm doar conținut real la scară de comună (PUG real, proiecte locale reale, navetă către oraș, demografie), cu cadru „comună".</li>
+    <li><b>C. Fără date plasate aiurea</b>: trafic/noduri doar pe rețea reală (nu peste lacuri); fără proiecții peste alt UAT.</li>
+    <li><b>D. Sursă + „estimare" pe fiecare cifră</b> derivată algoritmic (parțial făcut — de extins).</li>
+    <li><b>E. Poziționare comercială</b>: vindem UrbanX ca <b>screening + comunicare + pre-fezabilitate</b>, nu ca document legal — exact unde suntem peste competiție.</li>
+  </ul>
+
+  <div class="foot">
+    <b>Surse principale:</b>
+    <div class="src">
+      PMUD Iași oficial — <a href="https://www.primaria-iasi.ro">primaria-iasi.ro</a> · structură + model Visum (57 stații, O-D, JASPERS) — <a href="https://pmud.apix.ro/structura-pmud/">pmud.apix.ro</a> ·
+      Ghid MDLPA PMUD 2022 (legislatie.just.ro doc. 255096) · Ghidul SUMP/ELTIS (Comisia Europeană) ·
+      Legea 350/2001 + Ordin 233/2016 (conținut-cadru PUG/RLU) ·
+      Curtea de Conturi Europeană — Raport special 6/2020 (mobilitate urbană).
+    </div>
+    <p style="margin-top:10px">Notă de metodă: comparația se bazează pe surse web publice; pentru un audit „de tribunal", recomand deschiderea integrală a PDF-ului oficial Iași și a ghidului MDLPA 2022.</p>
+  </div>
+</div>
+</body>
+</html>

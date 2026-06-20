@@ -257,11 +257,24 @@ G._TCIMasterplanPDF = {
     pdf.text(S2(scenario==='S1'?'S1 OPTIMIST':scenario==='S2'?'S2 REFERINTA':'S3 CONSERVATOR'),
              bX+bW-27, bY+bH-6, {align:'center'});
 
-    // Harta localizare (placeholder - dacă există captura)
-    pdf.setFillColor(15,30,65); pdf.rect(14,195,W-28,52,'F');
-    pdf.setDrawColor(...GOLD); pdf.setLineWidth(0.3); pdf.rect(14,195,W-28,52,'S');
-    pdf.setTextColor(60,80,120); pdf.setFont('helvetica','italic'); pdf.setFontSize(8);
-    pdf.text(S2('Harta amplasament UAT — deschide TCI pentru vizualizare 4D interactiva'), W/2, 222, {align:'center'});
+    // ── DISCLAIMER LEGAL PROEMINENT (pagina 1) ──
+    const _isCom = String(city.tip||'').toLowerCase()==='comuna';
+    pdf.setFillColor(60,20,20); pdf.rect(14,195,W-28,52,'F');
+    pdf.setDrawColor(220,80,60); pdf.setLineWidth(0.6); pdf.rect(14,195,W-28,52,'S');
+    pdf.setFillColor(220,80,60); pdf.rect(14,195,W-28,8,'F');
+    pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+    pdf.text(S2('⚠  AVERTISMENT — INSTRUMENT DE PRE-ANALIZA'), W/2, 200.5, {align:'center'});
+    const _disc = _isCom
+      ? ['Acest document este generat ALGORITMIC din date publice si reprezinta un CADRU ORIENTATIV de pre-analiza',
+         'la scara de COMUNA. NU constituie si NU substituie un Masterplan / PUG / Strategie de Dezvoltare Locala',
+         'elaborate de proiectant atestat RUR si aprobate de Consiliul Local conform Legii 350/2001.',
+         'Cifrele sunt estimari ce necesita validare profesionala, anchete de teren si avize de specialitate.']
+      : ['Acest document este generat ALGORITMIC din date publice si reprezinta un instrument de PRE-ANALIZA',
+         'si comunicare. NU constituie si NU substituie un Masterplan / PMUD / PUG elaborat de proiectant',
+         'atestat RUR, validat MDLPA si aprobat conform Legii 350/2001 si Ordinului 233/2016.',
+         'Cifrele sunt orientative si necesita validare profesionala, modelare de trafic si anchete de teren.'];
+    pdf.setTextColor(245,225,225); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.6);
+    _disc.forEach((ln,i)=>{ pdf.text(S2(ln), W/2, 211+i*7.5, {align:'center', maxWidth:W-34}); });
 
     // Footer
     pdf.setTextColor(71,85,105); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
@@ -1426,9 +1439,16 @@ G._TCIMasterplanPDF = {
     let city = null;
     if(typeof _RO_CITIES_DB !== 'undefined') city = _RO_CITIES_DB[cityKey];
     if(!city && typeof _UAT_DB !== 'undefined') city = _UAT_DB[cityKey];
+    // COMUNE / sate: sunt in _EXTRA_UATS (NU in _RO_CITIES_DB). OBLIGATORIU inainte de
+    // fallback-ul la Iasi — altfel raportul unei comune ar contine date de MUNICIPIU (date FABRICATE).
+    if(!city && window.TCI && window.TCI._EXTRA_UATS) city = window.TCI._EXTRA_UATS[cityKey];
     if(!city && typeof _RO_CITIES_DB !== 'undefined'){
       const siruta = String(cityKey).split('-').pop();
       city = Object.values(_RO_CITIES_DB).find(c=>c.siruta===siruta||String(c.pop2021)===siruta);
+    }
+    if(!city && window.TCI && window.TCI._EXTRA_UATS){
+      const siruta = String(cityKey).split('-').pop();
+      city = Object.values(window.TCI._EXTRA_UATS).find(c=>String(c.siruta)===siruta);
     }
     if(!city && typeof _RO_CITIES_DB !== 'undefined')
       city = Object.values(_RO_CITIES_DB)[0]; // fallback Iași

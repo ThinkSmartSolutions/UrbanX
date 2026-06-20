@@ -397,6 +397,12 @@ window._startCinema = function(cityKey){
   if(!city&&window.TCI&&window.TCI._EXTRA_UATS) city=window.TCI._EXTRA_UATS[cityKey];
   if(!city&&window._RO_CITIES_DB) city=Object.values(window._RO_CITIES_DB)[0];
   if(!city){console.error('[v9] city negasit');return;}
+  // COMUNA / sat: NU aplicam aparatul de ORAS (congestie urbana, masterplan 6-axe, tren metropolitan,
+  // coridoare de crestere, gravitatie de hub) — ar fi date FABRICATE. Aratam doar ce e real la scara de comuna.
+  (function(){ var _p=+(city.pop2021||city.pop||city.populatie||0);
+    SE._isComuna = !!(String(city.tip||'').toLowerCase()==='comuna' || (_p>0 && _p<12000)); })();
+  // oglindim flag-ul pe motorul de scene (metodele _addTraffic* il citesc prin this._isComuna)
+  try{ if(window._SceneEngine) window._SceneEngine._isComuna=SE._isComuna; }catch(e){}
   try{ _cinLoadEmblem(city.name); }catch(e){}
 
   var pred=null;
@@ -556,6 +562,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     // Mapbox Standard are cladiri OSM GLOBAL (vezi captura Botosani — 3D complet). Activam Standard 3D
     // pentru toate orasele/municipiile (>=10k). Doar satele/comunele mici raman pe baza PUG colorata.
     SE._richBuildings = pop>=10000 || RICH.some(function(c){ return nm.indexOf(c)>=0; });
+    // COMUNA / sat: NU aplicam aparatul de ORAS (congestie urbana, masterplan 6-axe, tren metropolitan,
+    // coridoare de crestere) — ar fi date FABRICATE. Aratam doar ce e real la scara de comuna.
+    SE._isComuna = !!(SE._city && (String(SE._city.tip||'').toLowerCase()==='comuna' || (pop>0 && pop<12000)));
   })();
   SE._guardCanvas&&SE._guardCanvas();
 
@@ -1274,7 +1283,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // SCENA 5 PE TOT UAT-UL: cladirile reale cresc colorate pe potential (verde->rosu)
         onIdle(function(){try{SE._add3DGrowth&&SE._add3DGrowth(map);}catch(e){}});
         onIdle(function(){try{SE._addDensityPressure&&SE._addDensityPressure(map);}catch(e){}});
-        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map);}catch(e){} } },2800);
+        setTimeout(function(){ if(SE._playing && !SE._isComuna){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map);}catch(e){} } },2800);
         // POLI REALI DE DEZVOLTARE etichetati pe harta: Spital Regional (Moara de Vant),
         // zona Pacurari (hoteluri/blocuri), coridor centura->A8. Acolo CRESTE orasul concret.
         setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },3400);
@@ -1434,7 +1443,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}});
         setTimeout(function(){ try{map.setPaintProperty('v8-bld-l','fill-extrusion-opacity',0.35);}catch(e){} },1800);
         setTimeout(function(){ if(SE._playing){ try{SE._addRealProjects&&SE._addRealProjects(map, SE._cityKey);}catch(e){} } },2200);
-        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },3200);
+        setTimeout(function(){ if(SE._playing && !SE._isComuna){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },3200);
         // Vedere larga ca sa se vada propunerile pe tot orasul, apoi push-in
         fly(Z.C,12.8,56,15,4500,0,'day');
         rot(10,0.006);
@@ -1631,7 +1640,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b12s4': // Sinteza Masterplan — proiectia COMPLETA pe harta (nefazata)
         lp('dusk');
         onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
-        setTimeout(function(){ if(SE._playing){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },2600);
+        setTimeout(function(){ if(SE._playing && !SE._isComuna){ try{SE._addMasterplanProjection&&SE._addMasterplanProjection(map,{phased:false});}catch(e){} } },2600);
         rot(14,0.005);
         fly(Z.C,12.6,56,10,4500,0,'dusk');
         fly(Z.C,13.3,60,90,16000,5000,'dusk');
@@ -2416,7 +2425,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // Split temporal 2025<->2055 — matura o singura data in a doua jumatate a scenei
         if(t>0.45&&t<0.86) _drawTemporalSweep(ctx,W,H,(t-0.45)/0.41);
         // Etapizare masterplan — elementele proiectate apar pe ani (2025->2055)
-        try{ if(SE._revealMasterplan) SE._revealMasterplan(tE); }catch(e){}
+        try{ if(SE._revealMasterplan && !SE._isComuna) SE._revealMasterplan(tE); }catch(e){}
         // Cladirile Mapbox standard ascunse — bara 3D PUG le inlocuiesc
         try{map.setLayoutProperty('building-extrusion','visibility','none');}catch(e){}
         // Afisare progres animatie in canvas
@@ -2505,12 +2514,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b27s1': { // VIATA PIERDUTA IN TRAFIC — scena-erou emotionala
+        var _com=SE._isComuna;
         var TL=_trafficLife(city,pred); var cxC=W/2;
         ctx.save(); ctx.textAlign='center';
-        // eticheta sus
+        // eticheta sus — comuna: NAVETA catre oras (nu congestie urbana, ar fi fabricat)
         ctx.globalAlpha=sA*rE(0.02,0.1); ctx.fillStyle='rgba(239,68,68,0.92)';
         ctx.font='800 '+Math.min(W*0.013,18)+'px "IBM Plex Mono",monospace'; ctx.letterSpacing='.16em';
-        ctx.fillText('⏱  TRAFICUL CONSUMA VIATA', cxC, H*0.15); ctx.letterSpacing='0';
+        ctx.fillText(_com?'⏱  NAVETA CONSUMA TIMP':'⏱  TRAFICUL CONSUMA VIATA', cxC, H*0.15); ctx.letterSpacing='0';
         // CIFRA-EROU (numara crescator) + un mic increment "live"
         var gr=Math.max(0,Math.min(1,(t-0.06)/0.4)); var eg=gr<0.5?2*gr*gr:1-Math.pow(-2*gr+2,2)/2;
         var live=Math.round(TL.oreTotal/8760/31536000*Math.max(0,t)*20*8760); // ani acumulati cat privesti (mic)
@@ -2518,9 +2528,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         ctx.globalAlpha=sA; ctx.fillStyle='#ef4444'; ctx.font='900 '+Math.min(W*0.135,184)+'px "Space Grotesk",sans-serif';
         ctx.fillText(N2(heroN), cxC, H*0.42);
         ctx.fillStyle='rgba(255,255,255,0.94)'; ctx.font='800 '+Math.min(W*0.027,36)+'px "Space Grotesk",sans-serif';
-        ctx.fillText('ANI DE VIATA PIERDUTI IN TRAFIC', cxC, H*0.515);
+        ctx.fillText(_com?'ANI-OM PIERDUTI IN NAVETA / AN':'ANI DE VIATA PIERDUTI IN TRAFIC', cxC, H*0.515);
         ctx.fillStyle='rgba(148,163,184,0.85)'; ctx.font='500 '+Math.min(W*0.0125,16)+'px "IBM Plex Mono",monospace';
-        ctx.fillText('in ultimele 12 luni · '+(city.name||'')+' · echivalentul a '+TL.generatii+' generatii', cxC, H*0.57);
+        ctx.fillText((_com?'estimare orientativa · ':'in ultimele 12 luni · ')+(city.name||'')+' · echivalentul a '+TL.generatii+' generatii', cxC, H*0.57);
         ctx.restore();
         // 3 KPI
         if(t>0.42){
@@ -2537,7 +2547,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.fillText('Costul anual = '+TL.eScoli+' scoli · '+TL.eSpitale+' spitale · '+TL.eKmTramvai+' km tramvai construite', cxC, H*0.79);
           ctx.restore();
         }
-        narativ('Congestia nu inseamna minute — inseamna ANI DE VIATA. Formula: '+TL.orePerSofer+' ore/sofer/an × '+N2(TL.nrSoferi)+' soferi = '+N2(TL.oreTotal)+' ore = '+N2(TL.aniViataOras)+' ani consumati anual ('+TL.generatii+' generatii). Cost ~'+N2(Math.round(TL.costLei/1e6))+' mil lei/an (valoarea timpului ~30 lei/h, ordin INS/Eurostat) + '+N2(TL.litri)+' l combustibil + '+N2(TL.toneCO2)+' t CO₂/an. Fiecare proiect de mobilitate (BRT, pasaje, centura, tren metropolitan) = ani de viata redati comunitatii.');
+        narativ(_com
+          ? 'La scara de comuna mobilitatea inseamna NAVETA catre oras, nu congestie urbana proprie. Estimare orientativa: '+TL.orePerSofer+' ore/sofer/an × '+N2(TL.nrSoferi)+' soferi = '+N2(TL.oreTotal)+' ore = '+N2(TL.aniViataOras)+' ani-om/an consumati pe deplasari (preponderent catre orasul-centru). Solutiile reale pentru o comuna: transport public metropolitan, piste velo intercomunale, optimizarea legaturii cu orasul. (Cifre estimate — necesita anchete de teren.)'
+          : 'Congestia nu inseamna minute — inseamna ANI DE VIATA. Formula: '+TL.orePerSofer+' ore/sofer/an × '+N2(TL.nrSoferi)+' soferi = '+N2(TL.oreTotal)+' ore = '+N2(TL.aniViataOras)+' ani consumati anual ('+TL.generatii+' generatii). Cost ~'+N2(Math.round(TL.costLei/1e6))+' mil lei/an (valoarea timpului ~30 lei/h, ordin INS/Eurostat) + '+N2(TL.litri)+' l combustibil + '+N2(TL.toneCO2)+' t CO₂/an. Fiecare proiect de mobilitate (BRT, pasaje, centura, tren metropolitan) = ani de viata redati comunitatii.');
         break;
       }
 
@@ -3039,7 +3051,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       }
 
       case 'b12s4': { // Sinteza Masterplan + QR
-        titlu('Sinteza Masterplan '+_S()+'\u2013'+_E(),name+' \u00b7 6 axe strategice \u00b7 conf. Legii 350/2001'); linie();
+        var _comMP=SE._isComuna;
+        if(_comMP) titlu('Directii de dezvoltare '+_S()+'\u2013'+_E(),name+' \u00b7 cadru orientativ la scara de comuna (nu substituie Strategia/PUG)');
+        else titlu('Sinteza Masterplan '+_S()+'\u2013'+_E(),name+' \u00b7 6 axe strategice \u00b7 conf. Legii 350/2001');
+        linie();
         var axe=[
           {n:'01 Regenerare urbana',c:'#D4AF37'},
           {n:'02 Mobilitate durabila (PMUD)',c:'#60a5fa'},
@@ -3059,9 +3074,12 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.fillText(ax.n,bx+W*0.022,by+H*0.066);
           ctx.globalAlpha=1;
         });
-        cifra(N2(pred.invTotal||300)+' M\u20ac','Investitii mobilizate (FEDR+PNRR+PPP)');
+        if(_comMP) cifra(N2(pred.invTotal||300)+' M\u20ac','Necesar investitional estimat (orientativ)');
+        else cifra(N2(pred.invTotal||300)+' M\u20ac','Investitii mobilizate (FEDR+PNRR+PPP)');
         cifra2(_S()+'\u2013'+_E(),'Orizont strategic 30 ani');
-        narativ('Masterplanul integreaza toate analizele \u2014 demografie, economie, riscuri, mobilitate (PMUD), spatii verzi \u2014 in 6 axe strategice cu proiecte etapizate si surse de finantare. Documentul complet (100+ pagini) e disponibil in UrbanX Pro.');
+        narativ(_comMP
+          ? 'La scara de comuna, UrbanX ofera un CADRU ORIENTATIV de dezvoltare (directii prioritare din date), NU un Masterplan in sensul Legii 350/2001. Strategia de dezvoltare locala si PUG-ul raman in sarcina proiectantului atestat si a Consiliului Local. Cifrele sunt estimari pentru pre-analiza.'
+          : 'Masterplanul integreaza toate analizele \u2014 demografie, economie, riscuri, mobilitate (PMUD), spatii verzi \u2014 in 6 axe strategice cu proiecte etapizate si surse de finantare. Documentul complet (100+ pagini) e disponibil in UrbanX Pro.');
         if(t>0.55){
           var aqr=Math.min(1,(t-0.55)/0.16)*sA;
           ctx.globalAlpha=aqr;ctx.fillStyle='rgba(212,175,55,0.92)';ctx.font='700 '+Math.min(W*0.011,14)+'px "IBM Plex Mono",monospace';ctx.textAlign='center';
@@ -3458,6 +3476,19 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     try{ if(SE._flowMasterplan) SE._flowMasterplan(t); }catch(e){}
 
     prog();
+    // ── DISCLAIMER LEGAL PERSISTENT (mereu vizibil, fiecare frame) ──
+    try{
+      var _dlc = SE._isComuna
+        ? '⚠ INSTRUMENT DE PRE-ANALIZA generat algoritmic · NU substituie PUG/Masterplan/PMUD de proiectant atestat · date orientative la scara de comuna'
+        : '⚠ INSTRUMENT DE PRE-ANALIZA generat algoritmic · NU substituie PUG/Masterplan/PMUD elaborat de proiectant atestat si validat MDLPA · date orientative';
+      ctx.save();
+      ctx.globalAlpha=0.62;
+      ctx.fillStyle='rgba(148,163,184,0.85)';
+      ctx.font='600 '+Math.min(W*0.0072,9)+'px "IBM Plex Mono",monospace';
+      ctx.textAlign='left'; ctx.letterSpacing='.02em';
+      ctx.fillText(_dlc, W*0.035, H*0.985);
+      ctx.restore(); ctx.globalAlpha=1;
+    }catch(e){}
     ctx.save(); ctx.globalAlpha=0.008;
     for(var _i=0;_i<50;_i++){
       ctx.fillStyle=Math.random()>.5?'#fff':'#000';
@@ -4047,7 +4078,10 @@ window._cinEmblems = window._cinEmblems || {};
 function _cinLoadEmblem(name){
   if(!name || window._cinEmblems[name]) return;
   var clean = String(name).replace(/^(Municipiul|Comuna|Orasul|Orașul)\s+/i,'').trim();
-  var titles = ['Stema municipiului '+clean, 'Stema orașului '+clean, 'Stema comunei '+clean, clean];
+  // Comuna -> incercam intai "Stema comunei X" (altfel preluam stema gresita a unui municipiu omonim)
+  var titles = SE._isComuna
+    ? ['Stema comunei '+clean, 'Comuna '+clean, clean, 'Stema orașului '+clean]
+    : ['Stema municipiului '+clean, 'Stema orașului '+clean, 'Stema comunei '+clean, clean];
   function tryNext(i){
     if(i>=titles.length) return;
     var api='https://ro.wikipedia.org/w/api.php?action=query&titles='+encodeURIComponent(titles[i])+'&prop=pageimages&piprop=thumbnail&pithumbsize=256&format=json&origin=*';
