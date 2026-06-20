@@ -46,6 +46,28 @@
     }, 0);
   }
 
+  // ── ESTIMATOR CAPACITĂȚI INFRA (bootstrap onest) ──────────────────────────
+  // UrbanX nu are capacitățile reale de infrastructură per UAT (apă/școli/verde).
+  // Le ESTIMĂM din populația curentă + norme, presupunând că infrastructura actuală
+  // deservește populația curentă cu o marjă de proiectare. TOATE marcate quality:'estimat'
+  // — trebuie înlocuite cu date verificate de la operatori (RAJA, Electrica, ISJ...).
+  function estimateInfra(uat) {
+    var pop = +uat.population_current || +uat.pop2021 || +uat.pop || 0;
+    var margin = uat.design_margin || 1.2;   // marjă de proiectare presupusă
+    var dwell = pop / HOUSEHOLD;
+    return {
+      population_current: Math.round(pop),
+      infra_water_m3day: Math.round(pop * WATER_LPD * margin),
+      infra_sewer_m3day: Math.round(pop * WATER_LPD * SEWER_FACTOR * margin),
+      infra_schools_seats: Math.round(dwell * SCHOOL_PER_DWELL * 1.1),
+      infra_kinder_seats: Math.round(dwell * KINDER_PER_DWELL * 1.1),
+      infra_green_m2: Math.round(pop * GREEN_PER_CAP * 1.0),
+      area_ha: +uat.area_ha || +uat.suprafata_ha || 0,
+      quality: 'estimat',
+      note: 'Capacități estimate din populația curentă + norme (marjă ' + margin + '). Înlocuiți cu date verificate de la operatori.'
+    };
+  }
+
   // ── CAPACITY ENGINE ──────────────────────────────────────────────────────
   // uat: { area_ha, infra_water_m3day, infra_schools_seats, infra_kinder_seats,
   //        infra_green_m2, population_current }
@@ -179,7 +201,7 @@
 
   G.UXI = {
     capacity: capacity, cumulativeImpact: cumulativeImpact, fiscal: fiscal,
-    demoFloresti: demoFloresti, statusOf: statusOf,
+    estimateInfra: estimateInfra, demoFloresti: demoFloresti, statusOf: statusOf,
     CONST: { HOUSEHOLD: HOUSEHOLD, WATER_LPD: WATER_LPD, SCHOOL_PER_DWELL: SCHOOL_PER_DWELL, GREEN_PER_CAP: GREEN_PER_CAP }
   };
   console.log('[UXI] motor Intelligence încărcat (window.UXI)');

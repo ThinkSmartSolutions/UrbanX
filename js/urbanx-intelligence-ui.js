@@ -34,8 +34,13 @@
     m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
 
-    var demoBtn = el('button', { style: ST.ghost }, '⚡ Încarcă demo Florești (criză reală)');
-    body.appendChild(demoBtn);
+    var btnRow = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' });
+    var uatBtn = el('button', { style: ST.ghost }, '📍 UAT curent (capacități estimate)');
+    var demoBtn = el('button', { style: ST.ghost }, '⚡ Demo Florești (criză reală)');
+    btnRow.appendChild(uatBtn); btnRow.appendChild(demoBtn);
+    body.appendChild(btnRow);
+    var estNote = el('div', { style: 'font-size:11px;color:#fbbf24;margin-top:6px;display:none' });
+    body.appendChild(estNote);
 
     body.appendChild(el('div', { style: ST.label }, 'Date UAT + total aprobat'));
     var grid = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:8px' });
@@ -58,8 +63,23 @@
     var result = el('div', { style: 'margin-top:14px' }); body.appendChild(result);
     var run = el('button', { style: ST.btn + ';margin-top:16px' }, '▶ Calculează bilanț'); body.appendChild(run);
 
+    uatBtn.onclick = function () {
+      var c = null;
+      try {
+        var k = G.TCI && G.TCI.cityKey;
+        c = (G._RO_CITIES_DB && G._RO_CITIES_DB[k]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[k]) || null;
+      } catch (e) {}
+      if (!c) { estNote.style.display = ''; estNote.textContent = 'Niciun UAT selectat în UrbanX — alege un oraș/comună sau folosește demo.'; return; }
+      var inf = G.UXI.estimateInfra(c);
+      inputs.name.value = c.name || ''; inputs.area_ha.value = inf.area_ha || '';
+      inputs.infra_water_m3day.value = inf.infra_water_m3day; inputs.infra_schools_seats.value = inf.infra_schools_seats;
+      inputs.infra_kinder_seats.value = inf.infra_kinder_seats; inputs.infra_green_m2.value = inf.infra_green_m2;
+      inputs.dwelling_units.value = ''; inputs.built_footprint_m2.value = '';
+      estNote.style.display = ''; estNote.textContent = '⚠ ' + inf.note + ' Introdu locuințele aprobate cumulat (din registrul PUZ al UAT-ului).';
+    };
     demoBtn.onclick = function () {
       var d = G.UXI.demoFloresti(); var u = d.uat;
+      estNote.style.display = 'none';
       inputs.name.value = u.name; inputs.area_ha.value = u.area_ha; inputs.infra_water_m3day.value = u.infra_water_m3day;
       inputs.infra_schools_seats.value = u.infra_schools_seats; inputs.infra_kinder_seats.value = u.infra_kinder_seats;
       inputs.infra_green_m2.value = u.infra_green_m2; inputs.dwelling_units.value = d.capacity.dwelling_units;
@@ -80,7 +100,7 @@
         html += renderImpact(imp);
       }
       result.innerHTML = html;
-      G.UXI._last = { uat: uat, puz: puz };
+      G.UXI._last = { uat: uat, puz: puz, capacity: cap, impact: (+npDwell.value > 0 ? imp : null) };
     };
     ov.appendChild(m); document.body.appendChild(ov);
   }
