@@ -1017,10 +1017,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         // #1: heatmap concentratie varstnici + ZOOM pe cartierul cel mai imbatranit
         onIdle(function(){try{SE._addAgingHeat&&SE._addAgingHeat(map);}catch(e){}});
         fly(Z.C,13,50,0,4000,0,'dusk');
-        fly(Z.NE,14.2,60,30,5500,6500,'dusk');
-        // ZOOM APROAPE pe cartierul cel mai imbatranit + LINGER cu orbitare lenta (nu taietura brusca)
-        setTimeout(function(){ if(SE._playing){ var pk=SE._agingPeak||Z.NE; try{map.flyTo({center:pk,zoom:16,pitch:66,bearing:-18,duration:5000,essential:true});}catch(e){} } },12500);
-        setTimeout(function(){ if(SE._playing){ var pk=SE._agingPeak||Z.NE; try{map.flyTo({center:pk,zoom:16.1,pitch:67,bearing:34,duration:5800,essential:true});}catch(e){} } },18000);
+        // VIZITEAZA cele mai imbatranite CARTIERE (numite) — zoom aproape + linger/orbitare
+        var _agC=function(i){ var cl=(SE._agingClusters&&(SE._agingClusters[i]||SE._agingClusters[0])); return cl?[cl.lon,cl.lat]:(SE._agingPeak||Z.NE); };
+        setTimeout(function(){ if(SE._playing){ try{map.flyTo({center:_agC(0),zoom:15.8,pitch:64,bearing:-16,duration:5500,essential:true});}catch(e){} } },5500);
+        setTimeout(function(){ if(SE._playing){ try{map.flyTo({center:_agC(0),zoom:16.0,pitch:65,bearing:32,duration:4500,essential:true});}catch(e){} } },11500); // orbitare cluster 1
+        setTimeout(function(){ if(SE._playing){ try{map.flyTo({center:_agC(1),zoom:15.6,pitch:63,bearing:-26,duration:5500,essential:true});}catch(e){} } },16500); // al 2-lea cartier imbatranit
         break;
 
       case 'b2s3':
@@ -1612,8 +1613,11 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b12s2': // 3-30-300 — verde, oaze de racoare, aer (model Singapore)
         lp('day');
         onIdle(function(){ try{SE._addGreenHeatOasis&&SE._addGreenHeatOasis(map, D.green);}catch(e){} });
-        fly(Z.VERDE,14,54,0,4000,0,'day');
-        fly(Z.C,13.5,50,40,14000,4500,'day');
+        // ZOOM pe PARCURILE PUBLICE reale (numite din OSM), nu doar vedere de sus
+        var _pk=function(i){ var g=(SE._greenParks&&SE._greenParks[i]); return g?[g.lon,g.lat]:null; };
+        fly([cx,cy],12.8,48,0,4000,0,'day');                                    // panorama: insula de caldura vs oaze
+        setTimeout(function(){ if(SE._playing){ var p=_pk(0); if(p){try{map.flyTo({center:p,zoom:15.6,pitch:62,bearing:20,duration:5500,essential:true});}catch(e){}} } },5000);
+        setTimeout(function(){ if(SE._playing){ var p=_pk(1)||_pk(0); if(p){try{map.flyTo({center:p,zoom:15.4,pitch:60,bearing:-25,duration:5500,essential:true});}catch(e){}} } },11500);
         break;
       case 'b12s3': // Oras 15 minute
         lp('day');

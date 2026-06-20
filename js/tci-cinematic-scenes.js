@@ -14,6 +14,22 @@ const PROXY='https://urbanx-proxy.3dtravelsoftart.workers.dev';
 const INSE_USER='office@think-ss.eu';
 const INSE_PASS='7Jpu!m.2NiNFiVQ';
 
+// ── CARTIERE REALE per UAT (centre aproximative) — ca sa NUMIM clusterele (imbatranire, parcuri) ──
+const _NBHD={
+  'RO-IS-01':[{n:'Centru',lat:47.1585,lon:27.5875},{n:'Copou',lat:47.1900,lon:27.5750},{n:'Tătărași',lat:47.1720,lon:27.6050},{n:'Păcurari',lat:47.1660,lon:27.5560},{n:'Nicolina',lat:47.1450,lon:27.5790},{n:'Alexandru cel Bun',lat:47.1480,lon:27.5680},{n:'Dacia',lat:47.1530,lon:27.5980},{n:'Galata',lat:47.1380,lon:27.5650},{n:'Bucium',lat:47.1300,lon:27.6000},{n:'CUG / Mircea',lat:47.1380,lon:27.6180},{n:'Tudor Vladimirescu',lat:47.1600,lon:27.6150},{n:'Canta',lat:47.1650,lon:27.5660}],
+  'RO-SV-01':[{n:'Centru',lat:47.6510,lon:26.2550},{n:'Burdujeni',lat:47.6720,lon:26.2750},{n:'Ițcani',lat:47.6650,lon:26.2480},{n:'George Enescu',lat:47.6420,lon:26.2480},{n:'Obcini',lat:47.6480,lon:26.2300},{n:'Areni',lat:47.6470,lon:26.2580}],
+  'RO-GL-01':[{n:'Centru',lat:45.4350,lon:28.0480},{n:'Mazepa',lat:45.4470,lon:28.0420},{n:'Țiglina I',lat:45.4280,lon:28.0350},{n:'Țiglina II',lat:45.4200,lon:28.0300},{n:'Micro 19',lat:45.4150,lon:28.0500},{n:'Dunărea',lat:45.4250,lon:28.0600}],
+  'RO-BT-01':[{n:'Centru',lat:47.7480,lon:26.6650},{n:'Primăverii',lat:47.7400,lon:26.6550},{n:'Bucovina',lat:47.7550,lon:26.6720},{n:'Grivița',lat:47.7420,lon:26.6800}],
+  'RO-VS-01':[{n:'Centru',lat:46.6400,lon:27.7300},{n:'1 Decembrie',lat:46.6450,lon:27.7250},{n:'Gara',lat:46.6350,lon:27.7400}],
+  'RO-NT-01':[{n:'Centru',lat:46.9280,lon:26.3700},{n:'Dărmănești',lat:46.9350,lon:26.3550},{n:'Mărăței',lat:46.9180,lon:26.3850},{n:'Precista',lat:46.9230,lon:26.3650}]
+};
+function _nbhdName(cityKey, lon, lat){
+  var list=_NBHD[cityKey]; if(!list||!list.length) return null;
+  var best=null, bd=1e9;
+  for(var i=0;i<list.length;i++){ var d=Math.hypot(list[i].lon-lon, list[i].lat-lat); if(d<bd){bd=d; best=list[i];} }
+  return best? best.n : null;
+}
+
 // ── MOTOR PREDICTII v8 ──────────────────────────────────────────────────────
 const _PRED={
   calc(city){
@@ -1208,10 +1224,24 @@ G._CinemaEngine={
         'heatmap-radius':['interpolate',['linear'],['zoom'],10,28,15,70],'heatmap-opacity':0.9}
     });
     this._agingPeak=peak;
-    this._cinLabels(map,[
-      {lon:peak[0],lat:peak[1],color:'#a855f7',icon:'👵',title:'CARTIER ÎMBĂTRÂNIT',sub:'pondere 65+ ridicată · fond colectiv vechi'},
-      {lon:cx,lat:cy-0.03,color:'#60a5fa',icon:'👶',title:'PERIFERIE TÂNĂRĂ',sub:'familii tinere · cerere creșe/școli'}
-    ]);
+    // TOP-3 clustere DISTINCTE de imbatranire, NUMITE pe cartierul real (nu "CARTIER IMBATRANIT" generic)
+    const _ck=this._cityKey||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
+    const sorted=pts.slice().sort((a,b)=>b.properties.w-a.properties.w);
+    const clusters=[];
+    for(let si=0; si<sorted.length && clusters.length<3; si++){
+      if(sorted[si].properties.w<0.6) break;
+      const cc=sorted[si].geometry.coordinates;
+      const nm=_nbhdName(_ck,cc[0],cc[1]);
+      const farEnough=clusters.every(cl=>Math.hypot(cl.lon-cc[0],cl.lat-cc[1])>0.013);
+      const nameFree=!nm||clusters.every(cl=>cl.n!==nm);   // nu repeta acelasi cartier
+      if(farEnough && nameFree){ clusters.push({lon:cc[0],lat:cc[1],n:nm}); }
+    }
+    if(!clusters.length) clusters.push({lon:peak[0],lat:peak[1],n:_nbhdName(_ck,peak[0],peak[1])});
+    this._agingClusters=clusters;
+    const labs=clusters.map((cl,i)=>({lon:cl.lon,lat:cl.lat,color:'#a855f7',icon:'👵',
+      title:(cl.n?cl.n.toUpperCase():'CARTIER ÎMBĂTRÂNIT'),sub:(i===0?'cel mai îmbătrânit · ':'')+'pondere 65+ ridicată · fond colectiv vechi'}));
+    labs.push({lon:cx,lat:cy-0.03,color:'#60a5fa',icon:'👶',title:'PERIFERIE TÂNĂRĂ',sub:'familii tinere · cerere creșe/școli'});
+    this._cinLabels(map,labs);
     return peak;
   },
 
@@ -1480,8 +1510,13 @@ G._CinemaEngine={
       }
     });
     try{ map.setPaintProperty('v8-uhi-l','heatmap-opacity',0.78); }catch(e){}
-    // 2) OAZE DE RACOARE — parcurile reale, halo rece + miez verde
-    const gp=(green&&green.length)?green.slice(0,80):[];
+    // 2) OAZE DE RACOARE — parcurile reale, halo rece + miez verde (parcurile NUMITE primele)
+    const _gName=g=>(g.properties&&g.properties.n)||g.n||'';
+    const _named=(green||[]).filter(g=>{const n=_gName(g); return n && !/^(parc|spatiu verde|spațiu verde)$/i.test(n.trim());});
+    const _other=(green||[]).filter(g=>{const n=_gName(g); return !n || /^(parc|spatiu verde|spațiu verde)$/i.test(n.trim());});
+    const gp=_named.concat(_other).slice(0,80);
+    // expune parcurile numite pt camera (zoom pe parcuri reale)
+    this._greenParks=_named.slice(0,5).map(g=>{const co=(g.geometry&&g.geometry.coordinates)||[g.lon,g.lat]; return {lon:co[0],lat:co[1],n:_gName(g)};});
     if(gp.length){
       const gf=gp.map(g=>{ const co=(g.geometry&&g.geometry.coordinates)||[g.lon,g.lat]; return {type:'Feature',geometry:{type:'Point',coordinates:co},properties:{n:(g.properties&&g.properties.n)||g.n||'Spatiu verde'}}; });
       // halo rece (efectul de racoare ~ -3..-7°C in jurul parcului)
