@@ -244,6 +244,19 @@ function svProjectVolume(pos){
 
 const RAPORT_INFO = {
   // ═══ MODULE DE DECIZIE & ADMINISTRAȚIE (UrbanX Pro) ═══
+  fisa360: {
+    ico: '🧭', label: 'Fișa parcelei 360°', badge: 'recomandat', badgeLabel: 'Hub · toate modulele', color: '212,175,55',
+    fn: 'window.Fisa360&&window.Fisa360.open&&window.Fisa360.open()',
+    ce: 'Rulează simultan TOATE motoarele UrbanX pe parcela selectată și prezintă o imagine unificată: scor de conformitate (Dosar), avize necesare (CAU), trafic generat (Flux), randament investițional (Pro-formă), oportunitate (Investment Score), amprentă de carbon, monumente în proximitate (Patrimoniu) și sesizări legate. Fiecare indicator deschide modulul complet.',
+    dece: 'Este „inima" care leagă tot ecosistemul: în loc să deschizi 9 module separate pentru o parcelă, vezi totul într-un singur ecran — relevant pentru decident, investitor și administrație. Pentru trafic/pro-formă/carbon folosește scenariul maxim edificabil ipotetic (teren × CUT).',
+    legal: 'Agregare din modulele UrbanX (cadastru, PUG, registre CAU/Sesizări/Patrimoniu) · orientativ, nu substituie documentațiile oficiale',
+    output: [
+      { ico: '💯', txt: 'Scor conformitate + KPI: investiție, marjă, carbon, trafic, avize' },
+      { ico: '📋', txt: 'Avize necesare + patrimoniu în rază + sesizări + istoric autorizații' },
+      { ico: '🔗', txt: 'Fiecare indicator → deschide modulul complet' },
+    ],
+    nu: ['Cifrele trafic/pro-formă/carbon folosesc scenariul ipotetic maxim — rulează modulul pt valori reale', 'Nu substituie analizele detaliate per modul'],
+  },
   ux_capacitate: {
     ico: '🏗️', label: 'Capacitate & Conformitate UAT', badge: 'recomandat', badgeLabel: 'Intelligence · administrație', color: '96,165,250',
     fn: 'window.UXI&&window.UXI.openDashboard&&window.UXI.openDashboard()',
