@@ -445,7 +445,9 @@
     row.appendChild(ss); row.appendChild(fb); ctr.appendChild(row); body.appendChild(ctr);
     info.innerHTML = '<b style="color:#7dd3fc">' + RZONES.promenada.title + '</b><br>' + RZONES.promenada.desc;
     var gt = 0; (function loop() { _raf = requestAnimationFrame(loop); gt += 16; drawRiver(cv, p, gt); })();
-    saveBar(body, 'river', function () { return { 'Nivel apă': p.waterLevel, 'Anotimp': p.season, 'Zonă': RZONES[p.activeZone].title, 'Râu': p.riverName }; }, function () { return { 'Stare': p.flood ? 'sub viitură Q100' : 'normal' }; }, function () { try { return cv.toDataURL('image/jpeg', 0.7); } catch (e) { return null; } });
+    body.appendChild(el('div', { style: 'background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.5;margin-top:10px' },
+      '⚖ <b>Cadru legal obligatoriu (front de apă):</b> aviz Apele Române (ABA) pentru orice amenajare pe mal · zonă de protecție min. <b>10 m</b> de la malul apei, unde construcțiile sunt interzise (Legea 107/1996 art. 40) · servitute de trecere 1,5 m (art. 41) · construcții în albie interzise, podurile = excepție cu aviz special (art. 35) · verificare inundabilitate Q1% pe hărțile INHGA. Abordare recomandată: „a trăi cu inundațiile" (design amfibiu — Cheonggyecheon Seoul, Isar München), nu prevenirea lor.'));
+    saveBar(body, 'river', function () { return { 'Nivel apă': p.waterLevel, 'Anotimp': p.season, 'Zonă': RZONES[p.activeZone].title, 'Râu': p.riverName }; }, function () { return { 'Stare': p.flood ? 'sub viitură Q100' : 'normal', 'Aviz necesar': 'Apele Române (L.107/1996)', 'Zonă protecție': '10 m mal' }; }, function () { try { return cv.toDataURL('image/jpeg', 0.7); } catch (e) { return null; } });
   }
 
   // SIM 3 — Impact capacitate (gauges SVG, factori UXI)
