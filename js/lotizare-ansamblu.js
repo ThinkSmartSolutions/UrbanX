@@ -142,7 +142,9 @@
     var last = null;
     run.onclick = function () {
       var r = plan({ area_m2: +areaI.value, accese: +acc.value, pot: +potI.value, cut: +cutI.value, program: { case_individuale: +caseI.value, colectiv_units: +colI.value, comercial_mp: +comI.value, gradinita: grad.checked, biserica: bis.checked, parc_mp: +parcI.value } });
-      last = r; out.innerHTML = render(r); pdfBtn.style.display = (typeof G.Ansamblu.generatePDF === 'function') ? '' : 'none';
+      last = r; var html = render(r);
+      try { if (G.LotizareValidator && G.LotizareValidator.renderHTML) html += G.LotizareValidator.renderHTML(r, {}); } catch (e) { console.warn('[Ansamblu] validator', e); }
+      out.innerHTML = html; pdfBtn.style.display = (typeof G.Ansamblu.generatePDF === 'function') ? '' : 'none';
     };
     pdfBtn.onclick = function () { if (last) G.Ansamblu.generatePDF(last, { nrcad: pre && pre.nrcad }); };
     ov.appendChild(m); document.body.appendChild(ov);
