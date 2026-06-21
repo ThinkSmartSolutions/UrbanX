@@ -244,6 +244,19 @@ function svProjectVolume(pos){
 
 const RAPORT_INFO = {
   // ═══ MODULE DE DECIZIE & ADMINISTRAȚIE (UrbanX Pro) ═══
+  superbloc: {
+    ico: '🟧', label: 'Superbloc (model Barcelona)', badge: 'optional', badgeLabel: 'Regenerare · mobilitate', color: '251,146,60',
+    fn: 'window.Superbloc&&window.Superbloc.openPanel&&window.Superbloc.openPanel()',
+    ce: 'Aplică modelul superbloc (Barcelona / Salvador Rueda): grupezi ~9 cvartale (~400×400m), devii traficul de tranzit pe perimetru, iar interiorul devine zonă cu 10 km/h pentru pietoni și bicicliști. Calculează spațiul public recâștigat din carosabil, suprafața verde + piațete, populația deservită, răcirea (legat de UHI) și CO₂.',
+    dece: 'Reduce traficul, poluarea și insulele de căldură, redând spațiul oamenilor. Studii ISGlobal Barcelona: reduce zgomotul, emisiile și bolile cardiovasculare/respiratorii. Aplicabil la regenerarea cartierelor dense din România.',
+    legal: 'Concept urbanistic (nu normă RO); se implementează prin PUZ de regenerare + reglementări de trafic locale. Model: Agència d\'Ecologia Urbana Barcelona.',
+    output: [
+      { ico: '🟩', txt: 'Spațiu public recâștigat (mp) → verde + piațete' },
+      { ico: '❄', txt: 'Răcire estimată (legat de modulul UHI) + CO₂' },
+      { ico: '🗺', txt: 'Overlay ~400×400m pe hartă' },
+    ],
+    nu: ['Estimări pe rata de carosabil eliberat — rerutarea de perimetru cere studiu de trafic', 'Necesită PUZ + reglementări locale de circulație'],
+  },
   uhi: {
     ico: '🌿', label: 'LOISIR — Insulă de căldură (UHI)', badge: 'recomandat', badgeLabel: 'Mediu & climă · NbS', color: '34,197,94',
     fn: 'window.UHI&&window.UHI.openPanel&&window.UHI.openPanel()',
@@ -270,6 +283,18 @@ const RAPORT_INFO = {
       { ico: '☑️', txt: 'Verificări de aprobabilitate (accese/ISU, verde, CUT, pietonal) + brief PDF' },
     ],
     nu: ['Schemă de organizare + brief orientativ — desenul PUZ/PUD final (loturi, profile, plan reglementări) = proiectant atestat RUR', 'Pentru subdivizare simplă geometrică folosește „Lotizare" clasic'],
+  },
+  sidu: {
+    ico: '🏛', label: 'Coerență SIDU → PMUD → PUG', badge: 'recomandat', badgeLabel: 'Strategie · administrație', color: '96,165,250',
+    fn: 'window.SIDU&&window.SIDU.openPanel&&window.SIDU.openPanel()',
+    ce: 'Verifică dacă viziunea strategică a orașului este transpusă în legea spațială. SIDU (strategia integrată 10-15 ani) → PMUD (mobilitatea) → PUG (regulamentul de construire). Printr-un set de întrebări de coerență, identifică blocajele reale (ex. PMUD propune benzi dedicate dar PUG nu rezervă culoar → exproprieri; ansambluri în comune cu străzi în care autobuzul nu intră).',
+    dece: 'În România, decalajul SIDU/PMUD ↔ PUG e cauza majoră a blocajelor: proiecte strategice frumoase pe hârtie, neaplicabile pentru că nu sunt transpuse în regimul de construire. Niciun proiect din SIDU/PMUD nu prinde viață fără să fie desenat linie cu linie în PUG. UrbanX evidențiază aceste goluri.',
+    legal: 'HG 874/2019 (mobilitate urbană) · Legea 350/2001 (PUG/PUZ) · ghid SIDU (POR/MDLPA) · ghid PMUD/SUMP MDLPA. SIDU/PMUD nu emit autorizații — PUG-ul o face, deci corelarea e obligatorie.',
+    output: [
+      { ico: '☑️', txt: 'Scor de coerență + verdict (coerent / risc / necorelat)' },
+      { ico: '⚠️', txt: 'Lista blocajelor identificate + consecința fiecăruia' },
+    ],
+    nu: ['Cadru de coerență + checklist — lista completă de proiecte SIDU per UAT + corelarea geometrică în PUG = etapă cu date (server)'],
   },
   fisa360: {
     ico: '🧭', label: 'Fișa parcelei 360°', badge: 'recomandat', badgeLabel: 'Hub · toate modulele', color: '212,175,55',
