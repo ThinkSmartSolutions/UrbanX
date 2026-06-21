@@ -245,17 +245,18 @@ function svProjectVolume(pos){
 const RAPORT_INFO = {
   // ═══ MODULE DE DECIZIE & ADMINISTRAȚIE (UrbanX Pro) ═══
   superbloc: {
-    ico: '🟧', label: 'Superbloc (model Barcelona)', badge: 'optional', badgeLabel: 'Regenerare · mobilitate', color: '251,146,60',
+    ico: '🟧', label: 'Superbloc (model Barcelona)', badge: 'recomandat', badgeLabel: 'Funcție integrată · regenerare', color: '251,146,60',
     fn: 'window.Superbloc&&window.Superbloc.openPanel&&window.Superbloc.openPanel()',
-    ce: 'Aplică modelul superbloc (Barcelona / Salvador Rueda): grupezi ~9 cvartale (~400×400m), devii traficul de tranzit pe perimetru, iar interiorul devine zonă cu 10 km/h pentru pietoni și bicicliști. Calculează spațiul public recâștigat din carosabil, suprafața verde + piațete, populația deservită, răcirea (legat de UHI) și CO₂.',
-    dece: 'Reduce traficul, poluarea și insulele de căldură, redând spațiul oamenilor. Studii ISGlobal Barcelona: reduce zgomotul, emisiile și bolile cardiovasculare/respiratorii. Aplicabil la regenerarea cartierelor dense din România.',
-    legal: 'Concept urbanistic (nu normă RO); se implementează prin PUZ de regenerare + reglementări de trafic locale. Model: Agència d\'Ecologia Urbana Barcelona.',
+    ce: 'Aplică modelul superbloc (Barcelona / Salvador Rueda): grupezi ~9 cvartale (~400×400m), devii traficul de tranzit pe perimetru, iar interiorul devine zonă cu 10 km/h pentru pietoni și bicicliști. Calculează spațiul public recâștigat din carosabil, verde + piațete, populația deservită, răcirea (legat de UHI) și transferul modal. Vizualizare ÎNAINTE/DUPĂ pe hartă (perimetru de tranzit + străzi interioare devenite verzi + piațete la intersecții).',
+    dece: 'Nu e un calculator izolat — e o FUNCȚIE integrată în tot fluxul UrbanX: apare ca instrument în SIDU (domeniul regenerare), ca scenă reală pe hartă în prezentarea cinematică (b12s1), și ca un capitol dedicat în Masterplan (spațiu public + climă) și PMUD (tranzit pe perimetru + calmarea traficului). Studii ISGlobal Barcelona: reduce zgomotul, emisiile și bolile cardiovasculare/respiratorii.',
+    legal: 'Concept urbanistic (nu normă RO); se implementează prin PUZ de regenerare + reglementări de trafic locale. Model: Agència d\'Ecologia Urbana Barcelona (S. Rueda) · ISGlobal · plan Cerdà.',
     output: [
-      { ico: '🟩', txt: 'Spațiu public recâștigat (mp) → verde + piațete' },
-      { ico: '❄', txt: 'Răcire estimată (legat de modulul UHI) + CO₂' },
-      { ico: '🗺', txt: 'Overlay ~400×400m pe hartă' },
+      { ico: '🗺', txt: 'Vizualizare ÎNAINTE/DUPĂ pe hartă: perimetru + străzi interioare verzi + piațete' },
+      { ico: '🟩', txt: 'Spațiu public recâștigat (mp) → verde + piațete + răcire (UHI) + transfer modal' },
+      { ico: '🎬', txt: 'Scenă reală în cinematic (b12s1) + instrument în SIDU' },
+      { ico: '📄', txt: 'Capitol dedicat în Masterplan (spațiu public/climă) + PMUD (mobilitate)' },
     ],
-    nu: ['Estimări pe rata de carosabil eliberat — rerutarea de perimetru cere studiu de trafic', 'Necesită PUZ + reglementări locale de circulație'],
+    nu: ['Estimări pe rata de carosabil eliberat — rerutarea de perimetru cere studiu de trafic (UrbanX Flux)', 'Necesită PUZ + reglementări locale de circulație'],
   },
   loisir: {
     ico: '🌿', label: 'LOISIR — Spații verzi & plămân urban', badge: 'recomandat', badgeLabel: 'Modul complet · 5 funcții', color: '34,197,94',

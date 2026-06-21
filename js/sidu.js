@@ -33,11 +33,12 @@
     { name: 'Tramvaie + autobuze electrice + benzi dedicate', domain: 'mobilitate', status: 'in_executie', cost_mil: 120, funding: 'POR', priority: 1, drives: 'PMUD', termen: 'scurt', lista: 'scurta' },
     { name: 'Iași Velocity — bike-sharing + piste velo metropolitane', domain: 'mobilitate', status: 'propus', cost_mil: 25, funding: 'POR', priority: 2, drives: 'PMUD', termen: 'scurt', lista: 'lunga' },
     { name: 'Regenerare maluri Bahlui (coridor verde)', domain: 'regenerare', status: 'propus', cost_mil: 60, funding: 'POR', priority: 1, drives: 'Masterplan/LOISIR', termen: 'mediu', lista: 'scurta' },
+    { name: 'Superbloc-uri pilot (model Barcelona) — regenerare cartiere', domain: 'regenerare', status: 'propus', cost_mil: 15, funding: 'POR', priority: 2, drives: 'Masterplan/PMUD', termen: 'mediu', lista: 'lunga' },
     { name: 'Pol economic Aeroport + Parcuri Industriale (Miroslava/Holboca)', domain: 'economie', status: 'in_executie', cost_mil: 90, funding: 'PPP', priority: 1, termen: 'mediu', lista: 'metropolitan' },
     { name: 'Modernizare rețea școli/grădinițe (ex. Col. Gh. Asachi)', domain: 'educatie', status: 'finantat', cost_mil: 40, funding: 'PNRR', priority: 2, termen: 'scurt', lista: 'lunga' },
     { name: 'Autostrada A8 (Unirii) + A7 — conectivitate regională', domain: 'infrastructura', status: 'in_executie', cost_mil: 0, funding: 'buget de stat', priority: 1, drives: 'PUG', termen: 'lung', lista: 'metropolitan' }
   ];
-  var KEY = 'urbanx_sidu_projects_v1';
+  var KEY = 'urbanx_sidu_projects_v2';
   function load() { try { var v = localStorage.getItem(KEY); if (v == null) { var a = SEED.map(function (p, i) { return Object.assign({ id: 'sp_seed_' + i, seed: true }, p); }); localStorage.setItem(KEY, JSON.stringify(a)); return a; } return JSON.parse(v); } catch (e) { return SEED.slice(); } }
   function save(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} }
   var projects = {

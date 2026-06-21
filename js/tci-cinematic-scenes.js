@@ -1602,6 +1602,31 @@ G._CinemaEngine={
     if(this._cinLabels) this._cinLabels(map, labels);
   },
 
+  // SUPERBLOC (model Barcelona) — instrument de regenerare desenat pe hartă.
+  // Grilă sintetică 3×3: perimetru (tranzit) + străzi interioare devenite verzi + piațete.
+  _addSuperbloc(map){
+    const cx=this._city?.lon, cy=this._city?.lat; if(cx==null||cy==null) return;
+    let SB=G.Superbloc; if(!SB||!SB.cinematicData) return;
+    const d=SB.cinematicData([cx,cy], 460);
+    const g=d.geo;
+    // 1) perimetru (unde merge tranzitul) + umplere verde subtilă
+    this._safeAdd(map,'v8-sb',{type:'geojson',data:{type:'Feature',geometry:{type:'Polygon',coordinates:[g.boundary]},properties:{}}},{
+      id:'v8-sb-l',type:'fill',source:'v8-sb',paint:{'fill-color':'#639922','fill-opacity':0.14}
+    });
+    this._safeAdd(map,'v8-sb-perim',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:g.boundary},properties:{}}},{
+      id:'v8-sb-perim-l',type:'line',source:'v8-sb-perim',paint:{'line-color':'#fb923c','line-width':4,'line-dasharray':[2,1]}
+    });
+    // 2) străzi interioare transformate în verde (carosabil → spațiu public)
+    this._safeAdd(map,'v8-sb-st',{type:'geojson',data:{type:'FeatureCollection',features:g.streets.map(c=>({type:'Feature',geometry:{type:'LineString',coordinates:c},properties:{}}))}},{
+      id:'v8-sb-st-l',type:'line',source:'v8-sb-st',paint:{'line-color':'#639922','line-width':['interpolate',['linear'],['zoom'],13,5,16,12],'line-opacity':0.9}
+    });
+    // 3) piațete la intersecțiile interioare
+    this._safeAdd(map,'v8-sb-pl',{type:'geojson',data:{type:'FeatureCollection',features:g.plazas.map(co=>({type:'Feature',geometry:{type:'Point',coordinates:co},properties:{}}))}},{
+      id:'v8-sb-pl-l',type:'circle',source:'v8-sb-pl',paint:{'circle-radius':['interpolate',['linear'],['zoom'],13,7,16,16],'circle-color':'#97C459','circle-opacity':0.92,'circle-stroke-width':2,'circle-stroke-color':'#ecfdf5'}
+    });
+    if(this._cinLabels) this._cinLabels(map, d.labels);
+  },
+
   // Protejeaza canvas-ul — il re-adauga daca e sters de platforma
   _guardCanvas(){
     if(this._canvasObserver)this._canvasObserver.disconnect();
@@ -1631,6 +1656,7 @@ G._CinemaEngine={
      'v8-fi-2030-l','v8-fi-2030','v8-fi-2040-l','v8-fi-2040','v8-fi-2055-l','v8-fi-2055','v8-util-l','v8-util','v8-util-n-l','v8-util-n',
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
+     'v8-sb-l','v8-sb','v8-sb-perim-l','v8-sb-perim','v8-sb-st-l','v8-sb-st','v8-sb-pl-l','v8-sb-pl',
      'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
      'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers

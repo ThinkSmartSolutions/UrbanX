@@ -1613,13 +1613,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       // BLOC 11 — INOVATII & MODELE INTERNATIONALE ─────────────────────────
-      case 'b12s1': // Superblocks Barcelona — cladiri REALE (nu bare colorate) + zoom pe o intersectie
+      case 'b12s1': // Superblocks Barcelona — cladiri REALE + suprapunere superbloc pe harta (perimetru/verde/piatete)
         lp('day');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#3a4660'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.85);}catch(e){}
-        onIdle(function(){ _cinRealBuildings(map); }); // tesut urban real (model superbloc se explica pe canvas)
+        onIdle(function(){ _cinRealBuildings(map); }); // tesut urban real (fondul peste care se aplica superblocul)
+        // VIZUAL REAL pe harta: perimetru de tranzit + strazi interioare devenite verzi + piatete (model Rueda)
+        setTimeout(function(){ if(SE._playing){ try{SE._addSuperbloc&&SE._addSuperbloc(map);}catch(e){} } },4200);
         fly(Z.CBD,15.2,62,0,4000,0,'day');
         rot(8,0.004);
-        fly(Z.CBD,16.0,68,55,16000,4500,'day'); // zoom pe o intersectie/cvartal (scara superblocului)
+        fly(Z.CBD,16.0,68,55,16000,4500,'day'); // zoom pe scara superblocului (~400m) cu transformarea vizibila
         break;
       case 'b12s2': // 3-30-300 — verde, oaze de racoare, aer (model Singapore)
         lp('day');
