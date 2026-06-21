@@ -13,6 +13,8 @@
     if (!D || !D.chapter) return;
     var city = (ctx && ctx.city) || {};
     var cityName = city.name || '';
+    // SIDU = umbrela strategică — capitol propriu, ÎNAINTE de sinteza modulelor
+    try { if (G.SIDU && G.SIDU.chapter) G.SIDU.chapter(D); } catch (e) {}
 
     D.chapter('Module de decizie UrbanX — sinteză');
     D.P('Acest capitol sintetizează informațiile relevante pentru ' + (cityName || 'UAT') + ' din modulele ' +

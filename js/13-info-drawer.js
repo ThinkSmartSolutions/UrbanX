@@ -285,16 +285,18 @@ const RAPORT_INFO = {
     nu: ['Schemă de organizare + brief orientativ — desenul PUZ/PUD final (loturi, profile, plan reglementări) = proiectant atestat RUR', 'Pentru subdivizare simplă geometrică folosește „Lotizare" clasic'],
   },
   sidu: {
-    ico: '🏛', label: 'Coerență SIDU → PMUD → PUG', badge: 'recomandat', badgeLabel: 'Strategie · administrație', color: '96,165,250',
+    ico: '🏛', label: 'SIDU — Strategia Integrată (umbrela)', badge: 'recomandat', badgeLabel: 'Strategie · nivel superior', color: '96,165,250',
     fn: 'window.SIDU&&window.SIDU.openPanel&&window.SIDU.openPanel()',
-    ce: 'Verifică dacă viziunea strategică a orașului este transpusă în legea spațială. SIDU (strategia integrată 10-15 ani) → PMUD (mobilitatea) → PUG (regulamentul de construire). Printr-un set de întrebări de coerență, identifică blocajele reale (ex. PMUD propune benzi dedicate dar PUG nu rezervă culoar → exproprieri; ansambluri în comune cu străzi în care autobuzul nu intră).',
+    ce: 'SIDU = cadrul strategic de nivel SUPERIOR (10-15 ani) care integrează toate domeniile (economie, mobilitate, regenerare/verde, educație, sănătate, locuire, turism, infrastructură) și conduce Masterplanul (cartier) și PMUD (mobilitate). Modulul ține un registru de proiecte strategice pe domenii (cu cost, finanțare POR/PNRR, status), un dashboard de investiții, și un verificator de coerență SIDU→PMUD→PUG care semnalează blocajele (ex. PMUD propune benzi dar PUG nu rezervă culoar → exproprieri).',
     dece: 'În România, decalajul SIDU/PMUD ↔ PUG e cauza majoră a blocajelor: proiecte strategice frumoase pe hârtie, neaplicabile pentru că nu sunt transpuse în regimul de construire. Niciun proiect din SIDU/PMUD nu prinde viață fără să fie desenat linie cu linie în PUG. UrbanX evidențiază aceste goluri.',
     legal: 'HG 874/2019 (mobilitate urbană) · Legea 350/2001 (PUG/PUZ) · ghid SIDU (POR/MDLPA) · ghid PMUD/SUMP MDLPA. SIDU/PMUD nu emit autorizații — PUG-ul o face, deci corelarea e obligatorie.',
     output: [
-      { ico: '☑️', txt: 'Scor de coerență + verdict (coerent / risc / necorelat)' },
-      { ico: '⚠️', txt: 'Lista blocajelor identificate + consecința fiecăruia' },
+      { ico: '📋', txt: 'Registru proiecte strategice pe 8 domenii (cost, finanțare, status) + dashboard investiții' },
+      { ico: '🔗', txt: 'Câte proiecte conduc PMUD / Masterplan + ierarhia SIDU→PMUD→PUG' },
+      { ico: '☑️', txt: 'Verificator coerență → PUG: scor + lista blocajelor + consecințe' },
+      { ico: '📄', txt: 'Capitol „Cadru strategic SIDU" în Masterplan + PMUD' },
     ],
-    nu: ['Cadru de coerență + checklist — lista completă de proiecte SIDU per UAT + corelarea geometrică în PUG = etapă cu date (server)'],
+    nu: ['Lista completă de proiecte SIDU per UAT + corelarea geometrică detaliată în PUG = etapă cu date (server)', 'Nu emite autorizații — PUG-ul o face; corelarea e obligatorie'],
   },
   studyzone: {
     ico: '📐', label: 'Zonă de studiu flexibilă', badge: 'recomandat', badgeLabel: 'Fundație · fără nr. cadastral', color: '34,211,238',
