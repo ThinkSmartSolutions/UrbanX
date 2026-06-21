@@ -1994,7 +1994,9 @@ function runLotizare(){
     const retS = Math.max(0, _LOT.retSpate || 0);
     const retL = Math.max(0, _LOT.retLateral || 0);
     const retMed = (retF + retS + retL*2) / 4; // retragere medie pentru buffer uniform
-    const retBuf = Math.max(0.5, retMed); // minim 0.5m pentru stabilitate geometrica
+    // FIX algoritm lotizare (PASUL B): retragere perimetrala GARANTATA min 3m fata de limita sitului
+    // — elimina colturile ascutite/slivere imposibil de construit (P118 ISU + OMS 119)
+    const retBuf = Math.max(3, retMed);
     let fp = pFeat;
     try{
       const buf = turf.buffer(pFeat, -retBuf, {units:'meters'});
@@ -2098,10 +2100,15 @@ function runLotizare(){
     // Verificări
     const lotMin=Object.entries(loturiPerTip).reduce((mn,[k])=>{const t=_LOT.tipuri[k];return t?Math.min(mn,t.lotMin||mn):mn;},_LOT.lotAria);
     const hasEducatie2=Object.keys(loturiPerTip).some(k=>['gradinita','scoala'].includes(k)&&(loturiPerTip[k]||0)>0);
+    // FIX algoritm (PASUL 3): validatorul citește din GEOMETRIA generată, nu din parametri hardcodați
+    const _lotAreas = loturi.map(function(l){try{return turf.area(l);}catch(e){return 1e9;}});
+    const lotMinReal = loturi.length ? Math.round(Math.min.apply(null,_lotAreas)) : 0;
+    const lotMaxReal = loturi.length ? Math.round(Math.max.apply(null,_lotAreas.filter(function(a){return a<1e9;}))) : 0;
     const verificari=[
-      // Lot dimensiuni
-      {label:'Lot ≥ 150mp (min. legal RGU)',value:_LOT.lotAria+'mp',ok:_LOT.lotAria>=150,norm:'HG 525/1996 — Regulament General Urbanism'},
-      {label:'Lot ≥ minim funcțiune propusă',value:_LOT.lotAria+'mp ≥ '+lotMin+'mp',ok:_LOT.lotAria>=lotMin,norm:'Conf. funcțiune selectată'},
+      // Lot dimensiuni — verificate din geometria REALĂ a loturilor generate
+      {label:'Toate loturile ≥ 150mp (min. legal RGU)',value:'min real '+lotMinReal+'mp · max '+lotMaxReal+'mp',ok:lotMinReal>=150,norm:'HG 525/1996 — verificat din geometria generată'},
+      {label:'Lot ≥ minim funcțiune propusă',value:lotMinReal+'mp ≥ '+lotMin+'mp',ok:lotMinReal>=lotMin,norm:'Conf. funcțiune selectată'},
+      {label:'Loturi imposibile (colțuri ascuțite/slivere) eliminate',value:(_LOT._slivereRespinse||0)+' filtrate',ok:true,norm:'PASUL I — retragere 3m + filtru compacitate'},
       // Circulatii DN 537/2003
       {label:'Drum principal ≥ 6m (2 sensuri)',value:(_LOT.drumTipuri?.principal?.latime||_LOT.drumLat)+'m',ok:(_LOT.drumTipuri?.principal?.latime||_LOT.drumLat)>=6,norm:'DN 537/2003 · NP 051/2012'},
       {label:'Stradă locală ≥ 4m',value:(_LOT.drumTipuri?.secundar?.latime||Math.max(4,_LOT.drumLat*0.75))+'m',ok:(_LOT.drumTipuri?.secundar?.latime||4)>=4,norm:'DN 537/2003 art. 12'},
@@ -2574,9 +2581,12 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
   // pozitiile valide, apoi distribuim tipurile proportional
   const cols2=Math.max(1,Math.round(wDeg/lotW)+1); // +1 pentru margini
   const rows2=Math.max(1,Math.round(hDeg/lotH)+1);
-  const lotAriaMin=_LOT.lotAria*0.20; // minim 20% suprafata lot pentru a fi valid
+  // FIX algoritm (PASUL I): lot valid = area >= max(130mp legal, 55% din tinta) ȘI forma compacta
+  // (NU slivere/triunghiuri in colturi). Inainte: 20% → genera loturi imposibile in colturi ascutite.
+  const lotAriaMin=Math.max(130, _LOT.lotAria*0.55);
 
   const pozitiiValide=[];
+  let _slivereRespinse=0;
   for(let r=0;r<rows2;r++){
     const y0=bbox2[1]+r*lotH;
     const y1=y0+lotH;
@@ -2590,11 +2600,19 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
         const inter=turf.intersect(terenDisponibil,lotPoly);
         if(!inter?.geometry) continue;
         const interArea=turf.area(inter);
-        if(interArea < lotAriaMin) continue;
+        if(interArea < lotAriaMin){ if(interArea>5) _slivereRespinse++; continue; }
+        // Filtru COMPACITATE: respinge forme neregulate/triunghiulare (umplere bbox < 60%)
+        // — un lot construibil e ~dreptunghiular; un triunghi de colt are fill mic.
+        try{
+          const ib=turf.bbox(inter);
+          const ibArea=((ib[2]-ib[0])*mLng)*((ib[3]-ib[1])*mLat);
+          if(ibArea>0 && interArea/ibArea < 0.60){ _slivereRespinse++; continue; }
+        }catch(e){}
         pozitiiValide.push({geom:inter.geometry, area:Math.round(interArea), r, c});
       }catch(e){}
     }
   }
+  _LOT._slivereRespinse = _slivereRespinse; // pt validator (loturi imposibile eliminate)
 
   if(!pozitiiValide.length) return {loturi,drumuri};
 
