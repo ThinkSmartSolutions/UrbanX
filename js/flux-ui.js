@@ -223,6 +223,23 @@
       lastMeta = { site_name: siteName.value, city_name: cityName(), land_uses: g.scenario.land_uses, centroid: centroid };
       G.Flux._lastStudy = { result: res, meta: lastMeta };   // pt capitolul Mobilitate din Masterplan/PMUD
       result.innerHTML = summaryHTML(res);
+      // ── reține + compară scenarii ──
+      var cmpWrap = document.createElement('div'); cmpWrap.style.cssText = 'margin-top:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px';
+      var keep = document.createElement('button'); keep.textContent = '💾 Reține acest scenariu'; keep.style.cssText = 'background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:12px';
+      var cmpOut = document.createElement('div'); cmpOut.style.cssText = 'margin-top:8px';
+      keep.onclick = function () {
+        G.Flux._scenarios.push({ name: (siteName.value || 'Scenariu') + ' #' + (G.Flux._scenarios.length + 1), res: res });
+        if (G.Flux._scenarios.length > 4) G.Flux._scenarios.shift();
+        var n = G.Flux._scenarios.length;
+        if (n >= 2) {
+          var a = G.Flux._scenarios[n - 2], b = G.Flux._scenarios[n - 1], d = G.Flux.compareScenarios(a.res, b.res);
+          var sgn = function (v, inv) { var good = inv ? v < 0 : v > 0; var col = v === 0 ? '#94a3b8' : good ? '#34d399' : '#f87171'; return '<b style="color:' + col + '">' + (v > 0 ? '+' : '') + v + '</b>'; };
+          cmpOut.innerHTML = '<div style="font-size:11px;color:#93c5fd;font-weight:700;margin-bottom:4px">⚖ ' + a.name + ' → ' + b.name + '</div>' +
+            '<div style="font-size:12px;color:#cbd5e1;line-height:1.7">Deplasări zilnice: ' + sgn(d.trips_pct, true) + '% · Cotă auto: ' + sgn(d.modal_auto_pct_change, true) + ' pp · Mobilitate sustenabilă (PT+velo+pieton): ' + sgn(d.pkm_sustainable_pct_change) + ' pp · Intersecții critice noi: ' + sgn(d.new_critical_intersections, true) + ' · CO₂: ' + sgn(d.co2_delta_tonnes_day, true) + ' t/zi</div>' +
+            '<div style="font-size:10px;color:#64748b;margin-top:4px">Verde = îmbunătățire față de scenariul anterior reținut.</div>';
+        } else cmpOut.innerHTML = '<div style="font-size:11px;color:#94a3b8">Scenariu reținut. Modifică parametrii, recalculează și reține din nou pentru a compara.</div>';
+      };
+      cmpWrap.appendChild(keep); cmpWrap.appendChild(cmpOut); result.appendChild(cmpWrap);
       pdfBtn.style.display = '';
       mapBtn.style.display = centroid ? '' : 'none';
       stBtn.style.display = (typeof generateTrafficStudy === 'function') ? '' : 'none';

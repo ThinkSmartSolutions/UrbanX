@@ -223,8 +223,28 @@
   function r3(x) { return Math.round(x * 1000) / 1000; }
   function r4(x) { return Math.round(x * 10000) / 10000; }
 
+  // ── comparare scenarii (delta schema PMUD) ──
+  function _crit(res) { return (res.intersections || []).filter(function (i) { return i.over_capacity; }).length; }
+  function _sustain(res) { var s = res.modal_split || {}; return (s.pt || 0) + (s.bicycle || 0) + (s.pedestrian || 0); }
+  function compareScenarios(a, b) {
+    if (!a || !b) return null;
+    var tA = a.trips.daily || 1, tB = b.trips.daily || 0;
+    var co2A = (a.emissions.total_kg_day || 0) / 1000, co2B = (b.emissions.total_kg_day || 0) / 1000;
+    return {
+      trips_pct: r1((tB - tA) / tA * 100),
+      modal_auto_pct_change: r1(((b.modal_split.auto || 0) - (a.modal_split.auto || 0)) * 100),
+      pkm_sustainable_pct_change: r1((_sustain(b) - _sustain(a)) * 100),
+      new_critical_intersections: _crit(b) - _crit(a),
+      co2_delta_tonnes_day: r1(co2B - co2A),
+      a: { trips: a.trips.daily, auto_pct: r1((a.modal_split.auto || 0) * 100), critical: _crit(a), co2_t_day: r1(co2A) },
+      b: { trips: b.trips.daily, auto_pct: r1((b.modal_split.auto || 0) * 100), critical: _crit(b), co2_t_day: r1(co2B) }
+    };
+  }
+
   G.Flux = G.Flux || {};
   G.Flux.compute = compute;
+  G.Flux.compareScenarios = compareScenarios;
+  G.Flux._scenarios = G.Flux._scenarios || [];
   G.Flux.TRIP_RATES = TRIP_RATES;
   G.Flux.MODAL_BY_SIZE = MODAL_BY_SIZE;
   G.Flux.defaultParams = defaultParams;
