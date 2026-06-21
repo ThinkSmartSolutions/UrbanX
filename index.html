@@ -3247,6 +3247,17 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <div style="font-size:10px;color:rgba(196,181,253,.6)">PUG live → GBA · cost · GDV · profit · IRR · valoare teren · senzitivitate · PDF</div>
   </button>
 
+  <button onclick="window.LVC&&window.LVC.openPanel?window.LVC.openPanel():ss?.('LVC se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(124,58,237,.06);
+      border:none;color:#c4b5fd;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(124,58,237,.16)'"
+    onmouseout="this.style.background='rgba(124,58,237,.06)'"
+    title="Land Value Capture — plusvaloarea din infrastructură publică + contribuție de negociat (ZAC/CIL)">
+    📈 Land Value Capture
+    <div style="font-size:10px;color:rgba(196,181,253,.6)">plusvaloare teren · contribuție voluntară negociabilă (L.350 Art.56) · PDF</div>
+  </button>
+
   <button onclick="(function(){const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';if(window._GHSLLayer){_GHSLLayer.init(m,k);_GHSLLayer.toggle(m);}else{ss?.('GHSL: module se inițializează');}; _closeAllMenusAndOverlay();})()"
     style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
       border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
@@ -5991,6 +6002,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/heritage-ui.js?v=20260620a"></script>
     <script src="js/feasibility-engine.js?v=20260620a"></script>
     <script src="js/feasibility-ui.js?v=20260620a"></script>
+    <script src="js/lvc.js?v=20260620a"></script>
 </body>
 </html>
 <!-- cinema-v5.js defineste _startCinema -->
