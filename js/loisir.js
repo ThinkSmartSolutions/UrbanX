@@ -439,7 +439,7 @@
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { dispose3D(); ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
 
-    var TABS = [['catalog', '📊 Catalog'], ['proiect', '🎨 Proiectare parc'], ['p3d', '🧊 3D'], ['concurs', '🏆 Concurs'], ['clima', '🌡 Climă/UHI']];
+    var TABS = [['catalog', '📊 Catalog'], ['proiect', '🎨 Proiectare parc'], ['p3d', '🧊 3D'], ['validare', '🔎 Validare'], ['concurs', '🏆 Concurs'], ['clima', '🌡 Climă/UHI']];
     var tabBar = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px' }); body.appendChild(tabBar);
     var content = el('div'); body.appendChild(content);
     var cur = 'catalog';
@@ -454,6 +454,7 @@
       if (cur === 'catalog') return renderCatalog();
       if (cur === 'proiect') return renderProiect();
       if (cur === 'p3d') return renderP3D();
+      if (cur === 'validare') return renderValidare();
       if (cur === 'concurs') return renderConcurs();
       if (cur === 'clima') return renderClima();
     }
@@ -557,6 +558,46 @@
       bSeason.onclick = function () { si = (si + 1) % seasons.length; if (_3d.setSeason) _3d.setSeason(seasons[si]); bSeason.textContent = '🍂 ' + seasons[si]; };
       bShot.onclick = function () { if (_3d.screenshot) _3d.screenshot(); };
       content.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:8px' }, 'Generator procedural Three.js (r128) — arbori (InstancedMesh), promenadă inelară, piazză, fântână, lac, mobilier. Trage pentru rotire, scroll pentru zoom. Modelele detaliate ale propunerilor de concurs (import .GLB/.OBJ) = Faza 2.'));
+    }
+
+    // ── TAB VALIDARE (motor coduri PMR/ECH/ECO/PRG/MOB/CST) ──
+    function renderValidare() {
+      if (!G.LoisirValidator) { content.innerHTML = '<div style="color:#fca5a5;font-size:13px">Motorul de validare se inițializează.</div>'; return; }
+      content.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' }, 'Verifică o PROPUNERE de parc față de normative (PMR, EN 1176/1177/16630, ecologie, Legea 24/2007). Completează parametrii reali ai propunerii — regulile fără răspuns rămân „de verificat".'));
+      // prefill dintr-un program generat (dacă există) — propunere „bună" implicită
+      var pr = {
+        area_m2: lastProg ? lastProg.area_m2 : 20000, population_served: 2000,
+        promenada_width_m: 3, promenada_present: true, promenada_length_m: lastProg ? Math.round(4 * Math.sqrt(lastProg.area_m2) * 0.4) : 360,
+        alei_length_m: lastProg ? Math.round(4 * Math.sqrt(lastProg.area_m2)) : 560,
+        joaca_present: true, joaca_pmr_access: true, age_separation: true, en1176: true, en1177: true,
+        fitness_present: true, en16630: true, caini_present: true, caini_joaca_dist_m: 30,
+        amfiteatru_present: false, amfiteatru_pmr_ramp: true,
+        native_species_pct: 80, permeability_pct: 75, canopy_pct: 35, apa_present: true, margini_beton: false,
+        toalete_count: 2, toalete_pmr_count: 1, fantana_count: 2, banci_count: 6, cosuri_count: 12,
+        iluminat_present: true, estimated_cost_ron: lastProg ? lastProg.area_m2 * 400 : 8000000
+      };
+      var grid = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:6px' });
+      function num(key, label) { var w = el('div'); w.appendChild(el('div', { style: 'font-size:10px;color:#94a3b8;margin-bottom:2px' }, label)); var i = el('input', { style: ST.inp, type: 'number', value: '' + pr[key] }); i.oninput = function () { pr[key] = +i.value; }; w.appendChild(i); grid.appendChild(w); }
+      function bool(key, label) { var w = el('div'); w.appendChild(el('div', { style: 'font-size:10px;color:#94a3b8;margin-bottom:2px' }, label)); var s = el('select', { style: ST.inp }); [['true', 'DA'], ['false', 'NU'], ['null', '?']].forEach(function (o) { s.appendChild(el('option', { value: o[0] }, o[1])); }); s.value = String(pr[key]); s.onchange = function () { pr[key] = s.value === 'true' ? true : s.value === 'false' ? false : null; }; w.appendChild(s); grid.appendChild(w); }
+      num('area_m2', 'Suprafață (mp)'); num('population_served', 'Pop. deservită');
+      num('promenada_width_m', 'Lățime promenadă (m)'); num('promenada_length_m', 'Lungime promenadă (m)');
+      num('native_species_pct', 'Specii native %'); num('permeability_pct', 'Permeabilitate %');
+      num('canopy_pct', 'Acoperire arbori %'); num('estimated_cost_ron', 'Cost estimat (RON)');
+      num('toalete_count', 'Toalete (nr)'); num('toalete_pmr_count', 'Cabine PMR (nr)');
+      num('fantana_count', 'Fântâni potabile'); num('banci_count', 'Bănci (nr)');
+      content.appendChild(grid);
+      content.appendChild(el('div', { style: ST.label }, 'Conformitate (DA/NU/?)'));
+      var grid2 = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px' });
+      var g2old = grid; grid = grid2;
+      bool('joaca_pmr_access', 'Joacă acces PMR'); bool('en1176', 'Joacă EN 1176'); bool('en1177', 'Suprafață EN 1177');
+      bool('en16630', 'Fitness EN 16630'); bool('age_separation', 'Separare vârste'); bool('margini_beton', 'Maluri din beton');
+      bool('amfiteatru_pmr_ramp', 'Rampă scenă PMR'); bool('iluminat_present', 'Iluminat nocturn'); bool('apa_present', 'Are luciu de apă');
+      grid = g2old; content.appendChild(grid2);
+      var run = el('button', { style: ST.btn + ';margin-top:12px' }, '🔎 Validează propunerea'); content.appendChild(run);
+      var out = el('div', { style: 'margin-top:12px' }); content.appendChild(out);
+      run.onclick = function () { out.innerHTML = G.LoisirValidator.renderHTML(pr); };
+      run.onclick();
+      content.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:8px' }, 'Motor de validare codificat: PMR_001-004 · ECH_001-005 · ECO_001-004 · PRG_001-005 · MOB_001-002 · CST_001-002. Fiecare regulă are cod, temei legal și severitate (blocant/eroare/avertisment).'));
     }
 
     // ── TAB CONCURS ──
