@@ -23,15 +23,19 @@
   var STATUS = { propus: 'propus', finantat: 'finanțat', in_executie: 'în execuție', finalizat: 'finalizat' };
 
   // seed real (proiecte publice SIDU Iași — exemplu)
+  // structura unui SIDU real (ESTI București / ghid POR): 5 secțiuni
+  var SECTIUNI = ['Context & analiză', 'Formularea strategiei (viziune)', 'Portofoliu de proiecte (listă lungă/scurtă/metropolitane)', 'Plan de acțiune', 'Mediu & monitorizare'];
+  var TERMEN = { scurt: 'scurt (0-3 ani)', mediu: 'mediu (3-7 ani)', lung: 'lung (7-15 ani)' };
+  var LISTA = { lunga: 'listă lungă', scurta: 'listă scurtă', metropolitan: 'metropolitan' };
   var SEED = [
-    { name: 'Spital Regional de Urgență Iași (Moara de Vânt)', domain: 'sanatate', status: 'finantat', cost_mil: 350, funding: 'PNRR', priority: 1 },
-    { name: 'Tren Metropolitan Iași (Lețcani–Ciurea–Tomești)', domain: 'mobilitate', status: 'finantat', cost_mil: 280, funding: 'PNRR', priority: 1, drives: 'PMUD' },
-    { name: 'Tramvaie + autobuze electrice + benzi dedicate', domain: 'mobilitate', status: 'in_executie', cost_mil: 120, funding: 'POR', priority: 1, drives: 'PMUD' },
-    { name: 'Iași Velocity — bike-sharing + piste velo metropolitane', domain: 'mobilitate', status: 'propus', cost_mil: 25, funding: 'POR', priority: 2, drives: 'PMUD' },
-    { name: 'Regenerare maluri Bahlui (coridor verde)', domain: 'regenerare', status: 'propus', cost_mil: 60, funding: 'POR', priority: 1, drives: 'Masterplan/LOISIR' },
-    { name: 'Pol economic Aeroport + Parcuri Industriale (Miroslava/Holboca)', domain: 'economie', status: 'in_executie', cost_mil: 90, funding: 'PPP', priority: 1 },
-    { name: 'Modernizare rețea școli/grădinițe (ex. Col. Gh. Asachi)', domain: 'educatie', status: 'finantat', cost_mil: 40, funding: 'PNRR', priority: 2 },
-    { name: 'Autostrada A8 (Unirii) + A7 — conectivitate regională', domain: 'infrastructura', status: 'in_executie', cost_mil: 0, funding: 'buget de stat', priority: 1, drives: 'PUG' }
+    { name: 'Spital Regional de Urgență Iași (Moara de Vânt)', domain: 'sanatate', status: 'finantat', cost_mil: 350, funding: 'PNRR', priority: 1, termen: 'mediu', lista: 'scurta' },
+    { name: 'Tren Metropolitan Iași (Lețcani–Ciurea–Tomești)', domain: 'mobilitate', status: 'finantat', cost_mil: 280, funding: 'PNRR', priority: 1, drives: 'PMUD', termen: 'mediu', lista: 'metropolitan' },
+    { name: 'Tramvaie + autobuze electrice + benzi dedicate', domain: 'mobilitate', status: 'in_executie', cost_mil: 120, funding: 'POR', priority: 1, drives: 'PMUD', termen: 'scurt', lista: 'scurta' },
+    { name: 'Iași Velocity — bike-sharing + piste velo metropolitane', domain: 'mobilitate', status: 'propus', cost_mil: 25, funding: 'POR', priority: 2, drives: 'PMUD', termen: 'scurt', lista: 'lunga' },
+    { name: 'Regenerare maluri Bahlui (coridor verde)', domain: 'regenerare', status: 'propus', cost_mil: 60, funding: 'POR', priority: 1, drives: 'Masterplan/LOISIR', termen: 'mediu', lista: 'scurta' },
+    { name: 'Pol economic Aeroport + Parcuri Industriale (Miroslava/Holboca)', domain: 'economie', status: 'in_executie', cost_mil: 90, funding: 'PPP', priority: 1, termen: 'mediu', lista: 'metropolitan' },
+    { name: 'Modernizare rețea școli/grădinițe (ex. Col. Gh. Asachi)', domain: 'educatie', status: 'finantat', cost_mil: 40, funding: 'PNRR', priority: 2, termen: 'scurt', lista: 'lunga' },
+    { name: 'Autostrada A8 (Unirii) + A7 — conectivitate regională', domain: 'infrastructura', status: 'in_executie', cost_mil: 0, funding: 'buget de stat', priority: 1, drives: 'PUG', termen: 'lung', lista: 'metropolitan' }
   ];
   var KEY = 'urbanx_sidu_projects_v1';
   function load() { try { var v = localStorage.getItem(KEY); if (v == null) { var a = SEED.map(function (p, i) { return Object.assign({ id: 'sp_seed_' + i, seed: true }, p); }); localStorage.setItem(KEY, JSON.stringify(a)); return a; } return JSON.parse(v); } catch (e) { return SEED.slice(); } }
@@ -42,9 +46,9 @@
     remove: function (id) { save(load().filter(function (p) { return p.id !== id; })); }
   };
   function dashboard() {
-    var ps = load(); var byDom = {}, byStatus = {}, byFund = {}, total = 0;
-    ps.forEach(function (p) { byDom[p.domain] = (byDom[p.domain] || 0) + 1; byStatus[p.status] = (byStatus[p.status] || 0) + 1; byFund[p.funding] = (byFund[p.funding] || 0) + (+p.cost_mil || 0); total += (+p.cost_mil || 0); });
-    return { count: ps.length, total_mil: Math.round(total), by_domain: byDom, by_status: byStatus, by_funding: byFund, drives_pmud: ps.filter(function (p) { return /PMUD/.test(p.drives || ''); }).length, drives_mp: ps.filter(function (p) { return /Masterplan/.test(p.drives || ''); }).length };
+    var ps = load(); var byDom = {}, byStatus = {}, byFund = {}, byTermen = {}, byLista = {}, total = 0;
+    ps.forEach(function (p) { byDom[p.domain] = (byDom[p.domain] || 0) + 1; byStatus[p.status] = (byStatus[p.status] || 0) + 1; byFund[p.funding] = (byFund[p.funding] || 0) + (+p.cost_mil || 0); if (p.termen) byTermen[p.termen] = (byTermen[p.termen] || 0) + 1; if (p.lista) byLista[p.lista] = (byLista[p.lista] || 0) + 1; total += (+p.cost_mil || 0); });
+    return { count: ps.length, total_mil: Math.round(total), by_domain: byDom, by_status: byStatus, by_funding: byFund, by_termen: byTermen, by_lista: byLista, drives_pmud: ps.filter(function (p) { return /PMUD/.test(p.drives || ''); }).length, drives_mp: ps.filter(function (p) { return /Masterplan/.test(p.drives || ''); }).length };
   }
 
   // verificarea coerentei (pastrata)
@@ -67,8 +71,11 @@
       'integrează toate domeniile și conduce Masterplanul (regenerare de cartier) și PMUD (mobilitate). ' +
       'Acestea trebuie transpuse în PUG pentru a deveni aplicabile.');
     D.kpis([{ label: 'Proiecte strategice', val: '' + d.count, sub: 'în portofoliu' }, { label: 'Investiție', val: d.total_mil + ' M€', sub: 'cumulat' }, { label: 'Conduc PMUD', val: '' + d.drives_pmud, sub: 'mobilitate' }]);
-    var rows = projects.list().slice(0, 12).map(function (p) { var dm = DOMENII[p.domain] || {}; return [p.name, dm.label || p.domain, (p.cost_mil ? p.cost_mil + ' M€' : '—'), STATUS[p.status] || p.status, p.funding || '—']; });
-    D.table(['Proiect', 'Domeniu', 'Cost', 'Status', 'Finanțare'], rows, null, { boldFirst: true });
+    D.P('Documentația SIDU este structurată (model ESTI București / ghid POR) în 5 secțiuni: ' +
+      SECTIUNI.map(function (s, i) { return (i + 1) + '. ' + s; }).join('; ') + '. Portofoliul de mai jos corespunde secțiunii a 3-a, ' +
+      'cu prioritizare pe liste (lungă → scurtă → metropolitane) și termen de implementare.');
+    var rows = projects.list().slice(0, 12).map(function (p) { var dm = DOMENII[p.domain] || {}; return [p.name, dm.label || p.domain, (LISTA[p.lista] || '—'), (TERMEN[p.termen] || '—').replace(/\s*\(.*\)/, ''), (p.cost_mil ? p.cost_mil + ' M€' : '—'), STATUS[p.status] || p.status]; });
+    D.table(['Proiect', 'Domeniu', 'Listă', 'Termen', 'Cost', 'Status'], rows, [54, 30, 22, 18, 22, 26], { boldFirst: true });
     D.callout('Ierarhia SIDU → PMUD → PUG', 'SIDU stabilește viziunea; PMUD detaliază mobilitatea; PUG-ul o face aplicabilă (regim de construire). Proiectele care nu sunt transpuse în PUG rămân nefinanțabile/neautorizabile.', [96, 130, 200]);
   }
 
@@ -90,7 +97,9 @@
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
     body.appendChild(el('div', { style: 'background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;font-size:12px;color:#cbd5e1;margin-bottom:10px' },
-      '<b style="color:#60a5fa">SIDU</b> <span style="color:#d4af37">→</span> <b style="color:#34d399">PMUD</b> (mobilitate) + <b style="color:#fbbf24">Masterplan</b> (cartier) <span style="color:#d4af37">→</span> <b style="color:#a78bfa">PUG</b> (lege spațială). SIDU e umbrela; restul se subordonează și se transpun în PUG.'));
+      '<b style="color:#60a5fa">SIDU</b> <span style="color:#d4af37">→</span> <b style="color:#34d399">PMUD</b> (mobilitate) + <b style="color:#fbbf24">Masterplan</b> (cartier) <span style="color:#d4af37">→</span> <b style="color:#a78bfa">PUG</b> (lege spațială). SIDU e umbrela; restul se subordonează și se transpun în PUG.' +
+      '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#94a3b8">Structura documentației (model <b style="color:#cbd5e1">ESTI București</b> / ghid POR): ' +
+      SECTIUNI.map(function (s, i) { return '<span style="color:#cbd5e1">' + (i + 1) + '.</span> ' + s; }).join(' &nbsp;·&nbsp; ') + '</div>'));
     var tabs = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px' });
     var t1 = el('button', { style: ST.ghost }, '📋 Proiecte strategice'); var t2 = el('button', { style: ST.ghost }, '☑ Coerență → PUG');
     tabs.appendChild(t1); tabs.appendChild(t2); body.appendChild(tabs);
@@ -117,8 +126,10 @@
       function card(b, s, c) { return '<div style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:17px;font-weight:800;color:' + (c || '#60a5fa') + '">' + b + '</div><div style="font-size:10px;color:#94a3b8">' + s + '</div></div>'; }
       dashEl.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:8px">' + card(d.count, 'proiecte') + card(d.total_mil + ' M€', 'investiție', '#34d399') + card(d.drives_pmud, '→ PMUD', '#fbbf24') + card(d.drives_mp, '→ Masterplan', '#a78bfa') + '</div>';
       var ps = projects.list();
+      var lc = { scurta: '#34d399', metropolitan: '#a78bfa', lunga: '#94a3b8' };
       listEl.innerHTML = ps.map(function (p) { var dm = DOMENII[p.domain] || {}; var sc = p.status === 'finalizat' ? '#34d399' : p.status === 'in_executie' ? '#60a5fa' : p.status === 'finantat' ? '#fbbf24' : '#94a3b8';
-        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span>' + (dm.ico || '') + ' ' + p.name + ' <span style="color:#64748b">· ' + (dm.label || p.domain) + (p.drives ? ' → ' + p.drives : '') + '</span></span><span style="white-space:nowrap"><b style="color:' + sc + '">' + (STATUS[p.status] || p.status) + '</b> · ' + (p.cost_mil ? p.cost_mil + 'M€' : '') + ' <button data-del="' + p.id + '" style="' + ST.ghost + ';padding:1px 6px;margin-left:4px">✕</button></span></div>'; }).join('');
+        var badge = p.lista ? '<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.06);color:' + (lc[p.lista] || '#94a3b8') + '">' + (LISTA[p.lista] || p.lista) + (p.termen ? ' · t. ' + p.termen : '') + '</span> ' : '';
+        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span>' + (dm.ico || '') + ' ' + p.name + ' <span style="color:#64748b">· ' + (dm.label || p.domain) + (p.drives ? ' → ' + p.drives : '') + '</span></span><span style="white-space:nowrap">' + badge + '<b style="color:' + sc + '">' + (STATUS[p.status] || p.status) + '</b> · ' + (p.cost_mil ? p.cost_mil + 'M€' : '') + ' <button data-del="' + p.id + '" style="' + ST.ghost + ';padding:1px 6px;margin-left:4px">✕</button></span></div>'; }).join('');
       listEl.querySelectorAll('[data-del]').forEach(function (b) { b.onclick = function () { projects.remove(b.getAttribute('data-del')); renderProjects(); }; });
     }
     renderProjects();

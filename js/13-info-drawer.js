@@ -257,8 +257,22 @@ const RAPORT_INFO = {
     ],
     nu: ['Estimări pe rata de carosabil eliberat — rerutarea de perimetru cere studiu de trafic', 'Necesită PUZ + reglementări locale de circulație'],
   },
+  loisir: {
+    ico: '🌿', label: 'LOISIR — Spații verzi & plămân urban', badge: 'recomandat', badgeLabel: 'Modul complet · 5 funcții', color: '34,197,94',
+    fn: 'window.Loisir&&window.Loisir.openPanel&&window.Loisir.openPanel()',
+    ce: 'Modulul complet de spații de recreere și infrastructură verde, cu 5 funcții: (1) CATALOG spații verzi — inventarul obligatoriu prin Legea 24/2007, cu KPI mp/locuitor vs ținta de 26; (2) PROIECTARE ASISTATĂ parc — generează programul spațial al unui parc (cele 12 zone, mobilier, ecologie) din NORME, plus estimare de cost și specii native recomandate; (3) 3D PARC — vizualizator procedural Three.js al parcului proiectat; (4) CONCURS DE IDEI — brief PDF + criterii + punctaj juriu ponderat; (5) CLIMĂ/UHI — calculatorul de răcire și scorecard-ul verde (insula de căldură).',
+    dece: 'Spațiile verzi sunt obligatorii prin lege (catalog + 26 mp/loc), dar majoritatea UAT-urilor nu le au digitalizate și nici nu proiectează parcuri pe baza unui program spațial fundamentat. UrbanX acoperă tot lanțul: de la inventarul legal, la concursul de idei, la proiectarea pe norme și vizualizarea 3D. Benchmark: Central Park, Tiergarten, Vondelpark, Gardens by the Bay, Superkilen.',
+    legal: 'Legea 24/2007 (art.7 — 26 mp/loc; art.11 — catalog) · EN 1176/1177 (joacă) · EN 16630 (fitness) · NP 051/2012 (PMR) · SR EN 13201-2 (iluminat) · Legea 98/2016 (concurs de soluții art.110-114)',
+    output: [
+      { ico: '📊', txt: 'Catalog spații verzi + KPI mp/locuitor vs ținta Legea 24/2007 (deficit în ha)' },
+      { ico: '🎨', txt: 'Program spațial parc (12 zone din norme) + mobilier + cost estimativ + specii native' },
+      { ico: '🧊', txt: 'Vizualizator 3D procedural Three.js (zi/noapte, anotimp, captură PNG)' },
+      { ico: '🏆', txt: 'Concurs de idei: brief PDF + criterii + clasament juriu ponderat' },
+    ],
+    nu: ['Costurile sunt estimative — nu înlocuiesc devizul tehnic', 'Portalul public de depunere anonimă + e-mail arhitecți, asistentul AI și monitorizarea satelitară NDVI/IoT = Faza 2 (server)', 'Desenul tehnic final al parcului = proiectant peisagist atestat'],
+  },
   uhi: {
-    ico: '🌿', label: 'LOISIR — Insulă de căldură (UHI)', badge: 'recomandat', badgeLabel: 'Mediu & climă · NbS', color: '34,197,94',
+    ico: '🌡', label: 'LOISIR/Climă — Insulă de căldură (UHI)', badge: 'recomandat', badgeLabel: 'Componentă climă · NbS', color: '34,197,94',
     fn: 'window.UHI&&window.UHI.openPanel&&window.UHI.openPanel()',
     ce: 'Calculează efectul de răcire al soluțiilor bazate pe natură (pădure urbană, parc, acoperiș verde, zonă umedă, pavaj permeabil, fântână de răcire) folosind modele empirice validate — câte grade răcorește o intervenție și pe ce rază, plus CO₂ sechestrat. Plus un scorecard verde pe 6 dimensiuni comparat cu Singapore/Copenhaga/Paris.',
     dece: 'România are 9 din 10 veri record în ultimii 15 ani; orașe ca București/Cluj/Craiova au insule de căldură de 4-7°C. Soluțiile verzi-albastre (Nature-Based Solutions) reduc temperatura, poluarea și bolile. Modelul: Singapore „City in a Garden" + Klimaatlas Stuttgart. UrbanX cuantifică impactul intervențiilor înainte de a le finanța.',
