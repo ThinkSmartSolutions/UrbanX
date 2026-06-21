@@ -3126,41 +3126,19 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     </button>
   </div>
 
-  <!-- Grup: Dashboard & Date Live -->
-  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(212,175,55,.5);font-weight:700;
-    letter-spacing:.08em;text-transform:uppercase">📊 Intelligence & Date Live</div>
-
-  <button onclick="window._launchUATDashboard&&_launchUATDashboard(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.15);
-      border:1px solid rgba(212,175,55,.3);color:#D4AF37;padding:12px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:48px;font-family:inherit;margin-bottom:4px"
-    onmouseover="this.style.background='rgba(212,175,55,.25)'"
-    onmouseout="this.style.background='rgba(212,175,55,.15)'"
-    title="Dashboard interactiv cu date live INSE + Eurostat + OSM + Copernicus GHSL">
-    📊 Dashboard UAT Live
-    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">INSE · Eurostat · OSM · GHSL · Cohort-Component</div>
-  </button>
+  <!-- ═══ ADMINISTRAȚIE PUBLICĂ ═══ -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(96,165,250,.55);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase">🏛 Administrație publică</div>
 
   <button onclick="window.UXI&&window.UXI.openDashboard?window.UXI.openDashboard():ss?.('Intelligence se inițializează');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.08);
-      border:none;color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(96,165,250,.18)'"
-    onmouseout="this.style.background='rgba(96,165,250,.08)'"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.15);
+      border:1px solid rgba(96,165,250,.3);color:#60a5fa;padding:12px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:48px;font-family:inherit;margin-bottom:4px"
+    onmouseover="this.style.background='rgba(96,165,250,.25)'"
+    onmouseout="this.style.background='rgba(96,165,250,.15)'"
     title="UrbanX Intelligence — bilanț capacitate infrastructură cumulativă + verdict PUZ + alerte">
     🏗️ Capacitate &amp; Conformitate UAT
     <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">apă·școli·verde vs tot ce e aprobat · registru PUZ · alerte · capitol PDF</div>
-  </button>
-
-  <button onclick="window.Flux&&window.Flux.openStudiu?window.Flux.openStudiu():ss?.('Flux se inițializează');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
-      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(52,211,153,.18)'"
-    onmouseout="this.style.background='rgba(52,211,153,.08)'"
-    title="UrbanX Flux — studiu preliminar de impact de trafic pentru PUZ/PUD (parcela selectată)">
-    🚦 Studiu Trafic (PUZ/PUD)
-    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">generare·distribuție·intersecții v/c·parcare·CO₂ · PDF + hartă</div>
   </button>
 
   <button onclick="window.CAU&&window.CAU.openPanel?window.CAU.openPanel():ss?.('CAU se inițializează');_closeAllMenusAndOverlay()"
@@ -3169,21 +3147,17 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
     onmouseover="this.style.background='rgba(167,139,250,.2)'"
     onmouseout="this.style.background='rgba(167,139,250,.1)'"
-    title="UrbanX CAU — determină avizele pentru Certificatul de Urbanism + tracking aviz tacit 30 zile">
-    📋 CAU — Acorduri Unice (Certificat Urbanism)
-    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">9 reguli avize · rețele OSM · CU PDF · aviz tacit 30 zile (L.50/1991)</div>
+    title="CAU — Comisia de Acorduri Unice: primăria obține avizele în numele solicitantului; CU + Acord Unic + aviz tacit 30 zile">
+    📋 CAU — Acorduri Unice (CU + avize)
+    <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">cerere→CU→primăria obține avizele→Acord Unic · 9 reguli · L.50/1991</div>
   </button>
 
-  <!-- Grup: Cetățean & Transparență -->
-  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(94,234,212,.5);font-weight:700;
-    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">👥 Cetățean & Transparență</div>
-
   <button onclick="window.Dosar&&window.Dosar.open?window.Dosar.open():ss?.('Dosar se inițializează');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(13,148,136,.1);
-      border:1px solid rgba(13,148,136,.3);color:#5eead4;padding:10px 12px;cursor:pointer;border-radius:8px;
+    style="display:block;width:100%;text-align:left;background:rgba(13,148,136,.06);
+      border:none;color:#5eead4;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(13,148,136,.2)'"
-    onmouseout="this.style.background='rgba(13,148,136,.1)'"
+    onmouseover="this.style.background='rgba(13,148,136,.16)'"
+    onmouseout="this.style.background='rgba(13,148,136,.06)'"
     title="Dosarul Digital al imobilului — pașaport: cadastru + PUG + CU/AC + sesizări + scor conformitate">
     🗂️ Dosar Digital al imobilului
     <div style="font-size:10px;color:rgba(94,234,212,.6)">cadastru · PUG · autorizații · sesizări · scor conformitate · PDF</div>
@@ -3227,24 +3201,46 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
     onmouseover="this.style.background='rgba(220,38,38,.16)'"
     onmouseout="this.style.background='rgba(220,38,38,.06)'"
-    title="Patrimoniu construit — inventar monumente (LMI) + hartă; parcelă lângă monument → aviz Cultură obligatoriu în CAU">
-    🏛️ Patrimoniu construit (LMI)
-    <div style="font-size:10px;color:rgba(252,165,165,.6)">monumente & zone protejate · hartă · integrat cu avizarea CAU</div>
+    title="Inventar GIS de patrimoniu (LMI) + hartă; parcelă lângă monument → aviz Cultură obligatoriu în CAU. (Studiul Patrimoniu PDF e în Rapoarte.)">
+    🏛️ Inventar Patrimoniu (GIS)
+    <div style="font-size:10px;color:rgba(252,165,165,.6)">monumente & zone protejate · hartă · alimentează avizarea CAU</div>
   </button>
 
-  <!-- Grup: Economic & Investiții -->
-  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(196,181,253,.5);font-weight:700;
-    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">💰 Economic & Investiții</div>
+  <!-- ═══ INVESTITOR & DEZVOLTATOR ═══ -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(196,181,253,.55);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">💰 Investitor &amp; Dezvoltator</div>
 
-  <button onclick="window.Feaz&&window.Feaz.openPanel?window.Feaz.openPanel():ss?.('Feasibility se inițializează');_closeAllMenusAndOverlay()"
+  <button onclick="window.Feaz&&window.Feaz.openPanel?window.Feaz.openPanel():ss?.('Pro-forma se inițializează');_closeAllMenusAndOverlay()"
     style="display:block;width:100%;text-align:left;background:rgba(124,58,237,.1);
       border:1px solid rgba(124,58,237,.3);color:#c4b5fd;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
     onmouseover="this.style.background='rgba(124,58,237,.2)'"
     onmouseout="this.style.background='rgba(124,58,237,.1)'"
-    title="Feasibility — pro-forma de dezvoltator din PUG-ul live: GBA, cost, venit, profit, IRR, senzitivitate">
-    💰 Feasibility — studiu fezabilitate
-    <div style="font-size:10px;color:rgba(196,181,253,.6)">PUG live → GBA · cost · GDV · profit · IRR · valoare teren · senzitivitate · PDF</div>
+    title="Pro-forma investițional — randamentul dezvoltării din PUG-ul live (profit/IRR). NU e Studiul de Fezabilitate/DALI HG907 (acela e în Rapoarte).">
+    💰 Pro-formă investițional (dezvoltator)
+    <div style="font-size:10px;color:rgba(196,181,253,.6)">GBA · cost · GDV · profit · IRR · valoare teren · senzitivitate · PDF · ≠ SF/DALI</div>
+  </button>
+
+  <button onclick="window.Invest&&window.Invest.openPanel?window.Invest.openPanel():ss?.('Investment se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(245,158,11,.07);
+      border:none;color:#fbbf24;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(245,158,11,.17)'"
+    onmouseout="this.style.background='rgba(245,158,11,.07)'"
+    title="Investment Score — scor de oportunitate care integrează PUG + Heritage + Sesizări + locație">
+    📊 Investment Score (oportunitate)
+    <div style="font-size:10px;color:rgba(251,191,36,.6)">scor compus 0-100 · integrează toate modulele · per parcelă</div>
+  </button>
+
+  <button onclick="window.Portfolio&&window.Portfolio.openPanel?window.Portfolio.openPanel():ss?.('Portfolio se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(245,158,11,.07);
+      border:none;color:#fbbf24;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(245,158,11,.17)'"
+    onmouseout="this.style.background='rgba(245,158,11,.07)'"
+    title="Portfolio Due Diligence — DD urbanistic pe portofoliu de parcele (bănci/fonduri): scor + red flags + raport">
+    🏦 Portfolio Due Diligence
+    <div style="font-size:10px;color:rgba(251,191,36,.6)">portofoliu de parcele · scor conformitate · red flags · raport DD PDF</div>
   </button>
 
   <button onclick="window.LVC&&window.LVC.openPanel?window.LVC.openPanel():ss?.('LVC se inițializează');_closeAllMenusAndOverlay()"
@@ -3258,17 +3254,6 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <div style="font-size:10px;color:rgba(196,181,253,.6)">plusvaloare teren · contribuție voluntară negociabilă (L.350 Art.56) · PDF</div>
   </button>
 
-  <button onclick="window.Invest&&window.Invest.openPanel?window.Invest.openPanel():ss?.('Investment se inițializează');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(245,158,11,.07);
-      border:none;color:#fbbf24;padding:10px 12px;cursor:pointer;border-radius:8px;
-      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(245,158,11,.17)'"
-    onmouseout="this.style.background='rgba(245,158,11,.07)'"
-    title="Investment Score — scor de oportunitate care integrează PUG + Heritage + Sesizări + locație (capstone)">
-    📊 Investment Score (oportunitate)
-    <div style="font-size:10px;color:rgba(251,191,36,.6)">scor compus 0-100 · integrează toate modulele · per parcelă</div>
-  </button>
-
   <button onclick="window.Carbon&&window.Carbon.openPanel?window.Carbon.openPanel():ss?.('Carbon se inițializează');_closeAllMenusAndOverlay()"
     style="display:block;width:100%;text-align:left;background:rgba(34,197,94,.07);
       border:none;color:#86efac;padding:10px 12px;cursor:pointer;border-radius:8px;
@@ -3280,15 +3265,34 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <div style="font-size:10px;color:rgba(134,239,172,.6)">carbon înglobat+operațional+transport · etichetă A-D · EU 2030 · PDF</div>
   </button>
 
-  <button onclick="window.Portfolio&&window.Portfolio.openPanel?window.Portfolio.openPanel():ss?.('Portfolio se inițializează');_closeAllMenusAndOverlay()"
-    style="display:block;width:100%;text-align:left;background:rgba(245,158,11,.07);
-      border:none;color:#fbbf24;padding:10px 12px;cursor:pointer;border-radius:8px;
+  <!-- ═══ MOBILITATE ═══ -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(52,211,153,.55);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">🚦 Mobilitate</div>
+
+  <button onclick="window.Flux&&window.Flux.openStudiu?window.Flux.openStudiu():ss?.('Flux se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(52,211,153,.08);
+      border:none;color:#34d399;padding:10px 12px;cursor:pointer;border-radius:8px;
       font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
-    onmouseover="this.style.background='rgba(245,158,11,.17)'"
-    onmouseout="this.style.background='rgba(245,158,11,.07)'"
-    title="Portfolio Due Diligence — DD urbanistic pe portofoliu de parcele (bănci/fonduri): scor + red flags + raport">
-    🏦 Portfolio Due Diligence
-    <div style="font-size:10px;color:rgba(251,191,36,.6)">portofoliu de parcele · scor conformitate · red flags · raport DD PDF</div>
+    onmouseover="this.style.background='rgba(52,211,153,.18)'"
+    onmouseout="this.style.background='rgba(52,211,153,.08)'"
+    title="Trafic interactiv (UrbanX Flux) — calculator + hartă pentru impactul de trafic al unui PUZ. (Studiul de Impact Trafic PDF e în Rapoarte.)">
+    🚦 Trafic interactiv (Flux)
+    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">generare·distribuție·intersecții v/c·parcare·CO₂ · hartă + PDF</div>
+  </button>
+
+  <!-- ═══ DATE & PROIECȚIE UAT ═══ -->
+  <div style="padding:6px 8px 3px;font-size:10px;color:rgba(212,175,55,.5);font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;margin-top:4px">🗺 Date &amp; Proiecție UAT</div>
+
+  <button onclick="window._launchUATDashboard&&_launchUATDashboard(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.15);
+      border:1px solid rgba(212,175,55,.3);color:#D4AF37;padding:12px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:48px;font-family:inherit;margin-bottom:4px"
+    onmouseover="this.style.background='rgba(212,175,55,.25)'"
+    onmouseout="this.style.background='rgba(212,175,55,.15)'"
+    title="Dashboard interactiv cu date live INSE + Eurostat + OSM + Copernicus GHSL">
+    📊 Dashboard UAT Live
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">INSE · Eurostat · OSM · GHSL · Cohort-Component</div>
   </button>
 
   <button onclick="(function(){const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';if(window._GHSLLayer){_GHSLLayer.init(m,k);_GHSLLayer.toggle(m);}else{ss?.('GHSL: module se inițializează');}; _closeAllMenusAndOverlay();})()"
@@ -6014,7 +6018,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <!-- UrbanX Flux — modul mobilitate Faza 1 (studiu impact trafic PUZ/PUD) -->
     <script src="js/flux-engine.js?v=20260620a"></script>
     <script src="js/flux-report.js?v=20260620b"></script>
-    <script src="js/flux-ui.js?v=20260620d"></script>
+    <script src="js/flux-ui.js?v=20260620e"></script>
     <script src="js/flux-pdf-chapter.js?v=20260620a"></script>
     <!-- UrbanX Intelligence — capacitate cumulativă UAT (Faza 1, client-side) -->
     <script src="js/urbanx-intelligence-engine.js?v=20260620c"></script>
@@ -6032,9 +6036,9 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/notificari-ui.js?v=20260620a"></script>
     <!-- UrbanX Wave 3 — Feasibility (12), client-side -->
     <script src="js/heritage-engine.js?v=20260620a"></script>
-    <script src="js/heritage-ui.js?v=20260620a"></script>
+    <script src="js/heritage-ui.js?v=20260620b"></script>
     <script src="js/feasibility-engine.js?v=20260620a"></script>
-    <script src="js/feasibility-ui.js?v=20260620a"></script>
+    <script src="js/feasibility-ui.js?v=20260620b"></script>
     <script src="js/lvc.js?v=20260620a"></script>
     <!-- Grup C: Investment Heatmap (15) + Carbon Tracker (14) -->
     <script src="js/investment-heatmap.js?v=20260620a"></script>

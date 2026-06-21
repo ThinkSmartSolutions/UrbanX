@@ -20,7 +20,7 @@
     var pre = prefill();
     var ov = el('div', { style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
     var m = el('div', { style: ST.modal });
-    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">💰 Feasibility — studiu de fezabilitate</div><div style="font-size:11px;color:#94a3b8">Pro-forma dezvoltator din PUG-ul live · orientativ</div>'));
+    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">💰 Pro-formă investițional</div><div style="font-size:11px;color:#94a3b8">Randament dezvoltare din PUG live · ≠ Studiul de Fezabilitate/DALI (Rapoarte) · orientativ</div>'));
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
 

@@ -110,7 +110,7 @@
     var m = el('div', { style: ST.modal });
 
     var head = el('div', { style: ST.head });
-    head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">📊 UrbanX Flux — Studiu de trafic</div><div style="font-size:11px;color:#94a3b8">Pre-analiză impact trafic pentru PUZ/PUD · cifre orientative</div>'));
+    head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">🚦 Trafic interactiv (Flux)</div><div style="font-size:11px;color:#94a3b8">Calculator + hartă impact trafic PUZ/PUD · ≠ Studiul Impact Trafic PDF (Rapoarte) · orientativ</div>'));
     var x = el('button', { style: ST.btnGhost }, '✕ Închide'); x.onclick = function () { ov.remove(); };
     head.appendChild(x);
     m.appendChild(head);
