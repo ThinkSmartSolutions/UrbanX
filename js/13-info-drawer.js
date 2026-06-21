@@ -296,6 +296,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Cadru de coerență + checklist — lista completă de proiecte SIDU per UAT + corelarea geometrică în PUG = etapă cu date (server)'],
   },
+  studyzone: {
+    ico: '📐', label: 'Zonă de studiu flexibilă', badge: 'recomandat', badgeLabel: 'Fundație · fără nr. cadastral', color: '34,211,238',
+    fn: 'window.StudyZone&&window.StudyZone.openBuilder&&window.StudyZone.openBuilder()',
+    ce: 'Definește o zonă de studiu (poligon) FĂRĂ a depinde de un număr cadastral, prin 5 metode: desen pe hartă, buffer în jurul unei linii (râu, cale ferată), feature OSM căutat după nume (ex. „râul Bahlui" via Nominatim), adresă + rază, sau combinare de parcele. Rezultatul — un poligon GeoJSON — devine zona activă folosită de toate modulele.',
+    dece: 'Multe situri importante nu au referință cadastrală: coridoare de râu (Bahlui, Dâmbovița), căi ferate dezafectate, axe urbane, zone periurbane fără PUG. Fără un mod de a le delimita, modulele (LOISIR, UHI, Superbloc, Mobilitate) nu pot lucra pe ele. StudyZone e stratul de intrare comun — un singur desen, toate modulele.',
+    legal: 'Instrument de delimitare a ariei de studiu (nu document cadastral). Geometriile vin din OpenStreetMap/Nominatim (gratuit). Pentru parcele cu valoare juridică = ANCPI.',
+    output: [
+      { ico: '🗺', txt: 'Poligon GeoJSON + suprafață (ha) + perimetru' },
+      { ico: '🌊', txt: 'Ex. coridor Bahlui: buffer pe râu → folosit de LOISIR/UHI/Mobilitate' },
+      { ico: '🔗', txt: 'Zonă activă (★) citită de celelalte module' },
+    ],
+    nu: ['Buffer asimetric (mal stâng/drept) + import SHP/KML = etapă viitoare', 'Nu înlocuiește delimitarea cadastrală oficială (ANCPI)'],
+  },
   fisa360: {
     ico: '🧭', label: 'Fișa parcelei 360°', badge: 'recomandat', badgeLabel: 'Hub · toate modulele', color: '212,175,55',
     fn: 'window.Fisa360&&window.Fisa360.open&&window.Fisa360.open()',

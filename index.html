@@ -1837,7 +1837,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260618tur"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621notif"></script>
+<script src="js/13-info-drawer.js?v=20260621sz"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260616fl"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3135,6 +3135,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       <div style="font-size:10px;color:rgba(212,175,55,.7);font-weight:500">toate analizele într-un loc · Dosar·avize·trafic·pro-formă·investiție·carbon·patrimoniu</div>
     </button>
     <button onclick="infoDrawerOpen('fisa360')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:6px">
+    <button onclick="window.StudyZone&&window.StudyZone.openBuilder?window.StudyZone.openBuilder():ss?.('StudyZone se inițializează');_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:#67e8f9;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(34,211,238,.2)'" onmouseout="this.style.background='rgba(34,211,238,.1)'">
+      📐 Zonă de studiu (fără nr. cadastral)
+      <div style="font-size:10px;color:rgba(103,232,249,.65)">desen · buffer râu/CF · OSM (Bahlui) · adresă+rază → folosită de toate modulele</div>
+    </button>
+    <button onclick="infoDrawerOpen('studyzone')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
 
   <!-- ═══ ADMINISTRAȚIE PUBLICĂ ═══ -->
@@ -6057,6 +6067,8 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urbanx-intelligence-ui.js?v=20260620e"></script>
     <script src="js/urbanx-intelligence-chapter.js?v=20260620a"></script>
     <script src="js/urbanx-modules-chapter.js?v=20260621a"></script>
+    <script src="js/study-zone.js?v=20260621a"></script>
+    <script src="js/study-zone-ui.js?v=20260621a"></script>
     <script src="js/fisa-360.js?v=20260621a"></script>
     <script src="js/lotizare-ansamblu.js?v=20260621a"></script>
     <script src="js/loisir-uhi.js?v=20260621a"></script>
