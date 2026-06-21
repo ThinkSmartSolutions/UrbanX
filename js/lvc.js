@@ -10,6 +10,14 @@
  * ========================================================================== */
 (function (G) {
   'use strict';
+  // tabel uplift orientativ (plusvaloare tipică din literatură) — declanșator → % + rază
+  var TRIGGERS = {
+    drum_nou_major: { label: 'Drum nou major', lo: 25, hi: 40, raza_m: 300 },
+    extindere_metrou: { label: 'Extindere metrou/tren urban', lo: 30, hi: 50, raza_m: 800 },
+    parc_urban: { label: 'Parc urban nou', lo: 10, hi: 20, raza_m: 200 },
+    extindere_utilitati: { label: 'Extindere utilități (apă/canal/gaz)', lo: 15, hi: 25, raza_m: 500 },
+    rezoning_rezidential: { label: 'Rezonare (agricol → rezidențial)', lo: 30, hi: 60, raza_m: 0 }
+  };
   function compute(inp) {
     var baseline = +inp.baseline_eur_m2 || 0;       // valoare teren înainte (EUR/mp teren)
     var after = +inp.value_after_eur_m2 || 0;        // valoare teren după (EUR/mp teren)
@@ -52,11 +60,20 @@
     var body = el('div', { style: ST.body }); m.appendChild(body);
     if (pre) body.appendChild(el('div', { style: 'font-size:11px;color:#34d399;margin-bottom:4px' }, '✓ Parcelă: ' + Math.round(pre.area).toLocaleString('ro-RO') + ' mp · ADC estimat ' + Math.round(pre.area * pre.cut).toLocaleString('ro-RO') + ' mp'));
 
+    body.appendChild(el('div', { style: ST.label }, 'Declanșator (auto-completează „după" din tabelul uplift)'));
+    var trig = el('select', { style: ST.inp });
+    trig.appendChild(el('option', { value: '' }, '— manual (introduc eu valoarea după) —'));
+    Object.keys(TRIGGERS).forEach(function (k) { var t = TRIGGERS[k]; trig.appendChild(el('option', { value: k }, t.label + ' (+' + t.lo + '–' + t.hi + '%' + (t.raza_m ? ', rază ' + t.raza_m + 'm' : '') + ')')); });
+    body.appendChild(trig);
+    var trigNote = el('div', { style: 'font-size:10px;color:#94a3b8;margin-top:4px' }); body.appendChild(trigNote);
+
     body.appendChild(el('div', { style: ST.label }, 'Valoare teren (EUR/mp)'));
     var g = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:8px' });
     var base = el('input', { style: ST.inp, type: 'number', placeholder: 'înainte (baseline)' });
     var after = el('input', { style: ST.inp, type: 'number', placeholder: 'după infrastructură/rezonare' });
     g.appendChild(wrap('Înainte EUR/mp', base)); g.appendChild(wrap('După EUR/mp', after)); body.appendChild(g);
+    function applyTrigger() { var t = TRIGGERS[trig.value]; if (!t) { trigNote.textContent = ''; return; } var b = +base.value; var mid = (t.lo + t.hi) / 2; if (b > 0) { after.value = Math.round(b * (1 + mid / 100)); } trigNote.innerHTML = 'Uplift median <b style="color:#c4b5fd">+' + mid + '%</b> (interval +' + t.lo + '–' + t.hi + '%)' + (t.raza_m ? ' · aplicabil în raza de ' + t.raza_m + 'm' : '') + '. Ajustează „după" dacă ai o evaluare locală.'; }
+    trig.onchange = applyTrigger; base.addEventListener('input', function () { if (trig.value) applyTrigger(); });
     body.appendChild(el('div', { style: ST.label }, 'Suprafețe & rată recuperare'));
     var g2 = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px' });
     var land = el('input', { style: ST.inp, type: 'number' }); land.value = pre ? Math.round(pre.area) : '';
@@ -109,6 +126,6 @@
     G.ss && ss('✅ Notă LVC generată');
   }
 
-  G.LVC = { compute: compute, openPanel: openPanel, generatePDF: generatePDF };
+  G.LVC = { compute: compute, openPanel: openPanel, generatePDF: generatePDF, TRIGGERS: TRIGGERS };
   console.log('[LVC] modul Land Value Capture încărcat (window.LVC)');
 })(window);
