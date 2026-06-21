@@ -67,12 +67,31 @@
   // numar total de evenimente noi (pt badge)
   function count() { return feed().reduce(function (n, f) { return n + f.events.length; }, 0); }
 
+  // ── LATURA PRIMARIEI (functioneaza client-side, legal relevant): identifica
+  // vecinii afectati dintr-o zona de notificare (buffer in jurul cererii). ──
+  function zonePolygon(centroid, radius_m) {
+    try { if (G.turf) return G.turf.buffer(G.turf.point(centroid), radius_m, { units: 'meters' }); } catch (e) {}
+    return null;
+  }
+  // numara imobilele afectate din OSM (best-effort, Overpass via proxy)
+  function fetchAffected(centroid, radius_m) {
+    var proxy = window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    var q = '[out:json][timeout:20];(way(around:' + (radius_m || 100) + ',' + centroid[1] + ',' + centroid[0] + ')[building];);out center;';
+    return fetch(proxy + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) {
+        var b = (j.elements || []).filter(function (e) { return e.tags && e.tags.building; });
+        var resid = b.filter(function (e) { return /res|apart|house|yes|dorm/i.test(e.tags.building); }).length;
+        return { buildings: b.length, residential: resid, sample: b.slice(0, 60).map(function (e) { return e.center ? [e.center.lon, e.center.lat] : null; }).filter(Boolean) };
+      });
+  }
+
   var objections = {
     list: function () { return load(OKEY); },
     add: function (o) { var a = load(OKEY); o.id = 'o' + Date.now(); o.created_at = Date.now(); a.push(o); save(OKEY, a); return o; },
     forEvent: function (ref) { return load(OKEY).filter(function (o) { return o.event_ref === ref; }); }
   };
 
-  G.Notificari = { subs: subs, events: events, feed: feed, count: count, objections: objections, OBJ_DAYS: OBJ_DAYS };
+  G.Notificari = { subs: subs, events: events, feed: feed, count: count, objections: objections, OBJ_DAYS: OBJ_DAYS, zonePolygon: zonePolygon, fetchAffected: fetchAffected };
   console.log('[Notificari] motor încărcat (window.Notificari)');
 })(window);
