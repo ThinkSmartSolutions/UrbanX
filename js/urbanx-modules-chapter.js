@@ -87,8 +87,8 @@
     if (!obj || typeof obj.build !== 'function' || obj.__modPatched) return false;
     var orig = obj.build.bind(obj);
     obj.build = function (D, ctx) {
-      // SIDU = umbrela strategică → PRIMUL capitol (după copertă), nu îngropat la final
-      try { if (G.SIDU && G.SIDU.chapter) G.SIDU.chapter(D); } catch (e) { console.warn('[SIDU chapter]', e); }
+      // SIDU NU e un capitol aici — e document propriu (umbrela peste MP+PMUD). Doar o notă de subordonare.
+      try { if (G.SIDU && G.SIDU.subordinationNote) G.SIDU.subordinationNote(D); } catch (e) { console.warn('[SIDU note]', e); }
       orig(D, ctx);
       try { chapter(D, ctx); } catch (e) { console.warn('[UX modules chapter]', e); }
     };

@@ -3391,11 +3391,18 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     <button onclick="window.SIDU&&window.SIDU.openPanel?window.SIDU.openPanel():ss?.('SIDU se inițializează');_closeAllMenusAndOverlay()"
       style="flex:1;text-align:left;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;padding:11px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:800;min-height:46px;font-family:inherit"
       onmouseover="this.style.background='rgba(96,165,250,.22)'" onmouseout="this.style.background='rgba(96,165,250,.12)'">
-      🏛 SIDU — Strategia Integrată (umbrela)
-      <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">nivelul superior · conduce Masterplan + PMUD · coerență → PUG (blocaje)</div>
+      🏛 SIDU — registru & coerență (umbrela)
+      <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">nivelul superior · portofoliu pe domenii · conduce Masterplan + PMUD · coerență → PUG</div>
     </button>
     <button onclick="infoDrawerOpen('sidu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
+
+  <button onclick="window.SIDU&&window.SIDU.generateDocument?window.SIDU.generateDocument(window.TCI?.cityKey):ss?.('SIDU se inițializează');_closeAllMenusAndOverlay()"
+    style="display:block;width:100%;text-align:left;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#60a5fa;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(96,165,250,.22)'" onmouseout="this.style.background='rgba(96,165,250,.12)'">
+    📜 SIDU — Document strategic (PDF)
+    <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">document-umbrelă · context→viziune→portofoliu→plan acțiune→monitorizare · peste MP+PMUD</div>
+  </button>
 
   <button onclick="(function(){const k=window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-IS-01';const m=window.map||window._map;if(!m){ss?.('Harta nu e pregătită');return;}window._DataEngine?.fetchCityData(k).then(ld=>{if(window._ZoneEngine?.run){window._ZoneEngine.run(k).then(zd=>{const c=window._CorridorsLayer?.generateCorridors(k,zd,ld)||[];window._CorridorsLayer?.showOnMap(m,k,c);ss?.('✅ '+c.length+' coridoare pe hartă');});}else{const c=window._CorridorsLayer?.generateCorridors(k,null,ld)||[];window._CorridorsLayer?.showOnMap(m,k,c);ss?.('✅ '+c.length+' coridoare pe hartă');}});_closeAllMenusAndOverlay();})()"
     style="display:block;width:100%;text-align:left;background:rgba(212,175,55,.08);
@@ -6111,7 +6118,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urbanx-intelligence-engine.js?v=20260620c"></script>
     <script src="js/urbanx-intelligence-ui.js?v=20260620e"></script>
     <script src="js/urbanx-intelligence-chapter.js?v=20260620a"></script>
-    <script src="js/urbanx-modules-chapter.js?v=20260621sidu1"></script>
+    <script src="js/urbanx-modules-chapter.js?v=20260621note"></script>
     <script src="js/study-zone.js?v=20260621a"></script>
     <script src="js/study-zone-ui.js?v=20260621a"></script>
     <script src="js/fisa-360.js?v=20260621a"></script>
@@ -6123,7 +6130,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/fisa-cadastrala.js?v=20260621a"></script>
     <script src="js/simlab.js?v=20260621place"></script>
     <script src="js/superbloc.js?v=20260621bcn"></script>
-    <script src="js/sidu.js?v=20260621bcn"></script>
+    <script src="js/sidu.js?v=20260621doc"></script>
     <!-- UrbanX CAU — Comisia de Acorduri Unice (Faza 1 client-side: reguli avize + CU + tracking) -->
     <script src="js/cau-engine.js?v=20260620c"></script>
     <script src="js/plati-engine.js?v=20260621a"></script>
