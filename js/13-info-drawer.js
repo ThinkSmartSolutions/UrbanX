@@ -497,6 +497,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Contribuția e voluntară (nu există obligație legală în RO)', 'Valorile cer evaluare ANEVAR + consultanță juridică'],
   },
+  market: {
+    ico: '📈', label: 'Market Intelligence imobiliar', badge: 'recomandat', badgeLabel: 'Investitor · piață', color: '16,185,129',
+    fn: 'window.Market&&window.Market.openPanel&&window.Market.openPanel()',
+    ce: 'Inteligență de piață per UAT și tip de imobil (apartament/casă/teren/comercial/birou): preț median €/mp (și RON), interval min-max, variație pe 3 și 12 luni (trend SVG), pipeline ofertă, comparare între UAT-uri. Poți adăuga tranzacții reale locale manual.',
+    dece: 'Era singura piesă lipsă din lanțul investițional — modulele Investment Score și Pro-forma o așteptau ca sursă de preț. Fără un reper de piață, scorul de oportunitate și fezabilitatea rămân pe ipoteze. UrbanX agregă tranzacțiile (date publice din cărțile funciare) într-un indicator de piață.',
+    legal: 'Legea 7/1996 art. 51 (publicitatea cărților funciare — date publice) · GDPR L.190/2018 (prețuri agregate, fără nume) · Legea 297/2004. Disclaimer: „Nu constituie consultanță financiară sau investițională."',
+    output: [
+      { ico: '💶', txt: 'Preț median €/mp + RON + interval min-max + medie' },
+      { ico: '📉', txt: 'Variație 3 luni / 12 luni + trend SVG pe 12 luni' },
+      { ico: '⚖', txt: 'Comparare UAT-uri (același tip) + raport PDF' },
+    ],
+    nu: ['Date demonstrative — tranzacțiile reale (ANCPI eTranzacții) = Faza 2 (server)', 'Nu constituie consultanță financiară/investițională', 'Prețuri agregate, fără date personale (GDPR)'],
+  },
   carbon: {
     ico: '🌍', label: 'Carbon Tracker (CO₂ · ESG)', badge: 'optional', badgeLabel: 'ESG · EU Taxonomy', color: '134,239,172',
     fn: 'window.Carbon&&window.Carbon.openPanel&&window.Carbon.openPanel()',

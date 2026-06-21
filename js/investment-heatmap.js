@@ -22,8 +22,15 @@
     // 1. Potențial urbanistic (REAL din PUG): CUT mare = mai mult de construit
     comps.urbanistic = { score: Math.max(5, Math.min(100, Math.round(cut / 3 * 100))), q: 'real', note: 'CUT ' + (cut || '—') + ' (capacitate edificabilă)' };
 
-    // 2. Piață (date ANCPI indisponibile) — neutru
-    comps.market = { score: 50, q: 'neutru', note: 'preț/trend piață — necesită date ANCPI (Market Intel)' };
+    // 2. Piață — din modulul Market Intelligence (dacă există date pt UAT), altfel neutru
+    comps.market = { score: 50, q: 'neutru', note: 'preț/trend piață — adaugă date în Market Intelligence' };
+    try {
+      var cityNm = (G.TCI && (G.TCI.cityName || (G._RO_CITIES_DB && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name))) || '';
+      if (G.Market && cityNm) {
+        var ms = G.Market.snapshot(cityNm, 'apartament');
+        if (ms && ms.count) { var mtr = ms.change_12m_pct; comps.market = { score: Math.max(20, Math.min(95, Math.round(55 + mtr * 2.5))), q: 'real', note: ms.median_m2_eur + ' €/mp · ' + (mtr >= 0 ? '+' : '') + mtr + '% 12 luni (Market)' }; }
+      }
+    } catch (e) {}
 
     // 3. Locație — proxy pe mărime oraș (transport/amenități reale = Faza 2)
     var tier = 55; try { var c = G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey]; var pop = c && (c.pop2021 || c.pop || 0); tier = pop >= 200000 ? 72 : pop >= 50000 ? 60 : 48; } catch (e) {}

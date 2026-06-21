@@ -1838,7 +1838,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260618tur"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621models"></script>
+<script src="js/13-info-drawer.js?v=20260621market"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260616fl"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3239,6 +3239,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       <div style="font-size:10px;color:rgba(196,181,253,.6)">GBA·cost·GDV·profit·IRR·valoare teren·senzitivitate · ≠ SF/DALI</div>
     </button>
     <button onclick="infoDrawerOpen('feaz')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#c4b5fd'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
+    <button onclick="window.Market&&window.Market.openPanel?window.Market.openPanel():ss?.('Market se inițializează');_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(16,185,129,.08);border:none;color:#6ee7b7;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(16,185,129,.18)'" onmouseout="this.style.background='rgba(16,185,129,.08)'">
+      📈 Market Intelligence (prețuri €/mp)
+      <div style="font-size:10px;color:rgba(110,231,183,.6)">mediană · trend 3/12 luni · comparare UAT · date demonstrative (ANCPI = Faza 2)</div>
+    </button>
+    <button onclick="infoDrawerOpen('market')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#6ee7b7'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
 
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
@@ -6117,7 +6127,8 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/feasibility-ui.js?v=20260620c"></script>
     <script src="js/lvc.js?v=20260620a"></script>
     <!-- Grup C: Investment Heatmap (15) + Carbon Tracker (14) -->
-    <script src="js/investment-heatmap.js?v=20260620a"></script>
+    <script src="js/investment-heatmap.js?v=20260621mkt"></script>
+    <script src="js/market-engine.js?v=20260621a"></script>
     <script src="js/carbon-tracker.js?v=20260620a"></script>
     <script src="js/portfolio-dd.js?v=20260620a"></script>
 </body>
