@@ -181,7 +181,11 @@
     capacity: { ico: '📊', title: 'Impact capacitate', desc: 'Ce se întâmplă cu infrastructura dacă mai aprobi X apartamente', builtin: true },
     park: { ico: '🌳', title: 'Parc 3D', desc: 'Vizualizează un parc în 3D înainte de proiect', route: function () { closeAll(); G.Loisir && G.Loisir.openPanel && G.Loisir.openPanel(); } },
     feasibility: { ico: '💰', title: 'Fezabilitate', desc: 'Estimează rentabilitatea unui proiect imobiliar', route: function () { closeAll(); G.Feaz && G.Feaz.openPanel && G.Feaz.openPanel(); } },
-    superbloc: { ico: '🟧', title: 'Superbloc (Barcelona)', desc: 'Spațiu public recâștigat + înainte/după pe hartă', route: function () { closeAll(); G.Superbloc && G.Superbloc.openPanel && G.Superbloc.openPanel(); } }
+    superbloc: { ico: '🟧', title: 'Superbloc (Barcelona)', desc: 'Spațiu public recâștigat + înainte/după pe hartă', route: function () { closeAll(); G.Superbloc && G.Superbloc.openPanel && G.Superbloc.openPanel(); } },
+    city15: { ico: '🚶', title: 'Oraș 15 minute', desc: 'Acces la servicii esențiale într-o izocronă de mers pe jos', builtin: true },
+    tod: { ico: '🚉', title: 'TOD — dezvoltare lângă transport', desc: 'Densitate țintă în jurul unei stații + reducere auto', builtin: true },
+    corridor: { ico: '🏙', title: 'Coridor mixt (Mixed-Use)', desc: 'Locuințe + locuri de muncă + venit fiscal pe o axă', builtin: true },
+    sponge: { ico: '💧', title: 'Oraș-burete (Sponge City)', desc: 'Retenție apă pluvială + reducere inundații + răcire', builtin: true }
   };
 
   // ── UI ──
@@ -225,7 +229,10 @@
     body.appendChild(grid);
     // scenarii salvate
     var scns = scenarios.list();
-    body.appendChild(el('div', { style: ST.label }, 'Scenarii salvate (' + scns.length + ')'));
+    var schead = el('div', { style: 'display:flex;justify-content:space-between;align-items:center' });
+    schead.appendChild(el('div', { style: ST.label }, 'Scenarii salvate (' + scns.length + ')'));
+    if (scns.length >= 2) { var cmp = el('button', { style: ST.ghost }, '⚖ Compară'); cmp.onclick = compareScenarios; schead.appendChild(cmp); }
+    body.appendChild(schead);
     var sl = el('div'); body.appendChild(sl);
     function refresh() {
       var a = scenarios.list();
@@ -246,11 +253,144 @@
 
   function simHeaderBack(body) { var b = el('button', { style: ST.ghost + ';margin-bottom:8px' }, '← Toate simulatoarele'); b.onclick = openDashboard; body.appendChild(b); }
 
+  // ── comparare scenarii (side-by-side, valoarea mai bună evidențiată) ──
+  function compareScenarios() {
+    var body = shell('<div style="font-weight:800;font-size:16px">⚖ Comparare scenarii</div><div style="font-size:11px;color:#94a3b8">Maxim 3 scenarii alăturate · valorile numerice cele mai mari sunt evidențiate</div>');
+    simHeaderBack(body);
+    var all = scenarios.list();
+    // selectare (max 3)
+    var sel = [];
+    var pick = el('div', { style: 'margin-bottom:8px' });
+    all.forEach(function (s) {
+      var lab = el('label', { style: 'display:flex;gap:6px;align-items:center;font-size:12px;color:#cbd5e1;padding:3px 0' });
+      var cb = el('input', { type: 'checkbox' }); cb.onchange = function () { if (cb.checked) { if (sel.length >= 3) { cb.checked = false; return; } sel.push(s); } else { sel = sel.filter(function (x) { return x.id !== s.id; }); } draw(); };
+      lab.appendChild(cb); lab.appendChild(document.createTextNode((SIMS[s.sim] ? SIMS[s.sim].ico : '•') + ' ' + s.name)); pick.appendChild(lab);
+    });
+    body.appendChild(pick);
+    var out = el('div'); body.appendChild(out);
+    function numOf(v) { var m = String(v).replace(/\./g, '').match(/-?\d+([,.]\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : null; }
+    function draw() {
+      if (sel.length < 2) { out.innerHTML = '<div style="color:#64748b;font-size:12px">Selectează 2-3 scenarii pentru comparare.</div>'; return; }
+      // adună toate cheile de rezultate
+      var keys = []; sel.forEach(function (s) { Object.keys(s.results || {}).forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); }); });
+      var html = '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left;padding:4px;color:#94a3b8">Indicator</th>' + sel.map(function (s) { return '<th style="padding:4px;color:#e9d08a">' + s.name.slice(0, 18) + '</th>'; }).join('') + '</tr></thead><tbody>';
+      keys.forEach(function (k) {
+        var nums = sel.map(function (s) { return numOf((s.results || {})[k]); });
+        var best = Math.max.apply(null, nums.filter(function (x) { return x != null; }));
+        html += '<tr style="border-top:1px solid rgba(255,255,255,.06)"><td style="padding:4px;color:#94a3b8">' + k + '</td>' + sel.map(function (s, i) {
+          var v = (s.results || {})[k]; var isBest = nums[i] != null && nums[i] === best && nums.filter(function (x) { return x === best; }).length < sel.length;
+          return '<td style="padding:4px;text-align:center;' + (isBest ? 'color:#34d399;font-weight:700' : 'color:#e6edf7') + '">' + (v == null ? '—' : v) + '</td>';
+        }).join('') + '</tr>';
+      });
+      html += '</tbody></table><div style="font-size:10px;color:#64748b;margin-top:8px">Evidențierea verde marchează valoarea numerică cea mai mare per indicator (interpretarea „mai bine" depinde de indicator).</div>';
+      out.innerHTML = html;
+    }
+    draw();
+  }
+
   function open(sim) {
     if (sim === 'uhi') return openUHI();
     if (sim === 'river') return openRiver();
     if (sim === 'capacity') return openCapacity();
+    if (sim === 'city15') return openModel('city15');
+    if (sim === 'tod') return openModel('tod');
+    if (sim === 'corridor') return openModel('corridor');
+    if (sim === 'sponge') return openModel('sponge');
     if (SIMS[sim] && SIMS[sim].route) return SIMS[sim].route();
+  }
+
+  // ── modele urbane parametrice (15-min / TOD / coridor / sponge) ──
+  var MODELS = {
+    city15: {
+      title: '🚶 Oraș 15 minute', accent: '#fb923c',
+      params: [
+        { k: 'radius_m', label: 'Rază mers pe jos (m)', val: 750, min: 300, max: 1200, step: 50 },
+        { k: 'services_density', label: 'Densitate servicii (nr/km²)', val: 40, min: 5, max: 120, step: 5 },
+        { k: 'types_present', label: 'Tipuri funcțiuni esențiale (0-7)', val: 5, min: 0, max: 7, step: 1 }
+      ],
+      compute: function (p) {
+        var area_km2 = Math.PI * Math.pow(p.radius_m / 1000, 2);
+        var servicii = Math.round(area_km2 * p.services_density);
+        var mixitate = Math.round(p.types_present / 7 * 100);
+        var walk_min = Math.round(p.radius_m / 80); // ~4.8 km/h
+        return { stats: [{ v: servicii, l: 'servicii accesibile', c: '#fb923c' }, { v: mixitate + '%', l: 'scor mixitate (/7 tipuri)', c: '#34d399' }, { v: '~' + walk_min + ' min', l: 'timp de mers la margine', c: '#60a5fa' }, { v: (Math.round(area_km2 * 100) / 100) + ' km²', l: 'arie deservită' }],
+          results: { 'Servicii accesibile': servicii, 'Scor mixitate': mixitate + '%', 'Arie': (Math.round(area_km2 * 100) / 100) + ' km²' },
+          svg: izochrone(p.radius_m) };
+      }
+    },
+    tod: {
+      title: '🚉 TOD — Transit-Oriented Development', accent: '#0ea5e9',
+      params: [
+        { k: 'radius_m', label: 'Rază în jurul stației (m)', val: 500, min: 200, max: 1000, step: 50 },
+        { k: 'density_target', label: 'Densitate țintă (loc/ha)', val: 200, min: 50, max: 500, step: 25 }
+      ],
+      compute: function (p) {
+        var zona_ha = Math.PI * Math.pow(p.radius_m / 1000, 2) * 100;
+        var pop = Math.round(zona_ha * p.density_target);
+        var reducere_auto = 35; // studii TOD globale
+        return { stats: [{ v: Math.round(zona_ha) + ' ha', l: 'zonă TOD (cerc stație)', c: '#0ea5e9' }, { v: pop.toLocaleString('ro-RO'), l: 'populație suportată', c: '#34d399' }, { v: '−' + reducere_auto + '%', l: 'deplasări auto (vs sprawl)', c: '#fb923c' }],
+          results: { 'Zonă TOD': Math.round(zona_ha) + ' ha', 'Populație': pop.toLocaleString('ro-RO'), 'Reducere auto': '−' + reducere_auto + '%' },
+          svg: concentric(p.radius_m) };
+      }
+    },
+    corridor: {
+      title: '🏙 Coridor mixt (Mixed-Use)', accent: '#a855f7',
+      params: [
+        { k: 'lungime_m', label: 'Lungime coridor (m)', val: 800, min: 200, max: 3000, step: 100 },
+        { k: 'latime_m', label: 'Adâncime front (m)', val: 60, min: 20, max: 150, step: 10 },
+        { k: 'cut', label: 'CUT mediu', val: 2.5, min: 0.5, max: 5, step: 0.1 },
+        { k: 'mix_rezidential', label: 'Mix rezidențial (%)', val: 60, min: 0, max: 100, step: 5 }
+      ],
+      compute: function (p) {
+        var area_m2 = p.lungime_m * p.latime_m, ha = area_m2 / 10000;
+        var gba = area_m2 * p.cut;
+        var rez = gba * p.mix_rezidential / 100, com = gba - rez;
+        var locuinte = Math.round(rez * 0.82 / 65), munca = Math.round(com / 25);
+        var taxa = Math.round((locuinte * 900 + munca * 1200)); // impozit estimativ RON/an
+        return { stats: [{ v: (Math.round(ha * 10) / 10) + ' ha', l: 'suprafață coridor', c: '#a855f7' }, { v: locuinte.toLocaleString('ro-RO'), l: 'locuințe noi', c: '#34d399' }, { v: munca.toLocaleString('ro-RO'), l: 'locuri de muncă', c: '#60a5fa' }, { v: (Math.round(taxa / 1000)) + 'k RON', l: 'venit fiscal anual est.', c: '#fbbf24' }],
+          results: { 'Suprafață': (Math.round(ha * 10) / 10) + ' ha', 'GBA': Math.round(gba).toLocaleString('ro-RO') + ' mp', 'Locuințe': locuinte, 'Locuri muncă': munca, 'Venit fiscal/an': taxa.toLocaleString('ro-RO') + ' RON' }, svg: null };
+      }
+    },
+    sponge: {
+      title: '💧 Oraș-burete (Sponge City)', accent: '#22d3ee',
+      params: [
+        { k: 'area_ha', label: 'Suprafață intervenție (ha)', val: 5, min: 0.5, max: 100, step: 0.5 },
+        { k: 'permeabil_target', label: 'Suprafețe permeabile țintă (%)', val: 60, min: 10, max: 90, step: 5 },
+        { k: 'retentie_mm', label: 'Capacitate retenție (mm ploaie)', val: 40, min: 10, max: 120, step: 5 }
+      ],
+      compute: function (p) {
+        var area_m2 = p.area_ha * 10000;
+        var perm_m2 = area_m2 * p.permeabil_target / 100;
+        var volum = Math.round(perm_m2 * p.retentie_mm / 1000); // m³ reținut la o ploaie
+        var reducere_inund = Math.min(80, Math.round(p.permeabil_target * 0.8));
+        var racire = Math.round(Math.min(2.5, perm_m2 * 0.00015) * 10) / 10; // °C local (NbS)
+        return { stats: [{ v: volum.toLocaleString('ro-RO') + ' m³', l: 'apă reținută / ploaie', c: '#22d3ee' }, { v: '−' + reducere_inund + '%', l: 'risc inundații locale', c: '#34d399' }, { v: '−' + racire + '°C', l: 'răcire locală (UHI)', c: '#60a5fa' }],
+          results: { 'Apă reținută': volum.toLocaleString('ro-RO') + ' m³/ploaie', 'Reducere inundații': '−' + reducere_inund + '%', 'Răcire': '−' + racire + '°C', 'Permeabil': p.permeabil_target + '%' }, svg: null };
+      }
+    }
+  };
+  function izochrone(r) { var R = 60; return '<svg viewBox="0 0 200 130" style="width:100%;max-width:260px"><circle cx="100" cy="65" r="' + R + '" fill="rgba(251,146,60,.18)" stroke="#fb923c" stroke-width="2" stroke-dasharray="4 3"/><circle cx="100" cy="65" r="6" fill="#fb923c"/><text x="100" y="68" text-anchor="middle" fill="#fff" font-size="9">' + r + 'm</text><text x="100" y="122" text-anchor="middle" fill="#94a3b8" font-size="9">izocronă mers pe jos</text></svg>'; }
+  function concentric(r) { return '<svg viewBox="0 0 200 130" style="width:100%;max-width:260px"><circle cx="100" cy="62" r="55" fill="rgba(14,165,233,.10)" stroke="#0ea5e9" stroke-width="1.5"/><circle cx="100" cy="62" r="36" fill="rgba(14,165,233,.18)" stroke="#0ea5e9" stroke-width="1.5"/><circle cx="100" cy="62" r="18" fill="rgba(14,165,233,.3)"/><rect x="94" y="56" width="12" height="12" fill="#0ea5e9"/><text x="100" y="122" text-anchor="middle" fill="#94a3b8" font-size="9">densitate descrescătoare de la stație (' + r + 'm)</text></svg>'; }
+
+  function openModel(key) {
+    var M = MODELS[key]; if (!M) return;
+    var body = shell('<div style="font-weight:800;font-size:16px">' + M.title + '</div><div style="font-size:11px;color:#94a3b8">Model urban parametric · L.350 art.5 · ' + SIMS[key].desc + '</div>');
+    simHeaderBack(body);
+    var p = {}; M.params.forEach(function (q) { p[q.k] = q.val; });
+    var out = el('div'); var svgBox = el('div', { style: 'text-align:center;margin:8px 0' });
+    var sliders = el('div');
+    M.params.forEach(function (q) {
+      var w = el('div', { style: 'margin-bottom:6px' }); var v = el('span', { style: 'color:' + M.accent + ';font-weight:700' }, '' + q.val);
+      w.appendChild(el('span', { style: 'font-size:12px;color:#cbd5e1' }, q.label + ' — ')); w.firstChild.appendChild(v);
+      var i = el('input', { type: 'range', min: '' + q.min, max: '' + q.max, step: '' + q.step, value: '' + q.val, style: 'width:100%' });
+      i.oninput = function () { p[q.k] = +i.value; v.textContent = i.value; redraw(); }; w.appendChild(i); sliders.appendChild(w);
+    });
+    body.appendChild(sliders); body.appendChild(svgBox); body.appendChild(out);
+    var lastRes = {};
+    function redraw() { var r = M.compute(p); lastRes = r.results; out.innerHTML = statCards(r.stats); svgBox.innerHTML = r.svg || ''; }
+    redraw();
+    saveBar(body, key, function () { return Object.assign({}, p); }, function () { return lastRes; }, null);
+    body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:8px' }, 'Model parametric (calcul instant). Pentru analiza pe POI/rețele reale (Overpass/OSM) folosește modulele de hartă. Export = „Studiu de oportunitate" L.350 art.5.'));
   }
 
   function saveBar(body, sim, getParams, getResults, getThumb) {
