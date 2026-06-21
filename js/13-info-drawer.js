@@ -244,6 +244,20 @@ function svProjectVolume(pos){
 
 const RAPORT_INFO = {
   // ═══ MODULE DE DECIZIE & ADMINISTRAȚIE (UrbanX Pro) ═══
+  ansamblu: {
+    ico: '🏘️', label: 'Masterplan ansamblu (lotizare ghidată)', badge: 'recomandat', badgeLabel: 'Proiectare · metodologie PUZ/PUD', color: '168,85,247',
+    fn: 'window.Ansamblu&&window.Ansamblu.openWizard&&window.Ansamblu.openWizard()',
+    ce: 'Ghidează proiectarea unui ansamblu (case + colective + comerț + grădiniță + biserică + parc) în ORDINEA corectă: 1) programul funcțional, 2) accesele (min 2, ISU), 3) ierarhia stradală pe 3 niveluri (colector → local → woonerf), 4) separarea fluxurilor incompatibile (grădiniță drop-off, comerț pe colector, biserică cu parcare temporară), 5) abia apoi loturile + edificabilul pe ce rămâne. Verifică aprobabilitatea (accese, verde, densitate, continuitate pietonală).',
+    dece: 'Greșeala frecventă (și în versiunea veche de lotizare) e să pleci de la POT/CUT + retrageri și să tai loturi. Aprobabilitatea unui PUZ/PUD depinde de coerența circulațiilor și separarea fluxurilor — pietonalul se proiectează ÎNAINTEA mașinii ("poate un copil merge în siguranță din orice locuință la grădiniță/parc?"). UrbanX impune metodologia corectă, lucru pe care niciun tool din RO nu-l face.',
+    legal: 'Legea 350/2001 (PUZ/PUD) · NP 068/2002 (căi de circulație) · Legea 24/2007 (spații verzi 8 mp/loc) · GD 525/1996 (parcaje) · Legea 50/1991 (acces ISU)',
+    output: [
+      { ico: '📋', txt: 'Bilanț suprafețe: circulații ~22% + verde + echipamente ÎNAINTEA loturilor' },
+      { ico: '🛣', txt: 'Ierarhie stradală 3 niveluri cu profile + rol' },
+      { ico: '🔀', txt: 'Reguli de amplasare per funcțiune (separarea fluxurilor)' },
+      { ico: '☑️', txt: 'Verificări de aprobabilitate (accese/ISU, verde, CUT, pietonal) + brief PDF' },
+    ],
+    nu: ['Schemă de organizare + brief orientativ — desenul PUZ/PUD final (loturi, profile, plan reglementări) = proiectant atestat RUR', 'Pentru subdivizare simplă geometrică folosește „Lotizare" clasic'],
+  },
   fisa360: {
     ico: '🧭', label: 'Fișa parcelei 360°', badge: 'recomandat', badgeLabel: 'Hub · toate modulele', color: '212,175,55',
     fn: 'window.Fisa360&&window.Fisa360.open&&window.Fisa360.open()',

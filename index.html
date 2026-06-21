@@ -1837,7 +1837,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260618tur"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621fisa"></script>
+<script src="js/13-info-drawer.js?v=20260621ans"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260616fl"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3293,6 +3293,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     🛰 GHSL · Suprafață Construită 1975-2055
     <div style="font-size:10px;color:rgba(96,165,250,.6);font-weight:400">Copernicus · JRC EUR 31461 EN · Slider temporal</div>
   </button>
+
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px;margin-top:4px">
+    <button onclick="window.Ansamblu&&window.Ansamblu.openWizard?window.Ansamblu.openWizard():ss?.('Ansamblu se inițializează');_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);color:#d8b4fe;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(168,85,247,.2)'" onmouseout="this.style.background='rgba(168,85,247,.1)'">
+      🏘️ Masterplan ansamblu (lotizare ghidată)
+      <div style="font-size:10px;color:rgba(216,180,254,.65)">program→accese→ierarhie stradală→fluxuri→loturi · metodologia corectă PUZ/PUD</div>
+    </button>
+    <button onclick="infoDrawerOpen('ansamblu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#d8b4fe'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
 
   <!-- Grup: Planificare Strategica -->
   <div style="padding:6px 8px 3px;font-size:10px;color:rgba(96,165,250,.5);font-weight:700;
@@ -6014,6 +6024,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urbanx-intelligence-chapter.js?v=20260620a"></script>
     <script src="js/urbanx-modules-chapter.js?v=20260621a"></script>
     <script src="js/fisa-360.js?v=20260621a"></script>
+    <script src="js/lotizare-ansamblu.js?v=20260621a"></script>
     <!-- UrbanX CAU — Comisia de Acorduri Unice (Faza 1 client-side: reguli avize + CU + tracking) -->
     <script src="js/cau-engine.js?v=20260620c"></script>
     <script src="js/cau-report.js?v=20260620b"></script>
