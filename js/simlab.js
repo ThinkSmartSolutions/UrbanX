@@ -83,13 +83,31 @@
     [30, 90, 160].forEach(function (x) { var th = 45 + (x % 3) * 10; ctx.fillStyle = C.tree; ctx.fillRect(x + 8, H - 80 - th, 5, th); ctx.fillStyle = C.leaf; ctx.beginPath(); ctx.arc(x + 10, H - 80 - th, 14, 0, 7); ctx.fill(); });
     [420, 500, 580].forEach(function (x) { var th = 40 + (x % 4) * 8; ctx.fillStyle = C.tree; ctx.fillRect(x + 8, H - 66 - th, 4, th); ctx.fillStyle = C.leaf; ctx.beginPath(); ctx.arc(x + 10, H - 66 - th, 12, 0, 7); ctx.fill(); });
     if (p.waterLevel > 15) { ctx.fillStyle = '#639922'; for (var r = 0; r < 5; r++) { ctx.beginPath(); ctx.ellipse(225 + r * 12, waterY + 18, 3, 8, 0.3, 0, 7); ctx.fill(); } }
-    // viitură Q100
-    if (p.flood) { ctx.fillStyle = 'rgba(220,38,38,.18)'; ctx.fillRect(0, H - 56 - 100 * 0.5, W, 100 * 0.5 + 20); ctx.fillStyle = '#ef4444'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('⚠ Nivel viitură Q100 — elementele sub linie inundă', 16, H - 56 - 100 * 0.5 - 6); }
-    // zonă activă highlight + etichetă
+    // ── ELEMENTE DE DESIGN AMPLASATE (se desenează efectiv pe secțiune) ──
+    var cx1 = 220, cx2 = 360, surf = waterY + 18; // canalul apei
+    var placed = p.placed || {};
+    function outline(active, fn) { fn(); if (active) { ctx.save(); ctx.strokeStyle = '#fb923c'; ctx.lineWidth = 2; ctx.setLineDash([4, 3]); fn(true); ctx.setLineDash([]); ctx.restore(); } }
+    // PROMENADĂ — bandă lată evidențiată pe malul stâng
+    if (placed.promenada) { ctx.fillStyle = p.activeZone === 'promenada' ? '#fbbf24' : '#c8a85a'; ctx.fillRect(20, waterY + 8, 180, 8); ctx.fillStyle = '#0b1424'; ctx.font = '8px sans-serif'; ctx.fillText('promenadă 6m', 26, waterY + 14.5); }
+    // MAL naturalizat — stuf dens pe malul drept
+    if (placed.mal) { ctx.fillStyle = '#3f8c3a'; for (var rr = 0; rr < 8; rr++) { ctx.beginPath(); ctx.ellipse(cx2 - 4 + rr * 7, surf, 3, 11, 0.25, 0, 7); ctx.fill(); } }
+    // TERASĂ suspendată — deck pe piloți peste apă (mal stâng)
+    if (placed.terasa) { var tx = cx1 - 6, ty = surf - 24; ctx.fillStyle = '#444'; ctx.fillRect(tx + 6, ty + 4, 3, surf - ty); ctx.fillRect(tx + 44, ty + 4, 3, surf - ty); ctx.fillStyle = '#b07a3a'; ctx.fillRect(tx, ty, 58, 6); ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx, ty - 8); ctx.moveTo(tx + 58, ty); ctx.lineTo(tx + 58, ty - 8); ctx.stroke(); ctx.fillStyle = '#0b1424'; ctx.font = '8px sans-serif'; ctx.fillText('terasă', tx + 14, ty - 2); }
+    // BELVEDERE — platformă înălțată pe malul drept
+    if (placed.viewpoint || placed.belvedere) { var bx = cx2 + 24, by = surf - 48; ctx.fillStyle = '#555'; ctx.fillRect(bx + 10, by, 4, 48); ctx.fillStyle = '#7a8a9a'; ctx.fillRect(bx, by - 6, 30, 7); ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(bx, by - 6); ctx.lineTo(bx, by - 16); ctx.moveTo(bx + 30, by - 6); ctx.lineTo(bx + 30, by - 16); ctx.stroke(); ctx.fillStyle = '#e6edf7'; ctx.font = '8px sans-serif'; ctx.fillText('belvedere', bx - 2, by - 20); }
+    // LUCIU / PONTON — ponton plutitor + caiace pe apă
+    if (placed.apa) { var px = (cx1 + cx2) / 2 - 26; ctx.fillStyle = '#8a5a2a'; ctx.fillRect(px, surf - 4, 52, 7); ctx.fillStyle = '#d4a25a'; ctx.fillRect(px + 4, surf - 6, 44, 3); ctx.fillStyle = '#0b1424'; ctx.font = '8px sans-serif'; ctx.fillText('ponton', px + 12, surf + 1); ctx.fillStyle = '#e24b4a'; ctx.beginPath(); ctx.ellipse(px - 14, surf + 8, 9, 3, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.ellipse(px + 70, surf + 10, 9, 3, 0, 0, 7); ctx.fill(); }
+    // POD pietonal — arc peste apă
+    if (placed.pod) { ctx.strokeStyle = p.activeZone === 'pod' ? '#fb923c' : '#9aa3ad'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx1 - 16, surf - 6); ctx.quadraticCurveTo((cx1 + cx2) / 2, surf - 46, cx2 + 16, surf - 6); ctx.stroke(); ctx.lineWidth = 1; for (var pp = 0; pp <= 6; pp++) { var fx = (cx1 - 16) + (cx2 + 32) * pp / 6; var fy = surf - 6 - (40 * (1 - Math.pow((pp / 6 - 0.5) * 2, 2))); ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy + 6); ctx.stroke(); } ctx.fillStyle = '#e6edf7'; ctx.font = '8px sans-serif'; ctx.fillText('pod pietonal', (cx1 + cx2) / 2 - 22, surf - 50); }
+
+    // viitură Q100 (peste elemente — arată ce inundă)
+    if (p.flood) { var fl = surf - 36; ctx.fillStyle = 'rgba(220,38,38,.22)'; ctx.fillRect(0, fl, W, H - fl); ctx.strokeStyle = '#ef4444'; ctx.setLineDash([6, 4]); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, fl); ctx.lineTo(W, fl); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#fecaca'; ctx.font = 'bold 11px sans-serif'; ctx.fillText('⚠ Nivel viitură Q100 — ce e sub linie inundă', 14, fl - 5); }
+
+    // banner zonă activă (sus) — ce element e selectat acum
     var z = RZONES[p.activeZone];
-    if (z) { ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(12, 12, Math.min(380, W - 24), 22); ctx.fillStyle = '#0b1424'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('▸ ' + z.title, 18, 27); }
+    if (z) { var on = !!placed[p.activeZone]; ctx.fillStyle = 'rgba(255,255,255,.94)'; ctx.fillRect(12, 12, Math.min(420, W - 24), 22); ctx.fillStyle = on ? '#15803d' : '#92400e'; ctx.font = 'bold 12px sans-serif'; ctx.fillText((on ? '✓ amplasat: ' : '▸ apasă pentru a amplasa: ') + z.title, 18, 27); }
     ctx.fillStyle = 'rgba(11,20,36,.6)'; ctx.font = '11px sans-serif'; ctx.fillText('Secțiune transversală — ' + (p.riverName || 'Bahlui'), W - 180, H - 8);
-    return { waterLevel: p.waterLevel, zone: p.activeZone, flood: !!p.flood };
+    return { waterLevel: p.waterLevel, placed: Object.keys(placed).filter(function (k) { return placed[k]; }), flood: !!p.flood };
   }
 
   // ── Capacity (factori reali din UXI/Intelligence) ──
@@ -251,7 +269,7 @@
     body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px' }, 'SimLab rulează client-side (canvas/SVG/math). Scenariile se salvează local în browser; stocarea pe server + share-link = Faza 2. Export = „Studiu de oportunitate" (L.350/2001 art.5) — informativ, fără valoare juridică.'));
   }
 
-  function simHeaderBack(body) { var b = el('button', { style: ST.ghost + ';margin-bottom:8px' }, '← Toate simulatoarele'); b.onclick = openDashboard; body.appendChild(b); }
+  function simHeaderBack(body) { var b = el('button', { style: 'background:rgba(212,175,55,.16);color:#e9d08a;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:8px 13px;cursor:pointer;font-size:12px;font-weight:700;margin-bottom:10px' }, '← Înapoi la SimLab (toate simulatoarele)'); b.onclick = openDashboard; body.appendChild(b); }
 
   // ── comparare scenarii (side-by-side, valoarea mai bună evidențiată) ──
   function compareScenarios() {
@@ -429,12 +447,20 @@
   function openRiver() {
     var body = shell('<div style="font-weight:800;font-size:16px">🌊 SimLab — Front de apă (secțiune mal)</div><div style="font-size:11px;color:#94a3b8">Amenajarea malurilor + simulare viitură Q100 · model Cheonggyecheon/Bahlui</div>');
     simHeaderBack(body);
-    var p = { waterLevel: 40, season: 'vara', activeZone: 'promenada', flood: false, riverName: 'Bahlui' };
+    var p = { waterLevel: 40, season: 'vara', activeZone: 'promenada', flood: false, riverName: 'Bahlui', placed: { promenada: true } };
     var cv = el('canvas', { width: '660', height: '280', style: 'width:100%;background:#020617;border-radius:10px;border:1px solid rgba(255,255,255,.1)' }); body.appendChild(cv);
-    var info = el('div', { style: 'font-size:11px;color:#cbd5e1;margin-top:8px;min-height:32px' });
+    body.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px' }, 'Apasă un element ca să-l <b>amplasezi/elimini</b> pe secțiune (poți compune mai multe). Elementul activ e evidențiat portocaliu.'));
+    var info = el('div', { style: 'font-size:11px;color:#cbd5e1;margin-top:6px;min-height:30px' });
     var zbar = el('div', { style: 'display:flex;gap:5px;margin-top:8px;flex-wrap:wrap' });
-    Object.keys(RZONES).forEach(function (k) { var b = el('button', { style: ST.ghost }, RZONES[k].title.split(' ')[0]); b.onclick = function () { p.activeZone = k; info.innerHTML = '<b style="color:#7dd3fc">' + RZONES[k].title + '</b><br>' + RZONES[k].desc; }; zbar.appendChild(b); });
-    body.appendChild(zbar); body.appendChild(info);
+    var ZLABEL = { promenada: 'Promenadă', terasa: 'Terasă', viewpoint: 'Belvedere', mal: 'Mal natural', apa: 'Ponton/apă', pod: 'Pod' };
+    var zbtns = {};
+    function syncZ() { Object.keys(zbtns).forEach(function (k) { zbtns[k].innerHTML = (p.placed[k] ? '✓ ' : '+ ') + ZLABEL[k]; zbtns[k].setAttribute('style', (p.placed[k] ? 'background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.45)' : ST.ghost) + (p.activeZone === k ? ';outline:2px solid #fb923c' : '') + ';border-radius:8px;padding:7px 11px;cursor:pointer;font-size:12px;font-weight:600'); }); }
+    Object.keys(RZONES).forEach(function (k) {
+      var b = el('button', null, (p.placed[k] ? '✓ ' : '+ ') + ZLABEL[k]);
+      b.onclick = function () { p.placed[k] = !p.placed[k]; p.activeZone = k; info.innerHTML = '<b style="color:#7dd3fc">' + (p.placed[k] ? 'Amplasat: ' : 'Eliminat: ') + RZONES[k].title + '</b><br>' + RZONES[k].desc; syncZ(); };
+      zbtns[k] = b; zbar.appendChild(b);
+    });
+    body.appendChild(zbar); body.appendChild(info); syncZ();
     var ctr = el('div', { style: 'margin-top:8px' });
     var wl = el('div', { style: 'margin-bottom:6px' }); var wv = el('span', { style: 'color:#7dd3fc;font-weight:700' }, '40'); wl.appendChild(el('span', { style: 'font-size:12px;color:#cbd5e1' }, 'Nivel apă — ')); wl.firstChild.appendChild(wv);
     var ws = el('input', { type: 'range', min: '0', max: '100', value: '40', style: 'width:100%' }); ws.oninput = function () { p.waterLevel = +ws.value; wv.textContent = ws.value; }; wl.appendChild(ws); ctr.appendChild(wl);
@@ -447,7 +473,7 @@
     var gt = 0; (function loop() { _raf = requestAnimationFrame(loop); gt += 16; drawRiver(cv, p, gt); })();
     body.appendChild(el('div', { style: 'background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;border-radius:8px;padding:8px 10px;font-size:11px;line-height:1.5;margin-top:10px' },
       '⚖ <b>Cadru legal obligatoriu (front de apă):</b> aviz Apele Române (ABA) pentru orice amenajare pe mal · zonă de protecție min. <b>10 m</b> de la malul apei, unde construcțiile sunt interzise (Legea 107/1996 art. 40) · servitute de trecere 1,5 m (art. 41) · construcții în albie interzise, podurile = excepție cu aviz special (art. 35) · verificare inundabilitate Q1% pe hărțile INHGA. Abordare recomandată: „a trăi cu inundațiile" (design amfibiu — Cheonggyecheon Seoul, Isar München), nu prevenirea lor.'));
-    saveBar(body, 'river', function () { return { 'Nivel apă': p.waterLevel, 'Anotimp': p.season, 'Zonă': RZONES[p.activeZone].title, 'Râu': p.riverName }; }, function () { return { 'Stare': p.flood ? 'sub viitură Q100' : 'normal', 'Aviz necesar': 'Apele Române (L.107/1996)', 'Zonă protecție': '10 m mal' }; }, function () { try { return cv.toDataURL('image/jpeg', 0.7); } catch (e) { return null; } });
+    saveBar(body, 'river', function () { var pl = Object.keys(p.placed).filter(function (k) { return p.placed[k]; }).map(function (k) { return RZONES[k].title; }); return { 'Nivel apă': p.waterLevel, 'Anotimp': p.season, 'Elemente amplasate': pl.join(', ') || '—', 'Râu': p.riverName }; }, function () { var pl = Object.keys(p.placed).filter(function (k) { return p.placed[k]; }); return { 'Nr. elemente': pl.length, 'Stare': p.flood ? 'sub viitură Q100' : 'normal', 'Aviz necesar': 'Apele Române (L.107/1996)', 'Zonă protecție': '10 m mal' }; }, function () { try { return cv.toDataURL('image/jpeg', 0.7); } catch (e) { return null; } });
   }
 
   // SIM 3 — Impact capacitate (gauges SVG, factori UXI)
