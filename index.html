@@ -1838,7 +1838,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260618tur"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621market"></script>
+<script src="js/13-info-drawer.js?v=20260621plati"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260616fl"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3180,6 +3180,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       <div style="font-size:10px;color:rgba(167,139,250,.6);font-weight:400">cerere→CU→primăria obține avizele→Acord Unic · 9 reguli · L.50/1991</div>
     </button>
     <button onclick="infoDrawerOpen('cau')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
+    <button onclick="window.Plati&&window.Plati.openPanel?window.Plati.openPanel():ss?.('Plăți se inițializează');_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(34,197,94,.08);border:none;color:#86efac;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(34,197,94,.18)'" onmouseout="this.style.background='rgba(34,197,94,.08)'">
+      💳 Plăți taxe urbanistice (CU/AC/PUZ)
+      <div style="font-size:10px;color:rgba(134,239,172,.6)">calculator taxă (AC=0,5% L.50/1991) + plată online + chitanță · simulare (procesator=Faza 2)</div>
+    </button>
+    <button onclick="infoDrawerOpen('plati')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#86efac'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
 
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
@@ -6112,6 +6122,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/sidu.js?v=20260621bcn"></script>
     <!-- UrbanX CAU — Comisia de Acorduri Unice (Faza 1 client-side: reguli avize + CU + tracking) -->
     <script src="js/cau-engine.js?v=20260620c"></script>
+    <script src="js/plati-engine.js?v=20260621a"></script>
     <script src="js/cau-report.js?v=20260620b"></script>
     <script src="js/cau-ui.js?v=20260620c"></script>
     <!-- UrbanX Wave 1 — Dosar Digital (05) + Sesizări (06), client-side -->

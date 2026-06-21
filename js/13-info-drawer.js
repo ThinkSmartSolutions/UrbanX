@@ -394,6 +394,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Rețelele din OSM = date estimate (confirmați cu operatorii)', 'Dispecerizarea reală prin email/API + portalul avizatorilor + plata online = etapă viitoare (necesită server)', 'Nu înlocuiește CU-ul oficial emis de primărie'],
   },
+  plati: {
+    ico: '💳', label: 'Plăți taxe urbanistice', badge: 'recomandat', badgeLabel: 'Administrație · fiscal', color: '34,197,94',
+    fn: 'window.Plati&&window.Plati.openPanel&&window.Plati.openPanel()',
+    ce: 'Calculator de taxe urbanistice (Certificat de Urbanism, Autorizație de Construire = 0,5% din valoarea autorizată, taxă PUZ, copii, prelungiri) + flux de plată online + chitanță PDF cu suma în litere. Plata confirmată deblochează emiterea în CAU (concept de ghișeu unic digital).',
+    dece: 'OUG 98/2017 obligă primăriile peste 50.000 locuitori să ofere servicii publice online. Calculul taxei AC (0,5% din valoarea lucrărilor) e o sursă frecventă de erori și dispute. UrbanX calculează corect taxa și simulează încasarea, pregătind integrarea reală cu un procesator.',
+    legal: 'Legea 50/1991 art. 30 (taxa AC = 0,5% din valoarea autorizată) · Legea 227/2015 (Codul Fiscal — taxe locale + chitanță) · OUG 98/2017 (servicii online primării) · Legea 458/2002 (plăți electronice).',
+    output: [
+      { ico: '🧮', txt: 'Calcul taxă CU/AC/PUZ cu plafoane legale + temei' },
+      { ico: '💳', txt: 'Flux de plată (simulat) + istoric plăți' },
+      { ico: '🧾', txt: 'Chitanță PDF cu nr. (CHT-...) + suma în litere (L.227/2015)' },
+    ],
+    nu: ['Simulare — procesatorul real (Netopia/Stripe) + webhook HMAC + reconciliere fiscală = Faza 2 (server + persoană juridică)', 'Chitanța fiscală oficială (CIF/IBAN/serie fiscală) se emite de primărie', 'Nu stochează date de card'],
+  },
   dosar: {
     ico: '🗂️', label: 'Dosar Digital al imobilului', badge: 'recomandat', badgeLabel: 'Cetățean · transparență', color: '94,234,212',
     fn: 'window.Dosar&&window.Dosar.open&&window.Dosar.open()',
