@@ -10,7 +10,8 @@
 
   var DARK = [8, 15, 35], BLUE = [37, 99, 235], GRAY = [120, 140, 160], WHITE = [255, 255, 255];
 
-  G.CAU.generateCU = function (cu) {
+  G.CAU.generateCU = function (cu, opts) {
+    opts = opts || {};
     var Jc = J(); if (!Jc) { window.ss && ss('❌ jsPDF indisponibil'); return; }
     var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
@@ -23,9 +24,9 @@
     pdf.setTextColor(150, 190, 255); pdf.setFont(F, 'bold'); pdf.setFontSize(8);
     pdf.text('URBANX CAU · COMISIA DE ACORDURI UNICE', W / 2, 11, { align: 'center' });
     pdf.setTextColor.apply(pdf, WHITE); pdf.setFontSize(15);
-    pdf.text('CERTIFICAT DE URBANISM (draft)', W / 2, 20, { align: 'center' });
+    pdf.text(opts.acord ? 'ACORD UNIC (draft)' : 'CERTIFICAT DE URBANISM (draft)', W / 2, 20, { align: 'center' });
     pdf.setTextColor(150, 190, 170); pdf.setFontSize(8);
-    pdf.text((cu.registration_number || '—') + ' · ' + (cu.city_name || '') + ' · ' + today, W / 2, 25.5, { align: 'center' });
+    pdf.text((opts.acord ? (cu.acord_number || 'AU') : (cu.registration_number || '—')) + ' · ' + (cu.city_name || '') + ' · ' + today, W / 2, 25.5, { align: 'center' });
 
     var y = 38;
     function h(t) { pdf.setFillColor(238, 244, 252); pdf.rect(12, y - 4, W - 24, 7, 'F'); pdf.setTextColor.apply(pdf, BLUE); pdf.setFont(F, 'bold'); pdf.setFontSize(10); pdf.text(t, 14, y + 1); y += 10; }
@@ -78,8 +79,8 @@
     pdf.setTextColor(245, 225, 225); pdf.setFont(F, 'normal'); pdf.setFontSize(7);
     pdf.text(pdf.splitTextToSize('Acest document este generat algoritmic (UrbanX CAU) ca PRE-ANALIZĂ a avizelor necesare. NU este Certificatul de Urbanism oficial — acela se emite de primărie prin arhitectul șef (Legea 50/1991, Ord. 233/2016). Lista avizelor (mai ales cele din rețele OSM) necesită confirmare cu operatorii și autoritățile.', W - 30), W / 2, dy + 9.5, { align: 'center' });
 
-    var fn = ('CU_draft_' + (cu.registration_number || 'nou') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-    pdf.save(fn); window.ss && ss('✅ CU (draft) generat: ' + fn); return fn;
+    var fn = ((opts.acord ? 'Acord_unic_' + (cu.acord_number || 'AU') : 'CU_draft_' + (cu.registration_number || 'nou')) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    pdf.save(fn); window.ss && ss('✅ ' + (opts.acord ? 'Acord Unic' : 'CU (draft)') + ' generat: ' + fn); return fn;
   };
 
   function drawTable(pdf, F, x, y, w, headers, rows, ws) {

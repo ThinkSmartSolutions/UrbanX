@@ -164,28 +164,60 @@
     return Math.ceil((n.deadline - Date.now()) / DAY);
   }
 
+  // ── TARIFE (RON, orientative) — taxa CU + serviciul CAU + tarifele avizatorilor ──
+  var AVIZ_TARIFE = { retea_gaz_redusa: 150, retea_gaz_medie: 200, retea_gaz_inalta: 300, retea_electric_jt: 120, retea_electric_mt: 180, retea_electric_it: 300, retea_apa: 150, retea_canal: 150, isu: 0, cultura: 100, apele: 250, drumuri: 200, cfr: 300, mediu: 500, dsp: 150, anre_electric: 200 };
+  var TAXA_CU_FIX = 100, TAXA_SERVICIU_CAU_FIX = 200, TAXA_SERVICIU_CAU_PER_AVIZ = 50;
+  // canalul de comunicare cu avizatorul (cum legăm tehnic) — Faza 2 server pt API/email real
+  var CHANNELS = { isu: 'email', cultura: 'email', apele: 'email', drumuri: 'email', cfr: 'email', mediu: 'portal', dsp: 'email', anre_electric: 'email' };
+  function channelFor(nt) { if (/^retea_/.test(nt)) return 'api'; return CHANNELS[nt] || 'email'; }
+  function avizTarif(t) { return AVIZ_TARIFE[t] != null ? AVIZ_TARIFE[t] : 150; }
+  function feeBreakdown(cu) {
+    var mand = (cu.notices || []).filter(function (x) { return x.is_mandatory; });
+    var avize = mand.reduce(function (s, x) { return s + avizTarif(x.notice_type); }, 0);
+    var serviciu = TAXA_SERVICIU_CAU_FIX + TAXA_SERVICIU_CAU_PER_AVIZ * mand.length;
+    return { taxa_cu: TAXA_CU_FIX, taxa_serviciu_cau: serviciu, avize_tarife: avize, total: TAXA_CU_FIX + serviciu + avize, n_avize: mand.length };
+  }
+  function canIssueAcord(cu) {
+    var mand = (cu.notices || []).filter(function (x) { return x.is_mandatory; });
+    if (!mand.length) return false;
+    return mand.every(function (n) { return n.status === 'favorabil' || n.status === 'favorabil_tacit'; });
+  }
+
+  // ── CICLU DE VIAȚĂ (3 roluri): cerere_depusa → cu_emis → avize_in_curs → acord_unic ──
   var registry = {
     list: function () { var a = regAll(); var ch = false; a.forEach(function (cu) { if (tacitCheck(cu)) ch = true; }); if (ch) regSave(a); return a; },
+    // SOLICITANT: depune cererea de CU
     add: function (cu) {
       var a = regAll();
       cu.id = 'cu' + Date.now() + '_' + Math.round(Math.random() * 1e4);
       cu.registration_number = 'CU-' + new Date().getFullYear() + '-' + (a.length + 1);
-      cu.created_at = Date.now(); cu.status = 'depus';
+      cu.created_at = Date.now(); cu.status = 'cerere_depusa'; cu.fee = feeBreakdown(cu);
+      (cu.notices || []).forEach(function (n) { n.channel = channelFor(n.notice_type); n.tarif = avizTarif(n.notice_type); n.status = 'neinitiat'; });
       a.push(cu); regSave(a); return cu;
     },
-    // marchează toate avizele ca „trimise" (pornește termenul de 30 zile)
-    dispatch: function (id) {
+    // PRIMĂRIA: emite Certificatul de Urbanism
+    issueCU: function (id) { var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu) return null; cu.status = 'cu_emis'; cu.cu_emis_at = Date.now(); regSave(a); return cu; },
+    // SOLICITANTUL comandă obținerea avizelor → PRIMĂRIA le obține ÎN NUMELE lui (contra-cost)
+    comandaAvize: function (id) {
       var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu) return null;
+      if (cu.status === 'cerere_depusa') cu.status = 'cu_emis';
       var dl = Date.now() + 30 * DAY;
-      (cu.notices || []).forEach(function (n) { if (!n.status || n.status === 'in_asteptare') { n.status = 'trimis'; n.sent_at = Date.now(); n.deadline = dl; } });
-      cu.status = 'avize_trimise'; regSave(a); return cu;
+      (cu.notices || []).forEach(function (n) { if (n.status === 'neinitiat' || n.status === 'in_asteptare') { n.status = 'trimis'; n.sent_at = Date.now(); n.deadline = dl; } });
+      cu.status = 'avize_in_curs'; cu.avize_comandate_at = Date.now(); cu.fee = feeBreakdown(cu); regSave(a); return cu;
     },
-    setNotice: function (id, idx, status) {
+    // AVIZATORUL răspunde (favorabil / cu_conditii / nefavorabil)
+    setNotice: function (id, idx, status, note) {
       var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu || !cu.notices[idx]) return null;
-      cu.notices[idx].status = status; regSave(a); return cu;
+      cu.notices[idx].status = status; if (note) cu.notices[idx].response_note = note; regSave(a); return cu;
+    },
+    // PRIMĂRIA emite Acordul Unic când toate avizele obligatorii sunt favorabile/tacite
+    emiteAcordUnic: function (id) {
+      var a = regAll(); var cu = a.filter(function (c) { return c.id === id; })[0]; if (!cu) return null;
+      if (!canIssueAcord(cu)) return { error: 'Nu toate avizele obligatorii sunt favorabile/tacite.' };
+      cu.status = 'acord_unic'; cu.acord_number = 'AU-' + new Date().getFullYear() + '-' + (a.length); cu.acord_emis_at = Date.now(); regSave(a); return cu;
     },
     remove: function (id) { regSave(regAll().filter(function (c) { return c.id !== id; })); },
-    daysLeft: daysLeft
+    daysLeft: daysLeft, feeBreakdown: feeBreakdown, canIssueAcord: canIssueAcord, channelFor: channelFor
   };
 
   G.CAU = {

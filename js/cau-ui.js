@@ -99,33 +99,49 @@
     pdfBtn.onclick = function () { if (lastCU) { if (!lastCU.registration_number) lastCU.registration_number = 'CU-draft'; G.CAU.generateCU(lastCU); } };
     saveBtn.onclick = function () { if (lastCU) { G.CAU.registry.add(lastCU); window.ss && ss('💾 CU salvat în registru'); tReg.onclick(); } };
 
+    var ST_LABELS = { cerere_depusa: ['Cerere depusă', '#60a5fa'], cu_emis: ['CU emis', '#f59e0b'], avize_in_curs: ['Avize în curs', '#22d3ee'], acord_unic: ['Acord Unic emis', '#22c55e'], depus: ['Cerere depusă', '#60a5fa'], avize_trimise: ['Avize în curs', '#22d3ee'] };
     function renderRegistry() {
       var list = G.CAU.registry.list();
-      if (!list.length) { paneReg.innerHTML = '<div style="font-size:12px;color:#64748b;padding:10px 0">Niciun CU în registru. Creează unul în „Cerere CU nouă".</div>'; return; }
+      if (!list.length) { paneReg.innerHTML = '<div style="font-size:12px;color:#64748b;padding:10px 0">Niciun dosar. Creează o cerere în „Cerere CU nouă".</div>'; return; }
       paneReg.innerHTML = '';
       list.slice().reverse().forEach(function (cu) {
         var card = el('div', { style: 'background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:10px' });
-        var resolved = (cu.notices || []).filter(function (n) { return n.status && n.status !== 'in_asteptare' && n.status !== 'trimis'; }).length;
-        card.appendChild(el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:6px' },
+        var stl = ST_LABELS[cu.status] || [cu.status, '#94a3b8'];
+        var fee = cu.fee || (G.CAU.registry.feeBreakdown ? G.CAU.registry.feeBreakdown(cu) : null);
+        card.appendChild(el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:4px' },
           '<span style="font-weight:800">' + (cu.registration_number || cu.id) + ' · ' + (cu.applicant || '—') + '</span>' +
-          '<span style="font-size:11px;color:#94a3b8">' + (G.CAU.USE_LABELS[cu.work && cu.work.use] || '') + ' · ' + resolved + '/' + (cu.notices || []).length + ' avize</span>'));
+          '<span style="background:' + stl[1] + ';color:#06101f;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:800">' + stl[0] + '</span>'));
+        if (fee) card.appendChild(el('div', { style: 'font-size:10px;color:#94a3b8;margin-bottom:6px' }, '💳 Taxe: CU ' + fee.taxa_cu + ' + serviciu CAU ' + fee.taxa_serviciu_cau + ' + tarife avize ' + fee.avize_tarife + ' = <b style="color:#fbbf24">' + fee.total + ' RON</b> (' + fee.n_avize + ' avize obligatorii)'));
         (cu.notices || []).forEach(function (n, idx) {
+          if (!n.is_mandatory && cu.status !== 'cerere_depusa') return; // în flux arătăm obligatoriile
           var dl = G.CAU.daysLeft(n);
-          var stCol = n.status === 'favorabil_tacit' || n.status === 'favorabil' ? '#22c55e' : n.status === 'nefavorabil' ? '#ef4444' : n.status === 'trimis' ? '#60a5fa' : '#94a3b8';
+          var stCol = (n.status === 'favorabil_tacit' || n.status === 'favorabil') ? '#22c55e' : n.status === 'nefavorabil' ? '#ef4444' : n.status === 'trimis' ? '#60a5fa' : '#94a3b8';
           var dlTxt = n.deadline ? (dl >= 0 ? (dl + ' zile' + (dl < 5 ? ' ⚠' : '')) : 'expirat → tacit') : '';
           var row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)' });
-          row.appendChild(el('span', null, (n.is_mandatory ? '<b style="color:#f87171">●</b> ' : '○ ') + (n.label || n.notice_type) + ' <span style="color:#64748b">· ' + (n.holder_name || '') + '</span>'));
-          row.appendChild(el('span', { style: 'color:' + stCol + ';font-weight:700;white-space:nowrap' }, (n.status || '').replace(/_/g, ' ') + (dlTxt ? (' · ' + dlTxt) : '')));
+          row.appendChild(el('span', null, (n.is_mandatory ? '<b style="color:#f87171">●</b> ' : '○ ') + (n.label || n.notice_type) + ' <span style="color:#64748b">· ' + (n.channel || 'email') + ' · ' + (n.tarif || 0) + ' RON</span>'));
+          var st = el('span', { style: 'color:' + stCol + ';font-weight:700;white-space:nowrap' }, (n.status || '').replace(/_/g, ' ') + (dlTxt ? (' · ' + dlTxt) : ''));
+          row.appendChild(st);
           card.appendChild(row);
+          // AVIZATOR: răspunde (când avizele sunt în curs)
+          if (cu.status === 'avize_in_curs' && n.status === 'trimis') {
+            var rb = el('div', { style: 'display:flex;gap:5px;margin:3px 0 6px' });
+            ['favorabil', 'nefavorabil'].forEach(function (s) { var b = el('button', { style: ST.ghost + ';padding:2px 8px;font-size:10px;color:' + (s === 'favorabil' ? '#34d399' : '#f87171') }, 'avizator: ' + s); b.onclick = function () { G.CAU.registry.setNotice(cu.id, idx, s); renderRegistry(); }; rb.appendChild(b); });
+            card.appendChild(rb);
+          }
         });
+        // ── ACȚIUNI pe ROL/STARE ──
         var ca = el('div', { style: 'display:flex;gap:6px;margin-top:8px;flex-wrap:wrap' });
-        if (cu.status === 'depus') { var disp = el('button', { style: ST.ghost }, '📨 Trimite avize (pornește 30 zile)'); disp.onclick = function () { G.CAU.registry.dispatch(cu.id); renderRegistry(); }; ca.appendChild(disp); }
-        var pdf = el('button', { style: ST.ghost }, '⬇ CU PDF'); pdf.onclick = function () { G.CAU.generateCU(cu); }; ca.appendChild(pdf);
-        var del = el('button', { style: ST.ghost }, '🗑'); del.onclick = function () { G.CAU.registry.remove(cu.id); renderRegistry(); }; ca.appendChild(del);
+        function btn(txt, fn, col) { var b = el('button', { style: ST.ghost + (col ? (';color:' + col) : '') }, txt); b.onclick = fn; ca.appendChild(b); }
+        if (cu.status === 'cerere_depusa') btn('🏛️ Primăria: emite CU', function () { G.CAU.registry.issueCU(cu.id); renderRegistry(); }, '#f59e0b');
+        if (cu.status === 'cu_emis') btn('💳 Solicitant: comandă avizele' + (fee ? ' (' + (fee.taxa_serviciu_cau + fee.avize_tarife) + ' RON)' : ''), function () { G.CAU.registry.comandaAvize(cu.id); renderRegistry(); }, '#22d3ee');
+        if (cu.status === 'avize_in_curs' && G.CAU.registry.canIssueAcord(cu)) btn('🏛️ Emite Acord Unic', function () { var r = G.CAU.registry.emiteAcordUnic(cu.id); if (r && r.error) { window.ss && ss(r.error); } renderRegistry(); }, '#34d399');
+        if (cu.status === 'acord_unic') { card.appendChild(el('div', { style: 'font-size:12px;color:#34d399;font-weight:700;margin-top:6px' }, '✅ ' + (cu.acord_number || 'Acord Unic') + ' emis — toate avizele obligatorii favorabile/tacite')); btn('⬇ Acord Unic PDF', function () { G.CAU.generateCU(cu, { acord: true }); }); }
+        btn('⬇ CU PDF', function () { G.CAU.generateCU(cu); });
+        btn('🗑', function () { G.CAU.registry.remove(cu.id); renderRegistry(); });
         card.appendChild(ca);
         paneReg.appendChild(card);
       });
-      paneReg.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:4px' }, '⚠ „Trimite avize" pornește termenul de 30 zile (Legea 50/1991, Art. 7). La expirare fără răspuns, avizul devine FAVORABIL TACIT (calculat la deschidere). Dispecerizarea reală prin email + portalul deținătorilor = Faza 2 (backend).'));
+      paneReg.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:6px;line-height:1.5' }, '<b>Fluxul real (Legea 50/1991, Ord. 839/2009):</b> solicitantul depune cererea → primăria emite CU → solicitantul COMANDĂ obținerea avizelor (plătește) → PRIMĂRIA le obține de la avizatori ÎN NUMELE lui → la 30 zile fără răspuns = aviz tacit favorabil → primăria emite Acordul Unic. ⚠ Dispecerizarea reală (email/API către avizatori) + portalul avizatorilor + plata online = Faza 2 (server).'));
     }
 
     if (tab === 'reg') tReg.onclick();
