@@ -101,9 +101,12 @@
     var isu = floors >= 2 || area >= 600 || ['comercial', 'birouri', 'industrial', 'hotelier'].indexOf(use) >= 0 || (use === 'locuire' && area >= 2000);
     if (isu) add({ notice_type: 'isu', holder_name: 'Inspectoratul pentru Situații de Urgență (ISU)', is_mandatory: true, legal_basis: 'Legea 307/2006 · HG 571/2016 (securitate la incendiu)', label: 'Aviz/Autorizație securitate la incendiu (ISU)' });
 
-    // Regula 3 — Cultura (patrimoniu)
-    if (pug.in_protected_zone) add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', is_mandatory: true, legal_basis: 'Legea 422/2001 (monumente istorice)', label: 'Aviz Cultură — zonă protejată / monument' });
-    else add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', recommended: true, data_quality_flag: 'no_data', legal_basis: 'Legea 422/2001', label: 'Verificare manuală — proximitate monumente/zonă protejată (LMI)' });
+    // Regula 3 — Cultura (patrimoniu) — integrare cu modulul Heritage (10)
+    var heritage = (ctx.parcel_centroid && G.Heritage && G.Heritage.checkProximity) ? G.Heritage.checkProximity(ctx.parcel_centroid, 100) : [];
+    if (pug.in_protected_zone || heritage.length) {
+      var hn = heritage.length ? (' — ' + heritage[0].name + ' (' + heritage[0].level + ') la ' + heritage[0].distance_m + 'm' + (heritage[0].lmi_code ? ', LMI ' + heritage[0].lmi_code : '')) : '';
+      add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', is_mandatory: true, legal_basis: 'Legea 422/2001 (monumente istorice)', data_quality_flag: heritage.length ? 'verified' : 'regula', network_proximity_m: heritage.length ? heritage[0].distance_m : null, label: 'Aviz Cultură — monument/zonă protejată' + hn });
+    } else add({ notice_type: 'cultura', holder_name: 'Direcția Județeană pentru Cultură', recommended: true, data_quality_flag: 'no_data', legal_basis: 'Legea 422/2001', label: 'Verificare manuală — proximitate monumente/zonă protejată (LMI)' });
 
     // Regula 4 — Apele Române
     var flood = risks.flood_q1 || risks.flood_q10 || risks.flood_q100;

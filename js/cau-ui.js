@@ -79,7 +79,7 @@
     var lastCU = null;
     det.onclick = function () {
       out.innerHTML = '<div style="font-size:12px;color:#94a3b8">⏳ Caut rețele în jurul parcelei (OSM)...</div>';
-      var ctx = { work: { use: useSel.value, area_m2: +areaInp.value || 0, floors: +floorsInp.value || 0 }, pug: { utr: pre && pre.utr, zone_label: pre && pre.zone_label, pot: pre && pre.pot, cut: pre && pre.cut, in_protected_zone: protChk.checked }, risks: {}, networks: [] };
+      var ctx = { work: { use: useSel.value, area_m2: +areaInp.value || 0, floors: +floorsInp.value || 0 }, pug: { utr: pre && pre.utr, zone_label: pre && pre.zone_label, pot: pre && pre.pot, cut: pre && pre.cut, in_protected_zone: protChk.checked }, risks: {}, networks: [], parcel_centroid: pre && pre.centroid };
       var done = function (netinfo) {
         if (netinfo) { ctx.networks = netinfo.networks || []; ctx.railway_m = netinfo.railway_m; ctx.road_m = netinfo.road_m; ctx.water_m = netinfo.water_m; }
         var res = G.CAU.computeNotices(ctx);
