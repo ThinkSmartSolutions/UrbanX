@@ -13,8 +13,7 @@
     if (!D || !D.chapter) return;
     var city = (ctx && ctx.city) || {};
     var cityName = city.name || '';
-    // SIDU = umbrela strategică — capitol propriu, ÎNAINTE de sinteza modulelor
-    try { if (G.SIDU && G.SIDU.chapter) G.SIDU.chapter(D); } catch (e) {}
+    // (SIDU = umbrela strategică — randat ca PRIMUL capitol, în wrapper-ul build, înainte de orig)
 
     D.chapter('Module de decizie UrbanX — sinteză');
     D.P('Acest capitol sintetizează informațiile relevante pentru ' + (cityName || 'UAT') + ' din modulele ' +
@@ -87,7 +86,12 @@
     var obj = G[name];
     if (!obj || typeof obj.build !== 'function' || obj.__modPatched) return false;
     var orig = obj.build.bind(obj);
-    obj.build = function (D, ctx) { orig(D, ctx); try { chapter(D, ctx); } catch (e) { console.warn('[UX modules chapter]', e); } };
+    obj.build = function (D, ctx) {
+      // SIDU = umbrela strategică → PRIMUL capitol (după copertă), nu îngropat la final
+      try { if (G.SIDU && G.SIDU.chapter) G.SIDU.chapter(D); } catch (e) { console.warn('[SIDU chapter]', e); }
+      orig(D, ctx);
+      try { chapter(D, ctx); } catch (e) { console.warn('[UX modules chapter]', e); }
+    };
     obj.__modPatched = true; return true;
   }
   function tryPatch() { var a = patch('_StratMasterplanContent'), b = patch('_StratPMUDContent'); return a || b; }

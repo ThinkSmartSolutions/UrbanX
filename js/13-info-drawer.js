@@ -1094,8 +1094,9 @@ const RAPORT_INFO = {
 function infoDrawerOpen(key) {
   const d = RAPORT_INFO[key];
   if(!d) return;
-  // Închidem meniurile dropdown înainte
-  toggleRapoarteMenu(true);
+  // Închidem TOATE meniurile dropdown înainte (inclusiv UrbanX Pro / tci-adv-menu)
+  try { if (typeof _closeAllMenusAndOverlay === 'function') _closeAllMenusAndOverlay(); } catch(e){}
+  try { toggleRapoarteMenu(true); } catch(e){}
   const drawer = document.getElementById('info-drawer');
   const backdrop = document.getElementById('info-drawer-backdrop');
   const titleEl = document.getElementById('info-drawer-title');
