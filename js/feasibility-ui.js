@@ -53,16 +53,25 @@
 
     var run = el('button', { style: ST.btn + ';margin-top:14px' }, '▶ Calculează fezabilitatea'); body.appendChild(run);
     var out = el('div', { style: 'margin-top:14px' }); body.appendChild(out);
-    var pdfBtn = el('button', { style: ST.btn + ';display:none;margin-top:10px;background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '⬇ Studiu PDF'); body.appendChild(pdfBtn);
+    var actions2 = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px' });
+    var pdfBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '⬇ Pro-formă PDF');
+    var sfBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#d4af37,#b8901f);color:#06101f' }, '📄 → Studiu Fezabilitate/DALI (HG907)');
+    actions2.appendChild(pdfBtn); actions2.appendChild(sfBtn); body.appendChild(actions2);
     function wrap(lab, inp) { var w = el('div'); w.appendChild(el('div', { style: 'font-size:11px;color:#cbd5e1;margin-bottom:3px' }, lab)); w.appendChild(inp); return w; }
 
     var last = null;
     run.onclick = function () {
       if (!(+area.value > 0 && +cut.value > 0)) { out.innerHTML = '<div style="color:#fca5a5;font-size:13px">Completează suprafața și CUT.</div>'; return; }
       var res = G.Feaz.compute({ area_m2: +area.value, cut: +cut.value, pot: +pot.value, use: useSel.value, standard: stdSel.value, price_per_m2: +price.value || null, land_cost_total: +land.value || 0, leverage: +lev.value, interest_rate: +intr.value, dev_months: +months.value });
-      last = res; out.innerHTML = renderResult(res); pdfBtn.style.display = '';
+      last = res; out.innerHTML = renderResult(res); pdfBtn.style.display = ''; sfBtn.style.display = (typeof generateStudiuFezabilitate === 'function') ? '' : 'none';
     };
     pdfBtn.onclick = function () { if (last) G.Feaz.generatePDF(last, { site_name: 'PUZ ' + (pre && pre.nrcad ? 'CF ' + pre.nrcad : ''), city: cityName() }); };
+    // CONECTARE: pro-forma alimentează Studiul de Fezabilitate/DALI HG907 cu aceleași prețuri (o sursă de adevăr)
+    sfBtn.onclick = function () {
+      if (!last || typeof generateStudiuFezabilitate !== 'function') return;
+      ov.remove();
+      try { generateStudiuFezabilitate({ pretConstr: last.costs.constr_rate, pretVanzare: last.revenue.price_per_m2 }); } catch (e) { window.ss && ss('SF/DALI: ' + (e.message || e)); }
+    };
 
     ov.appendChild(m); document.body.appendChild(ov);
   }

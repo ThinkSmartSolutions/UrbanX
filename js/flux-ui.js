@@ -180,7 +180,8 @@
     var runBtn = el('button', { style: ST.btn }, '▶ Calculează');
     var mapBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#0891b2,#0e7490)' }, '🗺 Arată pe hartă');
     var pdfBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '⬇ Generează PDF');
-    actions.appendChild(runBtn); actions.appendChild(mapBtn); actions.appendChild(pdfBtn);
+    var stBtn = el('button', { style: ST.btn + ';display:none;background:linear-gradient(180deg,#34d399,#0f766e);color:#06101f' }, '📄 → Studiu Impact Trafic (complet)');
+    actions.appendChild(runBtn); actions.appendChild(mapBtn); actions.appendChild(pdfBtn); actions.appendChild(stBtn);
     body.appendChild(actions);
     m.appendChild(body);
 
@@ -224,8 +225,11 @@
       result.innerHTML = summaryHTML(res);
       pdfBtn.style.display = '';
       mapBtn.style.display = centroid ? '' : 'none';
+      stBtn.style.display = (typeof generateTrafficStudy === 'function') ? '' : 'none';
     };
     pdfBtn.onclick = function () { if (lastResult) G.Flux.generatePDF(lastResult, lastMeta); };
+    // CONECTARE: calculatorul Flux deschide Studiul de Impact Trafic PDF complet (aceeași parcelă, document formal)
+    stBtn.onclick = function () { if (typeof generateTrafficStudy === 'function') { ov.remove(); try { generateTrafficStudy(); } catch (e) { window.ss && ss('Studiu trafic: ' + (e.message || e)); } } };
     mapBtn.onclick = function () { if (lastResult && centroid) { G.Flux.drawOverlay(lastResult, centroid); ov.remove(); } };
 
     ov.appendChild(m);

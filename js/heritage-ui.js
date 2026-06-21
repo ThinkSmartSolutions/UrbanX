@@ -22,7 +22,14 @@
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
 
-    var mapBtn = el('button', { style: ST.ghost }, '🗺 Arată pe hartă'); mapBtn.onclick = function () { toggleMap(); }; body.appendChild(mapBtn);
+    var topRow = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' });
+    var mapBtn = el('button', { style: ST.ghost }, '🗺 Arată pe hartă'); mapBtn.onclick = function () { toggleMap(); }; topRow.appendChild(mapBtn);
+    if (typeof generateIstoricStudy === 'function') {
+      var stBtn = el('button', { style: ST.ghost + ';color:#fbbf24' }, '📄 → Studiu Patrimoniu & Istoric (PDF)');
+      stBtn.onclick = function () { ov.remove(); try { generateIstoricStudy(); } catch (e) { window.ss && ss('Studiu patrimoniu: ' + (e.message || e)); } };
+      topRow.appendChild(stBtn);
+    }
+    body.appendChild(topRow);
 
     // listă
     body.appendChild(el('div', { style: ST.label }, 'Inventar (' + G.Heritage.registry.list().length + ')'));
