@@ -339,6 +339,20 @@ const RAPORT_INFO = {
     ],
     nu: ['Buffer asimetric (mal stâng/drept) + import SHP/KML = etapă viitoare', 'Nu înlocuiește delimitarea cadastrală oficială (ANCPI)'],
   },
+  simlab: {
+    ico: '🧪', label: 'SimLab — explorare pre-proiectare', badge: 'recomandat', badgeLabel: 'Hub · 6 simulatoare · L.350 art.5', color: '212,175,55',
+    fn: 'window.SimLab&&window.SimLab.openDashboard&&window.SimLab.openDashboard()',
+    ce: 'Dashboard de simulare care schimbă fluxul din „aprobi apoi descoperi problemele" în „explorezi întâi, decizi informat". 6 simulatoare: (1) UHI — profil termic urban pe o secțiune, cu sliders verde/copaci/acoperișuri și presete (Parc minim / Standard european / Singapore); (2) Front de apă — secțiune de mal cu nivel apă + simulare viitură Q100; (3) Impact capacitate — gauges live (apă/canalizare/școli/grădinițe/verde/impermeabilizare) la N apartamente noi, cu factori din modulul Intelligence; (4) Parc 3D (→ LOISIR); (5) Fezabilitate (→ Pro-formă); (6) Superbloc (→ Barcelona). Scenariile se salvează local și se exportă ca „Studiu de oportunitate".',
+    dece: 'Fluxul clasic RO: idee → consultant → 18 luni → PUZ → se descoperă problemele. SimLab: idee → 30 minute de explorare → înțelegi implicațiile → ABIA APOI pornești procedura formală cu un brief clar. Ca un simulator de zbor înainte de avionul real. Bază legală: Legea 350/2001, Art. 5 (studii de oportunitate, pre-PUG/PUZ).',
+    legal: 'Legea 350/2001 Art. 5 (studii de oportunitate / strategii de dezvoltare, informale). Documentul exportat e informativ, fără valoare juridică în procedurile de autorizare. Formule: C40/Bowler 2010 (UHI), factori Intelligence (capacitate).',
+    output: [
+      { ico: '🌡', txt: 'UHI: profil termic + reducere °C + CO2 (sliders + presete)' },
+      { ico: '🌊', txt: 'Front de apă: secțiune mal + viitură Q100 animată' },
+      { ico: '📊', txt: 'Capacitate: gauges live la N apartamente (factori Intelligence)' },
+      { ico: '📄', txt: 'Salvare scenarii + export „Studiu de oportunitate" (L.350 art.5)' },
+    ],
+    nu: ['Document informativ, fără valoare juridică — nu substituie PUZ/PUD', 'Capacitatea actuală e estimată din populație (orientativ) — bilanțul autoritativ e în modulul Intelligence', 'Stocarea scenariilor pe server + share-link = Faza 2 (acum local în browser)'],
+  },
   fisa360: {
     ico: '🧭', label: 'Fișa parcelei 360°', badge: 'recomandat', badgeLabel: 'Hub · toate modulele', color: '212,175,55',
     fn: 'window.Fisa360&&window.Fisa360.open&&window.Fisa360.open()',

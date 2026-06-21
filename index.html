@@ -1838,7 +1838,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260618tur"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621loisir"></script>
+<script src="js/13-info-drawer.js?v=20260621simlab"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260616fl"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3146,6 +3146,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       <div style="font-size:10px;color:rgba(103,232,249,.65)">desen · buffer râu/CF · OSM (Bahlui) · adresă+rază → folosită de toate modulele</div>
     </button>
     <button onclick="infoDrawerOpen('studyzone')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#67e8f9'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:6px">
+    <button onclick="window.SimLab&&window.SimLab.openDashboard?window.SimLab.openDashboard():ss?.('SimLab se inițializează');_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(34,197,94,.12));border:1px solid rgba(212,175,55,.4);color:#e9d08a;padding:11px 12px;cursor:pointer;border-radius:9px;font-size:13px;font-weight:800;min-height:48px;font-family:inherit"
+      onmouseover="this.style.background='linear-gradient(135deg,rgba(212,175,55,.28),rgba(34,197,94,.18))'" onmouseout="this.style.background='linear-gradient(135deg,rgba(212,175,55,.18),rgba(34,197,94,.12))'">
+      🧪 SimLab — explorare pre-proiectare
+      <div style="font-size:10px;color:rgba(233,208,138,.7);font-weight:500">6 simulatoare (UHI·front apă·capacitate·parc 3D·fezabilitate·superbloc) · „de la număr la decizie în 30 min" · L.350 art.5</div>
+    </button>
+    <button onclick="infoDrawerOpen('simlab')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0" onmouseover="this.style.color='#e9d08a'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
 
   <!-- ═══ ADMINISTRAȚIE PUBLICĂ ═══ -->
@@ -6085,6 +6095,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/loisir-uhi.js?v=20260621a"></script>
     <script src="js/loisir.js?v=20260621a"></script>
     <script src="js/fisa-cadastrala.js?v=20260621a"></script>
+    <script src="js/simlab.js?v=20260621a"></script>
     <script src="js/superbloc.js?v=20260621bcn"></script>
     <script src="js/sidu.js?v=20260621bcn"></script>
     <!-- UrbanX CAU — Comisia de Acorduri Unice (Faza 1 client-side: reguli avize + CU + tracking) -->
