@@ -244,6 +244,19 @@ function svProjectVolume(pos){
 
 const RAPORT_INFO = {
   // ═══ MODULE DE DECIZIE & ADMINISTRAȚIE (UrbanX Pro) ═══
+  uhi: {
+    ico: '🌿', label: 'LOISIR — Insulă de căldură (UHI)', badge: 'recomandat', badgeLabel: 'Mediu & climă · NbS', color: '34,197,94',
+    fn: 'window.UHI&&window.UHI.openPanel&&window.UHI.openPanel()',
+    ce: 'Calculează efectul de răcire al soluțiilor bazate pe natură (pădure urbană, parc, acoperiș verde, zonă umedă, pavaj permeabil, fântână de răcire) folosind modele empirice validate — câte grade răcorește o intervenție și pe ce rază, plus CO₂ sechestrat. Plus un scorecard verde pe 6 dimensiuni comparat cu Singapore/Copenhaga/Paris.',
+    dece: 'România are 9 din 10 veri record în ultimii 15 ani; orașe ca București/Cluj/Craiova au insule de căldură de 4-7°C. Soluțiile verzi-albastre (Nature-Based Solutions) reduc temperatura, poluarea și bolile. Modelul: Singapore „City in a Garden" + Klimaatlas Stuttgart. UrbanX cuantifică impactul intervențiilor înainte de a le finanța.',
+    legal: 'Bowler 2010 · Gill 2007 · Santamouris 2013 · C40 Cities · WHO (30% canopy, 300m acces verde) · EU Nature Restoration Law 2023 · EU Biodiversity Strategy 2030',
+    output: [
+      { ico: '❄', txt: 'Răcire estimată (°C) + rază + CO₂/an per intervenție + simulare cumulată' },
+      { ico: '🌳', txt: 'Scorecard verde 6 dimensiuni vs benchmark mondial' },
+      { ico: '🛰', txt: 'Hartă insulă de căldură (Landsat/Sentinel LST) + coridoare aer rece — pipeline Copernicus (Faza 2)' },
+    ],
+    nu: ['Estimări empirice ±30-50% local — nu măsurători', 'Harta termică din satelit + coridoarele Stuttgart necesită server Copernicus (Faza 2)'],
+  },
   ansamblu: {
     ico: '🏘️', label: 'Masterplan ansamblu (lotizare ghidată)', badge: 'recomandat', badgeLabel: 'Proiectare · metodologie PUZ/PUD', color: '168,85,247',
     fn: 'window.Ansamblu&&window.Ansamblu.openWizard&&window.Ansamblu.openWizard()',
