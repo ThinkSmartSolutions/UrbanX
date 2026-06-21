@@ -299,6 +299,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Schemă de organizare + brief orientativ — desenul PUZ/PUD final (loturi, profile, plan reglementări) = proiectant atestat RUR', 'Pentru subdivizare simplă geometrică folosește „Lotizare" clasic'],
   },
+  cadastru: {
+    ico: '📐', label: 'Fișă cadastrală (lotizare/comasare/dezmembrare)', badge: 'recomandat', badgeLabel: 'Documentație ANCPI · cadastrist', color: '56,189,248',
+    fn: 'window.Cadastru&&window.Cadastru.openPanel&&window.Cadastru.openPanel()',
+    ce: 'Generează DOCUMENTAȚIA tehnică cadastrală pentru o parcelă reală (cea selectată pe hartă), în formatul Ordinului ANCPI 700/2014: (1) Plan de amplasament și delimitare — schiță la scară cu vârfurile numerotate; (2) Inventar de coordonate Stereo70 (Punct, X-Nord, Y-Est) + lungimi laturi + perimetru; (3) Tabel de mișcare parcelară (situația actuală → viitoare). Operații: fișă simplă, dezmembrare/lotizare (1 lot → N loturi cu bilanț de suprafețe), comasare (alipire de parcele).',
+    dece: 'Aceasta NU este „masterplanul lotizării" (acela e proiectarea — modulul Masterplan ansamblu). E paperwork-ul concret de care are nevoie un CADASTRIST pentru a depune la OCPI. UrbanX convertește geometria parcelei (WGS84) în coordonate Stereo70 și pre-completează cele 3 piese, economisind ore de lucru manual.',
+    legal: 'Ordin ANCPI 700/2014 (regulament recepție și înscriere) · Legea 7/1996 (cadastru și publicitate imobiliară) · sistem de proiecție Stereografic 1970 (EPSG:3844). Conversie cu proj4 (Helmert 7 parametri).',
+    output: [
+      { ico: '🗺', txt: 'Plan de amplasament și delimitare (schiță la scară, vârfuri numerotate, N↑)' },
+      { ico: '📊', txt: 'Inventar de coordonate Stereo70 (X-Nord, Y-Est) + lungimi laturi + perimetru' },
+      { ico: '📋', txt: 'Tabel de mișcare parcelară (actual → viitor) cu bilanț de suprafețe' },
+    ],
+    nu: ['DRAFT ORIENTATIV — coordonatele provin din reproiecția platformei (proj4), NU dintr-o ridicare topografică', 'Documentația oficială ANCPI necesită măsurători cu TransDatRO + viză topograf autorizat', 'Categoria de folosință și proprietarii se completează din actele de proprietate'],
+  },
   sidu: {
     ico: '🏛', label: 'SIDU — Strategia Integrată (umbrela)', badge: 'recomandat', badgeLabel: 'Strategie · nivel superior', color: '96,165,250',
     fn: 'window.SIDU&&window.SIDU.openPanel&&window.SIDU.openPanel()',
