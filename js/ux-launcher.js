@@ -159,18 +159,8 @@
   function close() { if (ov) { try { ov.remove(); } catch (e) {} ov = null; } }
   function toggle() { ov ? close() : open(); }
 
-  // buton flotant mereu vizibil (jos-stânga, discret)
-  function mountButton() {
-    if (D.getElementById('ux-launcher-btn')) return;
-    var b = D.createElement('button');
-    b.id = 'ux-launcher-btn';
-    b.innerHTML = '⌘ Funcții';
-    b.title = 'Toate funcțiile platformei (Cmd/Ctrl+K)';
-    b.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:8500;background:linear-gradient(180deg,#d4af37,#b8941f);color:#06101f;border:0;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.5);font-family:system-ui';
-    b.onclick = open;
-    D.body.appendChild(b);
-  }
-  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', mountButton); else mountButton();
+  // Acces: butonul „🔍 Funcții ⌘K" din bara de sus (mereu vizibil) + Cmd/Ctrl+K.
+  // (fără buton flotant — se suprapunea cu indicatorul de UAT / bara de jos)
 
   G.Launcher = { open: open, close: close, toggle: toggle, ACTIONS: A };
   console.log('[Launcher] paletă de comenzi unificată încărcată (' + A.length + ' funcții) — Cmd/Ctrl+K');

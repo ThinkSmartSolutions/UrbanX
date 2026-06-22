@@ -1262,6 +1262,9 @@ document.addEventListener('click', function(){
   </span>
 
   <!-- Grup 1: Navigare & Căutare -->
+  <button class="tb-btn" id="btn-launcher" title="Toate funcțiile platformei (Cmd/Ctrl+K)"
+    onclick="window.Launcher&&window.Launcher.open?window.Launcher.open():ss?.('Launcher se inițializează')"
+    style="background:linear-gradient(180deg,rgba(212,175,55,.22),rgba(212,175,55,.1));border:1px solid rgba(212,175,55,.5);color:#d4af37;font-weight:800;display:flex;align-items:center;gap:5px">🔍 Funcții <span style="font-size:9px;opacity:.7;border:1px solid rgba(212,175,55,.4);border-radius:4px;padding:0 4px">⌘K</span></button>
   <button class="tb-btn" id="btnUTR">🗺 UTR</button>
   <button class="tb-btn" id="btn-cadastru-bt" title="Toggle cadastru" style="display:none;color:#94a3b8;border-color:rgba(255,255,255,0.15)" onclick="window._toggleCadastru(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-BT-01')">🗺 Cadastru</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
@@ -6151,7 +6154,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <!-- Grup C: Investment Heatmap (15) + Carbon Tracker (14) -->
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260621a"></script>
-    <script src="js/ux-launcher.js?v=20260622a"></script>
+    <script src="js/ux-launcher.js?v=20260622b"></script>
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260620a"></script>
     <script src="js/portfolio-dd.js?v=20260620a"></script>
