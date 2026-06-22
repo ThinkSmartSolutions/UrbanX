@@ -273,6 +273,127 @@
     ov.appendChild(m); document.body.appendChild(ov);
   }
 
-  G.Cadastru = { toStereo: toStereo, buildFisa: buildFisa, generatePDF: generatePDF, openPanel: openPanel, ensureProj: ensureProj };
+  // ════════════ 004 — MODUL CADASTRU TABBED (componente 002) ════════════
+  var CAD_TABS = [
+    { id: 'proiecte', label: 'Proiecte' }, { id: 'dezmembrare', label: 'Dezmembrare/Lotizare' },
+    { id: 'apartamentare', label: 'Apartamentare' }, { id: 'comasare', label: 'Comasare' }, { id: 'export', label: 'Export ANCPI' }
+  ];
+  var _cadTab = 'proiecte', _cadOv = null;
+  function openCadastru(tab) {
+    _cadTab = tab || 'proiecte';
+    if (_cadOv) { try { _cadOv.remove(); } catch (e) {} }
+    var ov = el('div', { style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) { ov.remove(); _cadOv = null; } }; _cadOv = ov;
+    var m = el('div', { style: ST.modal }); ov.appendChild(m); document.body.appendChild(ov);
+    G._cadHostModal = m; _cadRender();
+  }
+  function _hdr() {
+    if (typeof G.moduleHeader === 'function') return G.moduleHeader({ title: '📐 Cadastru', context: 'ANCPI Ordin 700/2014', infoKey: 'cadastru', onClose: 'Cadastru.closeCadastru()' });
+    return '<div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between"><b>📐 Cadastru</b><button onclick="Cadastru.closeCadastru()" style="' + ST.ghost + '">✕</button></div>';
+  }
+  function _tabs() {
+    if (typeof G.viewTabs === 'function') return G.viewTabs({ tabs: CAD_TABS, activeTab: _cadTab, onChangeFn: 'Cadastru.switchTab' });
+    return '<div style="display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap">' + CAD_TABS.map(function (t) { return '<button onclick="Cadastru.switchTab(\'' + t.id + '\')" style="' + (t.id === _cadTab ? ST.btn : ST.ghost) + ';padding:5px 9px">' + t.label + '</button>'; }).join('') + '</div>';
+  }
+  function _cadRender() {
+    var m = G._cadHostModal; if (!m) return;
+    m.innerHTML = _hdr() + _tabs() + '<div id="cad-content" style="padding:16px;max-height:62vh;overflow:auto"></div>';
+    _cadContent();
+  }
+  function switchTab(t) { _cadTab = t; _cadRender(); }
+  function closeCadastru() { if (_cadOv) { try { _cadOv.remove(); } catch (e) {} _cadOv = null; } }
+  function _cadContent() {
+    var el2 = document.getElementById('cad-content'); if (!el2) return;
+    if (_cadTab === 'dezmembrare') el2.innerHTML = _renderDezmembrare();
+    else if (_cadTab === 'apartamentare') el2.innerHTML = _renderApartamentare();
+    else if (_cadTab === 'comasare') el2.innerHTML = _renderComasare();
+    else if (_cadTab === 'export') el2.innerHTML = _renderExport();
+    else el2.innerHTML = _renderProiecte();
+  }
+  var inpCss = 'width:100%;padding:8px 10px;border-radius:7px;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;font-size:13px;box-sizing:border-box';
+  function _activeInfo() { var S = G.S, ap = S && S.parcels && S.parcels[S.activeParcel]; return ap ? ('parcela CF ' + (ap.nrcad || '—') + ' · ' + (ap.area || '?') + ' mp') : 'nicio parcelă selectată'; }
+  function _renderProiecte() {
+    return '<div style="font-size:12px;color:#94a3b8;margin-bottom:12px">Fișa cadastrală pentru un cadastrist (plan amplasament + inventar coordonate Stereo70 + tabel mișcare parcelară), pe ' + _activeInfo() + '.</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' + CAD_TABS.filter(function (t) { return t.id !== 'proiecte'; }).map(function (t) { return '<button onclick="Cadastru.switchTab(\'' + t.id + '\')" style="' + ST.btn + ';background:linear-gradient(180deg,#0ea5e9,#0284c7)">' + t.label + '</button>'; }).join('') + '</div>' +
+      '<div style="font-size:10px;color:#64748b;margin-top:14px">⚠ DRAFT orientativ — coordonatele provin din reproiecția platformei (proj4), nu din ridicare topografică. Documentația oficială ANCPI necesită TransDatRO + viză topograf autorizat.</div>';
+  }
+  function _renderDezmembrare() {
+    return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Dezmembrare / Lotizare</h4>' +
+      '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Bilanț de suprafețe (planificare) — apoi „Generează" produce dosarul ANCPI real din geometria parcelei selectate.</p>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">' +
+      '<div><label style="font-size:11px;color:#94a3b8">Nr. cadastral parcelă mamă</label><input id="dz-nr" type="text" placeholder="ex: 127835" style="' + inpCss + '"></div>' +
+      '<div><label style="font-size:11px;color:#94a3b8">Suprafață măsurată (mp)</label><input id="dz-sup" type="number" placeholder="ex: 5420" oninput="Cadastru._dzRecalc()" style="' + inpCss + '"></div></div>' +
+      '<div style="font-size:11px;color:#7dd3fc;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:10px 0 6px">Loturi propuse</div><div id="dz-loturi">' +
+      [1, 2].map(_dzLotRow).join('') + '</div>' +
+      '<button onclick="Cadastru._dzAddLot()" style="' + ST.ghost + ';margin-bottom:14px">+ Adaugă lot</button>' +
+      '<div style="padding:10px 14px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin-bottom:14px;font-size:13px">' +
+      '<div style="display:flex;justify-content:space-between;padding:3px 0"><span>Parcelă mamă:</span><span id="dz-b-mama">— mp</span></div>' +
+      '<div style="display:flex;justify-content:space-between;padding:3px 0"><span>Total loturi:</span><span id="dz-b-loturi">0 mp</span></div>' +
+      '<div style="display:flex;justify-content:space-between;padding:6px 0 3px;border-top:1px solid rgba(255,255,255,.08);font-weight:700"><span>Diferență (trebuie 0):</span><span id="dz-b-dif" style="color:#22c55e">0 mp ✓</span></div></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="Cadastru._genFromActive(\'dezmembrare\')" style="' + ST.btn + '">⬇ Generează dosar ANCPI (din parcela selectată)</button></div>' +
+      '<div style="font-size:10px;color:#64748b;margin-top:8px">' + _activeInfo() + '</div></div>';
+  }
+  function _dzLotRow(i) {
+    return '<div class="dz-lot" style="display:grid;grid-template-columns:54px 1fr 1fr 30px;gap:8px;align-items:center;margin-bottom:6px">' +
+      '<span style="font-size:12px;color:#94a3b8">Lot ' + i + '</span>' +
+      '<input type="number" placeholder="mp" class="dz-sup" oninput="Cadastru._dzRecalc()" style="' + inpCss + '">' +
+      '<input type="text" placeholder="destinație" style="' + inpCss + '">' +
+      '<button onclick="Cadastru._dzRemoveLot(this)" style="background:none;border:0;color:#94a3b8;cursor:pointer;font-size:15px">✕</button></div>';
+  }
+  function _dzRecalc() {
+    var mama = parseFloat((document.getElementById('dz-sup') || {}).value || 0), total = 0;
+    document.querySelectorAll('.dz-sup').forEach(function (i) { total += parseFloat(i.value || 0); });
+    var dif = mama - total, ok = Math.abs(dif) < 1;
+    var mE = document.getElementById('dz-b-mama'), lE = document.getElementById('dz-b-loturi'), dE = document.getElementById('dz-b-dif');
+    if (mE) mE.textContent = mama.toLocaleString('ro-RO') + ' mp';
+    if (lE) lE.textContent = total.toLocaleString('ro-RO') + ' mp';
+    if (dE) { dE.textContent = Math.abs(dif).toLocaleString('ro-RO') + ' mp ' + (ok ? '✓' : (dif > 0 ? '⚠ lipsesc' : '⚠ depășesc')); dE.style.color = ok ? '#22c55e' : '#ef4444'; }
+  }
+  function _dzAddLot() { var c = document.getElementById('dz-loturi'); if (!c) return; var n = c.querySelectorAll('.dz-lot').length + 1; c.insertAdjacentHTML('beforeend', _dzLotRow(n)); }
+  function _dzRemoveLot(b) { var r = b.closest('.dz-lot'); if (r) r.remove(); _dzRecalc(); }
+  function _renderApartamentare() {
+    return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Apartamentare</h4>' +
+      '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Ordin ANCPI 700/2014 Art. 56-62 — descrierea unităților individuale (UI) dintr-o clădire.</p>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">' +
+      '<div><label style="font-size:11px;color:#94a3b8">Nr. cadastral clădire</label><input id="ap-nr" type="text" style="' + inpCss + '"></div>' +
+      '<div><label style="font-size:11px;color:#94a3b8">Nr. niveluri</label><input id="ap-niv" type="number" value="4" style="' + inpCss + '"></div></div>' +
+      '<button onclick="Cadastru._apAddUnit()" style="' + ST.ghost + ';margin-bottom:10px">+ Adaugă unitate (UI)</button>' +
+      '<div id="ap-unitati"></div>' +
+      '<div style="padding:10px 14px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);margin:12px 0;font-size:13px"><div style="display:flex;justify-content:space-between"><span>Total cotă-părți comune:</span><span id="ap-cota">0% (trebuie 100%)</span></div></div>' +
+      '<button onclick="Cadastru._apGen()" style="' + ST.btn + '">⬇ Generează releveu apartamentare (PDF)</button></div>';
+  }
+  function _apAddUnit() {
+    var c = document.getElementById('ap-unitati'); if (!c) return; var n = c.querySelectorAll('.ap-u').length + 1;
+    c.insertAdjacentHTML('beforeend', '<div class="ap-u" style="display:grid;grid-template-columns:60px 1fr 1fr 1fr 30px;gap:6px;align-items:center;margin-bottom:6px">' +
+      '<span style="font-size:12px;color:#94a3b8">UI ' + n + '</span>' +
+      '<input placeholder="nr. (ex 1A)" style="' + inpCss + '">' +
+      '<input type="number" placeholder="S utilă mp" style="' + inpCss + '">' +
+      '<input type="number" placeholder="cotă %" class="ap-cota-i" oninput="Cadastru._apRecalc()" style="' + inpCss + '">' +
+      '<button onclick="this.closest(\'.ap-u\').remove();Cadastru._apRecalc()" style="background:none;border:0;color:#94a3b8;cursor:pointer">✕</button></div>');
+  }
+  function _apRecalc() { var t = 0; document.querySelectorAll('.ap-cota-i').forEach(function (i) { t += parseFloat(i.value || 0); }); var e = document.getElementById('ap-cota'); if (e) { var ok = Math.abs(t - 100) < 0.5; e.textContent = t.toFixed(1) + '% ' + (ok ? '✓' : '(trebuie 100%)'); e.style.color = ok ? '#22c55e' : '#fbbf24'; } }
+  function _apGen() { G.ss && G.ss('Releveu apartamentare — folosește „Export ANCPI" pt dosarul cu geometrie reală (UI individuale = Faza 2 cu plan etaj).'); }
+  function _renderComasare() {
+    return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Comasare (alipire)</h4>' +
+      '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Unește parcele adiacente cu același proprietar. Selectează ≥2 parcele pe hartă (mod multi), apoi generează.</p>' +
+      '<div style="font-size:12px;color:#cbd5e1;margin-bottom:12px">' + _activeInfo() + '</div>' +
+      '<button onclick="Cadastru._genFromActive(\'comasare\')" style="' + ST.btn + '">⬇ Generează dosar comasare (ANCPI)</button></div>';
+  }
+  function _renderExport() {
+    return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Export dosar ANCPI</h4>' +
+      '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Plan de amplasament și delimitare + inventar coordonate Stereo70 + tabel mișcare parcelară (Ordin 700/2014) — din geometria reală a parcelei selectate.</p>' +
+      '<div style="font-size:12px;color:#cbd5e1;margin-bottom:12px">' + _activeInfo() + '</div>' +
+      '<button onclick="Cadastru._genFromActive(\'fisa\')" style="' + ST.btn + '">⬇ Generează dosarul complet (PDF)</button></div>';
+  }
+  function _genFromActive(op) {
+    var n = 2; try { var di = document.querySelectorAll('.dz-lot').length; if (di) n = di; } catch (e) {}
+    var f = buildFisa(op, { n_loturi: n }); if (f && f.error) { G.ss && G.ss(f.error); alert(f.error); return; }
+    generatePDF(f);
+  }
+
+  G.Cadastru = {
+    toStereo: toStereo, buildFisa: buildFisa, generatePDF: generatePDF, openPanel: openCadastru, openCadastru: openCadastru,
+    closeCadastru: closeCadastru, switchTab: switchTab, ensureProj: ensureProj,
+    _dzRecalc: _dzRecalc, _dzAddLot: _dzAddLot, _dzRemoveLot: _dzRemoveLot, _apAddUnit: _apAddUnit, _apRecalc: _apRecalc, _apGen: _apGen, _genFromActive: _genFromActive
+  };
   console.log('[Cadastru] fișă cadastrală (lotizare/comasare/dezmembrare) încărcată (window.Cadastru)');
 })(window);
