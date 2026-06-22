@@ -241,9 +241,60 @@
     };
   }
 
+  // ── LOS pe rețeaua REALĂ (OSM) — v/c per segment cu sarcina dezvoltării ──
+  function networkLOS(net, autoPeak) {
+    var ways = (net && net.ways) || [];
+    var arter = ways.filter(function (w) { return w.klass === 'arterial'; });
+    var totalCap = arter.reduce(function (s, w) { return s + (w.cap || 500); }, 0) || 1;
+    var baseUtil = { arterial: 0.55, local: 0.35, other: 0.45 };
+    return ways.map(function (w) {
+      var cap = w.cap || 500;
+      var base = cap * (baseUtil[w.klass] || 0.45);
+      // traficul auto al dezvoltării se distribuie pe artere proporțional cu capacitatea
+      var added = (w.klass === 'arterial') ? (autoPeak * (cap / totalCap)) : 0;
+      var vc = Math.min(1.4, (base + added) / cap);
+      return { coords: w.coords, hw: w.hw, name: w.name, klass: w.klass, vc: Math.round(vc * 100) / 100, los: losForVc(vc), added: Math.round(added), critical: vc > LOS_THRESHOLDS.D };
+    });
+  }
+  function vcColor(vc) { return vc <= 0.55 ? '#22c55e' : vc <= 0.75 ? '#a3e635' : vc <= 0.85 ? '#f59e0b' : vc <= 0.95 ? '#f97316' : '#ef4444'; }
+
+  var LOS_IDS = { line: 'flux-los-line', crit: 'flux-los-crit' };
+  function clearNetworkLOS(map) { map = map || G.map; if (!map) return; [LOS_IDS.line, LOS_IDS.crit].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} }); var b = document.getElementById('flux-los-bar'); if (b) b.remove(); }
+  function drawNetworkLOS(centroid, result) {
+    var map = G.map; if (!map || !centroid) { G.ss && G.ss('Harta/parcela indisponibilă'); return; }
+    if (!G.OSMStreets) { G.ss && G.ss('Modulul OSM se inițializează'); return; }
+    var autoPeak = Math.round(((result && result.trips && result.trips.am) || 0) * ((result && result.modal_split && result.modal_split.auto) || 0.5));
+    G.ss && G.ss('🚦 Aduc rețeaua reală + calculez LOS (' + autoPeak + ' veh/h auto vârf)…');
+    clearNetworkLOS(map);
+    G.OSMStreets.fetch(centroid, 650).then(function (net) {
+      var links = networkLOS(net, autoPeak);
+      var feats = links.map(function (l) { return { type: 'Feature', geometry: { type: 'LineString', coordinates: l.coords }, properties: { vc: l.vc, color: vcColor(l.vc), los: l.los, hw: l.hw } }; });
+      var crit = links.filter(function (l) { return l.critical; });
+      map.addSource(LOS_IDS.line, { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      map.addLayer({ id: LOS_IDS.line, type: 'line', source: LOS_IDS.line, paint: { 'line-color': ['get', 'color'], 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 2.5, 16, 7], 'line-opacity': 0.9 } });
+      try { map.flyTo({ center: centroid, zoom: Math.max(map.getZoom(), 14.5) }); } catch (e) {}
+      // bară legendă + nr intersecții/segmente critice
+      var b = document.getElementById('flux-los-bar'); if (b) b.remove();
+      b = document.createElement('div'); b.id = 'flux-los-bar';
+      b.style.cssText = 'position:fixed;bottom:130px;right:10px;z-index:3200;background:rgba(8,15,35,.95);color:#e6edf7;border:1px solid rgba(52,211,153,.5);border-radius:11px;padding:10px 12px;font-size:11px;font-family:system-ui;max-width:230px;line-height:1.5';
+      b.innerHTML = '<div style="font-weight:800;color:#34d399;margin-bottom:4px">🚦 LOS rețea reală (OSM)</div>' +
+        '<div style="color:#94a3b8">+' + autoPeak + ' veh/h auto din dezvoltare, distribuiți pe artere</div>' +
+        '<div style="margin-top:5px"><span style="color:#22c55e">▬</span> liber <span style="color:#f59e0b">▬</span> aglomerat <span style="color:#ef4444">▬</span> saturat (v/c>0.95)</div>' +
+        '<div style="margin-top:4px"><b style="color:' + (crit.length ? '#f87171' : '#34d399') + '">' + crit.length + '</b> segmente critice (LOS E/F)</div>' +
+        '<div style="font-size:9px;color:#64748b;margin-top:5px">Estimativ — distribuire simplificată pe capacitate (fără atribuire completă de rețea = Faza 2).</div>' +
+        '<button id="flux-los-hide" style="margin-top:7px;background:rgba(255,255,255,.08);color:#cbd5e1;border:1px solid rgba(255,255,255,.15);border-radius:7px;padding:5px 9px;cursor:pointer;font-size:11px">✕ Ascunde</button>';
+      document.body.appendChild(b);
+      document.getElementById('flux-los-hide').onclick = function () { clearNetworkLOS(map); };
+      G.ss && G.ss('🚦 LOS pe ' + links.length + ' segmente reale · ' + crit.length + ' critice (LOS E/F)');
+    }).catch(function (e) { console.warn('[Flux LOS]', e); G.ss && G.ss('OSM indisponibil pentru LOS'); });
+  }
+
   G.Flux = G.Flux || {};
   G.Flux.compute = compute;
   G.Flux.compareScenarios = compareScenarios;
+  G.Flux.networkLOS = networkLOS;
+  G.Flux.drawNetworkLOS = drawNetworkLOS;
+  G.Flux.clearNetworkLOS = clearNetworkLOS;
   G.Flux._scenarios = G.Flux._scenarios || [];
   G.Flux.TRIP_RATES = TRIP_RATES;
   G.Flux.MODAL_BY_SIZE = MODAL_BY_SIZE;
