@@ -26,6 +26,7 @@
     sesizari: mod('Sesizari', 'openForm'), 'sesizari-map': mod('Sesizari', 'toggleMap'),
     participare: function () { try { G._PublicParticipation && G._PublicParticipation.toggle(); } catch (e) {} },
     'sidu-doc': function () { try { G.SIDU && G.SIDU.generateDocument && G.SIDU.generateDocument(G.TCI && G.TCI.cityKey); } catch (e) {} },
+    'sidu-docx': function () { try { G.SIDU && G.SIDU.generateDocx && G.SIDU.generateDocx(G.TCI && G.TCI.cityKey); } catch (e) {} },
     sidu: mod('SIDU', 'openPanel'), masterplan: call('generateMasterplan'), pmud: call('generatePMUD'),
     portofoliu: call('generatePortfolio')
   };
@@ -65,6 +66,7 @@
       { label: 'Participare publică', moduleId: 'participare' } ] },
     { id: 'strategie', label: 'Strategie & Administrare', ico: '🏛', color: '#888780', items: [
       { label: 'SIDU — document strategic (PDF)', moduleId: 'sidu-doc' },
+      { label: 'SIDU — document strategic (Word)', moduleId: 'sidu-docx' },
       { label: 'SIDU — registru & coerență', moduleId: 'sidu' },
       { label: 'Masterplan strategic (PDF)', moduleId: 'masterplan' },
       { label: 'PMUD — mobilitate (PDF)', moduleId: 'pmud' },

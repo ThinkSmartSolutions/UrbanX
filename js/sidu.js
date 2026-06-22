@@ -155,6 +155,94 @@
     } catch (e) { try { G.__siduErr = (e && e.stack) || (e && e.message) || String(e); } catch (_) {} console.warn('[SIDU] document', e); alert('Eroare la generarea documentului SIDU: ' + e.message); }
   }
 
+  // ════════════ DOCUMENT SIDU — EXPORT WORD (.doc, client-side) ════════════
+  // Mecanism client-only (ca tot restul platformei): HTML + Blob application/msword.
+  // Word deschide nativ .doc-ul cu stiluri, titluri (navigabile), tabel portofoliu.
+  function generateDocx(cityKey) {
+    try {
+      var city = _resolveCity(cityKey), d = dashboard(), ps = projects.list();
+      var N = function (n) { try { return Math.round(n).toLocaleString('ro-RO'); } catch (e) { return '' + n; } };
+      var dateStr = new Date().toLocaleDateString('ro-RO', { day: '2-digit', month: 'long', year: 'numeric' });
+      var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+      var H1 = function (t) { return '<h1>' + esc(t) + '</h1>'; };
+      var H2 = function (t) { return '<h2>' + esc(t) + '</h2>'; };
+      var P = function (t) { return '<p class="bt">' + esc(t) + '</p>'; };
+      function table(hdr, rows) {
+        return '<table><thead><tr>' + hdr.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+          rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+      }
+      var b = '';
+      // copertă
+      b += '<div class="cover"><div class="cl">STRATEGIA INTEGRATĂ DE DEZVOLTARE URBANĂ</div>' +
+        '<div class="cb">SIDU</div><div class="cn">' + esc(city.name) + '</div>' +
+        '<div class="cs">„Constituția" dezvoltării urbane · orizont 10-15 ani</div>' +
+        '<div class="cs2">Cadrul-umbrelă peste Masterplan și PMUD · integrează toate domeniile</div>' +
+        '<div class="cd">' + dateStr + '</div></div><br clear="all" style="page-break-before:always">';
+      // cuprins (titlurile H1/H2 devin navigabile în Word)
+      b += H2('Cuprins');
+      b += '<p class="bt">' + SECTIUNI.map(function (s, i) { return (i + 1) + '. ' + esc(s); }).join('<br>') + '</p>';
+      b += '<br clear="all" style="page-break-before:always">';
+      // 1. Context
+      b += H1('1. Context și analiză (radiografia comunității)');
+      b += P('SIDU pornește de la o radiografie completă a comunității: demografie, economie, infrastructură, mediu și calitatea vieții. Spre deosebire de PMUD (exclusiv mobilitate) și de Masterplan (regenerarea unui cartier), SIDU integrează absolut toate domeniile și stabilește prioritățile pe 10-15 ani.');
+      b += table(['Indicator', 'Valoare'], [
+        ['Populație', city.pop ? N(city.pop) + ' loc.' : '—'],
+        ['Proiecte strategice în portofoliu', '' + d.count],
+        ['Investiție portofoliu', d.total_mil + ' M€'],
+        ['Domenii integrate', '' + Object.keys(DOMENII).length]
+      ]);
+      b += P('Domeniile acoperite: ' + Object.keys(DOMENII).map(function (k) { return DOMENII[k].label; }).join(' · ') + '.');
+      // 2. Viziune
+      b += H1('2. Formularea strategiei (viziunea pe 10-15 ani)');
+      b += P('Viziune: un oraș verde, conectat și competitiv economic, cu servicii publice la standard european, în care fiecare locuitor are acces în 15 minute la servicii esențiale, iar dezvoltarea imobiliară este corelată cu infrastructura. SIDU spune „ce vrem să devină orașul"; PMUD detaliază componenta de mobilitate; Masterplanul detaliază regenerarea de cartier.');
+      // 3. Portofoliu
+      b += H1('3. Portofoliul de proiecte (listă lungă / scurtă / metropolitane)');
+      b += P('Portofoliul integrat reunește, sub aceeași umbrelă, proiecte din toate domeniile (model SIDU Iași — 331 proiecte). Prioritizare pe liste (lungă → scurtă → metropolitane) și pe termen de implementare.');
+      b += table(['Proiect', 'Domeniu', 'Listă', 'Termen', 'Cost', 'Status'], ps.map(function (p) {
+        var dm = DOMENII[p.domain] || {};
+        return [p.name, dm.label || p.domain, (LISTA[p.lista] || '—'), (TERMEN[p.termen] || '—').replace(/\s*\(.*\)/, ''), (p.cost_mil ? p.cost_mil + ' M€' : '—'), STATUS[p.status] || p.status];
+      }));
+      // 4. Plan de acțiune
+      b += H1('4. Plan de acțiune (fazare pe termene)');
+      var byT = { scurt: [], mediu: [], lung: [] }; ps.forEach(function (p) { if (byT[p.termen]) byT[p.termen].push(p); });
+      ['scurt', 'mediu', 'lung'].forEach(function (t) { b += P('Termen ' + (TERMEN[t] || t) + ': ' + (byT[t].length ? byT[t].map(function (p) { return p.name; }).join('; ') : '—') + '.'); });
+      // 5. Ierarhie
+      b += H1('5. Ierarhia SIDU → PMUD → PUG și corelarea');
+      b += P('SIDU este umbrela mare. PMUD preia componenta de transport și o detaliază matematic. Masterplanul aprofundează un cartier. Niciunul nu emite autorizații — pentru reguli stricte de construire se folosește PUG-ul, cu care SIDU și PMUD trebuie corelate obligatoriu. Decalajul SIDU/PMUD ↔ PUG creează blocaje reale (benzi fără culoar de rezervă → exproprieri; ansambluri în comune cu străzi unde autobuzul metropolitan nu intră). Fiecare proiect strategic trebuie transpus linie cu linie în PUG.');
+      // 6. Mediu & monitorizare
+      b += H1('6. Considerații de mediu și monitorizare');
+      b += P('Implementarea se monitorizează prin indicatori (mp spațiu verde/locuitor, transfer modal, reducere emisii, locuințe noi corelate cu infrastructura). Proiectele cu impact > 1 ha necesită evaluare de mediu (OUG 195/2005). Actualizare periodică a portofoliului.');
+      b += P('Surse & cadru: ghid SIDU (POR/MDLPA) · HG 874/2019 (mobilitate) · Legea 350/2001 (PUG/PUZ) · model ESTI București. Document strategic orientativ — se aprobă de Consiliul Local și se transpune în PUG.');
+      b += '<p class="disc"><b>NOTĂ:</b> Document strategic ORIENTATIV generat de platforma UrbanX. Nu înlocuiește SIDU avizată/aprobată de Consiliul Local conform ghidului POR/MDLPA. Generat: ' + dateStr + '.</p>';
+
+      var css = 'body{font-family:"Times New Roman",serif;font-size:12pt;color:#222;line-height:1.5}' +
+        'h1{font-family:Arial,sans-serif;font-size:18pt;color:#1F3864;border-bottom:2pt solid #2E75B6;padding-bottom:3pt;margin:18pt 0 8pt}' +
+        'h2{font-family:Arial,sans-serif;font-size:14pt;color:#2E75B6;margin:14pt 0 6pt}' +
+        'p.bt{text-align:justify;margin:0 0 8pt}' +
+        'table{border-collapse:collapse;width:100%;margin:8pt 0;font-size:10pt}' +
+        'th{background:#2E75B6;color:#fff;border:.5pt solid #2E75B6;padding:4pt 6pt;text-align:left}' +
+        'td{border:.5pt solid #B7C3D9;padding:4pt 6pt}' +
+        'tr:nth-child(even) td{background:#D9E2F3}' +
+        '.cover{text-align:center;padding-top:120pt}.cl{font-family:Arial;color:#2E75B6;font-size:13pt;font-weight:bold;letter-spacing:1pt}' +
+        '.cb{font-family:Arial;font-size:60pt;font-weight:bold;color:#1F3864;margin:20pt 0 0}.cn{font-family:Arial;font-size:26pt;color:#2E75B6;margin:0 0 18pt}' +
+        '.cs{font-size:13pt;color:#444}.cs2{font-size:11pt;color:#777;margin-top:6pt}.cd{margin-top:50pt;font-size:11pt;color:#555}' +
+        '.disc{font-style:italic;color:#9E1414;font-size:9pt;border:1pt solid #9E1414;padding:8pt;margin-top:24pt}';
+      var full = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>" +
+        "<head><meta charset='utf-8'><title>SIDU " + esc(city.name) + "</title>" +
+        "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->" +
+        '<style>@page{size:A4;margin:2.5cm 2cm 2.5cm 3cm}' + css + '</style></head><body>' + b + '</body></html>';
+      var blob = new Blob(['﻿', full], { type: 'application/msword' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var slug = (city.name || 'UAT').replace(/[șş]/g, 's').replace(/[țţ]/g, 't').replace(/[ăâ]/g, 'a').replace(/î/g, 'i').replace(/[ȘŞ]/g, 'S').replace(/[ȚŢ]/g, 'T').replace(/[ĂÂ]/g, 'A').replace(/Î/g, 'I').replace(/[^\w]+/g, '_');
+      a.href = url; a.download = 'SIDU_' + slug + '_' + new Date().getFullYear() + '.doc';
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); try { document.body.removeChild(a); } catch (e) {} }, 2000);
+      try { G.__siduDocxLen = full.length; } catch (e) {}
+      G.ss && G.ss('📝 Document SIDU (Word) generat');
+    } catch (e) { try { G.__siduDocxErr = (e && e.stack) || String(e); } catch (_) {} console.warn('[SIDU] docx', e); alert('Eroare la generarea documentului Word SIDU: ' + e.message); }
+  }
+
   // capitol pt rapoarte (cadru strategic SIDU) — DEPRECAT pt MP/PMUD (vezi subordinationNote); păstrat pt compat
   function chapter(D) {
     if (!D || !D.chapter) return;
@@ -226,6 +314,11 @@
       listEl.querySelectorAll('[data-del]').forEach(function (b) { b.onclick = function () { projects.remove(b.getAttribute('data-del')); renderProjects(); }; });
     }
     renderProjects();
+    // EXPORT document strategic (PDF + Word)
+    var expBar = el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)' });
+    var bpdf = el('button', { style: ST.btn }, '📜 Document SIDU (PDF)'); bpdf.onclick = function () { generateDocument(_resolveCity().key); };
+    var bdoc = el('button', { style: ST.btn + ';background:linear-gradient(180deg,#0E6432,#0a4f28)' }, '📝 Document SIDU (Word .doc)'); bdoc.onclick = function () { generateDocx(_resolveCity().key); };
+    expBar.appendChild(bpdf); expBar.appendChild(bdoc); p1.appendChild(expBar);
 
     // COERENTA
     p2.appendChild(el('div', { style: 'font-size:12px;color:#cbd5e1;margin-bottom:8px' }, 'Verifică dacă strategia e transpusă în PUG (altfel = blocaje). Ex. Iași: decalajul SIDU/PMUD ↔ PUG creează blocaje reale (Podu Roș, benzi fără culoar, ansambluri fără străzi pt autobuz).'));
@@ -238,6 +331,6 @@
     ov.appendChild(m); document.body.appendChild(ov);
   }
 
-  G.SIDU = { projects: projects, dashboard: dashboard, check: check, chapter: chapter, subordinationNote: subordinationNote, generateDocument: generateDocument, openPanel: openPanel, DOMENII: DOMENII, Q: Q };
+  G.SIDU = { projects: projects, dashboard: dashboard, check: check, chapter: chapter, subordinationNote: subordinationNote, generateDocument: generateDocument, generateDocx: generateDocx, openPanel: openPanel, DOMENII: DOMENII, Q: Q };
   console.log('[SIDU] modul strategic (umbrela) încărcat (window.SIDU)');
 })(window);
