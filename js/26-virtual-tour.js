@@ -855,6 +855,12 @@
     _setupSceneAtmosphere();
     _buildDollhouse();
 
+    // ── 007: pipeline post-procesare (finisaj fotorealist) ──
+    // Captează render-ul pristin ÎNAINTE ca 46-postprocessing să-l monkeypatcheze
+    // (+1.8s). Loop-ul îl repune în fiecare cadru → fără recursie cu vechiul patch.
+    STATE._origRender = STATE.renderer.render.bind(STATE.renderer);
+    STATE._composer = _setupComposer(w, h);
+
     STATE._resize = () => {
       if(!STATE.renderer || !canvasCtn) return;
       const w = canvasCtn.clientWidth;
@@ -862,6 +868,10 @@
       STATE.renderer.setSize(w, h);
       STATE.camera.aspect = w / h;
       STATE.camera.updateProjectionMatrix();
+      if(STATE._composer){ try {
+        STATE._composer.setSize(w, h);
+        if(STATE._ssao){ STATE._ssao.setSize(w, h); }
+      } catch(e){} }
     };
     window.addEventListener('resize', STATE._resize);
 
@@ -871,7 +881,14 @@
       try {
         _updateExplode();
         if(STATE.controls) STATE.controls.update();
-        STATE.renderer.render(STATE.scene, STATE.camera);
+        if(STATE._composer){
+          // repune render-ul pristin (neutralizează patch-ul 46 → evită recursia
+          // RenderPass → renderer.render → composer.render → …)
+          STATE.renderer.render = STATE._origRender;
+          STATE._composer.render();
+        } else {
+          STATE.renderer.render(STATE.scene, STATE.camera);
+        }
         STATE.raf = requestAnimationFrame(loop);
       } catch(err){
         errCount++;
@@ -884,9 +901,46 @@
     console.log('[VTour S1c] ✅ Dollhouse start complet');
   }
 
+  // ── 007: construiește EffectComposer rezilient (adaugă DOAR pass-urile ce se
+  // construiesc fără eroare; SSAO depinde de SimplexNoise — poate lipsi). ──
+  function _setupComposer(w, h){
+    try {
+      if(!THREE.EffectComposer || !THREE.RenderPass){ console.warn('[VTour PP] EffectComposer indisponibil — fallback render direct'); return null; }
+      var pr = Math.min(window.devicePixelRatio, 2);
+      var composer = new THREE.EffectComposer(STATE.renderer);
+      composer.setPixelRatio(pr);
+      composer.setSize(w, h);
+      composer.addPass(new THREE.RenderPass(STATE.scene, STATE.camera));
+      var added = ['render'];
+      // SSAO — ocluziune ambientală în colțuri/contacte (realismul „contact")
+      try {
+        if(THREE.SSAOPass && THREE.SimplexNoise){
+          var ssao = new THREE.SSAOPass(STATE.scene, STATE.camera, w, h);
+          ssao.kernelRadius = 8; ssao.minDistance = 0.002; ssao.maxDistance = 0.1;
+          composer.addPass(ssao); STATE._ssao = ssao; added.push('ssao');
+        }
+      } catch(e){ console.warn('[VTour PP] SSAO skip:', e.message); }
+      // Bloom — strălucire pe ferestre/corpuri de iluminat (finisaj cinematic)
+      try {
+        if(THREE.UnrealBloomPass && THREE.LuminosityHighPassShader){
+          var bloom = new THREE.UnrealBloomPass(new THREE.Vector2(w, h), 0.45, 0.6, 0.85);
+          composer.addPass(bloom); STATE._bloom = bloom; added.push('bloom');
+        }
+      } catch(e){ console.warn('[VTour PP] Bloom skip:', e.message); }
+      // ultimul pass face renderToScreen (EffectComposer setează automat pe ultimul)
+      STATE.renderer.toneMappingExposure = 1.25;
+      console.log('[VTour PP] ✅ composer activ:', added.join(' + '));
+      STATE._ppPasses = added;
+      // dacă DOAR RenderPass (niciun efect real), nu merită overhead-ul → fallback
+      if(added.length === 1){ try { composer.dispose && composer.dispose(); } catch(e){} return null; }
+      return composer;
+    } catch(e){ console.warn('[VTour PP] setup eșuat — fallback:', e.message); return null; }
+  }
+
   function stop(){
     STATE.active = false;
     if(STATE.raf){ cancelAnimationFrame(STATE.raf); STATE.raf = null; }
+    if(STATE._composer){ try { STATE._composer.dispose && STATE._composer.dispose(); } catch(e){} STATE._composer = null; STATE._ssao = null; STATE._bloom = null; }
     if(STATE._resize){ window.removeEventListener('resize', STATE._resize); }
     if(STATE.scene){
       STATE.scene.traverse(o => {

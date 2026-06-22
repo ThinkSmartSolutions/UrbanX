@@ -6073,23 +6073,31 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
 })();
 </script>
 
-<!-- Three.js r128 addons pentru tur virtual fotorealist (SSAO, Bloom, HDRI, PMREM) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/RGBELoader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/GLTFLoader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/DRACOLoader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/EffectComposer.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/RenderPass.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/ShaderPass.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/SSAOPass.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/UnrealBloomPass.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/BokehShader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing/BokehPass.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/objects/Reflector.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/CopyShader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/SSAOShader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/shaders/LuminosityHighPassShader.js"></script>
-<script src="js/26-virtual-tour.js?v=20260604-S2b-FLOORPLAN"></script>
+<!-- Three.js r128 addons pt tur virtual fotorealist (SSAO, Bloom, HDRI, PMREM).
+     FIX 007: URL-urile cdnjs .../three.js/r128/{postprocessing,shaders,loaders,controls}/*
+     returnau 404 (cdnjs nu mirror-uiește examples/js) → OrbitControls/HDRI/post-proc
+     NU se încărcau deloc. Sursă funcțională = jsDelivr npm three@0.128.0/examples/js.
+     ORDINE: shaders + SimplexNoise ÎNAINTEA pass-urilor care le folosesc. -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/SSAOShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/BokehShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/math/SimplexNoise.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/Pass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/SSAOPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BokehPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="js/26-virtual-tour.js?v=20260622-PP-composer"></script>
 <script src="js/27-tur-sync.js?v=20260611"></script>
     <script src="js/28-ux-master.js?v=20260610"></script>
     <script src="js/29-completari-finale.js?v=20260609"></script>
