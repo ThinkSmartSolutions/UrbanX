@@ -56,9 +56,10 @@
   }
 
   D.addEventListener('keydown', function (e) {
-    // Cmd/Ctrl+K → căutare
+    // Cmd/Ctrl+K → paleta de comenzi (launcher unificat); fallback pe căutare
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
-      if (openSearch()) { e.preventDefault(); }
+      if (G.Launcher && G.Launcher.toggle) { G.Launcher.toggle(); e.preventDefault(); }
+      else if (openSearch()) { e.preventDefault(); }
       return;
     }
     // Cmd/Ctrl+. → închide tot
