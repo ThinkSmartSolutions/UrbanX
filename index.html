@@ -1311,7 +1311,7 @@ document.addEventListener('click', function(){
 
   <!-- Meniu TCI Avansat — Cinema, Comparatii, AI, Zone -->
   <div id="tci-group" style="position:relative">
-    <button class="tb-btn" onclick="_toggleTCIMenu(event)" title="UrbanX Pro — film cinematic, film cinematic, masterplan PDF, comparații, rapoarte, AI"
+    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.open():_toggleTCIMenu(event)" title="UrbanX Pro — meniu structurat (7 grupe)"
       style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
         border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
       🏙 UrbanX Pro ▾
@@ -6156,6 +6156,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260621a"></script>
     <script src="js/ux-launcher.js?v=20260622qa"></script>
+    <script src="js/ux-sidebar.js?v=20260622a"></script>
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260620a"></script>
     <script src="js/portfolio-dd.js?v=20260622rag"></script>

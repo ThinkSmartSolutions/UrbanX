@@ -1,199 +1,136 @@
-# UrbanX — Arhitectura Modulară
-**Versiune:** 1.0 · **Data:** 03 mai 2026 · **Status:** Producție
+# UrbanX — ARCHITECTURE.md
+# Generat de Claude Code · 2026-06-22 · Sursă de adevăr pentru prompturile 001–006
+# NU modifica manual — regenerează cu promptul 000 dacă repo-ul se schimbă
 
 ---
 
-## Structura fișierelor
-
-```
-/UrbanX/
-├── index.html                  ← HTML + CSS + <script src> — 1.270 linii (era 20.837)
-├── ARCHITECTURE.md             ← acest fișier
-│
-├── js/                         ← Module JavaScript — ordine de încărcare fixă
-│   ├── 00-globals.js           ← STATE, constante, auth — PRIMUL ÎNCĂRCAT ÎNTOTDEAUNA
-│   ├── 02-map-core.js          ← Mapbox, layere, volume, context OSM
-│   ├── 03-ui-panel.js          ← Panel lateral, tab-uri, HTML dinamic UI
-│   ├── 04-search.js            ← Căutare cadastru, adresă, coordonate GPS
-│   ├── 05-cad-utils.js         ← UTR helpers, switchTab, parametri PUG
-│   ├── 06-aedis.js             ← Urban3D modal, renderer 3D, FAL.AI, LOISIR
-│   ├── 07-pdf-utils.js         ← PDF logo, capturi hartă, bilanț edificabil
-│   ├── 08-lotizare.js          ← Generator lotizare, export PDF plan
-│   ├── 09-pdf-engine.js        ← Design system PDF (_initStudyPdf)
-│   ├── 10-studies.js           ← Toate studiile și rapoartele PDF
-│   ├── 11-viewer3d.js          ← Viewer Urban3D full-screen, materiale, Street View
-│   ├── 12-admin.js             ← Admin panel, utilizatori Supabase
-│   └── 13-info-drawer.js       ← RAPORT_INFO catalog, drawer lateral info
-│
-└── studies/                    ← (viitor) studii noi ca fișiere independente
-    └── README.md
-```
+## 1. STACK
+- Frontend: Vanilla JS (zero framework)
+- Bundler: NICIUNUL — `<script src>` directe, în ordine
+- HTML principal: `index.html` (rădăcină, ~300K caractere)
+- Încărcare JS: SCRIPT TAGS ÎN ORDINE (213 tag-uri, ne-bundlat, cache-bust `?v=`)
+- Backend: NU EXISTĂ server live — client-only pe GitHub Pages. Python doar OFFLINE (`romania_spatial_pipeline.py`, `scripts/*-probe.py`). `urbanx-mobility/` = FastAPI SEPARAT, Faza 2, NEdeployat.
+- DB: NU EXISTĂ — date statice `data/`, localStorage pt registre, Supabase opțional (auth)
 
 ---
 
-## Reguli de arhitectură — OBLIGATORII
-
-### 1. Ordinea de încărcare e critică
-Browserul execută script-urile în ordinea din `index.html`.
-**`00-globals.js` TREBUIE să fie primul** — definește `S`, `AEDIS`, `V3D`, `map` etc.
-Niciun modul nu importă din alt modul — toate citesc din globalele din `00-globals.js`.
-
-### 2. Cum adaugi un modul nou
-```
-studii noi → adaugă funcția în 10-studies.js SAU creează 10b-studies-new.js
-funcție UI nouă → 03-ui-panel.js
-funcționalitate hartă → 02-map-core.js
-tool nou (ex: comparator parcele) → js/14-comparator.js (număr următor)
-```
-
-**Template pentru fișier nou:**
+## 2. HARTA — Mapbox GL JS (NU MapLibre)
 ```javascript
-// UrbanX — Numele modulului
-// Dependențe: 00-globals.js (S, map, REGULI)
-// Adăugat: DD.MM.YYYY
-
-// === CONSTANTE MODUL ===
-const MY_MODULE_CONFIG = { ... };
-
-// === FUNCȚII PUBLICE ===
-function myNewFeature() {
-  // Folosește S.parcels, map, AEDIS etc din globals
-}
-
-// === EVENT LISTENERS (dacă e cazul) ===
-// document.addEventListener('DOMContentLoaded', () => { ... });
+const MAP_VAR  = "window.map";          // window.map.addLayer(...) sau G.map
+const MAP_FILE = "js/02-map-core.js";   // const map=new mapboxgl.Map({...}); window.map=map; (l.8)
+const MAP_READY_EVENT = "map.on('load', cb)";   // și map.on('style.load')
+const MAP_ADD_LAYER_FN = null;          // direct map.addSource(id,..)+map.addLayer({..})
 ```
+Este **Mapbox GL JS v3.11.0**, nu MapLibre (token Mapbox deja configurat). Instanțe secundare cinematic: `TCI.tciMap`, `TCI.mapLeft`. Pentru module → `window.map`.
+**REGULĂ:** layere noi → `window.map`; șterge layer ÎNAINTE de source la cleanup.
 
-### 3. Variabile globale — ce există în `00-globals.js`
+---
 
-| Variabilă | Tip | Descriere |
-|-----------|-----|-----------|
-| `S` | Object | State principal al aplicației (parcele, volum, tab activ) |
-| `AEDIS` | Object | Configurarea Urban3D (funcțiune, stil, niveluri) |
-| `V3D` | Object | State viewer 3D (renderer, scene, camera) |
-| `_LOT` | Object | State lotizare (tipuri, parametri, rezultate) |
-| `REGULI` | Object | Regulamentul PUG per UTR |
-| `FN_UTR` | Object | Funcțiuni urbanistice |
-| `PDF_C` | Object | Paleta culori pentru PDF (main report) |
-| `map` | mapboxgl.Map | Instanța hartă Mapbox — definită în 02-map-core.js |
-
-### 4. Cum adaugi un studiu nou în rapoarte
-Studiile sunt funcții `async generateXxx()` în `10-studies.js`.
-
-**Pași:**
-1. Adaugă funcția în `10-studies.js` — copiază structura oricărui studiu existent
-2. Adaugă butonul în `index.html` — secțiunea `rapoarte-menu` și `htmlMobRapoarte()`
-3. Adaugă intrarea în `RAPORT_INFO` din `13-info-drawer.js`
-4. Dacă studiul e mare (>300 linii) → creează `10b-studiu-nou.js` separat
-
-**Template studiu:**
+## 3. MECANISMUL DE MODULE
+NU există `openPanel()` central. Fiecare modul = IIFE care expune `window.X` cu metoda proprie (`.openPanel()/.open()/.openDashboard()/.openWizard()`).
 ```javascript
-async function generateNouStudiu() {
-  const ap = S.parcels[S.activeParcel ?? 0];
-  if(!ap?.geo?.geometry) { ss('Selectați o parcelă.'); return; }
-  ss('Se generează...');
-
-  const d = _initStudyPdf('Titlu Studiu', 'Subtitlu · Lege aplicabilă', 7);
-  const { pdf, W, H, DARK, GOLD, LIGHT, S2, hdr, ftr, sec, body, tblRow, addImg, concluzii, sign, cover } = d;
-
-  const caps = await _captureStudyMaps(ap, m => ss(m));
-
-  // PAG 1: Copertă
-  cover('Subtitlu copertă', caps.img3D, [['KPI 1', 'Valoare 1']], true, 'CONFORM');
-
-  // PAG 2..N: Conținut
-  pdf.addPage(); pdf.setFillColor(...LIGHT); pdf.rect(0,0,W,H,'F');
-  hdr('TITLU PAGINĂ', 2); ftr();
-  let cy = 33;
-  cy = sec('1. SECȚIUNE', cy);
-  cy = body('Text paragraf...', 14, cy);
-
-  // Ultima pagină: concluzii + semnături
-  pdf.addPage(); /* ... */ sign();
-
-  pdf.save('UrbanX_NouStudiu_' + d.nrcad + '.pdf');
-  ss('✅ Studiu generat.');
-}
+// Pattern overlay (toate modulele): div full-screen creat dinamic
+//   ST.overlay='position:fixed;inset:0;background:rgba(2,6,16,.74);z-index:9000;display:flex;...'
+//   ov.onclick=function(e){ if(e.target===ov) ov.remove(); };  // backdrop-close
+//   document.body.appendChild(ov);
+// Închidere: ov.remove() (backdrop / ✕). GLOBAL: Escape (js/ux-navigation.js) închide modalul de sus.
+// Vizual: overlay modal PESTE hartă (harta rămâne dedesubt). Meniurile sunt panouri ancorate sus.
 ```
+**REGULĂ:** modul nou → IIFE `window.X` + overlay propriu (z9000, inset:0, backdrop-close). NU inventa openModule() central.
 
-### 5. Cum adaugi funcționalitate hartă nouă
-Layerele Mapbox se adaugă în `02-map-core.js`, funcția `addLayers()`.
-Pattern consistent:
+---
+
+## 4. NAVIGARE & ACCES FUNCȚII
+- **Launcher** (`js/ux-launcher.js`, `window.Launcher`): paletă căutabilă cu ~63 funcții grupate + Quick Actions. Deschidere: buton `🔍 Funcții` (bara sus) + **Cmd/Ctrl+K**. PUNCTUL DE ACCES PRINCIPAL.
+- Meniuri dropdown: `#tci-adv-menu` ("UrbanX Pro", `_toggleTCIMenu`), `#rapoarte-menu` (`toggleRapoarteMenu`), `#viz-menu`, `#tools-menu`.
+- `_closeAllMenusAndOverlay()` (index.html) închide toate meniurile. NU există sidebar lateral.
+
+---
+
+## 5. ORDINEA & STRUCTURA
+- 213 `<script src>` ne-bundlat. Dependențe sus (~l.1813), apoi `js/*.js`. Module noi LA FINAL (înainte `</body>`), `?v=YYYYMMDDxx`.
+```
+index.html · ARCHITECTURE.md · CLAUDE.md
+js/*.js (212 fișiere, FLAT) · data/{uat}/ (pug.geojson+reguli.json) · scripts/*.py (test/GIS offline) · urbanx-mobility/ (FastAPI Faza 2)
+```
+**REGULĂ:** JS noi în `js/` flat; fără foldere noi; script tag la final.
+
+---
+
+## 6. CONVENȚII DE COD
 ```javascript
-// În addLayers():
-map.addSource('nou-src', { type:'geojson', data:{ type:'FeatureCollection', features:[] } });
-map.addLayer({ id:'nou-layer', type:'fill', source:'nou-src', paint:{ 'fill-color':'#3b82f6' } });
-
-// Helper pentru update:
-function updateNouLayer(features) {
-  setSource('nou-src', { type:'FeatureCollection', features });
-}
+const HTML_METHOD  = "innerHTML template literals + document.createElement (mixt)";
+const EVENT_METHOD = "onclick inline (meniuri) + .onclick/addEventListener după createElement (module)";
+const CSS_PREFIX   = null;          // module UX folosesc id-uri ux-* (ux-launcher, ux-navigation)
+const ICON_LIB     = "NU EXISTĂ — EMOJI (🗺 📐 🌿 🏛...) + text";
+const CSS_METHOD   = "style inline în JS (obiect ST/modul) + <style> în index.html; fără .css separate";
 ```
+**REGULĂ:** emoji pt iconițe (NU instala librărie), style inline ST, IIFE `(function(G){...})(window)`.
 
 ---
 
-## Cum rulezi local (fără server)
-
-Browserele blochează `<script src="...">` din fișiere locale (`file://`).
-Ai nevoie de un server HTTP minim:
-
-```bash
-# Python (built-in):
-cd /calea/catre/UrbanX
-python3 -m http.server 8080
-# Deschide: http://localhost:8080
-
-# Node.js (dacă ai npm):
-npx serve .
-# Deschide: http://localhost:3000
-```
-
----
-
-## Viitor — când crești mai mult
-
-### Când `06-aedis.js` (290KB) devine prea mare:
-Sparge-l în:
-- `06a-aedis-modal.js` — UI panel, tab-uri, render
-- `06b-aedis-3d.js` — geometrie 3D, materiale
-- `06c-loisir.js` — tot ce ține de LOISIR
-
-### Când ai 5+ studii noi:
-- Creează `10a-studies-tehnice.js`, `10b-studies-speciale.js`
-- Sau un folder `studies/` cu un fișier per studiu
-
-### Când vrei lazy loading (performanță):
+## 7. STATE GLOBAL
 ```javascript
-// In loc de <script src="10-studies.js"> in HTML,
-// incarci la prima folosire:
-async function generateSolarStudy() {
-  if(!window._studiesLoaded) {
-    await loadScript('js/10-studies.js');
-    window._studiesLoaded = true;
-  }
-  _generateSolarStudyInternal();
-}
+// window.S      : {parcels:[{geo,nrcad,area,utr,params}], activeParcel, multiMode}
+// window.TCI    : {cityKey:'RO-IS-01', cityName, _EXTRA_UATS}
+// window.REGULI : reguli PUG zona activă · window._RO_CITIES_DB : 31 municipii · window._USER : {email,role} · window.map
+// localStorage: ux_last_city, ux_user, ux_session, ux_package, ux_shortcuts, ux_comments_offline,
+//   urbanx_* (registre: urbanx_sidu_projects_v2, urbanx_market_tx_v1, urbanx_plati_v1, urbanx_heritage_v1,
+//   urbanx_portfolio_v1, urbanx_loisir_catalog_v1, urbanx_simlab_scenarios_v1...), tci_scenarios, ux_cache_*
 ```
-
-### Când vrei TypeScript / build system:
-- Instalezi Vite: `npm create vite@latest urbanx -- --template vanilla`
-- Muți fișierele .js în `/src/`
-- `import` / `export` în loc de globale
-- `npm run build` generează un singur fișier optimizat
+**REGULĂ:** NU suprascrie window.S/TCI/map/REGULI; chei localStorage prefixate `urbanx_`.
 
 ---
 
-## Verificare rapidă după modificări
+## 8. BACKEND API
+```
+BACKEND: NU EXISTĂ server live (client-only). Fetch extern prin Cloudflare Worker:
+  https://urbanx-proxy.3dtravelsoftart.workers.dev
+    /osm?q=<overpass> → Overpass (rețea OSM reală: OSMStreets/CAU/Flux LOS)
+    /inse → INSE TEMPO · /anar → ANAR WMS · /proxy?url= → CORS bypass
+urbanx-mobility/ (FastAPI 8001) = Faza 2, nedeployat.
+```
+**REGULĂ:** fetch extern → proxy; server real (email/plăți/NDVI/atribuire trafic) = „Faza 2" onest.
 
-```bash
-# Verifici că nu lipsesc funcții din fișierul monolitic original:
-grep -c "^function\|^async function" index_v4.html   # 368
-grep -rc "^function\|^async function" js/             # trebuie să fie tot 368
+---
 
-# Verifici că index.html are toate script-urile:
-grep "script src" index.html
+## 9. DEPENDENȚE
+```
+Mapbox GL JS v3.11.0 (NU MapLibre) · Turf.js v6 · Three.js r128 (fără OrbitControls/CapsuleGeometry)
+jsPDF 2.5.1 (+_registerROFont, font DejaVuRO) · proj4js 2.11.0 (Stereo70 EPSG:3844)
+html2canvas 1.4.1 · Mapbox GL Draw 1.5.0 · Iconițe: EMOJI
 ```
 
 ---
 
-*UrbanX TSS·FG · Arhitectură modulară v1.0 · Mai 2026*
+## 10. MODULE EXISTENTE (window.X, funcționale)
+```
+Launcher (ux-launcher) · UX nav (ux-navigation) · OSMStreets (osm-streets)
+SIDU (sidu — document standalone+registru) · Loisir (+validator+uhi) · Superbloc (real OSM drawReal)
+SimLab (10 simulatoare) · Cadastru (Stereo70) · Lotizare (08-lotizare+ansamblu+validator)
+Flux (engine+ui, +LOS OSM) · UXI/Intelligence · CAU · Plati (mock) · Market (demo)
+Dosar · Sesizari · Notificari · Heritage · Feaz · Invest · Portfolio (6-RAG) · LVC · Carbon · Fisa360 · StudyZone
+ORFANE (NU în index.html — NU edita fără re-cablare): massing-render.js, udre-engine.js,
+  pipeline.js, udre-confidence.js, 19-tci-modules-patch.js, 20-report-engine.js
+```
+
+---
+
+## 11. FUNCȚII GLOBALE
+```javascript
+_closeAllMenusAndOverlay()  · infoDrawerOpen(key) (js/13-info-drawer.js) · toggleRapoarteMenu() · _toggleTCIMenu(e)
+window.Launcher.open()/toggle() · ss(msg) (toast) · _registerROFont(pdf) · showUATSelector()
+window.OSMStreets.fetch(center,radiusM) · generate{Solar,Shadow,SSF,Traffic,Water,...}Study()
+```
+
+---
+
+## 12. REGULI GLOBALE
+1. MAP_VAR = `window.map` (Mapbox v3.11.0)
+2. Module = IIFE `window.X` + overlay propriu (ST z9000, backdrop-close); NU openModule() central
+3. Scripturi noi LA FINAL în index.html cu `?v=`
+4. Fișiere noi în `js/` flat
+5. Emoji iconițe, style inline ST, fără librării noi
+6. NU suprascrie window.S/TCI/map/REGULI; localStorage prefix `urbanx_`
+7. Fetch extern → proxy; server real = Faza 2
+8. **VERIFICĂ `grep -c "fisier.js" index.html` ÎNAINTE de a edita un fișier ca feature** — multe sunt orfane (neîncărcate → cod invizibil)
