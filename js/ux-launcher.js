@@ -94,6 +94,13 @@
   ];
   // doar acțiuni cu funcție disponibilă (filtrăm la deschidere ca să nu arătăm ce nu e încărcat)
 
+  // Quick Actions (v2 §QUICK_ACTIONS) — mereu vizibile, sus
+  var QUICK = [
+    { ico: '📣', l: 'Sesizare nouă', run: mod('Sesizari', 'openForm') },
+    { ico: '🔍', l: 'Caută parcelă', run: function () { var t = D.querySelector('.ptab[data-t="search"]'); if (t) t.click(); } },
+    { ico: '🧪', l: 'SimLab', run: mod('SimLab', 'openDashboard') },
+    { ico: '📋', l: 'CU nou (CAU)', run: mod('CAU', 'openPanel') }
+  ];
   var ov = null, items = [], sel = 0;
   function fnReady(a) {
     // best-effort: arătăm tot; dacă funcția lipsește, run() afișează „se inițializează"
@@ -116,7 +123,17 @@
     var foot = D.createElement('div');
     foot.style.cssText = 'padding:7px 14px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;color:#64748b;display:flex;justify-content:space-between';
     foot.innerHTML = '<span>↑↓ navighezi · Enter deschizi · Esc închizi</span><span>' + A.length + ' funcții</span>';
-    box.appendChild(inp); box.appendChild(list); box.appendChild(foot); ov.appendChild(box); D.body.appendChild(ov);
+    // strip Quick Actions (pinned)
+    var qa = D.createElement('div');
+    qa.style.cssText = 'display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08);flex-wrap:wrap;background:#0a1120';
+    QUICK.forEach(function (a) {
+      var b = D.createElement('button');
+      b.innerHTML = a.ico + ' ' + a.l;
+      b.style.cssText = 'flex:1;min-width:110px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#e9d08a;border-radius:8px;padding:8px 6px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap';
+      b.onclick = function () { close(); setTimeout(function () { try { a.run(); } catch (e) {} }, 30); };
+      qa.appendChild(b);
+    });
+    box.appendChild(inp); box.appendChild(qa); box.appendChild(list); box.appendChild(foot); ov.appendChild(box); D.body.appendChild(ov);
 
     function render(q) {
       q = (q || '').toLowerCase().trim();
