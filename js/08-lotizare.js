@@ -751,6 +751,7 @@ function _lotHtmlCirculatii(){
 function _lotBuild3D(loturi, drumuri){
   if(!loturi?.length){ clearSource('vol-src'); return; }
 
+  _LOT._neighborSetbackInfo = null; // PUNCT 1 — acumulator verificare H/2 vecini
   const feats3D = [];
   const pal = getArchPalette ? getArchPalette() : {
     etaje:['#7c9bcc','#8faacc','#a3b8cc','#b7c6cc','#c4d0cc','#d0dacc','#dce5cc','#e8efcc'],
@@ -796,6 +797,19 @@ function _lotBuild3D(loturi, drumuri){
     // Tipurile speciale (dotari/cult) genereaza doar o platforma de sol
     // Geometria 3D detaliata e adaugata de _lotRenderSpecial in viewer
     const _isSpecialTip = ['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'].includes(tipKey);
+
+    // PUNCT 1 — retragere min. H/2 față de construcțiile vecine existente (S.ctx OSM)
+    if(!_isSpecialTip){
+      const Hbld = hParter + Math.max(0, niv-1)*hNiv;
+      const nbs = _lotNeighborSetback(fpGeom, Hbld);
+      if(nbs.conflict){
+        fpGeom = nbs.geom;
+        const ni = _LOT._neighborSetbackInfo = _LOT._neighborSetbackInfo || {adjusted:0, unresolved:0, maxDeficit:0};
+        ni.adjusted++;
+        if(nbs.unresolved) ni.unresolved++;
+        ni.maxDeficit = Math.max(ni.maxDeficit, nbs.deficit||0);
+      }
+    }
 
     // Setări arhitecturale per tip (din override sau default)
     const tipStil      = ov.stil          ?? def.stil          ?? 'modern';
@@ -1017,6 +1031,27 @@ function _lotBuild3D(loturi, drumuri){
 
   // Trimite în vol-src — viewer-ul 3D redă automat
   setSource('vol-src', {type:'FeatureCollection', features:feats3D});
+
+  // PUNCT 1 — verificare retragere H/2 față de vecini → bilanț (panel rezultate)
+  try{
+    const ni = _LOT._neighborSetbackInfo;
+    if(_LOT._bilant?.verificari){
+      if(ni && ni.adjusted>0){
+        _LOT._bilant.verificari.push({
+          label:'Retragere min. H/2 față de construcții vecine',
+          value: ni.adjusted+' edificabil(e) retras(e) (deficit max '+ni.maxDeficit+'m)'+(ni.unresolved?(' · '+ni.unresolved+' necesită PUZ/derogare'):''),
+          ok: ni.unresolved===0,
+          norm:'RGU/HG 525/1996 — min. ½ din înălțime, dar nu mai puțin de 3m'
+        });
+      } else if(S.ctx?.features?.length){
+        _LOT._bilant.verificari.push({
+          label:'Retragere min. H/2 față de construcții vecine',
+          value:'Respectată (verificat pe '+S.ctx.features.length+' clădiri vecine OSM)',
+          ok:true, norm:'RGU/HG 525/1996'
+        });
+      }
+    }
+  }catch(e){}
 
   // Render 3D special pentru tipurile dotare/cult (dacă viewer 3D e deschis)
   const _specialTipuri = ['gazebo','garaj','bbq','bucvara','bortodoxa','bcatolica'];
@@ -1940,9 +1975,93 @@ function _lotHtmlExport(){
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// PUNCT 1 — Orientare loturi spre strada PRINCIPALĂ reală + retragere H/2 vecini
+// ════════════════════════════════════════════════════════════════════════════
+
+// Detectează latura parcelei dinspre strada principală reală (OSM, prin proxy).
+// Arterele (primary/secondary/tertiary) cântăresc mai mult decât străzile locale.
+// Returnează {side:'N'|'S'|'E'|'W', dist} sau null. Cache pe centrul parcelei.
+async function _lotDetectStreetSide(pFeat){
+  try{
+    if(!window.OSMStreets || !pFeat?.geometry || !window.turf) return null;
+    const c  = turf.centerOfMass(pFeat).geometry.coordinates;
+    const bb = turf.bbox(pFeat);
+    const ckey = c[0].toFixed(5)+','+c[1].toFixed(5);
+    if(_LOT._streetSideCache && _LOT._streetSideCache.key===ckey) return _LOT._streetSideCache.val;
+    let res=null;
+    try{
+      // race cu timeout 3s → generarea nu se blochează niciodată pe rețea;
+      // la regenerare OSMStreets servește din cache (instant)
+      res = await Promise.race([
+        OSMStreets.fetch(c, 170),
+        new Promise(r=>setTimeout(()=>r(null), 3000))
+      ]);
+    }catch(e){ return null; }
+    if(!res?.ways?.length) return null;
+    const cx=c[0], cy=c[1];
+    const sides = { N:[cx,bb[3]], S:[cx,bb[1]], E:[bb[2],cy], W:[bb[0],cy] };
+    const wgt = w => w.klass==='arterial'?3.0 : w.klass==='local'?1.4 : 1.0;
+    let best=null, bestScore=Infinity, bestRaw=Infinity;
+    for(const sk of Object.keys(sides)){
+      const pt = turf.point(sides[sk]);
+      let minEff=Infinity, minRaw=Infinity;
+      for(const w of res.ways){
+        if(!w.coords || w.coords.length<2) continue;
+        try{
+          const np = turf.nearestPointOnLine(turf.lineString(w.coords), pt);
+          const d  = turf.distance(pt, np, {units:'meters'});
+          const eff = d / wgt(w);
+          if(eff<minEff) minEff=eff;
+          if(d<minRaw)   minRaw=d;
+        }catch(e){}
+      }
+      if(minEff<bestScore){ bestScore=minEff; best=sk; bestRaw=minRaw; }
+    }
+    if(!best) return null;
+    const val = {side:best, dist:Math.round(bestRaw)};
+    _LOT._streetSideCache = {key:ckey, val};
+    return val;
+  }catch(e){ return null; }
+}
+
+// Retragere min. H/2 față de construcțiile vecine EXISTENTE (S.ctx = clădiri OSM reale).
+// Restrânge amprenta propusă cu deficitul față de cel mai apropiat vecin care încalcă H/2.
+// Întoarce {geom, conflict, deficit, unresolved}.
+function _lotNeighborSetback(fpGeom, heightM){
+  try{
+    if(!fpGeom || !S.ctx?.features?.length || !window.turf) return {geom:fpGeom, conflict:false};
+    const req = Math.max(3, heightM/2); // min. ½ din înălțime, dar nu mai puțin de 3m (RGU)
+    const self = {type:'Feature', geometry:fpGeom, properties:{}};
+    let sbb; try{ sbb = turf.bbox(self); }catch(e){ return {geom:fpGeom, conflict:false}; }
+    const cyy=(sbb[1]+sbb[3])/2;
+    const padLat=(req+6)/111320, padLng=(req+6)/(111320*Math.cos(cyy*Math.PI/180));
+    let worst=0;
+    for(const nb of S.ctx.features){
+      const g = nb?.geometry;
+      if(!g || (g.type!=='Polygon' && g.type!=='MultiPolygon')) continue;
+      try{ // respinge rapid vecinii departe (bbox)
+        const nbb=turf.bbox(nb);
+        if(nbb[0]>sbb[2]+padLng || nbb[2]<sbb[0]-padLng || nbb[1]>sbb[3]+padLat || nbb[3]<sbb[1]-padLat) continue;
+      }catch(e){}
+      const parts = g.type==='Polygon' ? [g] : g.coordinates.map(cc=>({type:'Polygon',coordinates:cc}));
+      for(const pp of parts){
+        try{
+          const d = minDistBetweenPolygons(self, {type:'Feature',geometry:pp,properties:{}}).dist;
+          if(d < req) worst = Math.max(worst, req - d);
+        }catch(e){}
+      }
+    }
+    if(worst <= 0.3) return {geom:fpGeom, conflict:false};
+    const shrunk = turf.buffer(self, -worst, {units:'meters'});
+    if(shrunk?.geometry && turf.area(shrunk) > 12) return {geom:shrunk.geometry, conflict:true, deficit:Math.round(worst*10)/10};
+    return {geom:fpGeom, conflict:true, deficit:Math.round(worst*10)/10, unresolved:true};
+  }catch(e){ return {geom:fpGeom, conflict:false}; }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 // MOTOR GENERARE
 // ════════════════════════════════════════════════════════════════════════════
-function runLotizare(){
+async function runLotizare(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('⚠️ Selectați o parcelă de pe hartă.');return;}
 
@@ -1985,6 +2104,8 @@ function runLotizare(){
     }
     // Saneaza geometria (repara self-intersections / MultiPolygon ex. CF 56832)
     pFeat = _lotSanitizeGeom(pFeat) || pFeat;
+    // PUNCT 1: detecteaza latura dinspre strada PRINCIPALA reala (OSM) → orientare loturi
+    try{ _LOT._streetSide = await _lotDetectStreetSide(pFeat); }catch(e){ _LOT._streetSide = null; }
     const pArea=turf.area(pFeat);
     const params=ap.params||getDefaultParams(ap.utr||'');
 
@@ -2122,6 +2243,10 @@ function runLotizare(){
       {label:'Suprafață drum (<30%)',value:(drumAreaFract*100).toFixed(0)+'%',ok:drumAreaFract<0.30,norm:'Recomandare urbanism'},
       // Educatie acces separat
       ...(hasEducatie2?[{label:'Acces separat grădiniță/școală',value:'Generat automat',ok:true,norm:'NP 010/1997 · OMS 119/2014'}]:[]),
+      // PUNCT 1 — orientarea loturilor cu fațada spre strada principală reală
+      (_LOT._streetSide
+        ? {label:'Fațadă principală spre strada principală', value:'Latură '+({N:'nord',S:'sud',E:'est',W:'vest'}[_LOT._streetSide.side])+' · stradă reală la ~'+_LOT._streetSide.dist+'m (OSM)', ok:true, norm:'Drum colector orientat spre strada detectată'}
+        : {label:'Fațadă principală spre stradă', value:'Stradă nedetectată (OSM) — orientare după forma parcelei', ok:true, warn:'Verificați manual accesul la stradă'}),
     ];
 
     _LOT._loturi=loturi;_LOT._drumuri=drumuri;
@@ -2512,12 +2637,22 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
     const latSecundar  = (dt?.secundar?.latime  || Math.max(4, _LOT.drumLat*0.75)) / mLat;
     const latAlee      = (dt?.acces?.latime     || 3.5) / mLat;
 
-    // ── Drum colector principal: paralel cu latura lunga, la 25% sau marginea strazii
-    // Pozitionat la sud (acces din strada) sau la est — cel mai scurt front la strada
-    const isWide = wDeg > hDeg; // parcela mai lata decat inalta
-    if(isWide){
-      // Drum principal orizontal (E-V) langa marginea de sud (stradă)
-      const drumY = bbox2[1] + lotH * 0.8; // langa marginea de sud
+    // ── Drum colector principal: orientat spre STRADA PRINCIPALĂ reală (PUNCT 1) ──
+    // Latura detectată din OSM (arteră > stradă locală); fallback pe forma parcelei.
+    // Loturile frontează acest drum → fațada principală spre strada reală.
+    const _ss = _LOT._streetSide?.side;
+    let roadAxis, roadEdge; // axis 'H'(E-V, stradă la N/S) sau 'V'(N-S, stradă la E/V)
+    if(_ss==='S'){ roadAxis='H'; roadEdge='S'; }
+    else if(_ss==='N'){ roadAxis='H'; roadEdge='N'; }
+    else if(_ss==='E'){ roadAxis='V'; roadEdge='E'; }
+    else if(_ss==='W'){ roadAxis='V'; roadEdge='W'; }
+    else { const isWide = wDeg>hDeg; roadAxis = isWide?'H':'V'; roadEdge = isWide?'S':'W'; }
+
+    if(roadAxis==='H'){
+      // Drum colector orizontal (E-V) lângă latura dinspre stradă (sud sau nord)
+      const drumY = (roadEdge==='N')
+        ? (bbox2[3] - lotH*0.8 - latPrincipal)
+        : (bbox2[1] + lotH*0.8);
       const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
         [bbox2[0],drumY],[bbox2[2],drumY],
         [bbox2[2],drumY+latPrincipal],[bbox2[0],drumY+latPrincipal],[bbox2[0],drumY]
@@ -2536,8 +2671,10 @@ function _genLotizareGeom(fpFeat, loturiPerTip, drumFract){
         try{const di=turf.intersect(fpFeat,ds);if(di?.geometry)drumuri.push({...di,properties:ds.properties});}catch(e){}
       }
     } else {
-      // Drum principal vertical (N-S) langa marginea de vest
-      const drumX = bbox2[0] + (wDeg/Math.max(1,Math.floor(wDeg/((dt?.principal?.latime||6)/mLng))))*0.5;
+      // Drum colector vertical (N-S) lângă latura dinspre stradă (vest sau est)
+      const drumX = (roadEdge==='E')
+        ? (bbox2[2] - lotW*0.8 - latPrincipal)
+        : (bbox2[0] + lotW*0.8);
       const dp={type:'Feature',geometry:{type:'Polygon',coordinates:[[
         [drumX,bbox2[1]],[drumX+latPrincipal,bbox2[1]],
         [drumX+latPrincipal,bbox2[3]],[drumX,bbox2[3]],[drumX,bbox2[1]]
