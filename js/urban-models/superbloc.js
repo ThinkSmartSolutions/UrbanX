@@ -194,14 +194,12 @@
       return '<button class="model-sel-btn' + (act ? ' active' : '') + '" onclick="_openUrbanModel(\'' + m.id + '\')" style="' + (act ? 'border-color:' + m.color + ';color:' + m.color + ';background:' + m.color + '22' : '') + '">' + m.icon + ' ' + m.label + '</button>';
     }).join('');
   }
-  // superbloc → dialogul parametric; restul → SimLab (care implementează deja city15/tod/corridor/sponge)
+  // superbloc → dialogul propriu; restul → dialogul generic standardizat (003 FAZA 4)
   function _openUrbanModel(id) {
+    closeSuperblocDialog(); if (G.closeUrbanModelDialog) G.closeUrbanModelDialog();
     if (id === 'superbloc') { renderSuperblocDialog(); return; }
-    closeSuperblocDialog();
-    try {
-      if (G.SimLab && G.SimLab.openDashboard) { G.SimLab.openDashboard(id); }
-      else { alert('Modelul „' + id + '" este în SimLab — deschide SimLab din meniu.'); }
-    } catch (e) { console.warn('003 openUrbanModel', e); }
+    if (G.renderUrbanModelDialog) { G.renderUrbanModelDialog(id); return; }
+    try { if (G.SimLab && G.SimLab.openDashboard) G.SimLab.openDashboard(id); } catch (e) { console.warn('003 openUrbanModel', e); }
   }
 
   G.calculateSuperbloc = calculateSuperbloc;
