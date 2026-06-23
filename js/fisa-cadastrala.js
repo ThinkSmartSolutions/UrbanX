@@ -319,9 +319,11 @@
   function _renderDezmembrare() {
     return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Dezmembrare / Lotizare</h4>' +
       '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Bilanț de suprafețe (planificare) — apoi „Generează" produce dosarul ANCPI real din geometria parcelei selectate.</p>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:6px">' +
       '<div><label style="font-size:11px;color:#94a3b8">Nr. cadastral parcelă mamă</label><input id="dz-nr" type="text" placeholder="ex: 127835" style="' + inpCss + '"></div>' +
-      '<div><label style="font-size:11px;color:#94a3b8">Suprafață măsurată (mp)</label><input id="dz-sup" type="number" placeholder="ex: 5420" oninput="Cadastru._dzRecalc()" style="' + inpCss + '"></div></div>' +
+      '<div><label style="font-size:11px;color:#94a3b8">Supr. <b>măsurată</b> (mp)</label><input id="dz-sup" type="number" placeholder="ex: 5420" oninput="Cadastru._dzRecalc()" style="' + inpCss + '"></div>' +
+      '<div><label style="font-size:11px;color:#94a3b8">Supr. din acte (opțional)</label><input id="dz-acte" type="number" placeholder="ex: 5400" oninput="Cadastru._dzRecalc()" style="' + inpCss + '"></div></div>' +
+      '<p style="font-size:10px;color:#64748b;margin:0 0 14px">Bilanțul se face pe suprafața <b>măsurată</b> (din coordonate), conform Ord. ANCPI 700/2014. Diferența față de actele de proprietate este normală (eroare istorică de cadastrare) — se <b>documentează în memoriul tehnic</b>, nu blochează dezmembrarea.</p>' +
       '<div style="font-size:11px;color:#7dd3fc;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin:10px 0 6px">Loturi propuse</div><div id="dz-loturi">' +
       [1, 2].map(_dzLotRow).join('') + '</div>' +
       '<button onclick="Cadastru._dzAddLot()" style="' + ST.ghost + ';margin-bottom:14px">+ Adaugă lot</button>' +
@@ -329,6 +331,7 @@
       '<div style="display:flex;justify-content:space-between;padding:3px 0"><span>Parcelă mamă:</span><span id="dz-b-mama">— mp</span></div>' +
       '<div style="display:flex;justify-content:space-between;padding:3px 0"><span>Total loturi:</span><span id="dz-b-loturi">0 mp</span></div>' +
       '<div style="display:flex;justify-content:space-between;padding:6px 0 3px;border-top:1px solid rgba(255,255,255,.08);font-weight:700"><span>Diferență (trebuie 0):</span><span id="dz-b-dif" style="color:#22c55e">0 mp ✓</span></div></div>' +
+      '<div id="dz-acte-note" style="display:none;font-size:11px;padding:8px 12px;border-radius:8px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24;margin-bottom:14px"></div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="Cadastru._genFromActive(\'dezmembrare\')" style="' + ST.btn + '">⬇ Generează dosar ANCPI (din parcela selectată)</button></div>' +
       '<div style="font-size:10px;color:#64748b;margin-top:8px">' + _activeInfo() + '</div></div>';
   }
@@ -347,6 +350,18 @@
     if (mE) mE.textContent = mama.toLocaleString('ro-RO') + ' mp';
     if (lE) lE.textContent = total.toLocaleString('ro-RO') + ' mp';
     if (dE) { dE.textContent = Math.abs(dif).toLocaleString('ro-RO') + ' mp ' + (ok ? '✓' : (dif > 0 ? '⚠ lipsesc' : '⚠ depășesc')); dE.style.color = ok ? '#22c55e' : '#ef4444'; }
+    // 005 FAZA 2: discrepanța acte-vs-măsurat — DOCUMENTATĂ, nu blocantă
+    var acte = parseFloat((document.getElementById('dz-acte') || {}).value || 0);
+    var nE = document.getElementById('dz-acte-note');
+    if (nE) {
+      if (acte > 0 && mama > 0) {
+        var dA = Math.round((mama - acte) * 100) / 100;
+        nE.style.display = 'block';
+        nE.innerHTML = Math.abs(dA) < 1
+          ? '✓ Suprafața măsurată coincide cu cea din acte (' + acte.toLocaleString('ro-RO') + ' mp).'
+          : 'ℹ Diferență acte ↔ măsurat: <b>' + (dA > 0 ? '+' : '') + dA.toLocaleString('ro-RO') + ' mp</b> (acte ' + acte.toLocaleString('ro-RO') + ' → măsurat ' + mama.toLocaleString('ro-RO') + '). Normală — se menționează în memoriul tehnic; NU blochează dezmembrarea.';
+      } else { nE.style.display = 'none'; }
+    }
   }
   function _dzAddLot() { var c = document.getElementById('dz-loturi'); if (!c) return; var n = c.querySelectorAll('.dz-lot').length + 1; c.insertAdjacentHTML('beforeend', _dzLotRow(n)); }
   function _dzRemoveLot(b) { var r = b.closest('.dz-lot'); if (r) r.remove(); _dzRecalc(); }
