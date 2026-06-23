@@ -2724,6 +2724,9 @@ setInterval(()=>{
   <!-- Deck.gl v9 — compatibil cu Mapbox GL JS v3 -->
   <script src="js/uats-registry.js?v=2026051201"></script>
   <script src="js/17-tci-cinema.js?v=20260524d"></script>
+  <!-- fix seismic: ag pe județ (P100-1/2022) — corectează bug bbox (ex. Cluj 0.30g→0.10g);
+       monotonic-safe (fallback la lookup-ul original când județul lipsește) -->
+  <script src="js/seismic-fix.js?v=20260623"></script>
   
   <script src="js/18-animation-engine.js?v=20260520c"></script>
   <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
