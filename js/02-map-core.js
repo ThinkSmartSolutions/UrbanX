@@ -1628,11 +1628,31 @@ function buildMultiVolume(p, fp, params, pi){
         coords=[[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
       }
       
-      const bldPoly = {type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{}};
-      
+      let bldPoly = {type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{}};
+
+      // PUNCT 6 — transform manual per corp (drag + rotire pe hartă): {dx,dy,rot}
+      const xf = S.vol.multiVolXform && S.vol.multiVolXform[bldCount];
+      const hasXf = xf && (xf.rot || xf.dx || xf.dy);
+      if(hasXf){
+        try{
+          if(xf.rot) bldPoly = turf.transformRotate(bldPoly, xf.rot); // în jurul centroidului
+          if(xf.dx || xf.dy){
+            const dM  = Math.sqrt(xf.dx*xf.dx + xf.dy*xf.dy);
+            const brg = Math.atan2(xf.dx, xf.dy)*180/Math.PI; // dx=est, dy=nord → azimut
+            bldPoly = turf.transformTranslate(bldPoly, dM/1000, brg, {units:'kilometers'});
+          }
+        }catch(e){}
+      }
+
       try{
-        let inter = turf.intersect(fp, bldPoly);
-        if(!inter?.geometry||turf.area(inter)<5) continue;
+        // corp mutat manual → clip la parcela întreagă (libertate de poziționare);
+        // altfel la edificabil (envelope legal)
+        const clipTo = hasXf ? {type:'Feature',geometry:p.geo.geometry,properties:{}} : fp;
+        let inter = turf.intersect(clipTo, bldPoly);
+        if(!inter?.geometry||turf.area(inter)<5){
+          if(hasXf){ bldCount++; continue; } // tras în afara parcelei — păstrează indexul corpului
+          continue;
+        }
         
         // În scenariul Demolare nu verificăm coliziuni cu existentele
         if(!isDemo && S.ctx?.features?.length){

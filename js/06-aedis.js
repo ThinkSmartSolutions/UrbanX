@@ -196,6 +196,12 @@ function htmlMultiVolUI(){
     '<input type="range" min="0.5" max="24" step="0.5" value="'+md+'" oninput="updateMVDist(+this.value)" style="flex:1;accent-color:#f59e0b">',
     '<span id="mvd-val" style="color:#f59e0b;font-weight:700;min-width:35px">'+md+'m</span>',
     '</div>',
+    // PUNCT 6 — aranjare manuală pe hartă (drag + rotire) per corp
+    '<div style="margin-top:8px;display:flex;gap:6px">',
+    '<button onclick="MVArrange.toggle()" id="mv-arrange-btn" style="flex:2;padding:8px;border-radius:8px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.12);color:#f59e0b;font-weight:700;font-size:11px;cursor:pointer">✋ Aranjează pe hartă</button>',
+    '<button onclick="MVArrange.reset()" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:transparent;color:#94a3b8;font-weight:700;font-size:11px;cursor:pointer">↺ Reset</button>',
+    '</div>',
+    '<div style="font-size:9px;color:#64748b;margin-top:4px;line-height:1.4">Trage clădirea pe hartă ca s-o muți · ține <b>Shift</b> apăsat și trage ca s-o rotești · fiecare corp se poziționează și se orientează independent.</div>',
     '</div>',
     htmlPerBldgUI(),  // Panel editare individuală per clădire
   ];
@@ -326,18 +332,20 @@ function _mvRegen(){
   }, 80);
 }
 
-function setMVC(n){ 
+function setMVC(n){
   S.vol.multiVolCount=n;
   // Inițializăm / redimensionăm array-ul per-building
   if(!S.vol.multiVolPerBldg) S.vol.multiVolPerBldg=[];
   while(S.vol.multiVolPerBldg.length < n) S.vol.multiVolPerBldg.push({});
+  S.vol.multiVolXform=[]; // PUNCT 6 — grila s-a schimbat → transformurile manuale devin stale
   _mvRegen();
-  renderTab('proiect'); 
+  renderTab('proiect');
 }
-function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s'); 
+function setMVS(s){ if(s&&s.getAttribute) s=s.getAttribute('data-s');
   S.vol.multiVolShape=s;
+  S.vol.multiVolXform=[]; // PUNCT 6 — forma s-a schimbat → reset transformuri manuale
   _mvRegen();
-  renderTab('proiect'); 
+  renderTab('proiect');
 }
 
 // Per-building param setters
@@ -348,6 +356,121 @@ function updateMVDist(v){
   _mvRegen();
   updateMap();
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// PUNCT 6 — MVArrange: aranjare manuală (drag + rotire) a corpurilor pe hartă.
+// Fiecare corp (bldIdx din feature 'vol-3d') primește un transform {dx,dy,rot}
+// stocat în S.vol.multiVolXform[bldIdx] și aplicat în buildMultiVolume().
+// ════════════════════════════════════════════════════════════════════════════
+window.MVArrange = (function(){
+  let _on=false, _idx=null, _mode='move', _pivot=null, _startBrg=0, _startRot=0, _last=null, _raf=0;
+
+  function _xf(i){
+    if(!S.vol.multiVolXform) S.vol.multiVolXform=[];
+    while(S.vol.multiVolXform.length<=i) S.vol.multiVolXform.push({dx:0,dy:0,rot:0});
+    if(!S.vol.multiVolXform[i]) S.vol.multiVolXform[i]={dx:0,dy:0,rot:0};
+    return S.vol.multiVolXform[i];
+  }
+  function _rebuild(){
+    try{ const f=buildVolume(); setSource('vol-src',{type:'FeatureCollection',features:f}); }catch(e){}
+  }
+  function _rebuildThrottled(){
+    if(_raf) return;
+    _raf = requestAnimationFrame(function(){ _raf=0; _rebuild(); });
+  }
+  function _bearing(a,b){ // azimut a→b ([lng,lat])
+    const lat1=a[1]*Math.PI/180, lat2=b[1]*Math.PI/180, dLng=(b[0]-a[0])*Math.PI/180;
+    const y=Math.sin(dLng)*Math.cos(lat2);
+    const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);
+    return (Math.atan2(y,x)*180/Math.PI+360)%360;
+  }
+
+  function _down(e){
+    if(!_on) return;
+    let feats=[];
+    try{ feats=map.queryRenderedFeatures(e.point,{layers:['vol-3d']}); }catch(err){ return; }
+    const hit=(feats||[]).find(f=>f.properties && f.properties.bldIdx!=null);
+    if(!hit) return;
+    _idx=+hit.properties.bldIdx;
+    _mode=(e.originalEvent && e.originalEvent.shiftKey)?'rotate':'move';
+    _last=[e.lngLat.lng,e.lngLat.lat];
+    try{ _pivot=turf.centerOfMass({type:'Feature',geometry:hit.geometry,properties:{}}).geometry.coordinates; }
+    catch(err){ _pivot=_last.slice(); }
+    if(_mode==='rotate'){ _startBrg=_bearing(_pivot,_last); _startRot=_xf(_idx).rot||0; }
+    map.dragPan.disable();
+    map.getCanvas().style.cursor = _mode==='rotate'?'crosshair':'grabbing';
+    if(e.preventDefault) e.preventDefault();
+  }
+  function _moveCursor(e){
+    if(!_on) return;
+    if(_idx==null){ // hover feedback
+      let feats=[]; try{ feats=map.queryRenderedFeatures(e.point,{layers:['vol-3d']}); }catch(err){}
+      const over=(feats||[]).some(f=>f.properties && f.properties.bldIdx!=null);
+      map.getCanvas().style.cursor = over?'grab':'';
+      return;
+    }
+    const cur=[e.lngLat.lng,e.lngLat.lat];
+    if(_mode==='rotate'){
+      const brg=_bearing(_pivot,cur);
+      const x=_xf(_idx);
+      x.rot = Math.round((_startRot + (brg-_startBrg))*10)/10;
+    } else {
+      const lat=cur[1]*Math.PI/180;
+      const dx=(cur[0]-_last[0])*111320*Math.cos(lat); // est (m)
+      const dy=(cur[1]-_last[1])*111320;                // nord (m)
+      const x=_xf(_idx);
+      x.dx=(x.dx||0)+dx; x.dy=(x.dy||0)+dy;
+      _last=cur;
+    }
+    _rebuildThrottled();
+  }
+  function _up(){
+    if(_idx==null) return;
+    _idx=null; _pivot=null;
+    map.dragPan.enable();
+    map.getCanvas().style.cursor = _on?'grab':'';
+    _rebuild();
+    try{ setTimeout(updateDistanceLines,120); }catch(e){}
+  }
+  function _esc(e){ if(e.key==='Escape' && _on) toggle(); }
+
+  function _hint(show){
+    const h=document.getElementById('mv-arrange-hint'); if(h) h.remove();
+    if(!show) return;
+    const d=document.createElement('div'); d.id='mv-arrange-hint';
+    d.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(8,21,42,.95);border:1px solid rgba(245,158,11,.5);color:#f59e0b;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;box-shadow:0 6px 24px rgba(0,0,0,.5)';
+    d.innerHTML='✋ Mod aranjare: <b>trage</b> = mută · <b>Shift+trage</b> = rotește · <span style="color:#94a3b8;font-weight:400">Esc / buton = ieșire</span>';
+    document.body.appendChild(d);
+  }
+
+  function toggle(){
+    if(!S.vol.multiVol){ try{ss('Activează „Multiple clădiri" mai întâi.');}catch(e){} return; }
+    if(!S.vol.genDone){ try{ss('Generează volumele 3D mai întâi.');}catch(e){} return; }
+    _on=!_on;
+    const btn=document.getElementById('mv-arrange-btn');
+    if(_on){
+      map.on('mousedown',_down); map.on('mousemove',_moveCursor); map.on('mouseup',_up);
+      window.addEventListener('keydown',_esc);
+      map.getCanvas().style.cursor='grab';
+      if(btn){ btn.style.background='rgba(245,158,11,.35)'; btn.textContent='✓ Termină aranjarea'; }
+      _hint(true);
+    } else {
+      map.off('mousedown',_down); map.off('mousemove',_moveCursor); map.off('mouseup',_up);
+      window.removeEventListener('keydown',_esc);
+      map.dragPan.enable(); map.getCanvas().style.cursor='';
+      if(btn){ btn.style.background='rgba(245,158,11,.12)'; btn.textContent='✋ Aranjează pe hartă'; }
+      _hint(false);
+    }
+  }
+  function reset(){
+    S.vol.multiVolXform=[];
+    _rebuild();
+    try{ setTimeout(updateDistanceLines,120); }catch(e){}
+    try{ss('Pozițiile corpurilor au fost resetate.');}catch(e){}
+  }
+  return { toggle:toggle, reset:reset, isOn:function(){return _on;} };
+})();
+
 function setScenariu(s){
   S.vol.scenariuConstructie = s;
 
