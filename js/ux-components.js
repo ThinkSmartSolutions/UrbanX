@@ -90,9 +90,65 @@
   ].join('');
   D.head.appendChild(st);
 
+  // ─── 003: BEFORE/AFTER SLIDER + DOCUMENT EXPORT (modele urbane) ───
+  function renderBeforeAfterSlider(containerId, value, disabled) {
+    var el = D.getElementById(containerId);
+    if (!el) { console.error('003: #' + containerId + ' nu există'); return; }
+    el.innerHTML = '<div class="ba-slider-wrap"><div class="ba-slider-labels"><span>← Situație actuală</span><span>Cu intervenție →</span></div>' +
+      '<div class="ba-slider-row"><span class="ba-label ' + (value === 0 ? 'active' : '') + '" style="color:#888780">ÎNAINTE</span>' +
+      '<input type="range" min="0" max="100" value="' + value + '" ' + (disabled ? 'disabled' : '') +
+      ' oninput="UrbanModelsStore.setTransition(parseInt(this.value)); _updateSliderHint(\'' + containerId + '\',parseInt(this.value))">' +
+      '<span class="ba-label ' + (value === 100 ? 'active' : '') + '" style="color:#639922">DUPĂ</span></div>' +
+      '<div class="ba-slider-hint" id="' + containerId + '-hint">' + (value === 0 ? 'Starea actuală' : value === 100 ? 'Cu intervenția aplicată' : 'Tranziție ' + value + '%') + '</div></div>';
+  }
+  function _updateSliderHint(containerId, v) { var h = D.getElementById(containerId + '-hint'); if (h) h.textContent = v === 0 ? 'Starea actuală' : v === 100 ? 'Cu intervenția aplicată' : 'Tranziție ' + v + '%'; }
+  function renderDocumentExport(containerId, documentContent) {
+    var el = D.getElementById(containerId);
+    if (!el) { console.error('003: #' + containerId + ' nu există'); return; }
+    el._docContent = documentContent;
+    el.innerHTML = '<div class="doc-export"><div class="doc-export-tabs">' +
+      '<button class="doc-tab active" onclick="switchDocTab(this,\'sidu\',\'' + containerId + '\')">SIDU — portofoliu</button>' +
+      '<button class="doc-tab" onclick="switchDocTab(this,\'masterplan\',\'' + containerId + '\')">Masterplan</button>' +
+      '<button class="doc-tab" onclick="switchDocTab(this,\'pmud\',\'' + containerId + '\')">PMUD</button></div>' +
+      '<div class="doc-export-content" id="' + containerId + '-text">' + _getDocText('sidu', documentContent) + '</div>' +
+      '<div class="doc-export-footer"><button class="uxc-btn uxc-btn--sec" onclick="_copyDocText(\'' + containerId + '\')">Copiază text</button>' +
+      '<span style="font-size:11px;opacity:0.45">Inserează direct în documentul strategic</span></div></div>';
+  }
+  function switchDocTab(btn, tab, containerId) {
+    var el = D.getElementById(containerId); if (!el) return;
+    var tabs = el.querySelectorAll('.doc-tab'); for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+    btn.classList.add('active');
+    var t = D.getElementById(containerId + '-text'); if (t) t.innerHTML = _getDocText(tab, el._docContent);
+  }
+  function _getDocText(tab, dc) {
+    if (!dc) return ''; var nl = function (s) { return s ? String(s).replace(/\n/g, '<br>') : ''; };
+    if (tab === 'sidu') { var s = dc.siduSection; return nl('<strong>' + s.projectTitle + '</strong>\n\n' + s.description + '\n\n<strong>Justificare:</strong> ' + s.justification + '\n<strong>Cost:</strong> ' + s.costEstimate + '\n<strong>Termen:</strong> ' + s.timeline + '\n<strong>Baza legală:</strong> ' + s.legalBasis + '\n\n<strong>Indicatori:</strong>\n' + s.indicators.map(function (i) { return '• ' + i; }).join('\n')); }
+    if (tab === 'masterplan') { var m = dc.masterplanSection; return nl('<strong>Tip intervenție:</strong> ' + m.interventionType + '\n<strong>Suprafață:</strong> ' + m.affectedArea + '\n\n<strong>Fazare:</strong>\n' + m.phasing.map(function (p) { return '• ' + p; }).join('\n') + '\n\n<strong>Principii:</strong>\n' + m.designPrinciples.map(function (p) { return '• ' + p; }).join('\n')); }
+    var p = dc.pmudSection; return nl('<strong>Tip măsură:</strong> ' + p.measureType + '\n<strong>Impact trafic:</strong> ' + p.trafficImpact + '\n<strong>Transfer modal:</strong> ' + p.modalShift + '\n\n<strong>Infrastructură necesară:</strong>\n' + p.infrastructureNeeded.map(function (i) { return '• ' + i; }).join('\n'));
+  }
+  function _copyDocText(containerId) {
+    var el = D.getElementById(containerId + '-text'); if (!el) return;
+    try { navigator.clipboard.writeText(el.innerText).then(function () { var btn = D.querySelector('#' + containerId + ' .uxc-btn'); if (btn) { btn.textContent = '✓ Copiat'; setTimeout(function () { btn.textContent = 'Copiază text'; }, 2000); } }); } catch (e) {}
+  }
+  var st003 = D.createElement('style');
+  st003.textContent = [
+    '.ba-slider-wrap{font-size:12px}.ba-slider-labels{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:6px}',
+    '.ba-slider-row{display:flex;align-items:center;gap:10px}.ba-slider-row input[type=range]{flex:1}',
+    '.ba-label{font-size:10px;font-weight:700;letter-spacing:.05em;opacity:.55}.ba-label.active{opacity:1}',
+    '.ba-slider-hint{text-align:center;font-size:11px;color:#cbd5e1;margin-top:6px}',
+    '.doc-export-tabs{display:flex;gap:4px;margin-bottom:8px}.doc-tab{flex:1;padding:6px 8px;border:0;border-radius:6px;background:rgba(255,255,255,.06);color:#cbd5e1;cursor:pointer;font-size:12px}',
+    '.doc-tab.active{background:rgba(46,117,182,.25);color:#93c5fd;font-weight:700}',
+    '.doc-export-content{background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:12px;font-size:12px;line-height:1.55;color:#cbd5e1;max-height:300px;overflow:auto;white-space:normal}',
+    '.doc-export-footer{display:flex;align-items:center;gap:10px;margin-top:8px}',
+    '.model-sel-btn{padding:7px 11px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.05);color:#cbd5e1;cursor:pointer;font-size:12px;white-space:nowrap}.model-sel-btn.active{font-weight:700}'
+  ].join('');
+  D.head.appendChild(st003);
+
   // expune global (002 le folosește inline + 003 le presupune)
   G.actionBar = actionBar; G.moduleHeader = moduleHeader; G.viewTabs = viewTabs;
   G.confirmAction = confirmAction; G.uxcCloseConfirm = uxcCloseConfirm;
   G.uxcToggleDropdown = uxcToggleDropdown; G.uxcCloseDropdowns = uxcCloseDropdowns;
-  console.log('[UX-components] actionBar/moduleHeader/viewTabs/confirmAction încărcate');
+  G.renderBeforeAfterSlider = renderBeforeAfterSlider; G._updateSliderHint = _updateSliderHint;
+  G.renderDocumentExport = renderDocumentExport; G.switchDocTab = switchDocTab; G._copyDocText = _copyDocText;
+  console.log('[UX-components] actionBar/moduleHeader/viewTabs/confirmAction + 003 slider/docExport încărcate');
 })(window);

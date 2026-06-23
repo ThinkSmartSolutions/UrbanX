@@ -240,6 +240,10 @@
         '<div style="font-size:10px;color:#64748b;margin-top:8px">Model Barcelona (S. Rueda). Apare automat ca instrument în SIDU (regenerare), capitol în Masterplan + PMUD, și ca scenă în prezentarea cinematică. Rerutarea de perimetru necesită studiu de trafic (UrbanX Flux).</div>';
     };
     mapBtn.onclick = function () { drawReal(+side.value || 400); ov.remove(); };
+    // 003: calculator parametric standardizat + before/after + export documente (SIDU/MP/PMUD)
+    var calcBtn = el('button', { style: ST.btn + ';margin-top:12px;background:linear-gradient(180deg,#F97316,#ea580c)' }, '📐 Calculator parametric + export documente');
+    calcBtn.onclick = function () { ov.remove(); if (G.renderSuperblocDialog) G.renderSuperblocDialog(); };
+    body.appendChild(calcBtn);
     ov.appendChild(m); document.body.appendChild(ov);
   }
 
