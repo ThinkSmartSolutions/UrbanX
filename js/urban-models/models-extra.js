@@ -194,13 +194,109 @@
     return r;
   }
 
+  // ── 3-30-300 (Konijnendijk 2021) — 3 copaci vizibili / 30% canopy / 300m la parc ──
+  function calculate330300(p) {
+    var canopy_pct = p.canopy_pct, copaci_vizibili = p.copaci_vizibili, dist_parc_m = p.dist_parc_m, pop_zona = p.pop_zona;
+    var c1 = copaci_vizibili >= 3, c2 = canopy_pct >= 30, c3 = dist_parc_m <= 300;
+    var indeplinite = (c1 ? 1 : 0) + (c2 ? 1 : 0) + (c3 ? 1 : 0);
+    var scor = Math.round(indeplinite / 3 * 100);
+    var deficit_canopy = Math.max(0, 30 - canopy_pct);
+    var racire = Math.round(Math.min(3, canopy_pct / 30 * 1.5) * 10) / 10;
+    // copaci de plantat ca să atingă 30% canopy pe zonă (~50 mp coronament/arbore matur)
+    var arie_lipsa_mp = pop_zona > 0 ? Math.round(deficit_canopy / 100 * (pop_zona * 35)) : 0;
+    var copaci_necesari = Math.round(arie_lipsa_mp / 50);
+    var pop_fara_parc = c3 ? 0 : Math.round(pop_zona * Math.min(0.9, (dist_parc_m - 300) / 700));
+    var r = CR('r330300', 'Regula 3-30-300', p);
+    r.metrics = [
+      { id: 'scor', label: 'Conformitate 3-30-300', value: scor, unit: '%', direction: 'positive' },
+      { id: 'crit', label: 'Criterii îndeplinite (din 3)', value: indeplinite, unit: '/3', direction: 'positive' },
+      { id: 'canopy', label: 'Deficit canopy la 30%', value: -Math.round(deficit_canopy), unit: 'pp', direction: 'positive' },
+      { id: 'copaci', label: 'Arbori de plantat', value: copaci_necesari, unit: 'buc', direction: 'neutral' },
+      { id: 'pop', label: 'Locuitori fără parc < 300m', value: -pop_fara_parc, unit: 'loc', direction: 'positive' },
+      { id: 'racire', label: 'Răcire din canopy', value: -racire, unit: '°C', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-330', type: 'circle', beforePaint: { 'circle-radius': 6, 'circle-color': '#888780', 'circle-opacity': 0.25 }, afterPaint: { 'circle-radius': 30, 'circle-color': '#2E9E5B', 'circle-opacity': 0.5 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Regula 3-30-300 — infrastructură verde la nivel de cartier (Konijnendijk)',
+        description: 'Proiectul aplică regula 3-30-300 (Cecil Konijnendijk, 2021), standard internațional de acces la natură urbană, asupra unei zone locuite de aproximativ ' + roN(pop_zona) + ' de persoane din municipiul Iași. Regula impune trei praguri obiective: fiecare locuitor trebuie să vadă cel puțin 3 arbori maturi de la locuință/loc de muncă/școală, cartierul trebuie să aibă minimum 30% acoperire cu coronament arboricol (canopy), iar un spațiu verde public de cel puțin 0,5 ha trebuie să fie la maximum 300 m. Situația analizată îndeplinește ' + indeplinite + ' din 3 criterii (conformitate ' + scor + '%), cu un deficit de canopy de ' + Math.round(deficit_canopy) + ' puncte procentuale până la pragul de 30%. Intervenția propune plantarea a aproximativ ' + roN(copaci_necesari) + ' de arbori (aliniamente, scuaruri, curți), amenajarea/apropierea de spații verzi publice și verde de proximitate, reducând cu circa ' + pop_fara_parc + ' numărul locuitorilor fără parc accesibil la 300 m și generând o răcire estimată de ' + racire.toFixed(1) + '°C în zilele caniculare. În portofoliul SIDU este un proiect-cheie de sănătate publică și adaptare climatică, corelat cu Masterplanul (spații verzi) și transpus în PUG prin coeficient minim de spațiu verde și regim al plantațiilor de aliniament.',
+        justification: 'Accesul la natură urbană are beneficii dovedite asupra sănătății mintale, răcirii și coeziunii sociale (OMS, IUCN). Regula 3-30-300 oferă praguri măsurabile, ușor de monitorizat și de transpus în reglementări.',
+        costEstimate: (Math.round(copaci_necesari * 0.0006 * 10) / 10) + ' M€ – ' + (Math.round(copaci_necesari * 0.0012 * 10) / 10) + ' M€ (plantare + amenajări verzi, 600–1200 €/arbore matur cu întreținere)',
+        timeline: 'Termen scurt (2026–2028): plantări de aliniament + scuaruri; mediu (2028–2032): parcuri de proximitate noi',
+        legalBasis: 'Legea 24/2007 (spații verzi); OUG 195/2005 (mediu); HG 525/1996; standard OMS spații verzi',
+        indicators: ['Conformitate 3-30-300: ' + scor + '%', 'Canopy: ' + canopy_pct + '% → țintă 30%', 'Arbori plantați: ~' + roN(copaci_necesari), 'Locuitori cu parc < 300m: în creștere; răcire −' + racire.toFixed(1) + '°C']
+      },
+      masterplanSection: {
+        interventionType: 'Infrastructură verde de cartier (aliniamente, scuaruri, parcuri de proximitate)',
+        affectedArea: 'cartier ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0 (4 luni): cartare canopy (GIS) + deficit acces parc 300m', 'Faza 1 (12 luni): plantări de aliniament + curți de școli/instituții', 'Faza 2 (24 luni): parcuri de proximitate ≥ 0,5 ha în zonele deficitare', 'Faza 3: monitorizare canopy și întreținere'],
+        designPrinciples: ['Arbori maturi vizibili din fiecare locuință (3)', 'Coronament ≥ 30% pe cartier', 'Parc public ≥ 0,5 ha la ≤ 300 m', 'Specii native rezistente la secetă și UHI']
+      },
+      pmudSection: {
+        measureType: 'Verde de aliniament și parcuri de proximitate (componentă de mediu și confort)',
+        trafficImpact: 'Neutru pe capacitate; umbrire și confort termic pe traseele pietonale/cicliste',
+        modalShift: 'Indirect: trasee mai atractive pentru mers pe jos și bicicletă',
+        infrastructureNeeded: ['Aliniamente de arbori pe coridoarele de mobilitate activă', 'Scuaruri și mici parcuri la noduri', 'Sol și spațiu subteran pentru rădăcini', 'Sistem de irigare/întreținere']
+      }
+    };
+    return r;
+  }
+
+  // ── SDG 11.7.1 — Spațiu public deschis (UN-Habitat) ──
+  function calculateSDG117(p) {
+    var construit_ha = p.construit_ha, spatiu_public_ha = p.spatiu_public_ha, pop_zona = p.pop_zona, acces_400m_pct = p.acces_400m_pct;
+    var share = construit_ha > 0 ? Math.round(spatiu_public_ha / construit_ha * 1000) / 10 : 0; // % din suprafața construită
+    var mp_loc = pop_zona > 0 ? Math.round(spatiu_public_ha * 10000 / pop_zona * 10) / 10 : 0;
+    var deficit_share = Math.max(0, 15 - share);       // țintă non-stradal UN-Habitat ~15%
+    var deficit_oms = Math.max(0, 26 - mp_loc);        // țintă OMS ~26 mp/loc
+    var pop_fara_acces = Math.round(pop_zona * Math.max(0, 100 - acces_400m_pct) / 100);
+    var r = CR('sdg117', 'SDG 11.7 — Spațiu public', p);
+    r.metrics = [
+      { id: 'share', label: 'Spațiu public din suprafața construită', value: share, unit: '%', direction: 'positive' },
+      { id: 'mploc', label: 'Spațiu public / locuitor', value: mp_loc, unit: 'mp/loc', direction: 'positive' },
+      { id: 'acces', label: 'Populație cu acces < 400m', value: acces_400m_pct, unit: '%', direction: 'positive' },
+      { id: 'fara', label: 'Locuitori fără acces < 400m', value: -pop_fara_acces, unit: 'loc', direction: 'positive' },
+      { id: 'd1', label: 'Deficit la țintă 15%', value: -Math.round(deficit_share * 10) / 10, unit: 'pp', direction: 'positive' },
+      { id: 'd2', label: 'Deficit la 26 mp/loc (OMS)', value: -Math.round(deficit_oms * 10) / 10, unit: 'mp/loc', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-sdg117', type: 'circle', beforePaint: { 'circle-radius': 7, 'circle-color': '#888780', 'circle-opacity': 0.22 }, afterPaint: { 'circle-radius': 26, 'circle-color': '#C2410C', 'circle-opacity': 0.45 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Spațiu public pentru toți — indicator SDG 11.7.1 (UN-Habitat)',
+        description: 'Proiectul vizează indicatorul ONU 11.7.1 (Obiectivul de Dezvoltare Durabilă 11 — orașe durabile): proporția suprafeței construite alocată spațiului public deschis pentru toți și ponderea populației cu acces la un spațiu public la maximum 400 m. Pe zona analizată (' + roN(construit_ha) + ' ha construit, ' + roN(pop_zona) + ' locuitori), spațiul public deschis reprezintă aproximativ ' + share + '% din suprafața construită și ' + mp_loc + ' mp/locuitor, iar circa ' + acces_400m_pct + '% din populație are acces la un spațiu public în 400 m. Față de țintele de referință (UN-Habitat recomandă ca spațiul public — inclusiv străzile — să atingă o pondere semnificativă din oraș, iar componenta non-stradală ~15%; OMS recomandă ~26 mp spațiu verde/locuitor), rezultă un deficit de ' + (Math.round(deficit_share * 10) / 10) + ' pp și respectiv ' + (Math.round(deficit_oms * 10) / 10) + ' mp/loc. Aproximativ ' + roN(pop_fara_acces) + ' de locuitori nu au acces la 400 m. Intervenția propune crearea/deschiderea de spații publice (scuaruri, piațete, maluri, curți deschise) prioritar în zonele deficitare. În SIDU este un proiect de echitate spațială și calitate a vieții, corelat cu Masterplanul și transpus în PUG prin rezervarea de spații publice.',
+        justification: 'Spațiul public accesibil tuturor este un determinant al sănătății, coeziunii și democrației urbane (UN-Habitat). Indicatorul SDG 11.7.1 este măsurabil din date OSM + populație și permite monitorizarea echității.',
+        costEstimate: (Math.round((deficit_oms * pop_zona / 10000) * 80 / 1000 * 10) / 10) + ' M€ – ' + (Math.round((deficit_oms * pop_zona / 10000) * 150 / 1000 * 10) / 10) + ' M€ (amenajare spații publice, 80–150 €/mp)',
+        timeline: 'Termen scurt-mediu (2026–2031): deschidere + amenajare spații publice pe zone deficitare',
+        legalBasis: 'Agenda 2030 ONU (SDG 11.7); Legea 350/2001; Legea 24/2007; Noua Cartă de la Leipzig',
+        indicators: ['Spațiu public / construit: ' + share + '%', 'Spațiu public/loc: ' + mp_loc + ' mp', 'Acces < 400m: ' + acces_400m_pct + '%', 'Locuitori fără acces: ' + roN(pop_fara_acces)]
+      },
+      masterplanSection: {
+        interventionType: 'Creare și deschidere de spații publice (scuaruri, piațete, maluri)',
+        affectedArea: '~' + roN(construit_ha) + ' ha construit; ' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0 (6 luni): cartare SDG 11.7.1 (OSM + populație) și zone deficitare', 'Faza 1 (12 luni): piațete și scuaruri de proximitate pilot', 'Faza 2 (24 luni): rețea de spații publice + maluri/curți deschise', 'Faza 3: monitorizare acces 400m și utilizare'],
+        designPrinciples: ['Acces universal la ≤ 400 m', 'Spații publice de calitate, sigure, incluzive', 'Continuitate pietonală între spații', 'Multifuncționalitate: recreere + verde + eveniment']
+      },
+      pmudSection: {
+        measureType: 'Spații publice conectate la rețeaua pietonală',
+        trafficImpact: 'Reducerea spațiului auto în favoarea spațiului public; calmarea traficului local',
+        modalShift: 'Încurajează mersul pe jos prin destinații publice de proximitate',
+        infrastructureNeeded: ['Trasee pietonale continue spre spațiile publice', 'Treceri sigure și accesibilitate universală', 'Mobilier urban și umbrire', 'Conexiuni cu stațiile de transport']
+      }
+    };
+    return r;
+  }
+
   // ── geometrie reprezentativă pe hartă (cerc/linie centrat pe map center) ──
   function addModelToMap(mapInstance, center, modelId, sizeM) {
     if (!mapInstance || !center) return;
     var L = (G.MODEL_LAYERS && G.MODEL_LAYERS[modelId]) || null;
     var dLat = sizeM / 111000, dLng = sizeM / (111000 * Math.cos(center.lat * Math.PI / 180));
     var src, data, layer;
-    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor' }[modelId];
+    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117' }[modelId];
     if (modelId === 'corridor') {
       data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[center.lng - dLng * 0.5, center.lat], [center.lng + dLng * 0.5, center.lat]] }, properties: {} };
       layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.6 } };
@@ -213,7 +309,7 @@
   }
   function removeModelFromMap(mapInstance) {
     if (!mapInstance) return;
-    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor'].forEach(function (id) {
+    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117'].forEach(function (id) {
       try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {}
       try { if (mapInstance.getSource(id + '-src')) mapInstance.removeSource(id + '-src'); } catch (e) {}
     });
@@ -224,7 +320,9 @@
     city15: { calc: calculate15Min, color: '#BA7517', icon: '⏱️', title: 'Oraș 15 Minute', size: function (p) { return p.raza_m; }, fields: [{ k: 'raza_m', l: 'Rază proximitate (m)', v: 800 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }, { k: 'servicii_lipsa', l: 'Servicii deficitare (buc)', v: 5 }] },
     tod: { calc: calculateTOD, color: '#534AB7', icon: '🚉', title: 'TOD', size: function (p) { return p.raza_m; }, fields: [{ k: 'raza_m', l: 'Rază captare stație (m)', v: 800 }, { k: 'densitate_loc_ha', l: 'Densitate țintă (loc/ha)', v: 250 }, { k: 'frecventa_min', l: 'Frecvență transport (min)', v: 6 }] },
     corridor: { calc: calculateCorridor, color: '#1D9E75', icon: '🏪', title: 'Coridor Mixt', size: function (p) { return p.lungime_m; }, fields: [{ k: 'lungime_m', l: 'Lungime coridor (m)', v: 1200 }, { k: 'fronturi_active_pct', l: '% fronturi active', v: 70 }, { k: 'latime_m', l: 'Lățime profil (m)', v: 26 }] },
-    sponge: { calc: calculateSponge, color: '#378ADD', icon: '💧', title: 'Sponge City', size: function (p) { return Math.sqrt(p.suprafata_mp); }, fields: [{ k: 'suprafata_mp', l: 'Suprafață zonă (mp)', v: 50000 }, { k: 'impermeabil_actual_pct', l: '% impermeabil actual', v: 75 }, { k: 'tinta_permeabil_pct', l: '% țintă permeabil', v: 45 }] }
+    sponge: { calc: calculateSponge, color: '#378ADD', icon: '💧', title: 'Sponge City', size: function (p) { return Math.sqrt(p.suprafata_mp); }, fields: [{ k: 'suprafata_mp', l: 'Suprafață zonă (mp)', v: 50000 }, { k: 'impermeabil_actual_pct', l: '% impermeabil actual', v: 75 }, { k: 'tinta_permeabil_pct', l: '% țintă permeabil', v: 45 }] },
+    r330300: { calc: calculate330300, color: '#2E9E5B', icon: '🌳', title: 'Regula 3-30-300', size: function (p) { return Math.max(150, p.dist_parc_m); }, fields: [{ k: 'canopy_pct', l: '% canopy actual', v: 18 }, { k: 'copaci_vizibili', l: 'Copaci vizibili (din locuință)', v: 2 }, { k: 'dist_parc_m', l: 'Distanță la parc (m)', v: 450 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
+    sdg117: { calc: calculateSDG117, color: '#C2410C', icon: '🏛️', title: 'SDG 11.7 — Spațiu public', size: function (p) { return 400; }, fields: [{ k: 'construit_ha', l: 'Suprafață construită (ha)', v: 120 }, { k: 'spatiu_public_ha', l: 'Spațiu public actual (ha)', v: 12 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 20000 }, { k: 'acces_400m_pct', l: '% pop. cu acces < 400m', v: 55 }] }
   };
   var _params = {}, _ov = null, _curId = null;
   Object.keys(REG).forEach(function (id) { _params[id] = {}; REG[id].fields.forEach(function (f) { _params[id][f.k] = f.v; }); });
@@ -286,6 +384,7 @@
   function closeUrbanModelDialog() { if (_ov) { try { _ov.remove(); } catch (e) {} _ov = null; } try { removeModelFromMap(G.map); } catch (e) {} }
 
   G.calculate15Min = calculate15Min; G.calculateTOD = calculateTOD; G.calculateCorridor = calculateCorridor; G.calculateSponge = calculateSponge;
+  G.calculate330300 = calculate330300; G.calculateSDG117 = calculateSDG117;
   G.renderUrbanModelDialog = renderUrbanModelDialog; G.runUrbanModelCalc = runUrbanModelCalc; G.saveUrbanModelScenario = saveUrbanModelScenario;
   G._toggleUmExport = _toggleUmExport; G._umSetParam = _umSetParam; G.closeUrbanModelDialog = closeUrbanModelDialog;
 })(window);

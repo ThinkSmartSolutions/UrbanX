@@ -185,7 +185,9 @@
     { id: 'city15', label: 'Oraș 15 Min', icon: '⏱️', color: '#BA7517' },
     { id: 'tod', label: 'TOD', icon: '🚉', color: '#534AB7' },
     { id: 'corridor', label: 'Coridor Mixt', icon: '🏪', color: '#1D9E75' },
-    { id: 'sponge', label: 'Sponge City', icon: '💧', color: '#378ADD' }
+    { id: 'sponge', label: 'Sponge City', icon: '💧', color: '#378ADD' },
+    { id: 'r330300', label: '3-30-300', icon: '🌳', color: '#2E9E5B' },
+    { id: 'sdg117', label: 'SDG 11.7', icon: '🏛️', color: '#C2410C' }
   ];
   function renderModelSelector(containerId, activeId) {
     var el = document.getElementById(containerId); if (!el) return;

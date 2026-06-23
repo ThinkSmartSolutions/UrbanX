@@ -203,7 +203,9 @@
     city15: { ico: '🚶', title: 'Oraș 15 minute', desc: 'Acces la servicii esențiale într-o izocronă de mers pe jos', builtin: true },
     tod: { ico: '🚉', title: 'TOD — dezvoltare lângă transport', desc: 'Densitate țintă în jurul unei stații + reducere auto', builtin: true },
     corridor: { ico: '🏙', title: 'Coridor mixt (Mixed-Use)', desc: 'Locuințe + locuri de muncă + venit fiscal pe o axă', builtin: true },
-    sponge: { ico: '💧', title: 'Oraș-burete (Sponge City)', desc: 'Retenție apă pluvială + reducere inundații + răcire', builtin: true }
+    sponge: { ico: '💧', title: 'Oraș-burete (Sponge City)', desc: 'Retenție apă pluvială + reducere inundații + răcire', builtin: true },
+    r330300: { ico: '🌳', title: 'Regula 3-30-300', desc: '3 copaci vizibili · 30% canopy · parc la 300m — înainte/după pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('r330300'); } },
+    sdg117: { ico: '🏛️', title: 'SDG 11.7 — Spațiu public', desc: 'Acces la spațiu public < 400m + mp/locuitor (UN-Habitat) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('sdg117'); } }
   };
 
   // ── UI ──
