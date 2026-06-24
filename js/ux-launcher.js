@@ -46,6 +46,7 @@
     { g: G4, ico: '🟧', l: 'Superbloc (model Barcelona)', d: 'tranzit perimetru · interior verde · înainte/după', k: 'superbloc barcelona rueda', run: mod('Superbloc', 'openPanel'), info: 'superbloc' },
     // Riscuri & Protecție civilă
     { g: GR, ico: '🌐', l: 'Simulare cutremur (scenariu Vrancea)', d: 'mag. 5–8 · intensitate EMS-98 · PGA · avarieri · pe hartă', k: 'cutremur seismic vrancea magnitudine p100 risc', run: mod('RiskSeismic', 'openPanel') },
+    { g: GR, ico: '🌊', l: 'Predicție inundație urbană (pluvială)', d: 'ploaie extremă · băltire pe relief real · Q=C·i·A · pe hartă', k: 'inundatie flood ploaie precipitatii anar pluvial relief', run: mod('RiskFlood', 'openPanel') },
     // Administrație
     { g: G5, ico: '🏗️', l: 'Capacitate & Conformitate UAT', d: 'apă·școli·verde vs ce s-a aprobat', k: 'capacitate intelligence uxi conformitate', run: mod('UXI', 'openDashboard'), info: 'ux_capacitate' },
     { g: G5, ico: '📋', l: 'CAU — Acorduri Unice (CU + avize)', d: 'cerere→CU→avize→Acord Unic · 9 reguli', k: 'cau acord unic aviz certificat urbanism', run: mod('CAU', 'openPanel'), info: 'cau' },
