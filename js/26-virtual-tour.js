@@ -601,16 +601,31 @@
     fill.position.set(anchor.cx - 30, anchor.baseY + 40, anchor.cz - 20);
     scene.add(fill);
 
-    // HDRI opțional dacă există
+    // HDRI IBL — PMREM prefiltrat (reflexii corecte pe rugozitate, standard coohom/Enscape)
     if(THREE.RGBELoader){
       try {
-        new THREE.RGBELoader().load('assets/tur3d/hdri/exterior.hdr',
+        new THREE.RGBELoader().load('assets/tur3d/hdri/interior.hdr',
           (tex) => {
             try {
-              tex.mapping = THREE.EquirectangularReflectionMapping;
-              if(STATE.scene){
+              if(STATE.scene && STATE.renderer && THREE.PMREMGenerator){
+                const pm = new THREE.PMREMGenerator(STATE.renderer);
+                pm.compileEquirectangularShader();
+                const env = pm.fromEquirectangular(tex).texture;
+                tex.dispose(); pm.dispose();
+                STATE.scene.environment = env;
+                window._urbanxEnvMap = env;
+                STATE.scene.traverse((o) => {
+                  if(!o.isMesh || !o.material) return;
+                  (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => {
+                    if(m && (m.isMeshStandardMaterial || m.isMeshPhysicalMaterial)){
+                      m.envMap = env; if(m.envMapIntensity == null) m.envMapIntensity = 1.0; m.needsUpdate = true;
+                    }
+                  });
+                });
+                console.log('[VTour] ✅ HDRI IBL (PMREM) aplicat');
+              } else if(STATE.scene){
+                tex.mapping = THREE.EquirectangularReflectionMapping;
                 STATE.scene.environment = tex;
-                console.log('[VTour S1c] ✅ HDRI încărcat');
               }
             } catch(e){}
           }, undefined, () => {}
