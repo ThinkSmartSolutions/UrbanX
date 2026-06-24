@@ -303,6 +303,37 @@
       ], [60, 80, 34], { boldFirst: true, fs: 7 });
       D.callout('Vision Zero', 'Responsabilitatea siguranței este partajata între proiectantii sistemului și utilizatori. Un sistem bine proiectat (viteze adecvate, separare a modurilor, infrastructură iertatoare) reduce atat probabilitatea, cât și gravitatea accidentelor — țintă finală fiind zero victime.');
 
+      // ── REZILIENTA SISTEMULUI DE TRANSPORT LA RISCURI (din _getRiskForCity) ──
+      (function _pmudRiskExt() {
+        const R = window._getRiskForCity ? window._getRiskForCity(city, ctx.risk || null) : null;
+        D.chapter('Reziliența sistemului de transport și mobilitatea în situații de urgență');
+        D.P('Sistemul de transport este esențial în situații de urgență: asigura accesul serviciilor de intervenție (ISU, SMURD, poliție) și, în caz de dezastru, evacuarea populației. PMUD integrează doua tipuri de risc relevante pentru infrastructura de transport: (A) seismic și (B) inundații.');
+        if (R && R.seismic) {
+          const sr = R.seismic;
+          D.h2('Vulnerabilitate seismica a infrastructurii de transport');
+          D.P(city.name + ' se afla în zona seismica ' + R.zona + ' (ag=' + R.ag + 'g). La un scenariu M7,0, sunt estimate ~' + N(sr.cladiriDS[4] + sr.cladiriDS[5]) + ' unitați inutilizabile — potențiala sursă de blocaje pe rețeaua stradală prin prabusiri de fațade și colaps. Rețeaua stradală de cca. ' + N(m.strRet || Math.round(pop / 140)) + ' km trebuie evaluata prioritar pe axele de acces la spitale, pompieri și adaposturi de urgență.');
+          D.table(['Măsură PMUD', 'Justificare risc', 'Termen'], [
+            ['Identificarea și marcarea rutelor de evacuare principale', 'Coridoare fără clădiri RS I/RS II pe trotuar', 'Scurt'],
+            ['Audit poduri și pasaje — clasa seismica', 'Structuri critice pentru evacuare', 'Scurt'],
+            ['Benzi dedicate urgențe pe arterele principale', 'Acces ISU/SMURD neobstructionat la M7+', 'Mediu'],
+            ['Integrarea rutelor de evacuare în ITS', 'Redirectionare trafic post-seism în timp real', 'Mediu'],
+          ], [78, 70, 26], { fs: 8 });
+        }
+        if (R && R.flood) {
+          const fr = R.flood;
+          D.h2('Vulnerabilitate la inundații a rețelei de transport');
+          D.P('La un scenariu pluviometric de 100 mm/h, ~' + fr.stradeAfectPct + '% din rețeaua stradală poate fi afectata de acumulari.' + (fr.depasireCapacitate > 0 ? ' Rețeaua de canalizare este depasita cu ' + fr.depasireCapacitate + '% fata de capacitatea standard SR EN 752.' : '') + ' Zonele joase (lunci, subsoluri pasaje, intersectii sub cota naturala) sunt prioritare pentru măsuri preventive.');
+          D.table(['Măsură PMUD', 'Justificare', 'Termen'], [
+            ['Inventarierea arterelor sub cota inundabila PGRA', 'Identificare rute alternative la blocare', 'Scurt'],
+            ['Bariere mobile și avertizare la pasajele vulnerabile', 'Reducere timp de raspuns ISU/UPU', 'Mediu'],
+            ['Senzori de nivel apa integrați în ITS', 'Monitorizare în timp real + alerta automata', 'Mediu'],
+            ['Profil stradal cu rigole dimensionate la 100 mm/h', 'SR EN 752 + reabilitare strazi prioritare', 'Lung'],
+          ], [78, 70, 26], { fs: 8 });
+        }
+        D.callout('Principiu SUMP / PMUD', 'Reziliența sistemului de transport nu este un capitol separat — este o condiție transversala. Rutele de evacuare se suprapun cu axele principale ale PMUD și trebuie rezervate în PUG.');
+        D.sourceBadges(['P100-1/2013 (MDLPA)', 'ANAR PGRA 2021-2027', 'Ghid SUMP/ELTIS 2019', 'SR EN 752', 'Legea 481/2004 (protectie civila)']);
+      })();
+
       D.chapter('Transport de marfă și logistică urbană');
       D.h2('Rolul și impactul logisticii urbane');
       D.P('Transportul de marfă și logistică urbană susțîn activitatea economică a orașului — aprovizionarea comerțului, a unitatilor de alimentație, livrările către populație (în creștere explozivă odată cu comerțul electronic) și serviciile. Desi reprezintă o pondere relativ redusă din numărul total de deplasari, transportul de marfă are un impact disproportionat asupra emisiilor, zgomotului, congestiei și uzurii infrastructurii, în special prin vehiculele grele și prin livrările pe ultimul kilometru în zonele dense.');

@@ -141,6 +141,28 @@
         ['Perioadă de control Tc', (seism.Tc || '-') + ' s', 'Conținutul de frecvente al mișcării'],
         ['Zonă seismică / intensitate', (seism.zona || '-') + ' / ' + (seism.MSK || '-'), 'Conform zonarii naționale P100-1/2013'],
       ], [62, 38, 76], { boldFirst: true });
+      // ── Extindere cantitativa: estimare daune scenariu M7,0 (din _getRiskForCity) ──
+      (function _mpRiskExt() {
+        const R = window._getRiskForCity ? window._getRiskForCity(city, risk) : null;
+        if (!R || !R.seismic) return;
+        const sr = R.seismic;
+        D.h3('Estimarea daunelor la scenariu de proiectare (M7,0)');
+        D.P('Pe baza distribuției fondului construit pe epoci (INS RPL2021) și a funcțiilor de vulnerabilitate macroseismica (Lagomarsino & Giovinazzi 2006, tipologii RISK-UE), pentru scenariul de proiectare P100-1/2013 (ag=' + R.ag + 'g, intensitate EMS-98 estimata ' + RN(sr.intensity, 1) + '):');
+        D.table(['Clasa deteriorare', 'Descriere', 'Unitați estimate', '% fond'], [
+          ['DS0 — fără daune', 'Structura intacta', N(sr.cladiriDS[0]), RN(sr.pDS_total[0] * 100, 0) + '%'],
+          ['DS1 — ușoare', 'Fisuri minore', N(sr.cladiriDS[1]), RN(sr.pDS_total[1] * 100, 0) + '%'],
+          ['DS2 — moderate', 'Fisuri, daune parțiale', N(sr.cladiriDS[2]), RN(sr.pDS_total[2] * 100, 0) + '%'],
+          ['DS3 — severe', 'Daune structurale grave', N(sr.cladiriDS[3]), RN(sr.pDS_total[3] * 100, 0) + '%'],
+          ['DS4 — foarte severe', 'Inutilizabile — demolare', N(sr.cladiriDS[4]), RN(sr.pDS_total[4] * 100, 0) + '%'],
+          ['DS5 — prabusire', 'Colaps total', N(sr.cladiriDS[5]), RN(sr.pDS_total[5] * 100, 0) + '%'],
+        ], [42, 54, 40, 20], { fs: 8 });
+        D.P('Impact uman estimat: ~' + N(sr.decese) + ' decese, ' + N(sr.ranGrav) + ' raniți grav, ' + N(sr.persDeplasate) + ' persoane deplasate. Cost reconstructie orientativ: ' + N(R.costMilEur) + ' mil. EUR. Surse: HAZUS-MH (FEMA), SYNER-G, Lagomarsino & Giovinazzi (2006). NOTĂ: estimari agregate la nivel UAT — nu inlocuiesc expertiza tehnica per cladire (P100-3).');
+        if (R.flood) {
+          const fr = R.flood;
+          D.h3('Susceptibilitate la inundații pluviale (SCS-CN)');
+          D.P('Coeficientul de scurgere CN ponderat este ' + fr.CN_weighted + ' (metoda SCS-CN, USDA TR-55), cu impermeabilizare estimata ~' + fr.impermeabilizare + '%. La 100 mm/h: runoff ' + fr.Q_mm + ' mm, ~' + fr.susceptPct + '% din suprafata cu susceptibilitate de acumulare, ~' + N(fr.locuinteExpuse) + ' locuinte expuse.' + (fr.depasireCapacitate > 0 ? ' Reteaua de canalizare standard (SR EN 752, ~40 mm/h) este depasita cu ' + fr.depasireCapacitate + '% — inundatii locale probabile in zonele joase.' : ' Reteaua standard nu este depasita la acest scenariu.'));
+        }
+      })();
       D.h2('Risc de inundății');
       D.P('Expunerea la inundății este evaluata în raport cu rețeaua hidrografica, cotele terenului și hărțile de hazard (Directivă 2007/60/CE, transpusa prin Legea 107/1996). ' + (apa.risc_inundabil ? 'Nivel estimat: ' + apa.risc_inundabil + '. ' : '') + 'Amplasamentele din albia majoră și zonele de protecție sunt supuse interdictiei de construire și necesită avizul de gospodarire a apelor.');
       D.h2('Alunecari de teren și stabilitate');

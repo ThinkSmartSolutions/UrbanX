@@ -2141,6 +2141,48 @@ D.P('In concluzie, profilul de transformare digitala al ' + uat + ' indica un pu
 
 D.sourceBadges(['INS', 'Eurostat', 'MDLPA', 'ADR ' + reg, 'Evaluare UrbanX']);
       }
+      // --- sectiune RISCURI NATURALE SI REZILIENTA (din _getRiskForCity) ---
+      {
+        const R = window._getRiskForCity ? window._getRiskForCity(city, risk) : null;
+        D.chapter('Riscuri naturale si rezilienta urbana');
+        if (!R) {
+          D.P('Date de risc indisponibile pentru acest UAT. A se consulta harta de hazard seismic P100-1/2013 (MDLPA) si planurile de management al riscului la inundatii ANAR PGRA 2021-2027.');
+        } else {
+          D.h2('Risc seismic');
+          D.P(Uat + ' se afla in zona seismica ' + R.zona + ' conform P100-1/2013 (MDLPA), cu acceleratia terenului de proiectare ag=' + R.ag + 'g si perioada de control Tc=' + R.Tc + 's. ' +
+            (R.ag >= 0.30 ? 'Zona cu RISC RIDICAT — sursa Vrancea, cu potential de magnitudine M7,0-7,4 si arie de afectare extinsa.' :
+             R.ag >= 0.20 ? 'Zona cu risc moderat-ridicat — fondul construit vechi (pre-1977) este vulnerabil la cutremure de proiectare.' :
+             'Zona cu risc seismic moderat — masurile de proiectare antiseismica raman obligatorii conform normativului.'));
+          if (R.seismic) {
+            const sr = R.seismic;
+            D.P('Pe baza distributiei fondului construit pe epoci de constructie (INS RPL2021) si a vulnerabilitatii macroseismice (metoda Lagomarsino & Giovinazzi 2006, tipologii RISK-UE), pentru scenariul de proiectare M7,0 (intensitate estimata EMS-98 ' + RN(sr.intensity, 1) + ') rezulta urmatoarea estimare agregata:');
+            D.table(['Indicator seismic (scenariu M7,0)', 'Valoare', 'Sursa'], [
+              ['Acceleratie teren ag', R.ag + 'g (zona ' + R.zona + ')', 'P100-1/2013'],
+              ['Unitati construite cu daune severe (DS3-DS5)', N(R.cladiriVuln) + ' (' + RN(R.cladiriVuln / sr.totalUnits * 100, 1) + '% din fond)', 'GEM/SYNER-G + INS'],
+              ['Persoane potential deplasate', N(R.persDeplasate), 'HAZUS-MH (FEMA) adaptat'],
+              ['Cost reconstructie estimat', N(R.costMilEur) + ' mil. EUR', 'valori medii calibrate RO'],
+              ['Scor risc seismic compus', R.riskScore + '/100', 'metodologie UrbanX']
+            ], [78, 64, 32], { fs: 8 });
+            D.P('Distributia estimata a daunelor: ' + RN(sr.pDS_total[3] * 100, 0) + '% daune severe (DS3), ' + RN(sr.pDS_total[4] * 100, 0) + '% foarte severe (DS4), ' + RN(sr.pDS_total[5] * 100, 0) + '% prabusire (DS5). Vulnerabilitate concentrata in fondul pre-1977 (' + RN((sr.epochs.pre1940 + sr.epochs._1940_1977) * 100, 0) + '% din total).');
+          }
+          D.h2('Risc la inundatii urbane');
+          D.P('Susceptibilitatea se evalueaza pe doua componente: (A) inundatii fluviale — risc oficial ANAR PGRA 2021-2027 (Directiva 2007/60/CE); (B) inundatii pluviale — precipitatii extreme care depasesc capacitatea retelei de canalizare (SR EN 752), modelate prin metoda SCS-CN (USDA TR-55).' + (R.flood && R.flood.hasFluvialRisk ? ' Judetul este inclus in PGRA cu risc fluvial identificat.' : ''));
+          if (R.flood) {
+            const fr = R.flood;
+            D.table(['Indicator inundatii (100 mm/h)', 'Valoare', 'Sursa'], [
+              ['Coeficient de scurgere CN ponderat', fr.CN_weighted + ' (impermeabilizare ~' + fr.impermeabilizare + '%)', 'SCS-CN / TR-55'],
+              ['Suprafata cu susceptibilitate ridicata', fr.susceptPct + '% din UAT', 'SCS-CN + Urban Atlas'],
+              ['Locuinte expuse estimate', N(fr.locuinteExpuse), 'SCS-CN + INS'],
+              ['Depasire capacitate retea', fr.depasireCapacitate > 0 ? '+' + fr.depasireCapacitate + '% fata de SR EN 752' : 'nu se depaseste', 'SR EN 752'],
+              ['Risc fluvial PGRA', fr.hasFluvialRisk ? 'DA — inclus in ANAR PGRA' : 'neidentificat', 'ANAR PGRA']
+            ], [78, 64, 32], { fs: 8 });
+          }
+          D.h2('Implicatii pentru strategia SIDU');
+          D.P('Analiza riscurilor fundamenteaza directiile: (1) consolidarea fondului construit vulnerabil seismic (prioritate RS I/RS II, finantare PNRR C10-I2); (2) infrastructura verde-albastra (sponge city) pentru reducerea scurgerii pluviale (POR Axa 4 / fonduri clima UE); (3) planuri de urgenta si evacuare corelate cu PMUD; (4) transpunerea zonelor de risc in PUG/RLU (regim restrictiv, cote minime de pardoseala, retentie pluviala).');
+          D.callout('Corelarea cu PUG (obligatorie)', 'Zonele de risc seismic ridicat (RS I/RS II) si de inundabilitate (PGRA Q100) trebuie marcate explicit in PUG si RLU. Fara aceasta transpunere, restrictiile strategice nu produc efecte juridice asupra autorizatiilor de construire.');
+          D.sourceBadges(['P100-1/2013 (MDLPA)', 'ANAR PGRA 2021-2027', 'GEM/SYNER-G', 'Lagomarsino & Giovinazzi 2006', 'SR EN 752', 'HAZUS-MH (FEMA)']);
+        }
+      }
       // --- sectiune ord 30 (chapter) ---
       {
 D.chapter('Analiza SWOT integrata si analiza PEST')
