@@ -6,6 +6,8 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const _format = opts?.format || 'a4';
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:_orient,unit:'mm',format:_format});
+  // Standard de sistem: font RO (diacritice) pentru proza studiilor (fallback helvetica)
+  const _roFont=(window._registerROFont&&window._registerROFont(pdf))?'DejaVuRO':null;
   const W = _orient==='landscape'?(_format==='a3'?420:297):(_format==='a3'?297:210);
   const H = _orient==='landscape'?(_format==='a3'?297:210):(_format==='a3'?420:297);
 
@@ -111,10 +113,12 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Body text justify
   const body=(txt,x,y,maxW,fontSize,lineH)=>{
-    pdf.setTextColor(24,36,54);pdf.setFont('helvetica','normal');
+    pdf.setTextColor(24,36,54);pdf.setFont(_roFont||'helvetica','normal');
     const fs=fontSize||8.5,lh=lineH||(fs*0.66),mx=maxW||(W-28),ox=x||14;
     pdf.setFontSize(fs);
-    const lines=pdf.splitTextToSize(S2(txt),mx);
+    // cu font RO pastram diacriticele; fara, fallback la transformarea ASCII (S2)
+    const _txt=_roFont?String(txt==null?'':txt):S2(txt);
+    const lines=pdf.splitTextToSize(_txt,mx);
     y=_ensureSpace(y, lines.length*lh+3);  // page-break in loc de a pierde textul
     lines.forEach((line,i)=>{
       pdf.setFontSize(fs);
