@@ -168,27 +168,61 @@
 
   function exportStudiu(scn) {
     try {
-      var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!jsPDFns) { alert('jsPDF indisponibil'); return; }
-      var pdf = new jsPDFns({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      if (G._registerROFont) G._registerROFont(pdf);
-      var x = 16;
-      pdf.setFontSize(20); pdf.setTextColor(20); pdf.text('UrbanX SimLab — Studiu de oportunitate', x, 24);
-      pdf.setFontSize(12); pdf.setTextColor(60);
-      pdf.text(scn.name || 'Scenariu', x, 34);
-      pdf.text('Simulator: ' + (SIMS[scn.sim] ? SIMS[scn.sim].title : scn.sim), x, 42);
-      pdf.text('UAT: ' + (scn.uat || '—') + '   ·   Bază legală: Legea 350/2001, Art. 5', x, 50);
-      if (scn.thumb) { try { pdf.addImage(scn.thumb, 'JPEG', x, 56, 200, 100); } catch (e) {} }
-      // parametri + rezultate
-      var py = scn.thumb ? 162 : 60;
-      pdf.setFontSize(12); pdf.setTextColor(20); pdf.text('Parametri & rezultate', x, py); py += 7;
-      pdf.setFontSize(9.5); pdf.setTextColor(70);
-      var rows = []; Object.keys(scn.params || {}).forEach(function (k) { rows.push(k + ': ' + scn.params[k]); });
-      Object.keys(scn.results || {}).forEach(function (k) { rows.push('→ ' + k + ': ' + scn.results[k]); });
-      var col = x; rows.forEach(function (r, i) { if (py > 188) { py = (scn.thumb ? 162 : 60) + 7; col += 95; } pdf.text('• ' + r, col, py); py += 5; });
-      pdf.setFontSize(8); pdf.setTextColor(150);
-      var lines = pdf.splitTextSize ? pdf.splitTextSize(DISCLAIMER, 265) : [DISCLAIMER];
-      pdf.text(lines, x, 196);
-      pdf.save('Studiu_oportunitate_' + (scn.sim || 'scenariu') + '.pdf');
+      var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { alert('jsPDF indisponibil'); return; }
+      var simT = SIMS[scn.sim] ? SIMS[scn.sim].title : (scn.sim || 'Indice');
+      var uat = scn.uat || (G.TCI && G.TCI.cityName) || 'UAT';
+      // A4: raport la standardul MP/PMUD (motor _makeStratDoc: diacritice, justify, grafice)
+      if (typeof G._makeStratDoc === 'function') {
+        var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        var D = G._makeStratDoc(pdf, { docTitle: 'STUDIU DE OPORTUNITATE · SIMLAB', cityName: uat, accent: [0, 130, 122] });
+        var W = 210, ML = D.dims.ML, CW = D.dims.CW;
+        // ── pagina 1: titlu (chrome suprimat) ──
+        D.setSuppress(true); D.setPage(1);
+        pdf.setFillColor(7, 26, 24); pdf.rect(0, 0, W, 46, 'F'); pdf.setFillColor(0, 130, 122); pdf.rect(0, 46, W, 1.4, 'F');
+        pdf.setTextColor(120, 220, 200); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(8); pdf.text('URBANX · SIMLAB', ML, 16);
+        pdf.setTextColor(255, 255, 255); pdf.setFontSize(17); pdf.text(D.S2('Studiu de oportunitate'), ML, 30);
+        pdf.setFontSize(11); pdf.setTextColor(140, 210, 195); pdf.text(D.S2(simT + '  ·  ' + uat), ML, 40);
+        D.setSuppress(false); D.setY(56);
+        D.P('Prezentul studiu de oportunitate analizeaza modelul/indicele "' + simT + '" pentru ' + uat + ', generat in laboratorul de simulare UrbanX SimLab. Documentul fundamenteaza decizia de oportunitate (Legea 350/2001, art. 5), pe baza parametrilor de intrare si a rezultatelor calculate, ca instrument de pre-analiza pentru deciziile de planificare urbana.');
+        var rk = Object.keys(scn.results || {});
+        if (rk.length) { D.kpis(rk.slice(0, 4).map(function (k) { return { val: String(scn.results[k]), label: k, sub: '' }; })); }
+        // ── captura harta (daca indicele e desenat pe harta) ──
+        try {
+          if (G.map && G.map.getCanvas) {
+            var img = G.map.getCanvas().toDataURL('image/jpeg', 0.82);
+            if (img && img.length > 2000) {
+              D.P('Vizualizare pe harta', { bold: true, fs: 11, gap: 1 });
+              D.ensure(96); var iw = CW, ih = Math.round(iw * 0.58);
+              try { pdf.addImage(img, 'JPEG', ML, D.y, iw, ih, '', 'FAST'); pdf.setDrawColor(200, 208, 220); pdf.rect(ML, D.y, iw, ih, 'S'); } catch (e) {}
+              D.setY(D.y + ih + 3); D.source('Captura harta UrbanX · ' + simT);
+            }
+          }
+        } catch (e) {}
+        // ── diagrama / thumbnail model ──
+        if (scn.thumb) {
+          try {
+            D.P('Diagrama modelului', { bold: true, fs: 11, gap: 1 });
+            D.ensure(84); var dw = Math.min(CW, 150), dh = Math.round(dw * 0.5);
+            pdf.addImage(scn.thumb, 'JPEG', ML, D.y, dw, dh); D.setY(D.y + dh + 3);
+          } catch (e) {}
+        }
+        // ── parametri + rezultate (tabele) ──
+        var pk = Object.keys(scn.params || {});
+        if (pk.length) { D.P('Parametri de intrare', { bold: true, fs: 11, gap: 1 }); D.table(['Parametru', 'Valoare'], pk.map(function (k) { return [k, String(scn.params[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
+        if (rk.length) { D.P('Rezultate ale modelului', { bold: true, fs: 11, gap: 1 }); D.table(['Indicator', 'Valoare'], rk.map(function (k) { return [k, String(scn.results[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
+        D.callout('Statut juridic', 'Studiu de oportunitate ORIENTATIV generat de UrbanX SimLab (Legea 350/2001, art. 5). Valorile sunt estimari calibrate pe parametrii introdusi; deciziile finale necesita documentatii de specialitate avizate de proiectant atestat.');
+        var _af = G._asciiFile || function (s) { return String(s || ''); };
+        pdf.save('Studiu_SimLab_' + _af(simT).replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf');
+        return;
+      }
+      // ── fallback minimal (motor strategic indisponibil) ──
+      var jsPDFns = J; var pdfF = new jsPDFns({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      if (G._registerROFont) G._registerROFont(pdfF);
+      pdfF.setFontSize(18); pdfF.text('UrbanX SimLab — Studiu de oportunitate', 16, 22);
+      pdfF.setFontSize(11); pdfF.text(simT + ' · ' + uat, 16, 32);
+      var py = 44; Object.keys(scn.params || {}).forEach(function (k) { pdfF.text('• ' + k + ': ' + scn.params[k], 16, py); py += 6; });
+      Object.keys(scn.results || {}).forEach(function (k) { pdfF.text('→ ' + k + ': ' + scn.results[k], 16, py); py += 6; });
+      pdfF.save('Studiu_oportunitate_' + (scn.sim || 'scenariu') + '.pdf');
     } catch (e) { console.warn('[SimLab] PDF', e); alert('Eroare PDF: ' + e.message); }
   }
 
