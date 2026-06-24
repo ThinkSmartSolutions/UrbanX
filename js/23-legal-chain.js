@@ -42,6 +42,7 @@
     tab.dataset.t   = 'legal';
     tab.textContent = '⚖ Legal';
     tab.onclick     = _activateTab;
+    tab.style.display = 'none'; // cap.15 flow: placeholder (Neo4j/Supabase nedesfasurat) — ascuns din tab-bar
     tabs.appendChild(tab);
 
     const body = document.getElementById('panel-body');

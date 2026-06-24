@@ -51,6 +51,7 @@
     tab.dataset.t    = 'regulament';
     tab.textContent  = '📋 Regulament';
     tab.onclick      = ()=>_activateTab();
+    tab.style.display = 'none'; // cap.20 flow: read-only stub Supabase (fara editor PUD/PUG, infra nedesfasurata) — ascuns
     tabs.appendChild(tab);
 
     // Tab content container

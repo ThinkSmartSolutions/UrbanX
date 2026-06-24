@@ -32,6 +32,7 @@
     tab.dataset.t   = 'temporal';
     tab.textContent = '⏱ Temporal';
     tab.onclick     = _activateTab;
+    tab.style.display = 'none'; // cap.15 flow: placeholder (depinde de infra istoric nedesfasurata) — ascuns din tab-bar
     tabs.appendChild(tab);
 
     const body = document.getElementById('panel-body');
