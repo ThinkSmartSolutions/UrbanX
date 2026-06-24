@@ -35,63 +35,70 @@
     indici: function () { try { G.UrbanIndicesReport && G.UrbanIndicesReport.generate(); } catch (e) {} },
     riscSeismic: mod('RiskSeismic', 'openPanel'), riscFlood: mod('RiskFlood', 'openPanel'),
     riscAla: function () { try { G.RiskShelters && G.RiskShelters.toggle(); } catch (e) {} },
-    retele: function () { try { G.CAU && G.CAU.showNetworksPanel(); } catch (e) {} }
+    retele: function () { try { G.CAU && G.CAU.showNetworksPanel(); } catch (e) {} },
+    // ── functii teritoriale restaurate (cap.15/21: nimic omis din vechiul UrbanX Pro) ──
+    monumente: mod('Heritage', 'openPanel'),
+    dashboardUAT: function () { try { var k = (G.TCI && G.TCI.cityKey) || localStorage.getItem('ux_last_city') || 'RO-IS-01'; G._launchUATDashboard && G._launchUATDashboard(k); } catch (e) {} },
+    ghsl: function () { try { var m = G.map || G._map, k = (G.TCI && G.TCI.cityKey) || 'RO-IS-01'; if (m && G._GHSLLayer) { G._GHSLLayer.init(m, k); G._GHSLLayer.toggle(m); } else G.ss && G.ss('GHSL se inițializează'); } catch (e) {} },
+    coridoare: function () { try { var k = (G.TCI && G.TCI.cityKey) || 'RO-IS-01', m = G.map || G._map; if (m && G._CorridorsLayer && G._DataEngine) G._DataEngine.fetchCityData(k).then(function (ld) { var c = G._CorridorsLayer.generateCorridors(k, null, ld) || []; G._CorridorsLayer.showOnMap(m, k, c); }); } catch (e) {} },
+    importPug: call('openPUGImport'),
+    proiectie: call('generateProiectieUrbanistica'),
+    aiMemoriu: function () { try { var k = (G.TCI && G.TCI.cityKey) || 'RO-IS-01'; G._AIUrbanNarrative && G._AIUrbanNarrative.open(k); } catch (e) {} },
+    pptx: call('generatePPTX'),
+    film: function () { try { G._switchToCinemaV2 && G._switchToCinemaV2(); setTimeout(function () { G._launchCinemaV2 && G._launchCinemaV2(); }, 100); } catch (e) {} },
+    tciClasic: call('_switchToTCIClassic')
   };
 
-  // ── NAV_STRUCTURE (7 grupe, emoji — fără librărie iconițe) ──
+  // ── NAV — PLANIFICARE URBANĂ: doar UAT / teritoriu / predicții (parcela+avizare = Flux de avizare) ──
   var NAV = [
-    { id: 'teritoriu', label: 'Teritoriu', ico: '🗺', color: '#378ADD', items: [
+    { id: 'teritoriu', label: 'Teritoriu & hărți', ico: '🗺', color: '#378ADD', items: [
       { label: 'Hartă (închide panourile)', moduleId: 'harta' },
-      { label: 'Fișa parcelei 360°', moduleId: 'fisa360' },
-      { label: 'Zonă de studiu', moduleId: 'studyzone' },
-      { label: 'Fișă cadastrală', moduleId: 'cadastru' },
-      { label: 'Dosar digital imobil', moduleId: 'dosar' },
-      { label: 'Patrimoniu construit', moduleId: 'heritage' } ] },
-    { id: 'autorizare', label: 'Autorizare', ico: '📋', color: '#BA7517', items: [
-      { label: 'CAU — Acorduri Unice (CU+avize)', moduleId: 'cau' },
-      { label: 'Plăți taxe urbanistice', moduleId: 'plati' },
-      { label: 'Notificarea vecinilor', moduleId: 'notificari' } ] },
-    { id: 'analiza', label: 'Analiză', ico: '📊', color: '#534AB7', items: [
+      { label: 'Dashboard UAT Live (INSE·Eurostat·OSM·GHSL)', moduleId: 'dashboardUAT' },
+      { label: 'GHSL — suprafață construită 1975-2055', moduleId: 'ghsl' },
+      { label: 'Coridoare de dezvoltare spațială', moduleId: 'coridoare' },
+      { label: 'Inventar patrimoniu & monumente (GIS)', moduleId: 'monumente' },
+      { label: 'Import PUG digital (GeoJSON/KML)', moduleId: 'importPug' } ] },
+    { id: 'analiza', label: 'Analiză teritorială', ico: '📊', color: '#534AB7', items: [
       { label: 'Capacitate & conformitate UAT', moduleId: 'intelligence' },
-      { label: 'Flux — trafic / mobilitate', moduleId: 'mobility' },
-      { label: 'Market — piața imobiliară', moduleId: 'market' },
-      { label: 'Pro-formă (fezabilitate)', moduleId: 'feasibility' },
-      { label: 'Investment Score', moduleId: 'invest' },
-      { label: 'Portfolio Due Diligence', moduleId: 'portfolio' },
-      { label: 'Land Value Capture', moduleId: 'lvc' },
-      { label: 'Carbon & emisii', moduleId: 'carbon' },
-      { label: 'Analytics — Walk/15-min/ROI/Carbon/UHI/SDG/seismic', moduleId: 'analytics' },
+      { label: 'SimLab — 10 simulatoare', moduleId: 'simlab' },
+      { label: 'Analytics — Walk/15-min/ROI/UHI/SDG/seismic', moduleId: 'analytics' },
       { label: 'Raport indici urbani (PDF, 12 indici)', moduleId: 'indici' },
+      { label: 'Market — piața imobiliară (UAT)', moduleId: 'market' },
+      { label: 'Carbon & emisii (UAT)', moduleId: 'carbon' },
       { label: 'Metodologie & surse de date', moduleId: 'metodologie' } ] },
+    { id: 'mobilitate', label: 'Mobilitate', ico: '🚦', color: '#0EA5A5', items: [
+      { label: 'Flux — studiu de trafic (calculator)', moduleId: 'mobility' } ] },
+    { id: 'mediu', label: 'Mediu, climă & verde', ico: '🌿', color: '#639922', items: [
+      { label: 'LOISIR — spații verzi & plămân urban', moduleId: 'loisir' },
+      { label: 'UHI — insulă de căldură urbană', moduleId: 'uhi' },
+      { label: 'Superbloc (model Barcelona)', moduleId: 'superbloc' } ] },
     { id: 'risc', label: 'Riscuri & Protecție civilă', ico: '⚠️', color: '#ef4444', items: [
       { label: 'Simulare cutremur (mag. 5-8, Vrancea)', moduleId: 'riscSeismic' },
       { label: 'Predicție inundație pluvială', moduleId: 'riscFlood' },
       { label: 'Inventar adăposturi ALA', moduleId: 'riscAla' },
       { label: 'Rețele edilitare pe hartă', moduleId: 'retele' } ] },
-    { id: 'proiectare', label: 'Proiectare', ico: '📐', color: '#D85A30', items: [
-      { label: 'SimLab — simulări (10)', moduleId: 'simlab' },
-      { label: 'Masterplan ansamblu (lotizare)', moduleId: 'lotizare' },
-      { label: 'Superbloc (Barcelona)', moduleId: 'superbloc' } ] },
-    { id: 'loisir', label: 'Loisir & Verde', ico: '🌿', color: '#639922', items: [
-      { label: 'LOISIR — spații verzi', moduleId: 'loisir' },
-      { label: 'UHI — insulă de căldură', moduleId: 'uhi' } ] },
-    { id: 'cetateni', label: 'Cetățeni', ico: '👥', color: '#1D9E75', items: [
+    { id: 'strategie', label: 'Strategie & predicții', ico: '🏛', color: '#888780', items: [
+      { label: 'SIDU — document strategic (PDF)', moduleId: 'sidu-doc' },
+      { label: 'SIDU — registru & coerență → PUG', moduleId: 'sidu' },
+      { label: 'Masterplan strategic (PDF)', moduleId: 'masterplan' },
+      { label: 'PMUD — mobilitate urbană (PDF)', moduleId: 'pmud' },
+      { label: 'Portofoliu strategic 2025-2055', moduleId: 'portofoliu' },
+      { label: 'Proiecție urbanistică 10/20/30 ani', moduleId: 'proiectie' },
+      { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' },
+      { label: 'Export PowerPoint (.pptx)', moduleId: 'pptx' } ] },
+    { id: 'cetateni', label: 'Cetățeni & consultare', ico: '👥', color: '#1D9E75', items: [
       { label: 'Sesizare urbană', moduleId: 'sesizari' },
       { label: 'Hartă sesizări (pe/off)', moduleId: 'sesizari-map' },
-      { label: 'Participare publică', moduleId: 'participare' } ] },
-    { id: 'strategie', label: 'Strategie & Administrare', ico: '🏛', color: '#888780', items: [
-      { label: 'SIDU — document strategic (PDF)', moduleId: 'sidu-doc' },
-      { label: 'SIDU — document strategic (Word)', moduleId: 'sidu-docx' },
-      { label: 'SIDU — registru & coerență', moduleId: 'sidu' },
-      { label: 'Masterplan strategic (PDF)', moduleId: 'masterplan' },
-      { label: 'PMUD — mobilitate (PDF)', moduleId: 'pmud' },
-      { label: 'Portofoliu strategic 2025-2055', moduleId: 'portofoliu' } ] }
+      { label: 'Participare publică (model Helsinki)', moduleId: 'participare' } ] },
+    { id: 'prezentare', label: 'Prezentare', ico: '🎬', color: '#8b5cf6', items: [
+      { label: 'Film cinematic (25 scene)', moduleId: 'film' },
+      { label: 'TCI Clasic (panou interactiv)', moduleId: 'tciClasic' } ] }
   ];
   var QUICK = [
-    { label: 'Sesizare', ico: '📣', moduleId: 'sesizari' },
-    { label: 'Caută parcelă', ico: '🔍', moduleId: '_search' },
+    { label: 'Caută UAT/parcelă', ico: '🔍', moduleId: '_search' },
+    { label: 'Dashboard UAT', ico: '📊', moduleId: 'dashboardUAT' },
     { label: 'SimLab', ico: '🧪', moduleId: 'simlab' },
-    { label: 'CU nou', ico: '📋', moduleId: 'cau' }
+    { label: 'SIDU', ico: '📜', moduleId: 'sidu-doc' }
   ];
 
   var State = { activeGroup: null, activeModule: null };

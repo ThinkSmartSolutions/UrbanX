@@ -874,6 +874,10 @@ canvas#c2d{width:100%;height:100%;display:block}
   -webkit-tap-highlight-color: rgba(255,255,255,0.1);
   touch-action: manipulation;
 }
+/* Flux de avizare — itemi + headere de sectiune */
+#tools-menu .fa-i{display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;line-height:1.25}
+#tools-menu .fa-i:hover{background:rgba(255,255,255,.08)}
+#tools-menu .fa-h{padding:4px 8px 5px;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
 /* Overlay pentru close meniu cu tap in afara */
 #menu-overlay {
   display: none;
@@ -1370,15 +1374,30 @@ document.addEventListener('click', function(){
 </div>
 
 <!-- TOOLS MENU — fixed, outside topbar -->
-<div id="tools-menu" data-locked="true" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:210px;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
-  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Analiză parcelă</div>
-  <button onclick="(window.Cadastru&&Cadastru.openPanel?Cadastru.openPanel():ss?.('Cadastru se inițializează'));_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#93c5fd;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Fișă cadastrală (Stereo70)</button>
-  <button id="btnLotizare" onclick="toggleLotizare();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏘 Lotizare teren</button>
-  <button onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Planșe & Proiect PAC</button>
-  <button id="btnBilant" onclick="toggleBilant();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#4ade80;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📐 Bilanț edificabil</button>
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Avizare</div>
-  <button onclick="(window.CAU&&CAU.openPanel?CAU.openPanel():ss?.('CAU se inițializează'));_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">📋 CAU — Certificat + avize</button>
-  <button id="btnCimec" onclick="showCimecWidget();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏛 LMI Monumente</button>
+<div id="tools-menu" data-locked="true" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:230px;max-width:92vw;max-height:82vh;overflow-y:auto;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
+  <!-- FLUX DE AVIZARE: tot ce tine de o parcela / mai multe parcele + avizare -->
+  <div class="fa-h">Analiză parcelă</div>
+  <button class="fa-i" style="color:#7dd3fc" onclick="(window.Fisa360&&Fisa360.open?Fisa360.open():ss?.('Fișa 360 se inițializează'));_closeAllMenus()">🧭 Fișa parcelei 360°</button>
+  <button class="fa-i" style="color:#93c5fd" onclick="(window.Cadastru&&Cadastru.openPanel?Cadastru.openPanel():ss?.('Cadastru se inițializează'));_closeAllMenus()">📐 Fișă cadastrală (lotizare/comasare/dezmembrare)</button>
+  <button class="fa-i" style="color:#cbd5e1" onclick="(window.StudyZone&&StudyZone.openBuilder?StudyZone.openBuilder():ss?.('Zonă de studiu se inițializează'));_closeAllMenus()">📐 Zonă de studiu (fără nr. cadastral)</button>
+  <button id="btnBilant" class="fa-i" style="color:#4ade80" onclick="toggleBilant();_closeAllMenus()">📐 Bilanț edificabil (plan 2D)</button>
+  <button class="fa-i" style="color:#cbd5e1" onclick="(typeof generateParcelFisa==='function'?generateParcelFisa():ss?.('Fișă urbanism se inițializează'));_closeAllMenus()">📋 Fișă urbanism per parcelă</button>
+  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Proiectare (parcelă / ansamblu)</div>
+  <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
+  <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
+  <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
+  <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
+  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Investiție pe parcelă</div>
+  <button class="fa-i" style="color:#86efac" onclick="(window.Feaz&&Feaz.openPanel?Feaz.openPanel():ss?.('Fezabilitate se inițializează'));_closeAllMenus()">💰 Pro-formă (fezabilitate · ROI)</button>
+  <button class="fa-i" style="color:#86efac" onclick="(window.Invest&&Invest.openPanel?Invest.openPanel():ss?.('Investment se inițializează'));_closeAllMenus()">📊 Investment Score</button>
+  <button class="fa-i" style="color:#86efac" onclick="(window.Portfolio&&Portfolio.openPanel?Portfolio.openPanel():ss?.('Portfolio se inițializează'));_closeAllMenus()">🗂 Portfolio Due Diligence</button>
+  <button class="fa-i" style="color:#86efac" onclick="(window.LVC&&LVC.openPanel?LVC.openPanel():ss?.('LVC se inițializează'));_closeAllMenus()">📈 Land Value Capture</button>
+  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Avizare</div>
+  <button class="fa-i" style="color:#fbbf24" onclick="(window.CAU&&CAU.openPanel?CAU.openPanel():ss?.('CAU se inițializează'));_closeAllMenus()">📋 CAU — Certificat de Urbanism + avize</button>
+  <button class="fa-i" style="color:#fbbf24" onclick="(typeof showAvize==='function'?showAvize():ss?.('Matrice avize se inițializează'));_closeAllMenus()">⚖️ Matrice avize necesare</button>
+  <button class="fa-i" style="color:#fbbf24" onclick="(window.Plati&&Plati.openPanel?Plati.openPanel():ss?.('Plăți se inițializează'));_closeAllMenus()">💳 Plăți taxe urbanistice (CU/AC/PUZ)</button>
+  <button class="fa-i" style="color:#fbbf24" onclick="(window.Notificari&&Notificari.openPanel?Notificari.openPanel():ss?.('Notificări se inițializează'));_closeAllMenus()">🔔 Notificarea vecinilor afectați</button>
+  <button class="fa-i" style="color:#fbbf24" onclick="(window.Dosar&&Dosar.open?Dosar.open():ss?.('Dosar se inițializează'));_closeAllMenus()">📁 Dosar digital al imobilului</button>
 
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
@@ -1411,20 +1430,8 @@ document.addEventListener('click', function(){
     <button onclick="runExport();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#e2e8f0;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">📄 Raport Urbanistic Complet</button>
     <button onclick="infoDrawerOpen('raport_complet')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">② Proiectare Preliminară</div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateRelevee();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📐 Planșe & Proiect Preliminar PAC</button>
-    <button onclick="infoDrawerOpen('relevee')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateMemoriu();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🏗 Memoriu Tehnic Avize</button>
-    <button onclick="infoDrawerOpen('memoriu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="_lotExportPDF();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#c084fc;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🏘 Plan de Lotizare PDF</button>
-    <button onclick="infoDrawerOpen('lotizare')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">③ Obligatorii AC/CU</div>
+  <!-- ② Proiectare Preliminară MUTAT in "Flux de avizare" (proiectare pe parcela) — fara duplicate in Rapoarte -->
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">② Obligatorii AC/CU</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateSolarStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">☀ Studiu de Însorire</button>
     <button onclick="infoDrawerOpen('insorire')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#475569'">ⓘ</button>
@@ -6177,7 +6184,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260621a"></script>
     <script src="js/ux-launcher.js?v=20260624risk4"></script>
-    <script src="js/ux-sidebar.js?v=20260624topbar3"></script>
+    <script src="js/ux-sidebar.js?v=20260624principiu"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>
