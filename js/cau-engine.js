@@ -220,8 +220,96 @@
     daysLeft: daysLeft, feeBreakdown: feeBreakdown, canIssueAcord: canIssueAcord, channelFor: channelFor
   };
 
+  // ── DESEN REȚELE EDILITARE PE HARTĂ (subterane + supraterane) ─────────────
+  // Trasează liniile reale din OSM, colorate pe categorie, cu legendă.
+  var NET_STYLE = {
+    electric_it: { col: '#ef4444', w: 3, lbl: 'Electric ÎT 110kV (suprateran)' },
+    electric_mt: { col: '#f97316', w: 2.2, lbl: 'Electric MT 6–20kV' },
+    electric_jt: { col: '#fbbf24', w: 1.6, lbl: 'Electric JT 0,4kV (subteran)' },
+    gaz: { col: '#a78bfa', w: 2.4, lbl: 'Gaze (subteran)' },
+    apa: { col: '#38bdf8', w: 2.4, lbl: 'Apă/conductă (subteran)' },
+    pipeline: { col: '#c084fc', w: 2, lbl: 'Conductă (subteran)' },
+    rail: { col: '#94a3b8', w: 2, lbl: 'Cale ferată' },
+    water: { col: '#22d3ee', w: 2.4, lbl: 'Curs de apă' }
+  };
+  function classifyDraw(t) {
+    if (!t) return null;
+    if (t.power === 'line') return 'electric_it';
+    if (t.power === 'minor_line') return 'electric_mt';
+    if (t.power === 'cable') return 'electric_jt';
+    if (t.man_made === 'pipeline') return /gas/i.test(t.substance || t.type || '') ? 'gaz' : (/water/i.test(t.substance || '') ? 'apa' : 'pipeline');
+    if (t.railway) return 'rail';
+    if (t.waterway) return 'water';
+    return null;
+  }
+  function drawNetworks(map, centroid, radiusM) {
+    if (!map) return Promise.resolve(0);
+    radiusM = radiusM || 350;
+    var proxy = G._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    var lat = centroid[1], lon = centroid[0];
+    var q = '[out:json][timeout:25];(' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[power~"line|minor_line|cable"];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[man_made=pipeline];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[railway~"rail|light_rail|tram"];' +
+      'way(around:' + radiusM + ',' + lat + ',' + lon + ')[waterway~"river|stream|canal"];' +
+      ');out geom;';
+    return fetch(proxy + '/osm?q=' + encodeURIComponent(q))
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (j) {
+        var feats = [];
+        (j.elements || []).forEach(function (e) {
+          if (!e.geometry || e.geometry.length < 2) return;
+          var cat = classifyDraw(e.tags || {}); if (!cat) return;
+          feats.push({ type: 'Feature', properties: { cat: cat }, geometry: { type: 'LineString', coordinates: e.geometry.map(function (p) { return [p.lon, p.lat]; }) } });
+        });
+        var fc = { type: 'FeatureCollection', features: feats };
+        try { if (map.getSource('cau-net-src')) map.getSource('cau-net-src').setData(fc); else map.addSource('cau-net-src', { type: 'geojson', data: fc }); } catch (e) {}
+        var colorExpr = ['match', ['get', 'cat']];
+        var widthExpr = ['match', ['get', 'cat']];
+        Object.keys(NET_STYLE).forEach(function (k) { colorExpr.push(k, NET_STYLE[k].col); widthExpr.push(k, NET_STYLE[k].w); });
+        colorExpr.push('#999'); widthExpr.push(1.5);
+        try {
+          if (!map.getLayer('cau-net')) map.addLayer({ id: 'cau-net', type: 'line', source: 'cau-net-src', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': colorExpr, 'line-width': widthExpr, 'line-opacity': 0.9 } });
+        } catch (e) {}
+        _netLegend(feats);
+        return feats.length;
+      });
+  }
+  function _netLegend(feats) {
+    _netLegendClear();
+    var present = {}; feats.forEach(function (f) { present[f.properties.cat] = true; });
+    var el = document.createElement('div');
+    el.id = 'cau-net-legend';
+    el.style.cssText = 'position:fixed;bottom:90px;right:14px;z-index:8000;background:rgba(11,20,36,.92);color:#e6edf7;border:1px solid rgba(56,189,248,.3);border-radius:10px;padding:10px 12px;font-family:system-ui,sans-serif;font-size:11px;max-width:230px;box-shadow:0 6px 24px rgba(0,0,0,.4)';
+    var rows = Object.keys(NET_STYLE).filter(function (k) { return present[k]; }).map(function (k) {
+      return '<div style="display:flex;align-items:center;gap:7px;margin:3px 0"><span style="width:18px;height:3px;background:' + NET_STYLE[k].col + ';display:inline-block;border-radius:2px"></span>' + NET_STYLE[k].lbl + '</div>';
+    }).join('') || '<div style="opacity:.6">Nicio rețea în OSM pe această zonă.</div>';
+    el.innerHTML = '<div style="font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">🔌 Rețele edilitare (OSM)<span onclick="CAU.clearNetworks(window.map)" style="cursor:pointer;opacity:.6">×</span></div>' + rows +
+      '<div style="margin-top:7px;font-size:9px;opacity:.5;line-height:1.4">Sursă: OpenStreetMap (estimativ). NU înlocuiește planurile de coordonare ale deținătorilor de rețea.</div>';
+    document.body.appendChild(el);
+  }
+  function _netLegendClear() { var e = document.getElementById('cau-net-legend'); if (e) try { e.remove(); } catch (x) {} }
+  function clearNetworks(map) {
+    _netLegendClear();
+    if (!map) return;
+    try { if (map.getLayer('cau-net')) map.removeLayer('cau-net'); } catch (e) {}
+    try { if (map.getSource('cau-net-src')) map.removeSource('cau-net-src'); } catch (e) {}
+  }
+  // deschidere ca acțiune standalone din launcher (centru = parcelă selectată sau centrul hărții)
+  function showNetworksPanel() {
+    var map = G.map; if (!map) { if (G.ss) G.ss('Harta nu este pregătită.'); return; }
+    if (map.getLayer && map.getLayer('cau-net')) { clearNetworks(map); return; }
+    var ctr = null;
+    try { if (G.TCI && G.TCI.selectedParcelCentroid) ctr = G.TCI.selectedParcelCentroid; } catch (e) {}
+    if (!ctr) { var c = map.getCenter(); ctr = [c.lng, c.lat]; }
+    if (G.ss) G.ss('🔌 Caut rețelele edilitare (OSM)…');
+    drawNetworks(map, ctr, 400).then(function (n) { if (G.ss) G.ss(n ? ('🔌 ' + n + ' tronsoane de rețea afișate.') : 'Nicio rețea găsită în OSM pe această zonă.'); })
+      .catch(function (e) { if (G.ss) G.ss('Eroare rețele: ' + e.message); });
+  }
+
   G.CAU = {
     computeNotices: computeNotices, fetchNetworks: fetchNetworks,
+    drawNetworks: drawNetworks, clearNetworks: clearNetworks, showNetworksPanel: showNetworksPanel, NET_STYLE: NET_STYLE,
     registry: registry, PROTECTION: PROTECTION, USE_LABELS: USE_LABELS, tacitCheck: tacitCheck, daysLeft: daysLeft
   };
   console.log('[CAU] motor Acorduri Unice încărcat (window.CAU)');
