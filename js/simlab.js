@@ -197,6 +197,7 @@
     uhi: { ico: '🌡', title: 'UHI — profil termic', desc: 'Estimează răcirea prin soluții verzi pe o secțiune urbană', builtin: true },
     river: { ico: '🌊', title: 'Front de apă', desc: 'Proiectează amenajarea malurilor + simulează viitura Q100', builtin: true },
     capacity: { ico: '📊', title: 'Impact capacitate', desc: 'Ce se întâmplă cu infrastructura dacă mai aprobi X apartamente', builtin: true },
+    health: { ico: '🩺', title: 'Scor sănătate urbană', desc: 'Scorecard agregat de cartier (radar 6 dimensiuni) — sinteza tuturor indicilor', builtin: true },
     park: { ico: '🌳', title: 'Parc 3D', desc: 'Vizualizează un parc în 3D înainte de proiect', route: function () { closeAll(); G.Loisir && G.Loisir.openPanel && G.Loisir.openPanel(); } },
     feasibility: { ico: '💰', title: 'Fezabilitate', desc: 'Estimează rentabilitatea unui proiect imobiliar', route: function () { closeAll(); G.Feaz && G.Feaz.openPanel && G.Feaz.openPanel(); } },
     superbloc: { ico: '🟧', title: 'Superbloc (Barcelona)', desc: 'Spațiu public recâștigat + înainte/după pe hartă', route: function () { closeAll(); G.Superbloc && G.Superbloc.openPanel && G.Superbloc.openPanel(); } },
@@ -319,6 +320,7 @@
     if (sim === 'tod') return openModel('tod');
     if (sim === 'corridor') return openModel('corridor');
     if (sim === 'sponge') return openModel('sponge');
+    if (sim === 'health') return openModel('health');
     if (SIMS[sim] && SIMS[sim].route) return SIMS[sim].route();
   }
 
@@ -390,8 +392,54 @@
         return { stats: [{ v: volum.toLocaleString('ro-RO') + ' m³', l: 'apă reținută / ploaie', c: '#22d3ee' }, { v: '−' + reducere_inund + '%', l: 'risc inundații locale', c: '#34d399' }, { v: '−' + racire + '°C', l: 'răcire locală (UHI)', c: '#60a5fa' }],
           results: { 'Apă reținută': volum.toLocaleString('ro-RO') + ' m³/ploaie', 'Reducere inundații': '−' + reducere_inund + '%', 'Răcire': '−' + racire + '°C', 'Permeabil': p.permeabil_target + '%' }, svg: null };
       }
+    },
+    health: {
+      title: '🩺 Scor sănătate urbană de cartier', accent: '#7C3AED',
+      params: [
+        { k: 'prox', label: 'Proximitate (15-min / Walk Score)', val: 60, min: 0, max: 100, step: 5 },
+        { k: 'verde', label: 'Verde & canopy (3-30-300 / GVI)', val: 45, min: 0, max: 100, step: 5 },
+        { k: 'public', label: 'Spațiu public (SDG 11.7)', val: 50, min: 0, max: 100, step: 5 },
+        { k: 'mob', label: 'Mobilitate & transport (TOD)', val: 55, min: 0, max: 100, step: 5 },
+        { k: 'clima', label: 'Reziliență climatică (Sponge / UHI)', val: 40, min: 0, max: 100, step: 5 },
+        { k: 'retea', label: 'Conectivitate rețea (Space Syntax)', val: 65, min: 0, max: 100, step: 5 }
+      ],
+      compute: function (p) {
+        var dims = [['Proximit.', p.prox, 'Proximitate'], ['Verde', p.verde, 'Verde & canopy'], ['Sp. public', p.public, 'Spațiu public'], ['Mobilit.', p.mob, 'Mobilitate'], ['Climă', p.clima, 'Reziliență climatică'], ['Rețea', p.retea, 'Conectivitate rețea']];
+        var vals = dims.map(function (d) { return d[1]; });
+        var agg = Math.round(vals.reduce(function (a, b) { return a + b; }, 0) / vals.length);
+        var cat = agg >= 80 ? 'Excelent' : agg >= 65 ? 'Bun' : agg >= 50 ? 'Acceptabil' : agg >= 35 ? 'Fragil' : 'Critic';
+        var catC = agg >= 65 ? '#34d399' : agg >= 50 ? '#fbbf24' : '#f87171';
+        var minV = Math.min.apply(null, vals); var minName = dims[vals.indexOf(minV)][2];
+        var sub = vals.filter(function (v) { return v < 50; }).length;
+        var rec = 'Prioritate: ' + minName + ' (' + minV + '/100)';
+        var stats = [
+          { v: agg + '/100', l: 'Scor sănătate urbană', c: catC },
+          { v: cat, l: 'Categorie', c: catC },
+          { v: minName, l: 'Cea mai slabă dimensiune', c: '#f87171' },
+          { v: sub, l: 'dimensiuni sub 50', c: sub ? '#fbbf24' : '#34d399' }
+        ];
+        var results = { 'Scor sănătate urbană': agg + '/100', 'Categorie': cat, 'Prioritate': minName + ' (' + minV + '/100)' };
+        dims.forEach(function (d) { results[d[2]] = d[1] + '/100'; });
+        return { stats: stats, results: results, svg: radarChart(dims, catC, rec) };
+      }
     }
   };
+  // radar 6 dimensiuni pentru scorul agregat de sănătate urbană
+  function radarChart(dims, color, caption) {
+    var cx = 100, cy = 66, R = 46, n = dims.length;
+    function pt(i, rad) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]; }
+    var rings = '';
+    [0.25, 0.5, 0.75, 1].forEach(function (f) { var pts = dims.map(function (_, i) { var q = pt(i, R * f); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' '); rings += '<polygon points="' + pts + '" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="0.5"/>'; });
+    var axes = '', labels = '';
+    dims.forEach(function (d, i) {
+      var e = pt(i, R); axes += '<line x1="' + cx + '" y1="' + cy + '" x2="' + e[0].toFixed(1) + '" y2="' + e[1].toFixed(1) + '" stroke="rgba(255,255,255,.12)" stroke-width="0.4"/>';
+      var l = pt(i, R + 11); var anc = l[0] < cx - 4 ? 'end' : l[0] > cx + 4 ? 'start' : 'middle';
+      labels += '<text x="' + l[0].toFixed(1) + '" y="' + (l[1] + 2).toFixed(1) + '" text-anchor="' + anc + '" fill="#94a3b8" font-size="6">' + d[0] + ' ' + d[1] + '</text>';
+    });
+    var dpts = dims.map(function (d, i) { var q = pt(i, R * Math.max(0, Math.min(100, d[1])) / 100); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+    var rgb = color === '#34d399' ? '52,211,153' : color === '#fbbf24' ? '251,191,36' : '248,113,113';
+    return '<svg viewBox="0 0 200 145" style="width:100%;max-width:320px">' + rings + axes + '<polygon points="' + dpts + '" fill="rgba(' + rgb + ',.30)" stroke="' + color + '" stroke-width="1.5"/>' + labels + '<text x="100" y="141" text-anchor="middle" fill="#cbd5e1" font-size="6.5">' + caption + '</text></svg>';
+  }
   function izochrone(r) { var R = 60; return '<svg viewBox="0 0 200 130" style="width:100%;max-width:260px"><circle cx="100" cy="65" r="' + R + '" fill="rgba(251,146,60,.18)" stroke="#fb923c" stroke-width="2" stroke-dasharray="4 3"/><circle cx="100" cy="65" r="6" fill="#fb923c"/><text x="100" y="68" text-anchor="middle" fill="#fff" font-size="9">' + r + 'm</text><text x="100" y="122" text-anchor="middle" fill="#94a3b8" font-size="9">izocronă mers pe jos</text></svg>'; }
   function concentric(r) { return '<svg viewBox="0 0 200 130" style="width:100%;max-width:260px"><circle cx="100" cy="62" r="55" fill="rgba(14,165,233,.10)" stroke="#0ea5e9" stroke-width="1.5"/><circle cx="100" cy="62" r="36" fill="rgba(14,165,233,.18)" stroke="#0ea5e9" stroke-width="1.5"/><circle cx="100" cy="62" r="18" fill="rgba(14,165,233,.3)"/><rect x="94" y="56" width="12" height="12" fill="#0ea5e9"/><text x="100" y="122" text-anchor="middle" fill="#94a3b8" font-size="9">densitate descrescătoare de la stație (' + r + 'm)</text></svg>'; }
 
