@@ -187,7 +187,10 @@
     { id: 'corridor', label: 'Coridor Mixt', icon: '🏪', color: '#1D9E75' },
     { id: 'sponge', label: 'Sponge City', icon: '💧', color: '#378ADD' },
     { id: 'r330300', label: '3-30-300', icon: '🌳', color: '#2E9E5B' },
-    { id: 'sdg117', label: 'SDG 11.7', icon: '🏛️', color: '#C2410C' }
+    { id: 'sdg117', label: 'SDG 11.7', icon: '🏛️', color: '#C2410C' },
+    { id: 'walkscore', label: 'Walk Score', icon: '🚶', color: '#0E7C5A' },
+    { id: 'gvi', label: 'Green View', icon: '🌿', color: '#3FA34D' },
+    { id: 'spacesyntax', label: 'Space Syntax', icon: '🔗', color: '#7C3AED' }
   ];
   function renderModelSelector(containerId, activeId) {
     var el = document.getElementById(containerId); if (!el) return;

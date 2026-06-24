@@ -290,14 +290,159 @@
     return r;
   }
 
+  // ── WALK SCORE (walkability, proximitate amenități + conectivitate) ──
+  function calculateWalkScore(p) {
+    var amenitati = p.amenitati, dist_medie_m = p.dist_medie_m, intersectii_km2 = p.intersectii_km2, pop_zona = p.pop_zona;
+    // distance-decay: amenități în 5–15 min de mers; penalizare distanță + bonus conectivitate
+    var ampts = Math.min(60, amenitati * 3.2);
+    var distpts = Math.max(0, 25 * (1 - Math.min(1, dist_medie_m / 800)));
+    var connpts = Math.min(15, intersectii_km2 / 10);
+    var scor = Math.max(0, Math.min(100, Math.round(ampts + distpts + connpts)));
+    var categorie = scor >= 90 ? 'Paradisul pietonului' : scor >= 70 ? 'Foarte pietonal' : scor >= 50 ? 'Parțial pietonal' : scor >= 25 ? 'Dependent de auto' : 'Total dependent de auto';
+    var auto_redus = Math.round(Math.min(30, (scor - 40) * 0.4));
+    if (auto_redus < 0) auto_redus = 0;
+    var r = CR('walkscore', 'Walk Score', p);
+    r.metrics = [
+      { id: 'scor', label: 'Walk Score', value: scor, unit: '/100', direction: 'positive' },
+      { id: 'cat', label: categorie, value: scor, unit: '', direction: 'neutral' },
+      { id: 'amen', label: 'Amenități accesibile pe jos', value: amenitati, unit: 'buc', direction: 'positive' },
+      { id: 'inter', label: 'Densitate intersecții', value: intersectii_km2, unit: '/km²', direction: 'positive' },
+      { id: 'dist', label: 'Distanță medie la amenități', value: dist_medie_m, unit: 'm', direction: 'negative' },
+      { id: 'auto', label: 'Potențial reducere auto', value: -auto_redus, unit: '%', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-walk', type: 'circle', beforePaint: { 'circle-radius': 6, 'circle-color': '#888780', 'circle-opacity': 0.25 }, afterPaint: { 'circle-radius': 28, 'circle-color': '#0E7C5A', 'circle-opacity': 0.5 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Walkability (Walk Score) — creșterea pietonabilității cartierului',
+        description: 'Proiectul evaluează și îmbunătățește pietonabilitatea (Walk Score) unei zone din municipiul Iași cu aproximativ ' + roN(pop_zona) + ' de locuitori. Walk Score (metodologie consacrată internațional) măsoară accesul pe jos la amenitățile cotidiene, ponderat cu distanța (distance-decay), densitatea intersecțiilor și lungimea cvartalelor. Scorul actual estimat este ' + scor + '/100 (' + categorie + '), pe baza a aproximativ ' + amenitati + ' amenități accesibile pe jos, o distanță medie de ' + dist_medie_m + ' m și ' + intersectii_km2 + ' intersecții/km². Intervențiile (densificarea serviciilor la parter, trasee pietonale continue, sporirea conectivității prin pasaje și treceri) pot ridica scorul și pot reduce deplasările auto scurte cu circa ' + auto_redus + '%. În SIDU este un indicator transversal de calitate a vieții, corelat cu modelul „15 minute" și cu PMUD (mobilitate activă).',
+        justification: 'Pietonabilitatea ridicată corelează cu sănătate publică mai bună, comerț local mai viu, valori imobiliare mai mari și emisii mai reduse. Walk Score este comparabil între orașe și ușor de monitorizat din date OSM.',
+        costEstimate: 'variabil (amenajări pietonale + activare parteruri); componenta publică modestă, impact ridicat',
+        timeline: 'Termen scurt (2026–2028): trasee pietonale + activare servicii de proximitate',
+        legalBasis: 'Legea 350/2001; HG 874/2019 — PMUD; norme accesibilitate pietonală',
+        indicators: ['Walk Score: ' + scor + '/100 (' + categorie + ')', 'Amenități pe jos: ' + amenitati, 'Densitate intersecții: ' + intersectii_km2 + '/km²', 'Reducere auto: −' + auto_redus + '%']
+      },
+      masterplanSection: {
+        interventionType: 'Creșterea pietonabilității (amenități de proximitate + conectivitate)',
+        affectedArea: 'cartier ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0: calcul Walk Score (OSM) + identificare deficite', 'Faza 1: trasee pietonale continue + treceri sigure', 'Faza 2: activare parteruri + amenități de proximitate', 'Faza 3: monitorizare scor'],
+        designPrinciples: ['Amenități la distanță de mers pe jos', 'Rețea densă de străzi și treceri', 'Cvartale scurte, fronturi active', 'Trasee sigure, umbrite, accesibile']
+      },
+      pmudSection: {
+        measureType: 'Promovarea mersului pe jos prin proximitate și conectivitate',
+        trafficImpact: 'Reducerea deplasărilor auto scurte cu ~' + auto_redus + '%',
+        modalShift: '+pietonal pe distanțe < 1 km',
+        infrastructureNeeded: ['Trotuare continue și late', 'Treceri de pietoni dese și sigure', 'Pasaje/scurtături pietonale', 'Iluminat și mobilier urban']
+      }
+    };
+    return r;
+  }
+
+  // ── GREEN VIEW INDEX (verde stradal vizibil, street-level) ──
+  function calculateGVI(p) {
+    var gvi_actual_pct = p.gvi_actual_pct, strazi_km = p.strazi_km, arbori_aliniament = p.arbori_aliniament, pop_zona = p.pop_zona;
+    var tinta = 25; // GVI „bun" ~ 25–30% (literatura street-level greenery)
+    var deficit = Math.max(0, tinta - gvi_actual_pct);
+    // ~1 arbore matur la 8 m de stradă pentru aliniament continuu pe ambele laturi
+    var arbori_tinta = Math.round(strazi_km * 1000 / 8 * 2);
+    var arbori_de_plantat = Math.max(0, arbori_tinta - arbori_aliniament);
+    var racire = Math.round(Math.min(2.5, gvi_actual_pct / tinta * 1.5) * 10) / 10;
+    var calitate = gvi_actual_pct >= 25 ? 'verde (excelent)' : gvi_actual_pct >= 15 ? 'moderat' : 'sărac în verde';
+    var r = CR('gvi', 'Green View Index', p);
+    r.metrics = [
+      { id: 'gvi', label: 'Green View Index actual', value: gvi_actual_pct, unit: '%', direction: 'positive' },
+      { id: 'cal', label: 'Calitate percepută: ' + calitate, value: gvi_actual_pct, unit: '', direction: 'neutral' },
+      { id: 'def', label: 'Deficit la țintă 25%', value: -Math.round(deficit), unit: 'pp', direction: 'positive' },
+      { id: 'plant', label: 'Arbori de aliniament de plantat', value: arbori_de_plantat, unit: 'buc', direction: 'neutral' },
+      { id: 'strazi', label: 'Lungime străzi tratate', value: strazi_km, unit: 'km', direction: 'neutral' },
+      { id: 'racire', label: 'Răcire/umbrire', value: -racire, unit: '°C', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-gvi', type: 'line', beforePaint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.55 }, afterPaint: { 'line-color': '#3FA34D', 'line-width': 9, 'line-opacity': 0.85 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Green View Index — verde stradal vizibil la nivelul ochiului',
+        description: 'Proiectul vizează Green View Index (GVI), indicator street-level care măsoară procentul de vegetație vizibilă din perspectiva pietonului (din imagini panoramice / vedere de stradă). GVI completează indicatorii „de sus" (canopy) cu percepția reală a verdelui la nivelul ochiului, corelată cu starea de bine, confortul termic și utilizarea spațiului public. Pe rețeaua analizată (' + strazi_km + ' km de stradă, ' + roN(pop_zona) + ' locuitori), GVI actual este de aproximativ ' + gvi_actual_pct + '% (' + calitate + '), față de un prag recomandat de ~25%. Acoperirea deficitului de ' + Math.round(deficit) + ' pp presupune plantarea a circa ' + roN(arbori_de_plantat) + ' de arbori de aliniament și verde vertical/pe fațade, cu o răcire estimată de ' + racire.toFixed(1) + '°C. În SIDU este un proiect de calitate a spațiului public și adaptare climatică, complementar regulii 3-30-300.',
+        justification: 'Verdele perceput la nivelul străzii influențează direct sănătatea mintală, confortul și mersul pe jos (studii GVI globale). Este măsurabil din street-view și permite prioritizarea plantărilor pe coridoarele cele mai „goale".',
+        costEstimate: (Math.round(arbori_de_plantat * 0.0006 * 10) / 10) + ' M€ – ' + (Math.round(arbori_de_plantat * 0.0012 * 10) / 10) + ' M€ (aliniamente + verde vertical)',
+        timeline: 'Termen scurt-mediu (2026–2031): plantări pe coridoarele cu GVI scăzut',
+        legalBasis: 'Legea 24/2007 (spații verzi); Legea 350/2001; OUG 195/2005',
+        indicators: ['GVI: ' + gvi_actual_pct + '% → țintă 25%', 'Arbori de aliniament: +' + roN(arbori_de_plantat), 'Străzi tratate: ' + strazi_km + ' km', 'Răcire: −' + racire.toFixed(1) + '°C']
+      },
+      masterplanSection: {
+        interventionType: 'Verde stradal (aliniamente + verde vertical/fațade)',
+        affectedArea: strazi_km + ' km străzi · ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0: calcul GVI pe rețea (street-view) + prioritizare coridoare', 'Faza 1: aliniamente pe coridoarele cu GVI < 10%', 'Faza 2: verde vertical + fațade verzi în zone dense', 'Faza 3: monitorizare GVI'],
+        designPrinciples: ['Aliniamente continue pe ambele laturi', 'Specii cu coronament generos, rezistente urban', 'Verde vertical unde nu încap arbori', 'Continuitate vizuală a verdelui pe coridor']
+      },
+      pmudSection: {
+        measureType: 'Verde de aliniament pe coridoarele de mobilitate activă',
+        trafficImpact: 'Neutru pe capacitate; umbrire și confort pe trasee',
+        modalShift: 'Indirect: trasee mai atractive pentru mers/bicicletă',
+        infrastructureNeeded: ['Spațiu de plantare pe profil', 'Sol/structură pentru rădăcini', 'Irigare', 'Coordonare cu rețelele edilitare']
+      }
+    };
+    return r;
+  }
+
+  // ── SPACE SYNTAX — Integrare (accesibilitate configurațională a rețelei) ──
+  function calculateSpaceSyntax(p) {
+    var segmente = p.segmente, conectivitate_medie = p.conectivitate_medie, lungime_retea_km = p.lungime_retea_km, intersectii = p.intersectii;
+    // proxy normalizat de integrare: conectivitate medie + densitate intersecții (0..1)
+    var dens = lungime_retea_km > 0 ? intersectii / lungime_retea_km : 0; // intersecții/km
+    var integrare = Math.max(0, Math.min(1, (conectivitate_medie / 6) * 0.6 + (dens / 25) * 0.4));
+    var integrare100 = Math.round(integrare * 1000) / 10;
+    var core_pct = Math.round(Math.min(100, integrare * 100 * 0.5 + 10)); // % „nucleu de integrare"
+    var miscare = Math.round(integrare * 100); // potențial de mișcare naturală pietonală
+    var calitate = integrare >= 0.66 ? 'rețea bine integrată' : integrare >= 0.4 ? 'integrare medie' : 'rețea fragmentată';
+    var r = CR('spacesyntax', 'Space Syntax — Integrare', p);
+    r.metrics = [
+      { id: 'integ', label: 'Integrare (normalizată)', value: integrare100, unit: '/100', direction: 'positive' },
+      { id: 'cal', label: calitate, value: integrare100, unit: '', direction: 'neutral' },
+      { id: 'core', label: 'Nucleu de integrare', value: core_pct, unit: '%', direction: 'positive' },
+      { id: 'misc', label: 'Potențial mișcare pietonală', value: miscare, unit: '/100', direction: 'positive' },
+      { id: 'conn', label: 'Conectivitate medie', value: conectivitate_medie, unit: 'racord', direction: 'positive' },
+      { id: 'dens', label: 'Densitate intersecții', value: Math.round(dens), unit: '/km', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-ss', type: 'line', beforePaint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.55 }, afterPaint: { 'line-color': '#7C3AED', 'line-width': 9, 'line-opacity': 0.85 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Space Syntax — integrarea configurațională a rețelei stradale (Hillier)',
+        description: 'Proiectul aplică principii de Space Syntax (Bill Hillier, UCL) pentru a evalua cât de „integrată" este rețeaua stradală — adică cât de accesibilă și ușor de parcurs este fiecare stradă în raport cu întregul oraș. Integrarea ridicată prezice mișcare naturală pietonală mai mare, vitalitate economică și siguranță („eyes on the street"). Pe rețeaua analizată (' + roN(segmente) + ' segmente, ' + lungime_retea_km + ' km, conectivitate medie ' + conectivitate_medie + '), indicele normalizat de integrare este ' + integrare100 + '/100 (' + calitate + '), cu un nucleu de integrare de circa ' + core_pct + '% și un potențial de mișcare pietonală de ' + miscare + '/100. Intervențiile (deschiderea de străzi/pasaje, eliminarea fundăturilor, conectarea ansamblurilor izolate) cresc integrarea și activează comerțul stradal. În SIDU fundamentează prioritizarea coridoarelor și amplasarea funcțiunilor; este un proxy orientativ — analiza completă necesită un model axial/segmental calibrat.',
+        justification: 'Configurarea rețelei (nu doar densitatea) determină unde apare mișcarea pietonală și viața urbană. Space Syntax oferă o bază obiectivă pentru a localiza centrele de activitate și a evita „insulele" izolate.',
+        costEstimate: 'analitic (studiu de rețea); intervențiile de conectare variază — pasaje, deschideri de stradă',
+        timeline: 'Termen mediu: studiu axial + intervenții de conectare pe etape',
+        legalBasis: 'Legea 350/2001 (PUG/PUZ); norme tehnice rețea stradală',
+        indicators: ['Integrare normalizată: ' + integrare100 + '/100', 'Nucleu de integrare: ' + core_pct + '%', 'Potențial mișcare: ' + miscare + '/100', 'Conectivitate medie: ' + conectivitate_medie]
+      },
+      masterplanSection: {
+        interventionType: 'Creșterea integrării rețelei (conectare, deschideri, eliminare fundături)',
+        affectedArea: lungime_retea_km + ' km rețea · ' + roN(segmente) + ' segmente',
+        phasing: ['Faza 0: model axial/segmental + hartă de integrare', 'Faza 1: conectarea ansamblurilor izolate', 'Faza 2: pasaje/deschideri pe nucleul de integrare', 'Faza 3: amplasarea funcțiunilor pe străzile integrate'],
+        designPrinciples: ['Rețea conectată, fără fundături inutile', 'Funcțiuni active pe străzile cel mai integrate', 'Continuitate și permeabilitate a țesutului', 'Evitarea „insulelor" rezidențiale izolate']
+      },
+      pmudSection: {
+        measureType: 'Optimizarea configurației rețelei pentru mișcare pietonală naturală',
+        trafficImpact: 'Redistribuie mișcarea spre străzile integrate; reduce ocolirile',
+        modalShift: '+pietonal pe coridoarele integrate',
+        infrastructureNeeded: ['Pasaje/legături pietonale', 'Deschideri de stradă unde e fezabil', 'Continuitate trotuare pe nucleul de integrare', 'Semnalistică de orientare']
+      }
+    };
+    return r;
+  }
+
   // ── geometrie reprezentativă pe hartă (cerc/linie centrat pe map center) ──
   function addModelToMap(mapInstance, center, modelId, sizeM) {
     if (!mapInstance || !center) return;
     var L = (G.MODEL_LAYERS && G.MODEL_LAYERS[modelId]) || null;
     var dLat = sizeM / 111000, dLng = sizeM / (111000 * Math.cos(center.lat * Math.PI / 180));
     var src, data, layer;
-    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117' }[modelId];
-    if (modelId === 'corridor') {
+    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss' }[modelId];
+    if (modelId === 'corridor' || modelId === 'gvi' || modelId === 'spacesyntax') {
       data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[center.lng - dLng * 0.5, center.lat], [center.lng + dLng * 0.5, center.lat]] }, properties: {} };
       layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.6 } };
     } else {
@@ -309,7 +454,7 @@
   }
   function removeModelFromMap(mapInstance) {
     if (!mapInstance) return;
-    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117'].forEach(function (id) {
+    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss'].forEach(function (id) {
       try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {}
       try { if (mapInstance.getSource(id + '-src')) mapInstance.removeSource(id + '-src'); } catch (e) {}
     });
@@ -322,7 +467,10 @@
     corridor: { calc: calculateCorridor, color: '#1D9E75', icon: '🏪', title: 'Coridor Mixt', size: function (p) { return p.lungime_m; }, fields: [{ k: 'lungime_m', l: 'Lungime coridor (m)', v: 1200 }, { k: 'fronturi_active_pct', l: '% fronturi active', v: 70 }, { k: 'latime_m', l: 'Lățime profil (m)', v: 26 }] },
     sponge: { calc: calculateSponge, color: '#378ADD', icon: '💧', title: 'Sponge City', size: function (p) { return Math.sqrt(p.suprafata_mp); }, fields: [{ k: 'suprafata_mp', l: 'Suprafață zonă (mp)', v: 50000 }, { k: 'impermeabil_actual_pct', l: '% impermeabil actual', v: 75 }, { k: 'tinta_permeabil_pct', l: '% țintă permeabil', v: 45 }] },
     r330300: { calc: calculate330300, color: '#2E9E5B', icon: '🌳', title: 'Regula 3-30-300', size: function (p) { return Math.max(150, p.dist_parc_m); }, fields: [{ k: 'canopy_pct', l: '% canopy actual', v: 18 }, { k: 'copaci_vizibili', l: 'Copaci vizibili (din locuință)', v: 2 }, { k: 'dist_parc_m', l: 'Distanță la parc (m)', v: 450 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
-    sdg117: { calc: calculateSDG117, color: '#C2410C', icon: '🏛️', title: 'SDG 11.7 — Spațiu public', size: function (p) { return 400; }, fields: [{ k: 'construit_ha', l: 'Suprafață construită (ha)', v: 120 }, { k: 'spatiu_public_ha', l: 'Spațiu public actual (ha)', v: 12 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 20000 }, { k: 'acces_400m_pct', l: '% pop. cu acces < 400m', v: 55 }] }
+    sdg117: { calc: calculateSDG117, color: '#C2410C', icon: '🏛️', title: 'SDG 11.7 — Spațiu public', size: function (p) { return 400; }, fields: [{ k: 'construit_ha', l: 'Suprafață construită (ha)', v: 120 }, { k: 'spatiu_public_ha', l: 'Spațiu public actual (ha)', v: 12 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 20000 }, { k: 'acces_400m_pct', l: '% pop. cu acces < 400m', v: 55 }] },
+    walkscore: { calc: calculateWalkScore, color: '#0E7C5A', icon: '🚶', title: 'Walk Score', size: function (p) { return Math.max(150, p.dist_medie_m); }, fields: [{ k: 'amenitati', l: 'Amenități pe jos (buc)', v: 14 }, { k: 'dist_medie_m', l: 'Distanță medie amenități (m)', v: 420 }, { k: 'intersectii_km2', l: 'Intersecții / km²', v: 90 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
+    gvi: { calc: calculateGVI, color: '#3FA34D', icon: '🌿', title: 'Green View Index', size: function (p) { return Math.max(200, p.strazi_km * 200); }, fields: [{ k: 'gvi_actual_pct', l: 'GVI actual (%)', v: 14 }, { k: 'strazi_km', l: 'Lungime străzi (km)', v: 8 }, { k: 'arbori_aliniament', l: 'Arbori aliniament (buc)', v: 600 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
+    spacesyntax: { calc: calculateSpaceSyntax, color: '#7C3AED', icon: '🔗', title: 'Space Syntax — Integrare', size: function (p) { return Math.max(200, p.lungime_retea_km * 100); }, fields: [{ k: 'segmente', l: 'Segmente rețea (buc)', v: 320 }, { k: 'conectivitate_medie', l: 'Conectivitate medie', v: 3.4 }, { k: 'lungime_retea_km', l: 'Lungime rețea (km)', v: 22 }, { k: 'intersectii', l: 'Intersecții (buc)', v: 280 }] }
   };
   var _params = {}, _ov = null, _curId = null;
   Object.keys(REG).forEach(function (id) { _params[id] = {}; REG[id].fields.forEach(function (f) { _params[id][f.k] = f.v; }); });
@@ -385,6 +533,7 @@
 
   G.calculate15Min = calculate15Min; G.calculateTOD = calculateTOD; G.calculateCorridor = calculateCorridor; G.calculateSponge = calculateSponge;
   G.calculate330300 = calculate330300; G.calculateSDG117 = calculateSDG117;
+  G.calculateWalkScore = calculateWalkScore; G.calculateGVI = calculateGVI; G.calculateSpaceSyntax = calculateSpaceSyntax;
   G.renderUrbanModelDialog = renderUrbanModelDialog; G.runUrbanModelCalc = runUrbanModelCalc; G.saveUrbanModelScenario = saveUrbanModelScenario;
   G._toggleUmExport = _toggleUmExport; G._umSetParam = _umSetParam; G.closeUrbanModelDialog = closeUrbanModelDialog;
 })(window);
