@@ -4899,7 +4899,7 @@ function aedis3DRemove(){
     if(map.getLayer('aedis-3d-layer')) map.removeLayer('aedis-3d-layer');
   }catch(e){}
   if(AEDIS3D.renderer){
-    AEDIS3D.renderer.dispose();
+    try{AEDIS3D.renderer.forceContextLoss&&AEDIS3D.renderer.forceContextLoss();}catch(e){} AEDIS3D.renderer.dispose();
     AEDIS3D.renderer = null;
   }
   AEDIS3D.active = false;
@@ -4993,7 +4993,7 @@ function aedisGenerateAll(){
   // Dezactivăm Three.js layer dacă era activ
   if(AEDIS3D.active){
     try{ map.removeLayer('aedis-3d-layer'); }catch(e){}
-    if(AEDIS3D.renderer){ AEDIS3D.renderer.dispose(); AEDIS3D.renderer=null; }
+    if(AEDIS3D.renderer){ try{AEDIS3D.renderer.forceContextLoss&&AEDIS3D.renderer.forceContextLoss();}catch(e){} AEDIS3D.renderer.dispose(); AEDIS3D.renderer=null; }
     AEDIS3D.active = false;
   }
   // DEMOLARE: curăță contextul de pe parcelă (ascundem din ctx-src)
@@ -6210,7 +6210,7 @@ function aedis3DGenerate(){
       if(map.getLayer('aedis-3d-layer')) map.removeLayer('aedis-3d-layer');
       AEDIS3D.active = false;
       if(AEDIS3D.renderer){
-        AEDIS3D.renderer.dispose();
+        try{AEDIS3D.renderer.forceContextLoss&&AEDIS3D.renderer.forceContextLoss();}catch(e){} AEDIS3D.renderer.dispose();
         AEDIS3D.renderer = null;
       }
     }catch(e){}

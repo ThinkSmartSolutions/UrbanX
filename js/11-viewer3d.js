@@ -552,7 +552,7 @@ function aedisOpen3DViewer(){
 function _v3dCleanup(){
   V3D._camInit = false; // resetare la inchidere — la redeschidere va repositiona camera corect
   if(V3D.af) cancelAnimationFrame(V3D.af);
-  if(V3D.r){ V3D.r.dispose(); V3D.r=null; }
+  if(V3D.r){ try{V3D.r.forceContextLoss&&V3D.r.forceContextLoss();}catch(e){} V3D.r.dispose(); V3D.r=null; }
   Object.values(V3D.texCache).forEach(t=>{ try{t.dispose();}catch(e){} });
   V3D.texCache={}; V3D.scene=null; V3D.cam=null; V3D.ctx=[]; V3D.aedis=[]; V3D.distShown=false;
   // Restaurăm topbar-ul
@@ -1323,6 +1323,7 @@ function _v3dCaptureSilent(ap){
       const topdown  =doCapture('day',     Math.PI/4,   0.18,         radDay);
       const nightAlt =doCapture('night',   -Math.PI/3,  Math.PI/3.5,  radNight);
 
+      try{ r.forceContextLoss && r.forceContextLoss(); }catch(e){}
       r.dispose();
       canvas.remove();
       resolve({day,night,golden,overcast,front,topdown,nightAlt});

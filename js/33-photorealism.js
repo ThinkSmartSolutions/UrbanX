@@ -864,7 +864,7 @@
     if (status) status.innerHTML =
       '<span style="color:#4ADE80;font-weight:800">✅ Render studio complet — 4096×4096px</span>';
 
-    r4k.dispose();
+    try{r4k.forceContextLoss&&r4k.forceContextLoss();}catch(e){} r4k.dispose();
     _ptProg(100, '✅ ' + OUT_W + '×' + OUT_H + 'px · PNG gata de descărcare');
   };
 

@@ -954,7 +954,7 @@
     }
     if(STATE.controls && STATE.controls.dispose){ STATE.controls.dispose(); }
     STATE.controls = null;
-    if(STATE.renderer){ STATE.renderer.dispose(); STATE.renderer = null; }
+    if(STATE.renderer){ try{STATE.renderer.forceContextLoss&&STATE.renderer.forceContextLoss();}catch(e){} STATE.renderer.dispose(); STATE.renderer = null; }
     if(STATE.overlay){ STATE.overlay.remove(); STATE.overlay = null; }
     STATE.canvas = null;
     STATE.dollhouseGroup = null;
@@ -1938,7 +1938,7 @@
     }
     if(STATE.controls && STATE.controls.dispose){ STATE.controls.dispose(); }
     STATE.controls = null;
-    if(STATE.renderer){ STATE.renderer.dispose(); STATE.renderer = null; }
+    if(STATE.renderer){ try{STATE.renderer.forceContextLoss&&STATE.renderer.forceContextLoss();}catch(e){} STATE.renderer.dispose(); STATE.renderer = null; }
     if(STATE.overlay){ STATE.overlay.remove(); STATE.overlay = null; }
     STATE.canvas = null;
     STATE.floorGroups = [];

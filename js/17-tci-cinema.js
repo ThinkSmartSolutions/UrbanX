@@ -4504,7 +4504,7 @@ out geom qt;`;
       if(anim)this._map?.triggerRepaint();
     },
 
-    onRemove(){try{this._renderer?.dispose();}catch(e){}try{this._overlay?.remove();}catch(e){}this._meshes=[];this._shadows=[];this._ready=false;},
+    onRemove(){try{this._renderer&&this._renderer.forceContextLoss&&this._renderer.forceContextLoss();}catch(e){}try{this._renderer?.dispose();}catch(e){}try{this._overlay?.remove();}catch(e){}this._meshes=[];this._shadows=[];this._ready=false;},
 
     // ── Setează originea orașului ─────────────────────────────────────
     setOrigin(cx, cy) {
