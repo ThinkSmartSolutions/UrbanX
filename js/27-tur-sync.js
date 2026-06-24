@@ -576,6 +576,10 @@
     if (_wKeys['a'] || _wKeys['arrowleft'])  dir.x -= spd;
     if (_wKeys['d'] || _wKeys['arrowright']) dir.x += spd;
     if (dir.length() > 0) { dir.applyEuler(new THREE.Euler(0, _wYaw, 0)); cam.position.add(dir); }
+    // orientare camera dupa yaw/pitch (mouse look)
+    cam.rotation.order = 'YXZ'; cam.rotation.y = _wYaw; cam.rotation.x = _wPitch;
+    // RENDER pe fiecare frame — in walk OrbitControls e dezactivat, altfel ecranul e inghetat
+    try { if (state.renderer && state.scene) state.renderer.render(state.scene, cam); } catch (e) {}
     _wRaf = requestAnimationFrame(_runWalk);
   }
 

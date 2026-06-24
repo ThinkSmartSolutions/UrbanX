@@ -570,8 +570,8 @@
       }
       ctx.putImageData(imageData, 0, 0);
 
-      // Cleanup (dispose numai renderer-ul propriu)
-      if (ownRenderer) renderer.dispose();
+      // Cleanup (dispose numai renderer-ul propriu) — elibereaza si contextul WebGL
+      if (ownRenderer) { try { renderer.forceContextLoss && renderer.forceContextLoss(); } catch (e) {} renderer.dispose(); }
       cubeRT.dispose();
       equirectTarget.dispose();
       equirectMat.dispose();
