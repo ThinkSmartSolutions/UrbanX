@@ -235,6 +235,9 @@
     park: { ico: '🌳', title: 'Parc 3D', desc: 'Vizualizează un parc în 3D înainte de proiect', route: function () { closeAll(); G.Loisir && G.Loisir.openPanel && G.Loisir.openPanel(); } },
     feasibility: { ico: '💰', title: 'Fezabilitate', desc: 'Estimează rentabilitatea unui proiect imobiliar', route: function () { closeAll(); G.Feaz && G.Feaz.openPanel && G.Feaz.openPanel(); } },
     superbloc: { ico: '🟧', title: 'Superbloc (Barcelona)', desc: 'Spațiu public recâștigat + înainte/după pe hartă', route: function () { closeAll(); G.Superbloc && G.Superbloc.openPanel && G.Superbloc.openPanel(); } },
+    seismic: { ico: '🌐', title: 'Cutremur (mag. 5-8)', desc: 'Scenariu Vrancea: intensitate EMS-98 + PGA + avarieri — desenat pe hartă', route: function () { closeAll(); G.RiskSeismic && G.RiskSeismic.openPanel && G.RiskSeismic.openPanel(); } },
+    flood: { ico: '🌊', title: 'Inundație pluvială', desc: 'Băltire la ploaie extremă pe relief real (SCS-CN) — desenat pe hartă', route: function () { closeAll(); G.RiskFlood && G.RiskFlood.openPanel && G.RiskFlood.openPanel(); } },
+    ala: { ico: '🛡', title: 'Adăposturi ALA', desc: 'Inventar candidați protecție civilă (NP-073) — pe hartă', route: function () { closeAll(); G.RiskShelters && G.RiskShelters.toggle && G.RiskShelters.toggle(); } },
     city15: { ico: '🚶', title: 'Oraș 15 minute', desc: 'Acces la servicii esențiale într-o izocronă de mers pe jos', builtin: true },
     tod: { ico: '🚉', title: 'TOD — dezvoltare lângă transport', desc: 'Densitate țintă în jurul unei stații + reducere auto', builtin: true },
     corridor: { ico: '🏙', title: 'Coridor mixt (Mixed-Use)', desc: 'Locuințe + locuri de muncă + venit fiscal pe o axă', builtin: true },
@@ -277,6 +280,10 @@
 
   function openDashboard() {
     var body = shell('<div style="font-weight:800;font-size:16px">🧪 UrbanX SimLab — Explorare & Simulare Pre-Proiectare</div><div style="font-size:11px;color:#94a3b8">Manipulează datele, vizualizează live, decide informat · Legea 350/2001 Art. 5</div>');
+    // Raport unificat pe TOTI indicatorii (PDF: definitie+formula+sursa+metrici+harta)
+    var rep = el('button', { style: 'width:100%;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.4);color:#e9d08a;border-radius:10px;padding:11px;cursor:pointer;font-size:12.5px;font-weight:700;margin-bottom:10px' }, '📄 Raport complet — toți indicatorii (PDF: definiție · formulă · sursă · hartă)');
+    rep.onclick = function () { if (G.UrbanIndicesReport && G.UrbanIndicesReport.generate) G.UrbanIndicesReport.generate(); else G.ss && G.ss('Raportul de indici se inițializează…'); };
+    body.appendChild(rep);
     body.appendChild(el('div', { style: ST.label }, 'Pornește un simulator'));
     var grid = el('div', { style: 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px' });
     Object.keys(SIMS).forEach(function (k) {
