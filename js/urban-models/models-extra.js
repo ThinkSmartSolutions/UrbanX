@@ -690,4 +690,7 @@
   G.calculateNoise = calculateNoise; G.calculateLST = calculateLST; G.calculateMixUse = calculateMixUse;
   G.renderUrbanModelDialog = renderUrbanModelDialog; G.runUrbanModelCalc = runUrbanModelCalc; G.saveUrbanModelScenario = saveUrbanModelScenario;
   G._toggleUmExport = _toggleUmExport; G._umSetParam = _umSetParam; G.closeUrbanModelDialog = closeUrbanModelDialog;
+  // FIX critic: expune desenarea indicilor pe harta — fara asta, capturile din SIDU/MP/PMUD
+  // si raportul de indici sareau peste TOTI indicii (if(G.addModelToMap) era mereu fals) -> doar superbloc aparea.
+  G.addModelToMap = addModelToMap; G.removeModelFromMap = removeModelFromMap;
 })(window);
