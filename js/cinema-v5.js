@@ -1926,14 +1926,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       ctx.globalAlpha=1;
     }
     function cifra(val,lbl,clr){
+      var col=clr||'#ffffff';
       ctx.globalAlpha=sA*rE(0.13,0.20);
-      ctx.fillStyle=clr||'#ffffff';
       var s=_kin(String(val)), fd=FD;
       ctx.font='900 '+fd+'px "Space Grotesk",sans-serif';
       // auto-shrink ca sa incapa intreg (ex. interval "[362.803—601.405]") — fara taiere
       while(ctx.measureText(s).width>W*0.52 && fd>14){ fd-=2; ctx.font='900 '+fd+'px "Space Grotesk",sans-serif'; }
       ctx.textAlign='left'; ctx.letterSpacing='0';
-      ctx.fillText(s,W*0.04,H*0.882);
+      // IMERSIV: impact scale-in 1.16→1.0 (Apple Keynote), apoi respiratie subtila + glow auriu
+      var _ki=Math.min(1,Math.max(0,(t-0.13)/0.15));
+      var _scl=_ki<1 ? (1.16-0.16*eo(_ki)) : (1+0.012*Math.sin((t-0.28)*3.0));
+      var ax=W*0.04, ay=H*0.882;
+      ctx.save();
+      ctx.translate(ax,ay); ctx.scale(_scl,_scl);
+      ctx.shadowColor=col; ctx.shadowBlur=Math.min(W*0.018,22)*(0.4+0.6*_ki); ctx.shadowOffsetX=0; ctx.shadowOffsetY=0;
+      ctx.fillStyle=col;
+      ctx.fillText(s,0,0);
+      ctx.restore();
       ctx.globalAlpha=sA*rE(0.16,0.17)*0.72;
       ctx.fillStyle='rgba(148,163,184,0.78)';
       ctx.font='600 '+FL+'px "IBM Plex Mono",monospace';
