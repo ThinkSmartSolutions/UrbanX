@@ -639,7 +639,8 @@
       '<div style="font-size:11px;font-weight:700;color:' + cfg.color + ';letter-spacing:1px;margin-bottom:10px">PARAMETRI</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">' +
       cfg.fields.map(function (f) { return '<div><label style="font-size:11px;opacity:0.65;display:block;margin-bottom:4px">' + f.l + '</label><input type="number" value="' + _params[modelId][f.k] + '" oninput="_umSetParam(\'' + f.k + '\',this.value)" style="width:100%;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:inherit;font-size:13px;box-sizing:border-box"></div>'; }).join('') + '</div>' +
-      '<div style="display:flex;gap:10px;margin-bottom:16px"><button class="uxc-btn uxc-btn--primary" style="flex:1" onclick="runUrbanModelCalc()">▶ Calculează + desenează</button><button class="uxc-btn uxc-btn--sec" id="um-save-btn" style="display:none" onclick="saveUrbanModelScenario()">💾 Salvează</button></div>' +
+      '<div style="display:flex;gap:10px;margin-bottom:10px"><button class="uxc-btn uxc-btn--primary" style="flex:1" onclick="runUrbanModelCalc()">▶ Calculează + desenează</button><button class="uxc-btn uxc-btn--sec" id="um-save-btn" style="display:none" onclick="saveUrbanModelScenario()">💾 Salvează</button></div>' +
+      '<button style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid rgba(124,58,237,.45);background:rgba(124,58,237,.14);color:#c4b5fd;font-weight:700;font-size:12px;cursor:pointer" onclick="window.UrbanIndicesReport&&UrbanIndicesReport.generate(window.TCI&&window.TCI.cityKey)">📊 Raport cu TOȚI indicii (PDF) — definiții · formule · hărți</button>' +
       '<div id="um-slider" style="display:none;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px"></div>' +
       '<div id="um-metrics" style="display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"></div>' +
       '<div id="um-export-wrap" style="display:none"><button class="uxc-btn uxc-btn--sec" style="width:100%;color:#93c5fd;border-color:rgba(46,117,182,0.4);background:rgba(46,117,182,0.1)" onclick="_toggleUmExport()">▼ Export SIDU / Masterplan / PMUD</button><div id="um-export" style="display:none;margin-top:8px"></div></div>' +
@@ -654,6 +655,8 @@
     var mapInst = G.map, center = mapInst ? mapInst.getCenter() : null;
     if (center) { addModelToMap(mapInst, { lat: center.lat, lng: center.lng }, _curId, cfg.size(_params[_curId])); G.initMapTransitionListener(mapInst); }
     G.UrbanModelsStore.setTransition(100);
+    // fa dialogul translucid + lasa harta interactiva, ca sa se VADA indicele desenat
+    try { if (_ov) { _ov.style.background = 'transparent'; _ov.style.pointerEvents = 'none'; } var _bx = document.getElementById('um-dialog'); if (_bx) { _bx.style.pointerEvents = 'auto'; _bx.style.opacity = '0.97'; _bx.style.marginLeft = 'auto'; _bx.style.marginRight = '14px'; } } catch (e) {}
     var sl = document.getElementById('um-slider'); if (sl) { sl.style.display = 'block'; G.renderBeforeAfterSlider('um-slider', 100, false); }
     var me = document.getElementById('um-metrics');
     if (me) {
