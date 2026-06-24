@@ -25,6 +25,7 @@ G._ParcelFisa = {
 
     const today = new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'});
     const pdf   = new J({orientation:'portrait',unit:'mm',format:'a4'});
+    const _F = (window._registerROFont && window._registerROFont(pdf)) ? 'DejaVuRO' : 'helvetica'; // A5 diacritice
     const W=210, H=297;
 
     try {
@@ -42,9 +43,9 @@ G._ParcelFisa = {
     // ── Header ─────────────────────────────────────────────────────────
     pdf.setFillColor(8,15,35); pdf.rect(0,0,W,18,'F');
     pdf.setFillColor(212,175,55); pdf.rect(0,17.5,W,0.8,'F');
-    pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(11);
+    pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(11);
     pdf.text('FIȘĂ DE URBANISM', W/2, 7, {align:'center'});
-    pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
     pdf.text('Conf. Legii 350/2001 · HG 525/1996 RGU · Ord. 233/2016  ·  Document orientativ', W/2, 13.5, {align:'center'});
 
     let y = 23;
@@ -105,9 +106,9 @@ G._ParcelFisa = {
       pdf.setFillColor(av.obligatoriu?239:59, av.obligatoriu?68:130, av.obligatoriu?68:246);
       pdf.rect(14,y,2,8,'F');
       pdf.setTextColor(av.obligatoriu?239:59, av.obligatoriu?68:130, av.obligatoriu?68:246);
-      pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+      pdf.setFont(_F,'bold'); pdf.setFontSize(8);
       pdf.text(S2(av.emitent), 18, y+5.5);
-      pdf.setTextColor(180,195,220); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+      pdf.setTextColor(180,195,220); pdf.setFont(_F,'normal'); pdf.setFontSize(7.5);
       pdf.text(S2(av.motiv + ' · ' + av.termen), 65, y+5.5);
       y += 9;
     });
@@ -117,34 +118,34 @@ G._ParcelFisa = {
     if(y > H-35) { pdf.addPage(); y=15; }
     pdf.setFillColor(50,8,8); pdf.roundedRect(14,y,W-28,22,2,2,'F');
     pdf.setDrawColor(239,68,68); pdf.setLineWidth(0.8); pdf.roundedRect(14,y,W-28,22,2,2,'S');
-    pdf.setTextColor(239,68,68); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.setTextColor(239,68,68); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
     pdf.text('DOCUMENT ORIENTATIV — NU ÎNLOCUIEȘTE CERTIFICATUL DE URBANISM', W/2, y+6, {align:'center'});
-    pdf.setTextColor(200,170,170); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+    pdf.setTextColor(200,170,170); pdf.setFont(_F,'normal'); pdf.setFontSize(7);
     pdf.text(S2('Datele sunt estimative. Reglementările exacte se găsesc în PUG-ul local și în CU emis de Primărie.'), 18, y+12);
     pdf.text(S2('Obligatoriu: verificare urbanist atestat RUR · Legea 350/2001 + Legea 184/2001'), 18, y+18);
     y += 26;
 
     pdf.setFillColor(6,12,38); pdf.roundedRect(14,y,W-28,14,2,2,'F');
     pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.3); pdf.roundedRect(14,y,W-28,14,2,2,'S');
-    pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
     pdf.text('Generat la: ' + S2(today) + '  ·  UrbanX TSS·FG v2.0  ·  thinksmartsolutions.github.io/UrbanX', 18, y+6);
-    pdf.setTextColor(100,120,150); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+    pdf.setTextColor(100,120,150); pdf.setFont(_F,'normal'); pdf.setFontSize(7);
     pdf.text(S2('UAT: '+city.name+' · SIRUTA: '+(city.siruta||'—')+' · Parcelă: '+(p.nr_cadastral||'—')), 18, y+11);
   },
 
   _section(pdf,W,y,title) {
     pdf.setFillColor(12,24,56); pdf.rect(14,y,W-28,7,'F');
     pdf.setFillColor(212,175,55); pdf.rect(14,y,3,7,'F');
-    pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+    pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
     pdf.text(S2(title), 20, y+5);
   },
 
   _row(pdf,W,y,label,val,alt) {
     pdf.setFillColor(alt?10:8, alt?18:14, alt?44:36);
     pdf.rect(14,y,W-28,6.5,'F');
-    pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+    pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(7.5);
     pdf.text(S2(label), 17, y+4.5);
-    pdf.setTextColor(200,215,235); pdf.setFont('helvetica','bold'); pdf.setFontSize(7.5);
+    pdf.setTextColor(200,215,235); pdf.setFont(_F,'bold'); pdf.setFontSize(7.5);
     pdf.text(S2(val), 75, y+4.5);
   },
 };

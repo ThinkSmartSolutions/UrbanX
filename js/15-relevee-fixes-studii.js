@@ -151,12 +151,13 @@ function _registerStudii(){
       ss&&ss('⏳ Generez '+titlu+'…');
 
       const pdf = new J({orientation:'portrait',unit:'mm',format:'a4'});
+    const _F = (window._registerROFont && window._registerROFont(pdf)) ? 'DejaVuRO' : 'helvetica'; // A5 diacritice
       const W=210, H=297;
 
       // Header
       pdf.setFillColor(10,20,50); pdf.rect(0,0,W,40,'F');
       pdf.setFillColor(180,140,30); pdf.rect(0,39.5,W,0.8,'F');
-      pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.setFontSize(14);
+      pdf.setTextColor(255,255,255); pdf.setFont(_F,'bold'); pdf.setFontSize(14);
       pdf.text(titlu, 14, 16);
       pdf.setTextColor(180,140,30); pdf.setFontSize(8);
       pdf.text(subtitlu, 14, 24);
@@ -168,13 +169,13 @@ function _registerStudii(){
       // Date parcelă dacă disponibile
       if(P){
         pdf.setFillColor(15,25,55); pdf.rect(10,y,W-20,7,'F');
-        pdf.setTextColor(180,140,30); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+        pdf.setTextColor(180,140,30); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
         pdf.text('DATE PARCELĂ', 14, y+5); y+=10;
         [['Nr. cadastral','Nr. '+P.nrCad],['Suprafață',P.area+'m²'],
          ['UTR',P.utr],['Adresă',P.address||P.locality||'—']].forEach(([l,v])=>{
-          pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+          pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
           pdf.text(l,14,y);
-          pdf.setTextColor(226,232,240); pdf.setFont('helvetica','bold');
+          pdf.setTextColor(226,232,240); pdf.setFont(_F,'bold');
           pdf.text(String(v||'—'),80,y); y+=6;
         });
         y+=4;
@@ -183,11 +184,11 @@ function _registerStudii(){
       // Normative
       if(normative.length){
         pdf.setFillColor(15,25,55); pdf.rect(10,y,W-20,7,'F');
-        pdf.setTextColor(180,140,30); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+        pdf.setTextColor(180,140,30); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
         pdf.text('NORMATIVE APLICABILE', 14, y+5); y+=10;
         normative.forEach(n=>{
           pdf.setFillColor(20,30,60); pdf.rect(10,y-2,W-20,8,'F');
-          pdf.setTextColor(147,197,253); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+          pdf.setTextColor(147,197,253); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
           pdf.text('• '+n, 14, y+3); y+=9;
         });
         y+=4;
@@ -195,9 +196,9 @@ function _registerStudii(){
 
       // Descriere
       pdf.setFillColor(15,25,55); pdf.rect(10,y,W-20,7,'F');
-      pdf.setTextColor(180,140,30); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
+      pdf.setTextColor(180,140,30); pdf.setFont(_F,'bold'); pdf.setFontSize(8);
       pdf.text('DESCRIERE STUDIU', 14, y+5); y+=10;
-      pdf.setTextColor(200,210,225); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+      pdf.setTextColor(200,210,225); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
       const lines = pdf.splitTextToSize(descriere, W-28);
       pdf.text(lines, 14, y); y+=lines.length*5+8;
 
@@ -206,16 +207,16 @@ function _registerStudii(){
       pdf.roundedRect(10,y,W-20,25,3,3,'F');
       pdf.setDrawColor(245,158,11,80); pdf.setLineWidth(0.5);
       pdf.roundedRect(10,y,W-20,25,3,3,'S');
-      pdf.setTextColor(251,191,36); pdf.setFont('helvetica','bold'); pdf.setFontSize(11);
+      pdf.setTextColor(251,191,36); pdf.setFont(_F,'bold'); pdf.setFontSize(11);
       pdf.text('⚠ STUDIU ÎN DEZVOLTARE', W/2, y+10, {align:'center'});
-      pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+      pdf.setFont(_F,'normal'); pdf.setFontSize(8);
       pdf.setTextColor(200,185,140);
       pdf.text('Calculele complete vor fi disponibile într-o versiune viitoare.', W/2, y+18, {align:'center'});
       pdf.text('Datele de mai sus sunt orientative pe baza parametrilor introduși.', W/2, y+23, {align:'center'});
 
       // Footer
       pdf.setFillColor(8,15,32); pdf.rect(0,H-9,W,9,'F');
-      pdf.setTextColor(71,85,105); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
+      pdf.setTextColor(71,85,105); pdf.setFont(_F,'italic'); pdf.setFontSize(6.5);
       pdf.text('UrbanX TSS·FG · Document orientativ · '+new Date().toLocaleDateString('ro-RO'),W/2,H-3.5,{align:'center'});
 
       const fn = titlu.toLowerCase().replace(/[^a-z0-9]+/g,'_')+'_'+((P?.nrCad)||'urbanx')+'.pdf';

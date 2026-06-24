@@ -349,13 +349,14 @@ G._Portfolio = {
     if(!J) { window.ss?.('❌ jsPDF indisponibil'); return; }
 
     const pdf = new J({orientation:'portrait', unit:'mm', format:'a4'});
+    const _F = (window._registerROFont && window._registerROFont(pdf)) ? 'DejaVuRO' : 'helvetica'; // A5 diacritice
     const W=210, H=297;
     const today = new Date().toLocaleDateString('ro-RO',{year:'numeric',month:'long',day:'numeric'});
 
     // Cover
     pdf.setFillColor(4,10,28); pdf.rect(0,0,W,H,'F');
     pdf.setFillColor(212,175,55); pdf.rect(0,H*0.55,W,0.8,'F');
-    pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(24);
+    pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(24);
     pdf.text('PORTOFOLIU PROIECTE STRATEGICE', W/2, 80, {align:'center'});
     pdf.setTextColor(255,255,255); pdf.setFontSize(16);
     pdf.text((portfolio.city||'UAT').toUpperCase()+' · 2025–2055', W/2, 96, {align:'center'});
@@ -379,19 +380,19 @@ G._Portfolio = {
       const col = axaColors2[axa]||[148,163,184];
       pdf.setFillColor(4,10,28); pdf.rect(0,0,W,H,'F');
       pdf.setFillColor(...col); pdf.rect(0,0,W,16,'F');
-      pdf.setTextColor(4,10,28); pdf.setFont('helvetica','bold'); pdf.setFontSize(11);
+      pdf.setTextColor(4,10,28); pdf.setFont(_F,'bold'); pdf.setFontSize(11);
       pdf.text('AXA: '+axa, 14, 10.5);
       let y=22;
       prjs.forEach(p=>{
         if(y>H-40){pdf.addPage();pdf.setFillColor(4,10,28);pdf.rect(0,0,W,H,'F');y=14;}
         pdf.setFillColor(8,16,42); pdf.roundedRect(14,y,W-28,8,1,1,'F');
         pdf.setFillColor(...col); pdf.rect(14,y,3,8,'F');
-        pdf.setTextColor(...col); pdf.setFont('helvetica','bold'); pdf.setFontSize(8.5);
+        pdf.setTextColor(...col); pdf.setFont(_F,'bold'); pdf.setFontSize(8.5);
         pdf.text(p.id+' — '+p.titlu.slice(0,60), 20,y+5.5);
-        pdf.setTextColor(200,215,235); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+        pdf.setTextColor(200,215,235); pdf.setFont(_F,'bold'); pdf.setFontSize(9);
         pdf.text(p.cost_mil_eur+' mil. €', W-16,y+5.5,{align:'right'});
         y+=10;
-        pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
+        pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(7.5);
         const desc = pdf.splitTextToSize(p.descriere, W-30).slice(0,3);
         desc.forEach((l,i)=>{ if(window._jPdfLine && desc.length>1) window._jPdfLine(pdf,l,17,y+i*4,W-30,i===desc.length-1); else pdf.text(l,17,y+i*4); });
         y+=desc.length*4+2;
@@ -422,10 +423,10 @@ G._Portfolio = {
     pdf.addPage();
     pdf.setFillColor(4,10,28); pdf.rect(0,0,W,H,'F');
     pdf.setFillColor(212,175,55); pdf.rect(0,0,W,16,'F');
-    pdf.setTextColor(4,10,28); pdf.setFont('helvetica','bold'); pdf.setFontSize(11);
+    pdf.setTextColor(4,10,28); pdf.setFont(_F,'bold'); pdf.setFontSize(11);
     pdf.text('REZUMAT FINANCIAR + SURSE FINANȚARE', 14, 10.5);
     let y2=24;
-    pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+    pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
     [
       ['Total portofoliu', portfolio.total_mil_eur+' mil. EUR',''],
       ['din care Fonduri UE', portfolio.total_fedr_mil_eur+' mil. EUR','(~'+Math.round(portfolio.total_fedr_mil_eur/portfolio.total_mil_eur*100)+'%)'],
@@ -434,16 +435,16 @@ G._Portfolio = {
       ['Investiție per locuitor', N(portfolio.per_cap_eur)+' EUR/loc.',''],
     ].forEach(([l,v,n])=>{
       pdf.setFillColor(8,16,42); pdf.rect(14,y2,W-28,8,'F');
-      pdf.setTextColor(148,163,184); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
+      pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
       pdf.text(l,17,y2+5.5);
-      pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(9);
+      pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(9);
       pdf.text(v,W-16,y2+5.5,{align:'right'});
-      pdf.setTextColor(100,120,150); pdf.setFont('helvetica','normal'); pdf.setFontSize(7);
+      pdf.setTextColor(100,120,150); pdf.setFont(_F,'normal'); pdf.setFontSize(7);
       if(n) pdf.text(n, W-16,y2+9,{align:'right'});
       y2+=11;
     });
     y2+=6;
-    pdf.setTextColor(50,70,110); pdf.setFont('helvetica','italic'); pdf.setFontSize(7.5);
+    pdf.setTextColor(50,70,110); pdf.setFont(_F,'italic'); pdf.setFontSize(7.5);
     pdf.text(portfolio.note, 14, y2, {maxWidth:W-28});
 
     const fname = 'portofoliu_'+( portfolio.city||'uat').toLowerCase().replace(/[^a-z0-9]/g,'_')+'_2025_2055.pdf';

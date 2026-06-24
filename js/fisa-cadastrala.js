@@ -131,7 +131,7 @@
       if (f.error) { alert(f.error); return; }
       var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!jsPDFns) { alert('jsPDF indisponibil'); return; }
       var pdf = new jsPDFns({ unit: 'mm', format: 'a4' });
-      if (G._registerROFont) G._registerROFont(pdf);
+      if (G._registerROFont && G._registerROFont(pdf)) pdf.setFont('DejaVuRO','normal'); // A5: diacritice
       var W = 210, H = 297, x = 16;
 
       // ── PAGINA 1: Plan de amplasament și delimitare ──
