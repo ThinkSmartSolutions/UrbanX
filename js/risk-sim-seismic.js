@@ -139,6 +139,7 @@
     var c = _curCenter(), j = _curJudet();
     var loc = c ? (c.lat.toFixed(3) + '°N, ' + c.lon.toFixed(3) + '°E') : '— deschideți pe un UAT —';
     box.innerHTML =
+      '<button onclick="RiskSeismic.close();if(window.SimLab&&SimLab.openDashboard)SimLab.openDashboard()" title="Înapoi la SimLab" style="position:absolute;top:12px;right:44px;background:rgba(212,175,55,.14);border:1px solid rgba(212,175,55,.35);color:#e9d08a;font-size:10px;font-weight:700;border-radius:7px;padding:4px 8px;cursor:pointer">← SimLab</button>' +
       '<button onclick="RiskSeismic.close()" style="position:absolute;top:12px;right:14px;background:none;border:0;color:#94a3b8;font-size:20px;cursor:pointer">×</button>' +
       '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">🌐</span>' +
       '<h3 style="margin:0;font-size:17px;font-weight:700">Simulare cutremur — scenariu Vrancea</h3></div>' +

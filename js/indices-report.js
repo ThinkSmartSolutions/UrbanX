@@ -103,6 +103,18 @@
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(30); pdf.text('RAPORT INDICI URBANI', W / 2, 88, { align: 'center' });
       pdf.setFontSize(15); pdf.setTextColor(180, 150, 240); pdf.text(D.S2(uat), W / 2, 102, { align: 'center' });
       pdf.setFontSize(9); pdf.setTextColor(150, 150, 175); pdf.text(D.S2(INDICI.length + ' indici · definitii · formule · metrici · capturi pe harta'), W / 2, 114, { align: 'center' });
+      // continut reprezentativ pe coperta — lista celor 12 indici (2 coloane)
+      pdf.setDrawColor(124, 58, 237); pdf.setLineWidth(0.3); pdf.line(ML, 128, W - ML, 128);
+      pdf.setFontSize(8); pdf.setTextColor(150, 140, 180); pdf.setFont('DejaVuRO', 'bold'); pdf.text('INDICI INCLUSI IN RAPORT', W / 2, 138, { align: 'center' });
+      pdf.setFontSize(9.5);
+      INDICI.forEach(function (m, i) {
+        var col = i < 6 ? 0 : 1, row = i % 6;
+        var x = col ? W / 2 + 4 : ML + 6, y = 150 + row * 13;
+        pdf.setTextColor(160, 120, 240); pdf.setFont('DejaVuRO', 'bold'); pdf.text((i + 1) + '.', x, y);
+        pdf.setTextColor(205, 205, 222); pdf.setFont('DejaVuRO', 'normal'); pdf.text(D.S2(m.t), x + 8, y, { maxWidth: W / 2 - ML - 16 });
+      });
+      pdf.setFontSize(8); pdf.setTextColor(130, 130, 160); pdf.setFont('DejaVuRO', 'normal');
+      pdf.text(D.S2('Fiecare indice: definitie · formula transparenta · sursa metodologica · metrici · diagrama · captura pe harta'), W / 2, 238, { align: 'center', maxWidth: W - 40 });
       pdf.setFontSize(8); pdf.setTextColor(120, 120, 150); pdf.text(D.S2('Generat de platforma UrbanX · ' + new Date().toLocaleDateString('ro-RO')), W / 2, 280, { align: 'center' });
       D.setSuppress(false);
 
@@ -128,6 +140,15 @@
             var v = (x.unit === '%' || x.unit === '°C') ? ((x.value > 0 ? '+' : '') + x.value + x.unit) : (x.value + (x.unit ? ' ' + x.unit : ''));
             return [x.label, v, x.direction === 'positive' ? 'favorabil' : x.direction === 'negative' ? 'de redus' : 'neutru'];
           }), [Math.round(CW * 0.52), Math.round(CW * 0.28), CW - Math.round(CW * 0.52) - Math.round(CW * 0.28)], { fs: 7.5, boldFirst: true });
+          // diagrama metrici (nu doar cifre)
+          try {
+            var nums = r.metrics.filter(function (x) { return typeof x.value === 'number' && isFinite(x.value) && x.value !== 0; }).slice(0, 6);
+            if (nums.length >= 2 && D.barChart) {
+              D.barChart(nums.map(function (x) {
+                return [x.label.slice(0, 16), Math.abs(x.value), x.direction === 'positive' ? [34, 197, 94] : x.direction === 'negative' ? [239, 68, 68] : [124, 58, 237]];
+              }), { title: 'Diagrama metrici — ' + m.t, h: 42, source: 'Valori orientative (parametri impliciti)' });
+            }
+          } catch (e) {}
         }
         if (shots[m.id]) {
           D.h2('Reprezentare pe harta UAT');

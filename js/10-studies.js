@@ -5350,6 +5350,8 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   cy=sec('12. CONCLUZII FINALE - SCENARIU DE SIGURANTA LA FOC',cy);cy+=2;
   cy=body('Prezentul Scenariu de Siguranta la Foc a fost elaborat cu caracter ORIENTATIV pentru amplasamentul cu nr. cadastral '+nrcad+', destinatia '+fnLabel+', UTR '+utr+', in '+S2(uat)+'. Constructia propusa (P+'+niv+'E, H='+aedisH.toFixed(1)+'m, SD~'+sdEst+'mp) se incadreaza in '+_grf+' cu clasa de risc la foc '+_riscFoc+'. Principalele masuri de siguranta la foc obligatorii sunt: '+(_needsHidrantiInt?'hidranti interiori, ':'')+(_needsDetectie?'instalatie DAI, ':'')+(_needsSprinklere?'sprinklere, ':'')+(_avizISU_SSF?'aviz ISU obligatoriu, ':'')+' cai de evacuare dimensionate pentru '+_pers+' persoane.',14,cy);cy+=4;
   cy=body('NOTA IMPORTANTA: Prezentul document are caracter STRICTLY ORIENTATIV si INFORMATIV. NU inlocuieste Scenariul de Siguranta la Foc elaborat de un proiectant autorizat la faza PT (Proiect Tehnic), conform MP 008/2000 si P118-2/2013. NU se poate folosi ca document oficial pentru obtinerea Avizului ISU sau a Autorizatiei de Construire.',14,cy);cy+=4;
+  // FIX: _needsPlatforma era definit in alta functie (scope) -> ReferenceError. Definire locala sigura.
+  var _needsPlatforma = (typeof _accesLung !== 'undefined') ? (_accesLung > 50) : false;
   cy=tblRow(['Concluzie sintetica','Valoare'],cy,true,[100,82]);
   [['Grad rezistenta la foc necesar',_grf],
    ['Clasa risc la foc',_riscFoc+' (densitate sarcina termica ~'+_sarcinaTermica+' MJ/mp)'],
