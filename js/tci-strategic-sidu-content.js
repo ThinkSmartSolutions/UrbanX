@@ -370,6 +370,8 @@
 
         // A3: insereaza plansele cu indici pe harta
         try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — indici si modele urbane pe harta UAT'); } catch (e) {}
+        // Incheiere eleganta: concluzii + limitari + disclaimer
+        try { if (window._DocMapCaptures && window._DocMapCaptures.docClosing) window._DocMapCaptures.docClosing(D, 'sidu', city.name); } catch (e) {}
 
         // TOC
         window._buildStratTOC && window._buildStratTOC(D, 1);

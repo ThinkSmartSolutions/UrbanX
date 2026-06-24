@@ -399,6 +399,8 @@
 
         // A3: planse cu indici pe harta
         try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — modele urbane si indici pe harta UAT'); } catch (e) {}
+        // Incheiere eleganta: concluzii + limitari + disclaimer (nu se termina brusc cu plansele)
+        try { if (window._DocMapCaptures && window._DocMapCaptures.docClosing) window._DocMapCaptures.docClosing(D, 'masterplan', city.name); } catch (e) {}
 
         // CUPRINS dupa coperta
         buildTOC(D, coverPages);

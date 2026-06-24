@@ -1610,7 +1610,8 @@ document.addEventListener('click', function(){
     <button class="ptab" data-t="indicatori" style="display:none">📊 Indicatori</button>
     <button class="ptab" data-t="proiect">🏗 Pre-Proiectare</button>
     <button class="ptab" data-t="multi">🔲 Multiparcele</button>
-    <button class="ptab" data-t="scen">📅 Scen.</button>
+    <!-- Scen. (Orizont de analiză) ascuns: nu produce vizual, doar alimentează predicțiile (induce în eroare) -->
+    <button class="ptab" data-t="scen" style="display:none">📅 Scen.</button>
     <button class="ptab" data-t="rapoarte" style="display:none">📋 Rapoarte</button>
     <!-- cap.16 flow: tab Hartă eliminat — harta conexiuni rapoarte e în meniul Rapoarte (openStudyMap) -->
     <button class="ptab" data-t="studymap" onclick="openStudyMap()" title="Hartă conexiuni rapoarte" style="display:none">🗺 Hartă</button>
@@ -2772,11 +2773,11 @@ setInterval(()=>{
   <script src="js/urbanx-resources.js?v=20260617"></script><!-- apa, seceta & economie circulara -->
   <script src="js/urbanx-rank.js?v=20260617h"></script><!-- nota/clasament UrbanX (+toate modulele) -->
   <script src="js/tci-risk-module.js?v=20260624A"></script>
-  <script src="js/tci-strategic-doc.js?v=20260624C"></script>
+  <script src="js/tci-strategic-doc.js?v=20260624D"></script>
   <script src="js/tci-strategic-masterplan-content.js?v=20260624B"></script>
-  <script src="js/tci-strategic-pmud-content.js?v=20260624E"></script>
-  <script src="js/tci-strategic-sidu-content.js?v=20260624E"></script>
-  <script src="js/doc-map-captures.js?v=20260624B"></script>
+  <script src="js/tci-strategic-pmud-content.js?v=20260624F"></script>
+  <script src="js/tci-strategic-sidu-content.js?v=20260624F"></script>
+  <script src="js/doc-map-captures.js?v=20260624C"></script>
   <script src="js/tci-masterplan-visual.js?v=20260620honest"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><!-- QR real scanabil (qrcode-generator, sincron) -->
   <script src="js/tci-masterplan-qr.js?v=20260624A"></script><!-- QR Code in PDF Masterplan — scanabil cu telefonul → deschide scenariul live -->

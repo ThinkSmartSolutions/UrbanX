@@ -46,6 +46,7 @@
         try { if (window._DocMapCaptures) _mapShots = await window._DocMapCaptures.capture(cityKey); } catch (e) {}
         G._StratPMUDContent.build(D, ctx);
         try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — indici de mobilitate si modele urbane pe harta UAT'); } catch (e) {}
+        try { if (window._DocMapCaptures && window._DocMapCaptures.docClosing) window._DocMapCaptures.docClosing(D, 'pmud', city.name); } catch (e) {}
         window._buildStratTOC(D, 1);
         const _af = window._asciiFile || ((s)=>String(s||''));
         const fn = ('PMUD_' + _af(city.name || cityKey) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');

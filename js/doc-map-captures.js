@@ -129,6 +129,25 @@
     } catch (e) { console.warn('[DocMapCaptures] renderPlates', e); }
   }
 
-  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates };
+  // ── Capitol de INCHIDERE — concluzii + limitari + disclaimer (documentul nu se termina brusc) ──
+  function docClosing(D, kind, cityName) {
+    if (!D || !D.chapter) return;
+    var L = { sidu: 'Strategia Integrată de Dezvoltare Urbană', masterplan: 'Masterplanul strategic', pmud: 'Planul de Mobilitate Urbană Durabilă' };
+    var docName = L[kind] || 'Documentul';
+    var uat = cityName || 'unitatea administrativ-teritorială';
+    try {
+      D.chapter('Concluzii, limitări și pași următori');
+      D.h2('Sinteză');
+      D.P(docName + ' pentru ' + uat + ' integrează diagnoza teritorială, indicatorii urbani calculați (POT/CUT, accesibilitate, spații verzi, mobilitate, risc seismic și la inundații, calitatea mediului) și proiecțiile de evoluție într-un cadru decizional coerent. Direcțiile strategice propuse au fost fundamentate pe date oficiale (INS, Eurostat, INFP, ANAR, Copernicus) și pe metodologii recunoscute, astfel încât prioritizarea investițiilor să fie trasabilă și justificabilă în fața finanțatorilor și a comunității.');
+      D.P('Implementarea coerentă a măsurilor propuse conduce la o evoluție pozitivă a indicatorilor-cheie pe orizontul de planificare, în timp ce scenariul inerțial (fără intervenție) este prezentat exclusiv ca avertisment. Corelarea cu celelalte documentații (PUG/RLU, ' + (kind === 'pmud' ? 'SIDU și Masterplan' : kind === 'sidu' ? 'Masterplan și PMUD' : 'SIDU și PMUD') + ') este obligatorie pentru ca prioritățile să producă efecte juridice și bugetare.');
+      D.h2('Limitări metodologice');
+      D.P('Valorile prezentate sunt estimări orientative, generate algoritmic pe baza datelor disponibile la momentul elaborării. Ele nu înlocuiesc studiile de specialitate avizate (microzonare seismică, studii hidrotehnice, studii de trafic calibrate, expertize tehnice individuale) și nici procedurile legale de avizare și aprobare. Indicatorii marcați „—" necesită completare din surse oficiale locale.');
+      D.callout('Pași următori recomandați', 'Validarea datelor cu sursele locale (primărie, ADR, operatori); completarea studiilor de specialitate pentru zonele critice; transpunerea priorităților în PUG/RLU și în programarea bugetară multianuală; consultarea publică a variantei finale înainte de aprobarea în Consiliul Local.');
+      D.P('Acest document constituie un instrument de fundamentare a deciziei urbanistice. Aplicat consecvent și actualizat periodic, el oferă administrației locale o bază solidă, transparentă și orientată spre rezultate pentru dezvoltarea sustenabilă a ' + uat + '.');
+      D.sourceBadges(['INS', 'Eurostat', 'INFP P100-1', 'ANAR PGRA', 'Copernicus', 'Legea 350/2001', 'Ghid MDLPA']);
+    } catch (e) { console.warn('[DocMapCaptures] docClosing', e); }
+  }
+
+  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing };
   console.log('[DocMapCaptures] modul capturi harta pentru documente incarcat');
 })(window);
