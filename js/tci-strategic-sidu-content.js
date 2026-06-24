@@ -424,18 +424,23 @@
       const _inDelta = sidu.pop > 0 ? (sidu.popInertial - sidu.pop) / sidu.pop * 100 : 0; // inertial (avertisment)
       const rows = [
         ['Populatie (2021):', N(pop) + ' loc.'],
-        ['Proiectie cu strategie:', N(sidu.pop55) + ' loc. (' + (_projDelta >= 0 ? '+' : '') + RN(_projDelta, 1) + '% — evolutie daca se implementeaza strategia)'],
-        ['Scenariu inertial (fara interventie):', N(sidu.popInertial) + ' loc. (' + (_inDelta >= 0 ? '+' : '') + RN(_inDelta, 1) + '% — avertisment)'],
-        ['Domenii integrate:', '8 domenii (detaliate in capitolul 5)'],
-        ['Nota UrbanX:', sidu.noteComp + '/100 (' + sidu.calific + ') · potential: ' + Math.min(100, sidu.noteComp + 18) + '/100 (2040)'],
+        ['Proiectie 2055 (cu strategie):', N(sidu.pop55) + ' loc. (' + (_projDelta >= 0 ? '+' : '') + RN(_projDelta, 1) + '%)'],
+        ['Scenariu inertial (avertisment):', N(sidu.popInertial) + ' loc. (' + (_inDelta >= 0 ? '+' : '') + RN(_inDelta, 1) + '%)'],
+        ['Domenii integrate:', '8 domenii (cap. 5)'],
+        ['Nota UrbanX:', sidu.noteComp + '/100 (' + sidu.calific + ') · potential ' + Math.min(100, sidu.noteComp + 18) + '/100 (2040)'],
         ['Investitie estimata 2026-2040:', N(sidu.invTot) + ' mil. EUR'],
-        ['Convergenta economica UE:', RN(sidu.convergUE, 1) + '% din media UE27 (' + N(sidu.pib) + ' EUR/cap vs ' + N(sidu.eu27) + ' EUR)'],
+        ['Convergenta economica UE:', RN(sidu.convergUE, 1) + '% din UE27 (' + N(sidu.pib) + ' vs ' + N(sidu.eu27) + ' EUR/cap)'],
       ];
+      const _valX = 92, _valMax = (W - 24) - _valX; // limita dreapta = W-24
       rows.forEach((r, i) => {
         pdf.setTextColor(160, 170, 185); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(8);
         pdf.text(S2(r[0]), 24, 120 + i * 10);
-        pdf.setTextColor(255, 255, 255); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9);
-        pdf.text(S2(String(r[1])), 100, 120 + i * 10);
+        // auto-fit valoare: scade fontul pana incape pe o linie in [_valX, W-24]
+        pdf.setTextColor(255, 255, 255); pdf.setFont('DejaVuRO', 'bold');
+        var _fs = 9, _txt = S2(String(r[1]));
+        pdf.setFontSize(_fs);
+        while (_fs > 6.4 && pdf.getTextWidth(_txt) > _valMax) { _fs -= 0.4; pdf.setFontSize(_fs); }
+        pdf.text(_txt, _valX, 120 + i * 10, { maxWidth: _valMax });
       });
 
       // Disclaimer
@@ -464,10 +469,11 @@
         pdf.text(S2(s), bx + 4, 207); bx += widths[i] + 3;
       });
 
-      // Footer
+      // Footer — centrat in zona LIBERA din stanga QR-ului (QR ocupa x∈[W-38, W-14])
+      var _ftCx = (W - 42) / 2, _ftMax = W - 50;
       pdf.setTextColor(120, 140, 165); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(7);
-      pdf.text(S2('Document strategic ORIENTATIV generat de platforma UrbanX. Nu inlocuieste o SIDU avizata conform ghidului POR/MDLPA.'), W / 2, H - 18, { align: 'center', maxWidth: W - 30 });
-      pdf.text(S2('Datele marcate "—" necesita completare din surse oficiale locale. · Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), W / 2, H - 10, { align: 'center' });
+      pdf.text(S2('Document strategic ORIENTATIV generat de platforma UrbanX. Nu inlocuieste o SIDU avizata conform ghidului POR/MDLPA.'), _ftCx, H - 18, { align: 'center', maxWidth: _ftMax });
+      pdf.text(S2('Datele marcate "—" necesita completare din surse oficiale locale. · Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), _ftCx, H - 10, { align: 'center', maxWidth: _ftMax });
 
       // QR deep-link
       try {

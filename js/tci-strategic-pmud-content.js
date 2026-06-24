@@ -85,9 +85,10 @@
       const srcs = ['INS TEMPO', 'Eurostat', 'EEA', 'OpenStreetMap', 'OpenAQ', 'INFP', 'Ghid SUMP/ELTIS', 'MDLPA']; let bx = 0; pdf.setFontSize(7);
       const widths = srcs.map(s => pdf.getTextWidth(S2(s)) + 8); const totalW = widths.reduce((a, b) => a + b + 3, 0); bx = (W - totalW) / 2;
       srcs.forEach((s, i) => { pdf.setFillColor(15, 45, 32); pdf.setDrawColor(34, 160, 90); pdf.setLineWidth(0.2); pdf.roundedRect(bx, 209, widths[i], 6, 1.2, 1.2, 'FD'); pdf.setTextColor(160, 220, 185); pdf.setFont('DejaVuRO', 'normal'); pdf.text(S2(s), bx + 4, 213); bx += widths[i] + 3; });
+      var _ftCx = (W - 42) / 2, _ftMax = W - 50;
       pdf.setTextColor(120, 150, 135); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(7);
-      pdf.text(S2('Document de fundamentare (pre-PMUD). PMUD final: model de trafic calibrat de consultant atestat, anchete de mobilitate, aviz CTATU.'), W / 2, H - 18, { align: 'center', maxWidth: W - 30 });
-      pdf.text(S2('Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), W / 2, H - 10, { align: 'center' });
+      pdf.text(S2('Document de fundamentare (pre-PMUD). PMUD final: model de trafic calibrat de consultant atestat, anchete de mobilitate, aviz CTATU.'), _ftCx, H - 18, { align: 'center', maxWidth: _ftMax });
+      pdf.text(S2('Generat: ' + new Date().toLocaleDateString('ro-RO') + ' · UrbanX'), _ftCx, H - 10, { align: 'center', maxWidth: _ftMax });
       // QR deep-link (UAT) — la scanare deschide platforma pe acest UAT
       try {
         if (window._QRMasterplanPatch && window._QRGenerator) {

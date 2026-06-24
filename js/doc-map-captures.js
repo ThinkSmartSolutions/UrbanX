@@ -20,9 +20,16 @@
   }
   function _grab(map, title) {
     try {
-      var url = map.getCanvas().toDataURL('image/jpeg', 0.82);
+      var url = map.getCanvas().toDataURL('image/jpeg', 0.92);
       return (url && url.length > 2000) ? { title: title, img: url } : null;
     } catch (e) { return null; }
+  }
+  // numara layerele cu un anumit prefix (verifica daca indicele chiar a desenat ceva)
+  function _layerCount(map, prefixes) {
+    try {
+      var ls = (map.getStyle() && map.getStyle().layers) || [];
+      return ls.filter(function (l) { return prefixes.some(function (p) { return l.id.indexOf(p) === 0; }); }).length;
+    } catch (e) { return 0; }
   }
 
   // Capturi: harta de baza a UAT + superbloc + cativa indici urbani, suprapusi pe harta reala
@@ -57,25 +64,38 @@
         }
       } catch (e) {}
 
-      // 3. indici urbani (modele FAZA 3/4) suprapusi pe harta
+      // 3. TOTI indicii urbani din baza de date (12 modele FAZA 3/4) suprapusi pe harta.
+      // Zoom la scara de cartier (~14.3) pentru lizibilitate — la zoom de UAT indicii erau specks.
       var models = [
         { id: 'city15', title: 'Indice Oras 15 minute' },
+        { id: 'tod', title: 'Indice TOD — dezvoltare orientata pe transit' },
+        { id: 'corridor', title: 'Indice Coridor mixt functional' },
+        { id: 'sponge', title: 'Indice Sponge City (retentie pluviala)' },
         { id: 'r330300', title: 'Indice 3-30-300 (verde urban)' },
-        { id: 'sdg117', title: 'Indice SDG 11.7 — spatiu public' },
-        { id: 'walkscore', title: 'Indice Walk Score (pietonabilitate)' }
+        { id: 'sdg117', title: 'Indice SDG 11.7 — spatiu public accesibil' },
+        { id: 'walkscore', title: 'Indice Walk Score (pietonabilitate)' },
+        { id: 'gvi', title: 'Indice Green View (vizibilitate verde)' },
+        { id: 'spacesyntax', title: 'Indice Space Syntax (integrare retea)' },
+        { id: 'noise', title: 'Indice zgomot urban (END)' },
+        { id: 'lst', title: 'Indice caldura urbana (LST)' },
+        { id: 'mixuse', title: 'Indice mix functional' }
       ];
-      if (G.addModelToMap && G.REG || G.calculate15Min) {
+      if (G.addModelToMap) {
+        // zoom mai aproape pentru indici (raza model ~700m)
+        try { map.jumpTo({ center: [center.lng, center.lat], zoom: 14.3, pitch: 0, bearing: 0 }); } catch (e) {}
+        await _idle(map, 900);
         for (var i = 0; i < models.length; i++) {
           var m = models[i];
           try {
-            if (G.addModelToMap) {
-              G.addModelToMap(map, center, m.id, 700);
-              if (G.UrbanModelsStore && G.UrbanModelsStore.setTransition) G.UrbanModelsStore.setTransition(100);
-              await _idle(map, 850);
-              var s = _grab(map, m.title); if (s) shots.push(s);
-              if (G.removeModelFromMap) G.removeModelFromMap(map);
-              await _idle(map, 300);
-            }
+            var before = _layerCount(map, ['um-', 'model-', 'idx-', m.id]);
+            G.addModelToMap(map, center, m.id, 700);
+            if (G.UrbanModelsStore && G.UrbanModelsStore.setTransition) G.UrbanModelsStore.setTransition(100);
+            await _idle(map, 950);
+            var after = _layerCount(map, ['um-', 'model-', 'idx-', m.id]);
+            // captureaza doar daca indicele chiar a adaugat un layer (altfel ar fi doar harta goala)
+            if (after > before) { var s = _grab(map, m.title); if (s) shots.push(s); }
+            if (G.removeModelFromMap) G.removeModelFromMap(map);
+            await _idle(map, 350);
           } catch (e) {}
         }
       }
@@ -94,8 +114,8 @@
       D.chapter(titluCapitol || 'Planse — indici si modele urbane pe harta UAT');
       D.P('Capturile de mai jos prezinta superblocul si indicii urbani generati automat de platforma, suprapusi pe harta unitatii administrativ-teritoriale. Ele ilustreaza, la scara reala, modelele urbane analizate in document.');
       shots.forEach(function (sh) {
-        var imgW = CW, imgH = Math.round(imgW * 0.60);
-        D.ensure(imgH + 16);
+        var imgW = CW, imgH = Math.round(imgW * 0.55);
+        D.ensure(imgH + 14);
         D.h2(sh.title);
         var yy = D.y;
         try {
