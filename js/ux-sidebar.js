@@ -117,9 +117,10 @@
     if (D.getElementById('ux-sidebar')) return;
     var style = D.createElement('style');
     style.textContent = [
-      '#ux-sidebar{position:fixed;left:0;top:0;height:100vh;width:288px;max-width:88vw;z-index:9300;background:#0b1424;border-right:1px solid rgba(212,175,55,.3);box-shadow:8px 0 40px rgba(0,0,0,.6);transform:translateX(-100%);transition:transform .22s ease;display:flex;flex-direction:column;font-family:system-ui,sans-serif;overflow:hidden}',
-      '#ux-sidebar.open{transform:translateX(0)}',
-      '#ux-sidebar-overlay{position:fixed;inset:0;background:rgba(2,6,16,.5);z-index:9290;display:none}',
+      /* cap.21 flow: NU sertar — dropdown ancorat in topbar (dreapta-sus, sub buton) */
+      '#ux-sidebar{position:fixed;top:50px;right:8px;max-height:82vh;width:312px;max-width:94vw;z-index:9300;background:#0b1424;border:1px solid rgba(139,92,246,.4);border-radius:12px;box-shadow:0 12px 44px rgba(0,0,0,.75);display:none;flex-direction:column;font-family:system-ui,sans-serif;overflow:hidden;backdrop-filter:blur(14px)}',
+      '#ux-sidebar.open{display:flex}',
+      '#ux-sidebar-overlay{position:fixed;inset:0;background:transparent;z-index:9290;display:none}',
       '#ux-sidebar-overlay.open{display:block}',
       '.uxsb-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)}',
       '.uxsb-logo{font-weight:800;color:#d4af37;font-size:16px}',
@@ -140,7 +141,7 @@
     D.head.appendChild(style);
     var ov = D.createElement('div'); ov.id = 'ux-sidebar-overlay'; ov.onclick = close;
     var sb = D.createElement('div'); sb.id = 'ux-sidebar';
-    sb.innerHTML = '<div class="uxsb-head"><span class="uxsb-logo">🏙 UrbanX — Meniu</span><button class="uxsb-x" onclick="UXSidebar.close()">✕</button></div>' +
+    sb.innerHTML = '<div class="uxsb-head"><span class="uxsb-logo">🏙 Planificare Urbană</span><button class="uxsb-x" onclick="UXSidebar.close()">✕</button></div>' +
       '<div id="ux-sidebar-body"></div>' +
       '<div class="uxsb-foot">🔍 Cmd/Ctrl+K = caută orice funcție</div>';
     D.body.appendChild(ov); D.body.appendChild(sb);

@@ -1308,7 +1308,7 @@ document.addEventListener('click', function(){
 
   <!-- Planificare Urbană (cap.21 flow: fost UrbanX Pro, mutat înainte de Rapoarte) -->
   <div id="tci-group" style="position:relative">
-    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.open():_toggleTCIMenu(event)" title="Planificare Urbană — PUG/PUZ/PUD, indici, simlab, risc, monumente, consultare"
+    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.toggle():_toggleTCIMenu(event)" title="Planificare Urbană — PUG/PUZ/PUD, indici, simlab, risc, monumente, consultare"
       style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
         border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
       🏙 Planificare Urbană ▾
@@ -1335,26 +1335,26 @@ document.addEventListener('click', function(){
   padding:6px;min-width:220px;max-width:90vw;max-height:80vh;overflow-y:auto;
   z-index:9100;box-shadow:0 8px 40px rgba(0,0,0,.8);backdrop-filter:blur(16px);
   -webkit-overflow-scrolling:touch">
-  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Perspectivă hartă</div>
-  <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🏙 Vedere 3D izometrică (60°)</button>
-  <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">⬛ Vedere 2D — Plan</button>
-  <!-- Camera presets pentru viewer 3D (#11) -->
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Vederi preset (Viewer 3D)</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px">
-    <button id="P" onclick="window._setCameraPreset('P');_closeAllMenus()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#a78bfa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Perspectivă 3/4">🎯 Perspectivă</button>
-    <button id="F" onclick="window._setCameraPreset('F');_closeAllMenus()" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60a5fa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Față Nord">⬆ Față</button>
-    <button id="L" onclick="window._setCameraPreset('L');_closeAllMenus()" style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60a5fa;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Lateral Est">➡ Lateral</button>
-    <button id="T" onclick="window._setCameraPreset('T');_closeAllMenus()" style="background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.25);color:#94a3b8;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:11px;font-weight:600" title="Vedere de sus">⬛ Top (plan)</button>
-  </div>
-  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;border-top:1px solid rgba(255,255,255,.06);margin-top:3px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
-  <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
-  <div style="padding:5px 8px 2px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Stil hartă</div>
+  <!-- cap.3 flow: Urban3D primar + Street View. Perspectiva/2D-3D/preseturile se fac din mouse/zoom (degete pe mobil) -->
+  <div style="padding:4px 8px 5px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700">Vizualizare hartă</div>
   <select class="tb-sel" id="selBase" style="display:block;width:calc(100% - 4px);margin:4px 2px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#e2e8f0;padding:6px 8px;font-size:12px;cursor:pointer">
     <option value="custom">🌆 Urban 3D</option>
     <option value="standard">☀ Standard 3D ✦</option>
     <option value="streets">🗺 Streets</option>
     <option value="sat">🛰 Satelitar</option>
   </select>
+  <button id="btnSV" onclick="svOpen();_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;margin-top:3px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🚶 Street View</button>
+  <button id="btnLegend" onclick="toggleFnLegend(this);_closeAllMenus()" style="display:block;width:100%;text-align:left;background:none;border:none;color:#e2e8f0;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px" onmouseover="this.style.background='rgba(255,255,255,.08)'" onmouseout="this.style.background='none'">🎨 Legendă funcțiuni</button>
+  <div style="font-size:9px;color:#475569;padding:4px 10px 2px;line-height:1.4">Rotire / înclinare: drag dreapta-mouse · zoom: scroll / pinch</div>
+  <!-- ascunse (cap.3): perspectiva 2D/3D + preseturi cameră — folosite din mouse/zoom; pastrate in DOM pt referinte JS -->
+  <div style="display:none">
+    <button id="btn3D" onclick="set3D(60,-20);_closeAllMenus()">3D</button>
+    <button id="btn2D" onclick="set3D(0,0);_closeAllMenus()">2D</button>
+    <button id="P" onclick="window._setCameraPreset('P');_closeAllMenus()">P</button>
+    <button id="F" onclick="window._setCameraPreset('F');_closeAllMenus()">F</button>
+    <button id="L" onclick="window._setCameraPreset('L');_closeAllMenus()">L</button>
+    <button id="T" onclick="window._setCameraPreset('T');_closeAllMenus()">T</button>
+  </div>
 
 
   <button class="menu-close-btn" 
@@ -6172,7 +6172,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260621a"></script>
     <script src="js/ux-launcher.js?v=20260624risk4"></script>
-    <script src="js/ux-sidebar.js?v=20260622b"></script>
+    <script src="js/ux-sidebar.js?v=20260624topbar"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>
