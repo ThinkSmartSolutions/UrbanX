@@ -1026,7 +1026,7 @@ function _rvDrawFurniture(ctx, r, rx, ry, rw, rh, SC){
 // ── FLUX DE CIRCULAȚIE INTERIOR ──────────────────────────────────────────────
 // Desenează traseul funcțional: intrare bloc → casa scării/lift → palier →
 // hol apartament → camere → balcon. Conform logicii de proiectare (NP 057, P118).
-function _rvDrawCirculation(ctx, fl, b, ox, oy, SC){
+function _rvDrawCircFlow(ctx, fl, b, ox, oy, SC){
   if(!fl || !fl.rects || !fl.rects.length) return;
   const cx = r => ox + (r.x + r.w/2)*SC;
   const cy = r => oy + (r.y + r.h/2)*SC;
@@ -1410,7 +1410,7 @@ function _rvRenderPlan(fl,b){
   });
 
   // Pasul 4b: FLUX DE CIRCULAȚIE INTERIOR (intrare→scară→palier→apartament→cameră→balcon)
-  if(_RV.showFlow) _rvDrawCirculation(ctx, fl, b, ox, oy, SC);
+  if(_RV.showFlow) _rvDrawCircFlow(ctx, fl, b, ox, oy, SC);
 
   // Cote
   // ── Ventilație obligatorie baie/WC (SR 1907-1:2014) ────────────────────
