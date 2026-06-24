@@ -135,9 +135,15 @@
       var W = 210, H = 297, x = 16;
 
       // ── PAGINA 1: Plan de amplasament și delimitare ──
-      pdf.setFontSize(9); pdf.setTextColor(120); pdf.text('UrbanX · Documentație cadastrală (Ordin ANCPI 700/2014) — DRAFT orientativ', x, 12);
-      pdf.setFontSize(16); pdf.setTextColor(20); pdf.text('Plan de amplasament și delimitare a imobilului', x, 22);
-      pdf.setFontSize(11); pdf.setTextColor(60); pdf.text('Operație: ' + (OPLABEL[f.operation] || f.operation), x, 30);
+      // ANTET STANDARD UrbanX (bara navy + accent auriu) — standardul de sistem
+      var _uatN = (G.TCI && (G.TCI.cityName || G.TCI.cityKey)) || '';
+      pdf.setFillColor(11, 20, 40); pdf.rect(0, 0, W, 17, 'F');
+      pdf.setFillColor(212, 175, 55); pdf.rect(0, 17, W, 0.8, 'F');
+      pdf.setTextColor(212, 175, 55); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(11); pdf.text('UrbanX', x, 8);
+      pdf.setTextColor(230, 237, 247); pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(8.2); pdf.text('Documentație cadastrală · Ordin ANCPI 700/2014 — DRAFT orientativ', x, 13.5);
+      if (_uatN) { pdf.setTextColor(150, 160, 180); pdf.setFontSize(8); pdf.text(String(_uatN), W - x, 10, { align: 'right' }); }
+      pdf.setFontSize(15); pdf.setTextColor(20); pdf.setFont('DejaVuRO', 'bold'); pdf.text('Plan de amplasament și delimitare a imobilului', x, 27);
+      pdf.setFontSize(11); pdf.setTextColor(60); pdf.setFont('DejaVuRO', 'normal'); pdf.text('Operație: ' + (OPLABEL[f.operation] || f.operation), x, 34);
       // schiță la scară din coordonatele Stereo70
       var all = []; f.rezultat.forEach(function (l) { l.pts.forEach(function (p) { all.push(p); }); });
       f.initial.forEach(function (l) { l.pts.forEach(function (p) { all.push(p); }); });
@@ -213,6 +219,17 @@
       pdf.setFontSize(8); pdf.setTextColor(150);
       pdf.text('Document DRAFT generat de UrbanX pentru pregătirea documentației cadastrale. Nu substituie lucrarea', x, 285);
       pdf.text('persoanei autorizate ANCPI. Categoria de folosință și proprietarii se completează din actele de proprietate.', x, 290);
+      // FOOTER STANDARD pe toate paginile (standardul de sistem)
+      try {
+        var _np = pdf.getNumberOfPages();
+        for (var _p = 1; _p <= _np; _p++) {
+          pdf.setPage(_p);
+          pdf.setDrawColor(212, 175, 55); pdf.setLineWidth(0.4); pdf.line(x, 293, W - x, 293);
+          pdf.setFont('DejaVuRO', 'normal'); pdf.setFontSize(6.8); pdf.setTextColor(140, 150, 170);
+          pdf.text('UrbanX · Documentație cadastrală ORIENTATIVĂ — nu substituie lucrarea persoanei autorizate ANCPI', x, 295.6);
+          pdf.text('Pag. ' + _p + '/' + _np, W - x, 295.6, { align: 'right' });
+        }
+      } catch (e) {}
       pdf.save('Fisa_cadastrala_' + f.operation + '.pdf');
     } catch (e) { console.warn('[Cadastru] PDF', e); alert('Eroare la generarea fișei: ' + e.message); }
   }
