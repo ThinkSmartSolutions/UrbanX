@@ -77,7 +77,7 @@ const _RV = {
   open: false,
   tab: 'plan', floor: 0,
   scale: 12,
-  showSolar: false, showISU: true, showDim: true, showSGrid: false,
+  showSolar: false, showISU: true, showDim: true, showSGrid: false, showFlow: true,
   panX:0, panY:0,
   building: null, floors: [],
   parcelParams: null,
@@ -1023,6 +1023,94 @@ function _rvDrawFurniture(ctx, r, rx, ry, rw, rh, SC){
   ctx.restore();
 }
 
+// ── FLUX DE CIRCULAȚIE INTERIOR ──────────────────────────────────────────────
+// Desenează traseul funcțional: intrare bloc → casa scării/lift → palier →
+// hol apartament → camere → balcon. Conform logicii de proiectare (NP 057, P118).
+function _rvDrawCirculation(ctx, fl, b, ox, oy, SC){
+  if(!fl || !fl.rects || !fl.rects.length) return;
+  const cx = r => ox + (r.x + r.w/2)*SC;
+  const cy = r => oy + (r.y + r.h/2)*SC;
+  function arrow(x1,y1,x2,y2,col,w,dash){
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy);
+    if(len<4) return;
+    ctx.save();
+    ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=w; ctx.lineCap='round';
+    if(dash) ctx.setLineDash(dash);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.setLineDash([]);
+    const ang=Math.atan2(dy,dx), hl=Math.max(5,w*3.2);
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-hl*Math.cos(ang-0.42), y2-hl*Math.sin(ang-0.42));
+    ctx.lineTo(x2-hl*Math.cos(ang+0.42), y2-hl*Math.sin(ang+0.42));
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  function dot(x,y,col,rad){ ctx.save(); ctx.fillStyle=col; ctx.beginPath(); ctx.arc(x,y,rad||2.5,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+
+  // 1. Nod vertical: casa scării + lift
+  const coreRect = fl.rects.find(r=>r.t==='core') || (b.cores&&b.cores.length?b.cores[0]:null);
+  const coreX = coreRect ? ox+(coreRect.x+coreRect.w/2)*SC : ox+(b.bW/2)*SC;
+  const coreY = coreRect ? oy+(coreRect.y+coreRect.h/2)*SC : oy+(b.bD/2)*SC;
+
+  // 2. Intrare bloc → nod vertical (acces vertical)
+  const mainDoor = (fl.doors||[]).find(d=>d.type==='main');
+  if(mainDoor){
+    const mx=ox+mainDoor.x*SC + (mainDoor.w*SC)/2;
+    const my=mainDoor.y!==undefined ? oy+mainDoor.y*SC : oy+b.bD*SC;
+    arrow(mx,my, coreX, coreY, 'rgba(245,158,11,.9)', 2.4, [7,4]);
+    dot(mx,my,'#F59E0B',3.4);
+  }
+  dot(coreX,coreY,'#2563EB',3.6);
+
+  // 3. Grupare camere pe apartament
+  const apts={};
+  fl.rects.forEach(r=>{
+    if(r.apt===undefined || r.apt===null || r.apt<0) return;
+    (apts[r.apt]=apts[r.apt]||[]).push(r);
+  });
+  Object.keys(apts).forEach(k=>{
+    const rooms=apts[k];
+    // Nod distribuție în apartament: hol/antreu, altfel cea mai mare cameră
+    let hub = rooms.find(r=>!r.bal && /hol|antre|vestib|hall|distrib/i.test((r.lbl||r.t||'')));
+    if(!hub){
+      const nb=rooms.filter(r=>!r.bal);
+      hub = nb.sort((a,c)=>(c.w*c.h)-(a.w*a.h))[0];
+    }
+    if(!hub) return;
+    const hx=cx(hub), hy=cy(hub);
+    // 3a. nod vertical → hol apartament (distribuție pe palier)
+    arrow(coreX, coreY, hx, hy, 'rgba(37,99,235,.62)', 1.7, [5,3]);
+    dot(hx,hy,'#1D4ED8',2.6);
+    // 3b. hol → fiecare cameră (circulație interioară)
+    rooms.forEach(r=>{
+      if(r===hub || r.bal) return;
+      arrow(hx,hy, cx(r), cy(r), 'rgba(96,165,250,.6)', 1.1, [3,3]);
+    });
+    // 3c. cameră → balcon (acces balcon)
+    rooms.filter(r=>r.bal).forEach(bal=>{
+      const nb=rooms.filter(r=>!r.bal);
+      let near=nb[0], bd=Infinity;
+      nb.forEach(r=>{ const dd=Math.hypot((r.x+r.w/2)-(bal.x+bal.w/2),(r.y+r.h/2)-(bal.y+bal.h/2)); if(dd<bd){bd=dd;near=r;} });
+      if(near) arrow(cx(near),cy(near), cx(bal),cy(bal), 'rgba(13,148,136,.65)', 1.2, [2,3]);
+    });
+  });
+
+  // 4. Legendă flux (colț stânga-sus în interiorul corpului)
+  const items=[['#F59E0B','Acces vertical (intrare→scară)'],['#2563EB','Distribuție palier'],['#60A5FA','Circulație interioară'],['#0D9488','Acces balcon']];
+  const lx=ox+5, ly=oy+12, lw=140, lh=items.length*10+5;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,.85)'; ctx.fillRect(lx-3,ly-9,lw,lh);
+  ctx.strokeStyle='rgba(37,99,235,.28)'; ctx.lineWidth=.6; ctx.strokeRect(lx-3,ly-9,lw,lh);
+  ctx.font='bold 7px IBM Plex Mono'; ctx.textAlign='left';
+  items.forEach((it,i)=>{
+    const yy=ly+i*10;
+    ctx.strokeStyle=it[0]; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(lx,yy-2); ctx.lineTo(lx+13,yy-2); ctx.stroke();
+    ctx.fillStyle='#0F172A'; ctx.fillText(it[1], lx+18, yy);
+  });
+  ctx.restore();
+}
+
 function _rvRenderPlan(fl,b){
   const {P,bW,bD}=b; const SC=_RV.scale;
   const pad=60; const lm=50;
@@ -1320,6 +1408,9 @@ function _rvRenderPlan(fl,b){
     ctx.fillStyle='#1E40AF';ctx.font='7px IBM Plex Mono';ctx.textAlign='center';
     ctx.fillText(d.w?.toFixed(2)+'m',dx+dw/2,dy_d+(isMain?-5:-2));ctx.textAlign='left';
   });
+
+  // Pasul 4b: FLUX DE CIRCULAȚIE INTERIOR (intrare→scară→palier→apartament→cameră→balcon)
+  if(_RV.showFlow) _rvDrawCirculation(ctx, fl, b, ox, oy, SC);
 
   // Cote
   // ── Ventilație obligatorie baie/WC (SR 1907-1:2014) ────────────────────
@@ -8574,6 +8665,10 @@ async function _rvInject(){
         <span class="rv-tog-lbl">🔲 Grilă structurală</span>
         <div class="rv-tog" id="rv-tog-sgrid" onclick="_rvToggle(this,'sGrid')"></div>
       </div>
+      <div class="rv-tog-row">
+        <span class="rv-tog-lbl">🧭 Flux circulație</span>
+        <div class="rv-tog rv-tog-on" id="rv-tog-flow" onclick="_rvToggle(this,'flow')"></div>
+      </div>
     </div>
 
     <!-- Bilanț -->
@@ -8853,6 +8948,7 @@ async function _rvInject(){
           <button class="rv-mob-ov-btn" id="rv-mob-ov-isu" onclick="_rvMobOverlay(this,'isu')">🚨 ISU Evacuare</button>
           <button class="rv-mob-ov-btn rv-mob-ov-on" id="rv-mob-ov-dim" onclick="_rvMobOverlay(this,'dim')">📐 Cote</button>
           <button class="rv-mob-ov-btn" id="rv-mob-ov-sGrid" onclick="_rvMobOverlay(this,'sGrid')">🔲 Grilă</button>
+          <button class="rv-mob-ov-btn rv-mob-ov-on" id="rv-mob-ov-flow" onclick="_rvMobOverlay(this,'flow')">🧭 Flux</button>
         </div>
         <!-- Solar controls mobil -->
         <div id="rv-mob-solar-ctrls" style="display:none;padding:8px;background:rgba(212,175,55,.06);border-radius:8px;border:1px solid rgba(212,175,55,.15)">
