@@ -161,7 +161,18 @@
         'La <b>' + res.P + ' mm</b> ploaie, cu impermeabilizare C=' + res.C + ', se scurg <b>' + Math.round(res.R_eff_mm) + ' mm</b> (din care rețeaua evacuează ~' + Math.round(res.drained_mm) + ' mm). Volumul rezidual de <b>' + Math.round(res.V).toLocaleString('ro') + ' m³</b> se acumulează în zonele joase, atingând cota ' + res.level.toFixed(1) + ' m (peste minimul ' + res.eMin.toFixed(1) + ' m).</div>' +
         '<div style="font-size:10.5px;opacity:0.55;margin-top:10px;line-height:1.6"><b>Metodă:</b> Q = C·i·A (i=' + res.i_mmh.toFixed(0) + ' mm/h, A=' + res.A_catch_ha.toFixed(0) + ' ha) · V=(P·C/1000−evacuat)·A · băltire bathtub pe ' + (res.cellM | 0) + ' m/celulă. Sursă relief: ' + res.source + '.</div>';
       if (rd) rd.innerHTML = html;
+      _dock();
     }).catch(function (e) { if (rd) rd.innerHTML = '<div style="color:#f59e0b;font-size:12px">Eroare citire relief: ' + e.message + '</div>'; });
+  }
+  // dupa simulare: dialog non-blocant + mutat in colt ca sa vezi inundatia desenata pe harta
+  function _dock() {
+    try {
+      if (!_ov) return;
+      _ov.style.background = 'transparent'; _ov.style.pointerEvents = 'none';
+      _ov.style.alignItems = 'flex-start'; _ov.style.justifyContent = 'flex-start';
+      var box = document.getElementById('flood-dialog');
+      if (box) { box.style.pointerEvents = 'auto'; box.style.width = 'min(380px,94vw)'; box.style.maxHeight = '86vh'; box.style.margin = '58px 0 0 12px'; box.style.boxShadow = '0 12px 44px rgba(0,0,0,.7)'; }
+    } catch (e) {}
   }
   function _kpi(label, val, col) {
     return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 12px;text-align:center">' +

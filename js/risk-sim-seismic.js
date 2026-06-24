@@ -184,6 +184,18 @@
       'I = I₀ − 3·log₁₀(R/h) − 3·α·log₁₀(e)·(R−h), R = ' + Math.round(r.R) + ' km, h = 95 km, α = 0,003 &nbsp;·&nbsp; ' +
       'PGA: I = 3,66·log₁₀(PGA) − 1,66 <i>(Wald — calibrare crustală; pentru sursele adânci Vrancea reprezintă o estimare de limită superioară).</i></div>';
     var rd = document.getElementById('seis-results'); if (rd) { rd.style.display = 'block'; rd.innerHTML = html; }
+    _dock();
+    try { if (G.map) G.map.flyTo({ center: [c.lon, c.lat], zoom: 12.6, duration: 800 }); } catch (e) {}
+  }
+  // dupa simulare: dialogul devine non-blocant + se muta in colt ca sa fie vizibil desenul pe harta
+  function _dock() {
+    try {
+      if (!_ov) return;
+      _ov.style.background = 'transparent'; _ov.style.pointerEvents = 'none';
+      _ov.style.alignItems = 'flex-start'; _ov.style.justifyContent = 'flex-start';
+      var box = document.getElementById('seis-dialog');
+      if (box) { box.style.pointerEvents = 'auto'; box.style.width = 'min(380px,94vw)'; box.style.maxHeight = '86vh'; box.style.margin = '58px 0 0 12px'; box.style.boxShadow = '0 12px 44px rgba(0,0,0,.7)'; }
+    } catch (e) {}
   }
   function _kpi(label, val, col) {
     return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 12px;text-align:center">' +

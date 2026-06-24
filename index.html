@@ -878,6 +878,11 @@ canvas#c2d{width:100%;height:100%;display:block}
 #tools-menu .fa-i{display:block;width:100%;text-align:left;background:none;border:none;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;line-height:1.25}
 #tools-menu .fa-i:hover{background:rgba(255,255,255,.08)}
 #tools-menu .fa-h{padding:4px 8px 5px;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+#tools-menu .fa-gh{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;color:#e6edf7;padding:9px 10px;font-size:12.5px;font-weight:700;border-radius:0 7px 7px 0}
+#tools-menu .fa-gh:hover{background:rgba(255,255,255,.05)}
+#tools-menu .fa-cv{font-size:9px;opacity:.5;flex-shrink:0}
+#tools-menu .fa-body{padding:1px 0 5px}
+#tools-menu .fa-body .fa-i{padding-left:18px}
 /* Overlay pentru close meniu cu tap in afara */
 #menu-overlay {
   display: none;
@@ -1375,29 +1380,37 @@ document.addEventListener('click', function(){
 
 <!-- TOOLS MENU — fixed, outside topbar -->
 <div id="tools-menu" data-locked="true" style="display:none;position:fixed;top:48px;background:rgba(7,14,28,.97);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px;min-width:230px;max-width:92vw;max-height:82vh;overflow-y:auto;z-index:9100;box-shadow:0 8px 32px rgba(0,0,0,.7);backdrop-filter:blur(12px)">
-  <!-- FLUX DE AVIZARE: tot ce tine de o parcela / mai multe parcele + avizare -->
-  <div class="fa-h">Analiză parcelă</div>
-  <button class="fa-i" style="color:#7dd3fc" onclick="(window.Fisa360&&Fisa360.open?Fisa360.open():ss?.('Fișa 360 se inițializează'));_closeAllMenus()">🧭 Fișa parcelei 360°</button>
-  <button class="fa-i" style="color:#93c5fd" onclick="(window.Cadastru&&Cadastru.openPanel?Cadastru.openPanel():ss?.('Cadastru se inițializează'));_closeAllMenus()">📐 Fișă cadastrală (lotizare/comasare/dezmembrare)</button>
-  <button class="fa-i" style="color:#cbd5e1" onclick="(window.StudyZone&&StudyZone.openBuilder?StudyZone.openBuilder():ss?.('Zonă de studiu se inițializează'));_closeAllMenus()">📐 Zonă de studiu (fără nr. cadastral)</button>
-  <button id="btnBilant" class="fa-i" style="color:#4ade80" onclick="toggleBilant();_closeAllMenus()">📐 Bilanț edificabil (plan 2D)</button>
-  <button class="fa-i" style="color:#cbd5e1" onclick="(typeof generateParcelFisa==='function'?generateParcelFisa():ss?.('Fișă urbanism se inițializează'));_closeAllMenus()">📋 Fișă urbanism per parcelă</button>
-  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Proiectare (parcelă / ansamblu)</div>
-  <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
-  <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
-  <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
-  <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
-  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Investiție pe parcelă</div>
-  <button class="fa-i" style="color:#86efac" onclick="(window.Feaz&&Feaz.openPanel?Feaz.openPanel():ss?.('Fezabilitate se inițializează'));_closeAllMenus()">💰 Pro-formă (fezabilitate · ROI)</button>
-  <button class="fa-i" style="color:#86efac" onclick="(window.Invest&&Invest.openPanel?Invest.openPanel():ss?.('Investment se inițializează'));_closeAllMenus()">📊 Investment Score</button>
-  <button class="fa-i" style="color:#86efac" onclick="(window.Portfolio&&Portfolio.openPanel?Portfolio.openPanel():ss?.('Portfolio se inițializează'));_closeAllMenus()">🗂 Portfolio Due Diligence</button>
-  <button class="fa-i" style="color:#86efac" onclick="(window.LVC&&LVC.openPanel?LVC.openPanel():ss?.('LVC se inițializează'));_closeAllMenus()">📈 Land Value Capture</button>
-  <div class="fa-h" style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">Avizare</div>
-  <button class="fa-i" style="color:#fbbf24" onclick="(window.CAU&&CAU.openPanel?CAU.openPanel():ss?.('CAU se inițializează'));_closeAllMenus()">📋 CAU — Certificat de Urbanism + avize</button>
-  <button class="fa-i" style="color:#fbbf24" onclick="(typeof showAvize==='function'?showAvize():ss?.('Matrice avize se inițializează'));_closeAllMenus()">⚖️ Matrice avize necesare</button>
-  <button class="fa-i" style="color:#fbbf24" onclick="(window.Plati&&Plati.openPanel?Plati.openPanel():ss?.('Plăți se inițializează'));_closeAllMenus()">💳 Plăți taxe urbanistice (CU/AC/PUZ)</button>
-  <button class="fa-i" style="color:#fbbf24" onclick="(window.Notificari&&Notificari.openPanel?Notificari.openPanel():ss?.('Notificări se inițializează'));_closeAllMenus()">🔔 Notificarea vecinilor afectați</button>
-  <button class="fa-i" style="color:#fbbf24" onclick="(window.Dosar&&Dosar.open?Dosar.open():ss?.('Dosar se inițializează'));_closeAllMenus()">📁 Dosar digital al imobilului</button>
+  <!-- FLUX DE AVIZARE — categorii colapsabile (ca Planificare Urbană) -->
+  <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">📐 Analiză parcelă <span class="fa-cv">▲</span></button>
+  <div class="fa-body">
+    <button class="fa-i" style="color:#7dd3fc" onclick="(window.Fisa360&&Fisa360.open?Fisa360.open():ss?.('Fișa 360 se inițializează'));_closeAllMenus()">🧭 Fișa parcelei 360°</button>
+    <button class="fa-i" style="color:#93c5fd" onclick="(window.Cadastru&&Cadastru.openPanel?Cadastru.openPanel():ss?.('Cadastru se inițializează'));_closeAllMenus()">📐 Fișă cadastrală (lotizare/comasare/dezmembrare)</button>
+    <button class="fa-i" style="color:#cbd5e1" onclick="(window.StudyZone&&StudyZone.openBuilder?StudyZone.openBuilder():ss?.('Zonă de studiu se inițializează'));_closeAllMenus()">📐 Zonă de studiu (fără nr. cadastral)</button>
+    <button id="btnBilant" class="fa-i" style="color:#4ade80" onclick="toggleBilant();_closeAllMenus()">📐 Bilanț edificabil (plan 2D)</button>
+    <button class="fa-i" style="color:#cbd5e1" onclick="(typeof generateParcelFisa==='function'?generateParcelFisa():ss?.('Fișă urbanism se inițializează'));_closeAllMenus()">📋 Fișă urbanism per parcelă</button>
+  </div>
+  <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">🏘 Proiectare (parcelă / ansamblu) <span class="fa-cv">▼</span></button>
+  <div class="fa-body" style="display:none">
+    <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
+    <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
+    <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
+    <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
+  </div>
+  <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">💰 Investiție pe parcelă <span class="fa-cv">▼</span></button>
+  <div class="fa-body" style="display:none">
+    <button class="fa-i" style="color:#86efac" onclick="(window.Feaz&&Feaz.openPanel?Feaz.openPanel():ss?.('Fezabilitate se inițializează'));_closeAllMenus()">💰 Pro-formă (fezabilitate · ROI)</button>
+    <button class="fa-i" style="color:#86efac" onclick="(window.Invest&&Invest.openPanel?Invest.openPanel():ss?.('Investment se inițializează'));_closeAllMenus()">📊 Investment Score</button>
+    <button class="fa-i" style="color:#86efac" onclick="(window.Portfolio&&Portfolio.openPanel?Portfolio.openPanel():ss?.('Portfolio se inițializează'));_closeAllMenus()">🗂 Portfolio Due Diligence</button>
+    <button class="fa-i" style="color:#86efac" onclick="(window.LVC&&LVC.openPanel?LVC.openPanel():ss?.('LVC se inițializează'));_closeAllMenus()">📈 Land Value Capture</button>
+  </div>
+  <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">📋 Avizare <span class="fa-cv">▼</span></button>
+  <div class="fa-body" style="display:none">
+    <button class="fa-i" style="color:#fbbf24" onclick="(window.CAU&&CAU.openPanel?CAU.openPanel():ss?.('CAU se inițializează'));_closeAllMenus()">📋 CAU — Certificat de Urbanism + avize</button>
+    <button class="fa-i" style="color:#fbbf24" onclick="(typeof showAvize==='function'?showAvize():ss?.('Matrice avize se inițializează'));_closeAllMenus()">⚖️ Matrice avize necesare</button>
+    <button class="fa-i" style="color:#fbbf24" onclick="(window.Plati&&Plati.openPanel?Plati.openPanel():ss?.('Plăți se inițializează'));_closeAllMenus()">💳 Plăți taxe urbanistice (CU/AC/PUZ)</button>
+    <button class="fa-i" style="color:#fbbf24" onclick="(window.Notificari&&Notificari.openPanel?Notificari.openPanel():ss?.('Notificări se inițializează'));_closeAllMenus()">🔔 Notificarea vecinilor afectați</button>
+    <button class="fa-i" style="color:#fbbf24" onclick="(window.Dosar&&Dosar.open?Dosar.open():ss?.('Dosar se inițializează'));_closeAllMenus()">📁 Dosar digital al imobilului</button>
+  </div>
 
   <button class="menu-close-btn" 
     onclick="_closeAllMenusAndOverlay()" 
@@ -6193,8 +6206,8 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urban-models/superbloc.js?v=20260624expl"></script>
     <script src="js/urban-models/models-extra.js?v=20260624idx4"></script>
     <script src="js/indices-report.js?v=20260624A"></script>
-    <script src="js/risk-sim-seismic.js?v=20260624B"></script>
-    <script src="js/risk-sim-flood.js?v=20260624A"></script>
+    <script src="js/risk-sim-seismic.js?v=20260624dock"></script>
+    <script src="js/risk-sim-flood.js?v=20260624dock"></script>
     <script src="js/risk-sim-shelters.js?v=20260624A"></script>
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260620a"></script>
