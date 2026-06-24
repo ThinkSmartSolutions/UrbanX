@@ -693,6 +693,7 @@ G._MethodologyPanel = {
       const tc = document.getElementById('tc-methodology');
       if(tc) tc.classList.add('active');
     };
+    btn.style.display = 'none'; // cap.18 flow: relocat in dropdown "Planificare Urbana" (ramane functional via click programatic)
     tabs.appendChild(btn);
 
     const tc = document.createElement('div');

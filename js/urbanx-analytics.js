@@ -888,6 +888,7 @@ G._AnalyticsPanel = {
       const tc = document.getElementById('tc-analytics');
       if(tc) tc.classList.add('active');
     };
+    btn.style.display = 'none'; // cap.17 flow: relocat in dropdown "Planificare Urbana" (ramane functional via click programatic)
     tabs.appendChild(btn);
 
     // Tab content
