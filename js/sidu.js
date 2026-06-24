@@ -83,6 +83,14 @@
   // Document SIDU COMPLET (multi-capitol, PDF) — pe motorul strategic _makeStratDoc,
   // ACELAȘI tipar dens ca Masterplanul / PMUD (cuprins, antet/subsol, justify, grafice).
   function generateDocument(cityKey) {
+    // SIDU COMPLET (document-umbrelă peste MP+PMUD) — generatorul dedicat _StratSIDU
+    // (13 capitole, 8 domenii, portofoliu parametric/UAT). Acesta e documentul principal.
+    if (G._StratSIDU && G._StratSIDU.generate) {
+      try {
+        var sc = (G._ProjectionEngine && G._ProjectionEngine.currentScenario) || 'S2';
+        return G._StratSIDU.generate(cityKey || (G.TCI && G.TCI.cityKey) || _resolveCity().key, sc);
+      } catch (e) { console.warn('[SIDU] _StratSIDU esuat → fallback intern', e); }
+    }
     try {
       var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { alert('jsPDF indisponibil'); return; }
       if (typeof G._makeStratDoc !== 'function') { console.warn('[SIDU] motor strategic indisponibil → fallback simplu'); return _generateDocumentSimple(cityKey); }
