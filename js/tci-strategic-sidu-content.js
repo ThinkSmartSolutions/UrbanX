@@ -406,9 +406,10 @@
       pdf.setFillColor(...ACCENT); pdf.rect(18, 110, 2.5, 72, 'F');
 
       const sidu = _siduModel(city, ctx.mob, ctx.need, ctx.invest, ctx.risk, ctx.grav, ctx.climate);
+      const _projDelta = sidu.pop > 0 ? (sidu.pop55 - sidu.pop) / sidu.pop * 100 : 0; // FIX: % real al proiectiei fata de 2021 (cu semn corect)
       const rows = [
         ['Populatie (2021):', N(pop) + ' loc.'],
-        ['Proiectie 2055 (S2):', N(sidu.pop55) + ' loc. (' + (sidu.varPct >= 0 ? '+' : '') + RN(sidu.varPct - (sidu.pop - sidu.pop11) / sidu.pop11 * 100 * 3.4, 1) + '% cumulat 2021-2055)'],
+        ['Proiectie orizont (S2):', N(sidu.pop55) + ' loc. (' + (_projDelta >= 0 ? '+' : '') + RN(_projDelta, 1) + '% fata de 2021)'],
         ['Domenii integrate:', '8 domenii (detaliate in capitolul 5)'],
         ['Nota UrbanX:', sidu.noteComp + '/100 (' + sidu.calific + ') · potential: ' + Math.min(100, sidu.noteComp + 18) + '/100 (2040)'],
         ['Investitie estimata 2026-2040:', N(sidu.invTot) + ' mil. EUR'],
