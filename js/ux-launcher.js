@@ -16,7 +16,8 @@
   // ─── REGISTRU UNIC DE FUNCȚII (grupat logic, după flux de lucru) ───
   var G1 = '🧭 Start & Explorare', G2 = '🏛 Strategie & Documente', G3 = '📐 Proiectare & Cadastru',
     G4 = '🌿 Mediu & Climă', G5 = '🏛 Administrație publică', G6 = '💰 Investitor & Dezvoltator',
-    G7 = '🚦 Mobilitate', G8 = '📊 Date & UAT', G9 = '📑 Studii & Avize (PDF)', G0 = '🎬 Prezentare';
+    G7 = '🚦 Mobilitate', G8 = '📊 Date & UAT', G9 = '📑 Studii & Avize (PDF)', G0 = '🎬 Prezentare',
+    GR = '⚠️ Riscuri & Protecție civilă';
   var A = [
     // Start
     { g: G1, ico: '🧭', l: 'Fișa parcelei 360°', d: 'toate analizele unei parcele într-un loc', k: 'fisa 360 hub parcela', run: mod('Fisa360', 'open'), info: 'fisa360' },
@@ -43,6 +44,8 @@
     // Mediu & Climă
     { g: G4, ico: '🌿', l: 'LOISIR — spații verzi & plămân urban', d: 'catalog L.24/2007 · parc 3D · concurs · climă', k: 'loisir spatii verzi parc uhi clima', run: mod('Loisir', 'openPanel'), info: 'loisir' },
     { g: G4, ico: '🟧', l: 'Superbloc (model Barcelona)', d: 'tranzit perimetru · interior verde · înainte/după', k: 'superbloc barcelona rueda', run: mod('Superbloc', 'openPanel'), info: 'superbloc' },
+    // Riscuri & Protecție civilă
+    { g: GR, ico: '🌐', l: 'Simulare cutremur (scenariu Vrancea)', d: 'mag. 5–8 · intensitate EMS-98 · PGA · avarieri · pe hartă', k: 'cutremur seismic vrancea magnitudine p100 risc', run: mod('RiskSeismic', 'openPanel') },
     // Administrație
     { g: G5, ico: '🏗️', l: 'Capacitate & Conformitate UAT', d: 'apă·școli·verde vs ce s-a aprobat', k: 'capacitate intelligence uxi conformitate', run: mod('UXI', 'openDashboard'), info: 'ux_capacitate' },
     { g: G5, ico: '📋', l: 'CAU — Acorduri Unice (CU + avize)', d: 'cerere→CU→avize→Acord Unic · 9 reguli', k: 'cau acord unic aviz certificat urbanism', run: mod('CAU', 'openPanel'), info: 'cau' },
