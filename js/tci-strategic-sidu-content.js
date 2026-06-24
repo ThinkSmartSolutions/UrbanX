@@ -46,7 +46,14 @@
   function _siduModel(city, mob, need, invest, risk, grav, climate) {
     const pop    = city.pop2021  || city.pop    || 50000;
     const pop11  = city.pop2011  || Math.round(pop / 0.94);
-    const pop55  = (need && need.pop2055) || Math.round(pop * Math.pow(1 + (city.rata_reala_2011_2021 || 0) / 100, 34));
+    // PROIECTIE CU STRATEGIE (pozitiva): un SIDU propune solutii, deci proiecteaza EVOLUTIE.
+    // Rata anuala cu strategie = pozitiva, scalata pe atractivitatea UAT (coef_hub) — formula
+    // transparenta; presupune inversarea soldului migrator prin proiectele propuse.
+    const _gWith = Math.max(0.30, Math.min(1.2, 0.20 + 0.45 * ((city.coef_hub || 0.85) - 0.60))); // %/an
+    const pop55  = Math.max(pop, Math.round(pop * Math.pow(1 + _gWith / 100, 34)));
+    const gWith  = _gWith;
+    // scenariu INERTIAL (fara interventie), doar pt comparatie/avertisment:
+    const popInertial = Math.round(pop * Math.pow(1 + (city.rata_reala_2011_2021 || 0) / 100, 34));
     const pib    = city.pib_eur_cap || 10000;
     const eu27   = 36600;
 
@@ -102,7 +109,7 @@
     const projects = _siduPortofoliu(city, pop, invTot, necLoc, deficitSV, mob, risk, _isCom);
 
     return {
-      pop, pop11, pop55, rata, delta21, varPct,
+      pop, pop11, pop55, popInertial, gWith, rata, delta21, varPct,
       pib, eu27, convergUE,
       authAn, locuinte, necLoc,
       acApa, acCanal, acGaz, acBB,
@@ -406,10 +413,12 @@
       pdf.setFillColor(...ACCENT); pdf.rect(18, 110, 2.5, 72, 'F');
 
       const sidu = _siduModel(city, ctx.mob, ctx.need, ctx.invest, ctx.risk, ctx.grav, ctx.climate);
-      const _projDelta = sidu.pop > 0 ? (sidu.pop55 - sidu.pop) / sidu.pop * 100 : 0; // FIX: % real al proiectiei fata de 2021 (cu semn corect)
+      const _projDelta = sidu.pop > 0 ? (sidu.pop55 - sidu.pop) / sidu.pop * 100 : 0; // proiectie CU strategie (pozitiva)
+      const _inDelta = sidu.pop > 0 ? (sidu.popInertial - sidu.pop) / sidu.pop * 100 : 0; // inertial (avertisment)
       const rows = [
         ['Populatie (2021):', N(pop) + ' loc.'],
-        ['Proiectie orizont (S2):', N(sidu.pop55) + ' loc. (' + (_projDelta >= 0 ? '+' : '') + RN(_projDelta, 1) + '% fata de 2021)'],
+        ['Proiectie cu strategie:', N(sidu.pop55) + ' loc. (' + (_projDelta >= 0 ? '+' : '') + RN(_projDelta, 1) + '% — evolutie daca se implementeaza strategia)'],
+        ['Scenariu inertial (fara interventie):', N(sidu.popInertial) + ' loc. (' + (_inDelta >= 0 ? '+' : '') + RN(_inDelta, 1) + '% — avertisment)'],
         ['Domenii integrate:', '8 domenii (detaliate in capitolul 5)'],
         ['Nota UrbanX:', sidu.noteComp + '/100 (' + sidu.calific + ') · potential: ' + Math.min(100, sidu.noteComp + 18) + '/100 (2040)'],
         ['Investitie estimata 2026-2040:', N(sidu.invTot) + ' mil. EUR'],

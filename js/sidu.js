@@ -63,16 +63,9 @@
   ];
   function check(ans) { ans = ans || {}; var gaps = Q.filter(function (q) { return ans[q.k] === false; }); var yes = Q.filter(function (q) { return ans[q.k] === true; }).length; var score = Math.round(yes / Q.length * 100); return { score: score, gaps: gaps, verdict: score >= 80 ? 'coerent' : score >= 50 ? 'parțial — risc de blocaje' : 'necorelat — blocaje majore' }; }
 
-  // ── notă scurtă pt MP/PMUD: ele sunt SUBORDONATE documentului SIDU (nu un capitol SIDU în ele) ──
-  function subordinationNote(D) {
-    if (!D || !D.callout) return;
-    D.callout('Document subordonat SIDU',
-      'Acest document (Masterplan / PMUD) este o componentă subordonată Strategiei Integrate de Dezvoltare Urbană (SIDU) — ' +
-      '„constituția" orașului pe 10-15 ani. SIDU stabilește viziunea și portofoliul integrat (economie, sănătate, educație, ' +
-      'locuire, mobilitate, regenerare, turism, infrastructură); Masterplanul detaliază regenerarea de cartier, iar PMUD ' +
-      'componenta de mobilitate. Vezi documentul SIDU separat. Toate trebuie transpuse în PUG pentru a deveni aplicabile.',
-      [96, 130, 200]);
-  }
+  // ── caseta "Document subordonat SIDU" ELIMINATA la cererea beneficiarului ──
+  // Se suprapunea peste coperta MP/PMUD (caseta alba). No-op pastrat pt compatibilitate API.
+  function subordinationNote(D) { return; }
 
   // ════════════ DOCUMENT SIDU STANDALONE (umbrela, peste MP + PMUD) ════════════
   function _resolveCity(cityKey) {

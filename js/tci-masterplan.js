@@ -646,18 +646,18 @@ G._TCIMasterplanPDF = {
         infra: 'Metrou ușor / BRT, extindere intravilan +15%',
         risc: 'Risc supraaglomerare fără infrastructură adecvată',
       },
-      { key:'S2', label:'S2 — Scenariu Moderat (referință)', color:[59,130,246],
-        desc:'Continuarea trendului actual 2015-2024. Creștere moderată PIB (+2.8%/an), autorizații la ritmul actual, investiții europene absorbite parțial.',
-        pop55: need.pop2055||Math.round((city.pop2021||100000)*Math.pow(1+(city.rata_reala_2011_2021||0)/100,34)),
+      { key:'S2', label:'S2 — Scenariu cu strategie (referință, recomandat)', color:[59,130,246],
+        desc:'Implementarea portofoliului integrat (SIDU/Masterplan/PMUD) inversează soldul migrator negativ și atrage populație prin locuri de muncă, locuire accesibilă și servicii de calitate. Creștere moderată și sustenabilă — scenariul recomandat al documentului.',
+        pop55: Math.round((city.pop2021||100000)*Math.pow(1+Math.max(0.30,Math.min(1.2,0.20+0.45*((city.coef_hub||0.85)-0.60)))/100,34)),
         constr: need.locuinteTotale||5000,
         invest: invest.total||500,
-        pot: 'Densificare moderată, P+4→P+6 pe axe principale',
-        infra: 'Modernizare transport existent, extindere intravilan +8%',
-        risc: 'Risc dezechilibru cerere/ofertă în zone premium',
+        pot: 'Densificare calitativă, P+4→P+6 pe axe principale, regenerare cartiere',
+        infra: 'Modernizare transport public + mobilitate activă, densificare TOD',
+        risc: 'Necesită corelare strictă SIDU→PUG pentru a fi realizabil',
       },
-      { key:'S3', label:'S3 — Scenariu Conservator', color:[200,80,20],
-        desc:'Declin economic moderat, emigrare accelerată, reducere finanțări europene, stagnare infrastructură. Corespunde RCP8.5 climatic.',
-        pop55: Math.round((city.pop2021||100000)*Math.pow(0.990,34)),
+      { key:'S3', label:'S3 — Scenariu inerțial (fără intervenție)', color:[200,80,20],
+        desc:'AVERTISMENT — continuarea trendului observat 2011-2021 FĂRĂ implementarea strategiei: emigrare, îmbătrânire, depopulare și depreciere a fondului construit. Ilustrează ce se pierde dacă măsurile propuse nu sunt aplicate; NU este o țintă, ci o referință de comparație.',
+        pop55: Math.round((city.pop2021||100000)*Math.pow(1+(city.rata_reala_2011_2021||0)/100,34)),
         constr: Math.round((need.locuinteTotale||5000)*0.6),
         invest: Math.round((invest.total||500)*0.5),
         pot: 'Consolidare fond existent, zero expansiune periferică',
@@ -1494,8 +1494,10 @@ G._TCIMasterplanPDF = {
     this._pgHeader(pdf,W,'12. INFRASTRUCTURA TEHNICO-EDILITARA',city.name,today,12);
     let y=22;
     const N=(v,d=0)=>isNaN(+v)?'—':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
-    const pop55=(need||{}).pop2055||city.pop2021||100000;
-    const popDelta=Math.max(0,pop55-(city.pop2021||100000));
+    // Proiectie CU STRATEGIE (pozitiva) — un document de planificare propune evolutie, nu declin
+    const _p0bl=city.pop2021||100000;
+    const pop55=Math.max(_p0bl, Math.round(_p0bl*Math.pow(1+Math.max(0.30,Math.min(1.2,0.20+0.45*((city.coef_hub||0.85)-0.60)))/100,34)));
+    const popDelta=Math.max(0,pop55-_p0bl);
 
     // ── BAR CHART: acoperire utilitati ──────────────────────────────
     y=this._section(pdf,W,y,'12.1 Acoperire Utilitati Publice (%) · Sursa: ANRSC+ANRE+ANCOM 2023');
