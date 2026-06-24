@@ -41,7 +41,11 @@
         const ctx = { city, mob, aq, scenario: scenario || 'S2', cityKey, pugGeo, reguli, risk };
         // COPERTA
         D.setSuppress(true); D.setPage(1); this._cover(D, ctx); D.setSuppress(false);
+        // A3: capturi superbloc + indici pe harta UAT (orchestrare automata)
+        let _mapShots = [];
+        try { if (window._DocMapCaptures) _mapShots = await window._DocMapCaptures.capture(cityKey); } catch (e) {}
         G._StratPMUDContent.build(D, ctx);
+        try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — indici de mobilitate si modele urbane pe harta UAT'); } catch (e) {}
         window._buildStratTOC(D, 1);
         const _af = window._asciiFile || ((s)=>String(s||''));
         const fn = ('PMUD_' + _af(city.name || cityKey) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');

@@ -360,9 +360,16 @@
         this._cover(D, ctx);
         D.setSuppress(false);
 
+        // A3: capturi superbloc + indici suprapusi pe harta UAT (orchestrare automata)
+        let _mapShots = [];
+        try { if (window._DocMapCaptures) _mapShots = await window._DocMapCaptures.capture(cityKey); } catch (e) {}
+
         // CONTINUT — SIDU REZUMA si CONECTEAZA MP/PMUD (NU le copiaza); e mare prin
         // profunzimea analizei multi-domeniu + capitolele obligatorii proprii.
         G._StratSIDUContent.build(D, ctx);
+
+        // A3: insereaza plansele cu indici pe harta
+        try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — indici si modele urbane pe harta UAT'); } catch (e) {}
 
         // TOC
         window._buildStratTOC && window._buildStratTOC(D, 1);

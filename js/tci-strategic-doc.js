@@ -391,7 +391,14 @@
         D.setSuppress(false);
         const coverPages = 1;
 
+        // A3: capturi superbloc + indici pe harta UAT (orchestrare automata)
+        let _mapShots = [];
+        try { if (window._DocMapCaptures) _mapShots = await window._DocMapCaptures.capture(cityKey); } catch (e) {}
+
         G._StratMasterplanContent.build(D, ctx);   // toate capitolele
+
+        // A3: planse cu indici pe harta
+        try { if (window._DocMapCaptures) window._DocMapCaptures.renderPlates(D, _mapShots, 'Planse — modele urbane si indici pe harta UAT'); } catch (e) {}
 
         // CUPRINS dupa coperta
         buildTOC(D, coverPages);
