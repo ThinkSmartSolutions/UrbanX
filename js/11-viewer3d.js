@@ -395,8 +395,8 @@ function aedisOpen3DViewer(){
         <button onclick="document.getElementById('aedis-3d-viewer-overlay').remove();_v3dCleanup()"
           style="background:rgba(139,92,246,.2);color:#a78bfa;border:1px solid rgba(139,92,246,.4);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;min-height:36px">✕ Închide</button>
       </div>
-      <!-- Rand 2: controale — scroll orizontal pe mobil -->
-      <div style="display:flex;align-items:center;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px">
+      <!-- Rand 2: controale — wrap pe mai multe randuri (B4: butoanele nu mai dispar pe desktop) -->
+      <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;-webkit-overflow-scrolling:touch;padding-bottom:2px">
         <select id="v3d-light" onchange="_v3dLight(this.value)"
           style="background:#0f172a;color:#e2e8f0;border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 8px;font-size:11px;flex-shrink:0;min-height:36px;touch-action:manipulation">
           <option value="day">☀ Zi</option>

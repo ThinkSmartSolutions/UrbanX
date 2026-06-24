@@ -1396,34 +1396,39 @@ function _rvRenderPlan(fl,b){
 function _rvInitTouchCanvas(cv){
   if(!cv||cv._rvTouchInit) return;
   cv._rvTouchInit = true;
-  let _t0=null, _sc0=1, _pan={x:0,y:0}, _panStart=null;
+  let _t0=null, _sc0=1, _panStart=null;
+  const _wrap=()=>document.getElementById('rv-drawwrap');
+  const _clamp=w=>{ if(!w) return; w.scrollLeft=Math.max(0,Math.min(w.scrollLeft,w.scrollWidth-w.clientWidth)); w.scrollTop=Math.max(0,Math.min(w.scrollTop,w.scrollHeight-w.clientHeight)); };
 
+  // ── TOUCH (mobil): pinch-zoom + pan cu un deget ──
   cv.addEventListener('touchstart', e=>{
-    if(e.touches.length===2){
-      _t0 = e.touches;
-      _sc0 = _RV.scale;
-    } else if(e.touches.length===1){
-      _panStart = {x:e.touches[0].clientX, y:e.touches[0].clientY,
-                   sx:(_RV.panX||0), sy:(_RV.panY||0)};
-    }
+    if(e.touches.length===2){ _t0=e.touches; _sc0=_RV.scale; }
+    else if(e.touches.length===1){ const w=_wrap(); _panStart={x:e.touches[0].clientX,y:e.touches[0].clientY, sx:(w?w.scrollLeft:0), sy:(w?w.scrollTop:0)}; }
   },{passive:true});
-
   cv.addEventListener('touchmove', e=>{
-    e.preventDefault();
     if(e.touches.length===2&&_t0){
+      e.preventDefault();
       const d0=Math.hypot(_t0[0].clientX-_t0[1].clientX, _t0[0].clientY-_t0[1].clientY);
       const d1=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-      _RV.scale = Math.max(4, Math.min(40, _sc0*(d1/d0)));
-      _rvRender();
+      _RV.scale = Math.max(4, Math.min(40, _sc0*(d1/d0))); _rvRender();
     } else if(e.touches.length===1&&_panStart){
-      const dx=e.touches[0].clientX-_panStart.x;
-      const dy=e.touches[0].clientY-_panStart.y;
-      const wrap=document.getElementById('rv-drawwrap');
-      if(wrap){ wrap.scrollLeft=_panStart.sx-dx; wrap.scrollTop=_panStart.sy-dy; }
+      e.preventDefault();
+      const w=_wrap(); if(w){ w.scrollLeft=_panStart.sx-(e.touches[0].clientX-_panStart.x); w.scrollTop=_panStart.sy-(e.touches[0].clientY-_panStart.y); _clamp(w); }
     }
   },{passive:false});
-
   cv.addEventListener('touchend',()=>{ _t0=null; _panStart=null; },{passive:true});
+
+  // ── DESKTOP: zoom cu scroll + pan prin drag (B5) ──
+  cv.style.cursor='grab';
+  cv.addEventListener('wheel', e=>{
+    e.preventDefault();
+    _RV.scale = Math.max(4, Math.min(40, _RV.scale*(e.deltaY>0?0.9:1.1)));
+    _rvRender();
+  },{passive:false});
+  let _md=false,_mx=0,_my=0,_msx=0,_msy=0;
+  cv.addEventListener('mousedown', e=>{ _md=true; const w=_wrap(); _mx=e.clientX;_my=e.clientY;_msx=(w?w.scrollLeft:0);_msy=(w?w.scrollTop:0); cv.style.cursor='grabbing'; e.preventDefault(); });
+  window.addEventListener('mousemove', e=>{ if(!_md) return; const w=_wrap(); if(w){ w.scrollLeft=_msx-(e.clientX-_mx); w.scrollTop=_msy-(e.clientY-_my); _clamp(w); } });
+  window.addEventListener('mouseup', ()=>{ if(_md){ _md=false; cv.style.cursor='grab'; } });
 }
 
 // ── PMR — Accesibilitate persoane cu dizabilități (NP051/2012) ────────────
