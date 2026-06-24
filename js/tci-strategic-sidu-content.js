@@ -328,25 +328,52 @@
           }
         } catch(e) {}
 
+        // Date suplimentare pt blocurile INTEGRATE: Masterplan (euComp/today/iso) + PMUD (aq)
+        const euComp = m._getEUComparable ? m._getEUComparable(city) : {};
+        let aq = null;
+        try { if (typeof _AQLive !== 'undefined' && _AQLive.fetch) aq = await Promise.race([_AQLive.fetch(city.lat, city.lon), new Promise(r => setTimeout(() => r(null), 5000))]); } catch (e) {}
+        const today = new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' });
+        const iso   = new Date().toISOString().split('T')[0];
+
         const pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         pdf.__doc = 'SIDU 2026-2040';
 
         const D = window._makeStratDoc(pdf, {
-          docTitle:  'SIDU — STRATEGIA INTEGRATA DE DEZVOLTARE URBANA',
+          docTitle:  'SIDU',   // antet/subsol scurt (titlul complet e pe coperta) — evita overflow
           cityName:  city.name,
           accent:    ACCENT,
         });
 
-        const ctx = { city, mob, need, risk, grav, climate, housing, invest, bench,
-                      scenario: scenario || 'S2', cityKey, pugGeo, reguli };
+        // ctx superset — acopera ce cer SIDU + Masterplan-content + PMUD-content
+        const ctx = { pdf, W: 210, H: 297, city, mob, aq, need, risk, grav, climate, housing, invest, bench, euComp,
+                      scenario: scenario || 'S2', cityKey, pugGeo, reguli, today, iso };
 
         // Copertă
         D.setSuppress(true); D.setPage(1);
         this._cover(D, ctx);
         D.setSuppress(false);
 
-        // Conținut
+        // ── PARTEA I — Cadru strategic integrat (SIDU propriu-zis) ────────────
         G._StratSIDUContent.build(D, ctx);
+
+        // ── PARTEA II — MASTERPLAN STRATEGIC integrat INTEGRAL (nu rezumat) ───
+        // SIDU INGLOBEAZA Masterplanul: reproduce continutul complet, in context.
+        if (G._StratMasterplanContent && G._StratMasterplanContent.build) {
+          D.chapter('PARTEA II — MASTERPLAN STRATEGIC (componenta integrata in SIDU)');
+          D.callout('Componenta de structurare spatiala si regenerare urbana',
+            'Sectiunea reproduce INTEGRAL Masterplanul Strategic al ' + city.name + ', subordonat SIDU. SIDU il inglobeaza si il pune in context strategic — nu il rescrie, nu il rezuma.');
+          try { G._StratMasterplanContent.build(D, ctx); }
+          catch (e) { console.warn('[SIDU] Masterplan integrat esuat', e); D.P('(Componenta Masterplan momentan indisponibila — generati documentul Masterplan separat.)'); }
+        }
+
+        // ── PARTEA III — PMUD integrat INTEGRAL ───────────────────────────────
+        if (G._StratPMUDContent && G._StratPMUDContent.build) {
+          D.chapter('PARTEA III — PMUD · PLAN DE MOBILITATE URBANA DURABILA (componenta integrata in SIDU)');
+          D.callout('Componenta de mobilitate urbana durabila (SUMP/ELTIS)',
+            'Sectiunea reproduce INTEGRAL Planul de Mobilitate Urbana Durabila al ' + city.name + ', subordonat SIDU si corelat cu portofoliul integrat.');
+          try { G._StratPMUDContent.build(D, ctx); }
+          catch (e) { console.warn('[SIDU] PMUD integrat esuat', e); D.P('(Componenta PMUD momentan indisponibila — generati documentul PMUD separat.)'); }
+        }
 
         // TOC
         window._buildStratTOC && window._buildStratTOC(D, 1);
