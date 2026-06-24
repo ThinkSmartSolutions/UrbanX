@@ -59,7 +59,7 @@
       ]);
       D.h2('Metodologia de elaborare');
       D.P('Documentul urmează ciclul de planificare strategică: (1) diagnostic multidisciplinar al situației existente, (2) analiză integrată și identificarea disfunctionalitatilor (SWOT), (3) formularea viziunii și a obiectivelor, (4) construirea și evaluarea scenariilor de dezvoltare, (5) propuneri de organizare urbanistică și reglementare, (6) plan de implementare, finanțare și monitorizare. Proiecțiile demografice utilizează modelul cohorta-componentă (ONU/Eurostat), iar estimarea necesarului de locuire un model de tip Mankiw-Romer-Weil adaptat. Riscurile sunt evaluate printr-un scor compozit multifactorial.');
-      D.callout('Caracterul documentului', 'Masterplan strategic de fundamentare, cu valoare orientativa și analitică. Propunerile spațiale și indicatorii se valideaza prin documentatiile de urbanism normative (PUG/PUZ) elaborate de colective atestate RUR, pe suport topografic vizat.');
+      // (caseta-disclaimer alba eliminata la cererea beneficiarului — acoperirea legala ramane pe coperta + footer)
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 2 — REZUMAT EXECUTIV

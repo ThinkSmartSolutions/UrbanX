@@ -801,7 +801,7 @@
         ['VOT', 'Value of Time — valoarea timpului de călătorie'],
         ['Vision Zero', 'Obiectivul de zero decese și raniri grave în trafic'],
       ], [30, 144], { boldFirst: true });
-      D.callout('Disclaimer', 'Document de fundamentare (pre-PMUD), cu valoare orientativa și analitică. Un PMUD final legal necesită recensamant de trafic, anchete de mobilitate, model de transport calibrat de consultant atestat și avizele aferente. Indicatorii sunt estimari calibrate pe date oficiale, ce se valideaza cu primăria și operatorii.');
+      // (caseta-disclaimer alba eliminata la cererea beneficiarului — acoperirea legala ramane pe coperta + footer)
     }
   };
   console.log('[StratPMUD] ✅ PMUD extins încărcat');

@@ -182,6 +182,7 @@ G._QRMasterplanPatch = {
     const s = scenario || window._ProjectionEngine?.currentScenario || 'S2';
     const y = window.TCI?.year || 2025;
     const inner = new URLSearchParams({ c: c, s: s, y: y });
+    inner.set('cin', '1'); // scanarea QR LANSEAZA cinematicul (nu TCO clasic) — cerinta beneficiar
     const map = window.map;
     if (map) { const cc = map.getCenter(); inner.set('lat', cc.lat.toFixed(5)); inner.set('lon', cc.lng.toFixed(5)); inner.set('z', map.getZoom().toFixed(1)); }
     return base + '?tci=' + btoa(inner.toString());

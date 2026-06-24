@@ -3224,6 +3224,10 @@ const _TCIShare = {
         if(!isNaN(lat) && !isNaN(lon) && window.map && window.map.flyTo){
           try{ window.map.flyTo({center:[lon,lat], zoom: isNaN(z)?15:z, duration:1500}); }catch(e){}
         }
+        // QR Masterplan/PMUD -> lanseaza CINEMATICUL automat (nu doar TCO clasic) — cerinta beneficiar
+        if(state.get('cin')==='1' && window._startCinema){
+          setTimeout(function(){ try{ window._startCinema(cityKey); }catch(e){} }, 1400);
+        }
       }, 800);
     } catch(e) {}
   },
