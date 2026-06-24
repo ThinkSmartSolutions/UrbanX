@@ -85,7 +85,7 @@
       if (!_hasSubsol()) return;
       var RV = window._RV;
       if (!RV || !RV.floors) return;
-      if (RV.floors.some(function (f) { return f.floorIdx === -1; })) return;
+      if (RV.floors.some(function (f) { return f && f.floorIdx === -1; })) return;
       var b  = RV.building || {};
       var bW = b.bW || 18, bD = b.bD || 14;
       RV.floors.unshift(_genS1Floor(bW, bD));

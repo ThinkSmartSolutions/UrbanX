@@ -412,6 +412,7 @@
   }
 
   function _drawLevelMarkers(ctx, fl, b, ox, oy, SC) {
+    if (!fl || !b) return; // gard: fl/b pot fi null (AutoPlanse) -> evita TypeError floorIdx
     const P = b.P;
     const fIdx = fl.floorIdx || 0;
     const cota = (fIdx * (P?.hn || 3)).toFixed(2);

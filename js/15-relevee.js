@@ -1756,6 +1756,7 @@ function _rvInjectCorpSelector(buildings, onSelect){
 // ════════════════════════════════════════════════════════════════════════════
 
 // ── Aplică corecții automate și returnează building + params modificate ────
+try{ window._rvAutoFix = _rvAutoFix; }catch(e){}
 function _rvAutoFix(b, P, floors){
   const fixes = [];
   const bOpt  = JSON.parse(JSON.stringify(b));   // clonă building
@@ -5713,7 +5714,8 @@ async function generateRelevee(){
     const flScore=_rvGetFloor(_RV.curFloor);
     _rvRenderScore(b, flScore, P);
     // Rulăm auto-fix și populăm tab-ul Scenarii A/B
-    const {bOpt,POpt,floorsOpt,fixes}=_rvAutoFix(b,P,_RV.floors);
+    const _afFn=(typeof _rvAutoFix==='function')?_rvAutoFix:(window._rvAutoFix||null);
+    const {bOpt,POpt,floorsOpt,fixes}=_afFn?_afFn(b,P,_RV.floors):{bOpt:b,POpt:P,floorsOpt:_RV.floors,fixes:[]};
     _RV.floorsOriginal = JSON.parse(JSON.stringify(_RV.floors));
     _RV.bOriginal = JSON.parse(JSON.stringify(b));
     _RV.POrig = JSON.parse(JSON.stringify(P));
