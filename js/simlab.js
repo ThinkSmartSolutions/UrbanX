@@ -209,7 +209,10 @@
     sdg117: { ico: '🏛️', title: 'SDG 11.7 — Spațiu public', desc: 'Acces la spațiu public < 400m + mp/locuitor (UN-Habitat) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('sdg117'); } },
     walkscore: { ico: '🚶', title: 'Walk Score', desc: 'Pietonabilitate: amenități pe jos + conectivitate (0-100) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('walkscore'); } },
     gvi: { ico: '🌿', title: 'Green View Index', desc: 'Verde stradal vizibil la nivelul ochiului (street-level) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('gvi'); } },
-    spacesyntax: { ico: '🔗', title: 'Space Syntax — Integrare', desc: 'Cât de integrată/accesibilă e rețeaua stradală (Hillier) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('spacesyntax'); } }
+    spacesyntax: { ico: '🔗', title: 'Space Syntax — Integrare', desc: 'Cât de integrată/accesibilă e rețeaua stradală (Hillier) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('spacesyntax'); } },
+    noise: { ico: '🔊', title: 'Expunere zgomot (END)', desc: 'Lden trafic + populație expusă > 55 dB (Directiva 2002/49/CE) — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('noise'); } },
+    lst: { ico: '🌡️', title: 'Insulă de căldură (LST)', desc: 'Intensitate UHI + răcire prin verde/albedo + populație vulnerabilă — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('lst'); } },
+    mixuse: { ico: '🧩', title: 'Mix funcțional (entropie)', desc: 'Echilibru funcțiuni (Land Use Mix, Frank et al.) — predictor walkability — pe hartă', route: function () { closeAll(); G._openUrbanModel && G._openUrbanModel('mixuse'); } }
   };
 
   // ── UI ──

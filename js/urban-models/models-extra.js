@@ -435,13 +435,157 @@
     return r;
   }
 
+  // ── EXPUNERE ZGOMOT (END / Directiva 2002/49/CE) ──
+  function calculateNoise(p) {
+    var trafic_vmd = p.trafic_vmd, viteza_kmh = p.viteza_kmh, dist_locuinte_m = p.dist_locuinte_m, pop_zona = p.pop_zona;
+    // estimare orientativă Lden (model simplificat tip RLS/CNOSSOS): trafic + viteză − atenuare distanță
+    var lden = 38 + 10 * Math.log10(Math.max(1, trafic_vmd)) + 0.18 * Math.max(0, viteza_kmh - 30) - 12 * Math.log10(Math.max(1, dist_locuinte_m / 10));
+    lden = Math.max(40, Math.min(85, Math.round(lden)));
+    var peste55 = lden > 55, peste65 = lden > 65;
+    var pct_expus = lden <= 55 ? 0 : Math.min(95, Math.round((lden - 55) * 4.5));
+    var pop_expusa = Math.round(pop_zona * pct_expus / 100);
+    // reducere posibilă: asfalt fonoabsorbant + calmare + ecranare/verde
+    var reducere = Math.min(12, Math.round((lden - 50) * 0.4));
+    if (reducere < 0) reducere = 0;
+    var r = CR('noise', 'Expunere la zgomot (END)', p);
+    r.metrics = [
+      { id: 'lden', label: 'Nivel Lden estimat', value: lden, unit: 'dB(A)', direction: 'negative' },
+      { id: 'prag', label: peste65 ? 'Peste 65 dB (acțiune prioritară)' : peste55 ? 'Peste 55 dB (prag OMS/END)' : 'Sub pragul de 55 dB', value: lden, unit: '', direction: peste55 ? 'negative' : 'positive' },
+      { id: 'exp', label: 'Populație expusă > 55 dB', value: -pop_expusa, unit: 'loc', direction: 'positive' },
+      { id: 'pct', label: 'Procent populație expusă', value: pct_expus, unit: '%', direction: 'negative' },
+      { id: 'red', label: 'Reducere posibilă (măsuri)', value: -reducere, unit: 'dB', direction: 'positive' },
+      { id: 'dist', label: 'Distanță sursă-locuințe', value: dist_locuinte_m, unit: 'm', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-noise', type: 'circle', beforePaint: { 'circle-radius': 8, 'circle-color': '#9a3412', 'circle-opacity': 0.28 }, afterPaint: { 'circle-radius': 24, 'circle-color': '#0EA5A5', 'circle-opacity': 0.45 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Reducerea expunerii la zgomot — hartă de acțiune (END)',
+        description: 'Proiectul evaluează expunerea la zgomotul de trafic conform Directivei 2002/49/CE (END, transpusă prin Legea 121/2019) pentru o zonă cu aproximativ ' + roN(pop_zona) + ' de locuitori din municipiul Iași. Pe baza traficului mediu zilnic (' + roN(trafic_vmd) + ' vehicule/zi), a vitezei (' + viteza_kmh + ' km/h) și a distanței sursă-locuințe (' + dist_locuinte_m + ' m), nivelul Lden estimat este de aproximativ ' + lden + ' dB(A). Aceasta expune circa ' + roN(pop_expusa) + ' de locuitori (' + pct_expus + '%) peste pragul de 55 dB recomandat de OMS. Măsurile propuse — calmarea traficului, asfalt fonoabsorbant, ecranare verde și redistribuirea traficului — pot reduce nivelul cu până la ' + reducere + ' dB. În SIDU este o componentă de sănătate publică și calitate a mediului, corelată cu PMUD (calmarea traficului) și transpusă în PUG prin retrageri și perdele de protecție. Estimare orientativă — harta strategică de zgomot oficială se realizează cu modelul CNOSSOS-EU și măsurători.',
+        justification: 'Zgomotul de trafic este al doilea factor de mediu ca impact asupra sănătății în UE (OMS/AEM): tulburări de somn, boli cardiovasculare. Hărțile strategice de zgomot și planurile de acțiune sunt obligatorii pentru aglomerări.',
+        costEstimate: 'variabil (asfalt fonoabsorbant ~15–25 €/mp; ecranare verde; calmare trafic)',
+        timeline: 'Termen scurt-mediu: calmare trafic + asfalt fonoabsorbant pe coridoarele critice',
+        legalBasis: 'Directiva 2002/49/CE (END); Legea 121/2019; OMS Environmental Noise Guidelines 2018',
+        indicators: ['Lden estimat: ' + lden + ' dB(A)', 'Populație > 55 dB: ' + roN(pop_expusa) + ' (' + pct_expus + '%)', 'Reducere posibilă: −' + reducere + ' dB', 'Trafic: ' + roN(trafic_vmd) + ' veh/zi']
+      },
+      masterplanSection: {
+        interventionType: 'Reducerea zgomotului (calmare trafic + asfalt fonoabsorbant + ecranare verde)',
+        affectedArea: 'coridor + zonă adiacentă · ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0: hartă de zgomot (CNOSSOS) + identificare puncte critice', 'Faza 1: calmare trafic + asfalt fonoabsorbant', 'Faza 2: ecranare verde + retrageri', 'Faza 3: monitorizare Lden'],
+        designPrinciples: ['Sursa la distanță de locuințe', 'Perdele verzi și ecrane acustice', 'Asfalt fonoabsorbant pe artere', 'Fațade orientate dinspre zgomot']
+      },
+      pmudSection: {
+        measureType: 'Calmarea traficului și reducerea vitezei pentru atenuarea zgomotului',
+        trafficImpact: 'Viteză redusă → zgomot redus; redistribuirea traficului de tranzit',
+        modalShift: 'Indirect: medii mai liniștite favorizează mersul pe jos/bicicletă',
+        infrastructureNeeded: ['Asfalt fonoabsorbant', 'Limitatoare de viteză', 'Perdele verzi de protecție', 'Ecrane acustice unde e necesar']
+      }
+    };
+    return r;
+  }
+
+  // ── INSULĂ DE CĂLDURĂ URBANĂ (LST / UHI) ──
+  function calculateLST(p) {
+    var delta_uhi = p.delta_uhi, verde_pct = p.verde_pct, albedo_pct = p.albedo_pct, pop_zona = p.pop_zona;
+    var racire = Math.min(delta_uhi, Math.round((verde_pct / 100 * 2.8 + albedo_pct / 100 * 1.6) * 10) / 10);
+    var rezidual = Math.max(0, Math.round((delta_uhi - racire) * 10) / 10);
+    // populație vulnerabilă la caniculă (vârstnici/copii ~ 30%), accentuată de UHI rezidual
+    var pop_vulnerabila = Math.round(pop_zona * 0.30 * Math.min(1, rezidual / 4));
+    var sever = delta_uhi >= 4 ? 'sever' : delta_uhi >= 2.5 ? 'moderat' : 'redus';
+    var r = CR('lst', 'Insulă de căldură (LST)', p);
+    r.metrics = [
+      { id: 'uhi', label: 'Intensitate UHI (oraș−rural)', value: delta_uhi, unit: '°C', direction: 'negative' },
+      { id: 'sev', label: 'Nivel: ' + sever, value: delta_uhi, unit: '', direction: 'neutral' },
+      { id: 'rac', label: 'Răcire posibilă (verde+albedo)', value: -racire, unit: '°C', direction: 'positive' },
+      { id: 'rez', label: 'ΔT rezidual după măsuri', value: rezidual, unit: '°C', direction: 'negative' },
+      { id: 'verde', label: 'Acoperire verde', value: verde_pct, unit: '%', direction: 'positive' },
+      { id: 'vuln', label: 'Populație vulnerabilă la caniculă', value: -pop_vulnerabila, unit: 'loc', direction: 'positive' }
+    ];
+    r.mapLayers = [
+      { id: 'um-lst', type: 'circle', beforePaint: { 'circle-radius': 8, 'circle-color': '#b91c1c', 'circle-opacity': 0.30 }, afterPaint: { 'circle-radius': 24, 'circle-color': '#2E9E5B', 'circle-opacity': 0.45 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Atenuarea insulei de căldură urbană (LST/UHI)',
+        description: 'Proiectul vizează atenuarea insulei de căldură urbană (UHI) într-o zonă cu aproximativ ' + roN(pop_zona) + ' de locuitori din municipiul Iași, unde diferența de temperatură oraș-rural este de aproximativ ' + delta_uhi + '°C (nivel ' + sever + '), estimată din temperatura suprafeței terestre (LST, satelit Landsat/Sentinel) și acoperirea actuală cu verde (' + verde_pct + '%). Prin creșterea verdelui urban, a albedoului suprafețelor (pavaje și acoperișuri reflectorizante) și a umbririi, se poate obține o răcire de aproximativ ' + racire.toFixed(1) + '°C, reducând ΔT rezidual la circa ' + rezidual.toFixed(1) + '°C și protejând aproximativ ' + roN(pop_vulnerabila) + ' de persoane vulnerabile la caniculă (vârstnici, copii). În SIDU este un proiect de adaptare climatică și sănătate publică, corelat cu regula 3-30-300, Sponge City și Masterplanul, transpus în PUG prin coeficienți de verde și cerințe de albedo. Estimare orientativă — analiza completă folosește imagini termice satelitare și măsurători.',
+        justification: 'Valurile de căldură sunt principalul risc climatic pentru orașe (mortalitate excesivă). Verdele și albedoul sunt cele mai cost-eficiente soluții de răcire, cu beneficii multiple (sănătate, energie, confort).',
+        costEstimate: 'variabil (plantare + acoperișuri/pavaje reflectorizante + umbrire)',
+        timeline: 'Termen mediu (2027–2032): verde + albedo pe zonele cele mai fierbinți (LST)',
+        legalBasis: 'OUG 195/2005; Legea 24/2007; Strategia națională de adaptare la schimbări climatice; IPCC AR6',
+        indicators: ['UHI: ' + delta_uhi + '°C (' + sever + ')', 'Răcire posibilă: −' + racire.toFixed(1) + '°C', 'ΔT rezidual: ' + rezidual.toFixed(1) + '°C', 'Populație vulnerabilă protejată: ' + roN(pop_vulnerabila)]
+      },
+      masterplanSection: {
+        interventionType: 'Răcire urbană (verde + albedo + umbrire)',
+        affectedArea: 'zonă fierbinte (LST) · ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0: hartă LST (satelit) + identificare puncte fierbinți', 'Faza 1: plantare + umbrire pe spațiile publice fierbinți', 'Faza 2: acoperișuri/pavaje reflectorizante', 'Faza 3: monitorizare LST'],
+        designPrinciples: ['Verde și umbră pe spațiile publice', 'Albedo ridicat (pavaje/acoperișuri deschise)', 'Coridoare de ventilație urbană', 'Apă și vegetație pentru răcire evaporativă']
+      },
+      pmudSection: {
+        measureType: 'Umbrire și verde pe traseele pietonale (confort termic)',
+        trafficImpact: 'Neutru pe capacitate; trasee utilizabile pe caniculă',
+        modalShift: 'Indirect: trasee umbrite favorizează mersul pe jos vara',
+        infrastructureNeeded: ['Aliniamente și umbrare pe trasee', 'Pavaje reflectorizante', 'Puncte de apă/răcorire', 'Adăposturi umbrite la stații']
+      }
+    };
+    return r;
+  }
+
+  // ── MIX FUNCȚIONAL (entropie utilizare teren — Frank et al.) ──
+  function calculateMixUse(p) {
+    var rezid_pct = p.rezid_pct, comert_pct = p.comert_pct, munca_pct = p.munca_pct, pop_zona = p.pop_zona;
+    var public_pct = Math.max(0, 100 - rezid_pct - comert_pct - munca_pct);
+    var shares = [rezid_pct, comert_pct, munca_pct, public_pct].map(function (v) { return Math.max(0, v) / 100; });
+    var prezente = shares.filter(function (s) { return s > 0.01; }).length;
+    // entropie normalizată (Land Use Mix, 0..1)
+    var H = 0; shares.forEach(function (s) { if (s > 0) H += s * Math.log(s); });
+    var entropie = prezente > 1 ? Math.round((-H / Math.log(prezente)) * 1000) / 10 : 0;
+    var calitate = entropie >= 75 ? 'foarte echilibrat' : entropie >= 50 ? 'mixt' : entropie >= 25 ? 'predominant monofuncțional' : 'monofuncțional';
+    var r = CR('mixuse', 'Mix funcțional (entropie)', p);
+    r.metrics = [
+      { id: 'ent', label: 'Indice mix funcțional (entropie)', value: entropie, unit: '/100', direction: 'positive' },
+      { id: 'cal', label: 'Caracter: ' + calitate, value: entropie, unit: '', direction: 'neutral' },
+      { id: 'fn', label: 'Funcțiuni prezente', value: prezente, unit: '/4', direction: 'positive' },
+      { id: 'rez', label: 'Rezidențial', value: rezid_pct, unit: '%', direction: 'neutral' },
+      { id: 'com', label: 'Comerț/servicii', value: comert_pct, unit: '%', direction: 'neutral' },
+      { id: 'pub', label: 'Public/verde', value: public_pct, unit: '%', direction: 'neutral' }
+    ];
+    r.mapLayers = [
+      { id: 'um-mix', type: 'circle', beforePaint: { 'circle-radius': 7, 'circle-color': '#888780', 'circle-opacity': 0.25 }, afterPaint: { 'circle-radius': 26, 'circle-color': '#D97706', 'circle-opacity': 0.45 } }
+    ];
+    r.documentContent = {
+      siduSection: {
+        projectTitle: 'Creșterea mixului funcțional — indice de entropie a utilizării terenului',
+        description: 'Proiectul evaluează și îmbunătățește mixul funcțional al unei zone cu aproximativ ' + roN(pop_zona) + ' de locuitori din municipiul Iași, folosind indicele de entropie a utilizării terenului (Land Use Mix, Frank et al.), un indicator-cheie de walkability. Pe distribuția actuală (rezidențial ' + rezid_pct + '%, comerț/servicii ' + comert_pct + '%, locuri de muncă ' + munca_pct + '%, public/verde ' + public_pct + '%), indicele de mix este ' + entropie + '/100 (' + calitate + '). Un mix echilibrat (entropie ridicată) reduce naveta, susține comerțul local și vitalitatea pe tot parcursul zilei. Intervențiile — funcțiuni mixte la parter, conversia zonelor monofuncționale, atragerea locurilor de muncă în cartierele-dormitor — cresc indicele. În SIDU fundamentează zonificarea mixtă, corelat cu modelul „15 minute" și cu coridoarele mixte; se transpune în PUG prin reglementarea funcțiunilor admise.',
+        justification: 'Zonarea monofuncțională (dormitor / pol de birouri) generează navetă, congestie și spații moarte la anumite ore. Mixul funcțional este un predictor robust al mersului pe jos și al vitalității urbane.',
+        costEstimate: 'reglementar + stimulente (conversie funcțiuni, parteruri active) — cost public redus',
+        timeline: 'Termen mediu: reglementare funcțiuni mixte + conversii pilot',
+        legalBasis: 'Legea 350/2001 (PUG/PUZ — funcțiuni admise); ghiduri de zonificare mixtă',
+        indicators: ['Indice mix (entropie): ' + entropie + '/100 (' + calitate + ')', 'Funcțiuni prezente: ' + prezente + '/4', 'Rezidențial/comerț/muncă/public: ' + rezid_pct + '/' + comert_pct + '/' + munca_pct + '/' + public_pct + '%']
+      },
+      masterplanSection: {
+        interventionType: 'Creșterea mixului funcțional (parter activ + conversii)',
+        affectedArea: 'cartier ~' + roN(pop_zona) + ' loc.',
+        phasing: ['Faza 0: cartare funcțiuni (OSM/teren) + calcul entropie', 'Faza 1: funcțiuni mixte la parter pe coridoare', 'Faza 2: conversia zonelor monofuncționale', 'Faza 3: monitorizare indice'],
+        designPrinciples: ['Funcțiuni mixte la parter', 'Locuri de muncă în zonele rezidențiale', 'Servicii de proximitate', 'Evitarea zonării rigide monofuncționale']
+      },
+      pmudSection: {
+        measureType: 'Reducerea navetei prin apropierea funcțiunilor',
+        trafficImpact: 'Mai puține deplasări obligate; cerere distribuită pe parcursul zilei',
+        modalShift: '+pietonal/bicicletă pentru nevoi cotidiene',
+        infrastructureNeeded: ['Parter activ pe coridoare', 'Trasee pietonale între funcțiuni', 'Acces la transport pentru funcțiuni mixte']
+      }
+    };
+    return r;
+  }
+
   // ── geometrie reprezentativă pe hartă (cerc/linie centrat pe map center) ──
   function addModelToMap(mapInstance, center, modelId, sizeM) {
     if (!mapInstance || !center) return;
     var L = (G.MODEL_LAYERS && G.MODEL_LAYERS[modelId]) || null;
     var dLat = sizeM / 111000, dLng = sizeM / (111000 * Math.cos(center.lat * Math.PI / 180));
     var src, data, layer;
-    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss' }[modelId];
+    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss', noise: 'um-noise', lst: 'um-lst', mixuse: 'um-mix' }[modelId];
     if (modelId === 'corridor' || modelId === 'gvi' || modelId === 'spacesyntax') {
       data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[center.lng - dLng * 0.5, center.lat], [center.lng + dLng * 0.5, center.lat]] }, properties: {} };
       layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.6 } };
@@ -454,7 +598,7 @@
   }
   function removeModelFromMap(mapInstance) {
     if (!mapInstance) return;
-    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss'].forEach(function (id) {
+    ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss', 'um-noise', 'um-lst', 'um-mix'].forEach(function (id) {
       try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {}
       try { if (mapInstance.getSource(id + '-src')) mapInstance.removeSource(id + '-src'); } catch (e) {}
     });
@@ -470,7 +614,10 @@
     sdg117: { calc: calculateSDG117, color: '#C2410C', icon: '🏛️', title: 'SDG 11.7 — Spațiu public', size: function (p) { return 400; }, fields: [{ k: 'construit_ha', l: 'Suprafață construită (ha)', v: 120 }, { k: 'spatiu_public_ha', l: 'Spațiu public actual (ha)', v: 12 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 20000 }, { k: 'acces_400m_pct', l: '% pop. cu acces < 400m', v: 55 }] },
     walkscore: { calc: calculateWalkScore, color: '#0E7C5A', icon: '🚶', title: 'Walk Score', size: function (p) { return Math.max(150, p.dist_medie_m); }, fields: [{ k: 'amenitati', l: 'Amenități pe jos (buc)', v: 14 }, { k: 'dist_medie_m', l: 'Distanță medie amenități (m)', v: 420 }, { k: 'intersectii_km2', l: 'Intersecții / km²', v: 90 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
     gvi: { calc: calculateGVI, color: '#3FA34D', icon: '🌿', title: 'Green View Index', size: function (p) { return Math.max(200, p.strazi_km * 200); }, fields: [{ k: 'gvi_actual_pct', l: 'GVI actual (%)', v: 14 }, { k: 'strazi_km', l: 'Lungime străzi (km)', v: 8 }, { k: 'arbori_aliniament', l: 'Arbori aliniament (buc)', v: 600 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
-    spacesyntax: { calc: calculateSpaceSyntax, color: '#7C3AED', icon: '🔗', title: 'Space Syntax — Integrare', size: function (p) { return Math.max(200, p.lungime_retea_km * 100); }, fields: [{ k: 'segmente', l: 'Segmente rețea (buc)', v: 320 }, { k: 'conectivitate_medie', l: 'Conectivitate medie', v: 3.4 }, { k: 'lungime_retea_km', l: 'Lungime rețea (km)', v: 22 }, { k: 'intersectii', l: 'Intersecții (buc)', v: 280 }] }
+    spacesyntax: { calc: calculateSpaceSyntax, color: '#7C3AED', icon: '🔗', title: 'Space Syntax — Integrare', size: function (p) { return Math.max(200, p.lungime_retea_km * 100); }, fields: [{ k: 'segmente', l: 'Segmente rețea (buc)', v: 320 }, { k: 'conectivitate_medie', l: 'Conectivitate medie', v: 3.4 }, { k: 'lungime_retea_km', l: 'Lungime rețea (km)', v: 22 }, { k: 'intersectii', l: 'Intersecții (buc)', v: 280 }] },
+    noise: { calc: calculateNoise, color: '#0EA5A5', icon: '🔊', title: 'Expunere zgomot (END)', size: function (p) { return Math.max(120, p.dist_locuinte_m); }, fields: [{ k: 'trafic_vmd', l: 'Trafic mediu zilnic (veh/zi)', v: 12000 }, { k: 'viteza_kmh', l: 'Viteză (km/h)', v: 50 }, { k: 'dist_locuinte_m', l: 'Distanță sursă-locuințe (m)', v: 20 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 6000 }] },
+    lst: { calc: calculateLST, color: '#B91C1C', icon: '🌡️', title: 'Insulă de căldură (LST)', size: function (p) { return 350; }, fields: [{ k: 'delta_uhi', l: 'Intensitate UHI (°C)', v: 3.5 }, { k: 'verde_pct', l: 'Acoperire verde (%)', v: 18 }, { k: 'albedo_pct', l: 'Albedo suprafețe (%)', v: 25 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 12000 }] },
+    mixuse: { calc: calculateMixUse, color: '#D97706', icon: '🧩', title: 'Mix funcțional (entropie)', size: function (p) { return 300; }, fields: [{ k: 'rezid_pct', l: 'Rezidențial (%)', v: 70 }, { k: 'comert_pct', l: 'Comerț/servicii (%)', v: 12 }, { k: 'munca_pct', l: 'Locuri de muncă (%)', v: 8 }, { k: 'pop_zona', l: 'Populație zonă (loc)', v: 8000 }] }
   };
   var _params = {}, _ov = null, _curId = null;
   Object.keys(REG).forEach(function (id) { _params[id] = {}; REG[id].fields.forEach(function (f) { _params[id][f.k] = f.v; }); });
@@ -534,6 +681,7 @@
   G.calculate15Min = calculate15Min; G.calculateTOD = calculateTOD; G.calculateCorridor = calculateCorridor; G.calculateSponge = calculateSponge;
   G.calculate330300 = calculate330300; G.calculateSDG117 = calculateSDG117;
   G.calculateWalkScore = calculateWalkScore; G.calculateGVI = calculateGVI; G.calculateSpaceSyntax = calculateSpaceSyntax;
+  G.calculateNoise = calculateNoise; G.calculateLST = calculateLST; G.calculateMixUse = calculateMixUse;
   G.renderUrbanModelDialog = renderUrbanModelDialog; G.runUrbanModelCalc = runUrbanModelCalc; G.saveUrbanModelScenario = saveUrbanModelScenario;
   G._toggleUmExport = _toggleUmExport; G._umSetParam = _umSetParam; G.closeUrbanModelDialog = closeUrbanModelDialog;
 })(window);

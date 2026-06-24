@@ -190,7 +190,10 @@
     { id: 'sdg117', label: 'SDG 11.7', icon: '🏛️', color: '#C2410C' },
     { id: 'walkscore', label: 'Walk Score', icon: '🚶', color: '#0E7C5A' },
     { id: 'gvi', label: 'Green View', icon: '🌿', color: '#3FA34D' },
-    { id: 'spacesyntax', label: 'Space Syntax', icon: '🔗', color: '#7C3AED' }
+    { id: 'spacesyntax', label: 'Space Syntax', icon: '🔗', color: '#7C3AED' },
+    { id: 'noise', label: 'Zgomot (END)', icon: '🔊', color: '#0EA5A5' },
+    { id: 'lst', label: 'Căldură (LST)', icon: '🌡️', color: '#B91C1C' },
+    { id: 'mixuse', label: 'Mix funcțional', icon: '🧩', color: '#D97706' }
   ];
   function renderModelSelector(containerId, activeId) {
     var el = document.getElementById(containerId); if (!el) return;
