@@ -373,6 +373,11 @@
       ]);
 
       // ─────────────────────────────────────────────────────────────────────
+      // ── INDICATORI URBANI SINTETICI (set complet, la capitol relevant de analiza) ──
+      D.chapter('Indicatori urbani sintetici aplicați');
+      D.P('Masterplanul integrează un set complet de indici urbani standardizați pentru diagnoza și prioritizarea intervențiilor la nivelul ' + (city.name || 'UAT') + ', fiecare cu formulă transparentă și sursă metodologică:');
+      try { if (window._DocMapCaptures && window._DocMapCaptures.indicesSection) window._DocMapCaptures.indicesSection(D); } catch (e) {}
+
       // CAP 14 — BILANT TERITORIAL EXISTENT
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Utilizarea terenului — bilant teritorial');

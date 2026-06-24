@@ -2185,6 +2185,12 @@ D.sourceBadges(['INS', 'Eurostat', 'MDLPA', 'ADR ' + reg, 'Evaluare UrbanX']);
           D.sourceBadges(['P100-1/2013 (MDLPA)', 'ANAR PGRA 2021-2027', 'GEM/SYNER-G', 'Lagomarsino & Giovinazzi 2006', 'SR EN 752', 'HAZUS-MH (FEMA)']);
         }
       }
+      // --- INDICATORI URBANI SINTETICI (set complet, la capitol relevant — analiza) ---
+      {
+        D.chapter('Indicatori urbani sintetici aplicați');
+        D.P('Pe lângă indicatorii de bază (POT/CUT, regim, spații verzi, mobilitate), platforma aplică un set complet de indici urbani standardizați, integrați în diagnoza ' + uat + ' și în prioritizarea intervențiilor.');
+        try { if (window._DocMapCaptures && window._DocMapCaptures.indicesSection) window._DocMapCaptures.indicesSection(D); } catch (e) {}
+      }
       // --- sectiune ord 30 (chapter) ---
       {
 D.chapter('Analiza SWOT integrata si analiza PEST')

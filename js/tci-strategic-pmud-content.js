@@ -431,6 +431,11 @@
       ], [50, 64, 60], { boldFirst: true });
       D.source('Estimari pe bază valorilor unitare din ghidurile europene de evaluare a costurilor externe ale transportului (Handbook on external costs of transport, CE Delft).');
 
+      // ── INDICATORI URBANI SINTETICI (set complet, la capitol relevant de analiza) ──
+      D.chapter('Indicatori urbani sintetici aplicați');
+      D.P('Analiza de mobilitate se corelează cu setul complet de indici urbani standardizați (în special Oraș 15 minute, Walk Score, TOD, coridor mixt, zgomot END), fiecare cu formulă transparentă și sursă:');
+      try { if (window._DocMapCaptures && window._DocMapCaptures.indicesSection) window._DocMapCaptures.indicesSection(D); } catch (e) {}
+
       D.chapter('Viziune, obiective și ținte');
       D.callout('Viziune de mobilitate 2040', 'În ' + city.name + ', mobilitatea este sigură, curăță, accesibilă și echitabilă: deplasarile zilnice se realizează preponderent pe jos, cu bicicletă și cu un transport public de calitate, iar autoturismul devine o opțiune complementara. Spațiul public este redat oamenilor, emisiile și accidentele scad semnificativ.');
       D.h2('Viziune pe trei niveluri teritoriale');

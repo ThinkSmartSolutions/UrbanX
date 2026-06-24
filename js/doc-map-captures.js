@@ -148,6 +148,33 @@
     } catch (e) { console.warn('[DocMapCaptures] docClosing', e); }
   }
 
-  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing };
+  // ── Sectiune INDICI URBANI (referinta cu formula + sursa) — la capitol relevant, nu la final ──
+  var _INDICI = [
+    ['Orașul 15 minute', 'Acces pe jos/bicicletă (≤15 min) la 6 funcțiuni esențiale', 'acoperire = min(95, 45 + servicii_lipsă·6) %', 'C. Moreno (Sorbonne) · Paris'],
+    ['TOD — orientare spre transit', 'Densificare locuire+muncă+servicii în jurul stațiilor', 'locuințe = arie_ha·densitate/2,3; transfer modal ↑', 'P. Calthorpe'],
+    ['Coridor urban mixt', 'Arteră de tranzit → stradă vie, funcțiuni mixte', 'front_activ = lungime·2·pct; spații = front/12', 'mixed-use (activare parter)'],
+    ['Oraș-burete (Sponge City)', 'Permeabilitate + retenție apă pluvială la sursă', 'apă = permeabil_nou·0,04 mc', 'K. Yu / Turenscape (NbS)'],
+    ['Regula 3-30-300', '3 arbori vizibili · 30% canopy · parc ≤300 m', 'conformitate = criterii/3·100 %', 'C. Konijnendijk · OMS/IUCN'],
+    ['SDG 11.7 — spațiu public', 'Pondere spațiu public + acces ≤400 m', 'share = spațiu_public/construit·100 %', 'UN-Habitat · SDG 11.7.1'],
+    ['Walk Score', 'Pietonabilitate: amenități pe jos + conectivitate', 'scor = f(amenități, distanță, intersecții) 0-100', 'metodologie Walk Score'],
+    ['Green View Index', 'Verde vizibil la nivelul ochiului (street-level)', 'deficit = max(0, 25 − GVI) pp', 'literatura GVI'],
+    ['Space Syntax — integrare', 'Accesibilitatea configurațională a rețelei stradale', 'integrare = f(conectivitate, intersecții) 0-1', 'B. Hillier (UCL)'],
+    ['Expunere zgomot (END)', 'Lden trafic + populație expusă >55 dB', 'Lden ≈ 38 + 10·log₁₀(trafic) − 12·log₁₀(d/10)', 'Dir. 2002/49/CE · OMS'],
+    ['Insulă de căldură (LST/UHI)', 'Intensitate UHI + răcire prin verde/albedo', 'răcire = min(ΔT, verde·2,8 + albedo·1,6) °C', 'LST satelitar · IPCC AR6'],
+    ['Mix funcțional (entropie)', 'Echilibrul amestecului de funcțiuni (predictor walkability)', 'entropie = −Σ(pᵢ·ln pᵢ)/ln(n) · 100', 'Frank et al. (Land Use Mix)']
+  ];
+  function indicesSection(D) {
+    if (!D || !D.h2) return;
+    try {
+      D.h2('Indicatori urbani sintetici — set complet aplicat');
+      D.P('Diagnoza se sprijină pe un set complet de indicatori urbani standardizați, fiecare cu formulă transparentă și sursă metodologică recunoscută. Valorile per zonă/UAT se generează interactiv (modulul „Raport indici urbani") și se vizualizează pe hartă (SimLab / Planificare Urbană). Mai jos — referința de calcul a fiecărui indice integrat în platformă:');
+      D.table(['Indice urban', 'Ce măsoară', 'Formulă (sinteză)', 'Sursă / standard'],
+        _INDICI.map(function (x) { return [x[0], x[1], x[2], x[3]]; }),
+        [38, 58, 50, 28], { fs: 7 });
+      D.P('Acești indicatori fundamentează prioritizarea intervențiilor și se corelează cu obiectivele strategice: pietonabilitate și acces la servicii (Oraș 15 minute, Walk Score, SDG 11.7), infrastructură verde-albastră și adaptare climatică (3-30-300, Green View, Sponge City, LST/UHI), calitatea mediului (zgomot END) și eficiența formei urbane (TOD, coridor mixt, mix funcțional, Space Syntax).');
+    } catch (e) { console.warn('[DocMapCaptures] indicesSection', e); }
+  }
+
+  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing, indicesSection: indicesSection };
   console.log('[DocMapCaptures] modul capturi harta pentru documente incarcat');
 })(window);
