@@ -30,7 +30,12 @@
     'sidu-doc': function () { try { G.SIDU && G.SIDU.generateDocument && G.SIDU.generateDocument(G.TCI && G.TCI.cityKey); } catch (e) {} },
     'sidu-docx': function () { try { G.SIDU && G.SIDU.generateDocx && G.SIDU.generateDocx(G.TCI && G.TCI.cityKey); } catch (e) {} },
     sidu: mod('SIDU', 'openPanel'), masterplan: call('generateMasterplan'), pmud: call('generatePMUD'),
-    portofoliu: call('generatePortfolio')
+    portofoliu: call('generatePortfolio'),
+    // module recente (cap.5/21: niciun coeficient/simulare neafisat)
+    indici: function () { try { G.UrbanIndicesReport && G.UrbanIndicesReport.generate(); } catch (e) {} },
+    riscSeismic: mod('RiskSeismic', 'openPanel'), riscFlood: mod('RiskFlood', 'openPanel'),
+    riscAla: function () { try { G.RiskShelters && G.RiskShelters.toggle(); } catch (e) {} },
+    retele: function () { try { G.CAU && G.CAU.showNetworksPanel(); } catch (e) {} }
   };
 
   // ── NAV_STRUCTURE (7 grupe, emoji — fără librărie iconițe) ──
@@ -56,7 +61,13 @@
       { label: 'Land Value Capture', moduleId: 'lvc' },
       { label: 'Carbon & emisii', moduleId: 'carbon' },
       { label: 'Analytics — Walk/15-min/ROI/Carbon/UHI/SDG/seismic', moduleId: 'analytics' },
+      { label: 'Raport indici urbani (PDF, 12 indici)', moduleId: 'indici' },
       { label: 'Metodologie & surse de date', moduleId: 'metodologie' } ] },
+    { id: 'risc', label: 'Riscuri & Protecție civilă', ico: '⚠️', color: '#ef4444', items: [
+      { label: 'Simulare cutremur (mag. 5-8, Vrancea)', moduleId: 'riscSeismic' },
+      { label: 'Predicție inundație pluvială', moduleId: 'riscFlood' },
+      { label: 'Inventar adăposturi ALA', moduleId: 'riscAla' },
+      { label: 'Rețele edilitare pe hartă', moduleId: 'retele' } ] },
     { id: 'proiectare', label: 'Proiectare', ico: '📐', color: '#D85A30', items: [
       { label: 'SimLab — simulări (10)', moduleId: 'simlab' },
       { label: 'Masterplan ansamblu (lotizare)', moduleId: 'lotizare' },
