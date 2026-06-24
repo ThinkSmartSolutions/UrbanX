@@ -133,6 +133,16 @@
       '<h3 style="margin:0;font-size:17px;font-weight:700">Superbloc (model Barcelona)</h3></div>' +
       '<p style="margin:4px 0 12px;font-size:12px;opacity:0.55">Tranzit pe perimetru · interior pentru oameni · reflectat în SIDU, Masterplan, PMUD</p>' +
       '<button onclick="closeSuperblocDialog()" style="position:absolute;top:12px;right:14px;background:none;border:0;color:#94a3b8;font-size:20px;cursor:pointer">×</button>' +
+      '<details style="margin-bottom:14px;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.18);border-radius:8px;padding:8px 12px">' +
+      '<summary style="cursor:pointer;font-size:12px;font-weight:700;color:#F97316">ℹ️ Cum se amplasează superbloc-ul (logica deterministă)</summary>' +
+      '<ol style="margin:8px 0 2px;padding-left:18px;font-size:11.5px;line-height:1.65;opacity:0.85">' +
+      '<li><b>Centrul</b> = centrul curent al hărții (<code>map.getCenter()</code>). Mută/zoom-ezi harta pe cartierul vizat înainte de „Calculează".</li>' +
+      '<li><b>Conturul</b> = pătrat de <i>latură × latură</i> m (implicit 400 m ≈ 9 cvartale Cerdà), centrat pe acel punct. Metrii → grade prin factorii Mercator (111 000 m/grad lat, corectat cu cos(lat) pe lon).</li>' +
+      '<li><b>Grila internă</b>: 2 străzi pe verticală + 2 pe orizontală, plasate la <b>1/3 și 2/3</b> din latură → împart interiorul în <b>3×3 = 9 cvartale</b>.</li>' +
+      '<li><b>4 piațete</b> generate la nodurile interioare (intersecțiile grilei la ±1/3).</li>' +
+      '<li><b>Ierarhie</b>: perimetrul rămâne pentru <span style="color:#F97316">tranzit (portocaliu)</span>, străzile interioare devin <span style="color:#86efac">pietonale 10 km/h (verzi)</span>.</li>' +
+      '<li><b>Determinist</b>: aceiași parametri → exact aceeași geometrie de fiecare dată (fără aleatoriu). Pentru aliniere la străzile reale: „Aplică pe străzile reale (OSM)".</li>' +
+      '</ol></details>' +
       '<div style="font-size:11px;font-weight:700;color:#F97316;letter-spacing:1px;margin-bottom:10px">PARAMETRI</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">' +
       fields.map(function (f) { return '<div><label style="font-size:12px;opacity:0.65;display:block;margin-bottom:4px">' + f.label + '</label>' +

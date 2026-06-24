@@ -182,7 +182,7 @@
       '<div style="font-size:10.5px;opacity:0.55;margin-top:10px;line-height:1.6">' +
       '<b>Formule:</b> I₀ = 1,5·M − 1,5 = ' + r.I0.toFixed(1) + ' &nbsp;·&nbsp; ' +
       'I = I₀ − 3·log₁₀(R/h) − 3·α·log₁₀(e)·(R−h), R = ' + Math.round(r.R) + ' km, h = 95 km, α = 0,003 &nbsp;·&nbsp; ' +
-      'PGA: I = 3,66·log₁₀(PGA) − 1,66.</div>';
+      'PGA: I = 3,66·log₁₀(PGA) − 1,66 <i>(Wald — calibrare crustală; pentru sursele adânci Vrancea reprezintă o estimare de limită superioară).</i></div>';
     var rd = document.getElementById('seis-results'); if (rd) { rd.style.display = 'block'; rd.innerHTML = html; }
   }
   function _kpi(label, val, col) {
