@@ -586,12 +586,15 @@
     var dLat = sizeM / 111000, dLng = sizeM / (111000 * Math.cos(center.lat * Math.PI / 180));
     var src, data, layer;
     var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss', noise: 'um-noise', lst: 'um-lst', mixuse: 'um-mix' }[modelId];
+    // culoare per indice (vizibil direct pe harta, nu gri prin setTransition)
+    var COL = { 'um-iso': '#BA7517', 'um-tod': '#534AB7', 'um-sponge': '#378ADD', 'um-corridor': '#1D9E75', 'um-330': '#2E9E5B', 'um-sdg117': '#C2410C', 'um-walk': '#0E7C5A', 'um-gvi': '#3FA34D', 'um-ss': '#7C3AED', 'um-noise': '#0EA5A5', 'um-lst': '#B91C1C', 'um-mix': '#D97706' };
+    var _c = COL[calcId] || '#7C3AED';
     if (modelId === 'corridor' || modelId === 'gvi' || modelId === 'spacesyntax') {
       data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[center.lng - dLng * 0.5, center.lat], [center.lng + dLng * 0.5, center.lat]] }, properties: {} };
-      layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': '#888780', 'line-width': 3, 'line-opacity': 0.6 } };
+      layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': _c, 'line-width': 9, 'line-opacity': 0.9 } };
     } else {
       data = { type: 'Feature', geometry: { type: 'Point', coordinates: [center.lng, center.lat] }, properties: {} };
-      layer = { id: calcId, type: 'circle', source: calcId + '-src', paint: { 'circle-radius': 6, 'circle-color': '#888780', 'circle-opacity': 0.25 } };
+      layer = { id: calcId, type: 'circle', source: calcId + '-src', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 26, 14, 90], 'circle-color': _c, 'circle-opacity': 0.4, 'circle-stroke-color': _c, 'circle-stroke-width': 2 } };
     }
     try { if (mapInstance.getSource(calcId + '-src')) mapInstance.getSource(calcId + '-src').setData(data); else mapInstance.addSource(calcId + '-src', { type: 'geojson', data: data }); } catch (e) {}
     try { if (!mapInstance.getLayer(calcId)) mapInstance.addLayer(layer); } catch (e) {}

@@ -99,13 +99,15 @@
     var setOrAdd = function (id, data) { try { if (mapInstance.getSource(id)) mapInstance.getSource(id).setData(data); else mapInstance.addSource(id, { type: 'geojson', data: data }); } catch (e) { console.error('003 source ' + id, e); } };
     setOrAdd('superbloc-perimeter-src', perimeter); setOrAdd('superbloc-interior-src', streets); setOrAdd('superbloc-plazas-src', plazas);
     var addLayer = function (id, type, source, paint) { try { if (!mapInstance.getLayer(id)) mapInstance.addLayer({ id: id, type: type, source: source, paint: paint }); } catch (e) { console.error('003 layer ' + id, e); } };
-    addLayer('superbloc-perimeter', 'line', 'superbloc-perimeter-src', { 'line-color': '#F97316', 'line-width': 2, 'line-dasharray': [4, 2], 'line-opacity': 0.9 });
-    addLayer('superbloc-interior-streets', 'line', 'superbloc-interior-src', { 'line-color': '#555555', 'line-width': 2, 'line-opacity': 0.8 });
-    addLayer('superbloc-plazas', 'circle', 'superbloc-plazas-src', { 'circle-radius': 0, 'circle-color': '#97C459', 'circle-opacity': 0.9 });
+    // VIZIBIL direct (nu prin setTransition): fill translucid + perimetru gros + strazi verzi + piatete vizibile
+    addLayer('superbloc-fill', 'fill', 'superbloc-perimeter-src', { 'fill-color': '#F97316', 'fill-opacity': 0.16 });
+    addLayer('superbloc-perimeter', 'line', 'superbloc-perimeter-src', { 'line-color': '#F97316', 'line-width': 4, 'line-opacity': 1 });
+    addLayer('superbloc-interior-streets', 'line', 'superbloc-interior-src', { 'line-color': '#39B54A', 'line-width': 6, 'line-opacity': 0.9 });
+    addLayer('superbloc-plazas', 'circle', 'superbloc-plazas-src', { 'circle-radius': 11, 'circle-color': '#97C459', 'circle-opacity': 0.92, 'circle-stroke-color': '#2c7a2c', 'circle-stroke-width': 1.5 });
   }
   function removeSuperblocFromMap(mapInstance) {
     if (!mapInstance) return;
-    ['superbloc-perimeter', 'superbloc-interior-streets', 'superbloc-plazas'].forEach(function (id) { try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {} });
+    ['superbloc-fill', 'superbloc-perimeter', 'superbloc-interior-streets', 'superbloc-plazas'].forEach(function (id) { try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {} });
     ['superbloc-perimeter-src', 'superbloc-interior-src', 'superbloc-plazas-src'].forEach(function (id) { try { if (mapInstance.getSource(id)) mapInstance.removeSource(id); } catch (e) {} });
   }
 

@@ -204,10 +204,8 @@ G._TCIMasterplanPDF = {
     pdf.setFillColor(10,22,58); pdf.rect(0,8,W,H-16,'F');
     pdf.setFillColor(...GOLD); pdf.rect(0,0,W,7,'F'); pdf.rect(0,H-7,W,7,'F');
 
-    // Logo + titlu
-    pdf.setFillColor(...GOLD); pdf.roundedRect(14,18,12,9,1.5,1.5,'F');
-    pdf.setTextColor(...DARK); pdf.setFont('helvetica','bold'); pdf.setFontSize(8);
-    pdf.text('UX',20,24.5,{align:'center'});
+    // Logo REAL UrbanX + titlu
+    if(window._drawUrbanxLogo){ window._drawUrbanxLogo(pdf,14,16,13); } else { pdf.setFillColor(...GOLD); pdf.roundedRect(14,18,12,9,1.5,1.5,'F'); pdf.setTextColor(...DARK); pdf.setFont('helvetica','bold'); pdf.setFontSize(8); pdf.text('UX',20,24.5,{align:'center'}); }
 
     pdf.setTextColor(...GOLD); pdf.setFont('helvetica','bold'); pdf.setFontSize(7);
     pdf.text('URBANX TSS·FG  ·  TEMPORAL CITY INTELLIGENCE', W/2, 20, {align:'center'});

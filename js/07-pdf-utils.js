@@ -2,6 +2,8 @@
 
 function _pdfDrawLogo(pdf, x, y, size){
   const s = size || 10;
+  // Logo REAL UrbanX (favicon) daca e disponibil — altfel fallback la vectorul de mai jos
+  try { if (window._urbanxLogoDataURL) { pdf.addImage(window._urbanxLogoDataURL, 'PNG', x, y, s, s); return; } } catch(e){}
   // Background rotund
   pdf.setFillColor(14, 22, 42);
   pdf.roundedRect(x, y, s, s, s*0.2, s*0.2, 'F');
