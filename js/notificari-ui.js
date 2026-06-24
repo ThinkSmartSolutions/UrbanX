@@ -65,11 +65,20 @@
       '⚠ <b>Necesită server + ca primăria să publice cererile în UrbanX.</b> Mecanismul real (planningalerts): cetățeanul se abonează la o zonă → la fiecare cerere nouă publicată de primărie, un server face matching geospatial → trimite email. Abonarea de mai jos e doar un <b>preview local</b> (în acest browser); livrarea reală prin email = Faza 2 (backend + email).'));
     p2.appendChild(el('div', { style: ST.label }, 'Abonare (preview local)'));
     var email = el('input', { style: ST.inp, placeholder: 'email@exemplu.ro' }); p2.appendChild(email);
+    // GDPR: consimtamant explicit inainte de a stoca emailul (date cu caracter personal)
+    var gdprLab = el('label', { style: 'display:flex;gap:7px;align-items:flex-start;font-size:10px;color:#94a3b8;margin-top:8px;cursor:pointer;line-height:1.4' });
+    var gdprCb = el('input', { type: 'checkbox', style: 'margin-top:2px;flex-shrink:0' });
+    gdprLab.appendChild(gdprCb);
+    gdprLab.appendChild(el('span', null, 'Sunt de acord ca adresa de email si zona selectata sa fie stocate (local, in acest browser) in scopul notificarilor de proximitate. Datele NU sunt transmise unui server in aceasta versiune si pot fi sterse oricand din browser. (Regulamentul UE 2016/679 - GDPR)'));
+    p2.appendChild(gdprLab);
     var subBtn = el('button', { style: ST.ghost + ';margin-top:8px' }, 'Salvează abonarea (local)'); p2.appendChild(subBtn);
     var subOut = el('div', { style: 'margin-top:8px' }); p2.appendChild(subOut);
     subBtn.onclick = function () {
+      var _em = (email.value || '').trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(_em)) { subOut.innerHTML = '<div style="font-size:12px;color:#fbbf24">Introduceti o adresa de email valida.</div>'; return; }
+      if (!gdprCb.checked) { subOut.innerHTML = '<div style="font-size:12px;color:#fbbf24">Bifati consimtamantul GDPR pentru a salva abonarea.</div>'; return; }
       var ac2 = activeCentroid();
-      var s = G.Notificari.subs.subscribe({ email: email.value, mode: ac2 ? 'address' : 'uat', center: ac2 ? ac2.c : null, radius_m: 200, uat: (G.TCI && G.TCI.cityKey) });
+      var s = G.Notificari.subs.subscribe({ email: _em, consent: true, consentTs: new Date().toISOString(), mode: ac2 ? 'address' : 'uat', center: ac2 ? ac2.c : null, radius_m: 200, uat: (G.TCI && G.TCI.cityKey) });
       var matches = G.Notificari.subs.matches(s).length;
       subOut.innerHTML = '<div style="font-size:12px;color:#34d399">✓ Abonare salvată local. ' + matches + ' evenimente în zonă (din registrele platformei). Emailul real vine cu serverul.</div>';
     };

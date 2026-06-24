@@ -71,11 +71,18 @@
     var desc = el('textarea', { style: ST.inp + ';margin-top:6px;min-height:60px', placeholder: 'Descriere' }); p1.appendChild(desc);
     var prio = el('select', { style: ST.inp + ';margin-top:6px' }); G.Sesizari.PRIORITIES.forEach(function (pp) { prio.appendChild(el('option', { value: pp }, 'Prioritate: ' + pp)); }); prio.value = 'medie'; p1.appendChild(prio);
     p1.appendChild(el('div', { style: 'font-size:11px;color:' + (loc ? '#34d399' : '#fbbf24') + ';margin-top:8px' }, loc ? ('📍 Locație: ' + (ap && ap.centroid ? 'parcela selectată (CF ' + (ap.nrcad || '—') + ')' : 'centrul hărții') + ' — ' + loc[1].toFixed(5) + ', ' + loc[0].toFixed(5)) : '⚠ Fără locație — selectează o parcelă sau deschide harta.'));
+    // GDPR: sesizarea (text + locatie) e afisata public pe harta UAT
+    var gdprS = el('label', { style: 'display:flex;gap:7px;align-items:flex-start;font-size:10px;color:#94a3b8;margin-top:10px;cursor:pointer;line-height:1.4' });
+    var gdprSCb = el('input', { type: 'checkbox', style: 'margin-top:2px;flex-shrink:0' });
+    gdprS.appendChild(gdprSCb);
+    gdprS.appendChild(el('span', null, 'Sesizarea (text + locatie) va fi afisata PUBLIC pe harta UAT. NU includeti date cu caracter personal (nume, telefon, CNP) in descriere. Sunt de acord cu publicarea. (GDPR - Reg. UE 2016/679)'));
+    p1.appendChild(gdprS);
     var send = el('button', { style: ST.btn + ';margin-top:12px' }, '📤 Trimite sesizarea'); p1.appendChild(send);
     var out = el('div', { style: 'margin-top:10px' }); p1.appendChild(out);
     send.onclick = function () {
       if (!title.value.trim()) { out.innerHTML = '<div style="color:#fca5a5;font-size:12px">Adaugă un titlu.</div>'; return; }
-      var s = G.Sesizari.registry.add({ category: catSel.value, title: title.value, description: desc.value, priority: prio.value, geom: loc, linked_parcel: ap ? { nrcad: ap.nrcad } : null, address_text: (ap && ap.nrcad ? 'CF ' + ap.nrcad : '') });
+      if (!gdprSCb.checked) { out.innerHTML = '<div style="color:#fbbf24;font-size:12px">Bifati acordul de publicare (GDPR) pentru a trimite sesizarea.</div>'; return; }
+      var s = G.Sesizari.registry.add({ category: catSel.value, title: title.value, description: desc.value, priority: prio.value, geom: loc, linked_parcel: ap ? { nrcad: ap.nrcad } : null, address_text: (ap && ap.nrcad ? 'CF ' + ap.nrcad : ''), consent: true, consentTs: new Date().toISOString() });
       var extra = s.flag_no_permit ? '<div style="color:#f87171;font-size:12px;margin-top:4px">⚠ Cross-check CAU: nicio autorizație găsită pentru parcelă → marcat PRIORITATE MARE.</div>' : (s.cau_check && s.cau_check.has_permit ? '<div style="color:#34d399;font-size:12px;margin-top:4px">✓ Parcela are ' + s.cau_check.permits + ' autorizație(i) în CAU.</div>' : '');
       out.innerHTML = '<div style="color:#34d399;font-size:13px">✓ Sesizare înregistrată (' + s.id.slice(0, 8) + '). Apare pe hartă & în dosarul parcelei.</div>' + extra;
       title.value = ''; desc.value = '';
