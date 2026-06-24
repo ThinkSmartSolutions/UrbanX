@@ -1261,14 +1261,14 @@ document.addEventListener('click', function(){
     <span>UrbanX</span>
   </span>
 
-  <!-- Grup 1: Navigare & Căutare -->
+  <!-- Grup 1: Navigare & Căutare (cap.1 flow: Funcții→doar ⌘K; Multi→meniul multiselect dreapta-jos) -->
   <button class="tb-btn" id="btn-launcher" title="Toate funcțiile platformei (Cmd/Ctrl+K)"
     onclick="window.Launcher&&window.Launcher.open?window.Launcher.open():ss?.('Launcher se inițializează')"
-    style="background:linear-gradient(180deg,rgba(212,175,55,.22),rgba(212,175,55,.1));border:1px solid rgba(212,175,55,.5);color:#d4af37;font-weight:800;display:flex;align-items:center;gap:5px">🔍 Funcții <span style="font-size:9px;opacity:.7;border:1px solid rgba(212,175,55,.4);border-radius:4px;padding:0 4px">⌘K</span></button>
+    style="display:none;background:linear-gradient(180deg,rgba(212,175,55,.22),rgba(212,175,55,.1));border:1px solid rgba(212,175,55,.5);color:#d4af37;font-weight:800;align-items:center;gap:5px">🔍 Funcții <span style="font-size:9px;opacity:.7;border:1px solid rgba(212,175,55,.4);border-radius:4px;padding:0 4px">⌘K</span></button>
   <button class="tb-btn" id="btnUTR">🗺 UTR</button>
   <button class="tb-btn" id="btn-cadastru-bt" title="Toggle cadastru" style="display:none;color:#94a3b8;border-color:rgba(255,255,255,0.15)" onclick="window._toggleCadastru(window.TCI?.cityKey||localStorage.getItem('ux_last_city')||'RO-BT-01')">🗺 Cadastru</button>
   <button class="tb-btn" id="btnGPS">📍 GPS</button>
-  <button class="tb-btn" id="btnMulti" title="Multiselect parcele">🔲 Multi</button>
+  <button class="tb-btn" id="btnMulti" title="Multiselect parcele" style="display:none">🔲 Multi</button>
 
   <!-- UAT activ -->
   <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
@@ -1301,22 +1301,22 @@ document.addEventListener('click', function(){
 
   <!-- Grup 3: Instrumente dropdown -->
   <div id="tools-group">
-    <button class="tb-btn" onclick="_toggleToolsMenu(event)" title="Instrumente analiză" style="display:flex;align-items:center;gap:4px">
-      🔬 Analiză ▾
+    <button class="tb-btn" onclick="_toggleToolsMenu(event)" title="Flux de avizare — cadastru, fișă, lotizare, planșe, avize" style="display:flex;align-items:center;gap:4px">
+      📋 Flux de avizare ▾
+    </button>
+  </div>
+
+  <!-- Planificare Urbană (cap.21 flow: fost UrbanX Pro, mutat înainte de Rapoarte) -->
+  <div id="tci-group" style="position:relative">
+    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.open():_toggleTCIMenu(event)" title="Planificare Urbană — PUG/PUZ/PUD, indici, simlab, risc, monumente, consultare"
+      style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
+        border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
+      🏙 Planificare Urbană ▾
     </button>
   </div>
 
   <!-- Rapoarte (rămâne vizibil — acțiunea principală) -->
   <button class="tb-btn" id="btnPDF" onclick="toggleRapoarteMenu()" title="Rapoarte & Studii" style="display:flex;align-items:center;gap:4px;position:relative">📋 Rapoarte ▾</button>
-
-  <!-- Meniu TCI Avansat — Cinema, Comparatii, AI, Zone -->
-  <div id="tci-group" style="position:relative">
-    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.open():_toggleTCIMenu(event)" title="UrbanX Pro — meniu structurat (7 grupe)"
-      style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
-        border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
-      🏙 UrbanX Pro ▾
-    </button>
-  </div>
 
   <!-- Admin & Cont -->
   <button onclick="_adminOpen()" id="btn-admin" title="Panou Admin" style="display:none;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:7px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0;align-items:center;gap:4px" onmouseover="this.style.background='rgba(212,175,55,.3)'" onmouseout="this.style.background='rgba(212,175,55,.15)'">⚙️ Admin</button>
@@ -1583,11 +1583,12 @@ document.addEventListener('click', function(){
     <button class="ptab active" data-t="search">🔍 Căutare</button>
     <button class="ptab" data-t="utr">📋 Reguli PUG</button>
     <button class="ptab" data-t="indicatori" style="display:none">📊 Indicatori</button>
-    <button class="ptab" data-t="proiect">🏗 Analiză</button>
-    <button class="ptab" data-t="multi">🔲 Multi</button>
+    <button class="ptab" data-t="proiect">🏗 Pre-Proiectare</button>
+    <button class="ptab" data-t="multi">🔲 Multiparcele</button>
     <button class="ptab" data-t="scen">📅 Scen.</button>
     <button class="ptab" data-t="rapoarte" style="display:none">📋 Rapoarte</button>
-    <button class="ptab" data-t="studymap" onclick="openStudyMap()" title="Hartă conexiuni rapoarte">🗺 Hartă</button>
+    <!-- cap.16 flow: tab Hartă eliminat — harta conexiuni rapoarte e în meniul Rapoarte (openStudyMap) -->
+    <button class="ptab" data-t="studymap" onclick="openStudyMap()" title="Hartă conexiuni rapoarte" style="display:none">🗺 Hartă</button>
   </div>
   <div id="panel-body">
     <div class="tc active" id="tc-search"></div>
