@@ -331,6 +331,7 @@
             ['Profil stradal cu rigole dimensionate la 100 mm/h', 'SR EN 752 + reabilitare strazi prioritare', 'Lung'],
           ], [78, 70, 26], { fs: 8 });
         }
+        try { if (window._DocMapCaptures && window._DocMapCaptures.riskExtras) window._DocMapCaptures.riskExtras(D, R, city); } catch (e) {}
         D.callout('Principiu SUMP / PMUD', 'Reziliența sistemului de transport nu este un capitol separat — este o condiție transversala. Rutele de evacuare se suprapun cu axele principale ale PMUD și trebuie rezervate în PUG.');
         D.sourceBadges(['P100-1/2013 (MDLPA)', 'ANAR PGRA 2021-2027', 'Ghid SUMP/ELTIS 2019', 'SR EN 752', 'Legea 481/2004 (protectie civila)']);
       })();

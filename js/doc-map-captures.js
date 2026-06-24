@@ -175,6 +175,33 @@
     } catch (e) { console.warn('[DocMapCaptures] indicesSection', e); }
   }
 
-  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing, indicesSection: indicesSection };
+  // ── Extra-uri risc pentru documente: diagrama avarieri seismice DS0-DS5 + sectiune ALA ──
+  function riskExtras(D, R, city) {
+    if (!D || !R) return;
+    try {
+      // 1. Diagrama distributiei avariilor seismice (scenariu M7,0)
+      if (R.seismic && R.seismic.pDS_total && D.barChart) {
+        var ds = R.seismic.pDS_total;
+        D.h3('Diagrama distribuției avariilor seismice (scenariu M7,0)');
+        D.barChart([
+          ['DS0 fără', Math.round(ds[0] * 100), [34, 197, 94]],
+          ['DS1 ușoare', Math.round(ds[1] * 100), [132, 204, 22]],
+          ['DS2 moderate', Math.round(ds[2] * 100), [234, 179, 8]],
+          ['DS3 severe', Math.round(ds[3] * 100), [249, 115, 22]],
+          ['DS4 f. severe', Math.round(ds[4] * 100), [239, 68, 68]],
+          ['DS5 colaps', Math.round(ds[5] * 100), [185, 28, 28]]
+        ], { title: 'Fondul construit pe grade de avariere EMS-98 (% din total)', h: 46, max: 100, source: 'Lagomarsino & Giovinazzi 2006 · EMS-98 (Grünthal 1998)' });
+      }
+      // 2. Adăposturi de protecție civilă (ALA)
+      var pop = (city && (+city.pop2021 || +city.pop)) || 0;
+      var locNecesare = Math.round(pop * 0.5);            // necesar orientativ locuri adăpostire (~50% pop, plan PC)
+      var supNecesara = Math.round(locNecesare * 2.5);    // 2,5 mp/persoană (NP-073/2002)
+      D.h3('Adăposturi de protecție civilă (ALA)');
+      D.P('Conform NP-073/2002 și Legii 481/2004, clădirile noi cu regim ridicat și subsol trebuie să prevadă adăposturi de protecție civilă (min. 2,5 m²/persoană, pereți ≥30 cm, înălțime liberă ≥2,2 m, filtru de aer). La nivelul ' + ((city && city.name) || 'UAT') + ', necesarul orientativ de adăpostire este de cca. ' + (locNecesare ? locNecesare.toLocaleString('ro') : '—') + ' locuri (~' + (supNecesara ? supNecesara.toLocaleString('ro') : '—') + ' m²). Inventarul de candidați (blocuri P+3 și mai mult, instituții publice cu subsol) se generează pe hartă în modulul „Inventar adăposturi ALA".');
+      D.callout('Recomandare ALA', 'Constituirea/actualizarea registrului ALA împreună cu ISU și protecția civilă locală; marcarea adăposturilor pe hartă; verificarea funcționalității (acces, filtru-ventilație, sursă autonomă) și includerea cerinței ALA în avizarea construcțiilor noi cu subsol.');
+    } catch (e) { console.warn('[DocMapCaptures] riskExtras', e); }
+  }
+
+  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing, indicesSection: indicesSection, riskExtras: riskExtras };
   console.log('[DocMapCaptures] modul capturi harta pentru documente incarcat');
 })(window);

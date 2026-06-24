@@ -2179,6 +2179,7 @@ D.sourceBadges(['INS', 'Eurostat', 'MDLPA', 'ADR ' + reg, 'Evaluare UrbanX']);
               ['Risc fluvial PGRA', fr.hasFluvialRisk ? 'DA — inclus in ANAR PGRA' : 'neidentificat', 'ANAR PGRA']
             ], [78, 64, 32], { fs: 8 });
           }
+          try { if (window._DocMapCaptures && window._DocMapCaptures.riskExtras) window._DocMapCaptures.riskExtras(D, R, city); } catch (e) {}
           D.h2('Implicatii pentru strategia SIDU');
           D.P('Analiza riscurilor fundamenteaza directiile: (1) consolidarea fondului construit vulnerabil seismic (prioritate RS I/RS II, finantare PNRR C10-I2); (2) infrastructura verde-albastra (sponge city) pentru reducerea scurgerii pluviale (POR Axa 4 / fonduri clima UE); (3) planuri de urgenta si evacuare corelate cu PMUD; (4) transpunerea zonelor de risc in PUG/RLU (regim restrictiv, cote minime de pardoseala, retentie pluviala).');
           D.callout('Corelarea cu PUG (obligatorie)', 'Zonele de risc seismic ridicat (RS I/RS II) si de inundabilitate (PGRA Q100) trebuie marcate explicit in PUG si RLU. Fara aceasta transpunere, restrictiile strategice nu produc efecte juridice asupra autorizatiilor de construire.');

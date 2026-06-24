@@ -162,6 +162,7 @@
           D.h3('Susceptibilitate la inundații pluviale (SCS-CN)');
           D.P('Coeficientul de scurgere CN ponderat este ' + fr.CN_weighted + ' (metoda SCS-CN, USDA TR-55), cu impermeabilizare estimata ~' + fr.impermeabilizare + '%. La 100 mm/h: runoff ' + fr.Q_mm + ' mm, ~' + fr.susceptPct + '% din suprafata cu susceptibilitate de acumulare, ~' + N(fr.locuinteExpuse) + ' locuinte expuse.' + (fr.depasireCapacitate > 0 ? ' Reteaua de canalizare standard (SR EN 752, ~40 mm/h) este depasita cu ' + fr.depasireCapacitate + '% — inundatii locale probabile in zonele joase.' : ' Reteaua standard nu este depasita la acest scenariu.'));
         }
+        try { if (window._DocMapCaptures && window._DocMapCaptures.riskExtras) window._DocMapCaptures.riskExtras(D, R, city); } catch (e) {}
       })();
       D.h2('Risc de inundății');
       D.P('Expunerea la inundății este evaluata în raport cu rețeaua hidrografica, cotele terenului și hărțile de hazard (Directivă 2007/60/CE, transpusa prin Legea 107/1996). ' + (apa.risc_inundabil ? 'Nivel estimat: ' + apa.risc_inundabil + '. ' : '') + 'Amplasamentele din albia majoră și zonele de protecție sunt supuse interdictiei de construire și necesită avizul de gospodarire a apelor.');
