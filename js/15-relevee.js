@@ -2130,6 +2130,8 @@ function _rvRenderComparativ(b, P, floors, bOpt, POpt, floorsOpt, fixes){
     optimizat: {b:bOpt, P:POpt, floors:floorsOpt}
   };
 }
+// Expunere globala defensiva — fix: _rvRenderComparativ nu ajungea in scope global
+try { window._rvRenderComparativ = _rvRenderComparativ; } catch(e){}
 
 // ── Switch între variante ──────────────────────────────────────────────────
 function _rvShowVariant(which){
@@ -5810,7 +5812,8 @@ async function generateRelevee(){
     _RV.floorsOriginal = JSON.parse(JSON.stringify(_RV.floors));
     _RV.bOriginal = JSON.parse(JSON.stringify(b));
     _RV.POrig = JSON.parse(JSON.stringify(P));
-    _rvRenderComparativ(b,P,_RV.floors,bOpt,POpt,floorsOpt,fixes);
+    var _rcmpFn=(typeof _rvRenderComparativ==='function')?_rvRenderComparativ:(window._rvRenderComparativ||null);
+    if(_rcmpFn) _rcmpFn(b,P,_RV.floors,bOpt,POpt,floorsOpt,fixes);
     // Tab Subsol — vizibil când sunt parcaje în deficit
     const subsolTab=document.getElementById('rv-tab-subsol');
     const hasSubsol=fixes.some(f=>f.rule==='NP051-Parc'&&f.subsolNiv>0);
