@@ -515,7 +515,9 @@ G._ParcelResults = {
       document.body.appendChild(b);
     }
     b.innerHTML = '📊 Analize parcelă ▸';
-    b.style.display = 'block';
+    // cap.13 flow: fara butoane flotante — analizele sunt accesibile din Planificare Urbana
+    // (Analytics) + Pre-Proiectare + Rapoarte. Butonul flotant ramane ascuns.
+    b.style.display = 'none';
   },
 
   _collapse() {
