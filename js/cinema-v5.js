@@ -2341,12 +2341,18 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         break;
 
       case 'b5s1':
-        titlu('Risc Seismic','P100-1/2013 \u00b7 Fond vulnerabil \u00b7 PNRR C10-I2 \u00b7 UTR-uri'); linie();
+        titlu('Risc Seismic','P100-1/2013 \u00b7 model HAZUS/EMS-98 \u00b7 PNRR C10-I2'); linie();
         var ag=(window._getSeismic&&city&&city.judet)?window._getSeismic(city.judet).ag:(pred.ag||0.20);
         var agTc=(window._getSeismic&&city&&city.judet)?window._getSeismic(city.judet).Tc:1.0;
         var agC=ag>=0.30?'#ef4444':ag>=0.20?'#f59e0b':'#22c55e';
-        cifra('ag='+ag.toFixed(2)+'g','Acceleratie seismica P100-1/2013',agC);
-        cifra2(N2(pred.fond||0)+' cladiri','Fond risc RS I-III estimat','#ef4444');
+        // cifre reale din tci-risk-module (DS3-5, deplasati, cost) cu fallback la pred.fond
+        var _R5=(window._getRiskForCity&&city)?window._getRiskForCity(city):null;
+        var _vuln=_R5?_R5.cladiriVuln:Math.round(pred.fond||0);
+        var _depl=_R5?_R5.persDeplasate:Math.round((pred.fond||0)*2.2);
+        var _cost=_R5?_R5.costMilEur:Math.round((pred.fond||0)*0.085);
+        var _intens=(_R5&&_R5.seismic)?_R5.seismic.intensity:null;
+        cifra('ag='+ag.toFixed(2)+'g'+(_intens?' \u00b7 I='+_intens.toFixed(0):''),'Acceleratie seismica P100-1/2013'+(_intens?' \u00b7 intensitate EMS-98':''),agC);
+        cifra2(N2(_vuln)+' unitati','Daune severe DS3-DS5 (scenariu M7,0)','#ef4444');
         [['#166534','<8m SIGUR'],['#854d0e','8-15m ATENTIE'],['#b91c1c','15-25m RISC'],['#dc2626','>25m MAXIM']].forEach(function(it,i){
           ctx.globalAlpha=sA*rE(0.20,0.15);
           ctx.fillStyle=it[0]; ctx.fillRect(W*(0.04+i*0.18),H*0.920,W*0.014,5);
@@ -2356,9 +2362,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
           ctx.fillText(it[1],W*(0.056+i*0.18),H*0.928);
         });
         ctx.globalAlpha=1;
-        narativ('Culorile cladirilor = risc seismic combinat (inaltime + zona ag P100). '+N2(pred.fond||0)+' cladiri risc RS I-III. PNRR C10-I2: '+N2(Math.round((pred.fond||0)*0.25))+' apartamente consolidabile (100% finantare). Cost: '+N2(Math.round((pred.fond||0)*0.085))+' M EUR. Termen depunere: 2026. Fond pre-1977 = vulnerabilitate maxima.');
+        narativ('Estimare HAZUS/EMS-98 (vulnerabilitate Lagomarsino-Giovinazzi pe epoci de constructie, scenariu de proiectare M7,0): '+N2(_vuln)+' unitati cu daune severe (DS3-DS5), '+N2(_depl)+' persoane potential deplasate, cost reconstructie ~'+N2(_cost)+' M EUR. PNRR C10-I2: consolidare 100% finantata, termen 2026. Fond pre-1977 = vulnerabilitate maxima.');
         concluzie('Consolidarea seismica este urgenta #1 indiferent de orice alt plan urbanistic');
-        negativ('Cutremur >7.0 (probabilitate 15% in 50 ani): '+Math.round((pred.fond||0)*0.15)+' cladiri prabusire partiala — tragedie umana + '+N2(Math.round((pred.fond||0)*0.15*300))+' M EUR pierderi');
+        negativ('Cost reconstructie estimat la scenariul de proiectare: '+N2(_cost)+' M EUR + '+N2(_depl)+' persoane deplasate — preventia (consolidare) costa de cateva ori mai putin');
         break;
 
       case 'b5s2':
@@ -2375,7 +2381,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         cifra2(Math.round(zile*2.1)+' zile/an','Proiectie '+_E()+' RCP4.5','#ef4444');
         if(t>0.20) _drawClima(ctx,W,H,Math.min(1,(t-0.20)/0.22)*sA,pred,zile);
         var _tempAzi=_meteo?_meteo.temp+'°C ('+_meteo.desc+')':'date indisponibile';
-        narativ('Meteo azi: '+_tempAzi+'. HARTA ANAR REALA afisata. Zile caniculare >35°C in '+_NOW+': '+zile+' zile (sursa: '+(city&&city._live&&city._live.zileCaniculare?'Open-Meteo arhiva':'estimare')+'. In '+_E()+': '+Math.round(zile*2.1)+' zile proiectie RCP4.5. UHI estimat: +'+(pred.uhi||1.8)+'°C. Costul inactiunii climatice: x4.5 mai mare decat adaptarea.');
+        var _Rf=(window._getRiskForCity&&city)?window._getRiskForCity(city):null;
+        var _flStr=_Rf&&_Rf.flood?(' Inundatii pluviale (model SCS-CN, 100 mm/h): ~'+_Rf.flood.susceptPct+'% din suprafata susceptibila, ~'+N2(_Rf.flood.locuinteExpuse)+' locuinte expuse'+(_Rf.flood.depasireCapacitate>0?', retea canalizare depasita cu '+_Rf.flood.depasireCapacitate+'% (SR EN 752).':'.')):'';
+        narativ('Meteo azi: '+_tempAzi+'. HARTA ANAR REALA afisata. Zile caniculare >35°C in '+_NOW+': '+zile+' zile (sursa: '+(city&&city._live&&city._live.zileCaniculare?'Open-Meteo arhiva':'estimare')+'. In '+_E()+': '+Math.round(zile*2.1)+' zile proiectie RCP4.5. UHI estimat: +'+(pred.uhi||1.8)+'°C.'+_flStr);
         concluzie('Spatii verzi + acoperisuri verzi = -1.5-2.5\u00b0C temperatura urbana = vietii salvate in valuri caldura');
         negativ('Val caldura '+_E()+' fara adaptare: '+Math.round(pop21*0.0003)+' spitalizari/val + blocaje termocentrale + '+N2(Math.round(pop21*0.0003*8000/1000000))+' M EUR/val cost sanatate');
         break;
@@ -2388,7 +2396,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         cifra2(N2(pred.invTotal||300)+' M \u20ac','Cost preventie — de 3.2x mai mic','#22c55e');
         [
           ['\u{1F534} Colaps retea rutiera dupa '+(pred.satAn||2040)+': '+N2(Math.round(pop21/1000*0.9*10))+' M EUR pierderi cumulate','#ef4444'],
-          ['\u{1F534} Fond seismic nereabilitat: '+N2(Math.round((pred.fond||0)*0.15*300))+' M EUR pagube la cutremur >7.0','#ef4444'],
+          ['\u{1F534} Fond seismic nereabilitat: '+N2((window._getRiskForCity&&city)?window._getRiskForCity(city).costMilEur:Math.round((pred.fond||0)*0.15*300))+' M EUR reconstructie la scenariu de proiectare (HAZUS/EMS-98)','#ef4444'],
           ['\u{1F534} Adaptare climatica intarziata: cost x4.5 preventie = '+N2(Math.round((pred.zile24||18)*2.1*pop21*0.00003))+' M EUR/an suplimentar','#ef4444'],
           ['\u{1F534} Declin demografic neabordat: -'+N2(Math.abs(pred.migNeta||500)*_HORIZON)+' persoane = colaps servicii dupa '+_P2(),'#ef4444'],
           ['\u26A0 TOTAL: '+N2(costIn)+' M EUR inactiune vs '+N2(pred.invTotal||300)+' M EUR preventie','#fbbf24'],
