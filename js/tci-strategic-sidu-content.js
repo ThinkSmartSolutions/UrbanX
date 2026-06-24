@@ -620,10 +620,36 @@
           ['Componenta Smart', 'Stare / directie', 'Tinta orizont'],
           [['Platforma date urbane', 'de dezvoltat', 'operationala'], ['Servicii publice digitale', 'partial', '>=80%'], ['ITS / trafic', 'incipient', 'artere majore']]]
       ];
-      profile.forEach(pf => {
+      // provocari-cheie + directii strategice per profil (autorate per domeniu) — adancime
+      const _profExtra = [
+        { prov: ['Decalaj intre PUG in vigoare si nevoile actuale de dezvoltare', 'Presiune de expansiune in extravilan fara echipare completa', 'Terenuri subutilizate / abandonate (brownfield) in intravilan', 'Densitati neomogene si fronturi stradale discontinue'],
+          dir: ['Actualizarea PUG cu zonificare functionala mixta si densificare calitativa', 'Prioritizarea reconversiei brownfield inaintea consumului de teren nou', 'Rezervarea culoarelor de mobilitate si a coridoarelor verzi', 'Reglementarea fronturilor active la parter pe arterele principale'] },
+        { prov: ['Fond construit 1960-1990 energivor si partial cu risc seismic', 'Deficit de locuinte accesibile si sociale -> suburbanizare', 'Spatiu public dintre blocuri degradat, parcari neorganizate', 'Necesar estimat de ~' + N(s.necLoc) + ' locuinte la orizont'],
+          dir: ['Regenerare integrata: cladire + spatiu public + mobilitate + dotari', 'Fond public de locuinte accesibile corelat cu transportul (TOD)', 'Reabilitare termica spre nZEB si reducerea riscului seismic', 'Densificare calitativa, nu sprawl pe teren verde'] },
+        { prov: ['Dependenta de autoturism (' + RN(s.modalAuto, 0) + '% deplasari) si congestie', 'Transport public subfinantat, frecventa si viteza comerciala reduse', 'Retea de mobilitate activa incompleta si nesigura', 'Naveta metropolitana necorelata cu capacitatea retelei'],
+          dir: ['Transfer modal spre transport public si moduri active (tinte PMUD)', 'Benzi dedicate, prioritizare semaforica, flota curata', 'Retea continua si sigura de piste si trasee pietonale', 'Rezervarea culoarelor in PUG pentru a evita exproprierile'] },
+        { prov: ['Uzura fizica a retelelor vechi; pierderi ridicate in sistemul de apa', 'Canalizare incompleta in zonele periferice', 'SACET / incalzire cu eficienta scazuta (unde exista)', 'Capacitate insuficienta de drenaj pluvial la ploi extreme'],
+          dir: ['Extindere si reabilitare retele; reducerea pierderilor sub 25%', 'Statii de epurare conforme directivelor UE', 'Digitalizarea managementului retelelor (SCADA, contorizare)', 'Solutii sponge city pentru apele pluviale'] },
+        { prov: ['Cladiri publice uzate, cu risc seismic si eficienta energetica scazuta', 'Distributie inegala a serviciilor -> deficite de proximitate', 'Presiune demografica diferentiata pe scoli/crese/gradinite', 'Acces inegal la servicii medicale si sociale'],
+          dir: ['Modernizarea si consolidarea infrastructurii educationale si medicale', 'Reorganizarea serviciilor pe principiul 15 minute', 'Pol medical / ambulatoriu si centre sociale de proximitate', 'Dotari publice rezervate in zonele de dezvoltare noua'] },
+        { prov: ['Spatii verzi sub norma (' + RN(s.svMpLoc, 1) + ' mp/loc vs ' + s.normaSV + ')', 'Insula de caldura urbana si crestere a zilelor caniculare', 'Risc de inundatii pluviale; risc seismic ag=' + s.ag + 'g', 'Depasiri periodice ale calitatii aerului (trafic, incalzire)'],
+          dir: ['Infrastructura verde-albastra; regula 3-30-300; coridoare ecologice', 'Reducerea emisiilor prin transfer modal si eficienta energetica', 'Adaptare climatica: sponge city, albedo, umbrire', 'Monitorizarea calitatii aerului si masuri de reducere'] },
+        { prov: ['Capacitate de management de proiect fluctuanta', 'Durata mare a procedurilor de avizare si expropriere', 'Coordonare inter-departamentala dificila pe proiecte complexe', 'Dependenta de fonduri externe pentru investitii majore'],
+          dir: ['Unitate de Implementare a Strategiei (UIS) dedicata', 'Pipeline de proiecte mature pentru absorbtie sustinuta', 'Digitalizarea proceselor administrative interne', 'Cooperare metropolitana prin ADI'] },
+        { prov: ['Platforma de date urbane inexistenta sau fragmentata', 'Servicii publice digitale incomplete', 'Sisteme de trafic si mediu fara senzori / ITS', 'Date inchise -> decizii fara suport cantitativ'],
+          dir: ['Platforma urbana de date (GIS / digital twin) operationala', 'Servicii publice digitale >=80% si ghiseu unic online', 'ITS si semaforizare adaptiva pe arterele majore', 'Date deschise pentru transparenta si decizii bazate pe dovezi'] }
+      ];
+      profile.forEach((pf, idx) => {
         D.h2(pf[0]);
         pf[1].forEach(t => D.P(t));
         D.table(pf[2], pf[3], [56, 44, CW - 100], { fs: 7 });
+        const ex = _profExtra[idx];
+        if (ex) {
+          D.h3('Provocari-cheie');
+          D.bullets(ex.prov);
+          D.h3('Directii strategice');
+          D.bullets(ex.dir);
+        }
       });
       D.sourceBadges(['INS Recensamant 2021', 'INS TEMPO', 'Eurostat Urban Audit', 'PMUD ' + city.name, 'Masterplan ' + city.name, 'PUG in vigoare', 'APM / ANAR / INFP']);
 
