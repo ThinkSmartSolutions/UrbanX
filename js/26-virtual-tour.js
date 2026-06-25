@@ -894,6 +894,8 @@
     const loop = () => {
       if(!STATE.active) return;
       try {
+        // expunere autoritara — 33-photorealism _configRenderer o forta la 1.35 (spala modelul alb)
+        if(STATE.renderer && STATE.renderer.toneMappingExposure !== 0.95) STATE.renderer.toneMappingExposure = 0.95;
         _updateExplode();
         if(STATE.controls) STATE.controls.update();
         if(STATE._composer){
