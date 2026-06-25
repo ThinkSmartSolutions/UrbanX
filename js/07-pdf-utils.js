@@ -483,14 +483,14 @@ function _bilantTabBilant(parcelArea,edificabilArea,volArea,sdReal,params,efEdif
   return `
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px">
       ${[
-        ['Teren total',Math.round(parcelArea)+' mp','#94a3b8'],
-        ['Edificabil',Math.round(edificabilArea)+' mp','#4ade80'],
-        ['Retrageri',Math.round(retrageriArea)+' mp','#f87171'],
+        ['Teren total',_nf(Math.round(parcelArea))+' mp','#94a3b8'],
+        ['Edificabil',_nf(Math.round(edificabilArea))+' mp','#4ade80'],
+        ['Retrageri',_nf(Math.round(retrageriArea))+' mp','#f87171'],
         ['POT max PUG',params?.pot+'%','#fbbf24'],
-        ['SC max admisă',Math.round(scMax)+' mp','#fbbf24'],
-        ['SD max admisă',Math.round(sdMax2)+' mp','#a78bfa'],
-        ['SC construită',Math.round(volArea)+' mp','#60a5fa'],
-        ['SD construită',Math.round(sdReal)+' mp','#818cf8'],
+        ['SC max admisă',_nf(Math.round(scMax))+' mp','#fbbf24'],
+        ['SD max admisă',_nf(Math.round(sdMax2))+' mp','#a78bfa'],
+        ['SC construită',_nf(Math.round(volArea))+' mp','#60a5fa'],
+        ['SD construită',_nf(Math.round(sdReal))+' mp','#818cf8'],
         ['POT real',potReal+'%',parseFloat(potReal)<=potMax?'#4ade80':'#f87171'],
       ].map(([l,v,c])=>`<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px;text-align:center;border:1px solid rgba(255,255,255,.05)">
         <div style="font-size:11px;font-weight:700;color:${c}">${v}</div>
@@ -769,9 +769,9 @@ function _bilantTabComasare(d){
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
               ${[
-                ['Suprafață parcelă',Math.round(v.area||0)+' mp'],
-                ['Teren combinat',Math.round(combined)+' mp'],
-                ['Câștig edificabil','+'+gainEdif+' mp'],
+                ['Suprafață parcelă',_nf(Math.round(v.area||0))+' mp'],
+                ['Teren combinat',_nf(Math.round(combined))+' mp'],
+                ['Câștig edificabil','+'+_nf(gainEdif)+' mp'],
               ].map(([l,v])=>`<div style="text-align:center;padding:4px;background:rgba(255,255,255,.03);border-radius:5px">
                 <div style="font-size:10px;font-weight:700;color:#e2e8f0">${v}</div>
                 <div style="font-size:7.5px;color:#475569">${l}</div>

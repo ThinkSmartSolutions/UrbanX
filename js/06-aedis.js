@@ -3405,8 +3405,8 @@ async function exportVol3(pdf, ap, r, p){
   const scCols=[55,40,40,51];
   y=pdfRow(pdf,['Indicator','Sc.1 Demolare','Sc.2 Ext.Orizontal','Sc.3 Corp Integrat'],y,true,scCols);
   const scRows=[
-    ['Suprafață construibilă la sol',SC_max+' m²',Math.round(SC_max*0.55)+' m² (zona liberă)',SC_max+' m²'],
-    ['Suprafață desfășurată (SD)',Math.round(SD_max)+' mp.ADC',Math.round(SD_max*0.55)+' mp.ADC',Math.round(SD_max)+' mp.ADC'],
+    ['Suprafață construibilă la sol',_nf(Math.round(SC_max))+' m²',_nf(Math.round(SC_max*0.55))+' m² (zona liberă)',_nf(Math.round(SC_max))+' m²'],
+    ['Suprafață desfășurată (SD)',_nf(Math.round(SD_max))+' mp.ADC',_nf(Math.round(SD_max*0.55))+' mp.ADC',_nf(Math.round(SD_max))+' mp.ADC'],
     ['Nr. niveluri',niv+' et.',niv+' et.',niv+' et.'],
     ['Înălțime totală',totH.toFixed(1)+' m',totH.toFixed(1)+' m',totH.toFixed(1)+' m'],
     ['POT realizabil',fmt(p.pot,'%'),Math.round((pN(p.pot)||35)*0.55)+'% (zona liberă)',fmt(p.pot,'%')],
@@ -3823,7 +3823,7 @@ async function runExport(){
     [['Suprafata totala teren',area+' mp (100%)','Spatii verzi min obligatorii',svMin+' mp ('+sv+'%)'],
      ['Suprafata construibila max (SC)',scMax>0?scMax+' mp (POT '+pot+'%)':'—','Suprafata desfasurata max (SD)',sdMax>0?sdMax+' mp.ADC (CUT '+cut+')':'—'],
      ['Inaltime propusa',aedisH.toFixed(1)+' m','Incadrare in H max',parseFloat(hmax||'0')>0?(aedisH<=parseFloat(hmax)?'IN LIMITA':'DEPASIT'):'H max nspec.'],
-     ['SC utila estimata (90%)',Math.round(scMax*0.9)+' mp','Nr. apartamente est. (~55mp)',scMax>0?Math.floor(scMax*parseInt(niv)*0.9/55)+' ap.':'—']
+     ['SC utila estimata (90%)',_nf(Math.round(scMax*0.9))+' mp','Nr. apartamente est. (~55mp)',scMax>0?_nf(Math.floor(scMax*parseInt(niv)*0.9/55))+' ap.':'—']
     ].forEach(([l1,v1,l2,v2])=>{cy=row2(l1,v1,l2,v2,cy);});cy+=5;
     cy=sec('10. UTILIZARI ADMISE IN UTR '+S2(utr),cy);cy+=3;
     cy=body('Conform PUG '+getUATLabel()+', in zona UTR '+S2(utr)+', sunt admise functiunile compatibile cu caracterul zonei. Functiunea propusa "'+S2(fnDef.label)+'" necesita verificare cu Certificatul de Urbanism emis de '+getPrimar()+', inainte de demararea oricarei proceduri de autorizare.',14,cy,W-28);cy+=5;
