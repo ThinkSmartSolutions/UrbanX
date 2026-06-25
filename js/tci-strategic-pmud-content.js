@@ -59,6 +59,7 @@
       const pdf = D.pdf, W = 210, H = 297, m = ctx.mob, city = ctx.city;
       pdf.setFillColor(7, 26, 18); pdf.rect(0, 0, W, H, 'F');
       pdf.setFillColor(34, 160, 90); pdf.rect(0, 0, W, 4, 'F'); pdf.rect(0, H - 4, W, 4, 'F');
+      try { if (window._drawUrbanxLogo) window._drawUrbanxLogo(pdf, W / 2 - 9, 14, 18); } catch (e) {}
       pdf.setTextColor(120, 230, 170); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9);
       pdf.text('URBANX · TEMPORAL CITY INTELLIGENCE', W / 2, 42, { align: 'center' });
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(34); pdf.text('PMUD', W / 2, 70, { align: 'center' });

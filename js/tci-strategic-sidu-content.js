@@ -401,6 +401,8 @@
       // Linie decorativă verticală stânga
       pdf.setFillColor(...ACCENT); pdf.rect(0, 4, 3, H - 8, 'F');
 
+      // Logo REAL UrbanX (cyan X) — centrat sus
+      try { if (window._drawUrbanxLogo) window._drawUrbanxLogo(pdf, W / 2 - 9, 13, 18); } catch (e) {}
       // Titlu instituție
       pdf.setTextColor(200, 130, 90); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(8.5);
       pdf.text('URBANX · TEMPORAL CITY INTELLIGENCE', W / 2, 40, { align: 'center' });

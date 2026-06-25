@@ -619,11 +619,16 @@
     obj[method] = function() {
       var r = orig.apply(this, arguments);
       setTimeout(function() {
+        // FIX #4 (tur crapa): asset-urile GLB (sofa_velvet.glb etc.) sunt 404, iar materialul
+        // procedural de fallback arunca uniform3fv (@@iterator) -> opreste tot loop-ul de render.
+        // Gardam mobilierul pana cand asset-urile exista + materialul e calibrat. Turul/dollhouse
+        // randeaza fara mobilier (functional). Reactivare: window._UX_TOUR_FURNITURE = true.
+        if (!window._UX_TOUR_FURNITURE) return;
         var state = window.VTour && window.VTour._state;
         var RV = window._RV;
         var THREE = window.THREE;
         if (state && THREE && RV) {
-          window._FurnitureModule.furnishScene(state, THREE, RV);
+          try { window._FurnitureModule.furnishScene(state, THREE, RV); } catch(e){ console.warn('[Furniture] skip:', e.message); }
         }
       }, 2000);
       return r;
