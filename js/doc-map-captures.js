@@ -52,6 +52,16 @@
       var ctr = map.getCenter();
       var center = { lat: ctr.lat, lng: ctr.lng };
 
+      // PRE-INCALZIRE: aducem reteaua stradala reala OSM o singura data (cache),
+      // ca desenul per-indice (city15/walkscore/tod/...) sa fie INSTANT din cache.
+      // Altfel fetch-ul Overpass (5-30s) nu termina in fereastra de captura si
+      // plansele ar prinde doar amprenta, nu strazile reale.
+      try {
+        if (G._OSMConnector && G._OSMConnector.fetchRoads) {
+          await G._OSMConnector.fetchRoads({ lat: center.lat, lon: center.lng });
+        }
+      } catch (e) {}
+
       // 2. superbloc pe strazile reale (daca modulul exista)
       try {
         if (G.addSuperblocToMap) {
@@ -90,7 +100,7 @@
             var before = _layerCount(map, ['um-', 'model-', 'idx-', m.id]);
             G.addModelToMap(map, center, m.id, 700);
             if (G.UrbanModelsStore && G.UrbanModelsStore.setTransition) G.UrbanModelsStore.setTransition(100);
-            await _idle(map, 950);
+            await _idle(map, 1250);
             var after = _layerCount(map, ['um-', 'model-', 'idx-', m.id]);
             // captureaza doar daca indicele chiar a adaugat un layer (altfel ar fi doar harta goala)
             if (after > before) { var s = _grab(map, m.title); if (s) shots.push(s); }
