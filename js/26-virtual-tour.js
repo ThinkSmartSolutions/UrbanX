@@ -60,7 +60,7 @@
       green:          new THREE.MeshStandardMaterial({ color: 0x4a7c4a, roughness: 0.85 }), // plante
 
       // ── Pereți ──
-      wallExt:        new THREE.MeshStandardMaterial({ color: 0xeae3d8, roughness: 0.92, transparent: true, opacity: 0.18, side: THREE.DoubleSide }),
+      wallExt:        new THREE.MeshStandardMaterial({ color: 0xeae3d8, roughness: 0.9, transparent: true, opacity: 0.55, side: THREE.DoubleSide }),
       wallInt:        new THREE.MeshStandardMaterial({ color: 0xf2ede4, roughness: 0.92, side: THREE.DoubleSide }),
 
       // ── Acoperiș ──
@@ -214,12 +214,14 @@
       // Sud (z+)
       const wS = new THREE.Mesh(new THREE.BoxGeometry(bW, wallH, wallThickExt), pal.wallExt);
       wS.position.set(anchor.cx, wallH/2, anchor.cz + bD/2);
+      wS.castShadow = true; wS.receiveShadow = true;
       floorGroup.add(wS);
       const wN = wS.clone();
       wN.position.set(anchor.cx, wallH/2, anchor.cz - bD/2);
       floorGroup.add(wN);
       const wE = new THREE.Mesh(new THREE.BoxGeometry(wallThickExt, wallH, bD), pal.wallExt);
       wE.position.set(anchor.cx + bW/2, wallH/2, anchor.cz);
+      wE.castShadow = true; wE.receiveShadow = true;
       floorGroup.add(wE);
       const wW = wE.clone();
       wW.position.set(anchor.cx - bW/2, wallH/2, anchor.cz);
