@@ -80,7 +80,7 @@
       var f = ev.features && ev.features[0]; if (!f) return;
       var p = f.properties, s = STYLE[p.cat] || {};
       new G.mapboxgl.Popup({ offset: 10 }).setLngLat(ev.lngLat)
-        .setHTML('<div style="font-family:system-ui;font-size:12px;color:#0b1424"><b>' + (p.name || '—') + '</b><br>' + (s.lbl || '') + '<br>Amprentă ~' + p.area + ' m² · capacitate estimată <b>' + p.cap + ' pers</b><br><span style="font-size:10px;opacity:.7">Candidat — de verificat la ISU/protecție civilă</span></div>').addTo(map);
+        .setHTML('<div style="font-family:system-ui;font-size:12px;color:#e6edf7"><b style="color:' + (s.col || '#fbbf24') + '">' + (p.name || '—') + '</b><br>' + (s.lbl || '') + '<br>Amprentă ~' + p.area + ' m² · capacitate estimată <b>' + p.cap + ' pers</b><br><span style="font-size:10px;opacity:.7">Candidat — de verificat la ISU/protecție civilă</span></div>').addTo(map);
     });
     map.on('mouseenter', 'ala-pts', function () { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'ala-pts', function () { map.getCanvas().style.cursor = ''; });
