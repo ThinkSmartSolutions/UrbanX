@@ -818,7 +818,9 @@
     if(!canvasCtn){ STATE.active = false; return; }
 
     STATE.scene = new THREE.Scene();
-    STATE.scene.fog = new THREE.Fog(0xc5dff0, 80, 300);
+    // fundal studio neutru (model alb pe alb = fara contrast; gri-rece subtil da adancime)
+    STATE.scene.background = new THREE.Color(0xdbe3ec);
+    STATE.scene.fog = new THREE.Fog(0xdbe3ec, 140, 420);
 
     STATE.canvas = document.createElement('canvas');
     STATE.canvas.style.cssText = 'width:100%;height:100%;display:block;';
