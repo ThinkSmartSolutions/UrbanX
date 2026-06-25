@@ -26,9 +26,12 @@
       var H = doc.internal.pageSize.getHeight();
 
       // — LOGO pe coperta (pagina 1), colt dreapta-sus, mic si discret —
+      // Folosim _drawUrbanxLogo (vectorul cyan dovedit pe coperta SIDU); _pdfStampLogo
+      // foloseste un dataURL rasterizat care randa invizibil pe fundal inchis.
       try {
         doc.setPage(1);
-        if (window._pdfStampLogo) window._pdfStampLogo(doc, W - 20, 6, 12);
+        if (window._drawUrbanxLogo) window._drawUrbanxLogo(doc, W - 22, 6, 14);
+        else if (window._pdfStampLogo) window._pdfStampLogo(doc, W - 20, 6, 12);
       } catch (e) {}
 
       // — DISCLAIMER pe ULTIMA pagina (sau pagina noua daca nu incape) —
