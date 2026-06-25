@@ -412,7 +412,8 @@
       try {
         equirectURL = await _renderCubemapToEquirect(scene, worldX, worldY, worldZ);
       } catch (renderErr) {
-        console.warn('[TurFoto] Eroare render cameră ' + (i+1) + ':', renderErr.message);
+        // log o SINGURA data (nu ×23) — restul cad pe placeholder silentios
+        if (!window.__tfRenderWarned) { window.__tfRenderWarned = true; console.warn('[TurFoto] render cubemap esuat, folosesc placeholder:', renderErr.message); }
         equirectURL = await _generatePlaceholderPanorama(worldX, worldZ);
       }
       scenes[key] = {
