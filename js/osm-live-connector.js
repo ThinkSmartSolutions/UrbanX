@@ -26,19 +26,20 @@ window._OSMConnector = {
     const rClamped = Math.min(12000, Math.max(3000, r));
 
     let data = null;
+    // include si strazi locale -> retea reala densa, nu doar arterele
+    const query = `[out:json][timeout:25];(way(around:${rClamped},${lat},${lon})[highway~"^(motorway|trunk|primary|secondary|tertiary|residential|unclassified|living_street)$"];);out geom;`;
 
-    // Încearcă proxy dacă există
+    // Încearcă proxy dacă există — endpoint-ul /osm vrea ?q=<overpass>
     if (this._proxy) {
       try {
-        const resp = await fetch(`${this._proxy}/osm?lat=${lat}&lon=${lon}&r=${rClamped}&type=roads`, { signal: AbortSignal.timeout(10000) });
-        if (resp.ok) data = await resp.json();
+        const resp = await fetch(`${this._proxy}/osm?q=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(30000) });
+        if (resp.ok) { const j = await resp.json(); if (j && j.elements && j.elements.length) data = j; }
       } catch(e) { console.warn('[OSM] proxy failed, trying direct'); }
     }
 
     // Fallback direct Overpass (CORS permis)
     if (!data) {
       try {
-        const query = `[out:json][timeout:20];(way(around:${rClamped},${lat},${lon})[highway~"^(motorway|trunk|primary|secondary|tertiary)$"];);out geom;`;
         const resp = await fetch('https://overpass-api.de/api/interpreter', {
           method: 'POST',
           body: 'data=' + encodeURIComponent(query),
