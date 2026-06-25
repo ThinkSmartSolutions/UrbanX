@@ -85,7 +85,9 @@
   // ── HARTĂ ──
   function drawOnMap(map, res, centerLat) {
     if (!map) return;
-    var halfM = res.cellM / 2;
+    // Extindem celulele cu ~18% peste latura DEM ca celulele adiacente sa se UNEASCA
+    // intr-o panza continua de apa (mult mai lizibil decat patratele izolate, abia vizibile).
+    var halfM = (res.cellM / 2) * 1.18;
     var dLat = halfM / 111320, dLon = halfM / (111320 * Math.cos(centerLat * Math.PI / 180));
     var feats = res.flooded.map(function (c) {
       return { type: 'Feature', properties: { d: +c.d.toFixed(2) }, geometry: { type: 'Polygon', coordinates: [[
@@ -95,8 +97,13 @@
     var fc = { type: 'FeatureCollection', features: feats };
     try { if (map.getSource('flood-src')) map.getSource('flood-src').setData(fc); else map.addSource('flood-src', { type: 'geojson', data: fc }); } catch (e) {}
     try {
+      // culori mai saturate (apa de mica adancime era #bae6fd ~ invizibila) + opacitate ridicata + contur
       if (!map.getLayer('flood-fill')) map.addLayer({ id: 'flood-fill', type: 'fill', source: 'flood-src',
-        paint: { 'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0.1, '#bae6fd', 0.3, '#7dd3fc', 0.6, '#38bdf8', 1.0, '#0ea5e9', 1.8, '#0369a1', 2.5, '#1e3a8a'], 'fill-opacity': 0.6 } });
+        paint: {
+          'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0.1, '#38bdf8', 0.3, '#0ea5e9', 0.6, '#0284c7', 1.0, '#0369a1', 1.8, '#1e40af', 2.5, '#1e3a8a'],
+          'fill-opacity': 0.82,
+          'fill-outline-color': '#7dd3fc'
+        } });
     } catch (e) {}
   }
   function clearMap(map) {

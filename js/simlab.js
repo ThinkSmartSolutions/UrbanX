@@ -180,7 +180,7 @@
   function exportStudiu(scn, _drawn) {
     try {
       var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { alert('jsPDF indisponibil'); return; }
-      var simT = SIMS[scn.sim] ? SIMS[scn.sim].title : (scn.sim || 'Indice');
+      var simT = scn.title || (SIMS[scn.sim] ? SIMS[scn.sim].title : (scn.sim || 'Indice'));
       // nume UAT real robust (cityName -> nume din baza UAT -> 'UAT')
       var _dbName = '';
       try { var _cc = (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[G.TCI.cityKey]); _dbName = (_cc && _cc.name) || ''; } catch (e) {}

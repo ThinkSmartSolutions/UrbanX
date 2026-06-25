@@ -694,7 +694,8 @@
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">' +
       cfg.fields.map(function (f) { return '<div><label style="font-size:11px;opacity:0.65;display:block;margin-bottom:4px">' + f.l + '</label><input type="number" value="' + _params[modelId][f.k] + '" oninput="_umSetParam(\'' + f.k + '\',this.value)" style="width:100%;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:inherit;font-size:13px;box-sizing:border-box"></div>'; }).join('') + '</div>' +
       '<div style="display:flex;gap:10px;margin-bottom:10px"><button class="uxc-btn uxc-btn--primary" style="flex:1" onclick="runUrbanModelCalc()">▶ Calculează + desenează</button><button class="uxc-btn uxc-btn--sec" id="um-save-btn" style="display:none" onclick="saveUrbanModelScenario()">💾 Salvează</button></div>' +
-      '<button style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid rgba(124,58,237,.45);background:rgba(124,58,237,.14);color:#c4b5fd;font-weight:700;font-size:12px;cursor:pointer" onclick="window.UrbanIndicesReport&&UrbanIndicesReport.generate(window.TCI&&window.TCI.cityKey)">📊 Raport cu TOȚI indicii (PDF) — definiții · formule · hărți</button>' +
+      '<button style="width:100%;margin-bottom:8px;padding:10px;border-radius:8px;border:1px solid rgba(124,58,237,.45);background:rgba(124,58,237,.14);color:#c4b5fd;font-weight:700;font-size:12px;cursor:pointer" onclick="window.UrbanIndicesReport&&UrbanIndicesReport.generate(window.TCI&&window.TCI.cityKey)">📊 Raport cu TOȚI indicii (PDF) — definiții · formule · hărți</button>' +
+      '<button style="width:100%;margin-bottom:14px;padding:10px;border-radius:8px;border:1px solid rgba(46,117,182,.45);background:rgba(46,117,182,.12);color:#93c5fd;font-weight:700;font-size:12px;cursor:pointer" onclick="exportUrbanModelStudiu()">📄 Export studiu PDF (acest indice) — cu captură hartă</button>' +
       '<div id="um-slider" style="display:none;margin-bottom:16px;padding:12px;background:rgba(255,255,255,0.04);border-radius:8px"></div>' +
       '<div id="um-metrics" style="display:none;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"></div>' +
       '<div id="um-export-wrap" style="display:none"><button class="uxc-btn uxc-btn--sec" style="width:100%;color:#93c5fd;border-color:rgba(46,117,182,0.4);background:rgba(46,117,182,0.1)" onclick="_toggleUmExport()">▼ Export SIDU / Masterplan / PMUD</button><div id="um-export" style="display:none;margin-top:8px"></div></div>' +
@@ -722,6 +723,24 @@
     }
     ['um-export-wrap', 'um-save-btn'].forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = id === 'um-save-btn' ? 'inline-block' : 'block'; });
   }
+  // Export studiu PDF pentru ACEST indice (reutilizeaza motorul SimLab — deseneaza
+  // amprenta pe harta + captureaza, apoi tabel metrici/parametri + disclaimer)
+  function exportUrbanModelStudiu() {
+    var r = G.UrbanModelsStore && G.UrbanModelsStore.activeResult;
+    var cfg = REG[_curId];
+    if (!r) { G.ss && G.ss('Rulează întâi „Calculează + desenează".'); return; }
+    if (!(G.SimLab && G.SimLab.exportStudiu)) { G.ss && G.ss('Motor studiu PDF indisponibil.'); return; }
+    var results = {};
+    (r.metrics || []).forEach(function (m) {
+      var pct = (m.unit === '%' || m.unit === '°C');
+      results[m.label] = ((m.value > 0 && pct) ? '+' : '') + m.value + (pct ? m.unit : ' ' + m.unit);
+    });
+    var uat = (G.TCI && G.TCI.cityName) || '';
+    G.ss && G.ss('📄 Generez studiul pentru „' + (cfg ? cfg.title : _curId) + '"…');
+    G.SimLab.exportStudiu({ sim: _curId, title: (cfg ? cfg.title : _curId), uat: uat, params: _params[_curId], results: results });
+  }
+  G.exportUrbanModelStudiu = exportUrbanModelStudiu;
+
   function saveUrbanModelScenario() {
     var r = G.UrbanModelsStore.activeResult; if (!r) return;
     G.UrbanModelsStore.save(r.modelName + ' — ' + new Date().toLocaleDateString('ro'), r);
