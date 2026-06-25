@@ -580,8 +580,9 @@
     grass.receiveShadow = true;
     scene.add(grass);
 
-    // SOARE direcțional cu shadow 2K (intensitate calibrata — 2.4 spala modelul alb in alb)
-    const sun = new THREE.DirectionalLight(0xfff4e0, 1.45);
+    // SOARE direcțional cu shadow 2K (intensitate calibrata — modelul iesea spalat alb;
+    // reduc sun+hemi+fill+expunere ca sa se vada CULORILE reale ale materialelor)
+    const sun = new THREE.DirectionalLight(0xfff4e0, 1.0);
     sun.position.set(anchor.cx + 40, anchor.baseY + 80, anchor.cz + 30);
     sun.target.position.set(anchor.cx, anchor.baseY, anchor.cz);
     sun.castShadow = true;
@@ -600,11 +601,11 @@
     scene.add(sun.target);
 
     // Hemi pentru ambient cer/sol
-    const hemi = new THREE.HemisphereLight(0xcce4f5, 0x7a8466, 0.55);
+    const hemi = new THREE.HemisphereLight(0xcce4f5, 0x7a8466, 0.30);
     scene.add(hemi);
 
     // Fill rece opus
-    const fill = new THREE.DirectionalLight(0xc8d8ee, 0.3);
+    const fill = new THREE.DirectionalLight(0xc8d8ee, 0.18);
     fill.position.set(anchor.cx - 30, anchor.baseY + 40, anchor.cz - 20);
     scene.add(fill);
 
@@ -904,7 +905,7 @@
       if(!STATE.active) return;
       try {
         // expunere autoritara — 33-photorealism _configRenderer o forta la 1.35 (spala modelul alb)
-        if(STATE.renderer && STATE.renderer.toneMappingExposure !== 0.95) STATE.renderer.toneMappingExposure = 0.95;
+        if(STATE.renderer && STATE.renderer.toneMappingExposure !== 0.70) STATE.renderer.toneMappingExposure = 0.70;
         _updateExplode();
         if(STATE.controls) STATE.controls.update();
         if(STATE._composer){
