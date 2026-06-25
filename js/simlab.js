@@ -166,11 +166,44 @@
     'prevederile Legii 350/2001, Art. 5, privind studiile de oportunitate urbanistică. Nu constituie documentație de urbanism ' +
     'și nu are valoare juridică în procedurile de autorizare.';
 
-  function exportStudiu(scn) {
+  // sims care au reprezentare pe harta prin framework-ul de indici (amprenta reala)
+  var _INDEX_SIMS = ['city15', 'tod', 'corridor', 'sponge', 'r330300', 'sdg117', 'walkscore', 'gvi', 'spacesyntax', 'noise', 'lst', 'mixuse'];
+  function _simCenter() {
+    try {
+      var c = (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[G.TCI.cityKey]);
+      if (c && c.lat) return { lat: c.lat, lng: c.lon != null ? c.lon : c.lng };
+      if (G.map) { var m = G.map.getCenter(); return { lat: m.lat, lng: m.lng }; }
+    } catch (e) {}
+    return null;
+  }
+
+  function exportStudiu(scn, _drawn) {
     try {
       var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { alert('jsPDF indisponibil'); return; }
       var simT = SIMS[scn.sim] ? SIMS[scn.sim].title : (scn.sim || 'Indice');
-      var uat = scn.uat || (G.TCI && G.TCI.cityName) || 'UAT';
+      // nume UAT real robust (cityName -> nume din baza UAT -> 'UAT')
+      var _dbName = '';
+      try { var _cc = (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[G.TCI.cityKey]); _dbName = (_cc && _cc.name) || ''; } catch (e) {}
+      var uat = scn.uat || (G.TCI && G.TCI.cityName) || _dbName || 'UAT';
+
+      // ── PAS 1: desenam indicele pe harta INAINTE de captura (altfel captura = harta goala) ──
+      // Re-apelam dupa ce harta s-a randat (idle), apoi construim PDF-ul cu captura relevanta.
+      if (!_drawn) {
+        var ov = document.getElementById('um-map-legend'); // nu blocam daca deja desenat
+        var center = _simCenter();
+        var alreadyMap = G.map && G.map.getLayer && (G.map.getLayer('seis-disk') || G.map.getLayer('flood-fill') || G.map.getLayer('ala-pts'));
+        if (center && G.map && G.addModelToMap && _INDEX_SIMS.indexOf(scn.sim) >= 0 && !alreadyMap) {
+          try { G.map.jumpTo({ center: [center.lng, center.lat], zoom: 14.2, pitch: 0, bearing: 0 }); } catch (e) {}
+          var _sz = (scn.params && (scn.params.radius_m || scn.params.raza_m || scn.params.lungime_m)) || 700;
+          try { G.addModelToMap(G.map, center, scn.sim, _sz); } catch (e) {}
+          var _done = false, _go = function () { if (_done) return; _done = true; try { exportStudiu(scn, true); } catch (e) {} };
+          try { G.map.once('idle', _go); } catch (e) {}
+          setTimeout(_go, 1500); // fallback daca 'idle' nu se declanseaza
+          return;
+        }
+        // seismic/flood deja desenate de user -> capturam ca atare; restul -> fara captura harta
+        _drawn = true;
+      }
       // A4: raport la standardul MP/PMUD (motor _makeStratDoc: diacritice, justify, grafice)
       if (typeof G._makeStratDoc === 'function') {
         var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -186,15 +219,18 @@
         D.P('Prezentul studiu de oportunitate analizeaza modelul/indicele "' + simT + '" pentru ' + uat + ', generat in laboratorul de simulare UrbanX SimLab. Documentul fundamenteaza decizia de oportunitate (Legea 350/2001, art. 5), pe baza parametrilor de intrare si a rezultatelor calculate, ca instrument de pre-analiza pentru deciziile de planificare urbana.');
         var rk = Object.keys(scn.results || {});
         if (rk.length) { D.kpis(rk.slice(0, 4).map(function (k) { return { val: String(scn.results[k]), label: k, sub: '' }; })); }
-        // ── captura harta (daca indicele e desenat pe harta) ──
+        // ── captura harta DOAR daca indicele/simularea e efectiv desenat pe harta ──
+        // (altfel am embeda harta goala = captura irelevanta, exact ce reclama userul)
         try {
-          if (G.map && G.map.getCanvas) {
+          var _ovLayers = ['seis-disk', 'flood-fill', 'ala-pts', 'um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss', 'um-noise', 'um-lst', 'um-mix', 'superbloc-fill'];
+          var _hasOverlay = G.map && G.map.getLayer && _ovLayers.some(function (id) { return !!G.map.getLayer(id); });
+          if (G.map && G.map.getCanvas && _hasOverlay) {
             var img = G.map.getCanvas().toDataURL('image/jpeg', 0.82);
             if (img && img.length > 2000) {
-              D.P('Vizualizare pe harta', { bold: true, fs: 11, gap: 1 });
+              D.P('Vizualizare pe harta (simulare desenata pe teren real)', { bold: true, fs: 11, gap: 1 });
               D.ensure(96); var iw = CW, ih = Math.round(iw * 0.58);
               try { pdf.addImage(img, 'JPEG', ML, D.y, iw, ih, '', 'FAST'); pdf.setDrawColor(200, 208, 220); pdf.rect(ML, D.y, iw, ih, 'S'); } catch (e) {}
-              D.setY(D.y + ih + 3); D.source('Captura harta UrbanX · ' + simT);
+              D.setY(D.y + ih + 3); D.source('Captura harta UrbanX · ' + simT + ' · ' + uat);
             }
           }
         } catch (e) {}
@@ -213,6 +249,8 @@
         D.callout('Statut juridic', 'Studiu de oportunitate ORIENTATIV generat de UrbanX SimLab (Legea 350/2001, art. 5). Valorile sunt estimari calibrate pe parametrii introdusi; deciziile finale necesita documentatii de specialitate avizate de proiectant atestat.');
         var _af = G._asciiFile || function (s) { return String(s || ''); };
         pdf.save('Studiu_SimLab_' + _af(simT).replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf');
+        // curatam amprenta indicelui desenata special pentru captura
+        try { if (_drawn && _INDEX_SIMS.indexOf(scn.sim) >= 0 && G.removeModelFromMap) G.removeModelFromMap(G.map); } catch (e) {}
         return;
       }
       // ── fallback minimal (motor strategic indisponibil) ──
