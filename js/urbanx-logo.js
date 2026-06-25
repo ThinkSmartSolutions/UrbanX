@@ -6,22 +6,24 @@
 (function (G) {
   'use strict';
   G._urbanxLogoDataURL = null;
-  function _load(src) {
+  function _load(src, fallbacks) {
     try {
       var img = new Image(); img.crossOrigin = 'anonymous';
       img.onload = function () {
         try {
-          var n = img.naturalWidth || 96, c = document.createElement('canvas');
-          c.width = n; c.height = img.naturalHeight || n;
-          c.getContext('2d').drawImage(img, 0, 0);
+          // rasterizam la 256x256 (crisp pt PDF) — sursa poate fi SVG (logo cyan) sau PNG
+          var T = 256, c = document.createElement('canvas');
+          c.width = T; c.height = T;
+          c.getContext('2d').drawImage(img, 0, 0, T, T);
           G._urbanxLogoDataURL = c.toDataURL('image/png');
         } catch (e) {}
       };
-      img.onerror = function () { if (src.indexOf('/UrbanX/') < 0) _load('/UrbanX/favicon-96x96.png'); };
+      img.onerror = function () { if (fallbacks && fallbacks.length) _load(fallbacks.shift(), fallbacks); };
       img.src = src;
     } catch (e) {}
   }
-  _load('favicon-96x96.png');
+  // Logo CYAN UrbanX (urbanx-logo.svg) — cu fallback la favicon-urile vechi daca lipseste
+  _load('urbanx-logo.svg', ['/UrbanX/urbanx-logo.svg', 'favicon-96x96.png', '/UrbanX/favicon-96x96.png']);
 
   // deseneaza logo-ul real; daca nu e gata, fallback la un patrat cu "X" (ca sa nu cada PDF-ul)
   G._drawUrbanxLogo = function (pdf, x, y, size, fallbackBg, fallbackFg) {
