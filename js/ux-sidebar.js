@@ -84,8 +84,7 @@
       { label: 'PMUD — mobilitate urbană (PDF)', moduleId: 'pmud' },
       { label: 'Portofoliu strategic 2025-2055', moduleId: 'portofoliu' },
       { label: 'Proiecție urbanistică 10/20/30 ani', moduleId: 'proiectie' },
-      { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' },
-      { label: 'Export PowerPoint (.pptx)', moduleId: 'pptx' } ] },
+      { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' } ] },
     { id: 'cetateni', label: 'Cetățeni & consultare', ico: '👥', color: '#1D9E75', items: [
       { label: 'Sesizare urbană', moduleId: 'sesizari' },
       { label: 'Hartă sesizări (pe/off)', moduleId: 'sesizari-map' },
@@ -95,8 +94,8 @@
       { label: 'TCI Clasic (panou interactiv)', moduleId: 'tciClasic' } ] }
   ];
   var QUICK = [
-    { label: 'Caută UAT/parcelă', ico: '🔍', moduleId: '_search' },
-    { label: 'Dashboard UAT', ico: '📊', moduleId: 'dashboardUAT' },
+    { label: 'Caută', ico: '🔍', moduleId: '_search' },
+    { label: 'Dashboard', ico: '📊', moduleId: 'dashboardUAT' },
     { label: 'SimLab', ico: '🧪', moduleId: 'simlab' },
     { label: 'SIDU', ico: '📜', moduleId: 'sidu-doc' }
   ];
@@ -120,7 +119,7 @@
     var groups = NAV; // (rol: toate vizibile; itemii admin sunt acțiuni publice de planificare)
     el.innerHTML =
       '<div class="uxsb-uat">📍 ' + ((G.TCI && (G.TCI.cityName)) || (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name) || 'UAT') + '</div>' +
-      '<div class="uxsb-qa">' + QUICK.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '">' + a.ico + ' ' + a.label + '</button>'; }).join('') + '</div>' +
+      '<div class="uxsb-qa">' + QUICK.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + a.label + '</span></button>'; }).join('') + '</div>' +
       groups.map(function (g) {
         var act = State.activeGroup === g.id;
         return '<div class="uxsb-group">' +
@@ -149,8 +148,11 @@
       '.uxsb-x{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#cbd5e1;border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:14px}',
       '#ux-sidebar-body{flex:1;overflow-y:auto;padding:8px}',
       '.uxsb-uat{font-size:11px;color:#94a3b8;padding:4px 8px 8px}',
-      '.uxsb-qa{display:flex;flex-wrap:wrap;gap:5px;padding:0 4px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:6px}',
-      '.uxsb-qabtn{flex:1;min-width:64px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#e9d08a;border-radius:7px;padding:7px 4px;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap}',
+      '.uxsb-qa{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 4px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:6px}',
+      '.uxsb-qabtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:50px;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:#e9d08a;border-radius:8px;padding:7px 3px;cursor:pointer;overflow:hidden}',
+      '.uxsb-qabtn:hover{background:rgba(212,175,55,.2)}',
+      '.uxsb-qaico{font-size:15px;line-height:1}',
+      '.uxsb-qalbl{font-size:10px;font-weight:700;line-height:1.1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}',
       '.uxsb-ghead{width:100%;display:flex;align-items:center;gap:9px;padding:10px 10px;background:transparent;border:none;border-left:3px solid transparent;cursor:pointer;color:#e6edf7;text-align:left;font-size:13px;border-radius:0 7px 7px 0;transition:background .1s}',
       '.uxsb-ghead:hover{background:rgba(255,255,255,.05)}',
       '.uxsb-ghead.active{background:rgba(255,255,255,.06);font-weight:700}',

@@ -611,14 +611,25 @@ G._PPTXExporter = {
   },
 
   async _loadPptxGenJS() {
-    return new Promise((resolve) => {
-      if(typeof PptxGenJS !== 'undefined') { resolve(); return; }
+    if(typeof PptxGenJS !== 'undefined') return;
+    // Lant de CDN-uri — daca unul pica, incercam urmatorul (cdnjs a esuat in productie)
+    const CDNS = [
+      'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js',
+      'https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js'
+    ];
+    const tryLoad = (src) => new Promise((resolve) => {
       const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js';
-      s.onload = resolve;
-      s.onerror = () => { console.warn('[PPTX] CDN fail'); resolve(); };
+      s.src = src;
+      s.onload = () => resolve(typeof PptxGenJS !== 'undefined');
+      s.onerror = () => { console.warn('[PPTX] CDN esuat:', src.split('/')[2]); resolve(false); };
       document.head.appendChild(s);
     });
+    for(const url of CDNS){
+      const ok = await tryLoad(url);
+      if(ok || typeof PptxGenJS !== 'undefined') return;
+    }
+    console.warn('[PPTX] toate CDN-urile au esuat');
   },
 };
 
@@ -651,8 +662,56 @@ window.showAvize = function() {
   const city = (window._RO_CITIES_DB||{})[k] || { name:k };
   const risk = (typeof _getRiskProfile==='function') ? _getRiskProfile(city) : {};
   const avize = G._AvizoMatrix.compute(p, city, risk);
-  console.table(avize);
-  ss('Avize necesare: ' + avize.length + ' (vezi consola F12 pentru detalii)');
+  const esc = (s)=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const oblig = avize.filter(a=>a.obligatoriu).length;
+
+  document.getElementById('avize-modal')?.remove();
+  const m = document.createElement('div');
+  m.id = 'avize-modal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(4,8,18,.78);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);font-family:system-ui,sans-serif';
+  m.onclick = (e)=>{ if(e.target===m) m.remove(); };
+  const rows = avize.map((a,i)=>`
+    <tr style="border-bottom:1px solid rgba(255,255,255,.06)">
+      <td style="padding:9px 10px;color:#64748b;font-size:11px;text-align:center">${i+1}</td>
+      <td style="padding:9px 10px;color:#e6edf7;font-size:12.5px;font-weight:600">${esc(a.emitent)}</td>
+      <td style="padding:9px 10px;color:#aebdd4;font-size:12px">${esc(a.motiv)}</td>
+      <td style="padding:9px 10px;color:#cbd5e1;font-size:11.5px;white-space:nowrap">${esc(a.termen)}</td>
+      <td style="padding:9px 10px;text-align:center">
+        <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;${a.obligatoriu
+          ? 'background:rgba(239,68,68,.16);color:#f87171;border:1px solid rgba(239,68,68,.35)'
+          : 'background:rgba(59,130,246,.14);color:#93c5fd;border:1px solid rgba(59,130,246,.3)'}">${a.obligatoriu?'OBLIGATORIU':'recomandat'}</span>
+      </td>
+    </tr>`).join('');
+  m.innerHTML = `
+    <div style="width:min(880px,96vw);max-height:90vh;display:flex;flex-direction:column;background:#0b1424;border:1px solid rgba(212,175,55,.35);border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.7);overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(212,175,55,.12),transparent)">
+        <div>
+          <div style="color:#d4af37;font-size:16px;font-weight:800">⚖️ Matrice avize necesare</div>
+          <div style="color:#94a3b8;font-size:11.5px;margin-top:3px">${esc(city.name)}${p.nr_cadastral?(' · CF '+esc(p.nr_cadastral)):''} — <b style="color:#f87171">${oblig} obligatorii</b> din ${avize.length} total</div>
+        </div>
+        <button onclick="document.getElementById('avize-modal').remove()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#cbd5e1;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px">✕</button>
+      </div>
+      <div style="overflow:auto;flex:1">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr style="position:sticky;top:0;background:#0e1830;z-index:1">
+            <th style="padding:9px 10px;color:#64748b;font-size:10px;text-align:center;font-weight:700">#</th>
+            <th style="padding:9px 10px;color:#94a3b8;font-size:10px;text-align:left;font-weight:700">EMITENT</th>
+            <th style="padding:9px 10px;color:#94a3b8;font-size:10px;text-align:left;font-weight:700">MOTIV</th>
+            <th style="padding:9px 10px;color:#94a3b8;font-size:10px;text-align:left;font-weight:700">TERMEN</th>
+            <th style="padding:9px 10px;color:#94a3b8;font-size:10px;text-align:center;font-weight:700">STATUT</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="color:#64748b;font-size:10.5px">Orientativ — confirmați la emitenți conform Legii 50/1991 și CU.</span>
+        <div style="display:flex;gap:8px">
+          ${typeof window.generateREPA==='function' ? `<button onclick="window.generateREPA&&window.generateREPA()" style="background:rgba(129,140,248,.14);border:1px solid rgba(129,140,248,.35);color:#a5b4fc;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">📄 Raport REPA (PDF)</button>`:''}
+          <button onclick="document.getElementById('avize-modal').remove()" style="background:rgba(212,175,55,.16);border:1px solid rgba(212,175,55,.35);color:#e9d08a;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">Închide</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
   return avize;
 };
 

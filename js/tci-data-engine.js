@@ -291,39 +291,55 @@ const OSM = {
     if(cached) return cached;
 
     const lat = city.lat||47.16, lon = city.lon||27.58;
-    const q = `[out:json][timeout:20];
+    // nwr = node+way+relation (multe scoli/spitale/parcuri sunt poligoane, nu noduri)
+    // out tags = primim fiecare element cu tag-urile lui -> numaram pe tip (NU "out count",
+    // care intoarce un singur element agregat fara breakdown -> dadea totul 0).
+    const a = `(around:${radius},${lat},${lon})`;
+    const q = `[out:json][timeout:25];
       (
-        node["amenity"="school"](around:${radius},${lat},${lon});
-        node["amenity"="hospital"](around:${radius},${lat},${lon});
-        node["amenity"="clinic"](around:${radius},${lat},${lon});
-        node["public_transport"="stop_position"](around:${radius},${lat},${lon});
-        node["amenity"="university"](around:${radius},${lat},${lon});
-        node["amenity"="kindergarten"](around:${radius},${lat},${lon});
-        node["leisure"="park"](around:${radius},${lat},${lon});
-        node["amenity"="supermarket"](around:${radius},${lat},${lon});
+        nwr["amenity"="school"]${a};
+        nwr["amenity"="kindergarten"]${a};
+        nwr["amenity"="hospital"]${a};
+        nwr["amenity"="clinic"]${a};
+        nwr["amenity"="university"]${a};
+        nwr["amenity"="college"]${a};
+        nwr["leisure"="park"]${a};
+        nwr["amenity"="supermarket"]${a};
+        nwr["shop"="supermarket"]${a};
+        node["highway"="bus_stop"]${a};
+        node["public_transport"="platform"]${a};
+        node["public_transport"="stop_position"]${a};
+        node["railway"~"^(tram_stop|station|halt)$"]${a};
       );
-      out count;`;
+      out tags;`;
 
     try {
       const res = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST', body: q,
-        signal: AbortSignal.timeout(15000)
+        signal: AbortSignal.timeout(20000)
       });
       const data = await res.json();
-      const counts = {};
+      const c = { school:0, kindergarten:0, hospital:0, clinic:0, university:0, park:0, supermarket:0, transport:0 };
       (data.elements||[]).forEach(el => {
-        const type = el.tags?.amenity||el.tags?.public_transport||el.tags?.leisure||'other';
-        counts[type] = (counts[type]||0) + 1;
+        const t = el.tags || {};
+        if(t.amenity==='school') c.school++;
+        else if(t.amenity==='kindergarten') c.kindergarten++;
+        else if(t.amenity==='hospital') c.hospital++;
+        else if(t.amenity==='clinic') c.clinic++;
+        else if(t.amenity==='university'||t.amenity==='college') c.university++;
+        else if(t.leisure==='park') c.park++;
+        else if(t.amenity==='supermarket'||t.shop==='supermarket') c.supermarket++;
+        else if(t.highway==='bus_stop'||t.public_transport==='platform'||t.public_transport==='stop_position'||/^(tram_stop|station|halt)$/.test(t.railway||'')) c.transport++;
       });
 
       const result = {
-        scoli: (counts.school||0)+(counts.kindergarten||0),
-        spitale: (counts.hospital||0)+(counts.clinic||0),
-        transport: counts.stop_position||0,
-        universitati: counts.university||0,
-        parcuri: counts.park||0,
-        supermarketuri: counts.supermarket||0,
-        total_poi: Object.values(counts).reduce((s,v)=>s+v,0),
+        scoli: c.school+c.kindergarten,
+        spitale: c.hospital+c.clinic,
+        transport: c.transport,
+        universitati: c.university,
+        parcuri: c.park,
+        supermarketuri: c.supermarket,
+        total_poi: c.school+c.kindergarten+c.hospital+c.clinic+c.university+c.park+c.supermarket+c.transport,
         radius_m: radius,
         source: 'OSM Overpass',
         timestamp: new Date().toISOString(),
