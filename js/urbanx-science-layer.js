@@ -397,14 +397,18 @@ G._FloodMapper = {
 
   async _fetchRiverBuffers(map, srcId, bufferDeg, color) {
     const b = map.getBounds();
-    const q = `[out:json][timeout:15];
-      (way["waterway"~"river|stream|canal"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}););
-      out geom;`;
+    const q = `[out:json][timeout:15];` +
+      `(way["waterway"~"river|stream|canal"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}););` +
+      `out geom;`;
     try {
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method:'POST', body:q,
-        signal: AbortSignal.timeout(12000)
-      });
+      // prin proxy Cloudflare (/osm?q=) — Overpass direct e nefiabil din browser (CORS/503)
+      const PROXY = (window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+      let res;
+      try { res = await fetch(`${PROXY}/osm?q=${encodeURIComponent(q)}`, { signal: AbortSignal.timeout(15000) }); }
+      catch(e0){ res = null; }
+      if (!res || !res.ok) {
+        res = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(q), signal: AbortSignal.timeout(12000) });
+      }
       const data = await res.json();
       const features = [];
       (data.elements||[]).forEach(el => {
