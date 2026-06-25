@@ -99,7 +99,7 @@
       // coperta
       D.setSuppress(true); D.setPage(1);
       pdf.setFillColor(14, 10, 28); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(124, 58, 237); pdf.rect(0, 60, W, 1.4, 'F');
-      try { if (window._drawUrbanxLogo) window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); } catch (e) {}
+      try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
       pdf.setTextColor(180, 150, 240); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(9); pdf.text('URBANX · INDICI & MODELE URBANE', W / 2, 44, { align: 'center' });
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(30); pdf.text('RAPORT INDICI URBANI', W / 2, 88, { align: 'center' });
       pdf.setFontSize(15); pdf.setTextColor(180, 150, 240); pdf.text(D.S2(uat), W / 2, 102, { align: 'center' });

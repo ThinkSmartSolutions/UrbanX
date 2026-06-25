@@ -48,8 +48,7 @@
       // serializeaza (XObject-ul de imagine e legat de pagina curenta la output), pe cand
       // operatiile vectoriale se scriu corect in stream-ul paginii 1 (la fel ca disclaimer-ul).
       try {
-        doc.setPage(1);
-        vlogo(doc, W - 22, 6, 14);
+        if (!doc.__hasCoverLogo) { doc.setPage(1); vlogo(doc, W - 22, 6, 14); }
       } catch (e) {}
 
       // — DISCLAIMER pe ULTIMA pagina (sau pagina noua daca nu incape) —
