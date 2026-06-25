@@ -897,19 +897,21 @@
         _updateExplode();
         if(STATE.controls) STATE.controls.update();
         if(STATE._composer){
-          // repune render-ul pristin (neutralizează patch-ul 46 → evită recursia
-          // RenderPass → renderer.render → composer.render → …)
           STATE.renderer.render = STATE._origRender;
           STATE._composer.render();
         } else {
-          STATE.renderer.render(STATE.scene, STATE.camera);
+          // FIX #4: folosim render-ul PRISTIN (capturat inainte ca 46-postprocessing sa
+          // monkeypatcheze renderer.render — acel patch arunca uniform3fv -> dadea
+          // "prea multe erori -> opresc" -> dollhouse iesea singur in viewer dupa cateva sec).
+          (STATE._origRender || STATE.renderer.render.bind(STATE.renderer))(STATE.scene, STATE.camera);
         }
         STATE.raf = requestAnimationFrame(loop);
       } catch(err){
         errCount++;
-        if(errCount <= 3) console.error('[VTour S1c] eroare loop:', err);
-        if(errCount > 5){ console.error('[VTour S1c] prea multe erori — opresc'); stop(); }
-        else STATE.raf = requestAnimationFrame(loop);
+        if(errCount <= 3) console.error('[VTour S1c] eroare cadru (continui):', err.message);
+        // NU mai oprim turul/dollhouse-ul la erori de cadru — sarim cadrul si continuam,
+        // ca sa nu mai iasa singur. (Daca un material e defect, se vede restul scenei.)
+        STATE.raf = requestAnimationFrame(loop);
       }
     };
     STATE.raf = requestAnimationFrame(loop);
@@ -1922,13 +1924,13 @@
       if(!STATE.active) return;
       try {
         if(STATE.controls) STATE.controls.update();
-        STATE.renderer.render(STATE.scene, STATE.camera);
+        (STATE._origRender || STATE.renderer.render.bind(STATE.renderer))(STATE.scene, STATE.camera);
         STATE.raf = requestAnimationFrame(loop);
       } catch(err){
         errCount++;
-        if(errCount <= 3) console.error('[VTour S2b]:', err);
-        if(errCount > 5){ stopFP(); }
-        else STATE.raf = requestAnimationFrame(loop);
+        if(errCount <= 3) console.error('[VTour S2b] cadru (continui):', err.message);
+        // NU mai oprim — sarim cadrul, continuam (nu mai iese singur)
+        STATE.raf = requestAnimationFrame(loop);
       }
     };
     STATE.raf = requestAnimationFrame(loop);
