@@ -412,9 +412,15 @@
       try {
         equirectURL = await _renderCubemapToEquirect(scene, worldX, worldY, worldZ);
       } catch (renderErr) {
-        // log o SINGURA data (nu ×23) — restul cad pe placeholder silentios
-        if (!window.__tfRenderWarned) { window.__tfRenderWarned = true; console.warn('[TurFoto] render cubemap esuat, folosesc placeholder:', renderErr.message); }
-        equirectURL = await _generatePlaceholderPanorama(worldX, worldZ);
+        // log o SINGURA data (nu ×23). CubeCamera.update face 6 randari FARA try/catch ->
+        // o eroare de material o face sa crape (panouri albastre placeholder). Cadem pe
+        // render-ul 6-fete perspective din camera VTour (aceea care randeaza OK in dollhouse),
+        // dand o VEDERE REALA a interiorului in loc de placeholder.
+        if (!window.__tfRenderWarned) { window.__tfRenderWarned = true; console.warn('[TurFoto] cubemap esuat -> fallback 6-fete perspective:', renderErr.message); }
+        equirectURL = await new Promise(function(res){
+          try { _renderFallbackIOS(scene, worldX, worldY, worldZ, res); }
+          catch(e){ _generatePlaceholderPanorama(worldX, worldZ).then(res); }
+        });
       }
       scenes[key] = {
         r, equirectURL,

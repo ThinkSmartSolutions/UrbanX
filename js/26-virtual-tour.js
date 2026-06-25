@@ -172,6 +172,18 @@
       if(window._RV.building.bW) bW = window._RV.building.bW;
       if(window._RV.building.bD) bD = window._RV.building.bD;
     }
+    // FIX acoperis retras: layout-ul camerelor poate DEPASI building.bW/bD (ex. 80m camere vs
+    // 46m amprenta declarata) -> peretii/placa/acoperisul (dimensionate la bW/bD) acopereau doar
+    // o parte, decalat. Extindem amprenta la intinderea REALA a camerelor releveului.
+    if(window._RV && Array.isArray(window._RV.floors)){
+      let rMaxX = 0, rMaxY = 0;
+      window._RV.floors.forEach(f => { if(f && Array.isArray(f.rects)) f.rects.forEach(r => {
+        if(isFinite(r.x + r.w)) rMaxX = Math.max(rMaxX, r.x + r.w);
+        if(isFinite(r.y + r.h)) rMaxY = Math.max(rMaxY, r.y + r.h);
+      }); });
+      if(rMaxX > bW + 0.5) bW = rMaxX;
+      if(rMaxY > bD + 0.5) bD = rMaxY;
+    }
     return { cx: center.x, cz: center.z, baseY: bbox.min.y, bW, bD, topY: bbox.max.y };
   }
 
