@@ -580,28 +580,79 @@
   }
 
   // ── geometrie reprezentativă pe hartă (cerc/linie centrat pe map center) ──
-  function addModelToMap(mapInstance, center, modelId, sizeM) {
+  var _UM_CALCID = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss', noise: 'um-noise', lst: 'um-lst', mixuse: 'um-mix' };
+  var _UM_COL = { 'um-iso': '#BA7517', 'um-tod': '#534AB7', 'um-sponge': '#378ADD', 'um-corridor': '#1D9E75', 'um-330': '#2E9E5B', 'um-sdg117': '#C2410C', 'um-walk': '#0E7C5A', 'um-gvi': '#3FA34D', 'um-ss': '#7C3AED', 'um-noise': '#0EA5A5', 'um-lst': '#B91C1C', 'um-mix': '#D97706' };
+
+  // Legenda analizabila pe harta: titlu + valorile calculate (NU doar o bulina)
+  function _umDrawLegend(result, color) {
+    try {
+      if (!result) return;
+      var el = document.getElementById('um-map-legend');
+      if (!el) { el = document.createElement('div'); el.id = 'um-map-legend'; document.body.appendChild(el); }
+      var col = color || '#7C3AED';
+      var mets = result.metrics || [];
+      var area = '';
+      try { area = (result.documentContent && result.documentContent.masterplanSection && result.documentContent.masterplanSection.affectedArea) || ''; } catch (e) {}
+      el.style.cssText = 'position:fixed;left:14px;bottom:18px;z-index:9200;width:288px;max-width:82vw;background:rgba(8,14,30,.95);border:1px solid ' + col + '66;border-left:4px solid ' + col + ';border-radius:10px;padding:12px 14px;font-family:system-ui,sans-serif;color:#e6edf7;box-shadow:0 10px 36px rgba(0,0,0,.6);backdrop-filter:blur(8px)';
+      el.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+          '<div style="font-size:13px;font-weight:800;color:' + col + '">' + (result.modelName || 'Indice urban') + '</div>' +
+          '<button onclick="this.parentNode.parentNode.remove()" style="background:none;border:0;color:#94a3b8;font-size:16px;cursor:pointer;line-height:1">×</button>' +
+        '</div>' +
+        (area ? ('<div style="font-size:10.5px;color:#94a3b8;margin-bottom:8px">📐 Suprafață vizată: ' + area + '</div>') : '') +
+        mets.slice(0, 5).map(function (m) {
+          var pos = m.direction === 'positive', neu = m.direction === 'neutral';
+          var disp = (m.unit === '%' || m.unit === '°C') ? ((m.value > 0 ? '+' : '') + m.value + m.unit) : (roN(m.value) + ' ' + m.unit);
+          return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)">' +
+            '<span style="font-size:11px;color:#aebdd4">' + m.label + '</span>' +
+            '<span style="font-size:12px;font-weight:700;white-space:nowrap;color:' + (pos ? '#97C459' : neu ? '#94a3b8' : '#F97316') + '">' + disp + '</span></div>';
+        }).join('') +
+        '<div style="font-size:9.5px;color:#5b6b86;margin-top:8px;line-height:1.4">Amprenta colorată = extinderea spațială reală a indicelui (rază/lungime în metri). Orientativ — detalii în raportul PDF.</div>';
+    } catch (e) {}
+  }
+
+  function addModelToMap(mapInstance, center, modelId, sizeM, result) {
     if (!mapInstance || !center) return;
-    var L = (G.MODEL_LAYERS && G.MODEL_LAYERS[modelId]) || null;
-    var dLat = sizeM / 111000, dLng = sizeM / (111000 * Math.cos(center.lat * Math.PI / 180));
-    var src, data, layer;
-    var calcId = { city15: 'um-iso', tod: 'um-tod', sponge: 'um-sponge', corridor: 'um-corridor', r330300: 'um-330', sdg117: 'um-sdg117', walkscore: 'um-walk', gvi: 'um-gvi', spacesyntax: 'um-ss', noise: 'um-noise', lst: 'um-lst', mixuse: 'um-mix' }[modelId];
-    // culoare per indice (vizibil direct pe harta, nu gri prin setTransition)
-    var COL = { 'um-iso': '#BA7517', 'um-tod': '#534AB7', 'um-sponge': '#378ADD', 'um-corridor': '#1D9E75', 'um-330': '#2E9E5B', 'um-sdg117': '#C2410C', 'um-walk': '#0E7C5A', 'um-gvi': '#3FA34D', 'um-ss': '#7C3AED', 'um-noise': '#0EA5A5', 'um-lst': '#B91C1C', 'um-mix': '#D97706' };
-    var _c = COL[calcId] || '#7C3AED';
-    if (modelId === 'corridor' || modelId === 'gvi' || modelId === 'spacesyntax') {
-      data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[center.lng - dLng * 0.5, center.lat], [center.lng + dLng * 0.5, center.lat]] }, properties: {} };
-      layer = { id: calcId, type: 'line', source: calcId + '-src', paint: { 'line-color': _c, 'line-width': 9, 'line-opacity': 0.9 } };
-    } else {
+    var calcId = _UM_CALCID[modelId];
+    var _c = _UM_COL[calcId] || '#7C3AED';
+    var isLine = (modelId === 'corridor' || modelId === 'spacesyntax'); // elemente liniare reale
+    var srcId = calcId + '-src';
+    var data;
+    // Amprenta SPATIALA reala din sizeM (metri), nu o bulina decorativa fixa
+    try {
+      if (window.turf && isLine) {
+        var halfKm = Math.max(0.05, (sizeM / 1000) / 2);
+        var pa = turf.destination([center.lng, center.lat], halfKm, -90, { units: 'kilometers' }).geometry.coordinates;
+        var pb = turf.destination([center.lng, center.lat], halfKm, 90, { units: 'kilometers' }).geometry.coordinates;
+        data = { type: 'Feature', geometry: { type: 'LineString', coordinates: [pa, pb] }, properties: {} };
+      } else if (window.turf) {
+        var radKm = Math.max(0.05, sizeM / 1000);
+        data = turf.circle([center.lng, center.lat], radKm, { steps: 64, units: 'kilometers' });
+      } else {
+        data = { type: 'Feature', geometry: { type: 'Point', coordinates: [center.lng, center.lat] }, properties: {} };
+      }
+    } catch (e) {
       data = { type: 'Feature', geometry: { type: 'Point', coordinates: [center.lng, center.lat] }, properties: {} };
-      layer = { id: calcId, type: 'circle', source: calcId + '-src', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 26, 14, 90], 'circle-color': _c, 'circle-opacity': 0.4, 'circle-stroke-color': _c, 'circle-stroke-width': 2 } };
     }
-    try { if (mapInstance.getSource(calcId + '-src')) mapInstance.getSource(calcId + '-src').setData(data); else mapInstance.addSource(calcId + '-src', { type: 'geojson', data: data }); } catch (e) {}
-    try { if (!mapInstance.getLayer(calcId)) mapInstance.addLayer(layer); } catch (e) {}
+    try { if (mapInstance.getSource(srcId)) mapInstance.getSource(srcId).setData(data); else mapInstance.addSource(srcId, { type: 'geojson', data: data }); } catch (e) {}
+    try {
+      var gt = data.geometry && data.geometry.type;
+      if (gt === 'LineString') {
+        if (!mapInstance.getLayer(calcId)) mapInstance.addLayer({ id: calcId, type: 'line', source: srcId, paint: { 'line-color': _c, 'line-width': 7, 'line-opacity': 0.9 } });
+      } else if (gt === 'Polygon') {
+        if (!mapInstance.getLayer(calcId)) mapInstance.addLayer({ id: calcId, type: 'fill', source: srcId, paint: { 'fill-color': _c, 'fill-opacity': 0.16 } });
+        if (!mapInstance.getLayer(calcId + '-ln')) mapInstance.addLayer({ id: calcId + '-ln', type: 'line', source: srcId, paint: { 'line-color': _c, 'line-width': 2.5, 'line-opacity': 0.9 } });
+      } else {
+        if (!mapInstance.getLayer(calcId)) mapInstance.addLayer({ id: calcId, type: 'circle', source: srcId, paint: { 'circle-radius': 30, 'circle-color': _c, 'circle-opacity': 0.4, 'circle-stroke-color': _c, 'circle-stroke-width': 2 } });
+      }
+    } catch (e) {}
+    _umDrawLegend(result, _c);
   }
   function removeModelFromMap(mapInstance) {
+    try { document.getElementById('um-map-legend') && document.getElementById('um-map-legend').remove(); } catch (e) {}
     if (!mapInstance) return;
     ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss', 'um-noise', 'um-lst', 'um-mix'].forEach(function (id) {
+      try { if (mapInstance.getLayer(id + '-ln')) mapInstance.removeLayer(id + '-ln'); } catch (e) {}
       try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {}
       try { if (mapInstance.getSource(id + '-src')) mapInstance.removeSource(id + '-src'); } catch (e) {}
     });
@@ -656,7 +707,7 @@
     var result = cfg.calc(_params[_curId]);
     G.UrbanModelsStore.setActive(result);
     var mapInst = G.map, center = mapInst ? mapInst.getCenter() : null;
-    if (center) { addModelToMap(mapInst, { lat: center.lat, lng: center.lng }, _curId, cfg.size(_params[_curId])); G.initMapTransitionListener(mapInst); }
+    if (center) { addModelToMap(mapInst, { lat: center.lat, lng: center.lng }, _curId, cfg.size(_params[_curId]), result); G.initMapTransitionListener(mapInst); }
     G.UrbanModelsStore.setTransition(100);
     // fa dialogul translucid + lasa harta interactiva, ca sa se VADA indicele desenat
     try { if (_ov) { _ov.style.background = 'transparent'; _ov.style.pointerEvents = 'none'; } var _bx = document.getElementById('um-dialog'); if (_bx) { _bx.style.pointerEvents = 'auto'; _bx.style.opacity = '0.97'; _bx.style.marginLeft = 'auto'; _bx.style.marginRight = '14px'; } } catch (e) {}
