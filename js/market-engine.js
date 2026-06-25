@@ -146,14 +146,17 @@
   function generatePDF(uat, type) {
     try {
       var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!jsPDFns) { alert('jsPDF indisponibil'); return; }
-      var pdf = new jsPDFns({ unit: 'mm', format: 'a4' }); if (G._registerROFont) G._registerROFont(pdf);
+      var pdf = new jsPDFns({ unit: 'mm', format: 'a4' });
+      var _F = (G._registerROFont && G._registerROFont(pdf)) ? 'DejaVuRO' : 'helvetica';
+      pdf.setFont(_F, 'normal'); // FIX: fontul RO era inregistrat dar niciodata aplicat -> diacritice rupte
       var x = 16, y = 22, s = snapshot(uat, type);
       pdf.setFontSize(9); pdf.setTextColor(120); pdf.text('UrbanX · Market Intelligence imobiliar (date demonstrative)', x, 13);
       pdf.setFontSize(17); pdf.setTextColor(20); pdf.text('Raport de piață — ' + (TYPES[type] || type) + ', ' + uat, x, y); y += 10;
       if (s.count) {
         pdf.setFontSize(11); pdf.setTextColor(60);
-        pdf.text('Preț median: ' + s.median_m2_eur + ' €/mp (' + s.median_m2_ron + ' RON/mp)', x, y); y += 6;
-        pdf.text('Interval: ' + s.min_m2_eur + '–' + s.max_m2_eur + ' €/mp · medie ' + s.avg_m2_eur + ' €/mp', x, y); y += 6;
+        var _nfn = (window._nf || function(n){return ''+n;});
+        pdf.text('Preț median: ' + _nfn(s.median_m2_eur) + ' €/mp (' + _nfn(s.median_m2_ron) + ' RON/mp)', x, y); y += 6;
+        pdf.text('Interval: ' + _nfn(s.min_m2_eur) + '–' + _nfn(s.max_m2_eur) + ' €/mp · medie ' + _nfn(s.avg_m2_eur) + ' €/mp', x, y); y += 6;
         pdf.text('Variație: ' + (s.change_3m_pct >= 0 ? '+' : '') + s.change_3m_pct + '% (3 luni) · ' + (s.change_12m_pct >= 0 ? '+' : '') + s.change_12m_pct + '% (12 luni)', x, y); y += 6;
         pdf.text('Eșantion: ' + s.count + ' tranzacții · calitate: ' + s.data_quality, x, y); y += 10;
       } else { pdf.setFontSize(11); pdf.setTextColor(120); pdf.text('Fără tranzacții pentru această combinație.', x, y); y += 10; }
