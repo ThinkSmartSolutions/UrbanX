@@ -372,8 +372,10 @@
     r4k.shadowMap.enabled = true;
     r4k.shadowMap.type = THREE.PCFSoftShadowMap;
     r4k.toneMapping = THREE.ACESFilmicToneMapping;
-    r4k.toneMappingExposure = 1.35;
-    r4k.physicallyCorrectLights = true;
+    r4k.toneMappingExposure = 1.15;
+    // physicallyCorrectLights=true interpreta intensitatile (sun 3.0, point 1.0) ca unitati
+    // fizice (candela/lux) => scena ~neagra. Luminile din _buildRoomScene sunt ne-fizice => OFF.
+    r4k.physicallyCorrectLights = false;
     if (THREE.sRGBEncoding) r4k.outputEncoding = THREE.sRGBEncoding;
 
     // ── SCENA FOTOREALISTĂ ────────────────────────────────────────────
