@@ -229,7 +229,12 @@
 
       // ── Camere din releveu ──
       if(hasRelevee){
-        const rvFloor = RV.floors[Math.min(fIdx, RV.floors.length - 1)];
+        // Etajul propriu daca are camere; altfel replicam primul etaj cu camere (de obicei
+        // parterul) — fix #4: etajele superioare apareau GOALE cand releveul detalia doar parterul.
+        let rvFloor = RV.floors[fIdx];
+        if(!rvFloor || !Array.isArray(rvFloor.rects) || rvFloor.rects.length === 0){
+          rvFloor = RV.floors.find(f => f && Array.isArray(f.rects) && f.rects.length > 0) || RV.floors[0];
+        }
         if(rvFloor && Array.isArray(rvFloor.rects)){
           rvFloor.rects.forEach(r => {
             if(!isFinite(r.w) || !isFinite(r.h) || r.w <= 0.1 || r.h <= 0.1) return;
