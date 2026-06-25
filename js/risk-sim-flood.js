@@ -85,9 +85,10 @@
   // ── HARTĂ ──
   function drawOnMap(map, res, centerLat) {
     if (!map) return;
-    // Extindem celulele cu ~18% peste latura DEM ca celulele adiacente sa se UNEASCA
-    // intr-o panza continua de apa (mult mai lizibil decat patratele izolate, abia vizibile).
-    var halfM = (res.cellM / 2) * 1.18;
+    // Celule la latura DEM (NU extinse — extinderea le unea in pete plate care
+    // acopereau cladirile, nelizibil la zoom). Opacitate redusa => se vad cladirile
+    // SUB apa (ca pe hartile de hazard reale), iar culoarea da adancimea.
+    var halfM = (res.cellM / 2) * 0.98;
     var dLat = halfM / 111320, dLon = halfM / (111320 * Math.cos(centerLat * Math.PI / 180));
     var feats = res.flooded.map(function (c) {
       return { type: 'Feature', properties: { d: +c.d.toFixed(2) }, geometry: { type: 'Polygon', coordinates: [[
@@ -97,16 +98,29 @@
     var fc = { type: 'FeatureCollection', features: feats };
     try { if (map.getSource('flood-src')) map.getSource('flood-src').setData(fc); else map.addSource('flood-src', { type: 'geojson', data: fc }); } catch (e) {}
     try {
-      // culori mai saturate (apa de mica adancime era #bae6fd ~ invizibila) + opacitate ridicata + contur
       if (!map.getLayer('flood-fill')) map.addLayer({ id: 'flood-fill', type: 'fill', source: 'flood-src',
         paint: {
-          'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0.1, '#38bdf8', 0.3, '#0ea5e9', 0.6, '#0284c7', 1.0, '#0369a1', 1.8, '#1e40af', 2.5, '#1e3a8a'],
-          'fill-opacity': 0.82,
-          'fill-outline-color': '#7dd3fc'
+          'fill-color': ['interpolate', ['linear'], ['get', 'd'], 0.1, '#7dd3fc', 0.3, '#38bdf8', 0.6, '#0ea5e9', 1.0, '#0284c7', 1.8, '#1d4ed8', 2.5, '#1e3a8a'],
+          // mai transparent la adancime mica (se vede ce e dedesubt), mai opac in zone adanci
+          'fill-opacity': ['interpolate', ['linear'], ['get', 'd'], 0.1, 0.34, 0.6, 0.5, 1.5, 0.62],
+          'fill-outline-color': 'rgba(125,211,252,0.55)'
         } });
+    } catch (e) {}
+    // legenda de adancime (mica, jos-stanga) — ca sa fie analizabil
+    try {
+      var lg = document.getElementById('flood-depth-legend');
+      if (!lg) { lg = document.createElement('div'); lg.id = 'flood-depth-legend'; document.body.appendChild(lg); }
+      lg.style.cssText = 'position:fixed;left:14px;bottom:18px;z-index:9200;background:rgba(8,14,30,.92);border:1px solid rgba(14,165,233,.4);border-radius:9px;padding:9px 12px;font-family:system-ui,sans-serif;color:#e6edf7;font-size:11px;box-shadow:0 8px 28px rgba(0,0,0,.5)';
+      lg.innerHTML = '<div style="font-weight:700;margin-bottom:6px;color:#7dd3fc">🌊 Adâncime băltire</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:16px;height:10px;background:#7dd3fc;display:inline-block;border-radius:2px"></span> &lt; 0,3 m</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:16px;height:10px;background:#0ea5e9;display:inline-block;border-radius:2px"></span> 0,3–1 m</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:16px;height:10px;background:#1d4ed8;display:inline-block;border-radius:2px"></span> 1–2 m</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:16px;height:10px;background:#1e3a8a;display:inline-block;border-radius:2px"></span> &gt; 2 m</div>' +
+        '<div style="font-size:9px;color:#7b88a0;margin-top:5px;max-width:150px;line-height:1.35">Screening DEM ' + Math.round(res.cellM) + ' m/celulă · orientativ</div>';
     } catch (e) {}
   }
   function clearMap(map) {
+    try { var lg = document.getElementById('flood-depth-legend'); if (lg) lg.remove(); } catch (e) {}
     if (!map) return;
     try { if (map.getLayer('flood-fill')) map.removeLayer('flood-fill'); } catch (e) {}
     try { if (map.getSource('flood-src')) map.removeSource('flood-src'); } catch (e) {}
