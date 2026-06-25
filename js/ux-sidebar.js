@@ -163,7 +163,7 @@
     D.head.appendChild(style);
     var ov = D.createElement('div'); ov.id = 'ux-sidebar-overlay'; ov.onclick = close;
     var sb = D.createElement('div'); sb.id = 'ux-sidebar';
-    sb.innerHTML = '<div class="uxsb-head"><span class="uxsb-logo">🏙 Planificare Urbană</span><button class="uxsb-x" onclick="UXSidebar.close()">✕</button></div>' +
+    sb.innerHTML = '<div class="uxsb-head"><span class="uxsb-logo">🏙 Teritoriu</span><button class="uxsb-x" onclick="UXSidebar.close()">✕</button></div>' +
       '<div id="ux-sidebar-body"></div>' +
       '<div class="uxsb-foot">🔍 Cmd/Ctrl+K = caută orice funcție</div>';
     D.body.appendChild(ov); D.body.appendChild(sb);
