@@ -77,7 +77,7 @@ const _RV = {
   open: false,
   tab: 'plan', floor: 0,
   scale: 12,
-  showSolar: false, showISU: true, showDim: true, showSGrid: false, showFlow: true,
+  showSolar: false, showISU: true, showDim: true, showSGrid: false, showFlow: false,
   panX:0, panY:0,
   building: null, floors: [],
   parcelParams: null,
@@ -8670,7 +8670,7 @@ async function _rvInject(){
       </div>
       <div class="rv-tog-row">
         <span class="rv-tog-lbl">🧭 Flux circulație</span>
-        <div class="rv-tog rv-tog-on" id="rv-tog-flow" onclick="_rvToggle(this,'flow')"></div>
+        <div class="rv-tog" id="rv-tog-flow" onclick="_rvToggle(this,'flow')"></div>
       </div>
     </div>
 
@@ -8951,7 +8951,7 @@ async function _rvInject(){
           <button class="rv-mob-ov-btn" id="rv-mob-ov-isu" onclick="_rvMobOverlay(this,'isu')">🚨 ISU Evacuare</button>
           <button class="rv-mob-ov-btn rv-mob-ov-on" id="rv-mob-ov-dim" onclick="_rvMobOverlay(this,'dim')">📐 Cote</button>
           <button class="rv-mob-ov-btn" id="rv-mob-ov-sGrid" onclick="_rvMobOverlay(this,'sGrid')">🔲 Grilă</button>
-          <button class="rv-mob-ov-btn rv-mob-ov-on" id="rv-mob-ov-flow" onclick="_rvMobOverlay(this,'flow')">🧭 Flux</button>
+          <button class="rv-mob-ov-btn" id="rv-mob-ov-flow" onclick="_rvMobOverlay(this,'flow')">🧭 Flux</button>
         </div>
         <!-- Solar controls mobil -->
         <div id="rv-mob-solar-ctrls" style="display:none;padding:8px;background:rgba(212,175,55,.06);border-radius:8px;border:1px solid rgba(212,175,55,.15)">
