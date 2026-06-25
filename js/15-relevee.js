@@ -872,6 +872,10 @@ function _rvInitCanvas(W,H,canvasId){
   let dpr=Math.min(window.devicePixelRatio||1,_mob?2:1);
   cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
   cv.style.width=W+'px';cv.style.height=H+'px';
+  // FIX pan stanga-dreapta: canvas e flex-item in .rv-drawwrap (display:flex) -> implicit
+  // flex-shrink:1 il comprima pe latime sa incapa -> zero overflow orizontal (puteai trage
+  // doar sus-jos). flex-shrink:0 ii pastreaza latimea reala -> overflow + pan pe ambele axe.
+  cv.style.flexShrink='0'; cv.style.flexGrow='0';
   let ctx=cv.getContext('2d');
   if(!ctx&&dpr>1){dpr=1;cv.width=Math.round(W);cv.height=Math.round(H);ctx=cv.getContext('2d');}
   if(!ctx){console.error('[RV] ctx null W='+W+' H='+H);return {cv,ctx:null,W,H};}
