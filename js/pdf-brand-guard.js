@@ -12,6 +12,23 @@
 (function () {
   'use strict';
 
+  // Logo UrbanX desenat VECTORIAL (cyan X pe patrat inchis rotunjit) — fara addImage,
+  // ca sa se serializeze corect cand e adaugat pe pagina 1 prin setPage(1) la save.
+  function vlogo(doc, x, y, s) {
+    try {
+      doc.setFillColor(11, 16, 24);
+      doc.roundedRect(x, y, s, s, s * 0.22, s * 0.22, 'F');
+      // glow discret
+      doc.setDrawColor(22, 174, 203); doc.setLineWidth(s * 0.05);
+      doc.roundedRect(x + s * 0.06, y + s * 0.06, s * 0.88, s * 0.88, s * 0.18, s * 0.18, 'S');
+      // X cyan din doua bare
+      doc.setDrawColor(125, 240, 251); doc.setLineWidth(s * 0.13); doc.setLineCap('round');
+      doc.line(x + s * 0.30, y + s * 0.30, x + s * 0.70, y + s * 0.70);
+      doc.line(x + s * 0.70, y + s * 0.30, x + s * 0.30, y + s * 0.70);
+      try { doc.setLineCap('butt'); } catch (e) {}
+    } catch (e) {}
+  }
+
   function stamp(doc) {
     try {
       if (!doc || doc.__brandStamped) return;
@@ -25,13 +42,14 @@
       var W = doc.internal.pageSize.getWidth();
       var H = doc.internal.pageSize.getHeight();
 
-      // — LOGO pe coperta (pagina 1), colt dreapta-sus, mic si discret —
-      // Folosim _drawUrbanxLogo (vectorul cyan dovedit pe coperta SIDU); _pdfStampLogo
-      // foloseste un dataURL rasterizat care randa invizibil pe fundal inchis.
+      // — LOGO pe coperta (pagina 1), colt dreapta-sus —
+      // IMPORTANT: desenam VECTORIAL (rect + linii), NU addImage. La save, doc-ul are ca
+      // pagina curenta ultima pagina; addImage adaugat pe pagina 1 prin setPage(1) NU se
+      // serializeaza (XObject-ul de imagine e legat de pagina curenta la output), pe cand
+      // operatiile vectoriale se scriu corect in stream-ul paginii 1 (la fel ca disclaimer-ul).
       try {
         doc.setPage(1);
-        if (window._drawUrbanxLogo) window._drawUrbanxLogo(doc, W - 22, 6, 14);
-        else if (window._pdfStampLogo) window._pdfStampLogo(doc, W - 20, 6, 12);
+        vlogo(doc, W - 22, 6, 14);
       } catch (e) {}
 
       // — DISCLAIMER pe ULTIMA pagina (sau pagina noua daca nu incape) —
