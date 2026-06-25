@@ -35,6 +35,9 @@ const CACHE = {
 const INSE = {
 
   BASE: 'https://statistici.insse.ro:8077/tempo-ins/matrix',
+  // Regula UrbanX: fetch extern DOAR prin proxy (insse.ro:8077 da ERR_SSL_PROTOCOL_ERROR direct).
+  get _proxy() { return window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev'; },
+  _url(code) { var u = this.BASE + '/' + code; return this._proxy ? (this._proxy + '/proxy?url=' + encodeURIComponent(u)) : u; },
 
   // POP107D — Populatie rezidenta per UAT (anual 2002-2023)
   async getPopulation(sirutaCode) {
@@ -54,7 +57,7 @@ const INSE = {
         response: { format: 'JSON-stat2' }
       });
 
-      const res = await fetch(`${this.BASE}/POP107D`, {
+      const res = await fetch(this._url('POP107D'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
@@ -99,7 +102,7 @@ const INSE = {
         response: { format: 'JSON-stat2' }
       });
 
-      const res = await fetch(`${this.BASE}/CON101A`, {
+      const res = await fetch(this._url('CON101A'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
@@ -147,7 +150,7 @@ const INSE = {
         response: { format: 'JSON-stat2' }
       });
 
-      const res = await fetch(`${this.BASE}/LOC101A`, {
+      const res = await fetch(this._url('LOC101A'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,
