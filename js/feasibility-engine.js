@@ -95,6 +95,7 @@
     var N = function (x) { try { return Math.round(x).toLocaleString('ro-RO'); } catch (e) { return String(x); } };
     var PURP = [124, 58, 237];
     pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, 28, 'F'); pdf.setFillColor.apply(pdf, PURP); pdf.rect(0, 0, W, 3, 'F');
+    try { window._pdfStampLogo && window._pdfStampLogo(pdf, 7, 6, 17); } catch (e) {}
     pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('URBANX FEASIBILITY · STUDIU DE FEZABILITATE', W / 2, 11, { align: 'center' });
     pdf.setTextColor(255, 255, 255); pdf.setFontSize(15); pdf.text('Pro-forma dezvoltare imobiliară', W / 2, 20, { align: 'center' });
     pdf.setTextColor(180, 170, 210); pdf.setFontSize(8); pdf.text((meta.site_name || 'Sit') + ' · ' + (meta.city || '') + ' · ' + today, W / 2, 25.5, { align: 'center' });

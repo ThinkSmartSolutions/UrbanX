@@ -81,6 +81,7 @@
     var N = function (x) { try { return Math.round(x).toLocaleString('ro-RO'); } catch (e) { return String(x); } };
     var TEAL = [13, 148, 136];
     pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, 28, 'F'); pdf.setFillColor.apply(pdf, TEAL); pdf.rect(0, 0, W, 3, 'F');
+    try { window._pdfStampLogo && window._pdfStampLogo(pdf, 7, 6, 17); } catch (e) {}
     pdf.setTextColor(120, 230, 210); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('URBANX · DOSAR DIGITAL AL IMOBILULUI', W / 2, 11, { align: 'center' });
     pdf.setTextColor(255, 255, 255); pdf.setFontSize(15); pdf.text('Extras din Dosarul Digital', W / 2, 20, { align: 'center' });
     pdf.setTextColor(150, 190, 180); pdf.setFontSize(8); pdf.text('CF ' + (d.identitate.nrcad || '—') + ' · ' + (d.identitate.city || '') + ' · ' + today, W / 2, 25.5, { align: 'center' });

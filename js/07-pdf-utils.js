@@ -1,5 +1,30 @@
 // UrbanX — PDF logo, capturi, bilant
 
+// ── Helperi UNIVERSALI pentru standardul PDF (logo coperta + disclaimer final) ──
+// Orice generator PDF din sistem trebuie sa cheme _pdfStampLogo pe coperta si
+// _pdfDisclaimer pe ultima pagina. (Florin: obligatoriu in TOATE PDF-urile.)
+window._pdfStampLogo = function(pdf, x, y, size){
+  try { _pdfDrawLogo(pdf, (x==null?12:x), (y==null?10:y), size||14); } catch(e){}
+};
+// Adauga blocul de disclaimer standard la baza paginii curente (sau pagina noua daca nu incape).
+window._pdfDisclaimer = function(pdf, opts){
+  try{
+    opts = opts || {};
+    var W = pdf.internal.pageSize.getWidth();
+    var H = pdf.internal.pageSize.getHeight();
+    var ML = opts.ml || 14;
+    var y = (opts.y != null) ? opts.y : (H - 26);
+    if (y > H - 24) { pdf.addPage(); y = H - 26; }
+    pdf.setDrawColor(212,175,55); pdf.setLineWidth(0.4); pdf.line(ML, y, W-ML, y);
+    pdf.setFont('helvetica','bold'); pdf.setFontSize(7); pdf.setTextColor(150,120,40);
+    pdf.text('NOTA / DISCLAIMER', ML, y+5);
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(6.4); pdf.setTextColor(90,100,118);
+    var txt = opts.text || 'Document orientativ si preliminar, generat automat de platforma UrbanX (TSS-FG) pe baza datelor publice disponibile. NU inlocuieste documentatiile tehnice de specialitate avizate conform Legii 50/1991 si Legii 350/2001. Valorile necesita verificare de catre un proiectant atestat / expert autorizat.';
+    var lines = pdf.splitTextToSize(txt, W - 2*ML);
+    pdf.text(lines, ML, y+9);
+  }catch(e){}
+};
+
 function _pdfDrawLogo(pdf, x, y, size){
   const s = size || 10;
   // Logo REAL UrbanX (favicon) daca e disponibil — altfel fallback la vectorul de mai jos

@@ -21,6 +21,7 @@
     // antet
     pdf.setFillColor.apply(pdf, DARK); pdf.rect(0, 0, W, 28, 'F');
     pdf.setFillColor.apply(pdf, BLUE); pdf.rect(0, 0, W, 3, 'F');
+    try { window._pdfStampLogo && window._pdfStampLogo(pdf, 7, 6, 17); } catch (e) {}
     pdf.setTextColor(150, 190, 255); pdf.setFont(F, 'bold'); pdf.setFontSize(8);
     pdf.text('URBANX CAU · COMISIA DE ACORDURI UNICE', W / 2, 11, { align: 'center' });
     pdf.setTextColor.apply(pdf, WHITE); pdf.setFontSize(15);

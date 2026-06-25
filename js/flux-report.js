@@ -33,6 +33,7 @@
     // ── ANTET ────────────────────────────────────────────────────────────
     pdf.setFillColor.apply(pdf, DARK); pdf.rect(0, 0, W, 30, 'F');
     pdf.setFillColor.apply(pdf, GREEN); pdf.rect(0, 0, W, 3, 'F');
+    try { window._pdfStampLogo && window._pdfStampLogo(pdf, 7, 7, 17); } catch (e) {}
     pdf.setTextColor(120, 230, 170); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8);
     pdf.text('URBANX FLUX · INTELIGENȚA MOBILITĂȚII URBANE', W / 2, 12, { align: 'center' });
     pdf.setTextColor.apply(pdf, WHITE); pdf.setFontSize(15);

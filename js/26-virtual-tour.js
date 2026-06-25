@@ -919,6 +919,10 @@
   // ── 007: construiește EffectComposer rezilient (adaugă DOAR pass-urile ce se
   // construiesc fără eroare; SSAO depinde de SimplexNoise — poate lipsi). ──
   function _setupComposer(w, h){
+    // FIX #4 (Dollhouse alb): Bloom/SSAO pe r128 spalau toata scena in alb (overexposure)
+    // -> dollhouse-ul aparea gol/alb. Randam DIRECT (ca viewer-ul, care merge). Post-procesarea
+    // ramane dezactivata pana o calibram corect (vizibilitatea > finisajul bloom).
+    if(!window._UX_VTOUR_PP) return null;
     try {
       if(!THREE.EffectComposer || !THREE.RenderPass){ console.warn('[VTour PP] EffectComposer indisponibil — fallback render direct'); return null; }
       var pr = Math.min(window.devicePixelRatio, 2);
