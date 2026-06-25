@@ -424,15 +424,18 @@ G._PPTXExporter = {
 
     // ── Slide 1: COPERTĂ ──────────────────────────────────────────────
     const s1 = addSlide();
-    s1.addText('MASTERPLAN STRATEGIC URBAN', {
-      x:1, y:1.5, w:11, h:1, fontSize:36, bold:true, color:GOLD,
+    s1.addText('PRE-STUDIU STRATEGIC URBAN', {
+      x:1, y:1.35, w:11, h:1, fontSize:34, bold:true, color:GOLD,
       fontFace:'Arial', align:'center',
     });
+    s1.addText('Sinteză preliminară de fundamentare — pentru Masterplan / SIDU / PMUD', {
+      x:1, y:2.45, w:11, h:0.5, fontSize:14, italic:true, color:'94a3b8', fontFace:'Arial', align:'center',
+    });
     s1.addText(city.name.toUpperCase() + ' · ' + (city.judet||'—'), {
-      x:1, y:2.8, w:11, h:0.8, fontSize:24, color:'ffffff', fontFace:'Arial', align:'center',
+      x:1, y:3.0, w:11, h:0.8, fontSize:24, color:'ffffff', fontFace:'Arial', align:'center',
     });
     s1.addText(`2025 → 2055  ·  Scenariu: ${scenario==='S1'?'S1 Optimist':scenario==='S2'?'S2 Moderat':' S3 Conservator'}`, {
-      x:1, y:3.6, w:11, h:0.5, fontSize:16, color:BLUE, fontFace:'Courier New', align:'center',
+      x:1, y:4.0, w:11, h:0.5, fontSize:16, color:BLUE, fontFace:'Courier New', align:'center',
     });
     s1.addText(`Populatie 2021: ${N(city.pop2021)} loc.  ·  SIRUTA: ${city.siruta||'—'}  ·  Jud. ${city.judet||'—'}`, {
       x:1, y:5.5, w:11, h:0.4, fontSize:12, color:'94a3b8', fontFace:'Courier New', align:'center',
@@ -602,6 +605,22 @@ G._PPTXExporter = {
     s10.addText(`Generat: ${today}  ·  UrbanX TSS·FG v2.0  ·  ${city.name}  ·  Scenariu: ${scenario}`, {
       x:0.5,y:6.4,w:12,h:0.35,fontSize:10,color:GOLD,fontFace:'Courier New',align:'center',
     });
+
+    // ── Slide-uri HĂRȚI REALE (superbloc + indici pe reteaua reala a UAT) ──
+    // Reutilizam _DocMapCaptures (aceleasi planse ca SIDU/MP/PMUD, cu reteaua stradala reala).
+    try {
+      if (window._DocMapCaptures && window._DocMapCaptures.capture) {
+        ss('🗺 Capturez hartile pentru prezentare...');
+        const shots = await window._DocMapCaptures.capture(cityKey);
+        (shots || []).forEach(function (sh) {
+          if (!sh || !sh.img) return;
+          const sm = addSlide();
+          sm.addText(String(sh.title || 'Harta UAT').toUpperCase(), { x:0.5, y:0.3, w:12.3, h:0.6, fontSize:20, bold:true, color:GOLD, fontFace:'Courier New' });
+          try { sm.addImage({ data: sh.img, x:0.7, y:1.15, w:11.9, h:5.55 }); } catch (e) {}
+          sm.addText('Captura harta UrbanX · proiectie WGS84 (orientativ) · ' + city.name, { x:0.5, y:6.85, w:12.3, h:0.3, fontSize:9, color:'64748b', fontFace:'Courier New' });
+        });
+      }
+    } catch (e) { /* prezentarea se genereaza si fara harti */ }
 
     // Salvam
     const fname = `prezentare_${S2(city.name)}_${new Date().toISOString().split('T')[0]}.pptx`;
