@@ -42,23 +42,42 @@
     } catch (e) {}
   }
 
-  function hookProto(P) {
-    if (!P || P.__brandHook) return;
-    P.__brandHook = 1;
-    ['save', 'output'].forEach(function (fn) {
-      var orig = P[fn];
-      if (typeof orig !== 'function') return;
-      P[fn] = function () {
-        try { stamp(this); } catch (e) {}
-        return orig.apply(this, arguments);
-      };
-    });
+  // jsPDF copiaza save()/output() ca proprietati pe INSTANTA (din API), NU pe prototip.
+  // Deci patch-ul pe prototip e umbrit -> trebuie sa patch-uim fiecare instanta.
+  function patchInstance(d) {
+    try {
+      if (!d || d.__brandInst) return; d.__brandInst = 1;
+      ['save', 'output'].forEach(function (fn) {
+        var orig = d[fn];
+        if (typeof orig !== 'function') return;
+        d[fn] = function () { try { stamp(this); } catch (e) {} return orig.apply(this, arguments); };
+      });
+    } catch (e) {}
+  }
+
+  // Invelim constructorul jsPDF: orice instanta noua isi primeste save/output patch-uite.
+  function wrapCtor(ns, key) {
+    try {
+      var Orig = ns[key];
+      if (typeof Orig !== 'function' || Orig.__brandCtor) return;
+      function Wrapped(opts) {
+        if (!(this instanceof Wrapped)) return new Wrapped(opts);
+        var r = Orig.apply(this, arguments);
+        var inst = (r && typeof r === 'object') ? r : this;
+        patchInstance(inst);
+        return inst;
+      }
+      Wrapped.prototype = Orig.prototype;
+      try { Object.keys(Orig).forEach(function (k) { try { Wrapped[k] = Orig[k]; } catch (e) {} }); } catch (e) {}
+      Wrapped.__brandCtor = 1;
+      Wrapped.__orig = Orig;
+      ns[key] = Wrapped;
+    } catch (e) {}
   }
 
   function tryHook() {
-    try { if (window.jspdf && window.jspdf.jsPDF) hookProto(window.jspdf.jsPDF.prototype); } catch (e) {}
-    try { if (window.jsPDF) hookProto(window.jsPDF.prototype); } catch (e) {}
-    try { if (typeof jsPDF !== 'undefined') hookProto(jsPDF.prototype); } catch (e) {}
+    try { if (window.jspdf && window.jspdf.jsPDF) wrapCtor(window.jspdf, 'jsPDF'); } catch (e) {}
+    try { if (window.jsPDF) wrapCtor(window, 'jsPDF'); } catch (e) {}
   }
 
   tryHook();
