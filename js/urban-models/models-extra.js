@@ -648,11 +648,41 @@
       }
     } catch (e) {}
     _umDrawLegend(result, _c);
+    // (b) INDICI REALI: la indicii de accesibilitate/retea desenam STRAZILE REALE din OSM
+    // (nu doar un cerc) — arata efectiv reteaua pe care se masoara accesul.
+    try { if (_NET_IDX.indexOf(modelId) >= 0) _umDrawRealNetwork(mapInstance, center, sizeM, _c, calcId); } catch (e) {}
+  }
+  // indici care reprezinta accesibilitate/retea -> beneficiaza de reteaua stradala reala
+  var _NET_IDX = ['city15', 'tod', 'walkscore', 'spacesyntax', 'corridor', 'gvi'];
+  function _umDrawRealNetwork(map, center, sizeM, color, calcId) {
+    if (!window._OSMConnector || !map || !center) return;
+    var nid = calcId + '-net';
+    _OSMConnector.fetchRoads({ lat: center.lat, lon: center.lng }).then(function (geo) {
+      if (!geo || !geo.features || !geo.features.length) return;
+      // pastram doar strazile in raza indicelui (turf), ca sa nu desenam tot orasul
+      var feats = geo.features;
+      try {
+        if (window.turf && turf.booleanPointInPolygon) {
+          var c = turf.circle([center.lng, center.lat], Math.max(0.1, sizeM / 1000), { units: 'kilometers', steps: 48 });
+          feats = geo.features.filter(function (f) {
+            try { var co = f.geometry.coordinates; var p = co[Math.floor(co.length / 2)] || co[0]; return turf.booleanPointInPolygon(turf.point(p), c); } catch (e) { return true; }
+          });
+        }
+      } catch (e) {}
+      var fc = { type: 'FeatureCollection', features: feats };
+      try { if (map.getSource(nid)) map.getSource(nid).setData(fc); else map.addSource(nid, { type: 'geojson', data: fc }); } catch (e) {}
+      try {
+        if (!map.getLayer(nid)) map.addLayer({ id: nid, type: 'line', source: nid,
+          paint: { 'line-color': color, 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1.4, 14, 3, 16, 5], 'line-opacity': 0.9 } });
+      } catch (e) {}
+    }).catch(function () {});
   }
   function removeModelFromMap(mapInstance) {
     try { document.getElementById('um-map-legend') && document.getElementById('um-map-legend').remove(); } catch (e) {}
     if (!mapInstance) return;
     ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss', 'um-noise', 'um-lst', 'um-mix'].forEach(function (id) {
+      try { if (mapInstance.getLayer(id + '-net')) mapInstance.removeLayer(id + '-net'); } catch (e) {}
+      try { if (mapInstance.getSource(id + '-net')) mapInstance.removeSource(id + '-net'); } catch (e) {}
       try { if (mapInstance.getLayer(id + '-ln')) mapInstance.removeLayer(id + '-ln'); } catch (e) {}
       try { if (mapInstance.getLayer(id)) mapInstance.removeLayer(id); } catch (e) {}
       try { if (mapInstance.getSource(id + '-src')) mapInstance.removeSource(id + '-src'); } catch (e) {}
