@@ -1063,7 +1063,8 @@ async function _getElevMapbox(lat, lon) {
 // Metoda 2: OpenTopoData EU-DEM 25m (Copernicus) — fallback gratuit
 async function _getElevOpenTopo(lat, lon) {
   try {
-    const url = `https://api.opentopodata.org/v1/eudem25m?locations=${lat.toFixed(6)},${lon.toFixed(6)}`;
+    const _px = window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    const url = `${_px}/proxy?url=${encodeURIComponent('https://api.opentopodata.org/v1/eudem25m?locations='+lat.toFixed(6)+','+lon.toFixed(6))}`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
     const data = await resp.json();
     if(data.status === 'OK' && data.results?.[0]?.elevation != null) {

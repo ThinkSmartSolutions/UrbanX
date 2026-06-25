@@ -346,7 +346,8 @@ async function _getElevGridFallback(lat, lon, radiusM, gridN){
 
   try{
     const locStr = pts.map(p=>`${p.lat},${p.lon}`).join('|');
-    const url = `https://api.opentopodata.org/v1/eudem25m?locations=${locStr}`;
+    const _px = window._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+    const url = `${_px}/proxy?url=${encodeURIComponent('https://api.opentopodata.org/v1/eudem25m?locations='+locStr)}`;
     const resp = await fetch(url, {signal: AbortSignal.timeout(12000)});
     const data = await resp.json();
     if(data.status==='OK' && data.results?.length === pts.length){
