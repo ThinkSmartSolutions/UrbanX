@@ -5581,16 +5581,17 @@ function _rvCollapseSection(titleEl){
   }
 }
 async function generateRelevee(){
-  // Diagnostic: titlul paginii se schimbă = JS e viu
+  // Detectie multi-corp: ruleaza cateva cicluri DOAR cat releveul e deschis,
+  // apoi se auto-opreste. (Fara diagnostice pe document.title — era debug cruft.)
   if(!window._rvDiagInit){
     window._rvDiagInit=true;
-    let _tc=0, _mc=0;
+    let _ticks=0;
     window._rvAlive=setInterval(()=>{
-      _tc++;
-      document.title='JS:'+_tc+'s|RV | UrbanX';
-      // Multi-building detection
+      // Auto-stop: releveul nu e deschis sau am rulat destul → eliberam intervalul
+      if(!_RV || !_RV.open || ++_ticks>20){ clearInterval(window._rvAlive); window._rvAlive=null; window._rvDiagInit=false; return; }
       setTimeout(()=>{try{
-        const blds=_rvDetectBuildings(); window._rvBuildings=blds;
+        if(!_RV || !_RV.building || !_RV.open){return;}
+        const blds=(typeof _rvDetectBuildings==='function'?_rvDetectBuildings():[])||[]; window._rvBuildings=blds;
         if(blds.length>1) _rvInjectCorpSelector(blds,(bld)=>{
           const Pnew=Object.assign({},_RV.building?.P||{},{_corpOverride:bld});
           _RV.building=_rvCompBuilding(Pnew); _RV.floors=[]; _RV.curFloor=0;
@@ -5598,11 +5599,6 @@ async function generateRelevee(){
         });
       }catch(e){console.warn('[RV bld]',e.message);}},900);
     },1000);
-    // mousedown pe tot documentul - cel mai de baza event posibil
-    document.addEventListener('mousedown',(e)=>{
-      _mc++;
-      document.title='MD'+_mc+':'+e.target.tagName+'#'+(e.target.id||'?')+'|RV';
-    },true);
   }
   const ap = S.parcels[S.activeParcel ?? 0];
   if(!ap?.geo?.geometry){

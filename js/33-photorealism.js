@@ -52,18 +52,19 @@
       aoMapIntensity: opts.ao !== undefined ? opts.ao : 1.0,
       envMapIntensity: opts.envI !== undefined ? opts.envI : 1.2,
 
-      // MeshPhysical extras
+      // MeshPhysical extras (doar cele suportate cert de THREE r128)
       clearcoat:            opts.cc    !== undefined ? opts.cc    : 0,
       clearcoatRoughness:   opts.ccR   !== undefined ? opts.ccR   : 0.1,
       transmission:         opts.trans !== undefined ? opts.trans : 0,
-      thickness:            opts.thick !== undefined ? opts.thick : 0,
       ior:                  opts.ior   !== undefined ? opts.ior   : 1.5,
-      sheen:                opts.sheen !== undefined ? opts.sheen : 0,
-      sheenRoughness:       opts.sheenR !== undefined ? opts.sheenR : 0.5,
-      sheenColor:           opts.sheenC ? (typeof opts.sheenC === 'string'
-                              ? parseInt(opts.sheenC.replace('#',''), 16)
-                              : opts.sheenC) : undefined,
     });
+
+    // THREE r128 NU are thickness/sheen/sheenColor/sheenRoughness pe MeshPhysicalMaterial
+    // → setate doar daca proprietatea exista pe instanta (elimina 556 warning-uri "is not a property")
+    if (opts.thick  !== undefined && 'thickness'      in m) m.thickness      = opts.thick;
+    if (opts.sheen  !== undefined && 'sheen'          in m) m.sheen          = opts.sheen;
+    if (opts.sheenR !== undefined && 'sheenRoughness' in m) m.sheenRoughness = opts.sheenR;
+    if (opts.sheenC && 'sheenColor' in m) { try { m.sheenColor = new THREE.Color(opts.sheenC); } catch (e) {} }
 
     // Curățăm undefined
     Object.keys(m).forEach(k => { if (m[k] === undefined) delete m[k]; });

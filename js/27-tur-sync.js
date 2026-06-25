@@ -1465,15 +1465,31 @@
     // Resetăm starea după generare
     setTimeout(function() {
       window._rvAllowOpen = prevAllow;
+      // CRITIC: generateRelevee → _rvOpen injecteaza stilul nuclear #rv-pe-override
+      // (pointer-events:none pe TOT, mai putin #rv-modal) + ascunde topbar/nav.
+      // In generare silentioasa modalul ramane ascuns, dar daca NU curatam aici
+      // intreaga pagina ramane neclickabila → "nu pot accesa viewer 3D".
+      // closeRelevee() sterge override-ul + restaureaza topbar/nav + _RV.open=false.
+      if (typeof window.closeRelevee === 'function') {
+        try { window.closeRelevee(); } catch(e) {}
+      }
+      // Plasa de siguranta — chiar daca closeRelevee a esuat partial:
+      var ovr = document.getElementById('rv-pe-override');
+      if (ovr) ovr.remove();
+      ['wx-topbar','wx-nav-desktop','wx-nav-mobile','wx-mobile-sheet'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el && el.dataset.rvHidden) { el.style.pointerEvents=''; el.style.visibility=''; delete el.dataset.rvHidden; }
+      });
       var m2 = document.getElementById('rv-modal');
       if (m2) {
-        // Ascundem complet dacă nu era deja deschis de utilizator
         m2.classList.remove('rv-modal-open');
         m2.style.visibility = 'hidden';
         m2.style.pointerEvents = '';
         m2.style.zIndex = '';
       }
-    }, 400);
+      // Oprim si intervalul-diagnostic _rvAlive (altfel ruleaza la nesfarsit + schimba title)
+      if (window._rvAlive) { clearInterval(window._rvAlive); window._rvAlive = null; }
+    }, 600);
 
     var msg = reason === 'aedis_changed'
       ? '🔄 Planșe actualizate automat'
