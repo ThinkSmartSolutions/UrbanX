@@ -573,8 +573,8 @@
     grass.receiveShadow = true;
     scene.add(grass);
 
-    // SOARE direcțional cu shadow 2K
-    const sun = new THREE.DirectionalLight(0xfff4e0, 2.4);
+    // SOARE direcțional cu shadow 2K (intensitate calibrata — 2.4 spala modelul alb in alb)
+    const sun = new THREE.DirectionalLight(0xfff4e0, 1.45);
     sun.position.set(anchor.cx + 40, anchor.baseY + 80, anchor.cz + 30);
     sun.target.position.set(anchor.cx, anchor.baseY, anchor.cz);
     sun.castShadow = true;
@@ -833,7 +833,7 @@
     STATE.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     STATE.renderer.outputEncoding = THREE.sRGBEncoding;
     STATE.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    STATE.renderer.toneMappingExposure = 1.1;
+    STATE.renderer.toneMappingExposure = 0.92;
 
     const aspect = w / h;
     STATE.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
