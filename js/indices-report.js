@@ -137,7 +137,8 @@
         if (r && r.metrics && r.metrics.length) {
           D.h2('Metrici (parametri impliciti)');
           D.table(['Indicator', 'Valoare', 'Sens'], r.metrics.map(function (x) {
-            var v = (x.unit === '%' || x.unit === '°C') ? ((x.value > 0 ? '+' : '') + x.value + x.unit) : (x.value + (x.unit ? ' ' + x.unit : ''));
+            var nf = (window._nf || function (n) { return '' + n; });
+            var v = (x.unit === '%' || x.unit === '°C') ? ((x.value > 0 ? '+' : '') + nf(x.value) + x.unit) : (nf(x.value) + (x.unit ? ' ' + x.unit : ''));
             return [x.label, v, x.direction === 'positive' ? 'favorabil' : x.direction === 'negative' ? 'de redus' : 'neutru'];
           }), [Math.round(CW * 0.52), Math.round(CW * 0.28), CW - Math.round(CW * 0.52) - Math.round(CW * 0.28)], { fs: 7.5, boldFirst: true });
           // diagrama metrici (nu doar cifre)

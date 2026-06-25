@@ -602,7 +602,8 @@
         (area ? ('<div style="font-size:10.5px;color:#94a3b8;margin-bottom:8px">📐 Suprafață vizată: ' + area + '</div>') : '') +
         mets.slice(0, 5).map(function (m) {
           var pos = m.direction === 'positive', neu = m.direction === 'neutral';
-          var disp = (m.unit === '%' || m.unit === '°C') ? ((m.value > 0 ? '+' : '') + m.value + m.unit) : (roN(m.value) + ' ' + m.unit);
+          var _nf = window._nf || function (n) { return '' + n; };
+          var disp = (m.unit === '%' || m.unit === '°C') ? ((m.value > 0 ? '+' : '') + _nf(m.value) + m.unit) : (_nf(m.value) + ' ' + m.unit);
           return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06)">' +
             '<span style="font-size:11px;color:#aebdd4">' + m.label + '</span>' +
             '<span style="font-size:12px;font-weight:700;white-space:nowrap;color:' + (pos ? '#97C459' : neu ? '#94a3b8' : '#F97316') + '">' + disp + '</span></div>';
@@ -717,7 +718,8 @@
     if (me) {
       me.style.display = 'grid';
       me.innerHTML = result.metrics.map(function (m) {
-        var disp = (m.unit === '%' || m.unit === '°C') ? ((m.value > 0 ? '+' : '') + m.value + m.unit) : (m.value > 0 ? roN(m.value) + ' ' + m.unit : m.value + ' ' + m.unit);
+        var _nf = window._nf || function (n) { return '' + n; };
+        var disp = (m.unit === '%' || m.unit === '°C') ? ((m.value > 0 ? '+' : '') + _nf(m.value) + m.unit) : (_nf(m.value) + ' ' + m.unit);
         return '<div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px 12px;text-align:center"><div style="font-size:15px;font-weight:700;color:' + (m.direction === 'positive' ? '#97C459' : m.direction === 'neutral' ? '#94a3b8' : '#F97316') + '">' + disp + '</div><div style="font-size:11px;opacity:0.55;margin-top:2px">' + m.label + '</div></div>';
       }).join('');
     }
@@ -731,9 +733,10 @@
     if (!r) { G.ss && G.ss('Rulează întâi „Calculează + desenează".'); return; }
     if (!(G.SimLab && G.SimLab.exportStudiu)) { G.ss && G.ss('Motor studiu PDF indisponibil.'); return; }
     var results = {};
+    var _nf = window._nf || function (n) { return '' + n; };
     (r.metrics || []).forEach(function (m) {
       var pct = (m.unit === '%' || m.unit === '°C');
-      results[m.label] = ((m.value > 0 && pct) ? '+' : '') + m.value + (pct ? m.unit : ' ' + m.unit);
+      results[m.label] = ((m.value > 0 && pct) ? '+' : '') + _nf(m.value) + (pct ? m.unit : ' ' + m.unit);
     });
     var uat = (G.TCI && G.TCI.cityName) || '';
     G.ss && G.ss('📄 Generez studiul pentru „' + (cfg ? cfg.title : _curId) + '"…');

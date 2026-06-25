@@ -1,6 +1,16 @@
 // UrbanX — State global, variabile si constante
 // Modul extras din index_v4.html
 
+// ── _nf: formator numeric cu separator de mii (ro-RO: "88182" -> "88.182") ──
+// Folosit in TOATE studiile/rapoartele/SIDU/MP/PMUD/UI. Pastreaza pana la `dec`
+// zecimale (implicit 1). NU folosi pe: numere cadastrale, lat/lon, ani.
+window._nf = function(n, dec){
+  var x = (typeof n === 'number') ? n : parseFloat(n);
+  if (n == null || !isFinite(x)) return (n == null ? '' : String(n));
+  try { return x.toLocaleString('ro-RO', { maximumFractionDigits: (dec == null ? 1 : dec) }); }
+  catch(e){ return String(n); }
+};
+
 // ── JUSTIFY global pt PDF — randeaza O LINIE aliniata la ambele margini
 // (distribuie spatiul intre cuvinte). Folosit de toate studiile/rapoartele.
 // isLast=true -> linie normala (ultima dintr-un paragraf nu se justifiaza).
