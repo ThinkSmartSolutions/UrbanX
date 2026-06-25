@@ -1317,7 +1317,7 @@ document.addEventListener('click', function(){
 
   <!-- Planificare Urbană (cap.21 flow: fost UrbanX Pro, mutat înainte de Rapoarte) -->
   <div id="tci-group" style="position:relative">
-    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.toggle():_toggleTCIMenu(event)" title="Teritoriu — UAT/PUG/PUZ/PUD, indici, simlab, risc, monumente, predicții, consultare"
+    <button class="tb-btn" onclick="window.UXSidebar?UXSidebar.toggle():_toggleTCIMenu(event)" title="Teritoriu — UAT/PUG/PUZ/PUD, indici, simlab, risc, monumente, prognoze, consultare"
       style="display:flex;align-items:center;gap:4px;background:rgba(139,92,246,.15);
         border:1px solid rgba(139,92,246,.4);color:#a78bfa;border-radius:8px">
       🏙 Teritoriu ▾
@@ -5568,8 +5568,13 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 (function(){
   var B=['3dtravels','predicti','prediction','predic\u021b','predic\u0163'];
   function bad(n){
-    var t=((n.textContent||'')+(n.getAttribute&&n.getAttribute('title')||'')).toLowerCase();
-    return B.some(function(b){return t.indexOf(b)!==-1;});
+    var txt=(n.textContent||'').toLowerCase();
+    var ttl=((n.getAttribute&&n.getAttribute('title'))||'').toLowerCase();
+    // brandingul vechi "3dtravels" se elimina pe text SAU title;
+    // familia "predic*" DOAR pe eticheta vizibila (un tooltip care descrie functii
+    // \u2014 ex. "prognoze/predictii teritoriale" \u2014 nu trebuie sa stearga un buton legitim)
+    if(ttl.indexOf('3dtravels')!==-1) return true;
+    return B.some(function(b){return txt.indexOf(b)!==-1;});
   }
   function clean(){
     var tb=document.getElementById('topbar');
