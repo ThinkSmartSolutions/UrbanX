@@ -6150,14 +6150,18 @@ async function _rvOpen(){
 }
 
 function closeRelevee(){
-  const modal=document.getElementById('rv-modal');
-  if(!modal) return;
-  // Restaurăm elementele ascunse de _rvOpen
+  // CRITIC: curatam stilul nuclear + restauram topbar-ul ÎNAINTE de orice gard.
+  // _rvOpen injecteaza #rv-pe-override (pointer-events:none pe TOT) si ascunde topbar;
+  // daca iesim devreme fara sa le curatam, pagina ramane neclickabila (viewer 3D blocat).
+  document.getElementById('rv-pe-override')?.remove();
   ['wx-topbar','wx-nav-desktop','wx-nav-mobile','wx-mobile-sheet'].forEach(id=>{
     const el=document.getElementById(id);
     if(el && el.dataset.rvHidden){ el.style.pointerEvents=''; el.style.visibility=''; delete el.dataset.rvHidden; }
   });
-  document.getElementById('rv-pe-override')?.remove();
+  if(window._RV) _RV.open=false;
+  if(window._rvAlive){ clearInterval(window._rvAlive); window._rvAlive=null; window._rvDiagInit=false; }
+  const modal=document.getElementById('rv-modal');
+  if(!modal) return;
   modal.classList.remove('rv-modal-open');
   _RV.open=false;
   // Curățăm selectorul de corp la închidere
