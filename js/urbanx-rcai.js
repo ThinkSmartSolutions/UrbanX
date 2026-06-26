@@ -15,11 +15,37 @@
     return { city: c, name: c.name || 'UAT', judet: c.judet || '', lat: lat, lon: lon, hasParcel: !!(ap && ap.lat), area: (ap && (ap.area || ap.suprafata)) || null };
   }
 
-  function generatePDF(cityKey, mode) {
+  var PROXY = (G._PROXY_BASE || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+  // fetch monumente/situri REALE din OSM (historic/heritage/biserici) lângă amplasament/UAT
+  async function _fetchHeritage(lat, lon, radius) {
+    var q = '[out:json][timeout:30];(' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[historic][name];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[heritage][name];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[tourism=attraction][name];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[amenity=place_of_worship][name];' +
+      ');out center tags;';
+    try {
+      var resp = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(35000) });
+      var j = await resp.json(); var els = (j && j.elements) || [];
+      var seen = {}, out = [];
+      els.forEach(function (el) {
+        var t = el.tags || {}; var nm = t.name || t['name:ro']; if (!nm || seen[nm]) return; seen[nm] = 1;
+        var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+        var dist = (la != null && G.turf) ? Math.round(G.turf.distance([lon, lat], [lo, la], { units: 'meters' })) : null;
+        var tip = t.historic || (t.amenity === 'place_of_worship' ? (t.religion ? 'lăcaș de cult (' + t.religion + ')' : 'lăcaș de cult') : '') || t.tourism || t.heritage || 'obiectiv';
+        out.push({ name: nm, tip: tip, dist: dist, heritage: t.heritage || (t['ref:ro:lmi'] ? 'LMI ' + t['ref:ro:lmi'] : '') });
+      });
+      out.sort(function (a, b) { return (a.dist || 1e9) - (b.dist || 1e9); });
+      return out;
+    } catch (e) { console.warn('[RCAI heritage]', e); return []; }
+  }
+
+  async function generatePDF(cityKey, mode) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
     var x = _ctx(cityKey, mode);
-    G.ss && G.ss('🏺 Generez Raportul de Cercetare Arheologică (RCAI)…');
+    G.ss && G.ss('🏺 Aduc monumentele reale (OSM) și generez RCAI…');
+    var heritage = await _fetchHeritage(x.lat, x.lon, mode === 'T' ? 12000 : 2500);
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: 'RAPORT DE CERCETARE ARHEOLOGICĂ', cityName: x.name, accent: [180, 83, 9] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
@@ -49,6 +75,18 @@
 
     D.chapter('Metodologia cercetării');
     D.P('Cercetarea integrează patru paliere de analiză: (1) documentară — bibliografie istorică și arheologică, repertorii, cronici; (2) cartografică — interpretarea și suprapunerea planurilor istorice (planuri de încartiruire, ridicări militare, planuri cadastrale) pe situația actuală; (3) arheologică — analiza siturilor din Repertoriul Arheologic Național (RAN), a monumentelor din Lista Monumentelor Istorice (LMI) și a cercetărilor anterioare din Cronica Cercetărilor Arheologice; (4) geomorfologică — relieful, terasele, hidrografia istorică și implicațiile lor pentru locuirea istorică și conservarea vestigiilor. Limitările sunt explicitate: accesul la unele surse poate fi parțial, iar estimările (în special stratigrafia) au caracter orientativ, prin analogie cu situri cercetate în proximitate.');
+
+    // ── DATE REALE: monumente și situri identificate (OSM heritage / LMI) ──
+    D.chapter('Monumente și situri istorice identificate (date reale)');
+    if (heritage && heritage.length) {
+      D.P('În urma interogării surselor cartografice deschise (OpenStreetMap — straturile historic/heritage, lăcașe de cult, obiective de patrimoniu), în ' + (mode === 'T' ? 'teritoriul ' + x.name : 'proximitatea amplasamentului (rază ~2,5 km)') + ' au fost identificate ' + heritage.length + ' obiective de patrimoniu și repere istorice. Acestea constituie contextul concret de patrimoniu al zonei și fundamentează evaluarea potențialului arheologic. Lista include monumente, lăcașe de cult istorice și obiective de interes, ordonate după distanță.');
+      var rows = heritage.slice(0, 40).map(function (m) { return [m.name, m.tip, m.dist != null ? (m.dist >= 1000 ? (m.dist / 1000).toFixed(1) + ' km' : m.dist + ' m') : '—']; });
+      if (D.table) D.table(['Denumire', 'Tip', 'Distanță'], rows, [CW * 0.5, CW * 0.32, CW * 0.18]);
+      D.P('Notă: lista provine din date deschise (OSM) și are caracter orientativ; pentru inventarul oficial complet se consultă Lista Monumentelor Istorice (LMI/MCIN) și Repertoriul Arheologic Național (RAN/CIMEC). Proximitatea acestor obiective față de amplasament este un indicator direct al potențialului arheologic — cu cât densitatea reperelor istorice este mai mare, cu atât probabilitatea descoperirii de vestigii crește.');
+      if (heritage.length > 40) D.P('(Au fost listate primele 40 de obiective din cele ' + heritage.length + ' identificate, în ordinea distanței.)');
+    } else {
+      D.P('Interogarea surselor deschise (OSM) nu a returnat obiective de patrimoniu denumite în raza analizată la momentul generării. Aceasta NU exclude existența unor situri sau monumente — multe nu sunt cartografiate în sursele deschise. Se impune consultarea inventarelor oficiale: Lista Monumentelor Istorice (LMI/MCIN) și Repertoriul Arheologic Național (RAN/CIMEC), precum și a Direcției Județene pentru Cultură.');
+    }
 
     // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 100+ pag ──
     try {
