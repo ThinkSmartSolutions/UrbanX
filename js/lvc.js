@@ -214,10 +214,14 @@
       D.P('O politică LVC eficientă include un mecanism de monitorizare: evidența contribuțiilor încasate, a destinației lor și a efectelor (infrastructură realizată, locuințe accesibile create). Indicatorii de urmărit sunt: valoarea totală captată anual, ponderea din necesarul de infrastructură finanțată prin LVC, numărul de proiecte negociate și eventualul efect descurajant asupra investițiilor (monitorizat prin ritmul autorizărilor). Evaluarea periodică permite recalibrarea ratei de recuperare.');
       D.P('Transparența raportării — un registru public al contribuțiilor și al cheltuielilor — este esențială pentru menținerea încrederii și a legitimității. Platforma UrbanX poate susține acest proces prin evidența digitală a estimărilor de plusvaloare și a contribuțiilor asociate fiecărei documentații de urbanism.');
 
-      D.chapter('21. Limitări și disclaimer');
+      D.chapter('21. Foaie de parcurs pentru implementare locală');
+      D.P('Trecerea de la o contribuție negociată ad-hoc la o politică locală coerentă de captare a plusvalorii poate parcurge etape graduale, în limita cadrului legal actual. Etapa 1 — pilotare: aplicarea metodologiei (ca în acest studiu) la câteva documentații de urbanism cu majorare de parametri, pentru calibrarea ratei și a procesului. Etapa 2 — instituționalizare: adoptarea unui regulament local care să stabilească transparent metoda de calcul, rata de recuperare și destinația fondurilor. Etapa 3 — operaționalizare: constituirea fondului dedicat, a registrului public și a procedurii standard de negociere.');
+      D.P('Pe termen lung, etapa 4 presupune susținerea unui cadru legislativ național dedicat (dincolo de art. 56 al L350/2001), care să confere predictibilitate și forță juridică mecanismului — aliniat recomandărilor OCDE și Băncii Mondiale. Această evoluție graduală permite administrației să acumuleze experiență și legitimitate înainte de a generaliza instrumentul, reducând rezistența și riscul juridic.');
+
+      D.chapter('22. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (L350/2001 art.56). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
 
-      D.chapter('22. Surse, bibliografie și glosar');
+      D.chapter('23. Surse, bibliografie și glosar');
       D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea nr. 350/2001 (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
