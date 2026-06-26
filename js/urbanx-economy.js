@@ -141,7 +141,18 @@
     D.chapter('Sustenabilitate fiscală și îndatorare');
     D.P('Sustenabilitatea fiscală presupune un echilibru pe termen lung între venituri și cheltuieli, un grad de îndatorare în limitele legale (Legea 273/2006 plafonează serviciul datoriei la 30% din veniturile proprii medii) și absența arieratelor. Îndatorarea poate fi un instrument sănătos pentru finanțarea investițiilor cu randament ridicat, atât timp cât serviciul datoriei rămâne acoperit confortabil de veniturile proprii. Monitorizarea gradului de îndatorare și a arieratelor este esențială pentru menținerea capacității de co-finanțare europeană.');
 
-    D.chapter('Benchmark și recomandări de consolidare fiscală');
+    D.chapter('Benchmark — autonomie fiscală pe categorii de UAT');
+    D.P('Poziționarea ' + e.name + ' devine semnificativă prin comparație cu repere tipice pe categorii de UAT. În general, autonomia fiscală crește cu mărimea și dezvoltarea economică: marile municipii și polii de creștere au ponderi ridicate de venituri proprii și cote din impozitul pe venit, în timp ce orașele mici și comunele depind mai mult de transferurile de echilibrare de la centru.');
+    if (D.table) D.table(['Categorie UAT', 'Autonomie fiscală tipică', 'Dependență de transferuri'], [
+      ['Mari municipii / poli de creștere', '60–75%', 'redusă (15–30%)'],
+      ['Municipii medii', '45–60%', 'medie (30–45%)'],
+      ['Orașe mici', '30–45%', 'ridicată (45–60%)'],
+      ['Comune', '15–35%', 'foarte ridicată (55–75%)'],
+      [e.name + ' (estimat)', N(e.autonomie) + '%', N(e.dependenta) + '%']
+    ], [CW * 0.42, CW * 0.3, CW * 0.28]);
+    D.P('Față de categoria sa, ' + e.name + ' are o autonomie ' + (e.autonomie >= 55 ? 'peste medie — o poziție fiscală solidă' : e.autonomie >= 40 ? 'apropiată de medie — cu spațiu de îmbunătățire' : 'sub medie — cu dependență ridicată ce necesită o strategie de consolidare fiscală') + '. Benchmarkingul orientează țintele realiste de îmbunătățire și permite învățarea din practicile UAT-urilor performante din aceeași categorie.');
+
+    D.chapter('Recomandări de consolidare fiscală');
     D.bullets([
       'Creșterea veniturilor proprii: actualizarea valorilor impozabile, eficientizarea colectării, reducerea evaziunii;',
       'Valorificarea fondului imobiliar: densificare, reconversia terenurilor subutilizate (HBU), captarea plusvalorii (LVC);',
