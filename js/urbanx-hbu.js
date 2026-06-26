@@ -169,6 +169,20 @@
     D.chapter('Comparabile și precedente');
     D.P('Reconversia siturilor industriale are precedente bine documentate la nivel european și românesc: foste platforme industriale transformate în cartiere mixte, hub-uri tehnologice, spații culturale sau parcuri. Aceste precedente oferă repere pentru indicii de densitate realizabili, pentru mixul funcțional optim și pentru instrumentele de finanțare și guvernanță utilizate. Analiza comparabilelor locale (tranzacții și proiecte similare din același oraș sau regiune) calibrează ipotezele de valoare și cost ale studiului, reducând incertitudinea estimărilor financiare.');
 
+    D.chapter('Analiză de sensibilitate financiară');
+    D.P('Rentabilitatea reconversiei depinde critic de două variabile incerte: valoarea de vânzare/închiriere realizată (€/mp) și costul total. Analiza de sensibilitate testează robustețea scenariului recomandat la variații ale acestor parametri, evitând o decizie bazată pe un singur set de ipoteze.');
+    if (D.table) {
+      var v0 = R.top.valEur, ct = f.totalCost, adc = f.adc;
+      var rowS = function (dv) {
+        var gdv2 = Math.round(adc * v0 * (1 + dv / 100));
+        var roiOpt = Math.round((gdv2 - ct) / ct * 100);
+        var roiPesim = Math.round((gdv2 - ct * 1.15) / (ct * 1.15) * 100);
+        return [(dv >= 0 ? '+' : '') + dv + '% valoare', N(gdv2) + ' €', N(roiOpt) + ' %', N(roiPesim) + ' %'];
+      };
+      D.table(['Scenariu valoare', 'GDV', 'ROI (cost de bază)', 'ROI (cost +15%)'], [rowS(-15), rowS(0), rowS(15)], [CW * 0.3, CW * 0.25, CW * 0.22, CW * 0.23]);
+    }
+    D.P('Tabelul arată cât de sensibil este randamentul la variațiile de piață și de cost. Dacă proiectul rămâne rentabil chiar în scenariul pesimist (valoare −15% și cost +15%), decizia de investiție este robustă; dacă devine nerentabil, este necesară fie o reconsiderare a funcțiunii, fie sprijin public (regenerare urbană), fie o etapizare care reduce expunerea la risc. Pragul uzual de atractivitate pentru capitalul privat este un ROI peste 15–20%.');
+
     D.chapter('Indicatori de monitorizare');
     if (D.table) D.table(['Indicator', 'Țintă / prag'], [
       ['Suprafață reconvertită (din situl țintă)', '> 80% utilizare activă'],
