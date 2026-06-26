@@ -263,10 +263,24 @@
     D.chapter('22. Etapizarea și impactul pe faze');
     D.P('Dezvoltările mari se realizează în etape, fiecare cu propriul profil de trafic. Etapizarea permite corelarea generării de trafic cu capacitatea rețelei și cu realizarea măsurilor de atenuare (de exemplu, o intersecție amenajată înainte de darea în folosință a fazei care o saturează). Studiul recomandă condiționarea fazelor de realizarea infrastructurii de atenuare aferente, pentru a evita perioade de impact necontrolat.');
 
-    D.chapter('23. Limitări și disclaimer');
+    D.chapter('23. Capacitatea de rezervă a rețelei');
+    D.P('Capacitatea de rezervă reprezintă diferența dintre capacitatea teoretică a unei artere sau intersecții și volumul de trafic existent înainte de dezvoltare. Acolo unde rezerva este amplă, traficul indus se absoarbe fără degradarea nivelului de serviciu; acolo unde rețeaua operează deja aproape de saturație (v/c > 0,85), chiar și un increment modest poate împinge intersecția peste capacitate, cu efecte disproporționate asupra întârzierilor — relația întârziere–grad de saturație fiind puternic neliniară în vecinătatea pragului v/c = 1,0.');
+    D.P('Evaluarea rezervei se face per element critic (intersecții semaforizate, sensuri giratorii, accese), nu pe arteră ca medie, întrucât gâtuirea apare local. Atunci când rezerva este insuficientă, opțiunile sunt: măsuri de management al cererii (reducerea generării prin mix funcțional și transport public), optimizarea semaforizării (reglaje de ciclu și defazaj), ori intervenții de capacitate (benzi suplimentare, reconfigurarea intersecției) — în această ordine de preferință, de la cele mai puțin costisitoare și mai sustenabile la cele mai intensive în resurse.');
+
+    D.chapter('24. Indicatori de performanță și praguri de declanșare');
+    D.P('Pentru monitorizarea și gestionarea impactului se definesc indicatori de performanță măsurabili, cu praguri de declanșare a măsurilor corective. Indicatori uzuali: gradul de saturație (v/c) la intersecțiile critice, întârzierea medie pe acces (s/vehicul) și nivelul de serviciu (LOS A–F) asociat, lungimea cozii la viraje, ponderea reală a deplasărilor non-auto (cota modală realizată față de cea asumată) și gradul de ocupare a parcării.');
+    D.bullets([
+      'v/c < 0,75 (LOS A–C): funcționare fluentă, fără măsuri suplimentare;',
+      'v/c 0,75–0,90 (LOS D–E): monitorizare activă și optimizarea semaforizării;',
+      'v/c > 0,90 (LOS E–F): declanșarea măsurilor de atenuare prevăzute (management al cererii, capacitate);',
+      'cotă modală non-auto sub ținta asumată: întărirea măsurilor pro-transport public și mobilitate activă.'
+    ]);
+    D.P('Pragurile transformă studiul dintr-un document static într-un instrument de management adaptiv: măsurile se activează când indicatorii o impun, evitând atât supra-dimensionarea preventivă (cost inutil), cât și reacția întârziată (congestie instalată). Monitorizarea periodică post-ocupare validează ipotezele studiului și permite recalibrarea.');
+
+    D.chapter('25. Limitări și disclaimer');
     D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
 
-    D.chapter('24. Surse și standarde');
+    D.chapter('26. Surse și standarde');
     D.P('ITE — Trip Generation Manual (ed. 10/11); NP 068/2002 — normativ proiectare străzi; STAS 10144 — caracteristici geometrice; GD 525/1996 — RGU (parcare); HG 874/2019; IPCC 2023 — factori de emisie. Glosar: LOS = Level of Service (nivel de serviciu, A–F); v/c = raport volum/capacitate; TDM = Transport Demand Management; TOD = Transit-Oriented Development; modal split = repartiția pe moduri de transport. Metodologie UrbanX · ThinkSmart Solutions.');
 
     var fn = ('Studiu_Trafic_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
