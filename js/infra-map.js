@@ -20,6 +20,9 @@
     supermarketuri: { f: ['[shop=supermarket]'],               c: '#06b6d4', l: 'Supermarketuri' },
     monumente:      { f: ['[historic]', '[tourism=attraction]', '[heritage]'], c: '#eab308', l: 'Monumente & patrimoniu' },
     turism:         { f: ['[amenity=theatre]', '[amenity=cinema]', '[tourism=museum]', '[amenity=arts_centre]', '[tourism~"^(hotel|gallery|viewpoint|artwork)$"]', '[amenity~"^(restaurant|cafe)$"]'], c: '#f472b6', l: 'Turism & agrement' },
+    muzee:          { f: ['[tourism=museum]', '[tourism=gallery]'], c: '#c084fc', l: 'Muzee & galerii' },
+    caini:          { f: ['[leisure=dog_park]'], c: '#84cc16', l: 'Parcuri pentru câini' },
+    ciclism:        { f: ['[highway=cycleway]', '[bicycle=designated]', '[cycleway~"^(lane|track)$"]'], c: '#14b8a6', l: 'Piste de biciclete', geom: 'line' },
   };
 
   var _active = null; // cheia tipului afisat curent
@@ -55,9 +58,10 @@
     var c = _center(); if (!c) { G.ss && G.ss('Harta indisponibilă'); return; }
     G.ss && G.ss('🔎 Aduc ' + T.l + ' din OSM…');
     var r = 2500; // raza ~2km (ca eticheta cardului)
+    var isLine = T.geom === 'line';
     var filters = Array.isArray(T.f) ? T.f : [T.f];
-    var parts = filters.map(function (fl) { return 'nwr(around:' + r + ',' + c.lat + ',' + c.lon + ')' + fl + ';'; }).join('');
-    var q = '[out:json][timeout:25];(' + parts + ');out center tags;';
+    var parts = filters.map(function (fl) { return (isLine ? 'way' : 'nwr') + '(around:' + r + ',' + c.lat + ',' + c.lon + ')' + fl + ';'; }).join('');
+    var q = '[out:json][timeout:25];(' + parts + ');out ' + (isLine ? 'geom' : 'center') + ' tags;';
     var data = null;
     try {
       var resp = await fetch(PROXY() + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
@@ -66,6 +70,13 @@
     if (!data || !data.elements.length) { G.ss && G.ss('⚠ Nu am găsit ' + T.l + ' în zonă (OSM).'); return; }
     var feats = [];
     data.elements.forEach(function (el) {
+      if (isLine) {
+        if (el.geometry && el.geometry.length > 1) {
+          feats.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: el.geometry.map(function (p) { return [p.lon, p.lat]; }) },
+            properties: { name: (el.tags && (el.tags.name || el.tags['name:ro'])) || T.l } });
+        }
+        return;
+      }
       var lat = el.lat != null ? el.lat : (el.center && el.center.lat);
       var lon = el.lon != null ? el.lon : (el.center && el.center.lon);
       if (lat == null || lon == null) return;
@@ -77,9 +88,14 @@
     var id = _ids(key);
     try { if (map.getSource(id.src)) map.getSource(id.src).setData(fc); else map.addSource(id.src, { type: 'geojson', data: fc }); } catch (e) {}
     try {
-      if (!map.getLayer(id.pt)) map.addLayer({ id: id.pt, type: 'circle', source: id.src,
-        paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 16, 9], 'circle-color': T.c,
-          'circle-stroke-color': '#0a0e1f', 'circle-stroke-width': 1.5, 'circle-opacity': 0.92 } });
+      if (!map.getLayer(id.pt)) {
+        if (isLine) map.addLayer({ id: id.pt, type: 'line', source: id.src,
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': T.c, 'line-width': ['interpolate', ['linear'], ['zoom'], 11, 2, 16, 5], 'line-opacity': 0.9 } });
+        else map.addLayer({ id: id.pt, type: 'circle', source: id.src,
+          paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4, 16, 9], 'circle-color': T.c,
+            'circle-stroke-color': '#0a0e1f', 'circle-stroke-width': 1.5, 'circle-opacity': 0.92 } });
+      }
     } catch (e) {}
     try {
       if (!map.getLayer(id.lb)) map.addLayer({ id: id.lb, type: 'symbol', source: id.src,
