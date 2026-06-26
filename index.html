@@ -1431,6 +1431,17 @@ document.addEventListener('click', function(){
     <span style="margin-left:auto;opacity:.5">→</span>
   </button>
 
+  <!-- #12 Studiu Valori Imobiliare (heatmap €/mp + raport) -->
+  <button onclick="window._ValueMap&&window._ValueMap.show('apartament');toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(16,124,92,.14),rgba(34,197,94,.06));border:1px solid rgba(16,124,92,.3);border-radius:8px;color:#34d399;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:5px">
+    <span style="font-size:16px">💶</span>
+    <div><div>Hartă Valori Imobiliare (€/mp)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">Heatmap valoric pe hartă · rentă urbană · re-click = ascunde</div></div>
+    <span style="margin-left:auto;opacity:.5">▸</span>
+  </button>
+  <button onclick="window._ValueMap&&window._ValueMap.generatePDF();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(16,124,92,.08);border:1px solid rgba(16,124,92,.2);border-radius:8px;color:#86efac;padding:7px 10px;cursor:pointer;font-size:11px;font-weight:600;margin-bottom:8px">
+    <span style="font-size:14px">📄</span>
+    <div><div>Studiu Valori Imobiliare (PDF)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">Raport ≥10 pag · metodă, hărți, predicții, surse, disclaimer</div></div>
+  </button>
+
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">① Analize de Bază</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateStudiuAmplasament();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;" title="Studiu TERITORIAL: UTR, context urban, restricții, LMI, utilități. ≠ Memoriu Tehnic care e ARHITECTURAL.">🗺 Studiu de Amplasament & Context Teritorial</button>
@@ -5597,7 +5608,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/osm-mirror-fallback.js?v=20260616"></script>
 <script src="js/osm-live-connector.js?v=20260625q"></script>
 <script src="js/infra-map.js?v=20260626a"></script>
-<script src="js/urbanx-value-map.js?v=20260626a"></script>
+<script src="js/urbanx-value-map.js?v=20260626b"></script>
 <script src="js/inse-connector.js?v=20260523"></script>
 <script src="js/inse-real-data.js?v=20260615"></script>
 <script src="js/cinema-data.js?v=20260525"></script>
