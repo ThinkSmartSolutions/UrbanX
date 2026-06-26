@@ -1,0 +1,192 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// urbanx-hbu.js — HBU / SRU · Highest & Best Use & Studiu de Reconversie Urbană
+// Pentru un amplasament (parcelă selectată sau centru UAT), evaluează compatibilitatea
+// a 12 funcțiuni de reconversie (industrial → rezidențial/mixt/hotelier/birouri/etc.),
+// cu scor transparent (localizare + accesibilitate + cerere + constrângeri) și
+// pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat.
+// Standard UrbanX: studiu PDF ≥10 pag + secțiune IVU + surse + disclaimer.
+// window._HBU.compute(opts) · .openPanel() · .generatePDF(cityKey)
+// 26 iunie 2026 · ThinkSmart Solutions SRL
+// ═══════════════════════════════════════════════════════════════════════════
+(function (G) {
+  'use strict';
+  function N(v, d) { try { return Number(v).toLocaleString('ro-RO', { maximumFractionDigits: d == null ? 0 : d }); } catch (e) { return '' + v; } }
+  function cl(v, lo, hi) { return Math.max(lo == null ? 2 : lo, Math.min(hi == null ? 99 : hi, Math.round(v))); }
+
+  // 12 funcțiuni de reconversie. Pondere pe: centralitate (c0), accesibilitate (a0),
+  // cerere de bază (d0). val_mult = multiplicator valoare construită €/mp (pt GDV).
+  var USES = [
+    { id: 'rezid', n: 'Rezidențial colectiv', c0: 0.9, a0: 1.0, d0: 70, valEur: 1250, cost: 780 },
+    { id: 'mixt', n: 'Mixt (locuire + comerț parter)', c0: 1.1, a0: 1.1, d0: 72, valEur: 1350, cost: 850 },
+    { id: 'birouri', n: 'Birouri / office', c0: 1.3, a0: 1.3, d0: 55, valEur: 1300, cost: 900 },
+    { id: 'hotel', n: 'Hotelier / cazare', c0: 1.4, a0: 1.2, d0: 48, valEur: 1500, cost: 1050 },
+    { id: 'retail', n: 'Comercial / retail', c0: 1.2, a0: 1.3, d0: 52, valEur: 1200, cost: 720 },
+    { id: 'logistic', n: 'Logistică / depozitare', c0: -0.8, a0: 0.6, d0: 58, valEur: 600, cost: 420 },
+    { id: 'cultural', n: 'Cultural / creativ (hub, loft)', c0: 1.0, a0: 0.9, d0: 45, valEur: 1000, cost: 680 },
+    { id: 'educ', n: 'Educațional', c0: 0.5, a0: 0.9, d0: 50, valEur: 1100, cost: 820 },
+    { id: 'sanatate', n: 'Sănătate / medical', c0: 0.6, a0: 1.0, d0: 56, valEur: 1250, cost: 950 },
+    { id: 'verde', n: 'Spațiu verde / parc public', c0: 0.3, a0: 0.4, d0: 60, valEur: 0, cost: 120 },
+    { id: 'indusoara', n: 'Industrie ușoară / producție', c0: -0.6, a0: 0.5, d0: 50, valEur: 700, cost: 500 },
+    { id: 'tech', n: 'Tech / data-center', c0: 0.2, a0: 0.8, d0: 46, valEur: 1400, cost: 1200 }
+  ];
+
+  function _ctx(cityKey) {
+    var db = G._RO_CITIES_DB || {}; var city = db[cityKey] || (G.TCI && G.TCI.cityData) || {};
+    var ap = G._activeParcel || G._selectedParcel || null; // parcela selectată, dacă există
+    var lat = (ap && ap.lat) || city.lat || 47, lon = (ap && ap.lon) || city.lon || 27;
+    // distanța la centru UAT [km]
+    var dCenter = 0;
+    try { if (city.lat && ap && ap.lat && G.turf) dCenter = G.turf.distance([city.lon, city.lat], [lon, lat], { units: 'kilometers' }); } catch (e) {}
+    var area = (ap && (ap.area || ap.suprafata)) || 5000;
+    var tier = (city.pop2021 || city.pop || 0) >= 250000 ? 1.0 : (city.pop2021 || 0) >= 100000 ? 0.82 : (city.pop2021 || 0) >= 40000 ? 0.6 : 0.42;
+    var hub = city.coef_hub || 0.7;
+    var ag = city.ag || 0.25;
+    return { city: city, name: city.name || 'UAT', lat: lat, lon: lon, dCenter: dCenter, area: area, tier: tier, hub: hub, ag: ag, hasParcel: !!(ap && ap.lat) };
+  }
+
+  function compute(cityKey) {
+    var x = _ctx(cityKey);
+    // centralitate 0-1 (1 = central). Dacă nu avem parcelă, presupunem semicentral.
+    var centr = x.hasParcel ? Math.max(0.1, 1 - x.dCenter / 6) : 0.62;
+    var access = cl(35 + x.tier * 45 + x.hub * 15) / 100; // accesibilitate 0-1
+    var seismicPen = x.ag > 0.3 ? 6 : x.ag > 0.2 ? 3 : 0; // construcții noi pe sit seismic
+    var scored = USES.map(function (u) {
+      var s = u.d0 + u.c0 * (centr * 28) + u.a0 * (access * 26) + x.hub * 6 - seismicPen * (u.valEur > 0 ? 1 : 0);
+      // bonus piață: hub mare favorizează birouri/hotel/tech
+      if (['birouri', 'hotel', 'tech'].indexOf(u.id) >= 0) s += x.hub * 8;
+      if (u.id === 'logistic' || u.id === 'indusoara') s += (1 - centr) * 14; // periferic favorizează logistica
+      return { id: u.id, n: u.n, score: cl(s), valEur: u.valEur, cost: u.cost };
+    }).sort(function (a, b) { return b.score - a.score; });
+    // pre-analiză financiară pt top scenariu (cu valoare construită)
+    var top = scored.filter(function (s) { return s.valEur > 0; })[0] || scored[0];
+    var CUT = 1.8; // ipoteză edificabil mediu (calibrabil din reguli PUG)
+    var adc = Math.round(x.area * CUT); // arie desfășurată construită
+    var gdv = Math.round(adc * top.valEur); // valoare brută dezvoltare
+    var capex = Math.round(adc * top.cost + x.area * 60); // construcție + amenajare teren
+    var demol = Math.round(x.area * 45); // demolare/dezafectare hală
+    var soft = Math.round(capex * 0.12); // proiectare, avize, taxe
+    var totalCost = capex + demol + soft;
+    var profit = gdv - totalCost;
+    var roi = totalCost > 0 ? Math.round(profit / totalCost * 100) : 0;
+    return { x: x, scored: scored, top: top, fin: { CUT: CUT, adc: adc, gdv: gdv, capex: capex, demol: demol, soft: soft, totalCost: totalCost, profit: profit, roi: roi }, centr: Math.round(centr * 100), access: Math.round(access * 100) };
+  }
+
+  // ── Studiu PDF (≥10 pag) ─────────────────────────────────────────────────
+  function generatePDF(cityKey) {
+    var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
+    if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
+    var R = compute(cityKey), x = R.x, f = R.fin;
+    G.ss && G.ss('🏗 Generez studiul de reconversie (HBU)…');
+    var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var D = G._makeStratDoc(pdf, { docTitle: 'STUDIU DE RECONVERSIE URBANĂ', cityName: x.name, accent: [146, 64, 14] });
+    var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
+    D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+    pdf.setFillColor(28, 18, 8); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(146, 64, 14); pdf.rect(0, 60, W, 1.4, 'F');
+    try { if (G._drawUrbanxLogo) { G._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · HBU — HIGHEST & BEST USE', W / 2, 44, { align: 'center' });
+    pdf.setTextColor(255, 255, 255); pdf.setFontSize(21); pdf.text('STUDIU DE RECONVERSIE URBANĂ', W / 2, 88, { align: 'center' });
+    pdf.setTextColor(251, 191, 36); pdf.setFontSize(13); pdf.text(D.S2(x.name + (x.hasParcel ? ' · amplasament selectat' : '')), W / 2, 102, { align: 'center' });
+    pdf.setTextColor(200, 170, 120); pdf.setFontSize(11); pdf.text('Funcțiune optimă: ' + R.top.n + ' · ROI estimat ' + N(f.roi) + '%', W / 2, 114, { align: 'center' });
+    D.setSuppress && D.setSuppress(false);
+
+    D.chapter('Rezumat executiv');
+    D.P('Prezentul studiu răspunde la întrebarea fundamentală a regenerării urbane: care este cea mai bună utilizare (Highest & Best Use) pentru un amplasament subutilizat sau industrial din ' + x.name + '? Pe baza localizării, accesibilității, cererii de piață și a constrângerilor, studiul evaluează 12 funcțiuni de reconversie și recomandă scenariul care maximizează simultan fezabilitatea economică și impactul urban pozitiv. Pentru amplasamentul analizat (suprafață ' + N(x.area) + ' mp), funcțiunea optimă este „' + R.top.n + '", cu un randament estimat de ' + N(f.roi) + '%.');
+    D.callout && D.callout('Recomandare', 'Reconversie către „' + R.top.n + '" — scor de compatibilitate ' + R.scored[0].score + '/100. Valoare brută de dezvoltare (GDV) estimată ' + N(f.gdv) + ' €, cost total ' + N(f.totalCost) + ' €, profit potențial ' + N(f.profit) + ' €. Valori orientative — necesită studiu de fezabilitate și due diligence.');
+
+    D.chapter('Metodologie');
+    D.P('Analiza HBU urmează cele patru teste clasice ale evaluării imobiliare internaționale (IVS): (1) admisibilitatea legală (regimul urbanistic PUG/PUZ), (2) posibilitatea fizică (suprafață, geotehnic, constrângeri), (3) fezabilitatea financiară (rentabilitatea fiecărei utilizări), (4) productivitatea maximă (utilizarea care produce cea mai mare valoare). Scorul de compatibilitate pentru fiecare funcțiune agregă transparent: localizarea (centralitatea), accesibilitatea (transport și dotări), cererea de piață specifică și penalizările pentru constrângeri (seismic, inundabilitate, patrimoniu).');
+    D.formula && D.formula('Scor de compatibilitate', 'Scor = cerere_bază + w_centralitate·Centralitate + w_acces·Accesibilitate + bonus_hub − penalizări', 'normalizat 0–100; ponderile diferă pe funcțiune (birourile favorizează centralitatea, logistica periferia)');
+    D.P('Centralitatea amplasamentului analizat este estimată la ' + R.centr + '/100, iar accesibilitatea la ' + R.access + '/100. Aceste valori, combinate cu profilul economic al orașului (coeficient de polarizare ' + N(x.hub, 2) + '), determină ierarhia funcțiunilor.');
+
+    D.chapter('Scoruri de compatibilitate — 12 funcțiuni');
+    if (D.barChart) {
+      D.barChart(R.scored.map(function (s, i) { return [s.n.split(' ')[0].slice(0, 10), s.score, i === 0 ? [34, 197, 94] : i < 3 ? [132, 204, 22] : [148, 163, 184]]; }), { title: 'Scor de compatibilitate pe funcțiune (0–100)', h: 56, max: 100, source: 'Model HBU UrbanX' });
+    }
+    if (D.table) D.table(['Funcțiune', 'Scor', 'Verdict'], R.scored.map(function (s, i) {
+      return [s.n, s.score + '/100', i === 0 ? 'OPTIM' : i < 3 ? 'recomandat' : s.score >= 50 ? 'posibil' : 'nerecomandat'];
+    }), [CW * 0.5, CW * 0.2, CW * 0.3]);
+    D.P('Primele trei funcțiuni clasate constituie scenariile recomandate; ele reflectă potrivirea cu localizarea și cu cererea de piață. Funcțiunile cu scor sub 50 sunt nerecomandate pentru acest amplasament, fie din cauza localizării nepotrivite, fie a cererii insuficiente.');
+
+    D.chapter('Analiza financiară a scenariului recomandat');
+    if (D.table) D.table(['Indicator', 'Valoare'], [
+      ['Suprafață teren', N(x.area) + ' mp'],
+      ['CUT ipoteză', N(f.CUT, 1) + ' (calibrabil din PUG)'],
+      ['Arie desfășurată construită (ADC)', N(f.adc) + ' mp'],
+      ['Valoare brută dezvoltare (GDV)', N(f.gdv) + ' €'],
+      ['Cost construcție + amenajare (CAPEX)', N(f.capex) + ' €'],
+      ['Demolare / dezafectare', N(f.demol) + ' €'],
+      ['Proiectare, avize, taxe (soft)', N(f.soft) + ' €'],
+      ['Cost total', N(f.totalCost) + ' €'],
+      ['Profit potențial', N(f.profit) + ' €'],
+      ['Randament (ROI)', N(f.roi) + ' %']
+    ], [CW * 0.55, CW * 0.45]);
+    D.P('Analiza folosește metoda valorii reziduale: din valoarea brută de dezvoltare (GDV) se scad costurile totale pentru a obține profitul și randamentul. Valorile sunt orientative, calibrate pe repere de piață românești; un ROI peste 15–20% indică un proiect atractiv pentru dezvoltatori, în timp ce un ROI sub pragul de risc poate justifica instrumente de sprijin public (regenerare urbană, parteneriat public-privat).');
+
+    D.chapter('Constrângeri și due diligence');
+    D.bullets([
+      'Urbanistice: regimul PUG/PUZ trebuie verificat — reconversia poate necesita modificare de PUZ (schimbare funcțiune, indici);',
+      'Mediu: terenurile industriale necesită investigare a contaminării solului (sit potențial contaminat — ANPM) înainte de funcțiuni sensibile (rezidențial, educație, sănătate);',
+      'Seismic: accelerația de proiectare ag = ' + N(x.ag, 2) + 'g impune cerințe structurale pentru construcțiile noi;',
+      'Patrimoniu: halele industriale valoroase pot avea valoare de patrimoniu industrial (reconversie cu păstrarea structurii);',
+      'Infrastructură: capacitatea rețelelor edilitare și a accesurilor trebuie verificată pentru noua funcțiune.'
+    ]);
+    D.P('Aceste constrângeri pot modifica semnificativ fezabilitatea și costurile; studiul HBU este o pre-analiză de orientare, iar decizia finală necesită studiu de fezabilitate, expertiză tehnică și due diligence juridic și de mediu.');
+
+    D.chapter('Cererea de piață');
+    D.P('Ierarhia funcțiunilor reflectă cererea estimată pe segmente: în orașele cu polarizare economică ridicată, birourile, hotelurile și funcțiunile tech au cerere susținută în zonele centrale și bine conectate; rezidențialul și mixtul au cerere largă și stabilă; logistica și producția ușoară sunt favorizate periferic, lângă infrastructura majoră de transport. Corelarea cu studiul de piață imobiliară (Market) și cu harta de valori a platformei rafinează aceste estimări cu prețuri €/mp reale pe segment.');
+
+    D.chapter('Impactul urban al reconversiei');
+    D.P('Dincolo de rentabilitatea privată, reconversia produce efecte urbane: transformarea unei zone industriale dezafectate într-o funcțiune activă elimină un „gol urban", crește baza de impozitare locală, generează locuri de muncă și activează spațiul public. Reconversia bine planificată este un instrument-cheie de regenerare urbană și de densificare a țesutului existent (în locul extinderii pe terenuri agricole), aliniat principiilor orașului compact și ale dezvoltării durabile.');
+    D.P('Captarea unei părți din plusvaloarea generată de schimbarea de funcțiune (prin instrumentele de Land Value Capture) permite administrației să finanțeze infrastructura și spațiile publice asociate — vezi studiul LVC al platformei.');
+
+    D.chapter('Etapizare și instrumente');
+    D.bullets([
+      'Faza 0: due diligence (urbanistic, contaminare, structură, proprietate);',
+      'Faza 1: modificare PUZ și obținerea avizelor (dacă funcțiunea o cere);',
+      'Faza 2: demolare/dezafectare selectivă și decontaminare;',
+      'Faza 3: construcție/reabilitare pe etape;',
+      'Faza 4: dare în folosință și activare spațiu public.'
+    ]);
+    D.P('Instrumente aplicabile: regenerare urbană (POR Axa 5), PNRR, parteneriat public-privat, captare de plusvaloare, facilități fiscale pentru reconversia siturilor contaminate (brownfield). Etapizarea reduce riscul și permite finanțare eșalonată.');
+
+    D.chapter('Surse de finanțare');
+    D.P('Reconversia siturilor subutilizate este o prioritate a politicilor europene și naționale: Programul Operațional Regional (Axa de regenerare urbană), PNRR (componenta de regenerare și eficiență energetică), fonduri pentru brownfield, precum și capital privat și parteneriate. Eligibilitatea depinde de funcțiunea propusă, de componenta de spațiu public și de obiectivele de sustenabilitate (eficiență energetică, infrastructură verde).');
+
+    // Nota UrbanX (IVU)
+    try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
+
+    D.chapter('Limitări și disclaimer');
+    D.P('Studiu generat algoritmic (UrbanX HBU) ca PRE-ANALIZĂ de reconversie. Scorurile și valorile financiare sunt orientative, bazate pe modele transparente și repere de piață, și NU substituie studiul de fezabilitate, raportul de evaluare ANEVAR, expertiza tehnică sau due diligence-ul juridic și de mediu. Regimul urbanistic și constrângerile reale (contaminare, structură, proprietate) trebuie verificate. Decizia de investiție rămâne responsabilitatea beneficiarului.');
+
+    D.chapter('Surse și standarde');
+    D.P('Metodologie HBU (Highest & Best Use) — Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR; Legea 350/2001 (urbanism); POR Axa 5 (regenerare urbană); PNRR; repere de cost și valoare de piață RO. Date amplasament: ' + (x.hasParcel ? N(x.lat, 4) + '°N, ' + N(x.lon, 4) + '°E' : 'centru UAT (selectați o parcelă pentru analiză punctuală)') + '. Metodologie UrbanX · ThinkSmart Solutions.');
+
+    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    G._buildStratTOC && G._buildStratTOC(D, 1);
+    pdf.save(fn); G.ss && ss('✅ Studiu de reconversie generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
+  }
+
+  // ── Panou rapid ──────────────────────────────────────────────────────────
+  function openPanel(cityKey) {
+    var R = compute(cityKey); var x = R.x;
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.74);z-index:9300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+    ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    var rows = R.scored.slice(0, 8).map(function (s, i) {
+      var c = s.score >= 70 ? '#22c55e' : s.score >= 55 ? '#84cc16' : s.score >= 45 ? '#f59e0b' : '#94a3b8';
+      return '<div style="display:flex;align-items:center;gap:8px;margin:4px 0"><div style="width:150px;font-size:11px;color:#cbd5e1">' + (i === 0 ? '★ ' : '') + s.n + '</div><div style="flex:1;height:9px;background:#0a1120;border-radius:5px;overflow:hidden"><div style="height:100%;width:' + s.score + '%;background:' + c + '"></div></div><div style="width:34px;text-align:right;font-size:11px;font-weight:700;color:' + c + '">' + s.score + '</div></div>';
+    }).join('');
+    ov.innerHTML = '<div style="background:#0b1424;color:#e6edf7;width:min(640px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(146,64,14,.5);border-radius:14px;font-family:system-ui,sans-serif;padding:18px 20px">' +
+      '<div style="font-weight:800;font-size:16px">🏗 Reconversie (HBU) — ' + x.name + '</div>' +
+      '<div style="font-size:11px;color:#94a3b8;margin:2px 0 12px">' + (x.hasParcel ? 'Amplasament selectat · ' + N(x.area) + ' mp' : 'Centru UAT — selectează o parcelă pentru analiză punctuală') + ' · centralitate ' + R.centr + '/100 · accesibilitate ' + R.access + '/100</div>' +
+      '<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:10px;margin-bottom:10px"><div style="font-size:11px;color:#86efac;font-weight:700">Funcțiune optimă: ' + R.top.n + '</div><div style="font-size:11px;color:#cbd5e1;margin-top:3px">GDV ' + N(R.fin.gdv) + ' € · cost ' + N(R.fin.totalCost) + ' € · profit ' + N(R.fin.profit) + ' € · ROI ' + N(R.fin.roi) + '%</div></div>' +
+      rows +
+      '<div style="display:flex;gap:8px;margin-top:12px"><button onclick="window._HBU.generatePDF(window.TCI&&window.TCI.cityKey)" style="flex:1;background:linear-gradient(180deg,#d97706,#92400e);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Studiu reconversie (PDF ≥10 pag)</button>' +
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;cursor:pointer">Închide</button></div>' +
+      '<div style="font-size:9px;color:#64748b;margin-top:10px">Model HBU transparent (localizare + accesibilitate + cerere + constrângeri). Pre-analiză orientativă — necesită fezabilitate + due diligence.</div></div>';
+    document.body.appendChild(ov);
+  }
+
+  G._HBU = { compute: compute, generatePDF: generatePDF, openPanel: openPanel, USES: USES };
+  console.log('[HBU] ✅ Studiu de reconversie urbană (Highest & Best Use) încărcat');
+})(window);

@@ -3416,6 +3416,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     </button>
     <button onclick="window._showInfoDrawer('clima')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(37,99,235,.25);color:#93c5fd;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
+  <!-- HBU / Reconversie urbană -->
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
+    <button onclick="window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey);_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(146,64,14,.14);border:1px solid rgba(217,119,6,.35);color:#fbbf24;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(146,64,14,.24)'" onmouseout="this.style.background='rgba(146,64,14,.14)'">
+      🏗 Reconversie urbană (HBU) & Studiu
+      <div style="font-size:10px;color:rgba(251,191,36,.6)">industrial→rezidențial/mixt/hotelier/birouri · scor 12 funcțiuni + financiar</div>
+    </button>
+    <button onclick="window._showInfoDrawer('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+  </div>
 
   <!-- ═══ PROIECTARE & LOTIZARE ═══ -->
   <div style="padding:6px 8px 3px;font-size:10px;color:rgba(168,85,247,.55);font-weight:700;
@@ -3967,6 +3977,13 @@ const _INFO_DATA = {
     desc:'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii (demografie, indici compoziți, modele spațiale, mediu, mobilitate, infrastructură, risc, imobiliar), fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (IVU).',
     tip:'Documentează CE se măsoară, CUM și DIN CE sursă — baza de transparență a platformei.',
     source:'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
+  },
+  'hbu': {
+    icon:'🏗', title:'Reconversie urbană (HBU) & Studiu', subtitle:'Highest & Best Use — funcțiunea optimă',
+    badge:'INVESTIȚIONAL · REGENERARE', badgeColor:'#d97706',
+    desc:'Pentru un amplasament subutilizat sau industrial, determină cea mai bună utilizare (Highest & Best Use): evaluează 12 funcțiuni de reconversie (rezidențial, mixt, birouri, hotelier, retail, logistică, cultural, educație, sănătate, verde, industrie ușoară, tech) cu scor de compatibilitate transparent (localizare + accesibilitate + cerere + constrângeri) și o pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat. Generează studiu PDF ≥10 pag.',
+    tip:'Selectează o parcelă pe hartă pentru analiză punctuală; altfel se analizează centrul UAT. Pre-analiză — necesită fezabilitate + due diligence (contaminare, structură, PUZ).',
+    source:'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · repere piață RO',
   },
   'clima': {
     icon:'🌦', title:'Profil Climatic & Studiu (SECAP)', subtitle:'Date reale Open-Meteo (reanaliză ERA5)',
@@ -6304,6 +6321,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260626ivu"></script>
     <script src="js/urbanx-climate.js?v=20260626clima3"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
+    <script src="js/urbanx-hbu.js?v=20260626hbu"></script><!-- HBU/SRU reconversie urbana (12 functiuni + financiar + studiu) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
 </body>
 </html>
