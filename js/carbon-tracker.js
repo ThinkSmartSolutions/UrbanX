@@ -106,12 +106,13 @@
       D.chapter('1. Rezumat executiv');
       D.P('Prezentul studiu cuantifică amprenta de carbon a dezvoltării analizate (' + N(r.area) + ' mp, funcțiune „' + r.use + '") pe întregul ciclu de viață, conform metodologiei de evaluare a ciclului de viață (LCA). Emisiile totale estimate sunt de ' + N(r.lifetime_t) + ' tone CO₂ echivalent pe un orizont de 30 de ani, respectiv ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp — corespunzând clasei de performanță „' + r.green_label + '". Studiul are caracter orientativ și servește raportării ESG, alinierii la Taxonomia UE și la Convenția Primarilor.');
       D.callout && D.callout('Concluzie', 'Carbonul înglobat (' + N(r.embodied_t) + ' t) reprezintă investiția inițială de emisii, recuperată/amortizată pe durata de viață, în timp ce emisiile operaționale (' + N(opAn) + ' t/an) sunt recurente — de aceea decarbonarea energetică și mobilitatea sustenabilă au impactul cel mai mare pe termen lung.');
-
-      D.newPage && D.newPage();
       D.chapter('2. Metodologie (LCA · EN 15978)');
       D.P('Evaluarea urmează standardul EN 15978 (Sustainability of construction works — Assessment of environmental performance of buildings) și ghidul RICS „Whole life carbon assessment". Amprenta totală însumează trei componente: (A) carbonul ÎNGLOBAT (embodied) — emisiile din producția materialelor, transport și punere în operă (modulele A1–A5); (B) carbonul OPERAȚIONAL — emisiile din consumul de energie pe durata exploatării (modulele B6), funcție de mixul energetic național; (C) carbonul INDUS de TRANSPORT — emisiile generate de deplasările utilizatorilor, dependente de localizare și de accesibilitate.');
       D.P('Factorii de emisie utilizați: pentru carbonul înglobat — valori de referință pe tip structural (RICS/ICE database, cca. 300–500 kg CO₂/mp construit); pentru operațional — intensitatea carbonică a rețelei electrice românești (~0,28 kg CO₂/kWh, sursă ENTSO-E/Transelectrica) aplicată consumului specific pe funcțiune; pentru transport — distanța medie pe deplasare și factorul de emisie auto, scalate la numărul de deplasări anuale induse. Orizontul de evaluare este de 30 de ani, conform practicii uzuale pentru clădiri rezidențiale.');
       D.formula && D.formula('Carbon total pe ciclu de viață', 'C_total = C_inglobat + (C_operational + C_transport) × 30 ani', 'rezultat în tone CO₂ echivalent');
+      D.P('Distincția dintre cele trei componente este esențială pentru strategia de decarbonare. Carbonul înglobat este o emisie „de capital" — produsă o singură dată, la construire, și ireversibilă ulterior; el a devenit ținta principală a reglementărilor recente (legislația franceză RE2020 și standardele nordice impun deja praguri de carbon înglobat). Carbonul operațional și cel de transport sunt emisii „de exploatare" — recurente an de an, dar reductibile progresiv prin retehnologizare energetică și prin schimbarea comportamentului de mobilitate. Pe un orizont de 30 de ani componenta de exploatare devine de regulă dominantă, ceea ce justifică investiția suplimentară în eficiență încă din faza de proiectare.');
+      D.P('Granițele evaluării (system boundary) acoperă modulele A1–A5 (produs + construcție) pentru carbonul înglobat și B6 (energie operațională) plus deplasările induse pentru componenta de exploatare. Nu sunt incluse, în această estimare orientativă, modulele C (sfârșit de viață) și D (potențial de reutilizare/reciclare), care ar necesita un inventar detaliat de materiale; includerea lor ar nuanța rezultatul, în general în favoarea structurilor demontabile și a materialelor reciclabile.');
+      D.P('Incertitudinea estimării provine din trei surse: variabilitatea factorilor de emisie ai materialelor (±20–30% în funcție de furnizor și proveniență), evoluția intensității carbonice a rețelei electrice (care în România scade pe măsură ce ponderea regenerabilelor crește, îmbunătățind în timp bilanțul operațional) și ipotezele de mobilitate. Rezultatul trebuie interpretat ca ordin de mărime și instrument de comparație între scenarii, nu ca valoare contractuală.');
 
       D.chapter('3. Date de intrare');
       D.table && D.table(['Parametru', 'Valoare'], [
@@ -122,13 +123,9 @@
         ['Intensitate rețea RO', '~0,28 kg CO₂/kWh'],
       ], [CW * 0.5, CW * 0.5]);
 
-      D.newPage && D.newPage();
-
       D.chapter('4. Carbon înglobat (embodied)');
       D.P('Carbonul înglobat estimat este de ' + N(r.embodied_t) + ' tone CO₂, aferent structurii de tip „' + r.structural_type + '". Acesta concentrează emisiile „din prima zi" — produse înainte ca clădirea să fie utilizată — și este, în consecință, ireversibil odată construcția realizată. Reducerea sa se obține prin alegerea materialelor cu amprentă redusă (lemn structural, beton cu ciment compozit, oțel reciclat) și prin optimizarea cantităților.');
       D.P('Pentru această dezvoltare, trecerea la o structură pe bază de lemn (CLT/glulam) ar economisi cca. ' + N(r.timber_saving_t) + ' tone CO₂ față de soluția curentă — lemnul stocând carbon biogenic pe durata de viață a clădirii.');
-
-      D.newPage && D.newPage();
       D.chapter('5. Carbon operațional și din transport');
       D.P('Emisiile operaționale sunt estimate la ' + N(r.operational_t_yr) + ' tone CO₂/an (energie pentru încălzire, răcire, apă caldă, iluminat, echipamente), iar cele induse de transport la ' + N(r.transport_t_yr) + ' tone CO₂/an (deplasările utilizatorilor). Pe orizontul de 30 de ani, acestea cumulează ' + N(opAn * 30) + ' tone CO₂ — partea dominantă a amprentei totale, ceea ce confirmă că eficiența energetică (NZEB), sursele regenerabile (fotovoltaic) și localizarea accesibilă (reducerea deplasărilor auto) sunt pârghiile decisive.');
       if (D.barChart) {
@@ -139,8 +136,6 @@
         ], { title: 'Defalcarea amprentei pe ciclul de viață (t CO₂, 30 ani)', h: 48, source: 'Model LCA UrbanX · EN 15978' });
       }
 
-      D.newPage && D.newPage();
-
       D.chapter('6. Total ciclu de viață și clasificare');
       D.table && D.table(['Componentă', 't CO₂', 'Pondere'], [
         ['Carbon înglobat', N(r.embodied_t), Math.round(r.embodied_t / Math.max(1, r.lifetime_t) * 100) + '%'],
@@ -149,8 +144,6 @@
         ['TOTAL', N(r.lifetime_t), '100%'],
       ], [CW * 0.46, CW * 0.27, CW * 0.27]);
       D.P('Intensitatea de ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp plasează dezvoltarea în clasa „' + r.green_label + '". Ținta UE 2030 prevede o reducere de -55% față de 1990; clădirile noi trebuie să tindă către neutralitate climatică până în 2050 (Green Deal).');
-
-      D.newPage && D.newPage();
 
       D.chapter('7. Scenarii de reducere (decarbonare)');
       D.P('Pe baza structurii amprentei, se conturează un plan de reducere cu impact gradual:');
@@ -162,12 +155,10 @@
         'Verde urban (3-30-300) — sechestrare suplimentară și reducerea insulei de căldură.',
       ]);
       D.P('Cumulat, un pachet ambițios poate reduce amprenta totală cu 40–60% față de scenariul de referință, apropiind dezvoltarea de clasa A și de cerințele de raportare ESG/Taxonomie UE.');
-
-      D.newPage && D.newPage();
+      D.P('Ierarhia intervențiilor urmează principiul „evită – reduce – compensează". Prioritatea o au măsurile pasive (orientare, formă compactă, izolare, masă termică), care nu generează costuri de operare și nu se uzează; urmează măsurile active eficiente (pompe de căldură, ventilație cu recuperare); apoi producția de energie regenerabilă la fața locului (fotovoltaic); și abia la final, pentru emisiile reziduale care nu pot fi eliminate tehnic, compensarea (offset) prin certificate verzi sau plantări — privită însă ca soluție de ultimă instanță, nu ca substitut al reducerii reale.');
+      D.P('Analiza cost-eficacitate a fiecărei măsuri (cost per tonă de CO₂ evitată) orientează ordinea de implementare în limita unui buget dat. În general, măsurile de anvelopă și sursele regenerabile au cel mai bun raport cost/tonă pe durata de viață, în timp ce intervențiile asupra structurii (trecerea la lemn) reduc semnificativ carbonul înglobat, dar depind de disponibilitatea materialului și de competențele locale de execuție. Un plan realist eșalonează aceste măsuri pe faze, corelat cu ciclul de mentenanță și de reabilitare a clădirii.');
       D.chapter('8. Cadru de raportare și aplicații');
       D.P('Rezultatele susțin: raportarea ESG (pilonul de mediu — emisii GES Scope 1–3); verificarea alinierii la Taxonomia UE (criteriul „contribuție substanțială la atenuarea schimbărilor climatice"); angajamentele asumate în cadrul Convenției Primarilor (Covenant of Mayors) și ale Planurilor de Acțiune pentru Energie Durabilă și Climă (PAEDC/SECAP); fundamentarea cererilor de finanțare verde (fonduri UE, credite cu dobândă preferențială pentru clădiri sustenabile).');
-
-      D.newPage && D.newPage();
 
       D.chapter('9. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV. Valorile sunt estimate cu factori de emisie de referință (RICS/ICE, IPCC, ENTSO-E), nu din facturi energetice reale sau dintr-o analiză detaliată a materialelor (BoQ). NU înlocuiește un audit de carbon certificat sau o evaluare LCA detaliată realizată de un expert. Pentru raportare oficială ESG/Taxonomie se recomandă verificarea de către un evaluator acreditat și utilizarea datelor măsurate.');
