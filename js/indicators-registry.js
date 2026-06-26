@@ -189,6 +189,9 @@
       D.P('Benchmarkingul — compararea cu alte UAT-uri și cu orașe-pereche europene — adaugă perspectivă: un indicator „bun" în absolut poate fi sub media regională, semnalând un decalaj de recuperat; invers, o valoare modestă în context de resurse limitate poate reprezenta o performanță relativă remarcabilă. Platforma permite comparația inter-UAT pe același indicator (vezi modulul de comparare și rapoartele tematice), iar alinierea la ISO 37120 asigură comparabilitatea metodologică la nivel internațional.');
       D.callout && D.callout('Țintă vs. valoare', 'Monitorizarea fără țintă este descriptivă; monitorizarea cu prag/țintă devine instrument de management. Registrul leagă, unde există, fiecare domeniu de reperele OMS, ONU (SDG), UE și naționale aplicabile.');
 
+      // ── Nota UrbanX (IVU) — standard transversal în orice raport ──
+      try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
+
       D.chapter(chapN + '. Limitări și disclaimer'); chapN++;
       D.P('Registrul documentează metodologia și sursele; valorile per-UAT se calculează în modulele dedicate și au, după caz, caracter orientativ (în special indicatorii compoziți și proxy, marcați ca atare). Datele live (aer, trafic, POI) depind de disponibilitatea și acoperirea surselor deschise (OpenAQ, OSM), care variază teritorial. Indicatorii nu substituie studiile de specialitate avizate de proiectanți atestați; au rol de pre-analiză și de tablou de bord pentru decizie. Validarea oficială revine documentațiilor de urbanism și studiilor de fundamentare elaborate conform Legii 350/2001.');
 

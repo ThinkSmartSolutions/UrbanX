@@ -180,6 +180,24 @@
       ov.appendChild(m); document.body.appendChild(ov);
       _render();
     },
+    // ── Secțiune IVU reutilizabilă în ORICE PDF (_makeStratDoc) ──────────────
+    // Injectează un capitol „Nota UrbanX (IVU)": scor + formulă + grafic pe
+    // dimensiuni + benchmark european. Apelabilă din orice generator de raport,
+    // teritorial sau de parcelă (contextul UAT al amplasamentului).
+    renderSection: function (D, cityKey) {
+      try {
+        if (!D || !(G._UrbanRank && G._UrbanRank.renderChapter)) return false;
+        var db = G._RO_CITIES_DB || {};
+        var key = cityKey || (G.TCI && G.TCI.cityKey);
+        var city = (db[key]) || (G._TCIMasterplanPDF && G._TCIMasterplanPDF._resolveCity && G._TCIMasterplanPDF._resolveCity(key)) || null;
+        if (!city) return false;
+        if (!city.key) city.key = key;
+        var pred = {};
+        try { if (G._PredEngine && G._PredEngine.calc) pred = G._PredEngine.calc(city) || {}; } catch (e) {}
+        G._UrbanRank.renderChapter(D, pred, city);
+        return true;
+      } catch (e) { console.warn('[IVU renderSection]', e); return false; }
+    },
     tab: function (t) { _tab = t; _render(); },
     show: function (k) { _active = k; _tab = 'card'; _render(); },
     add: function () { var s = document.getElementById('ivu-add'); if (s && s.value && _sel.indexOf(s.value) < 0 && _sel.length < 4) _sel.push(s.value); _tab = 'compare'; _render(); },

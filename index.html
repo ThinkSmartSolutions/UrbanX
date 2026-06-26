@@ -1278,6 +1278,8 @@ document.addEventListener('click', function(){
 
   <!-- UAT activ -->
   <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
+  <!-- IVU — Indicele de Vitalitate Urbană (standard transversal, lângă UAT) -->
+  <button class="tb-btn" onclick="window.UrbanXIVU&&window.UrbanXIVU.open()" title="IVU — Indicele de Vitalitate Urbană (Score Card + comparator)" style="border-color:rgba(16,185,129,.45);color:#6ee7b7;display:flex;align-items:center;gap:4px;font-weight:700">🏆 IVU</button>
 
   <div class="spacer"></div>
   <!-- Ascunde/afișează panel lateral — desktop (#12 audit) -->
@@ -1424,12 +1426,7 @@ document.addEventListener('click', function(){
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
 <div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:12px;padding:10px;min-width:280px;max-height:85vh;overflow-y:auto;z-index:9000;box-shadow:0 12px 40px rgba(0,0,0,.7)">
   <!-- TCI (Proiecție Urbanistică) mutat în meniul UrbanX Pro — nu mai apare în Rapoarte -->
-  <!-- IVU — Indicele de Vitalitate Urbană (City Intelligence & Comparator) -->
-  <button onclick="window.UrbanXIVU&&window.UrbanXIVU.open();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(110,231,183,.07));border:1px solid rgba(16,185,129,.4);border-radius:8px;color:#6ee7b7;padding:9px 10px;cursor:pointer;font-size:11px;font-weight:800;margin-bottom:8px">
-    <span style="font-size:17px">🏆</span>
-    <div><div>IVU — Indicele de Vitalitate Urbană <span style="font-size:8px;background:rgba(16,185,129,.2);padding:1px 5px;border-radius:8px">powered by UrbanX</span></div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">Score Card explicabil · de ce nota · catalog comparator între orașe</div></div>
-    <span style="margin-left:auto;opacity:.5">▸</span>
-  </button>
+  <!-- IVU mutat în topbar lângă UAT (standard transversal) — nu mai apare în Rapoarte -->
   <!-- Hartă conexiuni -->
   <button onclick="openStudyMap();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(99,102,241,.08));border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">
     <span style="font-size:16px">🗺</span>
@@ -2796,7 +2793,7 @@ setInterval(()=>{
   <script src="js/urbanx-energy.js?v=20260617"></script><!-- energie & climat -->
   <script src="js/urbanx-resources.js?v=20260617"></script><!-- apa, seceta & economie circulara -->
   <script src="js/urbanx-rank.js?v=20260617h"></script><!-- nota/clasament UrbanX (+toate modulele) -->
-  <script src="js/urbanx-ivu.js?v=20260626ivu"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
+  <script src="js/urbanx-ivu.js?v=20260626ivu2"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
   <script src="js/tci-risk-module.js?v=20260624A"></script>
   <script src="js/tci-strategic-doc.js?v=20260624D"></script>
   <script src="js/tci-strategic-masterplan-content.js?v=20260624D"></script>
@@ -6239,7 +6236,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urban-models/superbloc.js?v=20260624vis"></script>
     <script src="js/urban-models/models-extra.js?v=20260625net"></script>
     <script src="js/indices-report.js?v=20260625logo"></script>
-    <script src="js/indicators-registry.js?v=20260626rg4"></script>
+    <script src="js/indicators-registry.js?v=20260626rg5"></script>
     <script src="js/risk-sim-seismic.js?v=20260626iso"></script>
     <script src="js/risk-sim-flood.js?v=20260625clar"></script>
     <script src="js/risk-sim-shelters.js?v=20260625popup"></script>
