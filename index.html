@@ -3406,6 +3406,16 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     </button>
     <button onclick="window._showInfoDrawer('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
+  <!-- Profil climatic (Open-Meteo ERA5) -->
+  <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
+    <button onclick="window._ClimateEngine&&window._ClimateEngine.openPanel();_closeAllMenusAndOverlay()"
+      style="flex:1;text-align:left;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);color:#93c5fd;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;font-weight:700;min-height:44px;font-family:inherit"
+      onmouseover="this.style.background='rgba(37,99,235,.22)'" onmouseout="this.style.background='rgba(37,99,235,.12)'">
+      🌦 Profil Climatic & Studiu (SECAP)
+      <div style="font-size:10px;color:rgba(147,197,253,.65)">temperaturi, precipitații, grade-zile, zile tropicale · date reale Open-Meteo</div>
+    </button>
+    <button onclick="window._showInfoDrawer('clima')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(37,99,235,.25);color:#93c5fd;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+  </div>
 
   <!-- ═══ PROIECTARE & LOTIZARE ═══ -->
   <div style="padding:6px 8px 3px;font-size:10px;color:rgba(168,85,247,.55);font-weight:700;
@@ -3957,6 +3967,13 @@ const _INFO_DATA = {
     desc:'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii (demografie, indici compoziți, modele spațiale, mediu, mobilitate, infrastructură, risc, imobiliar), fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (IVU).',
     tip:'Documentează CE se măsoară, CUM și DIN CE sursă — baza de transparență a platformei.',
     source:'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
+  },
+  'clima': {
+    icon:'🌦', title:'Profil Climatic & Studiu (SECAP)', subtitle:'Date reale Open-Meteo (reanaliză ERA5)',
+    badge:'TERITORIAL · CLIMĂ & ADAPTARE', badgeColor:'#2563eb',
+    desc:'Caracterizează regimul climatic al UAT din date publice reale (Open-Meteo / Copernicus ERA5, normală 2019–2023): temperaturi și precipitații medii lunare, grade-zile de încălzire/răcire (HDD/CDD), profil sezonier, zile tropicale și de îngheț, indice de confort climatic. Generează un studiu PDF ≥10 pag cu implicații energetice (bază SECAP), adaptare la căldură și gospodărirea apelor pluviale.',
+    tip:'Fundamentează SECAP, eficiența energetică (nZEB) și măsurile de adaptare (infrastructură verde-albastră). Pentru proiectare se folosesc datele oficiale ANM.',
+    source:'Open-Meteo · Copernicus C3S ERA5 · EN ISO 15927 (grade-zile) · IPCC AR6',
   },
   'ivu': {
     icon:'🏆', title:'IVU — Indicele de Vitalitate Urbană', subtitle:'Score Card explicabil + catalog comparator',
@@ -6286,6 +6303,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/risk-sim-shelters.js?v=20260625popup"></script>
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260626ivu"></script>
+    <script src="js/urbanx-climate.js?v=20260626clima"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
 </body>
 </html>
