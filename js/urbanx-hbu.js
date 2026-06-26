@@ -72,11 +72,26 @@
   }
 
   // ── Studiu PDF (≥10 pag) ─────────────────────────────────────────────────
-  function generatePDF(cityKey) {
+  // captură REALĂ a hărții Mapbox cu amplasamentul marcat
+  async function _captureMap(lat, lon) {
+    var m = G.map; if (!m || !m.getCanvas) return null;
+    function cleanup() { try { if (m.getLayer('hbu-site-pt')) m.removeLayer('hbu-site-pt'); } catch (e) {} try { if (m.getSource('hbu-site-src')) m.removeSource('hbu-site-src'); } catch (e) {} }
+    try {
+      cleanup();
+      m.addSource('hbu-site-src', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: {} } });
+      m.addLayer({ id: 'hbu-site-pt', type: 'circle', source: 'hbu-site-src', paint: { 'circle-radius': 10, 'circle-color': 'rgba(217,119,6,0.35)', 'circle-stroke-color': '#fbbf24', 'circle-stroke-width': 3 } });
+      m.jumpTo({ center: [lon, lat], zoom: 15.4, pitch: 0, bearing: 0 });
+      await new Promise(function (res) { var done = false; function f() { if (!done) { done = true; res(); } } m.once('idle', f); setTimeout(f, 2400); });
+      var url = m.getCanvas().toDataURL('image/jpeg', 0.85); cleanup(); return url;
+    } catch (e) { cleanup(); return null; }
+  }
+
+  async function generatePDF(cityKey) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
     var R = compute(cityKey), x = R.x, f = R.fin;
     G.ss && G.ss('🏗 Generez studiul de reconversie (HBU)…');
+    var mapImg = null; try { mapImg = await _captureMap(x.lat, x.lon); } catch (e) {}
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: 'STUDIU DE RECONVERSIE URBANĂ', cityName: x.name, accent: [146, 64, 14] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
@@ -123,6 +138,20 @@
       return [s.n, s.score + '/100', i === 0 ? 'OPTIM' : i < 3 ? 'recomandat' : s.score >= 50 ? 'posibil' : 'nerecomandat'];
     }), [CW * 0.5, CW * 0.2, CW * 0.3]);
     D.P('Primele trei funcțiuni clasate constituie scenariile recomandate; ele reflectă potrivirea cu localizarea și cu cererea de piață. Funcțiunile cu scor sub 50 sunt nerecomandate pentru acest amplasament, fie din cauza localizării nepotrivite, fie a cererii insuficiente.');
+
+    // hartă reală a amplasamentului
+    if (mapImg) {
+      try {
+        D.chapter('Localizarea amplasamentului');
+        D.P('Amplasamentul analizat este marcat pe hartă (●) în contextul țesutului urban. Localizarea — centralitate ' + R.centr + '/100, accesibilitate ' + R.access + '/100 — determină ierarhia funcțiunilor de reconversie din capitolul anterior.');
+        var iw = CW, ih = Math.round(iw * 0.6); if (D.ensure) D.ensure(ih + 12);
+        var yy = (D.y != null ? D.y : 60);
+        pdf.addImage(mapImg, 'JPEG', D.dims.ML, yy, iw, ih, '', 'FAST');
+        pdf.setDrawColor(146, 64, 14); pdf.setLineWidth(0.4); pdf.rect(D.dims.ML, yy, iw, ih, 'S');
+        if (D.setY) D.setY(yy + ih + 2);
+        if (D.source) D.source('Hartă amplasament (●) · © Mapbox, © OpenStreetMap');
+      } catch (e) {}
+    }
 
     D.chapter('Analiza financiară a scenariului recomandat');
     if (D.table) D.table(['Indicator', 'Valoare'], [
