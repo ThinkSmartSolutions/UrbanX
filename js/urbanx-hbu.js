@@ -102,27 +102,74 @@
     } catch (e) { cleanup(); return null; }
   }
 
-  async function generatePDF(cityKey) {
+  var _PROXY = (G._PROXY_URL || G._PROXY_BASE || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+  // captură vecinătate imediată: dotări OSM <500m colorate pe tip (reutilizăm logica cardurilor POI)
+  async function _captureNeighborhood(lat, lon) {
+    var m = G.map; if (!m || !m.getCanvas || !G.turf) return null;
+    var TYPES = [
+      { f: '[amenity=school]', c: '#f59e0b', k: 'școală' }, { f: '[amenity~"^(hospital|clinic)$"]', c: '#ef4444', k: 'sănătate' },
+      { f: '[highway=bus_stop]', c: '#60a5fa', k: 'transport' }, { f: '[railway~"^(tram_stop|station)$"]', c: '#3b82f6', k: 'tren/tramvai' },
+      { f: '[leisure=park]', c: '#22c55e', k: 'parc' }, { f: '[shop=supermarket]', c: '#06b6d4', k: 'comerț' }
+    ];
+    var q = '[out:json][timeout:25];(' + TYPES.map(function (t) { return 'nwr(around:500,' + lat + ',' + lon + ')' + t.f + ';'; }).join('') + ');out center tags;';
+    var feats = [], counts = {};
+    try {
+      var resp = await fetch(_PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
+      var j = await resp.json(); var els = (j && j.elements) || [];
+      els.forEach(function (el) {
+        var t = el.tags || {}; var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+        if (la == null) return;
+        var col = '#94a3b8', kind = 'dotare';
+        if (t.amenity === 'school') { col = '#f59e0b'; kind = 'școală'; } else if (t.amenity === 'hospital' || t.amenity === 'clinic') { col = '#ef4444'; kind = 'sănătate'; }
+        else if (t.highway === 'bus_stop' || t.railway) { col = '#60a5fa'; kind = 'transport'; } else if (t.leisure === 'park') { col = '#22c55e'; kind = 'parc'; } else if (t.shop === 'supermarket') { col = '#06b6d4'; kind = 'comerț'; }
+        counts[kind] = (counts[kind] || 0) + 1;
+        feats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [lo, la] }, properties: { c: col, n: t.name || '' } });
+      });
+    } catch (e) {}
+    var ids = ['hbu-nb-pt', 'hbu-nb-lb', 'hbu-nb-site'], srcs = ['hbu-nb-src', 'hbu-nb-site-src'];
+    function cln() { ids.forEach(function (i) { try { if (m.getLayer(i)) m.removeLayer(i); } catch (e) {} }); srcs.forEach(function (s) { try { if (m.getSource(s)) m.removeSource(s); } catch (e) {} }); }
+    try {
+      cln();
+      m.addSource('hbu-nb-src', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      m.addSource('hbu-nb-site-src', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: {} } });
+      m.addLayer({ id: 'hbu-nb-pt', type: 'circle', source: 'hbu-nb-src', paint: { 'circle-radius': 5, 'circle-color': ['get', 'c'], 'circle-stroke-color': '#0a0e1f', 'circle-stroke-width': 1.3, 'circle-opacity': 0.92 } });
+      m.addLayer({ id: 'hbu-nb-lb', type: 'symbol', source: 'hbu-nb-src', layout: { 'text-field': ['get', 'n'], 'text-size': 8.5, 'text-offset': [0, 1], 'text-anchor': 'top', 'text-allow-overlap': false }, paint: { 'text-color': '#e5e7eb', 'text-halo-color': '#0a0e1f', 'text-halo-width': 1.3 }, minzoom: 14.5 });
+      m.addLayer({ id: 'hbu-nb-site', type: 'circle', source: 'hbu-nb-site-src', paint: { 'circle-radius': 9, 'circle-color': 'rgba(217,119,6,0.4)', 'circle-stroke-color': '#fbbf24', 'circle-stroke-width': 3 } });
+      m.jumpTo({ center: [lon, lat], zoom: 15.2, pitch: 0, bearing: 0 });
+      await new Promise(function (res) { var done = false; function ff() { if (!done) { done = true; res(); } } m.once('idle', ff); setTimeout(ff, 2400); });
+      var url = m.getCanvas().toDataURL('image/jpeg', 0.85); cln();
+      return { url: url, counts: counts, total: feats.length };
+    } catch (e) { cln(); return null; }
+  }
+
+  async function generatePDF(cityKey, mode) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
+    var territorial = (mode === 'T');
+    var PC = (G._ParcelCtx && !territorial) ? G._ParcelCtx.get(cityKey) : null;
+    var onParcel = !territorial; // studiu PUNCTUAL (parcelă + zona ei)
     var R = compute(cityKey), x = R.x, f = R.fin;
-    G.ss && G.ss('🏗 Generez studiul de reconversie (HBU)…');
+    G.ss && G.ss('🏗 Generez studiul de reconversie (HBU)' + (territorial ? ' — teritorial' : ' — parcelă/zonă') + '…');
     var mapImg = null; try { mapImg = await _captureMap(x.lat, x.lon); } catch (e) {}
+    // captură vecinătate imediată (dotări <500m) pentru studiul de parcelă
+    var nbImg = null; if (onParcel && PC && PC.lat) { try { nbImg = await _captureNeighborhood(PC.lat, PC.lon); } catch (e) {} }
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    var D = G._makeStratDoc(pdf, { docTitle: 'STUDIU DE RECONVERSIE URBANĂ', cityName: x.name, accent: [146, 64, 14] });
+    var D = G._makeStratDoc(pdf, { docTitle: territorial ? 'STUDIU DE RECONVERSIE URBANĂ — TERITORIAL' : 'STUDIU DE RECONVERSIE URBANĂ — PARCELĂ', cityName: x.name, accent: [146, 64, 14] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
     D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
     pdf.setFillColor(28, 18, 8); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(146, 64, 14); pdf.rect(0, 60, W, 1.4, 'F');
     try { if (G._drawUrbanxLogo) { G._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
     pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · HBU — HIGHEST & BEST USE', W / 2, 44, { align: 'center' });
-    pdf.setTextColor(255, 255, 255); pdf.setFontSize(21); pdf.text('STUDIU DE RECONVERSIE URBANĂ', W / 2, 88, { align: 'center' });
-    pdf.setTextColor(251, 191, 36); pdf.setFontSize(13); pdf.text(D.S2(x.name + (x.hasParcel ? ' · amplasament selectat' : '')), W / 2, 102, { align: 'center' });
+    pdf.setTextColor(255, 255, 255); pdf.setFontSize(21); pdf.text('STUDIU DE RECONVERSIE URBANĂ', W / 2, 84, { align: 'center' });
+    pdf.setTextColor(245, 158, 11); pdf.setFontSize(11); pdf.text(territorial ? 'Analiză teritorială — UAT' : 'Analiză punctuală — parcelă și zona din care face parte', W / 2, 93, { align: 'center' });
+    var _subc = territorial ? x.name : (x.name + (PC && PC.nrcad ? ' · CF/cad. ' + PC.nrcad : '') + (PC && PC.zone && PC.zone.utrNr ? ' · UTR ' + PC.zone.utrNr : ''));
+    pdf.setTextColor(251, 191, 36); pdf.setFontSize(13); pdf.text(D.S2(_subc), W / 2, 103, { align: 'center' });
     pdf.setTextColor(200, 170, 120); pdf.setFontSize(11); pdf.text('Funcțiune optimă: ' + R.top.n + ' · ROI estimat ' + N(f.roi) + '%', W / 2, 114, { align: 'center' });
     // panou copertă — structura studiului + reperele cheie (fără pagină parțială)
     var cy0 = 134;
     pdf.setDrawColor(146, 64, 14); pdf.setLineWidth(0.4); pdf.setFillColor(40, 26, 10);
     pdf.roundedRect(26, cy0, W - 52, 92, 3, 3, 'FD');
-    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('STUDIU DE RECONVERSIE URBANĂ (HBU)', W / 2, cy0 + 9, { align: 'center' });
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text(territorial ? 'STUDIU TERITORIAL DE RECONVERSIE (HBU)' : 'STUDIU DE PARCELĂ — RECONVERSIE (HBU)', W / 2, cy0 + 9, { align: 'center' });
     pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(220, 205, 180);
     var capLines = ['Analiză de reconversie pe metodologia Highest & Best Use (IVS/ANEVAR):', 'profil sit · regim urbanistic · cele 4 teste HBU · scor de compatibilitate pentru', '12 funcțiuni · analiză financiară (GDV/CAPEX/NPV/ROI) și sensibilitate · constrângeri', 'și due diligence · patrimoniu industrial · etapizare · finanțare · monitorizare · Nota UrbanX.'];
     capLines.forEach(function (l, i) { pdf.text(l, W / 2, cy0 + 18 + i * 6, { align: 'center' }); });
@@ -169,6 +216,84 @@
       } catch (e) {}
     }
 
+    // ── SECȚIUNE PUNCTUALĂ: date parcelă + regimul urbanistic al zonei (doar studiul de parcelă) ──
+    if (onParcel && PC) {
+      var z = PC.zone || {};
+      D.chapter('Identificarea parcelei și a zonei');
+      D.P('Studiul de față este PUNCTUAL: analizează parcela selectată și ZONA (unitatea teritorială de referință — UTR / subzona) din care face parte, nu întregul teritoriu administrativ. Spre deosebire de studiul teritorial, aici reglementările și indicatorii sunt cei aplicabili efectiv parcelei, iar concluziile privesc strict acest amplasament.');
+      if (D.table) D.table(['Atribut parcelă', 'Valoare'], [
+        ['Identificator cadastral (CF/nr. cad.)', PC.nrcad || 'neidentificat (selectați parcela)'],
+        ['Suprafață', PC.area ? N(PC.area) + ' mp' : '—'],
+        ['Coordonate (centroid)', PC.lat != null ? N(PC.lat, 5) + '°N, ' + N(PC.lon, 5) + '°E' : '—'],
+        ['Perimetru', PC.shape && PC.shape.perimetru ? N(PC.shape.perimetru) + ' m' : '—'],
+        ['Deschidere (latura max.)', PC.shape && PC.shape.latura_max ? N(PC.shape.latura_max) + ' m' : '—'],
+        ['Indice de compactare (1=cerc)', PC.shape && PC.shape.compactare != null ? N(PC.shape.compactare, 2) : '—'],
+        ['UTR / zonă funcțională', (z.utrNr || '—') + (z.code ? ' · ' + z.code : '') + (z.denumire ? ' — ' + z.denumire : '')]
+      ], [CW * 0.5, CW * 0.5]);
+
+      D.chapter('Regimul urbanistic al parcelei (PUG)');
+      if (z.pot != null || z.cut != null || z.hmax != null) {
+        D.P('Indicatorii de mai jos sunt extrași din regulamentul local de urbanism (RLU/PUG) pentru zona din care face parte parcela și constituie cadrul în care se testează admisibilitatea legală a funcțiunilor de reconversie (Testul 1 HBU).');
+        if (D.table) D.table(['Indicator urbanistic', 'Valoare reglementată'], [
+          ['POT maxim', z.pot != null ? N(z.pot) + ' %' : 'nereglementat în date'],
+          ['CUT maxim', z.cut != null ? N(z.cut, 2) : 'nereglementat în date'],
+          ['Înălțime maximă', z.hmax != null ? N(z.hmax, 1) + ' m' : '—'],
+          ['Regim de înălțime', z.regim || (z.niv ? 'cca. P+' + Math.max(0, (z.niv - 1)) : '—')],
+          ['Retragere frontală', z.retragere_fata || '—'],
+          ['Retragere laterală', z.retragere_laterala || '—'],
+          ['Retragere posterioară', z.retragere_spate || '—'],
+          ['Spații verzi minime', z.spatii_verzi_pct != null ? N(z.spatii_verzi_pct) + ' %' : '—']
+        ], [CW * 0.5, CW * 0.5]);
+        if (z.utilizari_admise) D.P('Utilizări admise: ' + z.utilizari_admise);
+        if (z.utilizari_conditionate) D.P('Utilizări admise cu condiționări: ' + z.utilizari_conditionate);
+        if (z.utilizari_interzise) D.P('Utilizări interzise: ' + z.utilizari_interzise);
+        if (D.source) D.source('Sursă reglementări: ' + (z.sursa || 'RLU/PUG al UAT') + ' · indicatori aplicabili zonei parcelei');
+        // edificabil teoretic pe ACEASTĂ parcelă
+        if (PC.edif && PC.area) {
+          D.chapter('Edificabilul teoretic pe parcelă');
+          D.P('Pornind de la suprafața parcelei (' + N(PC.area) + ' mp) și de la indicatorii zonei, capacitatea maximă de edificare se estimează astfel:');
+          D.formula && D.formula('Amprentă la sol și arie construită', 'Amprenta = POT × S_teren ; ADC = CUT × S_teren', 'POT = procent de ocupare a terenului; CUT = coeficient de utilizare; S_teren = suprafața parcelei');
+          var er = [];
+          if (PC.edif.amprenta != null) er.push(['Amprentă maximă la sol (POT)', N(PC.edif.amprenta) + ' mp']);
+          if (PC.edif.adc != null) er.push(['Arie desfășurată construită maximă (CUT)', N(PC.edif.adc) + ' mp']);
+          if (PC.edif.niv) er.push(['Număr orientativ de niveluri', 'cca. ' + PC.edif.niv]);
+          if (D.table && er.length) D.table(['Capacitate de edificare', 'Estimare pe parcelă'], er, [CW * 0.6, CW * 0.4]);
+          D.P('Aceste valori sunt plafoane teoretice; capacitatea efectiv valorificabilă depinde de forma și deschiderea parcelei, de retrageri, de accese și de constrângerile tehnice. Analiza financiară din capitolul următor calibrează scenariul recomandat pe acest edificabil.');
+        }
+      } else {
+        D.P('Regulamentul urbanistic detaliat (POT/CUT/regim) nu este disponibil în datele platformei pentru zona acestei parcele' + (z.utrNr ? ' (UTR ' + z.utrNr + ')' : '') + '. Se recomandă obținerea certificatului de urbanism, care stabilește oficial reglementările aplicabile. Restul analizei HBU rămâne valabil ca pre-orientare.');
+      }
+
+      // vecinătate imediată (dotări <500m) — captură + bilanț (reutilizarea straturilor POI)
+      if (nbImg && nbImg.url) {
+        D.chapter('Vecinătatea imediată — dotări la sub 500 m');
+        D.P('Accesibilitatea la dotări în proximitate este un factor direct al celei mai bune utilizări: o parcelă bine deservită susține funcțiuni rezidențiale și mixte, în timp ce deficitul de dotări orientează către alte utilizări. Harta marchează amplasamentul (●) și dotările identificate în jur (date OpenStreetMap, rază 500 m).');
+        try {
+          var iw2 = CW, ih2 = Math.round(iw2 * 0.6); if (D.ensure) D.ensure(ih2 + 12);
+          var yy2 = (D.y != null ? D.y : 60);
+          pdf.addImage(nbImg.url, 'JPEG', D.dims.ML, yy2, iw2, ih2, '', 'FAST');
+          pdf.setDrawColor(146, 64, 14); pdf.setLineWidth(0.4); pdf.rect(D.dims.ML, yy2, iw2, ih2, 'S');
+          if (D.setY) D.setY(yy2 + ih2 + 2);
+          if (D.source) D.source('Dotări în rază de 500 m · © OpenStreetMap (interogare live)');
+        } catch (e) {}
+        var ck = Object.keys(nbImg.counts || {});
+        if (ck.length && D.barChart) D.barChart(ck.map(function (k, i) { var pal = [[245, 158, 11], [239, 68, 68], [96, 165, 250], [34, 197, 94], [6, 182, 212], [148, 163, 184]]; return [k, nbImg.counts[k], pal[i % pal.length]]; }), { title: 'Dotări identificate în proximitate (rază 500 m)', h: 44, source: 'OpenStreetMap — date reale' });
+      }
+
+      // restricții de patrimoniu / aviz pe ACEASTĂ parcelă (zona de protecție)
+      if (G._LMI && G._LMI.avizForParcel && PC.lat != null) {
+        try {
+          var av = await G._LMI.avizForParcel(PC.lat, PC.lon);
+          if (av && av.nota) {
+            D.chapter('Restricții de patrimoniu pe parcelă (avize)');
+            D.P(av.nota);
+            if (av.nivel && D.callout) D.callout('Nivel de avizare necesar', av.nivel);
+            if (av.monumente && av.monumente.length && D.table) D.table(['Monument în proximitate', 'Grupă', 'Distanță'], av.monumente.slice(0, 8).map(function (m) { return [m.nume || m.name || 'monument', (m.aviz && m.aviz.grupa) || '—', m.dist != null ? m.dist + ' m' : '—']; }), [CW * 0.56, CW * 0.18, CW * 0.26]);
+          }
+        } catch (e) {}
+      }
+    }
+
     D.chapter('Analiza financiară a scenariului recomandat');
     if (D.table) D.table(['Indicator', 'Valoare'], [
       ['Suprafață teren', N(x.area) + ' mp'],
@@ -197,9 +322,9 @@
     ], { title: 'Randament (ROI %) — analiză de sensibilitate', h: 44, source: 'Model HBU UrbanX' });
     D.P('Analiza folosește metoda valorii reziduale: din valoarea brută de dezvoltare (GDV) se scad costurile totale pentru a obține profitul și randamentul. Valorile sunt orientative, calibrate pe repere de piață românești; un ROI peste 15–20% indică un proiect atractiv pentru dezvoltatori, în timp ce un ROI sub pragul de risc poate justifica instrumente de sprijin public (regenerare urbană, parteneriat public-privat).');
 
-    // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 80-100 pag ──
+    // ── Corpul dezvoltat: teritorial (_HBU_DEEP, 100+ pag) sau parcelă (_HBU_DEEP_PARCEL, ~50 pag punctual) ──
     try {
-      var deep = G._HBU_DEEP || [];
+      var deep = territorial ? (G._HBU_DEEP || []) : (G._HBU_DEEP_PARCEL || G._HBU_DEEP || []);
       deep.forEach(function (ch) {
         if (!ch || !ch.title) return;
         D.chapter(ch.title);
@@ -332,7 +457,7 @@
     D.chapter('Surse și standarde');
     D.P('Metodologie HBU (Highest & Best Use) — Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR; Legea 350/2001 (urbanism); POR Axa 5 (regenerare urbană); PNRR; repere de cost și valoare de piață RO. Date amplasament: ' + (x.hasParcel ? N(x.lat, 4) + '°N, ' + N(x.lon, 4) + '°E' : 'centru UAT (selectați o parcelă pentru analiză punctuală)') + '. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Studiu_reconversie_HBU_' + (territorial ? 'teritorial_' : 'parcela_') + (x.name || 'UAT').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Studiu de reconversie generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }

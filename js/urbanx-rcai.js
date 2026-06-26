@@ -119,6 +119,33 @@
     D.chapter('Metodologia cercetării');
     D.P('Cercetarea integrează patru paliere de analiză: (1) documentară — bibliografie istorică și arheologică, repertorii, cronici; (2) cartografică — interpretarea și suprapunerea planurilor istorice (planuri de încartiruire, ridicări militare, planuri cadastrale) pe situația actuală; (3) arheologică — analiza siturilor din Repertoriul Arheologic Național (RAN), a monumentelor din Lista Monumentelor Istorice (LMI) și a cercetărilor anterioare din Cronica Cercetărilor Arheologice; (4) geomorfologică — relieful, terasele, hidrografia istorică și implicațiile lor pentru locuirea istorică și conservarea vestigiilor. Limitările sunt explicitate: accesul la unele surse poate fi parțial, iar estimările (în special stratigrafia) au caracter orientativ, prin analogie cu situri cercetate în proximitate.');
 
+    // ── SECȚIUNE PUNCTUALĂ: amplasamentul analizat + avize pe parcelă (doar raportul de parcelă) ──
+    if (mode !== 'T') {
+      var PC = G._ParcelCtx ? G._ParcelCtx.get(cityKey) : null;
+      D.chapter('Amplasamentul analizat');
+      D.P('Acest raport este PUNCTUAL: evaluează potențialul arheologic pentru amplasamentul (parcela) selectat și zona imediată din care face parte, nu pentru întregul teritoriu administrativ. Concluziile și recomandările de avizare privesc strict acest sit.');
+      if (PC && PC.hasParcel) {
+        if (D.table) D.table(['Atribut amplasament', 'Valoare'], [
+          ['Identificator cadastral (CF/nr. cad.)', PC.nrcad || 'neidentificat'],
+          ['Suprafață', PC.area ? N(PC.area) + ' mp' : '—'],
+          ['Coordonate (centroid)', PC.lat != null ? N(PC.lat, 5) + '°N, ' + N(PC.lon, 5) + '°E' : '—'],
+          ['UTR / zonă', (PC.zone && PC.zone.utrNr || '—') + (PC.zone && PC.zone.denumire ? ' — ' + PC.zone.denumire : '')]
+        ], [CW * 0.5, CW * 0.5]);
+      } else {
+        D.P('Nu a fost selectată o parcelă; analiza se raportează la zona centrală/coordonatele indicate. Pentru un raport pe parcelă, selectați amplasamentul pe hartă.');
+      }
+      // avize pe ACEST amplasament (zona de protecție a monumentelor)
+      if (G._LMI && G._LMI.avizForParcel && x.lat != null) {
+        try {
+          var av = await G._LMI.avizForParcel(x.lat, x.lon);
+          if (av && av.nota) {
+            D.P(av.nota);
+            if (av.nivel && D.callout) D.callout('Nivel de avizare necesar', av.nivel);
+          }
+        } catch (e) {}
+      }
+    }
+
     // ── DATE REALE: monumente și situri identificate (OSM heritage / LMI) ──
     D.chapter('Monumente și situri istorice identificate (date reale)');
     if (heritage && heritage.length) {
@@ -173,9 +200,9 @@
     // restricții și niveluri de avizare LMI (serviciu comun _LMI)
     try { if (G._LMI && G._LMI.renderSection) await G._LMI.renderSection(D, cityKey); } catch (e) {}
 
-    // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 100+ pag ──
+    // ── Corpul dezvoltat: teritorial (_RCAI_DEEP, 100+ pag) sau parcelă (_RCAI_DEEP_PARCEL, ~50 pag punctual) ──
     try {
-      var deep = G._RCAI_DEEP || [];
+      var deep = (mode === 'T') ? (G._RCAI_DEEP || []) : (G._RCAI_DEEP_PARCEL || G._RCAI_DEEP || []);
       deep.forEach(function (ch) {
         if (!ch || !ch.title) return;
         D.chapter(ch.title);
@@ -198,7 +225,7 @@
     D.chapter('Surse și standarde');
     D.P('OG 43/2000 (protejarea patrimoniului arheologic) · Legea 422/2001 (monumente istorice) · norme metodologice MCIN · Repertoriul Arheologic Național (RAN/CIMEC) · Lista Monumentelor Istorice (LMI) · Cronica Cercetărilor Arheologice · OpenStreetMap (situri istorice) · hărți istorice georeferențiate · date geomorfologice și hidrografice. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Raport_arheologic_RCAI_' + x.name.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Raport_arheologic_RCAI_' + (mode === 'T' ? 'teritorial_' : 'parcela_') + x.name.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Raport arheologic generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }

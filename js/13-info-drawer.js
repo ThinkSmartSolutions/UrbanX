@@ -666,10 +666,24 @@ const RAPORT_INFO = {
     ],
     nu: ['Document de pre-cercetare — nu înlocuiește cercetarea unui arheolog autorizat MCIN', 'Pentru raport pe o parcelă, folosește „RCAI Parcelă/Zonă" din meniul Rapoarte'],
   },
+  hbu_teritoriu: {
+    ico: '🏗', label: 'HBU Teritoriu — Reconversie (UAT)', badge: 'recomandat', badgeLabel: 'Strategic · teritorial', color: '217,119,6',
+    fn: "window._HBU&&window._HBU.generatePDF(window.TCI&&window.TCI.cityKey,'T')",
+    ce: 'Studiu TERITORIAL de reconversie urbană la nivelul întregului UAT: cadrul metodologic Highest & Best Use, profilul economic și de piață al orașului, ierarhia funcțiunilor de reconversie și politica de regenerare a siturilor subutilizate/industriale. Document amplu (100+ pagini), complementar celui de parcelă.',
+    dece: 'Fundamentează strategia de regenerare urbană din SIDU/Masterplan: ce tipuri de reconversie sunt prioritare în oraș, în ce zone și cu ce instrumente (POR, PNRR, captare de plusvaloare).',
+    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · Carta de la Leipzig',
+    output: [
+      { ico: '📊', txt: 'Ierarhia funcțiunilor de reconversie la nivel de oraș' },
+      { ico: '🗺', txt: 'Hărți, diagrame și indici teritoriali' },
+      { ico: '🏛', txt: 'Cadru legal, european și instrumente de finanțare' },
+      { ico: '🎯', txt: 'Politică de regenerare și monitorizare (100+ pagini)' }
+    ],
+    nu: ['Pentru analiza unei parcele anume folosește „HBU Parcelă" din meniul Rapoarte', 'Pre-analiză strategică — orientează deciziile, nu înlocuiește fezabilitatea'],
+  },
   hbu: {
-    ico: '🏗', label: 'Reconversie urbană (HBU)', badge: 'recomandat', badgeLabel: 'Investițional · regenerare', color: '217,119,6',
+    ico: '🏗', label: 'HBU Parcelă — Reconversie (punctual)', badge: 'recomandat', badgeLabel: 'Investițional · parcelă', color: '217,119,6',
     fn: "window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey)",
-    ce: 'Determină cea mai bună utilizare (Highest & Best Use) pentru un amplasament subutilizat sau industrial: evaluează 12 funcțiuni de reconversie cu scor de compatibilitate (localizare, accesibilitate, cerere, constrângeri) și o pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat.',
+    ce: 'Studiu PUNCTUAL de reconversie pentru parcela selectată și ZONA (UTR/subzona) din care face parte: regimul urbanistic real al parcelei (POT/CUT/Hmax/retrageri), edificabilul teoretic, cele 4 teste HBU aplicate pe amplasament, vecinătatea imediată (dotări <500m), scor pentru 12 funcțiuni și pre-analiză financiară (GDV/CAPEX/profit/ROI). Min. 50+ pagini.',
     dece: 'Fundamentează decizia de reconversie/achiziție și negocierile cu administrația sau investitorii, eliminând incertitudinea prin metodologia IVS/ANEVAR și repere de piață. Sprijină regenerarea urbană și densificarea în locul expansiunii periferice.',
     legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR',
     output: [
