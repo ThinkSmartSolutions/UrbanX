@@ -1442,7 +1442,7 @@ document.addEventListener('click', function(){
     <span style="font-size:16px">📋</span>
     <div><div>Registru Indicatori Urbani</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">Audit ≥10 pag · 8 domenii · definiție, formulă, sursă pe fiecare</div></div>
   </button>
-  <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
+  <button onclick="window._showInfoDrawer('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">① Analize de Bază</div>
@@ -3395,7 +3395,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       💶 Hartă Valori Imobiliare (€/mp)
       <div style="font-size:10px;color:rgba(134,239,172,.65)">Heatmap valoric pe hartă · rentă urbană · re-click = ascunde</div>
     </button>
-    <button onclick="infoDrawerOpen('valori')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.25);color:#34d399;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="window._showInfoDrawer('valori')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.25);color:#34d399;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
     <button onclick="window._ValueMap&&window._ValueMap.generatePDF();_closeAllMenusAndOverlay()"
@@ -3404,7 +3404,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       📄 Studiu Valori Imobiliare (PDF)
       <div style="font-size:10px;color:rgba(134,239,172,.55)">Raport ≥10 pag · metodă, hărți, predicții, surse, disclaimer</div>
     </button>
-    <button onclick="infoDrawerOpen('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="window._showInfoDrawer('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
 
   <!-- ═══ PROIECTARE & LOTIZARE ═══ -->
