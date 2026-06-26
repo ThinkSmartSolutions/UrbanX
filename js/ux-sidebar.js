@@ -72,14 +72,11 @@
       { label: 'Market — piața imobiliară (UAT)', moduleId: 'market' },
       { label: '💶 Hartă Valori Imobiliare (€/mp)', moduleId: 'valoriMap', info: 'valori' },
       { label: '📄 Studiu Valori Imobiliare (PDF)', moduleId: 'valoriPdf', info: 'valori_pdf' },
-      { label: '🏗 Reconversie urbană (HBU) & studiu', moduleId: 'hbu', info: 'hbu' },
-      { label: '💰 Analiză economică UAT (buget local)', moduleId: 'economie', info: 'economie' },
       { label: 'Carbon & emisii (UAT)', moduleId: 'carbon' },
       { label: 'Metodologie & surse de date', moduleId: 'metodologie' } ] },
     { id: 'mobilitate', label: 'Mobilitate', ico: '🚦', color: '#0EA5A5', items: [
       { label: 'Flux — studiu de trafic (calculator)', moduleId: 'mobility' } ] },
     { id: 'mediu', label: 'Mediu, climă & verde', ico: '🌿', color: '#639922', items: [
-      { label: '🌦 Profil Climatic & Studiu (SECAP)', moduleId: 'clima', info: 'clima' },
       { label: 'LOISIR — spații verzi & plămân urban', moduleId: 'loisir' },
       { label: 'UHI — insulă de căldură urbană', moduleId: 'uhi' },
       { label: 'Superbloc (model Barcelona)', moduleId: 'superbloc' } ] },
@@ -95,7 +92,11 @@
       { label: 'PMUD — mobilitate urbană (PDF)', moduleId: 'pmud' },
       { label: 'Portofoliu strategic 2025-2055', moduleId: 'portofoliu' },
       { label: 'Proiecție urbanistică 10/20/30 ani', moduleId: 'proiectie' },
-      { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' } ] },
+      { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' },
+      { sep: 'STUDII DE RANG SUPERIOR — Strategic Planning Suite' },
+      { label: '🌦 Climatică — SECAP & adaptare', moduleId: 'clima', info: 'clima' },
+      { label: '💰 Economică — buget & finanțe locale', moduleId: 'economie', info: 'economie' },
+      { label: '🏗 Reconversie urbană (HBU) ★', moduleId: 'hbu', info: 'hbu' } ] },
     { id: 'cetateni', label: 'Cetățeni & consultare', ico: '👥', color: '#1D9E75', items: [
       { label: 'Sesizare urbană', moduleId: 'sesizari' },
       { label: 'Hartă sesizări (pe/off)', moduleId: 'sesizari-map' },
@@ -137,6 +138,7 @@
           '<button class="uxsb-ghead' + (act ? ' active' : '') + '" style="' + (act ? 'border-left-color:' + g.color : '') + '" onclick="UXSidebar.toggleGroup(\'' + g.id + '\')">' +
           '<span class="uxsb-gico">' + g.ico + '</span><span class="uxsb-glabel">' + g.label + '</span><span class="uxsb-gchev">' + (act ? '▲' : '▼') + '</span></button>' +
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
+            if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + i.sep + '</div>';
             var ia = State.activeModule === i.moduleId;
             var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (i.info ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
             if (!i.info) return main;
