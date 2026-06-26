@@ -89,59 +89,122 @@
   function generatePDF(res, meta) {
     meta = meta || {};
     var Jc = (typeof jsPDF !== 'undefined') ? jsPDF : (window.jspdf && window.jspdf.jsPDF) || window.jsPDF; if (!Jc) { G.ss && ss('❌ jsPDF indisponibil'); return; }
-    var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
-    var F = 'DejaVuRO', W = 210, H = 297, today = new Date().toLocaleDateString('ro-RO');
     var N = function (x) { try { return Math.round(x).toLocaleString('ro-RO'); } catch (e) { return String(x); } };
-    var PURP = [124, 58, 237];
-    pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, 28, 'F'); pdf.setFillColor.apply(pdf, PURP); pdf.rect(0, 0, W, 3, 'F');
-    try { window._pdfStampLogo && window._pdfStampLogo(pdf, 7, 6, 17); } catch (e) {}
-    pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('URBANX FEASIBILITY · STUDIU DE FEZABILITATE', W / 2, 11, { align: 'center' });
-    pdf.setTextColor(255, 255, 255); pdf.setFontSize(15); pdf.text('Pro-forma dezvoltare imobiliară', W / 2, 20, { align: 'center' });
-    pdf.setTextColor(180, 170, 210); pdf.setFontSize(8); pdf.text((meta.site_name || 'Sit') + ' · ' + (meta.city || '') + ' · ' + today, W / 2, 25.5, { align: 'center' });
+    if (typeof window._makeStratDoc !== 'function') return _genSimpleFeaz(res, meta, Jc, N);
+    try {
+      var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var D = window._makeStratDoc(pdf, { docTitle: 'STUDIU DE FEZABILITATE', cityName: (meta.site_name || 'Sit'), accent: [124, 58, 237] });
+      var W = 210, ML = D.dims.ML, CW = D.dims.CW, F = 'DejaVuRO';
+      var u = res.urbanistic, c = res.costs, rv = res.revenue, rr = res.result;
+      D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+      pdf.setFillColor(14, 10, 30); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(124, 58, 237); pdf.rect(0, 60, W, 1.4, 'F');
+      try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+      pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · FEASIBILITY', W / 2, 44, { align: 'center' });
+      pdf.setTextColor(255, 255, 255); pdf.setFontSize(26); pdf.text('STUDIU DE FEZABILITATE', W / 2, 92, { align: 'center' });
+      pdf.setTextColor(196, 181, 253); pdf.setFontSize(14); pdf.text(D.S2((meta.site_name || 'Sit') + (meta.city ? ' · ' + meta.city : '')), W / 2, 104, { align: 'center' });
+      pdf.setTextColor(180, 170, 210); pdf.setFontSize(11); pdf.text('Pro-forma dezvoltare imobiliară · marjă ' + rr.margin_pct + '% · verdict: ' + res.verdict, W / 2, 116, { align: 'center' });
+      D.setSuppress && D.setSuppress(false);
 
-    var vc = res.verdict === 'favorabil' ? [34, 160, 90] : res.verdict === 'marginal' ? [200, 130, 20] : [200, 60, 40];
-    pdf.setFillColor.apply(pdf, vc); pdf.roundedRect(W - 56, 33, 44, 16, 2, 2, 'F'); pdf.setTextColor(255, 255, 255); pdf.setFont(F, 'bold'); pdf.setFontSize(13); pdf.text(res.result.margin_pct + '%', W - 34, 41, { align: 'center' }); pdf.setFontSize(6.5); pdf.text('marjă · ' + res.verdict, W - 34, 46, { align: 'center' });
+      D.chapter('1. Rezumat executiv');
+      D.P('Prezentul studiu evaluează fezabilitatea economică a unei dezvoltări imobiliare pe situl „' + (meta.site_name || 'analizat') + '", pe baza unei analize pro-forma (rezidual) ce confruntă valoarea dezvoltării finalizate (GDV) cu costurile totale de realizare. Rezultatul principal: o marjă de dezvoltare de ' + rr.margin_pct + '% și un profit estimat de ' + N(rr.profit) + ' EUR, încadrând proiectul în categoria „' + res.verdict + '".');
+      D.callout && D.callout('Verdict', 'Pragurile uzuale de decizie: marjă ≥ 20% (favorabil — risc acoperit), 12–20% (marginal — atenție la ipoteze), sub 12% (nefavorabil — risc neacoperit). Acest proiect: ' + rr.margin_pct + '% → ' + res.verdict + '.');
 
-    var y = 40;
-    function h(t) { pdf.setFillColor(243, 240, 252); pdf.rect(12, y - 4, W - 70, 7, 'F'); pdf.setTextColor.apply(pdf, PURP); pdf.setFont(F, 'bold'); pdf.setFontSize(10); pdf.text(t, 14, y + 1); y += 10; }
-    function kv(l, v) { pdf.setTextColor(90, 100, 120); pdf.setFont(F, 'normal'); pdf.setFontSize(9); pdf.text(l, 16, y); pdf.setTextColor(20, 30, 50); pdf.setFont(F, 'bold'); pdf.text(String(v), 110, y); y += 6; }
-    h('1. Capacitate edificabilă (din PUG)'); y = Math.max(y, 54);
-    kv('Suprafață teren', N(res.urbanistic.area_m2) + ' mp · CUT ' + res.urbanistic.cut + ' · POT ' + res.urbanistic.pot + '%');
-    kv('GBA maximă', N(res.urbanistic.max_gba) + ' mp · vandabil ' + N(res.urbanistic.net_sellable) + ' mp');
-    kv('Parcaje necesare', N(res.urbanistic.parking_slots) + ' locuri');
-    h('2. Costuri (EUR)');
-    kv('Construcție', N(res.costs.construction) + ' (' + res.costs.constr_rate + ' EUR/mp)');
-    kv('Parcaje + Soft costs', N(res.costs.parking) + ' + ' + N(res.costs.soft));
-    kv('Teren + Finanțare', N(res.costs.land) + ' + ' + N(res.costs.financing));
-    kv('COST TOTAL', N(res.costs.total) + ' EUR');
-    h('3. Venituri & rezultat (EUR)');
-    kv('Valoare dezvoltare (GDV)', N(res.revenue.gdv) + ' (' + N(res.revenue.price_per_m2) + ' EUR/mp)');
-    kv('PROFIT', N(res.result.profit) + ' EUR');
-    kv('Marjă / Randament', res.result.margin_pct + '% / ' + res.result.dev_yield_pct + '%');
-    kv('IRR (simplificat)', (res.result.irr_pct != null ? res.result.irr_pct + '%' : '—') + ' · valoare reziduală teren: ' + N(res.result.residual_land) + ' EUR');
+      D.chapter('2. Metodologie (analiza reziduală)');
+      D.P('Studiul aplică metoda reziduală de evaluare a dezvoltării, standard în analiza de fezabilitate imobiliară (RICS — Valuation of development property). Logica este: pornind de la valoarea de piață a produsului finit (GDV = suprafață vandabilă × preț unitar de piață), se scad toate costurile de realizare (construcție, parcaje, costuri „soft", finanțare) și profitul minim cerut de dezvoltator; ceea ce rămâne este valoarea maximă pe care proiectul o poate susține pentru achiziția terenului (valoarea reziduală a terenului).');
+      D.formula && D.formula('Profit și marjă de dezvoltare', 'Profit = GDV − Costuri totale ;  Marjă = Profit / GDV', 'GDV = suprafață vandabilă × preț €/mp');
+      D.P('Indicatorii de performanță calculați sunt: marja de dezvoltare (profit/GDV — măsoară „perna" de risc), randamentul dezvoltării (profit/cost total — eficiența capitalului angajat) și RIR/IRR simplificat (anualizat pe durata proiectului). Senzitivitatea rezultatului la variațiile de preț și de cost este testată într-o matrice bidimensională, esențială într-o piață volatilă.');
 
-    h('4. Analiză de senzitivitate (marjă %)');
-    var ws = (W - 24) / 6;
-    pdf.setFillColor(14, 26, 54); pdf.rect(12, y, W - 24, 6, 'F'); pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(6.6);
-    pdf.text('preț ↓ / cost →', 14, y + 4);
-    res.sensitivity.cost_var.forEach(function (cv, i) { pdf.text((cv > 0 ? '+' : '') + (cv * 100) + '%', 12 + ws * (i + 1) + 2, y + 4); }); y += 6;
-    res.sensitivity.matrix.forEach(function (row, ri) {
-      if (ri % 2 === 0) { pdf.setFillColor(244, 247, 251); pdf.rect(12, y, W - 24, 6, 'F'); }
-      pdf.setTextColor(60, 72, 94); pdf.setFont(F, 'bold'); pdf.setFontSize(6.6); pdf.text((row.price_delta > 0 ? '+' : '') + (row.price_delta * 100) + '%', 14, y + 4);
-      row.cells.forEach(function (m, ci) { pdf.setTextColor.apply(pdf, m >= 20 ? [30, 140, 60] : m >= 12 ? [200, 130, 20] : [200, 60, 40]); pdf.setFont(F, 'normal'); pdf.text(m + '%', 12 + ws * (ci + 1) + 2, y + 4); });
-      y += 6;
-    });
-    y += 4;
+      D.chapter('3. Date de intrare și ipoteze');
+      D.table && D.table(['Parametru', 'Valoare'], [
+        ['Suprafață teren', N(u.area_m2) + ' mp'],
+        ['CUT / POT (din PUG)', u.cut + ' / ' + u.pot + '%'],
+        ['Cost construcție unitar', N(c.constr_rate) + ' EUR/mp'],
+        ['Preț de piață (GDV)', N(rv.price_per_m2) + ' EUR/mp'],
+        ['Marjă-țintă (rezidual)', (res.inputs && res.inputs.target_margin != null ? Math.round(res.inputs.target_margin * 100) : 20) + '%'],
+      ], [CW * 0.5, CW * 0.5]);
+      D.P('Ipotezele de preț și cost sunt calibrate pe nivelurile de piață 2024–2025 și au caracter orientativ. Coeficienții urbanistici (CUT/POT) provin din regulamentul PUG aplicabil parcelei; ei determină plafonul de suprafață construibilă și, implicit, întregul model economic.');
 
-    var dy = H - 24;
-    pdf.setFillColor(40, 24, 60); pdf.rect(12, dy, W - 24, 16, 'F'); pdf.setDrawColor.apply(pdf, PURP); pdf.setLineWidth(0.4); pdf.rect(12, dy, W - 24, 16, 'S');
-    pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('⚠ Studiu de ORIENTARE — estimativ', W / 2, dy + 5, { align: 'center' });
-    pdf.setTextColor(210, 200, 225); pdf.setFont(F, 'normal'); pdf.setFontSize(7);
-    pdf.text(pdf.splitTextToSize('Costurile și prețurile sunt estimative (EUR/mp, 2024) și se învechesc rapid. Rezultatele NU înlocuiesc consultanța unui specialist imobiliar autorizat sau un studiu de fezabilitate detaliat. Prețul de piață real necesită date de tranzacții (ANCPI).', W - 30), W / 2, dy + 9.5, { align: 'center' });
+      D.chapter('4. Capacitatea edificabilă');
+      D.table && D.table(['Indicator', 'Valoare'], [
+        ['Suprafață construită desfășurată max. (GBA)', N(u.max_gba) + ' mp'],
+        ['Amprentă la sol max.', N(u.max_footprint) + ' mp'],
+        ['Suprafață vandabilă (net sellable)', N(u.net_sellable) + ' mp'],
+        ['Locuri de parcare necesare', N(u.parking_slots)],
+      ], [CW * 0.6, CW * 0.4]);
+      D.P('Suprafața desfășurată maximă rezultă din înmulțirea suprafeței terenului cu CUT, iar suprafața vandabilă se obține aplicând un coeficient de eficiență (raportul dintre aria utilă comercializabilă și aria desfășurată brută — tipic 80–85%, restul fiind circulații, ziduri, spații tehnice). Numărul de parcaje rezultă din normativul local și condiționează adesea soluția de subsol, cu impact major asupra costurilor.');
 
-    var fn = ('Feasibility_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
-    pdf.save(fn); G.ss && ss('✅ Studiu de fezabilitate generat'); return fn;
+      D.chapter('5. Bugetul de costuri');
+      D.table && D.table(['Categorie de cost', 'EUR'], [
+        ['Construcție (' + N(c.constr_rate) + ' EUR/mp)', N(c.construction)],
+        ['Parcaje', N(c.parking)],
+        ['Costuri soft (proiectare, avize, taxe, marketing)', N(c.soft)],
+        ['Teren', N(c.land)],
+        ['Finanțare (dobânzi pe perioada dezvoltării)', N(c.financing)],
+        ['COST TOTAL', N(c.total)],
+      ], [CW * 0.62, CW * 0.38]);
+      D.P('Costurile „soft" (proiectare, avize, taxe de autorizare, management, comisioane de vânzare, marketing) reprezintă tipic 12–20% din costul de construcție și sunt adesea subestimate. Costul de finanțare depinde de structura capital propriu/credit și de durata proiectului — orice întârziere în autorizare sau vânzare crește direct această componentă.');
+
+      D.chapter('6. Venituri și indicatori de rentabilitate');
+      D.table && D.table(['Indicator', 'Valoare'], [
+        ['Valoarea dezvoltării (GDV)', N(rv.gdv) + ' EUR'],
+        ['Preț unitar de piață', N(rv.price_per_m2) + ' EUR/mp'],
+        ['Profit', N(rr.profit) + ' EUR'],
+        ['Marjă de dezvoltare', rr.margin_pct + '%'],
+        ['Randamentul dezvoltării (dev yield)', rr.dev_yield_pct + '%'],
+        ['RIR / IRR (simplificat, anualizat)', (rr.irr_pct != null ? rr.irr_pct + '%' : '—')],
+      ], [CW * 0.6, CW * 0.4]);
+      D.P('Marja de ' + rr.margin_pct + '% reprezintă „perna" care absoarbe abaterile de cost și de preț față de ipoteze. Randamentul dezvoltării (' + rr.dev_yield_pct + '%) măsoară eficiența capitalului total angajat, iar RIR-ul anualizează profitul pe durata proiectului, permițând comparația cu randamentele altor investiții. Cu cât proiectul e mai lung, cu atât același profit absolut produce un RIR mai mic.');
+
+      D.chapter('7. Analiză de senzitivitate (marjă %)');
+      D.P('Matricea de mai jos arată cum variază marja de dezvoltare la modificarea simultană a prețului de vânzare (rânduri) și a costului de realizare (coloane). Este testul de stres central al studiului: un proiect robust rămâne favorabil pe o plajă largă de variații; unul fragil bascolează în zona nefavorabilă la abateri mici.');
+      if (D.table && res.sensitivity && res.sensitivity.matrix) {
+        var hdr = ['preț↓ / cost→'].concat(res.sensitivity.cost_var.map(function (cv) { return (cv > 0 ? '+' : '') + Math.round(cv * 100) + '%'; }));
+        var rows = res.sensitivity.matrix.map(function (row) {
+          return [(row.price_delta > 0 ? '+' : '') + Math.round(row.price_delta * 100) + '%'].concat(row.cells.map(function (m) { return m + '%'; }));
+        });
+        var cw0 = CW * 0.22, cwn = (CW - cw0) / res.sensitivity.cost_var.length;
+        D.table(hdr, rows, [cw0].concat(res.sensitivity.cost_var.map(function () { return cwn; })));
+      }
+      D.P('Interpretare: celulele cu marjă ≥ 20% indică scenarii confortabile, cele între 12–20% scenarii marginale, iar cele sub 12% scenarii de pierdere a pernei de risc. Dacă majoritatea celulelor sunt în zona favorabilă, proiectul este rezilient la volatilitatea pieței.');
+
+      D.chapter('8. Valoarea reziduală a terenului');
+      D.P('Aplicând metoda reziduală pentru marja-țintă, valoarea maximă pe care proiectul o poate susține pentru achiziția terenului este de ' + N(rr.residual_land) + ' EUR. Aceasta este suma peste care prețul terenului erodează profitul sub pragul acceptabil. Valoarea reziduală este instrumentul-cheie în negocierea achiziției: ea răspunde la întrebarea „cât pot plăti pe acest teren și să-mi păstrez marja-țintă?".');
+      D.P('Dacă prețul cerut de vânzător depășește valoarea reziduală, dezvoltatorul are trei opțiuni: renegocierea prețului, creșterea densității/valorii proiectului (dacă reglementarea permite), sau renunțarea. Astfel, studiul de fezabilitate devine fundamentul deciziei de achiziție, nu doar o validare ex-post.');
+
+      D.chapter('9. Structura de finanțare');
+      D.P('Un proiect imobiliar se finanțează tipic printr-o combinație de capital propriu (equity) și credit bancar (debt), în raport de 20–40% equity / 60–80% debt, cu un grad de îndatorare (LTC — loan-to-cost) limitat de bancă în funcție de risc. Costul finanțării din buget (' + N(c.financing) + ' EUR) reflectă dobânda pe tragerile de credit, eșalonată pe durata construcției și a vânzării.');
+      D.P('Indicatorii pe care îi urmărește finanțatorul sunt: LTC/LTV (gradul de acoperire cu credit), marja de dezvoltare (perna de risc), pre-vânzările (procentul de unități vândute „pe hârtie" înainte de finalizare, ce reduce riscul de absorbție) și acoperirea serviciului datoriei. O marjă de ' + rr.margin_pct + '% influențează direct accesul la credit și costul acestuia.');
+
+      D.chapter('10. Riscuri și factori de incertitudine');
+      D.bullets && D.bullets([
+        'Risc de piață — scăderea prețului de vânzare sau a ritmului de absorbție (testat în matricea de senzitivitate);',
+        'Risc de cost — creșterea prețurilor la materiale/manoperă peste estimare;',
+        'Risc de autorizare/durată — întârzieri care cresc costul de finanțare și amână veniturile;',
+        'Risc de finanțare — creșterea dobânzilor sau restrângerea creditării;',
+        'Risc de reglementare — modificări de CUT/POT sau condiționări la aprobarea PUZ.',
+      ]);
+      D.P('Gestionarea acestor riscuri se face prin marja de dezvoltare (perna), prin pre-vânzări, prin contracte de construcție cu preț fix și prin etapizarea proiectului. Un studiu de fezabilitate prudent folosește ipoteze conservatoare și verifică reziliența în scenariul pesimist al matricei de senzitivitate.');
+
+      D.chapter('11. Concluzii și recomandare de investiție');
+      D.P('Pe baza ipotezelor curente, proiectul prezintă o marjă de ' + rr.margin_pct + '% și un profit de ' + N(rr.profit) + ' EUR, fiind clasificat „' + res.verdict + '". ' + (res.verdict === 'favorabil' ? 'Recomandarea este de a continua, cu menținerea disciplinei de cost și a unei strategii de pre-vânzare care să confirme prețul de piață.' : res.verdict === 'marginal' ? 'Recomandarea este prudență: proiectul depinde de respectarea strictă a ipotezelor; se impun renegocierea terenului, optimizarea costurilor sau creșterea valorii prin calitate/densitate înainte de angajament.' : 'Recomandarea este reconsiderarea proiectului: marja nu acoperă riscul; sunt necesare renegocierea substanțială a terenului, regândirea programului sau abandonarea.'));
+      D.P('Decizia finală trebuie fundamentată pe validarea independentă a prețului de piață (date de tranzacții ANCPI, evaluare ANEVAR) și a costurilor de construcție (oferte de la antreprenori), precum și pe o analiză detaliată de cash-flow lunar pe durata proiectului.');
+
+      D.chapter('12. Limitări și disclaimer');
+      D.P('Studiul este ORIENTATIV, de fundamentare a deciziei. Costurile și prețurile sunt estimative (EUR/mp, calibrate pe 2024–2025) și se învechesc rapid. Rezultatele NU înlocuiesc consultanța unui specialist imobiliar autorizat, o evaluare ANEVAR sau un studiu de fezabilitate detaliat cu cash-flow lunar. Prețul de piață real necesită date de tranzacții (ANCPI), iar costurile de construcție necesită oferte ferme. RIR-ul este o aproximare simplificată, nu un calcul de flux de numerar actualizat complet.');
+
+      D.chapter('13. Surse, standarde și glosar');
+      D.P('RICS — „Valuation of development property" și „Financial viability in planning"; IVS — International Valuation Standards; date de piață imobiliară 2024–2025; indici de cost în construcții; ANCPI — date de tranzacții. Glosar: GDV = Gross Development Value (valoarea dezvoltării finalizate); GBA = Gross Buildable Area (suprafață desfășurată brută); marjă de dezvoltare = profit/GDV; valoare reziduală teren = sumă maximă susținută pentru achiziția terenului la marja-țintă; LTC/LTV = loan-to-cost / loan-to-value. Metodologie UrbanX · ThinkSmart Solutions.');
+
+      var fn = ('Studiu_Fezabilitate_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      window._buildStratTOC && window._buildStratTOC(D, 1);
+      pdf.save(fn); G.ss && ss('✅ Studiu de fezabilitate generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
+    } catch (e) { console.error('[Feaz PDF]', e); try { return _genSimpleFeaz(res, meta, Jc, N); } catch (e2) {} }
+  }
+  function _genSimpleFeaz(res, meta, Jc, N) {
+    var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' }); try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
+    var F = 'DejaVuRO', y = 22; pdf.setFont(F, 'bold'); pdf.setFontSize(14); pdf.text('Studiu de fezabilitate', 16, y); y += 10; pdf.setFont(F, 'normal'); pdf.setFontSize(10);
+    [['GDV', N(res.revenue.gdv) + ' EUR'], ['Cost total', N(res.costs.total) + ' EUR'], ['Profit', N(res.result.profit) + ' EUR'], ['Marjă', res.result.margin_pct + '%'], ['Verdict', res.verdict]].forEach(function (kv) { pdf.text(kv[0] + ': ' + kv[1], 16, y); y += 8; });
+    pdf.save('Feasibility_' + (meta.site_name || 'sit') + '.pdf');
   }
 
   G.Feaz = { compute: compute, generatePDF: generatePDF, CONSTR: CONSTR, DEFAULT_PRICE: DEFAULT_PRICE, EFFICIENCY: EFFICIENCY };
