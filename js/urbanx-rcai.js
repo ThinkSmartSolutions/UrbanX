@@ -32,11 +32,35 @@
         var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
         var dist = (la != null && G.turf) ? Math.round(G.turf.distance([lon, lat], [lo, la], { units: 'meters' })) : null;
         var tip = t.historic || (t.amenity === 'place_of_worship' ? (t.religion ? 'lăcaș de cult (' + t.religion + ')' : 'lăcaș de cult') : '') || t.tourism || t.heritage || 'obiectiv';
-        out.push({ name: nm, tip: tip, dist: dist, heritage: t.heritage || (t['ref:ro:lmi'] ? 'LMI ' + t['ref:ro:lmi'] : '') });
+        out.push({ name: nm, tip: tip, dist: dist, lat: la, lon: lo, heritage: t.heritage || (t['ref:ro:lmi'] ? 'LMI ' + t['ref:ro:lmi'] : '') });
       });
       out.sort(function (a, b) { return (a.dist || 1e9) - (b.dist || 1e9); });
       return out;
     } catch (e) { console.warn('[RCAI heritage]', e); return []; }
+  }
+
+  // captură REALĂ a hărții Mapbox cu monumentele și amplasamentul desenate
+  async function _captureMap(lat, lon, heritage) {
+    var m = G.map; if (!m || !m.getCanvas || !G.turf) return null;
+    var ids = ['rcai-her-pt', 'rcai-her-lb', 'rcai-site-pt'], srcs = ['rcai-her-src', 'rcai-site-src'];
+    function cleanup() { ids.forEach(function (i) { try { if (m.getLayer(i)) m.removeLayer(i); } catch (e) {} }); srcs.forEach(function (s) { try { if (m.getSource(s)) m.removeSource(s); } catch (e) {} }); }
+    try {
+      cleanup();
+      var pts = heritage.filter(function (h) { return h.lat; }).slice(0, 60).map(function (h) { return { type: 'Feature', geometry: { type: 'Point', coordinates: [h.lon, h.lat] }, properties: { n: h.name } }; });
+      var fc = { type: 'FeatureCollection', features: pts };
+      var site = { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: {} }] };
+      m.addSource('rcai-her-src', { type: 'geojson', data: fc });
+      m.addSource('rcai-site-src', { type: 'geojson', data: site });
+      m.addLayer({ id: 'rcai-her-pt', type: 'circle', source: 'rcai-her-src', paint: { 'circle-radius': 5, 'circle-color': '#f59e0b', 'circle-stroke-color': '#1a1206', 'circle-stroke-width': 1.5, 'circle-opacity': 0.95 } });
+      m.addLayer({ id: 'rcai-her-lb', type: 'symbol', source: 'rcai-her-src', layout: { 'text-field': ['get', 'n'], 'text-size': 9, 'text-offset': [0, 1], 'text-anchor': 'top', 'text-allow-overlap': false }, paint: { 'text-color': '#fde68a', 'text-halo-color': '#0a0e1f', 'text-halo-width': 1.4 }, minzoom: 12.5 });
+      m.addLayer({ id: 'rcai-site-pt', type: 'circle', source: 'rcai-site-src', paint: { 'circle-radius': 8, 'circle-color': '#ef4444', 'circle-stroke-color': '#fff', 'circle-stroke-width': 2.5 } });
+      var all = pts.concat([{ geometry: { coordinates: [lon, lat] } }]);
+      try { var bb = G.turf.bbox({ type: 'FeatureCollection', features: pts.length ? pts.concat([site.features[0]]) : [site.features[0]] }); m.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]], { padding: 70, maxZoom: 15.5, duration: 0 }); } catch (e) { m.jumpTo({ center: [lon, lat], zoom: 13.5 }); }
+      await new Promise(function (res) { var done = false; function f() { if (!done) { done = true; res(); } } m.once('idle', f); setTimeout(f, 2600); });
+      var url = m.getCanvas().toDataURL('image/jpeg', 0.85);
+      cleanup();
+      return url;
+    } catch (e) { cleanup(); console.warn('[RCAI map]', e); return null; }
   }
 
   async function generatePDF(cityKey, mode) {
@@ -45,6 +69,7 @@
     var x = _ctx(cityKey, mode);
     G.ss && G.ss('🏺 Aduc monumentele reale (OSM) și generez RCAI…');
     var heritage = await _fetchHeritage(x.lat, x.lon, mode === 'T' ? 12000 : 2500);
+    var mapImg = null; try { mapImg = await _captureMap(x.lat, x.lon, heritage); } catch (e) {}
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: 'RAPORT DE CERCETARE ARHEOLOGICĂ', cityName: x.name, accent: [180, 83, 9] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
@@ -80,6 +105,17 @@
     if (heritage && heritage.length) {
       D.P('În urma interogării surselor cartografice deschise (OpenStreetMap — straturile historic/heritage, lăcașe de cult, obiective de patrimoniu), în ' + (mode === 'T' ? 'teritoriul ' + x.name : 'proximitatea amplasamentului (rază ~2,5 km)') + ' au fost identificate ' + heritage.length + ' obiective de patrimoniu și repere istorice. Acestea constituie contextul concret de patrimoniu al zonei și fundamentează evaluarea potențialului arheologic. Lista include monumente, lăcașe de cult istorice și obiective de interes, ordonate după distanță.');
       var rows = heritage.slice(0, 40).map(function (m) { return [m.name, m.tip, m.dist != null ? (m.dist >= 1000 ? (m.dist / 1000).toFixed(1) + ' km' : m.dist + ' m') : '—']; });
+      // hartă reală cu monumentele + amplasamentul marcat
+      if (mapImg) {
+        try {
+          var iw = CW, ih = Math.round(iw * 0.62); if (D.ensure) D.ensure(ih + 14);
+          var yy = (D.y != null ? D.y : 60);
+          pdf.addImage(mapImg, 'JPEG', D.dims.ML, yy, iw, ih, '', 'FAST');
+          pdf.setDrawColor(180, 83, 9); pdf.setLineWidth(0.4); pdf.rect(D.dims.ML, yy, iw, ih, 'S');
+          if (D.setY) D.setY(yy + ih + 2);
+          if (D.source) D.source('Hartă: amplasament (●roșu) și monumente/situri identificate (●galben) · © Mapbox, © OpenStreetMap');
+        } catch (e) {}
+      }
       if (D.table) D.table(['Denumire', 'Tip', 'Distanță'], rows, [CW * 0.5, CW * 0.32, CW * 0.18]);
       D.P('Notă: lista provine din date deschise (OSM) și are caracter orientativ; pentru inventarul oficial complet se consultă Lista Monumentelor Istorice (LMI/MCIN) și Repertoriul Arheologic Național (RAN/CIMEC). Proximitatea acestor obiective față de amplasament este un indicator direct al potențialului arheologic — cu cât densitatea reperelor istorice este mai mare, cu atât probabilitatea descoperirii de vestigii crește.');
       if (heritage.length > 40) D.P('(Au fost listate primele 40 de obiective din cele ' + heritage.length + ' identificate, în ordinea distanței.)');
