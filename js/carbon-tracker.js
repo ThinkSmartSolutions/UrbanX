@@ -122,6 +122,8 @@
         ['Intensitate rețea RO', '~0,28 kg CO₂/kWh'],
       ], [CW * 0.5, CW * 0.5]);
 
+      D.newPage && D.newPage();
+
       D.chapter('4. Carbon înglobat (embodied)');
       D.P('Carbonul înglobat estimat este de ' + N(r.embodied_t) + ' tone CO₂, aferent structurii de tip „' + r.structural_type + '". Acesta concentrează emisiile „din prima zi" — produse înainte ca clădirea să fie utilizată — și este, în consecință, ireversibil odată construcția realizată. Reducerea sa se obține prin alegerea materialelor cu amprentă redusă (lemn structural, beton cu ciment compozit, oțel reciclat) și prin optimizarea cantităților.');
       D.P('Pentru această dezvoltare, trecerea la o structură pe bază de lemn (CLT/glulam) ar economisi cca. ' + N(r.timber_saving_t) + ' tone CO₂ față de soluția curentă — lemnul stocând carbon biogenic pe durata de viață a clădirii.');
@@ -146,6 +148,8 @@
       ], [CW * 0.46, CW * 0.27, CW * 0.27]);
       D.P('Intensitatea de ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp plasează dezvoltarea în clasa „' + r.green_label + '". Ținta UE 2030 prevede o reducere de -55% față de 1990; clădirile noi trebuie să tindă către neutralitate climatică până în 2050 (Green Deal).');
 
+      D.newPage && D.newPage();
+
       D.chapter('7. Scenarii de reducere (decarbonare)');
       D.P('Pe baza structurii amprentei, se conturează un plan de reducere cu impact gradual:');
       D.bullets && D.bullets([
@@ -160,6 +164,8 @@
       D.newPage && D.newPage();
       D.chapter('8. Cadru de raportare și aplicații');
       D.P('Rezultatele susțin: raportarea ESG (pilonul de mediu — emisii GES Scope 1–3); verificarea alinierii la Taxonomia UE (criteriul „contribuție substanțială la atenuarea schimbărilor climatice"); angajamentele asumate în cadrul Convenției Primarilor (Covenant of Mayors) și ale Planurilor de Acțiune pentru Energie Durabilă și Climă (PAEDC/SECAP); fundamentarea cererilor de finanțare verde (fonduri UE, credite cu dobândă preferențială pentru clădiri sustenabile).');
+
+      D.newPage && D.newPage();
 
       D.chapter('9. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV. Valorile sunt estimate cu factori de emisie de referință (RICS/ICE, IPCC, ENTSO-E), nu din facturi energetice reale sau dintr-o analiză detaliată a materialelor (BoQ). NU înlocuiește un audit de carbon certificat sau o evaluare LCA detaliată realizată de un expert. Pentru raportare oficială ESG/Taxonomie se recomandă verificarea de către un evaluator acreditat și utilizarea datelor măsurate.');
