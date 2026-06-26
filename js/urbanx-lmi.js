@@ -62,6 +62,44 @@
     return true;
   }
 
+  // monumente REALE (cu coordonate, din OSM) lângă un punct/parcelă + cod LMI + aviz
+  var PROXY = (G._PROXY_BASE || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+  async function nearPoint(lat, lon, radius) {
+    radius = radius || 500;
+    var q = '[out:json][timeout:25];(' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[historic];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[heritage];' +
+      ');out center tags;';
+    try {
+      var r = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
+      var j = await r.json(); var out = [], seen = {};
+      (j.elements || []).forEach(function (el) {
+        var t = el.tags || {}; var nm = t.name || t['name:ro']; if (!nm || seen[nm]) return;
+        var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+        if (la == null) return; seen[nm] = 1;
+        var dist = G.turf ? Math.round(G.turf.distance([lon, lat], [lo, la], { units: 'meters' })) : null;
+        var cod = t['ref:ro:lmi'] || t['ref:RO:LMI'] || null;
+        out.push({ name: nm, cod: cod, lat: la, lon: lo, dist: dist, aviz: cod ? avizLevel(cod) : null });
+      });
+      out.sort(function (a, b) { return (a.dist || 1e9) - (b.dist || 1e9); });
+      return out;
+    } catch (e) { return []; }
+  }
+
+  // verdict de avizare pentru o parcelă: cel mai strict nivel din monumentele apropiate
+  async function avizForParcel(lat, lon) {
+    var near = await nearPoint(lat, lon, 200); // zona de protecție tipică ~100-200m
+    if (!near.length) return { necesar: false, nivel: null, monumente: [], nota: 'Nu s-au identificat monumente în raza de 200 m (OSM). Verificați totuși LMI/DJC oficial.' };
+    var hasA = near.some(function (m) { return m.aviz && m.aviz.grupa === 'A'; });
+    var hasMon = near.some(function (m) { return m.aviz || m.dist <= 100; });
+    return {
+      necesar: true,
+      nivel: hasA ? 'Ministerul Culturii / Comisia Națională a Monumentelor Istorice (grupa A)' : 'Direcția Județeană pentru Cultură (DJC)',
+      monumente: near.slice(0, 10),
+      nota: 'Există monumente/repere istorice în proximitate; intervenția în monument sau în zona sa de protecție necesită aviz de specialitate (Legea 422/2001).'
+    };
+  }
+
   // panou dashboard: monumente LMI + regimul avizelor
   async function openPanel(cityKeyOrJud) {
     var key = cityKeyOrJud || (G.TCI && G.TCI.cityKey);
@@ -82,6 +120,6 @@
     document.body.appendChild(ov);
   }
 
-  G._LMI = { judetCode: judetCode, avizLevel: avizLevel, forJudet: forJudet, summary: summary, renderSection: renderSection, openPanel: openPanel };
+  G._LMI = { judetCode: judetCode, avizLevel: avizLevel, forJudet: forJudet, summary: summary, renderSection: renderSection, openPanel: openPanel, nearPoint: nearPoint, avizForParcel: avizForParcel };
   console.log('[LMI] ✅ serviciu LMI comun încărcat (window._LMI)');
 })(window);
