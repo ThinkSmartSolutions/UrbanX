@@ -151,6 +151,31 @@
     ]);
     D.P('Aceste măsuri reduc dependența de bugetul de stat și cresc autonomia — obiectivul strategic central al sănătății financiare a oricărui UAT. Ele se corelează direct cu celelalte module ale platformei (valoare imobiliară, reconversie, LVC, fezabilitate).');
 
+    D.chapter('Mecanismul de echilibrare și redistribuire');
+    D.P('Sistemul de finanțe publice locale din România include un mecanism de echilibrare prin care sume defalcate din TVA și cote din impozitul pe venit sunt redistribuite către UAT-uri în funcție de capacitatea fiscală și de nevoile lor. Scopul este reducerea disparităților teritoriale: UAT-urile cu venituri proprii reduse primesc transferuri mai mari. Acest mecanism este esențial pentru coeziune, dar are un efect secundar — poate diminua stimulentul pentru dezvoltarea bazei fiscale proprii, întrucât o parte din creșterea veniturilor locale este compensată prin reducerea sumelor de echilibrare.');
+    D.P('Pentru ' + e.name + ', cu o dependență de ' + N(e.dependenta) + '%, înțelegerea acestui mecanism este strategică: politicile de creștere a veniturilor proprii trebuie corelate cu regulile de echilibrare pentru a maximiza câștigul net. Predictibilitatea transferurilor de la centru (stabilite anual prin legea bugetului de stat) este un factor de risc pe care administrația locală trebuie să îl gestioneze în planificarea multianuală.');
+
+    D.chapter('Riscuri fiscale și scenarii');
+    D.bullets([
+      'Risc de transfer: reducerea sumelor de echilibrare prin decizii la nivel central — afectează direct UAT-urile dependente;',
+      'Risc de venituri proprii: subevaluarea fondului impozabil și colectarea deficitară erodează autonomia;',
+      'Risc de cheltuieli: creșterea cheltuielilor de funcționare (salarii, utilități) reduce spațiul de dezvoltare;',
+      'Risc de absorbție: incapacitatea de a cheltui fondurile UE alocate (co-finanțare insuficientă, proiecte nepregătite);',
+      'Risc macroeconomic: recesiunea reduce cotele IPV (legate de ocupare și salarii) și veniturile proprii.'
+    ]);
+    D.P('Într-un scenariu prudent, administrația își consolidează veniturile proprii și menține o rezervă, reducând expunerea la deciziile de la centru. Într-un scenariu de creștere, dezvoltarea economică și valorificarea fondului imobiliar lărgesc baza fiscală, crescând autonomia. Planificarea bugetară multianuală cu scenarii alternative este instrumentul de gestionare a acestor riscuri.');
+
+    D.chapter('Indicatori de monitorizare a sănătății financiare');
+    if (D.table) D.table(['Indicator', 'Prag / țintă sănătoasă'], [
+      ['Grad de autonomie fiscală', '> 50% (venituri proprii + cote IPV)'],
+      ['Dependență de transferuri', 'în scădere de la an la an'],
+      ['Pondere cheltuieli de dezvoltare', '> 25% din total'],
+      ['Grad de îndatorare (serviciul datoriei)', '< 30% din veniturile proprii (L.273/2006)'],
+      ['Arierate', '0 (fără plăți restante)'],
+      ['Rata de absorbție fonduri UE', '> 70% din alocare']
+    ], [CW * 0.55, CW * 0.45]);
+    D.P('Acești indicatori, urmăriți anual, oferă un tablou de bord al sănătății financiare a UAT și se corelează cu dimensiunea economică a Notei UrbanX (IVU). O administrație care își îmbunătățește acești indicatori demonstrează o guvernanță fiscală solidă — un criteriu tot mai important pentru finanțatori și pentru încrederea investitorilor.');
+
     // Nota UrbanX (IVU)
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (ex) {}
 
