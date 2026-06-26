@@ -139,6 +139,8 @@
         ], { title: 'Defalcarea amprentei pe ciclul de viață (t CO₂, 30 ani)', h: 48, source: 'Model LCA UrbanX · EN 15978' });
       }
 
+      D.newPage && D.newPage();
+
       D.chapter('6. Total ciclu de viață și clasificare');
       D.table && D.table(['Componentă', 't CO₂', 'Pondere'], [
         ['Carbon înglobat', N(r.embodied_t), Math.round(r.embodied_t / Math.max(1, r.lifetime_t) * 100) + '%'],
