@@ -205,6 +205,17 @@
     ], [CW * 0.55, CW * 0.45]);
     D.P('Acești indicatori, urmăriți anual, oferă un tablou de bord al sănătății financiare a UAT și se corelează cu dimensiunea economică a Notei UrbanX (IVU). O administrație care își îmbunătățește acești indicatori demonstrează o guvernanță fiscală solidă — un criteriu tot mai important pentru finanțatori și pentru încrederea investitorilor.');
 
+    // grafice native din structura bugetară calculată (date reale, nu umplutură)
+    try {
+      if (D.barChart && e.P) {
+        D.chapter('Structura bugetară — vizualizare');
+        D.barChart([['Venituri proprii', Math.round(e.P.proprii), [34, 197, 94]], ['Cote IPV', Math.round(e.P.cote), [59, 130, 246]], ['Sume TVA', Math.round(e.P.tva), [249, 115, 22]], ['Subvenții', Math.round(e.P.subv), [148, 163, 184]]], { title: 'Structura veniturilor bugetare (% din total)', h: 48, max: 100, source: 'Model UrbanX pe structura tipică L.273/2006' });
+        D.barChart([['Autonomie fiscală', Math.round(e.autonomie), [34, 197, 94]], ['Dependență de stat/județ', Math.round(e.dependenta), [239, 68, 68]]], { title: 'Autonomie vs dependență fiscală (%)', h: 40, max: 100, source: 'Venituri proprii+cote vs transferuri necondiționate' });
+        if (e.pFunctionare != null || e.pDezvoltare != null) D.barChart([['Funcționare', Math.round(e.pFunctionare || (100 - (e.pDezvoltare || 0))), [148, 163, 184]], ['Dezvoltare', Math.round(e.pDezvoltare || 0), [34, 197, 94]]], { title: 'Cheltuieli: funcționare vs dezvoltare (%)', h: 40, max: 100, source: 'Execuție bugetară orientativă' });
+        D.P('Graficele sintetizează structura bugetară a UAT: ponderea veniturilor proprii (autonomie), dependența de transferurile de la centru și echilibrul dintre cheltuielile de funcționare și cele de dezvoltare — indicatori-cheie ai sănătății financiare locale, detaliați în capitolele următoare.');
+      }
+    } catch (ex) {}
+
     // ── Corp dezvoltat (analiză TERITORIALĂ de rang superior, 80-100 pag) ──
     try { if (G._deepRender && G._ECON_DEEP) G._deepRender(D, G._ECON_DEEP, CW); } catch (ex) {}
 
