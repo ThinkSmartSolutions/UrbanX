@@ -98,6 +98,20 @@
     pdf.setTextColor(255, 255, 255); pdf.setFontSize(22); pdf.text('ANALIZĂ ECONOMICĂ A UAT', W / 2, 88, { align: 'center' });
     pdf.setTextColor(94, 234, 212); pdf.setFontSize(13); pdf.text(D.S2(e.name), W / 2, 102, { align: 'center' });
     pdf.setTextColor(150, 200, 190); pdf.setFontSize(11); pdf.text('Autonomie fiscală ' + N(e.autonomie) + '% · dependență buget stat ' + N(e.dependenta) + '%', W / 2, 114, { align: 'center' });
+    // panou copertă — repere + structură + surse (fără pagină parțială)
+    var cye = 136;
+    pdf.setDrawColor(13, 148, 136); pdf.setLineWidth(0.4); pdf.setFillColor(8, 32, 30);
+    pdf.roundedRect(26, cye, W - 52, 98, 3, 3, 'FD');
+    pdf.setTextColor(94, 234, 212); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('REPERE FINANCIARE (model orientativ)', W / 2, cye + 9, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(200, 224, 218);
+    [['Buget local total estimat', N(e.bugTotalEur) + ' €'], ['Buget pe locuitor', N(e.bugCap) + ' lei/an'], ['Autonomie fiscală', N(e.autonomie) + '%'], ['Dependență de bugetul de stat', N(e.dependenta) + '%'], ['Cheltuieli de dezvoltare', N(e.pDezvoltare) + '%']].forEach(function (r, i) {
+      var yy = cye + 18 + i * 6.6; pdf.text(r[0], 36, yy); pdf.setFont(FONT, 'bold'); pdf.text(r[1], W - 36, yy, { align: 'right' }); pdf.setFont(FONT, 'normal');
+    });
+    pdf.setTextColor(94, 234, 212); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8.5); pdf.text('STRUCTURA STUDIULUI', W / 2, cye + 56, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setTextColor(185, 210, 204); pdf.setFontSize(8.5);
+    ['Profil economic · structura veniturilor · venituri proprii · dependență de stat și județ', 'cheltuieli funcționare vs dezvoltare · absorbție fonduri UE · context macro · sustenabilitate', 'echilibrare/redistribuire · riscuri fiscale · transparență · benchmark · Nota UrbanX · surse'].forEach(function (l, i) { pdf.text(l, W / 2, cye + 64 + i * 5.6, { align: 'center' }); });
+    pdf.setTextColor(150, 180, 174); pdf.setFontSize(8.5);
+    pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Structura Legea 273/2006 · surse MFP/INS/Eurostat', W / 2, cye + 106, { align: 'center', maxWidth: W - 50 });
     D.setSuppress && D.setSuppress(false);
 
     D.chapter('Rezumat executiv');
@@ -218,7 +232,7 @@
       '<div style="font-size:11px;color:#94a3b8;margin:2px 0 12px">Buget local ~' + N(e.bugTotalEur) + ' € · ' + N(e.bugCap) + ' lei/loc/an · model orientativ (structura L.273/2006)</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' + kpi(N(e.autonomie) + '%', 'Autonomie fiscală', '#34d399') + kpi(N(e.dependenta) + '%', 'Dependență buget stat', '#f59e0b') + kpi(N(e.pDezvoltare) + '%', 'Cheltuieli dezvoltare', '#60a5fa') + '</div>' +
       '<div style="font-size:11px;color:#94a3b8;margin-bottom:4px">Structura veniturilor bugetului local</div>' + bars +
-      '<div style="display:flex;gap:8px;margin-top:12px"><button onclick="window._Economy.generatePDF(window.TCI&&window.TCI.cityKey)" style="flex:1;background:linear-gradient(180deg,#0d9488,#0f766e);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Analiză economică (PDF ≥10 pag)</button>' +
+      '<div style="display:flex;gap:8px;margin-top:12px"><button onclick="window._Economy.generatePDF(window.TCI&&window.TCI.cityKey)" style="flex:1;background:linear-gradient(180deg,#0d9488,#0f766e);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Analiză economică (PDF)</button>' +
       '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;cursor:pointer">Închide</button></div>' +
       '<div style="font-size:9px;color:#64748b;margin-top:10px">Estimări orientative — pentru cifre oficiale: execuția bugetară MFP + bugetul local aprobat.</div></div>';
     document.body.appendChild(ov);

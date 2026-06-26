@@ -1440,7 +1440,7 @@ document.addEventListener('click', function(){
   <div style="display:flex;align-items:stretch;gap:4px;margin-bottom:8px">
   <button onclick="window.IndicatorsRegistry&&window.IndicatorsRegistry.generate(window.TCI&&window.TCI.cityKey);toggleRapoarteMenu()" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(168,85,247,.06));border:1px solid rgba(124,58,237,.32);border-radius:8px;color:#c4b5fd;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
     <span style="font-size:16px">📋</span>
-    <div><div>Registru Indicatori Urbani</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">Audit ≥10 pag · 8 domenii · definiție, formulă, sursă pe fiecare</div></div>
+    <div><div>Registru Indicatori Urbani</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">8 domenii · definiție, formulă, sursă pe fiecare</div></div>
   </button>
   <button onclick="window._showInfoDrawer('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
@@ -3402,7 +3402,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       style="flex:1;text-align:left;background:rgba(16,124,92,.06);border:1px solid rgba(16,124,92,.2);color:#86efac;padding:9px 12px;cursor:pointer;border-radius:8px;font-size:12.5px;font-weight:600;min-height:42px;font-family:inherit"
       onmouseover="this.style.background='rgba(16,124,92,.14)'" onmouseout="this.style.background='rgba(16,124,92,.06)'">
       📄 Studiu Valori Imobiliare (PDF)
-      <div style="font-size:10px;color:rgba(134,239,172,.55)">Raport ≥10 pag · metodă, hărți, predicții, surse, disclaimer</div>
+      <div style="font-size:10px;color:rgba(134,239,172,.55)">Raport · metodă, hărți, predicții, surse, disclaimer</div>
     </button>
     <button onclick="window._showInfoDrawer('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
@@ -3544,7 +3544,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseover="this.style.background='rgba(212,175,55,.2)'"
     onmouseout="this.style.background='rgba(212,175,55,.08)'">
     📋 Masterplan PDF
-    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">Document strategic 100+ pagini · diagnostic multidisciplinar · RLU · planșe · conf. Legii 350/2001</div>
+    <div style="font-size:10px;color:rgba(212,175,55,.6);font-weight:400">Document strategic · diagnostic multidisciplinar · RLU · planșe · conf. Legii 350/2001</div>
   </button>
 
   <button onclick="if(typeof generatePMUD==='function')generatePMUD();else ss?.('⏳ PMUD se inițializează — mai încearcă');_closeAllMenusAndOverlay()"
@@ -3554,7 +3554,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseover="this.style.background='rgba(52,211,153,.2)'"
     onmouseout="this.style.background='rgba(52,211,153,.08)'">
     🚍 PMUD — Plan Mobilitate Urbană Durabilă
-    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">Document strategic 100+ pagini · 8 componente SUMP · ghid MDLPA + EU/ELTIS</div>
+    <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:400">Document strategic · 8 componente SUMP · ghid MDLPA + EU/ELTIS</div>
   </button>
 
   <!-- PPTX Export -->
@@ -3961,11 +3961,11 @@ const _INFO_DATA = {
     icon:'💶', title:'Hartă Valori Imobiliare', subtitle:'Heatmap €/mp pe hartă · rentă urbană',
     badge:'TERITORIAL · MODEL DE RENTĂ', badgeColor:'#10b981',
     desc:'Afișează pe hartă valoarea estimată €/mp printr-un model de rentă urbană (von Thünen/Alonso): valoarea scade radial de la centru și se modulează pe zone funcționale. Re-click pe buton = ascunde stratul. Util pentru pre-evaluare, identificarea terenurilor subutilizate semicentrale și calibrarea bazei de impozitare.',
-    tip:'Valori orientative — nu substituie o evaluare ANEVAR. Pentru raportul complet (≥10 pag) folosește „Studiu Valori Imobiliare (PDF)".',
+    tip:'Valori orientative — nu substituie o evaluare ANEVAR. Pentru raportul complet folosește „Studiu Valori Imobiliare (PDF)".',
     source:'Model rentă urbană UrbanX · ANCPI · standardele ANEVAR/IVS',
   },
   'valori_pdf': {
-    icon:'📄', title:'Studiu Valori Imobiliare (PDF)', subtitle:'Raport ≥10 pag · metodă, hărți, predicții',
+    icon:'📄', title:'Studiu Valori Imobiliare (PDF)', subtitle:'Raport · metodă, hărți, predicții',
     badge:'STUDIU COMPLET · ≥10 PAGINI', badgeColor:'#10b981',
     desc:'Generează studiul complet de valori imobiliare: metodologie și formulă, distribuție valorică pe benzi, factori determinanți, scenarii de evoluție 3–5 ani, hartă a valorilor, secțiunea Nota UrbanX (IVU), surse și disclaimer. Format unitar SIDU.',
     tip:'Documentul include captura hărții de valori și predicții pe scenarii.',
@@ -3981,21 +3981,21 @@ const _INFO_DATA = {
   'economie': {
     icon:'💰', title:'Analiză economică a UAT', subtitle:'Buget local · dependență de bugetul de stat',
     badge:'TERITORIAL · FINANȚE LOCALE', badgeColor:'#0d9488',
-    desc:'Analizează situația economică și financiară a UAT, micro și macro: structura veniturilor bugetului local (venituri proprii, cote din impozitul pe venit, sume defalcate din TVA, subvenții, fonduri UE), gradul de autonomie fiscală și dependența de bugetul de stat, cheltuielile de funcționare vs. dezvoltare, capacitatea de investiție și absorbția fondurilor UE. Generează studiu PDF ≥10 pag.',
+    desc:'Analizează situația economică și financiară a UAT, micro și macro: structura veniturilor bugetului local (venituri proprii, cote din impozitul pe venit, sume defalcate din TVA, subvenții, fonduri UE), gradul de autonomie fiscală și dependența de bugetul de stat, cheltuielile de funcționare vs. dezvoltare, capacitatea de investiție și absorbția fondurilor UE. Generează studiu PDF.',
     tip:'Valorile sunt orientative (model pe structura Legii 273/2006). Pentru cifre oficiale: execuția bugetară MFP + bugetul local aprobat.',
     source:'Legea 273/2006 (finanțe publice locale) · Ministerul Finanțelor · INS · Eurostat',
   },
   'hbu': {
     icon:'🏗', title:'Reconversie urbană (HBU) & Studiu', subtitle:'Highest & Best Use — funcțiunea optimă',
     badge:'INVESTIȚIONAL · REGENERARE', badgeColor:'#d97706',
-    desc:'Pentru un amplasament subutilizat sau industrial, determină cea mai bună utilizare (Highest & Best Use): evaluează 12 funcțiuni de reconversie (rezidențial, mixt, birouri, hotelier, retail, logistică, cultural, educație, sănătate, verde, industrie ușoară, tech) cu scor de compatibilitate transparent (localizare + accesibilitate + cerere + constrângeri) și o pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat. Generează studiu PDF ≥10 pag.',
+    desc:'Pentru un amplasament subutilizat sau industrial, determină cea mai bună utilizare (Highest & Best Use): evaluează 12 funcțiuni de reconversie (rezidențial, mixt, birouri, hotelier, retail, logistică, cultural, educație, sănătate, verde, industrie ușoară, tech) cu scor de compatibilitate transparent (localizare + accesibilitate + cerere + constrângeri) și o pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat. Generează studiu PDF.',
     tip:'Selectează o parcelă pe hartă pentru analiză punctuală; altfel se analizează centrul UAT. Pre-analiză — necesită fezabilitate + due diligence (contaminare, structură, PUZ).',
     source:'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · repere piață RO',
   },
   'clima': {
     icon:'🌦', title:'Profil Climatic & Studiu (SECAP)', subtitle:'Date reale Open-Meteo (reanaliză ERA5)',
     badge:'TERITORIAL · CLIMĂ & ADAPTARE', badgeColor:'#2563eb',
-    desc:'Caracterizează regimul climatic al UAT din date publice reale (Open-Meteo / Copernicus ERA5, normală 2019–2023): temperaturi și precipitații medii lunare, grade-zile de încălzire/răcire (HDD/CDD), profil sezonier, zile tropicale și de îngheț, indice de confort climatic. Generează un studiu PDF ≥10 pag cu implicații energetice (bază SECAP), adaptare la căldură și gospodărirea apelor pluviale.',
+    desc:'Caracterizează regimul climatic al UAT din date publice reale (Open-Meteo / Copernicus ERA5, normală 2019–2023): temperaturi și precipitații medii lunare, grade-zile de încălzire/răcire (HDD/CDD), profil sezonier, zile tropicale și de îngheț, indice de confort climatic. Generează un studiu PDF cu implicații energetice (bază SECAP), adaptare la căldură și gospodărirea apelor pluviale.',
     tip:'Fundamentează SECAP, eficiența energetică (nZEB) și măsurile de adaptare (infrastructură verde-albastră). Pentru proiectare se folosesc datele oficiale ANM.',
     source:'Open-Meteo · Copernicus C3S ERA5 · EN ISO 15927 (grade-zile) · IPCC AR6',
   },
@@ -6327,10 +6327,10 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/risk-sim-shelters.js?v=20260625popup"></script>
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260626ivu"></script>
-    <script src="js/urbanx-climate.js?v=20260626clima3"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
+    <script src="js/urbanx-climate.js?v=20260626clima4"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
     <script src="js/urbanx-hbu-content.js?v=20260626hbuc2"></script><!-- continut dezvoltat HBU (workflow multi-agent) -->
-    <script src="js/urbanx-hbu.js?v=20260626hbu7"></script><!-- HBU/SRU reconversie urbana (12 functiuni + financiar + studiu) -->
-    <script src="js/urbanx-economy.js?v=20260626eco4"></script><!-- Analiza economica UAT (buget local + dependenta stat) -->
+    <script src="js/urbanx-hbu.js?v=20260626hbu8"></script><!-- HBU/SRU reconversie urbana (12 functiuni + financiar + studiu) -->
+    <script src="js/urbanx-economy.js?v=20260626eco5"></script><!-- Analiza economica UAT (buget local + dependenta stat) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
 </body>
 </html>

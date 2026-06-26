@@ -116,6 +116,20 @@
     pdf.setTextColor(255, 255, 255); pdf.setFontSize(23); pdf.text('STUDIU CLIMATIC URBAN', W / 2, 90, { align: 'center' });
     pdf.setTextColor(147, 197, 253); pdf.setFontSize(14); pdf.text(D.S2(ll.name || 'UAT'), W / 2, 104, { align: 'center' });
     pdf.setTextColor(150, 180, 220); pdf.setFontSize(11); pdf.text(N(c.tAnnual, 1) + ' °C medie · ' + N(c.pAnnual) + ' mm/an · confort ' + c.comfort + '/100', W / 2, 116, { align: 'center' });
+    // panou copertă — repere + structură + surse (fără pagină parțială)
+    var cyc = 138;
+    pdf.setDrawColor(37, 99, 235); pdf.setLineWidth(0.4); pdf.setFillColor(14, 26, 52);
+    pdf.roundedRect(26, cyc, W - 52, 96, 3, 3, 'FD');
+    pdf.setTextColor(147, 197, 253); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('REPERE CLIMATICE (normală 2019–2023)', W / 2, cyc + 9, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(205, 218, 240);
+    [['Temperatură medie anuală', N(c.tAnnual, 1) + ' °C'], ['Precipitații anuale', N(c.pAnnual) + ' mm'], ['Grade-zile încălzire / răcire', N(c.hdd) + ' / ' + N(c.cdd)], ['Zile tropicale / de îngheț', N(c.tropicalDays) + ' / ' + N(c.frostDays) + ' pe an'], ['Indice de confort climatic', c.comfort + ' / 100']].forEach(function (r, i) {
+      var yy = cyc + 18 + i * 6.6; pdf.text(r[0], 36, yy); pdf.setFont(FONT, 'bold'); pdf.text(r[1], W - 36, yy, { align: 'right' }); pdf.setFont(FONT, 'normal');
+    });
+    pdf.setTextColor(147, 197, 253); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8.5); pdf.text('STRUCTURA STUDIULUI', W / 2, cyc + 56, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setTextColor(190, 205, 230); pdf.setFontSize(8.5);
+    ['Rezumat · metodologie · regim termic și pluviometric · sezonalitate · grade-zile', 'implicații energetice (SECAP) · adaptare · sănătate/canicule · risc pluvial · aridizare', 'calendar bioclimatic · semnal de schimbare · scenarii · Nota UrbanX · surse'].forEach(function (l, i) { pdf.text(l, W / 2, cyc + 64 + i * 5.6, { align: 'center' }); });
+    pdf.setTextColor(150, 165, 200); pdf.setFontSize(8.5);
+    pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Date reale Open-Meteo (reanaliză ERA5 · Copernicus C3S)', W / 2, cyc + 104, { align: 'center', maxWidth: W - 50 });
     D.setSuppress && D.setSuppress(false);
 
     D.chapter('Rezumat executiv');
@@ -229,7 +243,7 @@
       kpi(N(c.tropicalDays), 'Zile tropicale/an', '#f59e0b') + kpi(N(c.frostDays), 'Zile îngheț/an', '#60a5fa') +
       kpi(c.comfort + '/100', 'Confort climatic', '#34d399') + '</div>' +
       '<div style="background:#0a1120;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px"><div style="font-size:10px;color:#94a3b8;margin-bottom:4px">Precipitații (albastru) · Temperatură (portocaliu) — medii lunare</div><div style="display:flex;gap:3px;align-items:flex-end">' + bars + '</div></div>' +
-      '<div style="display:flex;gap:8px;margin-top:10px"><button onclick="window._ClimateEngine.generatePDF(window.TCI&&window.TCI.cityKey);this.closest(\'div[style*=fixed]\').remove&&0" style="flex:1;background:linear-gradient(180deg,#2563eb,#1d4ed8);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Studiu climatic (PDF ≥10 pag)</button></div>' +
+      '<div style="display:flex;gap:8px;margin-top:10px"><button onclick="window._ClimateEngine.generatePDF(window.TCI&&window.TCI.cityKey);this.closest(\'div[style*=fixed]\').remove&&0" style="flex:1;background:linear-gradient(180deg,#2563eb,#1d4ed8);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Studiu climatic (PDF)</button></div>' +
       '<div style="font-size:9px;color:#64748b;margin-top:10px">Sursă: Open-Meteo (reanaliză ERA5 · Copernicus C3S) · normală 2019–2023 · HDD ' + N(c.hdd) + ' · CDD ' + N(c.cdd) + ' · orientativ</div>';
   }
 
