@@ -189,6 +189,7 @@ async function generateStudiuPMR(){
     'Nerespectarea Legii 448/2006 poate atrage refuzul recepției și amenzi contravenționle (art. 98 Legea 448/2006, amendă 5.000-10.000 lei).',
   ],cy);
   sign();ftr();
+  try{ if(typeof _pdfParcelIVUSection==='function') _pdfParcelIVUSection(d); }catch(e){}
   _pdfSaveMobile(pdf,'studiu_pmr_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
   ss('✅ Studiu PMR generat · 10 pagini · '+S2(uat));
 }
@@ -380,6 +381,7 @@ async function generateStudiuIluminat(){
     'Iluminatul artificial complementar trebuie proiectat conform EN 12464-1:2021: Em='+Emin_300+'Lux minim, UGR<22, Ra≥80 pentru spații de '+S2(fn)+'.',
   ],cy);
   sign();ftr();
+  try{ if(typeof _pdfParcelIVUSection==='function') _pdfParcelIVUSection(d); }catch(e){}
   _pdfSaveMobile(pdf,'studiu_iluminat_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
   ss('✅ Studiu Iluminat Natural generat · 10 pagini · FLZ min='+FLZ_min+'% · GHI='+ghi);
 }
@@ -569,6 +571,7 @@ async function generateREPA(){
     'Pași imediat următori: (1) Solicitare CU de la Primăria '+S2(uat)+', (2) Angajare arhitect cu drept de semnătură, (3) Studiu geotehnic (NP 074/2014), (4) Solicitare avize prealabile utilități.',
   ],cy);
   sign();ftr();
+  try{ if(typeof _pdfParcelIVUSection==='function') _pdfParcelIVUSection(d); }catch(e){}
   _pdfSaveMobile(pdf,'repa_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
   ss('✅ REPA generat · '+score+'/'+total+' conf. · '+Math.ceil(etape.reduce((s,e)=>s+parseInt(e[3])||0,0)/22)+' luni autorizare');
 }
@@ -717,6 +720,7 @@ async function generateStudiuApePluviale(){
       ],cy);
     } else { sign();ftr(); }
   });
+  try{ if(typeof _pdfParcelIVUSection==='function') _pdfParcelIVUSection(d); }catch(e){}
   _pdfSaveMobile(pdf,'studiu_ape_pluviale_'+S2(nrcad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');
   ss('✅ Studiu Ape Pluviale generat · 10 pagini · Q='+Q_pl.toFixed(2)+'l/s');
 }

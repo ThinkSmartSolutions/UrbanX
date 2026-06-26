@@ -1,3 +1,39 @@
+// ── Notă IVU pe studiile de parcelă (jsPDF custom) — brand UrbanX uniform (#19) ─────
+function _pdfParcelIVUSection(d){
+  try{
+    if(!d || !d.pdf) return;
+    var pdf=d.pdf, W=d.W||210, H=d.H||297, S2=d.S2||function(s){return String(s||'');};
+    var ivu=(window.UrbanXIVU && window.UrbanXIVU.scoreFor) ? window.UrbanXIVU.scoreFor(window.TCI && window.TCI.cityKey) : null;
+    pdf.addPage();
+    if(d.LIGHT) pdf.setFillColor.apply(pdf,d.LIGHT); else pdf.setFillColor(248,250,253);
+    pdf.rect(0,0,W,H,'F');
+    if(d.hdr) try{ d.hdr('NOTA URBANX (IVU) - INDICELE DE VITALITATE URBANA'); }catch(e){}
+    if(d.ftr) try{ d.ftr(); }catch(e){}
+    var cy=42;
+    pdf.setTextColor(20,30,60); pdf.setFont('helvetica','bold'); pdf.setFontSize(13);
+    pdf.text(S2('Nota UrbanX (IVU) - contextul teritorial al amplasamentului'),16,cy); cy+=10;
+    pdf.setFont('helvetica','normal'); pdf.setFontSize(9); pdf.setTextColor(60,70,90);
+    var txt = (ivu&&ivu.R)
+      ? 'Amplasamentul analizat se incadreaza in '+(ivu.name||'UAT-ul de referinta')+', care obtine Nota UrbanX (Indicele de Vitalitate Urbana) de '+ivu.R.score+'/100 (calificativ '+ivu.R.grade+', categorie de marime: '+(ivu.R.tierLabel||'')+'). IVU este un indice compozit (0-100) dezvoltat de UrbanX, calculat din date reale pe sase dimensiuni - economie, calitatea vietii, conectivitate, mediu, demografie si rezilienta - fiecare cu formula explicita si recalculabila. Nota ofera contextul de vitalitate al localitatii in care se incadreaza parcela si se regaseste, in forma detaliata, in studiile teritoriale ale platformei UrbanX.'
+      : 'Nota UrbanX (IVU) este un indice compozit (0-100) dezvoltat de UrbanX care exprima vitalitatea urbana a unui UAT pe sase dimensiuni (economie, calitatea vietii, conectivitate, mediu, demografie, rezilienta), din date reale si cu formula transparenta, recalculabila.';
+    var lines=pdf.splitTextToSize(S2(txt),W-32);
+    pdf.text(lines,16,cy); cy+=lines.length*5+8;
+    if(ivu&&ivu.R){
+      pdf.setFillColor(20,35,70); pdf.rect(16,cy,W-32,28,'F');
+      pdf.setTextColor(212,175,55); pdf.setFont('helvetica','bold'); pdf.setFontSize(22);
+      pdf.text(ivu.R.score+'/100',24,cy+18);
+      pdf.setTextColor(255,255,255); pdf.setFontSize(11);
+      pdf.text(S2('Calificativ '+ivu.R.grade+' - '+(ivu.R.tierLabel||'')),74,cy+13);
+      pdf.setTextColor(150,170,200); pdf.setFontSize(7.5); pdf.setFont('helvetica','normal');
+      pdf.text(S2('Indice compozit dezvoltat de UrbanX - formula transparenta, recalculabila'),74,cy+20);
+      cy+=34;
+    }
+    pdf.setTextColor(110,120,140); pdf.setFontSize(7.5);
+    pdf.text(S2('Marca UrbanX. Document orientativ - nu substituie evaluarea oficiala.'),16,H-12);
+  }catch(e){}
+}
+try{ window._pdfParcelIVUSection=_pdfParcelIVUSection; }catch(e){}
+
 // ── Mobile-safe PDF save — iOS nu suportă _pdfSaveMobile(pdf,) direct ─────────────────
 function _pdfSaveMobile(pdf, filename){
   try{
