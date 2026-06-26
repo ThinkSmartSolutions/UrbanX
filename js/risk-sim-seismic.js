@@ -70,39 +70,73 @@
       k === 7 ? '#fb923c' : k === 8 ? '#f87171' : k === 9 ? '#ef4444' : '#b91c1c';
   }
 
-  // ── HARTĂ ──
+  // distanța epicentrală (km) la care intensitatea = Itarget (inversez atenuarea, bisecție)
+  function intensityRadiusKm(M, Itarget) {
+    var I0 = 1.5 * M - 1.5;
+    if (Itarget >= I0) return 0;
+    function intensAt(d) { var R = Math.sqrt(d * d + VR.h * VR.h); return I0 - 3 * Math.log10(R / VR.h) - 3 * ALPHA * LOG10E * (R - VR.h); }
+    var lo = 0, hi = 1200; // intensitatea scade cu distanța → bisecție
+    for (var i = 0; i < 40; i++) { var mid = (lo + hi) / 2; if (intensAt(mid) > Itarget) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+
+  // ── HARTĂ — câmp macroseismic real (inele izoseiste centrate pe epicentru) ──
   function drawOnMap(map, lat, lon, res) {
-    if (!map) return;
-    var col = shakeColor(res.I);
-    // disc de scuturare peste UAT (rază ~6 km, vizibil la scară urbană)
-    var disk = { type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] }, properties: {} };
+    if (!map || !G.turf) return;
+    var I0 = res.I0;
+    // benzi de intensitate EMS-98 vizibile (de la cea mai mică spre cea mai mare)
+    var levels = [];
+    for (var I = 4; I <= Math.min(10, Math.floor(I0)); I++) {
+      var rad = intensityRadiusKm(res.M, I); if (rad > 1) levels.push({ I: I, rad: rad });
+    }
+    levels.sort(function (a, b) { return b.rad - a.rad; }); // mari întâi (jos), mici deasupra
+    var fills = [], lines = [], labels = [];
+    levels.forEach(function (lv) {
+      var poly;
+      try { poly = G.turf.circle([VR.lon, VR.lat], lv.rad, { steps: 96, units: 'kilometers' }); } catch (e) { return; }
+      var c = shakeColor(lv.I), desc = emsDescriptor(lv.I);
+      poly.properties = { col: c, I: lv.I };
+      fills.push(poly);
+      lines.push(Object.assign({}, poly, { properties: { col: c } }));
+      // eticheta benzii — pe marginea de N a inelului
+      var latLbl = VR.lat + (lv.rad / 111);
+      labels.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [VR.lon, latLbl] },
+        properties: { txt: 'Int. ' + roman(lv.I) + ' — ' + desc.dmg, col: c } });
+    });
     var epi = { type: 'Feature', geometry: { type: 'Point', coordinates: [VR.lon, VR.lat] }, properties: {} };
+    var city = { type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] },
+      properties: { txt: (G.TCI && G.TCI.cityName ? G.TCI.cityName : 'UAT') + ' · Int. ' + roman(res.I) } };
     var link = { type: 'Feature', geometry: { type: 'LineString', coordinates: [[VR.lon, VR.lat], [lon, lat]] }, properties: {} };
     var setOrAdd = function (id, data) { try { if (map.getSource(id)) map.getSource(id).setData(data); else map.addSource(id, { type: 'geojson', data: data }); } catch (e) {} };
-    setOrAdd('seis-disk-src', disk); setOrAdd('seis-epi-src', epi); setOrAdd('seis-link-src', link);
+    setOrAdd('seis-iso-src', { type: 'FeatureCollection', features: fills });
+    setOrAdd('seis-isoline-src', { type: 'FeatureCollection', features: lines });
+    setOrAdd('seis-isolbl-src', { type: 'FeatureCollection', features: labels });
+    setOrAdd('seis-epi-src', epi); setOrAdd('seis-city-src', city); setOrAdd('seis-link-src', link);
     var addLayer = function (def, before) { try { if (!map.getLayer(def.id)) map.addLayer(def, before); } catch (e) {} };
-    // tentă clădiri reale (composite/building) după severitatea scuturării
-    try {
-      if (map.getSource('composite') && !map.getLayer('seis-buildings')) {
-        map.addLayer({ id: 'seis-buildings', type: 'fill-extrusion', source: 'composite', 'source-layer': 'building',
-          paint: { 'fill-extrusion-color': col, 'fill-extrusion-opacity': 0.55,
-            'fill-extrusion-height': ['coalesce', ['get', 'render_height'], ['get', 'height'], 6] } });
-      } else if (map.getLayer('seis-buildings')) {
-        map.setPaintProperty('seis-buildings', 'fill-extrusion-color', col);
-      }
-    } catch (e) {}
-    // halo scuturare
-    addLayer({ id: 'seis-disk', type: 'circle', source: 'seis-disk-src',
-      paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 30, 14, 220], 'circle-color': col, 'circle-opacity': 0.22, 'circle-stroke-color': col, 'circle-stroke-width': 2 } });
+    addLayer({ id: 'seis-iso-fill', type: 'fill', source: 'seis-iso-src',
+      paint: { 'fill-color': ['get', 'col'], 'fill-opacity': 0.28 } });
+    addLayer({ id: 'seis-iso-line', type: 'line', source: 'seis-isoline-src',
+      paint: { 'line-color': ['get', 'col'], 'line-width': 1.6, 'line-opacity': 0.9 } });
     addLayer({ id: 'seis-link', type: 'line', source: 'seis-link-src',
       paint: { 'line-color': '#fca5a5', 'line-width': 1.5, 'line-dasharray': [3, 2], 'line-opacity': 0.6 } });
+    addLayer({ id: 'seis-iso-lbl', type: 'symbol', source: 'seis-isolbl-src',
+      layout: { 'text-field': ['get', 'txt'], 'text-size': 11, 'text-anchor': 'center', 'text-allow-overlap': false },
+      paint: { 'text-color': ['get', 'col'], 'text-halo-color': '#0a0e1f', 'text-halo-width': 1.6 } });
     addLayer({ id: 'seis-epi', type: 'circle', source: 'seis-epi-src',
       paint: { 'circle-radius': 7, 'circle-color': '#7f1d1d', 'circle-stroke-color': '#fecaca', 'circle-stroke-width': 2 } });
     addLayer({ id: 'seis-epi-lbl', type: 'symbol', source: 'seis-epi-src',
-      layout: { 'text-field': '★ Vrancea', 'text-size': 11, 'text-offset': [0, 1.4], 'text-anchor': 'top' },
+      layout: { 'text-field': '★ Epicentru Vrancea (h=95 km)', 'text-size': 11, 'text-offset': [0, 1.4], 'text-anchor': 'top' },
       paint: { 'text-color': '#fecaca', 'text-halo-color': '#450a0a', 'text-halo-width': 1.5 } });
-    // pulsație halo
-    _pulse(map, col);
+    addLayer({ id: 'seis-city', type: 'circle', source: 'seis-city-src',
+      paint: { 'circle-radius': 8, 'circle-color': shakeColor(res.I), 'circle-stroke-color': '#fff', 'circle-stroke-width': 2.5 } });
+    addLayer({ id: 'seis-city-lbl', type: 'symbol', source: 'seis-city-src',
+      layout: { 'text-field': ['get', 'txt'], 'text-size': 12, 'text-offset': [0, 1.5], 'text-anchor': 'top', 'text-allow-overlap': true },
+      paint: { 'text-color': '#fff', 'text-halo-color': '#0a0e1f', 'text-halo-width': 2 } });
+    // încadrează epicentru + oraș
+    try {
+      var b = [[Math.min(VR.lon, lon), Math.min(VR.lat, lat)], [Math.max(VR.lon, lon), Math.max(VR.lat, lat)]];
+      map.fitBounds(b, { padding: 90, duration: 1100, maxZoom: 9 });
+    } catch (e) {}
   }
   var _pulseRAF = null, _pulseT = 0;
   function _pulse(map, col) {
@@ -118,8 +152,8 @@
   function clearMap(map) {
     if (_pulseRAF) { cancelAnimationFrame(_pulseRAF); _pulseRAF = null; }
     if (!map) return;
-    ['seis-buildings', 'seis-disk', 'seis-link', 'seis-epi', 'seis-epi-lbl'].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} });
-    ['seis-disk-src', 'seis-epi-src', 'seis-link-src'].forEach(function (id) { try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} });
+    ['seis-buildings', 'seis-disk', 'seis-iso-fill', 'seis-iso-line', 'seis-iso-lbl', 'seis-link', 'seis-epi', 'seis-epi-lbl', 'seis-city', 'seis-city-lbl'].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} });
+    ['seis-disk-src', 'seis-iso-src', 'seis-isoline-src', 'seis-isolbl-src', 'seis-epi-src', 'seis-city-src', 'seis-link-src'].forEach(function (id) { try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} });
   }
 
   // ── DIALOG ──
@@ -186,7 +220,7 @@
       'PGA: I = 3,66·log₁₀(PGA) − 1,66 <i>(Wald — calibrare crustală; pentru sursele adânci Vrancea reprezintă o estimare de limită superioară).</i></div>';
     var rd = document.getElementById('seis-results'); if (rd) { rd.style.display = 'block'; rd.innerHTML = html; }
     _dock();
-    try { if (G.map) G.map.flyTo({ center: [c.lon, c.lat], zoom: 12.6, duration: 800 }); } catch (e) {}
+    // încadrarea epicentru+oraș se face în drawOnMap (câmp macroseismic regional)
   }
   // dupa simulare: dialogul devine non-blocant + se muta in colt ca sa fie vizibil desenul pe harta
   function _dock() {
