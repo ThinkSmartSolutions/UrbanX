@@ -48,11 +48,17 @@
       { f: '[leisure=park]', c: '#22c55e', k: 'parcuri' }, { f: '[amenity~"^(university|college)$"]', c: '#a78bfa', k: 'universități' },
       { f: '[historic]', c: '#eab308', k: 'monumente' }
     ];
-    var q = '[out:json][timeout:25];(' + TYPES.map(function (t) { return 'nwr(around:' + radius + ',' + lat + ',' + lon + ')' + t.f + ';'; }).join('') + ');out center tags;';
+    var q = '[out:json][timeout:40];(' + TYPES.map(function (t) { return 'nwr(around:' + radius + ',' + lat + ',' + lon + ')' + t.f + ';'; }).join('') + ');out center tags;';
     var feats = [], counts = {};
+    var els = [];
+    for (var attempt = 0; attempt < 3 && !els.length; attempt++) {
+      try {
+        if (attempt) await new Promise(function (r) { setTimeout(r, 1500); });
+        var resp = await fetch(_PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(45000) });
+        var j = await resp.json(); els = (j && j.elements) || [];
+      } catch (e) { els = []; }
+    }
     try {
-      var resp = await fetch(_PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
-      var j = await resp.json(); var els = (j && j.elements) || [];
       els.forEach(function (el) {
         var t = el.tags || {}; var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
         if (la == null) return;
