@@ -152,6 +152,37 @@
     D.chapter('Tendințe și scenarii');
     D.P('Proiecțiile climatice regionale pentru România (Copernicus, IPCC AR6) indică o tendință de încălzire continuă și o frecvență crescută a valurilor de căldură și a evenimentelor pluviale extreme. În scenariul inerțial, numărul zilelor tropicale și cererea de răcire cresc semnificativ până în 2050; în scenariul de adaptare, efectele sunt atenuate prin infrastructură verde și eficiență energetică. Planificarea trebuie să asume această traiectorie, dimensionând infrastructura pentru clima viitoare, nu pentru cea trecută.');
 
+    D.chapter('Disconfort termic și sănătate publică');
+    D.P('Valurile de căldură reprezintă cel mai letal hazard climatic din Europa. Cele ' + N(c.tropicalDays) + ' zile tropicale (>30 °C) și ' + N(c.summerDays) + ' zile de vară (>25 °C) pe an, amplificate de insula de căldură urbană, cresc mortalitatea și morbiditatea, în special la grupurile vulnerabile: vârstnici, copii mici, persoane cu afecțiuni cardiovasculare și respiratorii, lucrători în exterior. Stresul termic afectează și productivitatea și calitatea somnului în nopțile tropicale (temperaturi minime ridicate).');
+    D.P('Răspunsul de sănătate publică combină măsuri pe termen scurt (planuri de avertizare la canicule, puncte de răcorire, hidratare) cu măsuri structurale pe termen lung (vegetație, umbrire, reducerea suprafețelor impermeabile). Localizarea zonelor cu populație vârstnică și fond construit fără izolație termică permite prioritizarea intervențiilor acolo unde vulnerabilitatea este maximă — o corelație directă între acest profil climatic și indicatorii demografici și de locuire din platformă.');
+
+    D.chapter('Regimul precipitațiilor și riscul pluvial');
+    D.P('Cumulul mediu de ' + N(c.pAnnual) + ' mm/an se distribuie neuniform, cu un maxim la începutul verii și ploi convective intense, tot mai frecvente într-un climat în încălzire. Aceste evenimente torențiale suprasolicită rețelele de canalizare pluvială dimensionate pentru regimuri istorice și produc inundații urbane rapide (pluviale), distincte de inundațiile din revărsarea râurilor. Gradul de impermeabilizare a țesutului urban este factorul agravant principal: cu cât mai mult asfalt și beton, cu atât mai puțină apă se infiltrează și mai multă se scurge la suprafață.');
+    D.P('Soluția modernă — orașul-burete (sponge city) — gestionează apa la sursă prin grădini de ploaie, pavaje permeabile, acoperișuri verzi și zone de retenție, reducând vârful de scurgere și reîncărcând pânza freatică. Dimensionarea acestor soluții pleacă direct din regimul pluviometric local și din curbele intensitate-durată-frecvență, motiv pentru care profilul climatic este punctul de plecare al oricărui plan de gospodărire a apelor pluviale.');
+
+    D.chapter('Resurse de apă și tendința de aridizare');
+    D.P('Bilanțul hidric — diferența dintre precipitații și evapotranspirație — determină disponibilitatea resurselor de apă. Creșterea temperaturilor mărește evapotranspirația, iar dacă precipitațiile nu cresc proporțional, rezultă un deficit hidric în extindere (aridizare), cu impact asupra spațiilor verzi (necesar de irigare), agriculturii periurbane și alimentării cu apă. Sud-estul și estul României sunt deja expuse acestui fenomen.');
+    D.P('Pentru oraș, aridizarea impune specii vegetale rezistente la secetă, sisteme de irigare eficiente (inclusiv reutilizarea apelor pluviale colectate) și o planificare a spațiilor verzi care echilibrează beneficiile de răcire cu consumul de apă. Monitorizarea bilanțului hidric devine astfel un indicator de planificare, nu doar de mediu.');
+
+    D.chapter('Calendar bioclimatic și sezonul de vegetație');
+    D.P('Temperatura medie anuală de ' + N(c.tAnnual, 1) + ' °C și distribuția sezonieră definesc sezonul de vegetație (intervalul cu temperaturi peste 5–10 °C) — relevant pentru planificarea plantărilor, întreținerea spațiilor verzi și calendarul lucrărilor publice. Extinderea sezonului cald, observată în ultimele decenii, prelungește perioada de utilizare a spațiilor publice exterioare (oportunitate pentru economia locală și viața urbană), dar și perioada de stres termic și de cerere de răcire.');
+    D.P('Corelarea calendarului bioclimatic cu programul de evenimente, cu sezonul turistic și cu întreținerea infrastructurii verzi permite o gestionare mai eficientă a resurselor municipale de-a lungul anului.');
+
+    D.chapter('Semnalul de schimbare climatică');
+    D.P('Compararea normalei recente (2019–2023) cu normalele climatologice istorice (1961–1990, 1991–2020) evidențiază semnalul de schimbare climatică: creșterea temperaturii medii, a numărului de zile tropicale și a gradelor-zile de răcire, alături de o variabilitate mai mare a precipitațiilor. Acest semnal justifică principiul fundamental al adaptării: infrastructura urbană trebuie dimensionată pentru clima viitoare proiectată, nu pentru media trecutului. Un sistem pluvial sau un plan de spații verzi calibrat pe date istorice va fi subdimensionat în deceniile următoare.');
+    D.P('Proiecțiile regionale (Copernicus, IPCC AR6, scenariile SSP) indică pentru România o continuare a încălzirii și o intensificare a extremelor; integrarea acestor proiecții în SIDU, Masterplan și SECAP transformă adaptarea climatică dintr-o reacție într-o strategie anticipativă.');
+
+    D.chapter('Recomandări de planificare climatică');
+    D.bullets([
+      'Adaptare la căldură: infrastructură verde-albastră, umbrire, materiale cu albedo ridicat, perdele de arbori pe arterele expuse;',
+      'Gospodărirea apelor pluviale: soluții de oraș-burete dimensionate pe regimul local, cu prioritate în zonele impermeabilizate;',
+      'Eficiență energetică: reabilitare termică (reducerea HDD efectiv) și standarde nZEB, cu răcire pasivă prioritară (reducerea CDD);',
+      'Vegetație rezistentă la secetă și irigare eficientă din ape pluviale recuperate;',
+      'Integrarea proiecțiilor climatice în dimensionarea infrastructurii și în SECAP;',
+      'Plan de avertizare și răspuns la canicule, corelat cu harta populației vulnerabile.'
+    ]);
+    D.P('Aceste recomandări se integrează în pachetul de adaptare climatică al platformei (UHI, LOISIR spații verzi, gospodărire ape pluviale, carbon) și alimentează capitolele de mediu și risc din documentele strategice.');
+
     // Nota UrbanX (IVU) — standard transversal
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
