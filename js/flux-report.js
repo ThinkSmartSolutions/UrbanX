@@ -240,10 +240,33 @@
     D.P('Dezvoltarea generează ' + N(g.daily) + ' deplasări/zi, cu un vârf PM de ' + N(g.pm_total) + ' depl/h. ' + ((res.intersections || []).some(function (i) { return i.over_capacity; }) ? 'Cel puțin o intersecție adiacentă depășește capacitatea, ceea ce impune măsuri de atenuare obligatorii înainte de aprobare.' : 'Impactul asupra rețelei este gestionabil cu măsurile uzuale.') + ' Recomandarea centrală: maximizarea transferului modal către transport public și mobilitate dulce, susținută de un pachet TDM și de o politică de parcare echilibrată.');
     D.P('Acest studiu preliminar fundamentează decizia de a comanda un studiu de trafic detaliat (cu recensăminte de teren și model de trafic) și identifică din timp punctele critice și măsurile de atenuare, reducând riscul de respingere la avizare.');
 
-    D.chapter('17. Limitări și disclaimer');
+    D.chapter('17. Profilul temporal al traficului');
+    D.P('Traficul generat nu este uniform pe parcursul zilei, ci concentrat în orele de vârf. Profilul temporal depinde de funcțiune: locuințele produc un vârf matinal de ieșiri (7–9) și unul vesperal de intrări (17–19); birourile, profil invers; comerțul, un profil mai aplatizat cu vârf la prânz și sâmbăta. Analiza de capacitate se face pentru ora de vârf dimensionantă (de regulă PM), când traficul generat se suprapune cu vârful de fond al rețelei.');
+    D.P('Aplatizarea vârfurilor (peak spreading) — prin program de lucru flexibil, mix funcțional cu profiluri complementare sau livrări în afara orelor de vârf — reduce încărcarea maximă a rețelei fără a reduce volumul total. Este o strategie eficientă de atenuare, deoarece capacitatea unei intersecții este dimensionată tocmai pe vârf: reducerea vârfului evită investiții costisitoare în infrastructură.');
+
+    D.chapter('18. Accese și organizarea circulației pe sit');
+    D.P('Proiectarea accesurilor este critică pentru fluența și siguranța traficului indus. Principiile: minimizarea numărului de accese pe arterele principale (pentru a reduce punctele de conflict), poziționarea lor la distanță suficientă de intersecții, asigurarea benzilor de stocare/decelerare pentru virajele la stânga, și separarea fluxurilor auto de cele pietonale și de aprovizionare. Un acces prost amplasat poate satura o arteră chiar la volume moderate.');
+    D.P('Circulația internă pe sit (alei, parcare, întoarcere) trebuie dimensionată pentru gabaritele vehiculelor (inclusiv aprovizionare și intervenție), cu evitarea manevrelor de mers înapoi pe spațiul public. Organizarea circulației interne influențează și capacitatea accesurilor: o circulație internă fluidă evite formarea de cozi care se propagă pe stradă.');
+
+    D.chapter('19. Impactul asupra transportului public local');
+    D.P('O dezvoltare semnificativă modifică cererea de transport public local: creșterea numărului de utilizatori poate impune suplimentarea frecvenței sau a capacității liniilor existente, ori extinderea rețelei. Studiul trebuie să verifice dacă oferta de transport public din zonă poate absorbi cererea suplimentară estimată din repartiția modală — altfel, ponderea reală a transportului public va fi mai mică decât cea asumată, iar traficul auto mai mare.');
+    D.P('Acolo unde dezvoltarea justifică, contribuția la îmbunătățirea transportului public (stații noi, frecvență sporită) este o măsură de atenuare cu efect de durată, aliniată principiului dezvoltării orientate pe transit (TOD) și mecanismelor de captare a plusvalorii.');
+
+    D.chapter('20. Logistica și aprovizionarea');
+    D.P('Pe lângă traficul de persoane, dezvoltarea generează trafic de marfă (aprovizionare, colectare deșeuri, servicii). Acesta implică vehicule grele, cu manevre și gabarite specifice, care necesită spații de încărcare-descărcare dedicate, dimensionate corect și separate de circulația de persoane. Aprovizionarea comerțului, în special, are un impact local concentrat care trebuie planificat (ferestre orare, rampe, accese dedicate).');
+    D.P('Logistica urbană modernă încurajează consolidarea livrărilor, livrarea în afara orelor de vârf și soluțiile de ultimul kilometru cu emisii reduse (cargo-bike, vehicule electrice). Pentru funcțiunile comerciale și mixte, planul de logistică este parte integrantă a studiului de trafic.');
+
+    D.chapter('21. Comparația cu scenariul „fără dezvoltare"');
+    D.P('Evaluarea corectă a impactului compară situația cu dezvoltarea (scenariul „do-something") cu cea fără dezvoltare (scenariul „do-nothing"), pe același orizont de timp. Diferența reprezintă impactul net atribuibil dezvoltării, izolat de evoluția de fond a traficului (care crește oricum, prin dezvoltarea generală a orașului). Această comparație evită atât supraestimarea (atribuirea întregii congestii dezvoltării), cât și subestimarea impactului.');
+    D.P('Pe orizontul de analiză (tipic 5–10 ani), scenariul de referință include și celelalte dezvoltări planificate în zonă, pentru a evalua impactul cumulat. Un proiect care, izolat, are impact redus poate contribui, cumulat cu altele, la saturarea rețelei — de aceea analiza cumulativă este esențială în zonele cu presiune de dezvoltare.');
+
+    D.chapter('22. Etapizarea și impactul pe faze');
+    D.P('Dezvoltările mari se realizează în etape, fiecare cu propriul profil de trafic. Etapizarea permite corelarea generării de trafic cu capacitatea rețelei și cu realizarea măsurilor de atenuare (de exemplu, o intersecție amenajată înainte de darea în folosință a fazei care o saturează). Studiul recomandă condiționarea fazelor de realizarea infrastructurii de atenuare aferente, pentru a evita perioade de impact necontrolat.');
+
+    D.chapter('23. Limitări și disclaimer');
     D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
 
-    D.chapter('18. Surse și standarde');
+    D.chapter('24. Surse și standarde');
     D.P('ITE — Trip Generation Manual (ed. 10/11); NP 068/2002 — normativ proiectare străzi; STAS 10144 — caracteristici geometrice; GD 525/1996 — RGU (parcare); HG 874/2019; IPCC 2023 — factori de emisie. Glosar: LOS = Level of Service (nivel de serviciu, A–F); v/c = raport volum/capacitate; TDM = Transport Demand Management; TOD = Transit-Oriented Development; modal split = repartiția pe moduri de transport. Metodologie UrbanX · ThinkSmart Solutions.');
 
     var fn = ('Studiu_Trafic_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
