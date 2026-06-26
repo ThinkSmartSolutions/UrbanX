@@ -154,6 +154,12 @@
         chapN++;
       });
 
+      // ── Citire integrată ──
+      D.chapter(chapN + '. Interdependența indicatorilor și citirea integrată'); chapN++;
+      D.P('Indicatorii nu trebuie citiți izolat: puterea diagnostică reală apare din citirea lor încrucișată, întrucât domeniile se condiționează reciproc. Un preț imobiliar în creștere accelerată (domeniul H) corelat cu o accesibilitate a locuirii în deteriorare (PIR ridicat) și cu venituri stagnante (domeniul A) semnalează o piață care se îndepărtează de fundamentul ei — un risc pe care niciun indicator singur nu îl arată. Tot astfel, un grad ridicat de motorizare (A) coroborat cu o acoperire slabă a transportului public (E) și cu o calitate a aerului degradată (D) conturează un cerc vicios auto-dependență → poluare, a cărui rupere ține de politica de mobilitate.');
+      D.P('Exemple de citiri integrate utile în decizie: (1) verde redus (D) + insulă de căldură intensă (D) + populație vârstnică (A) = vulnerabilitate ridicată la caniculă, prioritate pentru infrastructură verde; (2) dotări concentrate central (F) + Walk Score periferic scăzut (C) = inechitate teritorială, prioritate pentru descentralizarea serviciilor; (3) CUT subutilizat semicentral (H) + acces bun la transport (E) = oportunitate de densificare orientată pe transit (TOD). Această logică de citire transversală este ceea ce transformă un set de indicatori într-un instrument de diagnoză urbană.');
+      D.callout && D.callout('Principiu', 'Valoarea unui sistem de indicatori nu stă în numărul lor, ci în capacitatea de a fi citiți împreună. Cele 8 domenii sunt proiectate să se completeze, oferind o imagine integrată a orașului.');
+
       // ── Sinteză + grafic distribuție pe domenii ──
       D.chapter(chapN + '. Sinteza acoperirii pe domenii'); chapN++;
       if (D.barChart) {
