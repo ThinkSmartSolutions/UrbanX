@@ -8,22 +8,22 @@
   'use strict';
   function N(v, d) { try { return Number(v).toLocaleString('ro-RO', { maximumFractionDigits: d == null ? 0 : d }); } catch (e) { return '' + v; } }
 
-  function _ctx(cityKey) {
+  function _ctx(cityKey, mode) {
     var db = G._RO_CITIES_DB || {}; var c = db[cityKey] || (G.TCI && G.TCI.cityData) || {};
-    var ap = G._activeParcel || G._selectedParcel || null;
+    var ap = (mode === 'T') ? null : (G._activeParcel || G._selectedParcel || null); // mode T = teritorial (ignoră parcela)
     var lat = (ap && ap.lat) || c.lat || 47, lon = (ap && ap.lon) || c.lon || 27;
     return { city: c, name: c.name || 'UAT', judet: c.judet || '', lat: lat, lon: lon, hasParcel: !!(ap && ap.lat), area: (ap && (ap.area || ap.suprafata)) || null };
   }
 
-  function generatePDF(cityKey) {
+  function generatePDF(cityKey, mode) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
-    var x = _ctx(cityKey);
+    var x = _ctx(cityKey, mode);
     G.ss && G.ss('🏺 Generez Raportul de Cercetare Arheologică (RCAI)…');
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: 'RAPORT DE CERCETARE ARHEOLOGICĂ', cityName: x.name, accent: [180, 83, 9] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
-    var tip = x.hasParcel ? 'RAPORT SIT / PARCELĂ' : 'RAPORT TERITORIAL — UAT';
+    var tip = (mode === 'T') ? 'RAPORT TERITORIAL — UAT' : (x.hasParcel ? 'RAPORT SIT / PARCELĂ' : 'RAPORT ZONĂ / PARCELĂ');
     // ── COPERTĂ completă ──
     D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
     pdf.setFillColor(24, 16, 6); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(180, 83, 9); pdf.rect(0, 60, W, 1.4, 'F');

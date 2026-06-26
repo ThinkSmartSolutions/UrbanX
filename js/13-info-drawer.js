@@ -652,6 +652,20 @@ const RAPORT_INFO = {
     ],
     nu: ['Selectează o parcelă pe hartă pentru raport punctual', 'Document de pre-cercetare — nu înlocuiește raportul unui arheolog autorizat MCIN și nu are valoare juridică în avizare'],
   },
+  rcai_teritoriu: {
+    ico: '🏺', label: 'RCAI Teritoriu — Cercetare Arheologică UAT', badge: 'optional', badgeLabel: 'Patrimoniu · teritorial', color: '180,83,9',
+    fn: "window._RCAI&&window._RCAI.generatePDF(window.TCI&&window.TCI.cityKey,'T')",
+    ce: 'Inventarul și evaluarea patrimoniului arheologic la nivelul întregului UAT: evoluția istorică, siturile RAN și monumentele LMI, cercetările anterioare, geomorfologia și zonarea potențialului arheologic pe teritoriu. Document amplu de rang superior.',
+    dece: 'Fundamentează capitolele de patrimoniu din SIDU/Masterplan și deciziile de planificare teritorială; semnalează zonele cu potențial arheologic ridicat care necesită prudență la dezvoltare.',
+    legal: 'OG 43/2000 · Legea 422/2001 · norme MCIN · Convenția de la Valletta',
+    output: [
+      { ico: '🗺', txt: 'Zonarea potențialului arheologic pe teritoriul UAT' },
+      { ico: '📊', txt: 'Inventar situri RAN și monumente LMI' },
+      { ico: '🏺', txt: 'Evoluția istorică a așezării pe perioade' },
+      { ico: '⚠️', txt: 'Zone sensibile și recomandări pentru planificare' }
+    ],
+    nu: ['Document de pre-cercetare — nu înlocuiește cercetarea unui arheolog autorizat MCIN', 'Pentru raport pe o parcelă, folosește „RCAI Parcelă/Zonă" din meniul Rapoarte'],
+  },
   hbu: {
     ico: '🏗', label: 'Reconversie urbană (HBU)', badge: 'recomandat', badgeLabel: 'Investițional · regenerare', color: '217,119,6',
     fn: "window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey)",

@@ -53,7 +53,8 @@
     clima: function () { try { G._ClimateEngine && G._ClimateEngine.openPanel(); } catch (e) {} },
     hbu: function () { try { G._HBU && G._HBU.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} },
     economie: function () { try { G._Economy && G._Economy.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} },
-    spsTodo: function () { try { G.ss && G.ss('Modul Strategic Planning Suite — în dezvoltare. Disponibile acum: SIDU · Masterplan · PMUD · Climatică (SECAP) · Economică · HBU.'); } catch (e) {} }
+    spsTodo: function () { try { G.ss && G.ss('Modul Strategic Planning Suite — în dezvoltare. Disponibile acum: SIDU · Masterplan · PMUD · Climatică (SECAP) · Economică · HBU · RCAI Teritoriu.'); } catch (e) {} },
+    rcaiT: function () { try { G._RCAI && G._RCAI.generatePDF(G.TCI && G.TCI.cityKey, 'T'); } catch (e) {} }
   };
 
   // ── NAV — PLANIFICARE URBANĂ: doar UAT / teritoriu / predicții (parcela+avizare = Flux de avizare) ──
@@ -117,6 +118,7 @@
       { label: 'SPPC — Patrimoniu Construit · Peisaj', moduleId: 'spsTodo' },
       { sep: '— INVESTIȚIONAL —' },
       { label: '🏗 HBU ★ — Highest & Best Use (Reconversie) ✓', moduleId: 'hbu', info: 'hbu' },
+      { label: '🏺 RCAI Teritoriu — Cercetare Arheologică ✓', moduleId: 'rcaiT', info: 'rcai_teritoriu' },
       { sep: '— INSTRUMENTE & PREDICȚII —' },
       { label: 'SIDU — registru & coerență → PUG', moduleId: 'sidu' },
       { label: 'Portofoliu strategic 2025-2055', moduleId: 'portofoliu' },
