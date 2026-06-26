@@ -83,7 +83,7 @@
     if (D.sourceBadges) D.sourceBadges(['MFP — execuții bugetare', 'Legea 273/2006', 'INS', 'Eurostat']);
   }
 
-  function generatePDF(cityKey) {
+  async function generatePDF(cityKey) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
     var e = compute(cityKey);
@@ -204,6 +204,9 @@
       ['Rata de absorbție fonduri UE', '> 70% din alocare']
     ], [CW * 0.55, CW * 0.45]);
     D.P('Acești indicatori, urmăriți anual, oferă un tablou de bord al sănătății financiare a UAT și se corelează cu dimensiunea economică a Notei UrbanX (IVU). O administrație care își îmbunătățește acești indicatori demonstrează o guvernanță fiscală solidă — un criteriu tot mai important pentru finanțatori și pentru încrederea investitorilor.');
+
+    // dotări urbane (POI OSM) — reutilizarea capturilor din carduri (#14)
+    try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Dotări și servicii publice — echiparea teritoriului (OSM)'); } catch (ex) {}
 
     // grafice native din structura bugetară calculată (date reale, nu umplutură)
     try {

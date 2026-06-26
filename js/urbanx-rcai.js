@@ -202,6 +202,9 @@
     // restricții și niveluri de avizare LMI (serviciu comun _LMI)
     try { if (G._LMI && G._LMI.renderSection) await G._LMI.renderSection(D, cityKey); } catch (e) {}
 
+    // dotări urbane (POI OSM) la nivel teritorial — reutilizarea capturilor din carduri (#14)
+    if (mode === 'T') { try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Context urban — dotări și repere (OSM)'); } catch (e) {} }
+
     // ── Corpul dezvoltat: teritorial (_RCAI_DEEP, 100+ pag) sau parcelă (_RCAI_DEEP_PARCEL, ~50 pag punctual) ──
     try {
       var deep = (mode === 'T') ? (G._RCAI_DEEP || []) : (G._RCAI_DEEP_PARCEL || G._RCAI_DEEP || []);

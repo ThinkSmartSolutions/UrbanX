@@ -324,6 +324,9 @@
     ], { title: 'Randament (ROI %) — analiză de sensibilitate', h: 44, source: 'Model HBU UrbanX' });
     D.P('Analiza folosește metoda valorii reziduale: din valoarea brută de dezvoltare (GDV) se scad costurile totale pentru a obține profitul și randamentul. Valorile sunt orientative, calibrate pe repere de piață românești; un ROI peste 15–20% indică un proiect atractiv pentru dezvoltatori, în timp ce un ROI sub pragul de risc poate justifica instrumente de sprijin public (regenerare urbană, parteneriat public-privat).');
 
+    // dotări urbane (POI OSM) la nivel teritorial — reutilizarea capturilor din carduri (#14)
+    if (territorial) { try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Dotări urbane și accesibilitate la servicii (OSM)'); } catch (e) {} }
+
     // ── Corpul dezvoltat: teritorial (_HBU_DEEP, 100+ pag) sau parcelă (_HBU_DEEP_PARCEL, ~50 pag punctual) ──
     try {
       var deep = territorial ? (G._HBU_DEEP || []) : (G._HBU_DEEP_PARCEL || G._HBU_DEEP || []);

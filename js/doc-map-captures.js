@@ -32,6 +32,78 @@
     } catch (e) { return 0; }
   }
 
+  // ── Captură DOTĂRI urbane (POI OSM) — reutilizează logica cardurilor de infrastructură ──
+  // Returnează {img, counts, total} sau null. Folosit în studiile teritoriale (#14).
+  var _PROXY = (G._PROXY_URL || G._PROXY_BASE || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
+  async function capturePOI(cityKey, opts) {
+    opts = opts || {};
+    var map = G.map; if (!map || !map.getCanvas || !G.turf) return null;
+    var c = (G._RO_CITIES_DB && G._RO_CITIES_DB[cityKey]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[cityKey]);
+    var lat = (c && c.lat) || (opts.lat), lon = (c && c.lon) || (opts.lon);
+    if (lat == null) { try { var cc = map.getCenter(); lat = cc.lat; lon = cc.lng; } catch (e) { return null; } }
+    var radius = opts.radius || 3000;
+    var TYPES = [
+      { f: '[amenity=school]', c: '#f59e0b', k: 'școli' }, { f: '[amenity~"^(hospital|clinic)$"]', c: '#ef4444', k: 'sănătate' },
+      { f: '[highway=bus_stop]', c: '#60a5fa', k: 'transport' }, { f: '[railway~"^(tram_stop|station)$"]', c: '#3b82f6', k: 'tren/tramvai' },
+      { f: '[leisure=park]', c: '#22c55e', k: 'parcuri' }, { f: '[amenity~"^(university|college)$"]', c: '#a78bfa', k: 'universități' },
+      { f: '[historic]', c: '#eab308', k: 'monumente' }
+    ];
+    var q = '[out:json][timeout:25];(' + TYPES.map(function (t) { return 'nwr(around:' + radius + ',' + lat + ',' + lon + ')' + t.f + ';'; }).join('') + ');out center tags;';
+    var feats = [], counts = {};
+    try {
+      var resp = await fetch(_PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
+      var j = await resp.json(); var els = (j && j.elements) || [];
+      els.forEach(function (el) {
+        var t = el.tags || {}; var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+        if (la == null) return;
+        var col = '#94a3b8', kind = 'altele';
+        if (t.amenity === 'school') { col = '#f59e0b'; kind = 'școli'; } else if (t.amenity === 'hospital' || t.amenity === 'clinic') { col = '#ef4444'; kind = 'sănătate'; }
+        else if (t.amenity === 'university' || t.amenity === 'college') { col = '#a78bfa'; kind = 'universități'; }
+        else if (t.highway === 'bus_stop') { col = '#60a5fa'; kind = 'transport'; } else if (t.railway) { col = '#3b82f6'; kind = 'tren/tramvai'; }
+        else if (t.leisure === 'park') { col = '#22c55e'; kind = 'parcuri'; } else if (t.historic) { col = '#eab308'; kind = 'monumente'; }
+        counts[kind] = (counts[kind] || 0) + 1;
+        feats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [lo, la] }, properties: { c: col } });
+      });
+    } catch (e) { return null; }
+    if (!feats.length) return null;
+    var ids = ['dmc-poi-pt'], srcs = ['dmc-poi-src'];
+    function cln() { ids.forEach(function (i) { try { if (map.getLayer(i)) map.removeLayer(i); } catch (e) {} }); srcs.forEach(function (s) { try { if (map.getSource(s)) map.removeSource(s); } catch (e) {} }); }
+    var savedC, savedZ, savedP, savedB;
+    try { savedC = map.getCenter(); savedZ = map.getZoom(); savedP = map.getPitch(); savedB = map.getBearing(); } catch (e) {}
+    try {
+      cln();
+      map.addSource('dmc-poi-src', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      map.addLayer({ id: 'dmc-poi-pt', type: 'circle', source: 'dmc-poi-src', paint: { 'circle-radius': 4, 'circle-color': ['get', 'c'], 'circle-stroke-color': '#0a0e1f', 'circle-stroke-width': 1, 'circle-opacity': 0.9 } });
+      try { var bb = G.turf.bbox({ type: 'FeatureCollection', features: feats }); map.fitBounds([[bb[0], bb[1]], [bb[2], bb[3]]], { padding: 50, maxZoom: 14.5, duration: 0 }); } catch (e) { map.jumpTo({ center: [lon, lat], zoom: 12.8 }); }
+      await _idle(map, 2400);
+      var url = map.getCanvas().toDataURL('image/jpeg', 0.9);
+      cln();
+      try { if (savedC) map.jumpTo({ center: savedC, zoom: savedZ, pitch: savedP, bearing: savedB }); } catch (e) {}
+      return { img: (url && url.length > 2000) ? url : null, counts: counts, total: feats.length };
+    } catch (e) { cln(); return null; }
+  }
+
+  // Inserează un capitol cu dotările urbane (POI) în orice studiu (D = _makeStratDoc)
+  async function poiSection(D, cityKey, titlu) {
+    try {
+      if (!D || !D.chapter) return false;
+      var r = await capturePOI(cityKey);
+      if (!r || !r.img) return false;
+      D.chapter(titlu || 'Infrastructura urbană — dotări (OSM)');
+      D.P && D.P('Harta sintetizează dotările urbane identificate în date deschise (OpenStreetMap) în jurul localității: unități de învățământ, sănătate, transport public, parcuri, universități și monumente. Distribuția și densitatea lor reflectă nivelul de echipare a teritoriului și fundamentează analiza accesibilității la servicii.');
+      var CW = D.dims.CW, ML = D.dims.ML;
+      var iw = CW, ih = Math.round(iw * 0.6); if (D.ensure) D.ensure(ih + 12);
+      var yy = (D.y != null ? D.y : 60);
+      D.pdf.addImage(r.img, 'JPEG', ML, yy, iw, ih, '', 'FAST');
+      try { D.pdf.setDrawColor(120, 130, 160); D.pdf.setLineWidth(0.3); D.pdf.rect(ML, yy, iw, ih, 'S'); } catch (e) {}
+      if (D.setY) D.setY(yy + ih + 2);
+      if (D.source) D.source('Dotări OSM (rază ~3 km) · © OpenStreetMap');
+      var ck = Object.keys(r.counts || {});
+      if (ck.length && D.barChart) D.barChart(ck.map(function (k, i) { var pal = [[245, 158, 11], [239, 68, 68], [96, 165, 250], [59, 130, 246], [34, 197, 94], [167, 139, 250], [234, 179, 8]]; return [k, r.counts[k], pal[i % pal.length]]; }), { title: 'Dotări urbane identificate pe tip (OSM)', h: 46, source: 'OpenStreetMap — date reale' });
+      return true;
+    } catch (e) { return false; }
+  }
+
   // Capturi: harta de baza a UAT + superbloc + cativa indici urbani, suprapusi pe harta reala
   async function capture(cityKey) {
     var map = G.map;
@@ -212,6 +284,6 @@
     } catch (e) { console.warn('[DocMapCaptures] riskExtras', e); }
   }
 
-  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing, indicesSection: indicesSection, riskExtras: riskExtras };
+  G._DocMapCaptures = { capture: capture, renderPlates: renderPlates, docClosing: docClosing, indicesSection: indicesSection, riskExtras: riskExtras, capturePOI: capturePOI, poiSection: poiSection };
   console.log('[DocMapCaptures] modul capturi harta pentru documente incarcat');
 })(window);
