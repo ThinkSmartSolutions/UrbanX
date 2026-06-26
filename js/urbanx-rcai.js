@@ -1,0 +1,100 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// urbanx-rcai.js — RCAI · Raport de Cercetare Arheologică și Evaluarea
+// Potențialului Arheologic. Document de RANG SUPERIOR (țintă 100+ pag), pe parcelă
+// → meniul Rapoarte. Conținut profund din workflow (_RCAI_DEEP) + date OSM historic.
+// window._RCAI.generatePDF(cityKey) · .openPanel() · 26 iunie 2026 · ThinkSmart Solutions
+// ═══════════════════════════════════════════════════════════════════════════
+(function (G) {
+  'use strict';
+  function N(v, d) { try { return Number(v).toLocaleString('ro-RO', { maximumFractionDigits: d == null ? 0 : d }); } catch (e) { return '' + v; } }
+
+  function _ctx(cityKey) {
+    var db = G._RO_CITIES_DB || {}; var c = db[cityKey] || (G.TCI && G.TCI.cityData) || {};
+    var ap = G._activeParcel || G._selectedParcel || null;
+    var lat = (ap && ap.lat) || c.lat || 47, lon = (ap && ap.lon) || c.lon || 27;
+    return { city: c, name: c.name || 'UAT', judet: c.judet || '', lat: lat, lon: lon, hasParcel: !!(ap && ap.lat), area: (ap && (ap.area || ap.suprafata)) || null };
+  }
+
+  function generatePDF(cityKey) {
+    var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
+    if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
+    var x = _ctx(cityKey);
+    G.ss && G.ss('🏺 Generez Raportul de Cercetare Arheologică (RCAI)…');
+    var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var D = G._makeStratDoc(pdf, { docTitle: 'RAPORT DE CERCETARE ARHEOLOGICĂ', cityName: x.name, accent: [180, 83, 9] });
+    var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
+    var tip = x.hasParcel ? 'RAPORT SIT / PARCELĂ' : 'RAPORT TERITORIAL — UAT';
+    // ── COPERTĂ completă ──
+    D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+    pdf.setFillColor(24, 16, 6); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(180, 83, 9); pdf.rect(0, 60, W, 1.4, 'F');
+    try { if (G._drawUrbanxLogo) { G._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · PATRIMONIU & ARHEOLOGIE', W / 2, 44, { align: 'center' });
+    pdf.setTextColor(245, 158, 11); pdf.setFontSize(10); pdf.text(tip, W / 2, 72, { align: 'center' });
+    pdf.setTextColor(255, 255, 255); pdf.setFontSize(20); pdf.text('RAPORT DE CERCETARE', W / 2, 90, { align: 'center' }); pdf.text('ARHEOLOGICĂ', W / 2, 100, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(12); pdf.setTextColor(230, 215, 190); pdf.text('și Evaluarea Potențialului Arheologic', W / 2, 110, { align: 'center' });
+    pdf.setFont(FONT, 'bold'); pdf.setTextColor(251, 191, 36); pdf.setFontSize(15); pdf.text(D.S2(x.name + (x.judet ? ' · jud. ' + x.judet : '')), W / 2, 124, { align: 'center' });
+    var cyr = 142;
+    pdf.setDrawColor(180, 83, 9); pdf.setLineWidth(0.4); pdf.setFillColor(38, 24, 8);
+    pdf.roundedRect(26, cyr, W - 52, 96, 3, 3, 'FD');
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('STRUCTURA RAPORTULUI', W / 2, cyr + 9, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(8.7); pdf.setTextColor(220, 205, 180);
+    ['Obiectivul studiului · cadru legislativ (OG 43/2000, Legea 422/2001, norme MCIN)', 'metodologia cercetării · amplasament · analiză geomorfologică (terase, izvoare, pâraie)', 'evoluția istorică pe perioade (preistorie → antichitate → medieval → modern → comunist)', 'analiză cartografică (planuri istorice) · context arheologic (situri RAN, monumente LMI)', 'cercetări anterioare · stratigrafie estimativă · evaluarea potențialului arheologic', 'analiza riscului pentru investiție (scenarii) · recomandări și avize · concluzii', 'Nota UrbanX Patrimoniu · bibliografie · anexe'].forEach(function (l, i) { pdf.text(l, W / 2, cyr + 18 + i * 6.2, { align: 'center' }); });
+    pdf.setTextColor(170, 150, 120); pdf.setFontSize(8.5);
+    pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Document de pre-cercetare · UrbanX TSS-FG', W / 2, cyr + 104, { align: 'center', maxWidth: W - 50 });
+    D.setSuppress && D.setSuppress(false);
+
+    D.chapter('Rezumat executiv');
+    D.P('Prezentul Raport de Cercetare Arheologică și de Evaluare a Potențialului Arheologic ' + (x.hasParcel ? 'pentru amplasamentul analizat din ' : 'pentru teritoriul administrativ al ') + x.name + (x.judet ? ', județul ' + x.judet : '') + ', sintetizează cercetarea documentară, cartografică și arheologică disponibilă public, în scopul evaluării potențialului arheologic și a riscului pe care patrimoniul îngropat îl poate genera pentru o investiție. Raportul are caracter de pre-cercetare și orientează beneficiarul, proiectantul și autoritatea de avizare asupra demersurilor necesare conform legislației în vigoare (OG 43/2000, Legea 422/2001).');
+    D.callout && D.callout('Statut', 'Document de PRE-CERCETARE generat algoritmic. NU înlocuiește raportul de cercetare arheologică întocmit de un arheolog autorizat MCIN și nu are valoare juridică în procedurile de avizare ale DJC sau MCIN.');
+
+    D.chapter('Metodologia cercetării');
+    D.P('Cercetarea integrează patru paliere de analiză: (1) documentară — bibliografie istorică și arheologică, repertorii, cronici; (2) cartografică — interpretarea și suprapunerea planurilor istorice (planuri de încartiruire, ridicări militare, planuri cadastrale) pe situația actuală; (3) arheologică — analiza siturilor din Repertoriul Arheologic Național (RAN), a monumentelor din Lista Monumentelor Istorice (LMI) și a cercetărilor anterioare din Cronica Cercetărilor Arheologice; (4) geomorfologică — relieful, terasele, hidrografia istorică și implicațiile lor pentru locuirea istorică și conservarea vestigiilor. Limitările sunt explicitate: accesul la unele surse poate fi parțial, iar estimările (în special stratigrafia) au caracter orientativ, prin analogie cu situri cercetate în proximitate.');
+
+    // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 100+ pag ──
+    try {
+      var deep = G._RCAI_DEEP || [];
+      deep.forEach(function (ch) {
+        if (!ch || !ch.title) return;
+        D.chapter(ch.title);
+        (ch.blocks || []).forEach(function (bl) {
+          try {
+            if (bl.type === 'p' && bl.text) D.P(bl.text);
+            else if (bl.type === 'bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
+            else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) { var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; })); }
+          } catch (e) {}
+        });
+      });
+    } catch (e) {}
+
+    // Nota UrbanX (IVU)
+    try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
+
+    D.chapter('Limitări și disclaimer');
+    D.P('Document de pre-cercetare generat algoritmic de UrbanX, pe baza surselor publice (RAN/CIMEC, LMI/MCIN, OSM, hărți istorice, date geomorfologice). NU înlocuiește raportul de cercetare arheologică realizat de un arheolog autorizat de MCIN, nu are valoare juridică în procedurile de avizare ale DJC sau MCIN și nu substituie diagnosticul sau cercetarea preventivă de teren. Estimările de potențial și stratigrafie au caracter orientativ. Validarea revine specialiștilor și instituțiilor abilitate.');
+
+    D.chapter('Surse și standarde');
+    D.P('OG 43/2000 (protejarea patrimoniului arheologic) · Legea 422/2001 (monumente istorice) · norme metodologice MCIN · Repertoriul Arheologic Național (RAN/CIMEC) · Lista Monumentelor Istorice (LMI) · Cronica Cercetărilor Arheologice · OpenStreetMap (situri istorice) · hărți istorice georeferențiate · date geomorfologice și hidrografice. Metodologie UrbanX · ThinkSmart Solutions.');
+
+    var fn = ('Raport_arheologic_RCAI_' + x.name.replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    G._buildStratTOC && G._buildStratTOC(D, 1);
+    pdf.save(fn); G.ss && ss('✅ Raport arheologic generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
+  }
+
+  function openPanel(cityKey) {
+    var x = _ctx(cityKey); var n = (G._RCAI_DEEP || []).length;
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.78);z-index:9300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+    ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    ov.innerHTML = '<div style="background:#0b1424;color:#e6edf7;width:min(560px,94vw);border:1px solid rgba(180,83,9,.5);border-radius:14px;font-family:system-ui,sans-serif;padding:18px 20px">' +
+      '<div style="font-weight:800;font-size:16px">🏺 Raport de Cercetare Arheologică (RCAI) — ' + x.name + '</div>' +
+      '<div style="font-size:11px;color:#94a3b8;margin:4px 0 12px">' + (x.hasParcel ? 'Raport sit/parcelă' : 'Raport teritorial UAT') + ' · evaluarea potențialului arheologic și a riscului pentru investiție · document de rang superior</div>' +
+      '<div style="font-size:11.5px;color:#cbd5e1;line-height:1.5">Sinteză a cercetării documentare, cartografice și arheologice publice (RAN, LMI, hărți istorice, geomorfologie). Generează un raport PDF amplu, cu evoluție istorică pe perioade, context arheologic, stratigrafie estimativă, evaluarea potențialului și recomandări de avizare (DJC/MCIN).</div>' +
+      '<div style="display:flex;gap:8px;margin-top:14px"><button onclick="window._RCAI.generatePDF(window.TCI&&window.TCI.cityKey)" style="flex:1;background:linear-gradient(180deg,#d97706,#92400e);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Generează Raport Arheologic (PDF)</button>' +
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;cursor:pointer">Închide</button></div>' +
+      '<div style="font-size:9px;color:#64748b;margin-top:10px">Pre-cercetare — nu înlocuiește raportul unui arheolog autorizat MCIN.' + (n ? '' : ' (conținut profund în curs de generare)') + '</div></div>';
+    document.body.appendChild(ov);
+  }
+
+  G._RCAI = { generatePDF: generatePDF, openPanel: openPanel };
+  console.log('[RCAI] ✅ Raport de Cercetare Arheologică încărcat');
+})(window);
