@@ -330,19 +330,20 @@
     // ── Corpul dezvoltat: teritorial (_HBU_DEEP, 100+ pag) sau parcelă (_HBU_DEEP_PARCEL, ~50 pag punctual) ──
     try {
       var deep = territorial ? (G._HBU_DEEP || []) : (G._HBU_DEEP_PARCEL || G._HBU_DEEP || []);
-      deep.forEach(function (ch) {
+      deep.forEach(function (ch, _ci) {
         if (!ch || !ch.title) return;
-        D.chapter(ch.title);
+        D.chapter(ch.title); var _vis = false;
         (ch.blocks || []).forEach(function (bl) {
           try {
             if (bl.type === 'p' && bl.text) D.P(bl.text);
             else if (bl.type === 'bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
             else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) {
               var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; }));
-              _autoChart(D, bl.headers, bl.rows);
+              _autoChart(D, bl.headers, bl.rows); _vis = true;
             }
           } catch (e) {}
         });
+        if (!_vis) { try { if (G._chapterGraphic) G._chapterGraphic(D, _ci); } catch (e) {} }
       });
     } catch (e) {}
 

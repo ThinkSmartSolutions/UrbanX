@@ -321,6 +321,56 @@
   // ── Render corp dezvoltat (capitole _DEEP) + auto-grafic din tabele numerice ──
   // Reutilizabil de orice studiu (climate, economy, etc.) ca să atingă rangul superior.
   function _num(s){ if(typeof s==='number')return s; if(s==null)return null; var m=(''+s).replace(/\./g,'').replace(/,/g,'.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+
+  // ── Context real al orașului pentru grafice (calculat o dată, cache pe D) ──
+  function _gctx(D){
+    if(D.__gctx) return D.__gctx;
+    var ctx={ivuDims:null,score:null,grade:null,pop:null,growth:null,avg:null,name:null};
+    try{
+      var ck=(D.__cityKey)||(G.TCI&&G.TCI.cityKey);
+      var city=(G._RO_CITIES_DB&&G._RO_CITIES_DB[ck])||(G.TCI&&G.TCI._EXTRA_UATS&&G.TCI._EXTRA_UATS[ck])||
+        (G._TCIMasterplanPDF&&G._TCIMasterplanPDF._resolveCity&&G._TCIMasterplanPDF._resolveCity(ck))||{};
+      ctx.name=city.name||'UAT';
+      ctx.pop=city.pop2021||city.pop||null;
+      // creștere pe deceniu (%) — pt prognoză demografică
+      var g=city.rata_reala_2011_2021; if(g==null && city.r10!=null) g=city.r10*10; if(g==null) g=0;
+      ctx.growth=g;
+      if(G.UrbanXIVU&&G.UrbanXIVU.scoreFor){ var s=G.UrbanXIVU.scoreFor(ck); if(s&&s.R){ ctx.ivuDims=s.R.dims; ctx.score=s.R.score; ctx.grade=s.R.grade; } }
+      if(G.UrbanXIVU&&G.UrbanXIVU.catalog){ try{ var cat=G.UrbanXIVU.catalog(); if(cat&&cat.length){ ctx.avg=Math.round(cat.reduce(function(a,b){return a+(b.R&&b.R.score||0);},0)/cat.length); } }catch(e){} }
+    }catch(e){}
+    D.__gctx=ctx; D.__gci=0; return ctx;
+  }
+  // Desenează un grafic din date REALE pe un capitol fără vizual propriu. Rotește un set
+  // de vizualizări reale/prognoză ca să nu fie perete de text. Returnează true dacă a desenat.
+  function _chapterGraphic(D, idx){
+    try{
+      if(!D || !D.barChart) return false;
+      var c=_gctx(D);
+      var opts=[];
+      if(c.ivuDims&&c.ivuDims.length){
+        opts.push(function(){ var pal=[[37,99,235],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
+          D.barChart(c.ivuDims.map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,14), Math.round(d.score), pal[i%pal.length]];}),{title:'Nota UrbanX pe dimensiuni (0-100) — '+(c.name||''),max:100,source:'IVU UrbanX · date reale'}); });
+      }
+      if(c.pop){
+        opts.push(function(){ var g=c.growth/100; var p2031=Math.round(c.pop*(1+g)), p2041=Math.round(c.pop*(1+g)*(1+g));
+          D.barChart([['2021 (real)',Math.round(c.pop),[100,116,139]],['2031 (prognoză)',p2031,[59,130,246]],['2041 (prognoză)',p2041,[37,99,235]]],{title:'Proiecție demografică — '+(c.name||'UAT')+' (trend '+(c.growth>=0?'+':'')+c.growth.toFixed(1)+'%/deceniu)',max:0,source:'INS Recensământ 2021 + prognoză liniară UrbanX'}); });
+      }
+      if(c.score!=null && c.avg!=null){
+        opts.push(function(){ D.barChart([[(c.name||'Oraș').slice(0,14),c.score,[34,197,94]],['Media națională',c.avg,[148,163,184]]],{title:'Nota UrbanX — poziție față de media națională',max:100,source:'IVU UrbanX · catalog național'}); });
+      }
+      if(c.ivuDims&&c.ivuDims.length>=4){
+        opts.push(function(){ var sorted=c.ivuDims.slice().sort(function(a,b){return b.score-a.score;}); var top=sorted.slice(0,2), low=sorted.slice(-2);
+          D.barChart(top.concat(low).map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,14),Math.round(d.score), i<2?[34,197,94]:[239,68,68]];}),{title:'Puncte forte vs. vulnerabilități (IVU)',max:100,source:'IVU UrbanX'}); });
+      }
+      if(!opts.length) return false;
+      var pick=opts[(D.__gci||0)%opts.length]; D.__gci=(D.__gci||0)+1;
+      // asigură spațiu (graficul are ~50mm)
+      if(D.ensure) D.ensure(54);
+      pick(); return true;
+    }catch(e){ return false; }
+  }
+  window._chapterGraphic = _chapterGraphic;
+
   function deepRender(D, deepArr, CW){
     if(!D || !deepArr || !deepArr.length) return 0;
     var n=0;
@@ -328,13 +378,19 @@
       if(!ch || !ch.title) return;
       try{
         D.chapter(ch.title); n++;
+        var hadVisual=false;
         (ch.blocks||[]).forEach(function(bl){
           try{
             if(bl.type==='p' && bl.text) D.P(bl.text);
             else if(bl.type==='bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
+            else if(bl.type==='chart' && bl.data && bl.data.length && D.barChart){
+              // bloc grafic explicit din conținut: data=[[label,val],...]
+              var pal2=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
+              var cd=bl.data.map(function(r,i){ return [(''+(r[0]||('#'+(i+1)))).slice(0,16), _num(r[1]), (r[2]&&r[2].length===3)?r[2]:pal2[i%pal2.length]]; }).filter(function(r){return r[1]!=null;});
+              if(cd.length>=2){ D.barChart(cd, {title:bl.title||'Reprezentare grafică', max:bl.max||0, source:bl.source||'Date studiu'}); hadVisual=true; }
+            }
             else if(bl.type==='table' && bl.headers && bl.rows && bl.rows.length && D.table){
               var nc=bl.headers.length||1; D.table(bl.headers, bl.rows, bl.headers.map(function(){return CW/nc;}));
-              // auto-grafic dacă ultima coloană e numerică pe ≥2 rânduri
               try{
                 if(D.barChart && bl.rows.length>=2 && bl.rows.length<=14){
                   var li=bl.headers.length-1;
@@ -345,6 +401,7 @@
                     if(ok===bl.rows.length && Object.keys(uniq).length>=2){
                       var pal=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
                       D.barChart(bl.rows.map(function(r,i){return [(''+(r[0]||('#'+(i+1)))).replace(/\s+/g,' ').trim().slice(0,16), vals[i], pal[i%pal.length]];}), {title:((bl.headers[li])||'Valori')+' — reprezentare grafică', max:0, source:'Date din tabelul de mai sus'});
+                      hadVisual=true;
                     }
                   }
                 }
@@ -352,6 +409,8 @@
             }
           }catch(e){}
         });
+        // REGULĂ: fiecare capitol are un element grafic — fallback cu date reale/prognoză
+        if(!hadVisual){ try{ _chapterGraphic(D, n); }catch(e){} }
       }catch(e){}
     });
     return n;
