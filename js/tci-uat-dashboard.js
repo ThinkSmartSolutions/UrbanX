@@ -303,6 +303,13 @@ G._UATDashboard = {
               `).join('')}
             </div>
             <div style="color:#475569;font-size:9px;margin-top:4px;text-align:center">click pe un card → afișare pe hartă</div>
+            <div onclick="window._LMI&&window._LMI.openPanel(window.TCI&&window.TCI.cityKey)" title="Monumente istorice (LMI) și regimul avizelor"
+              style="margin-top:6px;display:flex;align-items:center;gap:8px;background:rgba(180,83,9,.14);border:1px solid rgba(217,119,6,.35);border-radius:6px;padding:7px 9px;cursor:pointer"
+              onmouseover="this.style.background='rgba(180,83,9,.24)'" onmouseout="this.style.background='rgba(180,83,9,.14)'">
+              <span style="font-size:16px">🏛️</span>
+              <div style="flex:1"><div style="color:#fbbf24;font-size:12px;font-weight:700">Monumente istorice (LMI) & avize</div><div style="color:#94a3b8;font-size:9px">cod LMI · grupa A (Minister) / B (DJC) · restricții de construire</div></div>
+              <span style="color:#fbbf24;opacity:.6">▸</span>
+            </div>
             <div style="color:#475569;font-size:9px;margin-top:6px">
               OSM Overpass · ${poi.source} · ${new Date(poi.timestamp).toLocaleDateString('ro-RO')}
             </div>

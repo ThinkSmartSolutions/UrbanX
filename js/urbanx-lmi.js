@@ -62,6 +62,26 @@
     return true;
   }
 
-  G._LMI = { judetCode: judetCode, avizLevel: avizLevel, forJudet: forJudet, summary: summary, renderSection: renderSection };
+  // panou dashboard: monumente LMI + regimul avizelor
+  async function openPanel(cityKeyOrJud) {
+    var key = cityKeyOrJud || (G.TCI && G.TCI.cityKey);
+    var lst = await forJudet(key); var s = await summary(key);
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.78);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+    ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    var rows = lst.slice(0, 30).map(function (m) { var lv = avizLevel(m.cod); return '<tr style="border-top:1px solid rgba(255,255,255,.06)"><td style="padding:3px 5px;color:#94a3b8;font-size:10px;white-space:nowrap">' + m.cod + '</td><td style="padding:3px 5px;color:#dce8fa;font-size:11px">' + (m.nume || '') + '</td><td style="padding:3px 5px;text-align:center"><span style="color:' + lv.culoare + ';font-weight:700;font-size:10px">' + lv.grupa + '</span></td></tr>'; }).join('');
+    ov.innerHTML = '<div style="background:#0b1424;color:#e6edf7;width:min(640px,95vw);max-height:90vh;overflow:auto;border:1px solid rgba(180,83,9,.5);border-radius:14px;font-family:system-ui,sans-serif;padding:18px 20px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:16px">🏛️ Monumente istorice (LMI) — ' + (s.judet || '') + '</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:5px 10px;cursor:pointer">✕</button></div>' +
+      '<div style="display:flex;gap:8px;margin:12px 0">' +
+      '<div style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:9px;text-align:center"><div style="font-size:18px;font-weight:800;color:#fbbf24">' + s.total + '</div><div style="font-size:9px;color:#94a3b8">monumente LMI</div></div>' +
+      '<div style="flex:1;background:#0a1120;border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:9px;text-align:center"><div style="font-size:18px;font-weight:800;color:#ef4444">' + s.grupaA + '</div><div style="font-size:9px;color:#94a3b8">grupa A · aviz Minister</div></div>' +
+      '<div style="flex:1;background:#0a1120;border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:9px;text-align:center"><div style="font-size:18px;font-weight:800;color:#f59e0b">' + s.grupaB + '</div><div style="font-size:9px;color:#94a3b8">grupa B · aviz DJC</div></div></div>' +
+      '<div style="font-size:11px;color:#cbd5e1;background:rgba(180,83,9,.08);border:1px solid rgba(180,83,9,.25);border-radius:8px;padding:9px;margin-bottom:10px">Regimul avizelor: <b style="color:#ef4444">grupa A</b> (interes național) → aviz <b>Ministerul Culturii / Comisia Națională a Monumentelor Istorice</b>; <b style="color:#f59e0b">grupa B</b> (interes local) → aviz <b>Direcția Județeană pentru Cultură (DJC)</b>. Parcelele din <b>zona de protecție</b> a unui monument necesită aviz chiar dacă nu sunt ele însele clasate (Legea 422/2001).</div>' +
+      (lst.length ? '<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:3px 5px;color:#94a3b8;font-size:10px">Cod LMI</th><th style="text-align:left;padding:3px 5px;color:#94a3b8;font-size:10px">Denumire</th><th style="padding:3px 5px;color:#94a3b8;font-size:10px">Gr.</th></tr>' + rows + '</table>' + (lst.length > 30 ? '<div style="font-size:10px;color:#64748b;margin-top:6px">Primele 30 din ' + lst.length + ' poziții LMI ale județului.</div>' : '') + '</div>' : '<div style="color:#64748b;font-size:12px">Nu există date LMI pentru acest județ în setul curent.</div>') +
+      '<div style="font-size:9px;color:#64748b;margin-top:10px">Sursă: Lista Monumentelor Istorice (LMI) — INP / Ministerul Culturii (set deschis data.gov.ro). Orientativ; pentru regimul juridic exact se consultă LMI oficial și DJC.</div></div>';
+    document.body.appendChild(ov);
+  }
+
+  G._LMI = { judetCode: judetCode, avizLevel: avizLevel, forJudet: forJudet, summary: summary, renderSection: renderSection, openPanel: openPanel };
   console.log('[LMI] ✅ serviciu LMI comun încărcat (window._LMI)');
 })(window);
