@@ -312,14 +312,15 @@ async function _rvExportMemoriu(){
 
   section('7','ESTIMARE COSTURI');
   const totalCost=Math.round(sdaTotal*1200);
+  const _eur=v=>Math.round(v).toLocaleString('ro-RO')+' €';
   const costItems=[
-    ['Structură + fundații',Math.round(totalCost*0.32)+'€'],
-    ['Închideri + compartimentări',Math.round(totalCost*0.18)+'€'],
-    ['Tâmplărie + vitraj',Math.round(totalCost*0.12)+'€'],
-    ['Finisaje interioare',Math.round(totalCost*0.15)+'€'],
-    ['Instalații (sanitare+termice+elec)',Math.round(totalCost*0.18)+'€'],
-    [subsolInfo.needsBasement?'Subsol parcare '+subsolInfo.nLevels+' nivel':'Infrastructură + racorduri',Math.round(totalCost*(subsolInfo.needsBasement?0.08:0.05))+'€'],
-    ['TOTAL ESTIMAT (fără TVA)',Math.round(totalCost)+'€ (~'+Math.round(totalCost/1000)+'k€)'],
+    ['Structură + fundații',_eur(totalCost*0.32)],
+    ['Închideri + compartimentări',_eur(totalCost*0.18)],
+    ['Tâmplărie + vitraj',_eur(totalCost*0.12)],
+    ['Finisaje interioare',_eur(totalCost*0.15)],
+    ['Instalații (sanitare+termice+elec)',_eur(totalCost*0.18)],
+    [subsolInfo.needsBasement?'Subsol parcare '+subsolInfo.nLevels+' nivel':'Infrastructură + racorduri',_eur(totalCost*(subsolInfo.needsBasement?0.08:0.05))],
+    ['TOTAL ESTIMAT (fără TVA)',_eur(totalCost)+' (~'+Math.round(totalCost/1000)+'k€)'],
   ];
   costItems.forEach(([l,v],i)=>{
     if(cy_mem>PH-18){pdf.addPage();cy_mem=15;}
