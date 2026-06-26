@@ -244,7 +244,7 @@
       D.chapter('25. Surse, standarde și glosar');
       D.P('RICS — „Valuation of development property" și „Financial viability in planning"; IVS — International Valuation Standards; date de piață imobiliară 2024–2025; indici de cost în construcții; ANCPI — date de tranzacții. Glosar: GDV = Gross Development Value (valoarea dezvoltării finalizate); GBA = Gross Buildable Area (suprafață desfășurată brută); marjă de dezvoltare = profit/GDV; valoare reziduală teren = sumă maximă susținută pentru achiziția terenului la marja-țintă; LTC/LTV = loan-to-cost / loan-to-value. Metodologie UrbanX · ThinkSmart Solutions.');
 
-      var fn = ('Studiu_Fezabilitate_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      var fn = ('Studiu_Fezabilitate_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       window._buildStratTOC && window._buildStratTOC(D, 1);
       pdf.save(fn); G.ss && ss('✅ Studiu de fezabilitate generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
     } catch (e) { console.error('[Feaz PDF]', e); try { return _genSimpleFeaz(res, meta, Jc, N); } catch (e2) {} }

@@ -273,7 +273,7 @@
       D.P && D.P('Glosar: €/mp = euro pe metru pătrat construit; CBD = Central Business District (nucleul de oportunitate); rentă urbană = surplusul de valoare al unei locații față de marginea construibilă; LVC = Land Value Capture (captarea plusvalorii generate de decizia publică); evaluare de masă = estimarea valorii unui număr mare de proprietăți printr-un model unitar, distinctă de evaluarea individuală ANEVAR.');
       D.P && D.P('Document elaborat cu platforma UrbanX · ThinkSmart Solutions SRL. Metodologie proprietară, parametri calibrați pe piața românească. Pentru actualizări și analize pe tranzacții reale, contactați echipa UrbanX.');
 
-      var fn = ('Studiu_Valori_' + (window._asciiFile ? window._asciiFile(uat) : uat) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      var fn = ('Studiu_Valori_' + (window._asciiFile ? window._asciiFile(uat) : uat) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       window._buildStratTOC && window._buildStratTOC(D, 1);
       pdf.save(fn);
       G.ss && G.ss('✅ Studiu Valori Imobiliare generat: ' + pdf.getNumberOfPages() + ' pagini · ' + uat);

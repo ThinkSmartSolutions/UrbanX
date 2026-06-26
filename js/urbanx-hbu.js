@@ -299,7 +299,7 @@
     D.chapter('Surse și standarde');
     D.P('Metodologie HBU (Highest & Best Use) — Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR; Legea 350/2001 (urbanism); POR Axa 5 (regenerare urbană); PNRR; repere de cost și valoare de piață RO. Date amplasament: ' + (x.hasParcel ? N(x.lat, 4) + '°N, ' + N(x.lon, 4) + '°E' : 'centru UAT (selectați o parcelă pentru analiză punctuală)') + '. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Studiu de reconversie generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }
