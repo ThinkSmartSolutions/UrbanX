@@ -14,7 +14,8 @@
   // Indicatorii dinamici se calculează per-UAT în modulele/rapoartele dedicate;
   // aici se documentează CE se monitorizează, CUM și DE UNDE (sursa).
   var DOMENII = [
-    { d: 'A. Demografie și economie', src: 'INS TEMPO · Eurostat · _RO_CITIES_DB', items: [
+    { d: 'A. Demografie și economie', src: 'INS TEMPO · Eurostat · _RO_CITIES_DB',
+      note: 'Demografia și economia sunt fundamentul oricărei analize urbane: ele determină cererea de locuințe, servicii și infrastructură și condiționează sustenabilitatea financiară a orașului. Rata reală de creștere și proiecțiile semnalează dacă orașul este în expansiune sau contracție, iar nivelul veniturilor (raportat la media UE) măsoară puterea de cumpărare și atractivitatea pentru forța de muncă. Indicele de îmbătrânire anticipează presiunea viitoare pe serviciile medicale și sociale.', items: [
       ['Populație rezidentă', 'recensământ 2021 + actualizare INS', 'INS / Eurostat'],
       ['Rata reală de creștere 2011–2021', '(pop2021 − pop2011) / pop2011', 'INS RPL'],
       ['Proiecție populație 2030/2055', 'model logistic pe rata reală + coef. hub', 'metodologie UrbanX'],
@@ -24,7 +25,8 @@
       ['Coeficient de hub regional', 'index atractivitate (universități, industrie, logistică)', 'model UrbanX'],
       ['Indice de îmbătrânire', 'pop. 65+ / pop. 0–14 × 100', 'INS structură pe vârste'],
     ]},
-    { d: 'B. Indici compoziți de calitate urbană', src: 'urbanx-indices.js · ISO 37120/37122 · OECD · WHO', items: [
+    { d: 'B. Indici compoziți de calitate urbană', src: 'urbanx-indices.js · ISO 37120/37122 · OECD · WHO',
+      note: 'Indicii compoziți sintetizează mai multe dimensiuni într-un scor unic, ușor de comunicat și de comparat în timp — analog modului în care PIB-ul rezumă economia. Ei traduc complexitatea urbană în limbaj de decizie: City DNA descrie profilul orașului pe șase axe, Urban Health Index oferă un „semn vital" agregat, iar indicii tematici (Happiness, Stress, Silver, Child) surprind calitatea vieții resimțite de grupuri specifice. Fiind agregate, au caracter orientativ și se citesc împreună cu indicatorii de bază care îi compun.', items: [
       ['Amprenta Orașului (City DNA)', 'media(6 axe: capital uman, economie, accesibilitate, inovare, natură, reziliență)', 'ISO 37120 + Eurostat + INFP'],
       ['Urban Health Index', 'media(demografie, economie, mobilitate, mediu, locuire, reziliență)', 'OECD Better Life + ISO 37120'],
       ['Happiness Index', 'media(verde, mobilitate, venit, siguranță, sănătate, cultură)', 'World Happiness Report + OECD'],
@@ -35,7 +37,8 @@
       ['Oraș pentru Copii', '45 + mp_verde/loc + acoperire_TP×0,2 [%]', 'UNICEF Child Friendly Cities'],
       ['Carbon Pathway', 'traiectorie CO2/cap 2025→2055 (decarbonare)', 'EEA + IPCC + EU Green Deal'],
     ]},
-    { d: 'C. Modele spațiale de planificare (desenate pe hartă)', src: 'indices-report.js · urban-models', items: [
+    { d: 'C. Modele spațiale de planificare (desenate pe hartă)', src: 'indices-report.js · urban-models',
+      note: 'Spre deosebire de indicatorii sintetici, modelele spațiale se desenează direct pe hartă, pe rețeaua și geometria reală a orașului, transformând un principiu de planificare într-o evaluare concretă a teritoriului. Orașul-15-minute și Walk Score măsoară proximitatea funcțiunilor; TOD și coridorul mixt orientează densificarea spre transport; 3-30-300, SDG 11.7 și GVI cuantifică verdele și spațiul public; Space Syntax și mixul funcțional descriu configurația rețelei. Ele fundamentează propunerile din SIDU și PUZ cu argumente măsurabile.', items: [
       ['Orașul 15 minute', 'acoperire = min(95; 45 + servicii_lipsă×6) [%]', 'C. Moreno (Sorbonne, 2020)'],
       ['TOD — dezvoltare orientată pe transport', 'locuințe = arie_ha×densitate/2,3; transfer modal', 'P. Calthorpe'],
       ['Coridor urban mixt', 'front activ = lungime×2×%/100; locuri muncă', 'practică mixed-use'],
@@ -47,7 +50,8 @@
       ['Space Syntax — integrare', 'integrare = f(conectivitate, intersecții/lungime) [0–1]', 'B. Hillier (UCL)'],
       ['Mix funcțional (entropie)', 'entropie = −Σ(p_i·ln p_i)/ln(n) × 100', 'Frank et al. (walkability)'],
     ]},
-    { d: 'D. Mediu, climă și calitatea aerului', src: 'OpenAQ · EEA · IPCC · Copernicus · Directiva END', items: [
+    { d: 'D. Mediu, climă și calitatea aerului', src: 'OpenAQ · EEA · IPCC · Copernicus · Directiva END',
+      note: 'Domeniul de mediu măsoară presiunea orașului asupra climei (carbon) și presiunea climei asupra orașului (căldură, inundații pluviale), alături de factorii care afectează direct sănătatea — calitatea aerului și zgomotul. Acești indicatori sunt din ce în ce mai relevanți juridic și financiar: respectarea pragurilor OMS și a directivelor europene (calitatea aerului, zgomot) condiționează conformitatea, iar traiectoria de decarbonare este cerută de Pactul Verde și de finanțările europene. Multe valori provin din senzori live (OpenAQ) sau din teledetecție satelitară.', items: [
       ['CO2 pe locuitor', 't CO2 echiv. / locuitor / an', 'EEA + IPCC AR6'],
       ['Acoperire coronament (canopy)', '% suprafață cartier acoperită de coronament', 'OMS/IUCN · LST satelitar'],
       ['Insula de căldură urbană (LST/UHI)', 'ΔT oraș−rural; răcire = f(verde, albedo)', 'Landsat/Sentinel · IPCC AR6'],
@@ -58,7 +62,8 @@
       ['Spațiu verde pe locuitor', 'mp spațiu verde public / locuitor', 'INS + OSM · țintă OMS 26 mp/loc'],
       ['Permeabilitate teritoriu', '% suprafață permeabilă (anti-inundație pluvială)', 'model Sponge City'],
     ]},
-    { d: 'E. Mobilitate și trafic', src: 'CNAIR · GTFS · OpenSky · OSM Overpass', items: [
+    { d: 'E. Mobilitate și trafic', src: 'CNAIR · GTFS · OpenSky · OSM Overpass',
+      note: 'Mobilitatea determină accesibilitatea — condiția de bază a vieții urbane — și este, simultan, principala sursă de emisii și de zgomot. Indicatorii de aici măsoară atât oferta (acoperirea transportului public, rețeaua ciclabilă), cât și cererea și performanța (generare de deplasări, repartiție modală, nivel de serviciu la intersecții, necesar de parcare). Repartiția modală este pârghia-cheie: transferul dinspre auto spre transport public și mobilitate activă reduce simultan congestia, emisiile și consumul de spațiu, fiind obiectivul central al PMUD.', items: [
       ['Acoperire transport public', '% populație la ≤400 m de stație TP', 'GTFS + OSM'],
       ['Repartiție modală (modal split)', '% auto / TP / bicicletă / pietonal', 'model Flux (ITE adaptat RO)'],
       ['Generare deplasări (trip generation)', 'rate ITE pe funcțiune × suprafață/unități', 'ITE Trip Generation 10/11'],
@@ -68,7 +73,8 @@
       ['Necesar parcare', 'normativ GD 525/1996 − reducere proximitate TP', 'GD 525/1996'],
       ['Lungime rețea ciclabilă', 'km piste din rețeaua OSM', 'OSM Overpass'],
     ]},
-    { d: 'F. Infrastructură și dotări (POI live)', src: 'infra-map.js · OSM Overpass (via proxy)', items: [
+    { d: 'F. Infrastructură și dotări (POI live)', src: 'infra-map.js · OSM Overpass (via proxy)',
+      note: 'Dotările publice (educație, sănătate, comerț, recreere, transport) sunt cele care fac un oraș locuibil; distribuția lor spațială determină echitatea accesului între cartiere. Acești indicatori se extrag live din OpenStreetMap, cu numărare și localizare reală pe hartă, și se interpretează prin raportare la populație și la timpul de acces (criteriul 15 minute). Concentrarea dotărilor în centru și deficitul la periferie este un semnal clasic de inechitate teritorială, pe care densificarea orientată și investițiile țintite îl pot corecta.', items: [
       ['Unități de învățământ (școli)', 'nr. + densitate la 1000 loc (OSM amenity=school)', 'OSM Overpass'],
       ['Unități sanitare (spitale/clinici)', 'nr. + acoperire spațială', 'OSM amenity=hospital'],
       ['Universități / învățământ superior', 'nr. instituții', 'OSM amenity=university'],
@@ -76,13 +82,15 @@
       ['Comerț alimentar (supermarket)', 'nr. + acoperire la 15 min', 'OSM shop=supermarket'],
       ['Noduri transport (stații/transit)', 'nr. stații TP / intermodalitate', 'OSM public_transport'],
     ]},
-    { d: 'G. Risc și reziliență', src: 'INFP · ANAR · P100-1/2022', items: [
+    { d: 'G. Risc și reziliență', src: 'INFP · ANAR · P100-1/2022',
+      note: 'Reziliența la hazarduri condiționează siguranța vieții și continuitatea funcțiilor urbane. În România, riscul seismic este determinant — accelerația de proiectare (ag) din codul P100-1/2022 fundamentează cerințele structurale și prioritizarea consolidărilor. Hazardul la inundații și insulele de căldură completează profilul de risc, cu impact direct asupra populației vulnerabile. Acești indicatori orientează zonele de restricție din PUG, programele de reducere a riscului și măsurile de adaptare climatică, fiind tot mai importanți în autorizare și asigurare.', items: [
       ['Accelerație seismică de proiectare (ag)', 'valoare ag pe județ, P100-1/2022', 'INFP · cod P100-1/2022'],
       ['Hazard la inundații', 'zone inundabile + adâncime (model DEM + ANAR WMS)', 'ANAR · DEM Copernicus'],
       ['Reziliență compozită', '82 − ag×120 (axă din City DNA)', 'INFP + metodologie UrbanX'],
       ['Populație vulnerabilă la caniculă', 'pop. în zone UHI peste prag', 'LST + structură demografică'],
     ]},
-    { d: 'H. Imobiliar și economie urbană', src: 'market-engine · value-map · ANCPI · IVS', items: [
+    { d: 'H. Imobiliar și economie urbană', src: 'market-engine · value-map · ANCPI · IVS',
+      note: 'Piața imobiliară este barometrul economic al orașului și, totodată, baza impozitării locale: valoarea terenului și a construcțiilor reflectă atractivitatea localizării și finanțează, prin impozite, serviciile publice. Indicatorii măsoară nivelul și dinamica prețurilor, randamentul investițional (yield), accesibilitatea locuirii și plusvaloarea generată de reglementarea urbanistică (LVC). Corelarea hărții de valoare cu zonarea PUG identifică terenurile subutilizate — oportunități de densificare cu dublu beneficiu: regenerare urbană și lărgirea bazei fiscale locale.', items: [
       ['Preț median €/mp', 'mediana prețului unitar pe segment/UAT', 'ANCPI (L7/1996) · agregat GDPR'],
       ['Variație preț 3 / 12 luni', 'Δ% = (Med_recent − Med_anterior)/Med_anterior', 'serie temporală tranzacții'],
       ['Randament locativ brut (yield)', '(chirie_lunară×12)/preț × 100', 'piață chirii · IVS'],
@@ -142,6 +150,7 @@
         if (D.table) {
           D.table(['Indicator', 'Metodă / formulă', 'Sursă'], g.items.map(function (it) { return [it[0], it[1], it[2]]; }), [CW * 0.30, CW * 0.45, CW * 0.25]);
         }
+        if (g.note) D.P(g.note);
         chapN++;
       });
 
