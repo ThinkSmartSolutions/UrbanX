@@ -138,6 +138,9 @@
       D.P('Sursă: Lista Monumentelor Istorice (LMI), Institutul Național al Patrimoniului — set de date deschise (data.gov.ro / cultura.ro). Codurile de grupă „A" indică monumente de interes național, iar „B" de interes local. Prezența unor monumente clasate în proximitatea amplasamentului ridică nivelul de prudență și poate impune avize suplimentare de la Direcția Județeană pentru Cultură.');
     }
 
+    // restricții și niveluri de avizare LMI (serviciu comun _LMI)
+    try { if (G._LMI && G._LMI.renderSection) await G._LMI.renderSection(D, cityKey); } catch (e) {}
+
     // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 100+ pag ──
     try {
       var deep = G._RCAI_DEEP || [];

@@ -186,6 +186,9 @@
       });
     } catch (e) {}
 
+    // restricții patrimoniu + niveluri de avizare LMI (serviciu comun)
+    try { if (G._LMI && G._LMI.renderSection) await G._LMI.renderSection(D, cityKey); } catch (e) {}
+
     D.chapter('Constrângeri și due diligence');
     D.bullets([
       'Urbanistice: regimul PUG/PUZ trebuie verificat — reconversia poate necesita modificare de PUZ (schimbare funcțiune, indici);',
