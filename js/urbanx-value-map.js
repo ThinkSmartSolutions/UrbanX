@@ -159,7 +159,8 @@
       D.P && D.P('Prețul de referință este calibrat pe nivelurile de piață 2024–2025 pentru municipiile reședință de județ, pe baza datelor publice de tranzacționare și a ofertelor agregate. Pentru analize pe tranzacții reale se recomandă coroborarea cu grila notarială și cu baza ANCPI.');
 
       if (mapShot) {
-        D.chapter && D.chapter('4. Harta de valoare (€/mp)');
+        D.newPage && D.newPage();
+      D.chapter && D.chapter('4. Harta de valoare (€/mp)');
         D.P && D.P('Reprezentarea coropletă de mai jos suprapune câmpul de valoare pe teritoriul real al UAT. Nuanțele calde (roșu/portocaliu) indică zonele cu valoare ridicată (central), cele reci (verde) zonele periferice.');
         try { var iw = CW, ih = Math.round(iw * 0.62); D.ensure && D.ensure(ih + 10); pdf.addImage(mapShot, 'JPEG', ML, D.y, iw, ih, '', 'FAST'); pdf.setDrawColor(180, 200, 190); pdf.rect(ML, D.y, iw, ih, 'S'); D.setY && D.setY(D.y + ih + 3); D.source && D.source('Captură hartă valori UrbanX · model rentă urbană · WGS84 (orientativ)'); } catch (e) {}
       } else {
@@ -200,6 +201,7 @@
       }
       D.P && D.P('Tabelul de mai sus oferă reperele de valoare pe paliere de localizare, utile pentru o pre-evaluare rapidă și pentru calibrarea taxelor locale. Conversia în RON folosește un curs orientativ de 5,0 RON/€; pentru evaluări oficiale se folosește cursul BNR din ziua evaluării.');
 
+      D.newPage && D.newPage();
       D.chapter && D.chapter('7. Predicție de evoluție (orizont 3–5 ani)');
       D.P && D.P('Pe baza trendurilor recente ale pieței și a presiunii de dezvoltare, se estimează o evoluție anuală de +3…+6% în termeni nominali pentru zonele centrale și de tranzit bine deservite, respectiv +1…+3% pentru periferie. Factorii de risc (creșterea dobânzilor, încetinirea creditării) pot tempera creșterea. Proiecția are caracter orientativ — vezi capitolul de limitări.');
       D.table && D.table(['Scenariu (orizont +5 ani)', 'Central €/mp', 'Periferie €/mp'], [
@@ -225,6 +227,7 @@
       D.P && D.P('Decalajul față de orașele vest-europene comparabile nu este doar un indicator de „rămânere în urmă", ci și o măsură a potențialului de convergență. Experiența orașelor din Europa Centrală (Polonia, Cehia, Ungaria) arată că, odată cu integrarea infrastructurii (transport public performant, regenerare urbană, digitalizare administrativă), valorile imobiliare converg treptat către media regională. Pentru ' + uat + ', principalele pârghii de convergență sunt: modernizarea transportului public, creșterea suprafețelor verzi accesibile și predictibilitatea reglementării urbanistice (PUG actualizat, proceduri de autorizare rapide).');
       D.P && D.P('Comparația cu grila notarială locală constituie un test de coerență util: în mod tipic, valorile de piață depășesc grila notarială cu 20–60%, întrucât grila se actualizează cu întârziere și are rol fiscal/minimal. O divergență mare semnalează fie o subevaluare a grilei (cu impact asupra veniturilor din taxe de tranzacționare), fie o supraîncălzire a pieței. Harta de valoare oferă administrației un instrument de actualizare periodică a grilei pe baze obiective.');
 
+      D.newPage && D.newPage();
       D.chapter && D.chapter('9. Aplicații practice');
       D.P && D.P('Harta de valoare are aplicații directe în administrația publică locală și în mediul privat de dezvoltare. La nivel municipal, ea fundamentează deciziile de politică fiscală și de investiții, oferind o bază obiectivă, transparentă și ușor de actualizat pentru diferențierea teritorială a valorii.');
       D.bullets && D.bullets([
