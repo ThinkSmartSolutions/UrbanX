@@ -18,12 +18,11 @@
   var PROXY = (G._PROXY_BASE || 'https://urbanx-proxy.3dtravelsoftart.workers.dev');
   // fetch monumente/situri REALE din OSM (historic/heritage/biserici) lângă amplasament/UAT
   async function _fetchHeritage(lat, lon, radius) {
-    var q = '[out:json][timeout:30];(' +
-      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[historic][name];' +
-      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[heritage][name];' +
-      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[tourism=attraction][name];' +
-      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[amenity=place_of_worship][name];' +
-      ');out center tags;';
+    var q = '[out:json][timeout:25];(' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[historic];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[heritage];' +
+      'nwr(around:' + radius + ',' + lat + ',' + lon + ')[tourism=attraction];' +
+      ');out center tags;'; // fără [name] (al doilea filtru returna 0); numele se filtrează în cod
     try {
       var resp = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(35000) });
       var j = await resp.json(); var els = (j && j.elements) || [];
