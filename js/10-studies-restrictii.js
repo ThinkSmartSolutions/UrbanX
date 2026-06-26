@@ -245,12 +245,25 @@
     ['Aviz MApN (militar)', 'VERIFICARE', 'Servituti militare'],
     ['Aviz administratie portuara', R.port.da ? 'POSIBIL' : 'Neaplicabil', 'Cod maritim/portuar'],
     ['Compatibilitate Seveso (APM/ISU)', 'VERIFICARE', 'Legea 59/2016']];
+    // aviz patrimoniu (LMI/monumente) — serviciu comun _LMI (zona de protecție)
+    var lmiAviz = null; try { if (window._LMI && window._LMI.avizForParcel) lmiAviz = await window._LMI.avizForParcel(lat, lon); } catch (e) { }
+    var lmiNivel = (lmiAviz && lmiAviz.necesar) ? ((lmiAviz.nivel && /minister/i.test(lmiAviz.nivel)) ? 'PROBABIL — Min. Culturii (gr. A)' : 'PROBABIL — DJC (gr. B)') : 'Verificare LMI/RAN';
+    avize.push(['Aviz patrimoniu (monument / zona de protectie)', lmiNivel, 'Legea 422/2001; OG 43/2000']);
     cy = tblRow(['Aviz / studiu', 'Necesitate', 'Temei'], cy, true, [62, 46, 74]);
     avize.forEach(function (r) { cy = tblRow(r, cy, false, [62, 46, 74]); });
     cy += 3;
+    if (lmiAviz && lmiAviz.nota) { cy = body('Patrimoniu (LMI/RAN): ' + S2(lmiAviz.nota) + (lmiAviz.necesar ? ' Nivel de avizare estimat: ' + S2(lmiAviz.nivel || 'DJC') + '.' : ''), 14, cy, undefined, 7.5); cy += 2; }
     cy = sec('6.2 Recomandari pentru proiectant, beneficiar si autoritati', cy);
     cy = body('Pentru PROIECTANT: integrarea restrictiilor de la faza de concept; comandarea din timp a studiilor de specialitate (geotehnic, hidrologic, expertiza); dimensionarea la actiunea seismica ag=' + seism.ag + 'g. Pentru BENEFICIAR: bugetarea avizelor si studiilor; verificarea fezabilitatii inainte de achizitie. Pentru AUTORITATI: prezentul studiu sustine analiza incadrarii in restrictiile legale si fundamenteaza conditiile din Certificatul de Urbanism.', 14, cy); cy += 1;
-    cy = body('Caracter: document preliminar de fundamentare, orientativ. Datele de risc se confirma pe sursele oficiale (MMAP/ANAR, MDLPA, ANRM, administratii de arii protejate) si prin studiile de specialitate certificate. Sursele de adevar sunt indicate la finalul fiecarui capitol.', 14, cy, undefined, 7);
+    cy = body('Caracter: document preliminar de fundamentare, orientativ. Datele de risc se confirma pe sursele oficiale (MMAP/ANAR, MDLPA, ANRM, administratii de arii protejate) si prin studiile de specialitate certificate. Sursele de adevar sunt indicate la finalul fiecarui capitol.', 14, cy, undefined, 7); cy += 2;
+    // ── Nota UrbanX (IVU) — context teritorial al amplasamentului (brand UrbanX) ──
+    try {
+      var _ivuCk = (window.TCI && window.TCI.cityKey);
+      var _ivu = (window.UrbanXIVU && window.UrbanXIVU.scoreFor) ? window.UrbanXIVU.scoreFor(_ivuCk) : null;
+      cy = sec('6.3 Nota UrbanX (IVU) — contextul teritorial', cy);
+      if (_ivu && _ivu.R) cy = body('Amplasamentul se afla intr-un UAT cu Nota UrbanX (Indicele de Vitalitate Urbana) de ' + _ivu.R.score + '/100 (calificativ ' + _ivu.R.grade + ', categorie de marime: ' + (_ivu.R.tierLabel || '') + '). IVU este un indice compozit (0-100) dezvoltat de UrbanX, calculat din date reale pe sase dimensiuni (economie, calitatea vietii, conectivitate, mediu, demografie, rezilienta), cu formula transparenta si recalculabila. El ofera contextul de vitalitate al localitatii in care se incadreaza parcela.', 14, cy, undefined, 8);
+      else cy = body('Nota UrbanX (IVU) este un indice compozit (0-100) dezvoltat de UrbanX, care exprima vitalitatea urbana a UAT pe sase dimensiuni (economie, calitatea vietii, conectivitate, mediu, demografie, rezilienta), din date reale si cu formula transparenta. Selectati un UAT cu date pentru calculul notei.', 14, cy, undefined, 8);
+    } catch (e) { }
 
     // ── ESG ────────────────────────────────────────────────────────────────
     try {
