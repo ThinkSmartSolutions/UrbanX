@@ -136,7 +136,7 @@ G._UrbanRank = {
     if(D.kpis) D.kpis([
       {val:R.score+'/100', label:'Nota UrbanX', sub:'index compozit'},
       {val:R.grade, label:'Calificativ', sub:'scala A+..D'},
-      {val:'#'+R.rankInPeers+'/'+R.peerCount, label:'În tier-ul echivalent', sub:R.tierLabel},
+      {val:'#'+R.rankInPeers+'/'+R.peerCount, label:'În categoria de mărime', sub:R.tierLabel},
     ]);
     D.formula('Formula notei', R.formula, 'Toate ponderile însumează 100%. Sub-scorurile sunt normalizate 0–100.');
     D.h2('Descompunerea notei pe dimensiuni');
@@ -145,9 +145,9 @@ G._UrbanRank = {
     }
     D.bullets(R.dims.map(function(d){ return [d.label+' ('+Math.round(d.w*100)+'%)', 'scor '+d.score+'/100 — '+d.formula+' (sursă: '+d.src+').']; }));
     D.h2('Benchmark cu orașe europene echivalente');
-    D.P('Comparația se face DOAR în interiorul tier-ului de mărime ('+R.tierLabel+') — nu se compară un oraș mic cu o metropolă. Scorurile orașelor europene sunt repere orientative din clasamente publice (Mercer, EU Urban Audit, Numbeo), nu calculate cu formula UrbanX.');
+    D.P('Comparația se face DOAR în interiorul categoriei de mărime ('+R.tierLabel+') — nu se compară un oraș mic cu o metropolă. Scorurile orașelor europene sunt repere orientative din clasamente publice (Mercer, EU Urban Audit, Numbeo), nu calculate cu formula UrbanX.');
     if(D.barChart){
-      D.barChart(R.peersWithCity.map(function(p){return [p.n.split(' ')[0], p.s, p.self?[212,175,55]:[120,140,170]];}), {title:'Poziție vs orașe europene din același tier', max:100, vfmt:function(v){return String(Math.round(v));}});
+      D.barChart(R.peersWithCity.map(function(p){return [p.n.split(' ')[0], p.s, p.self?[212,175,55]:[120,140,170]];}), {title:'Poziție vs orașe europene din aceeași categorie', max:100, vfmt:function(v){return String(Math.round(v));}});
     }
     if(D.sourceBadges) D.sourceBadges(['ISO 37120','Eurostat','OECD Better Life','INFP P100','EEA','Mercer / EU Urban Audit']);
     D.P('Notă metodologică: nota este recalculată automat la fiecare actualizare a datelor live. '+R.source);

@@ -14,10 +14,29 @@
   function gradeColor(s) { return s >= 80 ? '#22c55e' : s >= 65 ? '#84cc16' : s >= 50 ? '#f59e0b' : '#ef4444'; }
   var TIER_RO = { metropola: 'Metropolă', mare: 'Oraș mare', mediu: 'Oraș mediu', mic: 'Oraș mic' };
 
+  // IVU este NAȚIONAL — orice UAT cu date în platformă (municipii _RO_CITIES_DB
+  // + orașe/comune _EXTRA_UATS). Sursă unică, dedusă (DB are prioritate).
+  function _allUats() {
+    var out = {};
+    // comune/orașe mici din TCI._EXTRA_UATS (sau window._EXTRA_UATS)
+    var extra = (G.TCI && G.TCI._EXTRA_UATS) || G._EXTRA_UATS || {};
+    Object.keys(extra).forEach(function (k) { out[k] = extra[k]; });
+    // municipii/orașe din _RO_CITIES_DB (suprascrie — date mai bogate)
+    var db = G._RO_CITIES_DB || {};
+    Object.keys(db).forEach(function (k) { out[k] = db[k]; });
+    return out;
+  }
+  function _resolveCityData(cityKey) {
+    var all = _allUats();
+    if (all[cityKey]) return all[cityKey];
+    // fallback: rezolvare prin motorul masterplan (comune/sate cu SIRUTA)
+    try { if (G._TCIMasterplanPDF && G._TCIMasterplanPDF._resolveCity) return G._TCIMasterplanPDF._resolveCity(cityKey); } catch (e) {}
+    return null;
+  }
+
   // ── calcul IVU pentru un cityKey (sincron) ───────────────────────────────
   function scoreFor(cityKey) {
-    var db = G._RO_CITIES_DB || {};
-    var city = db[cityKey]; if (!city) return null;
+    var city = _resolveCityData(cityKey); if (!city) return null;
     if (!city.key) city.key = cityKey;
     var pred = {};
     try { if (G._PredEngine && G._PredEngine.calc) pred = G._PredEngine.calc(city) || {}; } catch (e) {}
@@ -26,10 +45,10 @@
     return { key: cityKey, name: city.name || cityKey, city: city, R: R };
   }
 
-  // catalog complet (toate orașele din _RO_CITIES_DB), ordonat după IVU
+  // catalog NAȚIONAL (toate UAT-urile cu date: municipii + orașe + comune), ordonat după IVU
   function catalog() {
-    var db = G._RO_CITIES_DB || {};
-    return Object.keys(db).map(scoreFor).filter(Boolean)
+    var all = _allUats();
+    return Object.keys(all).map(scoreFor).filter(Boolean)
       .sort(function (a, b) { return b.R.score - a.R.score; });
   }
 
@@ -45,7 +64,7 @@
   function explain(s) {
     var dims = s.R.dims.slice().sort(function (a, b) { return b.score - a.score; });
     var top = dims.slice(0, 2), low = dims.slice(-2).reverse();
-    var txt = s.name + ' obține nota UrbanX de <b>' + s.R.score + '/100</b> (calificativ <b>' + s.R.grade + '</b>, tier: ' + s.R.tierLabel + '). ';
+    var txt = s.name + ' obține nota UrbanX de <b>' + s.R.score + '/100</b> (calificativ <b>' + s.R.grade + '</b>, categorie de mărime: ' + s.R.tierLabel + '). ';
     txt += 'Scorul este susținut în principal de <b>' + top[0].label + '</b> (' + top[0].score + '/100) și <b>' + top[1].label + '</b> (' + top[1].score + '/100), ';
     txt += 'și este limitat de <b>' + low[0].label + '</b> (' + low[0].score + '/100) și <b>' + low[1].label + '</b> (' + low[1].score + '/100). ';
     txt += 'Fiecare sub-scor provine din date reale și are formulă explicită — nota poate fi recalculată și verificată oricând.';
@@ -96,7 +115,7 @@
         '<div style="font-size:11px;color:#93c5fd;font-weight:700;margin-bottom:4px">📈 Cum poate crește nota</div>' +
         x.improve.map(function (im) { return '<div style="font-size:11px;color:#cbd5e1;padding:2px 0">+' + im.pts + ' pct → ridicarea „' + im.label + '" la 80/100 (' + im.formula + ')</div>'; }).join('') +
         '</div>' : '') +
-      '<div style="margin-top:10px"><div style="font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:3px">Benchmark european (același tier)</div>' + peers + '</div>' +
+      '<div style="margin-top:10px"><div style="font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:3px">Benchmark european (aceeași categorie de mărime)</div>' + peers + '</div>' +
       '<div style="font-size:10px;color:#64748b;margin-top:8px">' + R.formula + '</div>' +
       '</div></div>';
   }
