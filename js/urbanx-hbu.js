@@ -87,6 +87,23 @@
     pdf.setTextColor(255, 255, 255); pdf.setFontSize(21); pdf.text('STUDIU DE RECONVERSIE URBANĂ', W / 2, 88, { align: 'center' });
     pdf.setTextColor(251, 191, 36); pdf.setFontSize(13); pdf.text(D.S2(x.name + (x.hasParcel ? ' · amplasament selectat' : '')), W / 2, 102, { align: 'center' });
     pdf.setTextColor(200, 170, 120); pdf.setFontSize(11); pdf.text('Funcțiune optimă: ' + R.top.n + ' · ROI estimat ' + N(f.roi) + '%', W / 2, 114, { align: 'center' });
+    // panou copertă — structura studiului + reperele cheie (fără pagină parțială)
+    var cy0 = 134;
+    pdf.setDrawColor(146, 64, 14); pdf.setLineWidth(0.4); pdf.setFillColor(40, 26, 10);
+    pdf.roundedRect(26, cy0, W - 52, 92, 3, 3, 'FD');
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('STUDIU TERITORIAL DE RANG SUPERIOR', W / 2, cy0 + 9, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(220, 205, 180);
+    var capLines = ['Analiză de reconversie pe metodologia Highest & Best Use (IVS/ANEVAR):', 'profil sit · regim urbanistic · cele 4 teste HBU · scor de compatibilitate pentru', '12 funcțiuni · analiză financiară (GDV/CAPEX/NPV/ROI) și sensibilitate · constrângeri', 'și due diligence · patrimoniu industrial · etapizare · finanțare · monitorizare · Nota UrbanX.'];
+    capLines.forEach(function (l, i) { pdf.text(l, W / 2, cy0 + 18 + i * 6, { align: 'center' }); });
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('REPERE AMPLASAMENT', W / 2, cy0 + 50, { align: 'center' });
+    pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(220, 205, 180);
+    [['Suprafață teren', N(x.area) + ' mp'], ['Centralitate / accesibilitate', R.centr + ' / ' + R.access + ' (0–100)'], ['GDV estimat', N(f.gdv) + ' €'], ['Cost total estimat', N(f.totalCost) + ' €'], ['Profit potențial · ROI', N(f.profit) + ' € · ' + N(f.roi) + '%']].forEach(function (r, i) {
+      var yy = cy0 + 58 + i * 6.4; pdf.text(r[0], 36, yy); pdf.setFont(FONT, 'bold'); pdf.text(r[1], W - 36, yy, { align: 'right' }); pdf.setFont(FONT, 'normal');
+    });
+    pdf.setTextColor(170, 150, 120); pdf.setFontSize(8.5);
+    pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Instrument de pre-analiză generat algoritmic', W / 2, cy0 + 102, { align: 'center' });
+    pdf.setTextColor(140, 122, 96); pdf.setFontSize(7.5);
+    pdf.text('Surse: metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · ANPM · repere de piață RO', W / 2, cy0 + 110, { align: 'center', maxWidth: W - 50 });
     D.setSuppress && D.setSuppress(false);
 
     D.chapter('Rezumat executiv');
