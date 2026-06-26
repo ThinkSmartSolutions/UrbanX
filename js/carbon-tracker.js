@@ -84,26 +84,103 @@
     ov.appendChild(m); document.body.appendChild(ov);
   }
   function generatePDF(r, meta) {
-    meta = meta || {}; var Jc = (typeof jsPDF !== 'undefined') ? jsPDF : (window.jspdf && window.jspdf.jsPDF) || window.jsPDF; if (!Jc) return;
+    meta = meta || {};
+    var Jc = (typeof jsPDF !== 'undefined') ? jsPDF : (window.jspdf && window.jspdf.jsPDF) || window.jsPDF; if (!Jc) return;
+    var N = window._nf || function (x) { return Math.round(x).toLocaleString('ro-RO'); };
+    // Studiu complet pe motorul strategic (chapters/table/barChart) — daca exista; altfel fisa simpla.
+    if (typeof window._makeStratDoc !== 'function') { return _genSimple(r, meta, Jc, N); }
+    try {
+      var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var D = window._makeStratDoc(pdf, { docTitle: 'STUDIU AMPRENTĂ DE CARBON', cityName: (meta.nrcad ? 'CF ' + meta.nrcad : 'Dezvoltare'), accent: [34, 160, 90] });
+      var W = 210, ML = D.dims.ML, CW = D.dims.CW, F = 'DejaVuRO';
+      var opAn = r.operational_t_yr + r.transport_t_yr;
+      D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+      pdf.setFillColor(6, 22, 14); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(34, 160, 90); pdf.rect(0, 60, W, 1.4, 'F');
+      try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+      pdf.setTextColor(134, 239, 172); pdf.setFont(F, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · CARBON TRACKER', W / 2, 44, { align: 'center' });
+      pdf.setTextColor(255, 255, 255); pdf.setFontSize(26); pdf.text('STUDIU AMPRENTĂ DE CARBON', W / 2, 92, { align: 'center' });
+      pdf.setFontSize(14); pdf.setTextColor(134, 239, 172); pdf.text(D.S2((meta.nrcad ? 'CF ' + meta.nrcad + ' · ' : '') + N(r.area) + ' mp · ' + r.use), W / 2, 104, { align: 'center' });
+      pdf.setFontSize(11); pdf.setTextColor(150, 200, 170); pdf.text('Clasă energetică estimată: ' + r.green_label + ' · ' + N(r.lifetime_t) + ' t CO₂ pe ciclu de viață (30 ani)', W / 2, 116, { align: 'center' });
+      D.setSuppress && D.setSuppress(false);
+
+      D.chapter('1. Rezumat executiv');
+      D.P('Prezentul studiu cuantifică amprenta de carbon a dezvoltării analizate (' + N(r.area) + ' mp, funcțiune „' + r.use + '") pe întregul ciclu de viață, conform metodologiei de evaluare a ciclului de viață (LCA). Emisiile totale estimate sunt de ' + N(r.lifetime_t) + ' tone CO₂ echivalent pe un orizont de 30 de ani, respectiv ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp — corespunzând clasei de performanță „' + r.green_label + '". Studiul are caracter orientativ și servește raportării ESG, alinierii la Taxonomia UE și la Convenția Primarilor.');
+      D.callout && D.callout('Concluzie', 'Carbonul înglobat (' + N(r.embodied_t) + ' t) reprezintă investiția inițială de emisii, recuperată/amortizată pe durata de viață, în timp ce emisiile operaționale (' + N(opAn) + ' t/an) sunt recurente — de aceea decarbonarea energetică și mobilitatea sustenabilă au impactul cel mai mare pe termen lung.');
+
+      D.newPage && D.newPage();
+      D.chapter('2. Metodologie (LCA · EN 15978)');
+      D.P('Evaluarea urmează standardul EN 15978 (Sustainability of construction works — Assessment of environmental performance of buildings) și ghidul RICS „Whole life carbon assessment". Amprenta totală însumează trei componente: (A) carbonul ÎNGLOBAT (embodied) — emisiile din producția materialelor, transport și punere în operă (modulele A1–A5); (B) carbonul OPERAȚIONAL — emisiile din consumul de energie pe durata exploatării (modulele B6), funcție de mixul energetic național; (C) carbonul INDUS de TRANSPORT — emisiile generate de deplasările utilizatorilor, dependente de localizare și de accesibilitate.');
+      D.P('Factorii de emisie utilizați: pentru carbonul înglobat — valori de referință pe tip structural (RICS/ICE database, cca. 300–500 kg CO₂/mp construit); pentru operațional — intensitatea carbonică a rețelei electrice românești (~0,28 kg CO₂/kWh, sursă ENTSO-E/Transelectrica) aplicată consumului specific pe funcțiune; pentru transport — distanța medie pe deplasare și factorul de emisie auto, scalate la numărul de deplasări anuale induse. Orizontul de evaluare este de 30 de ani, conform practicii uzuale pentru clădiri rezidențiale.');
+      D.formula && D.formula('Carbon total pe ciclu de viață', 'C_total = C_inglobat + (C_operational + C_transport) × 30 ani', 'rezultat în tone CO₂ echivalent');
+
+      D.chapter('3. Date de intrare');
+      D.table && D.table(['Parametru', 'Valoare'], [
+        ['Suprafață construită', N(r.area) + ' mp'],
+        ['Funcțiune', String(r.use)],
+        ['Tip structural', String(r.structural_type)],
+        ['Orizont de evaluare', '30 ani'],
+        ['Intensitate rețea RO', '~0,28 kg CO₂/kWh'],
+      ], [CW * 0.5, CW * 0.5]);
+
+      D.chapter('4. Carbon înglobat (embodied)');
+      D.P('Carbonul înglobat estimat este de ' + N(r.embodied_t) + ' tone CO₂, aferent structurii de tip „' + r.structural_type + '". Acesta concentrează emisiile „din prima zi" — produse înainte ca clădirea să fie utilizată — și este, în consecință, ireversibil odată construcția realizată. Reducerea sa se obține prin alegerea materialelor cu amprentă redusă (lemn structural, beton cu ciment compozit, oțel reciclat) și prin optimizarea cantităților.');
+      D.P('Pentru această dezvoltare, trecerea la o structură pe bază de lemn (CLT/glulam) ar economisi cca. ' + N(r.timber_saving_t) + ' tone CO₂ față de soluția curentă — lemnul stocând carbon biogenic pe durata de viață a clădirii.');
+
+      D.newPage && D.newPage();
+      D.chapter('5. Carbon operațional și din transport');
+      D.P('Emisiile operaționale sunt estimate la ' + N(r.operational_t_yr) + ' tone CO₂/an (energie pentru încălzire, răcire, apă caldă, iluminat, echipamente), iar cele induse de transport la ' + N(r.transport_t_yr) + ' tone CO₂/an (deplasările utilizatorilor). Pe orizontul de 30 de ani, acestea cumulează ' + N(opAn * 30) + ' tone CO₂ — partea dominantă a amprentei totale, ceea ce confirmă că eficiența energetică (NZEB), sursele regenerabile (fotovoltaic) și localizarea accesibilă (reducerea deplasărilor auto) sunt pârghiile decisive.');
+      if (D.barChart) {
+        D.barChart([
+          ['Înglobat (o dată)', Math.round(r.embodied_t), [120, 100, 60]],
+          ['Operațional ×30', Math.round(r.operational_t_yr * 30), [34, 160, 90]],
+          ['Transport ×30', Math.round(r.transport_t_yr * 30), [59, 130, 246]],
+        ], { title: 'Defalcarea amprentei pe ciclul de viață (t CO₂, 30 ani)', h: 48, source: 'Model LCA UrbanX · EN 15978' });
+      }
+
+      D.chapter('6. Total ciclu de viață și clasificare');
+      D.table && D.table(['Componentă', 't CO₂', 'Pondere'], [
+        ['Carbon înglobat', N(r.embodied_t), Math.round(r.embodied_t / Math.max(1, r.lifetime_t) * 100) + '%'],
+        ['Operațional (30 ani)', N(r.operational_t_yr * 30), Math.round(r.operational_t_yr * 30 / Math.max(1, r.lifetime_t) * 100) + '%'],
+        ['Transport (30 ani)', N(r.transport_t_yr * 30), Math.round(r.transport_t_yr * 30 / Math.max(1, r.lifetime_t) * 100) + '%'],
+        ['TOTAL', N(r.lifetime_t), '100%'],
+      ], [CW * 0.46, CW * 0.27, CW * 0.27]);
+      D.P('Intensitatea de ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp plasează dezvoltarea în clasa „' + r.green_label + '". Ținta UE 2030 prevede o reducere de -55% față de 1990; clădirile noi trebuie să tindă către neutralitate climatică până în 2050 (Green Deal).');
+
+      D.chapter('7. Scenarii de reducere (decarbonare)');
+      D.P('Pe baza structurii amprentei, se conturează un plan de reducere cu impact gradual:');
+      D.bullets && D.bullets([
+        'Anvelopă NZEB (izolare, tâmplărie performantă) — reduce operaționalul cu 30–50%;',
+        'Sistem fotovoltaic + pompe de căldură — reduce operaționalul cu încă 20–40% și decarbonează sursa;',
+        'Structură pe lemn / materiale cu amprentă redusă — economie de cca. ' + N(r.timber_saving_t) + ' t CO₂ înglobat;',
+        'Localizare accesibilă + mobilitate dulce — reduce transportul indus cu 20–40%;',
+        'Verde urban (3-30-300) — sechestrare suplimentară și reducerea insulei de căldură.',
+      ]);
+      D.P('Cumulat, un pachet ambițios poate reduce amprenta totală cu 40–60% față de scenariul de referință, apropiind dezvoltarea de clasa A și de cerințele de raportare ESG/Taxonomie UE.');
+
+      D.newPage && D.newPage();
+      D.chapter('8. Cadru de raportare și aplicații');
+      D.P('Rezultatele susțin: raportarea ESG (pilonul de mediu — emisii GES Scope 1–3); verificarea alinierii la Taxonomia UE (criteriul „contribuție substanțială la atenuarea schimbărilor climatice"); angajamentele asumate în cadrul Convenției Primarilor (Covenant of Mayors) și ale Planurilor de Acțiune pentru Energie Durabilă și Climă (PAEDC/SECAP); fundamentarea cererilor de finanțare verde (fonduri UE, credite cu dobândă preferențială pentru clădiri sustenabile).');
+
+      D.chapter('9. Limitări și disclaimer');
+      D.P('Studiul este ORIENTATIV. Valorile sunt estimate cu factori de emisie de referință (RICS/ICE, IPCC, ENTSO-E), nu din facturi energetice reale sau dintr-o analiză detaliată a materialelor (BoQ). NU înlocuiește un audit de carbon certificat sau o evaluare LCA detaliată realizată de un expert. Pentru raportare oficială ESG/Taxonomie se recomandă verificarea de către un evaluator acreditat și utilizarea datelor măsurate.');
+
+      D.chapter('10. Surse și bibliografie');
+      D.P('EN 15978:2011 — evaluarea performanței de mediu a clădirilor; RICS — „Whole Life Carbon Assessment for the Built Environment"; ICE Database (Inventory of Carbon & Energy); IPCC AR6 — factori de emisie; ENTSO-E / Transelectrica — intensitatea carbonică a rețelei RO; Comisia Europeană — EU Green Deal, Taxonomia UE, Convenția Primarilor. Metodologie internă UrbanX · ThinkSmart Solutions.');
+
+      var fn = ('Studiu_Carbon_' + (meta.nrcad || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      window._buildStratTOC && window._buildStratTOC(D, 1);
+      pdf.save(fn);
+      G.ss && G.ss('✅ Studiu amprentă de carbon generat: ' + pdf.getNumberOfPages() + ' pagini');
+    } catch (e) { console.error('[Carbon PDF]', e); try { _genSimple(r, meta, Jc, N); } catch (e2) {} }
+  }
+  // fallback fisa simpla (daca motorul strategic lipseste)
+  function _genSimple(r, meta, Jc, N) {
     var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' }); try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
-    var F = 'DejaVuRO', W = 210, H = 297, today = new Date().toLocaleDateString('ro-RO'); var N = function (x) { return Math.round(x).toLocaleString('ro-RO'); };
-    pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, 26, 'F'); pdf.setFillColor(34, 197, 94); pdf.rect(0, 0, W, 3, 'F');
-    pdf.setTextColor(134, 239, 172); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('URBANX · CARBON TRACKER', W / 2, 10, { align: 'center' });
-    pdf.setTextColor(255, 255, 255); pdf.setFontSize(14); pdf.text('Amprenta de carbon a dezvoltării', W / 2, 19, { align: 'center' });
-    pdf.setTextColor(150, 200, 170); pdf.setFontSize(8); pdf.text((meta.nrcad ? 'CF ' + meta.nrcad + ' · ' : '') + today, W / 2, 24, { align: 'center' });
-    var lc = r.green_label[0] === 'A' ? [34, 160, 90] : r.green_label === 'B' ? [132, 204, 22] : r.green_label === 'C' ? [200, 130, 20] : [200, 60, 40];
-    pdf.setFillColor.apply(pdf, lc); pdf.roundedRect(W - 44, 32, 30, 18, 3, 3, 'F'); pdf.setTextColor(255, 255, 255); pdf.setFont(F, 'bold'); pdf.setFontSize(20); pdf.text(r.green_label, W - 29, 44, { align: 'center' });
-    var y = 40; function kv(l, v) { pdf.setTextColor(90, 100, 120); pdf.setFont(F, 'normal'); pdf.setFontSize(9.5); pdf.text(l, 16, y); pdf.setTextColor(20, 30, 50); pdf.setFont(F, 'bold'); pdf.text(String(v), 110, y); y += 8; }
-    kv('Suprafață / funcțiune', N(r.area) + ' mp · ' + r.use);
-    kv('Carbon înglobat', N(r.embodied_t) + ' t CO₂ (' + r.structural_type + ')');
-    kv('Operațional', N(r.operational_t_yr) + ' t CO₂/an');
-    kv('Transport indus', N(r.transport_t_yr) + ' t CO₂/an');
-    kv('TOTAL 30 ani', N(r.lifetime_t) + ' t CO₂ (' + N(r.per_m2_lifetime_kg) + ' kg/mp)');
-    kv('Economie cu lemn', '~' + N(r.timber_saving_t) + ' t CO₂');
-    y += 4; pdf.setFillColor(12, 40, 24); pdf.rect(12, y, W - 24, 20, 'F'); pdf.setTextColor(134, 239, 172); pdf.setFont(F, 'normal'); pdf.setFontSize(7.5);
-    pdf.text(pdf.splitTextToSize('Factori estimativi (RICS embodied carbon, IPCC, grid RO ~0.28 kg CO₂/kWh ENTSO-E). Orientativ pentru raportare ESG / EU Taxonomy / Covenant of Mayors. Țintă EU 2030: -55% vs 1990. NU înlocuiește un audit de carbon certificat.', W - 30), W / 2, y + 7, { align: 'center' });
-    pdf.save(('Carbon_' + (meta.nrcad || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_'));
-    G.ss && ss('✅ Raport carbon generat');
+    var F = 'DejaVuRO', W = 210, today = new Date().toLocaleDateString('ro-RO');
+    pdf.setFont(F, 'bold'); pdf.setFontSize(14); pdf.text('Studiu amprentă de carbon', 16, 20);
+    pdf.setFont(F, 'normal'); pdf.setFontSize(10); var y = 32;
+    [['Suprafață', N(r.area) + ' mp · ' + r.use], ['Înglobat', N(r.embodied_t) + ' t CO₂'], ['Operațional', N(r.operational_t_yr) + ' t/an'], ['Transport', N(r.transport_t_yr) + ' t/an'], ['TOTAL 30 ani', N(r.lifetime_t) + ' t CO₂'], ['Clasă', r.green_label]].forEach(function (kv) { pdf.text(kv[0] + ': ' + kv[1], 16, y); y += 8; });
+    pdf.save('Carbon_' + (meta.nrcad || 'sit') + '.pdf');
   }
   G.Carbon = { compute: compute, openPanel: openPanel, generatePDF: generatePDF };
   console.log('[Carbon] modul Carbon Tracker încărcat (window.Carbon)');
