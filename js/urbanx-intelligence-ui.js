@@ -8,6 +8,7 @@
   'use strict';
   var COL = { ok: '#22c55e', avertizare: '#f59e0b', critic: '#f97316', blocat: '#ef4444' };
   function el(t, a, h) { var e = document.createElement(t); if (a) Object.keys(a).forEach(function (k) { e.setAttribute(k, a[k]); }); if (h != null) e.innerHTML = h; return e; }
+  function _nfUI(n) { try { return Math.round(n).toLocaleString('ro-RO'); } catch (e) { return '' + n; } }
   var ST = {
     overlay: 'position:fixed;inset:0;background:rgba(2,6,16,.72);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)',
     modal: 'background:#0b1424;color:#e6edf7;width:min(720px,95vw);max-height:92vh;overflow:auto;border:1px solid rgba(96,165,250,.4);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:system-ui,sans-serif',
@@ -235,7 +236,7 @@
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
       '<span style="font-weight:800">Verdict PUZ nou</span>' +
       '<span style="background:' + recCol + ';color:#06101f;padding:3px 10px;border-radius:20px;font-weight:800;font-size:12px;text-transform:uppercase">' + imp.recommendation.replace(/_/g, ' ') + '</span></div>' +
-      '<div style="font-size:12px;color:#cbd5e1">+' + imp.marginal.population + ' loc · +' + imp.marginal.water_m3day + ' m³/zi apă · +' + imp.marginal.school_seats + ' locuri școală · +' + imp.marginal.trips_daily + ' deplasări/zi</div>' +
+      '<div style="font-size:12px;color:#cbd5e1">+' + _nfUI(imp.marginal.population) + ' loc · +' + _nfUI(imp.marginal.water_m3day) + ' m³/zi apă · +' + _nfUI(imp.marginal.school_seats) + ' locuri școală · +' + _nfUI(imp.marginal.trips_daily) + ' deplasări/zi</div>' +
       (imp.pug_fail.length ? '<div style="font-size:12px;color:#f87171;margin-top:5px">⚠ Neconformitate PUG: ' + imp.pug_fail.join(' · ') + '</div>' : '') +
       (imp.exceeded_indicators.length ? '<div style="font-size:12px;color:#f87171;margin-top:3px">⚠ Infrastructură depășită: ' + imp.exceeded_indicators.join(', ') + '</div>' : '') +
       (crossed.length ? '<div style="font-size:12px;color:#fbbf24;margin-top:3px">↗ Trece pragul critic la: ' + crossed.join(', ') + '</div>' : '') +
