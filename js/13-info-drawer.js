@@ -655,7 +655,7 @@ const RAPORT_INFO = {
   rcai_teritoriu: {
     ico: '🏺', label: 'RCAI Teritoriu — Cercetare Arheologică UAT', badge: 'optional', badgeLabel: 'Patrimoniu · teritorial', color: '180,83,9',
     fn: "window._RCAI&&window._RCAI.generatePDF(window.TCI&&window.TCI.cityKey,'T')",
-    ce: 'Inventarul și evaluarea patrimoniului arheologic la nivelul întregului UAT: evoluția istorică, siturile RAN și monumentele LMI, cercetările anterioare, geomorfologia și zonarea potențialului arheologic pe teritoriu. Document amplu de rang superior.',
+    ce: 'Inventarul și evaluarea patrimoniului arheologic la nivelul întregului UAT: evoluția istorică, siturile RAN și monumentele LMI, cercetările anterioare, geomorfologia și zonarea potențialului arheologic pe teritoriu. Document teritorial amplu.',
     dece: 'Fundamentează capitolele de patrimoniu din SIDU/Masterplan și deciziile de planificare teritorială; semnalează zonele cu potențial arheologic ridicat care necesită prudență la dezvoltare.',
     legal: 'OG 43/2000 · Legea 422/2001 · norme MCIN · Convenția de la Valletta',
     output: [

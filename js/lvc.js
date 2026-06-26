@@ -240,7 +240,7 @@
       D.chapter('24. Surse, bibliografie și glosar');
       D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea nr. 350/2001 (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
 
-      var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+      var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       window._buildStratTOC && window._buildStratTOC(D, 1);
       pdf.save(fn); G.ss && ss('✅ Studiu LVC generat: ' + pdf.getNumberOfPages() + ' pagini');
     } catch (e) { console.error('[LVC PDF]', e); try { return _genSimpleLVC(r, meta, Jc, N); } catch (e2) {} }

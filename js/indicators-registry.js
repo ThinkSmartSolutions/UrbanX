@@ -217,7 +217,7 @@
       D.chapter(chapN + '. Surse și standarde');
       D.P('ISO 37120/37122 · UN-Habitat SDG 11 · EEA / EU Green Deal · OECD Better Life · OMS (aer, verde, age-friendly) · INS TEMPO · Eurostat · ANCPI (L7/1996) · INFP / P100-1/2022 · ANAR · Copernicus / Landsat-Sentinel · OpenAQ · OpenSky · OSM Overpass · CNAIR · ITE Trip Generation · STAS 10144 · GD 525/1996 · Legea 350/2001. Metodologie UrbanX · ThinkSmart Solutions.');
 
-      var fn = ('Registru_indicatori_' + uat.replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+      var fn = ('Registru_indicatori_' + uat.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       G._buildStratTOC && G._buildStratTOC(D, 1);
       pdf.save(fn);
       G.ss && G.ss('✅ Registru de indicatori generat: ' + total + ' indicatori · ' + pdf.getNumberOfPages() + ' pagini');

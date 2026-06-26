@@ -215,7 +215,7 @@
     D.chapter('Surse și standarde');
     D.P('Open-Meteo Historical Weather API (reanaliză ERA5 — Copernicus Climate Change Service C3S); metodologie grade-zile EN ISO 15927 / ASHRAE; cadru SECAP (Convenția Primarilor); IPCC AR6 pentru tendințe. Coordonate: ' + N(c.lat, 2) + '°N, ' + N(c.lon, 2) + '°E. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Studiu_climatic_' + (ll.name || 'UAT').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Studiu_climatic_' + (ll.name || 'UAT').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Studiu climatic generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }

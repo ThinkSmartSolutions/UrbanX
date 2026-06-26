@@ -7,6 +7,20 @@
 (function (G) {
   'use strict';
   function N(v, d) { try { return Number(v).toLocaleString('ro-RO', { maximumFractionDigits: d == null ? 0 : d }); } catch (e) { return '' + v; } }
+  function _num(s) { if (typeof s === 'number') return s; if (s == null) return null; var m = ('' + s).replace(/\./g, '').replace(/,/g, '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
+  function _autoChart(D, headers, rows, title) {
+    try {
+      if (!D.barChart || !rows || rows.length < 2 || rows.length > 14) return;
+      var li = (headers ? headers.length : (rows[0] ? rows[0].length : 0)) - 1; if (li < 1) return;
+      var vals = rows.map(function (r) { return _num(r[li]); });
+      var ok = vals.filter(function (v) { return v != null; }).length;
+      if (ok < rows.length || ok < 2) return;
+      var uniq = {}; vals.forEach(function (v) { uniq[v] = 1; }); if (Object.keys(uniq).length < 2) return;
+      var pal = [[180, 83, 9], [245, 158, 11], [217, 119, 6], [168, 85, 247], [59, 130, 246], [22, 163, 74]];
+      var data = rows.map(function (r, i) { var lb = ('' + (r[0] || ('#' + (i + 1)))).replace(/\s+/g, ' ').trim().slice(0, 16); return [lb, vals[i], pal[i % pal.length]]; });
+      D.barChart(data, { title: title || ((headers && headers[li]) || 'Valori') + ' — reprezentare grafică', h: Math.min(58, 26 + data.length * 4), source: 'Date din tabelul de mai sus' });
+    } catch (e) {}
+  }
 
   function _ctx(cityKey, mode) {
     var db = G._RO_CITIES_DB || {}; var c = db[cityKey] || (G.TCI && G.TCI.cityData) || {};
@@ -122,6 +136,12 @@
         } catch (e) {}
       }
       if (D.table) D.table(['Denumire', 'Tip', 'Distanță'], rows, [CW * 0.5, CW * 0.32, CW * 0.18]);
+      // grafic: distribuția obiectivelor pe tip
+      try {
+        var byTip = {}; heritage.forEach(function (m) { var t = (m.tip || 'obiectiv').split(' (')[0]; byTip[t] = (byTip[t] || 0) + 1; });
+        var tipArr = Object.keys(byTip).map(function (k) { return [k, byTip[k]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 10);
+        if (D.barChart && tipArr.length >= 2) { var pal = [[180, 83, 9], [245, 158, 11], [217, 119, 6], [168, 85, 247], [59, 130, 246], [22, 163, 74], [236, 72, 153], [14, 165, 233]]; D.barChart(tipArr.map(function (t, i) { return [('' + t[0]).slice(0, 16), t[1], pal[i % pal.length]]; }), { title: 'Obiective de patrimoniu identificate, pe tip', h: Math.min(56, 26 + tipArr.length * 4), source: 'OpenStreetMap (historic/heritage) — date reale' }); }
+      } catch (e) {}
       D.P('Notă: lista provine din date deschise (OSM) și are caracter orientativ; pentru inventarul oficial complet se consultă Lista Monumentelor Istorice (LMI/MCIN) și Repertoriul Arheologic Național (RAN/CIMEC). Proximitatea acestor obiective față de amplasament este un indicator direct al potențialului arheologic — cu cât densitatea reperelor istorice este mai mare, cu atât probabilitatea descoperirii de vestigii crește.');
       if (heritage.length > 40) D.P('(Au fost listate primele 40 de obiective din cele ' + heritage.length + ' identificate, în ordinea distanței.)');
     } else {
@@ -132,6 +152,18 @@
     if (lmi && lmi.length) {
       D.chapter('Monumente istorice clasate — LMI oficial (INP)');
       D.P('Conform Listei Monumentelor Istorice (LMI) — sursă oficială Institutul Național al Patrimoniului (INP) / Ministerul Culturii — pe județul de referință sunt înregistrate ' + lmi.length + ' poziții de monumente clasate (extras din setul deschis INP). Fiecare monument are un cod LMI oficial (format JJ-categorie-tip-grupă-număr) care îi atestă regimul de protecție și impune restricții și avize specifice pentru intervenții în monument sau în zona sa de protecție (Legea 422/2001).');
+      // grafic: monumente clasate pe grupă de interes (A naţional / B local) + pe categorie
+      try {
+        var gA = 0, gB = 0, byCat = {};
+        lmi.forEach(function (m) {
+          var c = m.cod || ''; var pg = (c.match(/-[IVX]+-[a-z]-([AB])-/) || [])[1];
+          if (pg === 'A') gA++; else if (pg === 'B') gB++;
+          var cat = (c.match(/-([IVX]+)-/) || [])[1]; if (cat) { var lbl = { 'I': 'I arheologie', 'II': 'II arhitectură', 'III': 'III for public', 'IV': 'IV memorial' }[cat] || cat; byCat[lbl] = (byCat[lbl] || 0) + 1; }
+        });
+        if (D.barChart && (gA + gB) >= 2) D.barChart([['Grupa A (naţional)', gA, [185, 28, 28]], ['Grupa B (local)', gB, [217, 119, 6]]], { title: 'Monumente clasate pe grupă de interes — județ', h: 40, source: 'LMI / INP — Ministerul Culturii (avize: A→Minister, B→DJC)' });
+        var catArr = Object.keys(byCat).map(function (k) { return [k, byCat[k]]; }).sort(function (a, b) { return b[1] - a[1]; });
+        if (D.barChart && catArr.length >= 2) { var palc = [[180, 83, 9], [245, 158, 11], [168, 85, 247], [59, 130, 246]]; D.barChart(catArr.map(function (t, i) { return [t[0], t[1], palc[i % palc.length]]; }), { title: 'Monumente clasate pe categorie LMI', h: 44, source: 'LMI / INP — categorii: I arheologie, II arhitectură, III artă for public, IV memorial' }); }
+      } catch (e) {}
       var lrows = lmi.slice(0, 60).map(function (m) { return [m.cod, m.nume]; });
       if (D.table) D.table(['Cod LMI', 'Denumire monument'], lrows, [CW * 0.28, CW * 0.72]);
       if (lmi.length > 60) D.P('(Sunt listate primele 60 din ' + lmi.length + ' poziții LMI ale județului; lista completă se consultă în LMI oficial publicat de Ministerul Culturii.)');
@@ -151,7 +183,7 @@
           try {
             if (bl.type === 'p' && bl.text) D.P(bl.text);
             else if (bl.type === 'bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
-            else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) { var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; })); }
+            else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) { var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; })); _autoChart(D, bl.headers, bl.rows); }
           } catch (e) {}
         });
       });
@@ -166,7 +198,7 @@
     D.chapter('Surse și standarde');
     D.P('OG 43/2000 (protejarea patrimoniului arheologic) · Legea 422/2001 (monumente istorice) · norme metodologice MCIN · Repertoriul Arheologic Național (RAN/CIMEC) · Lista Monumentelor Istorice (LMI) · Cronica Cercetărilor Arheologice · OpenStreetMap (situri istorice) · hărți istorice georeferențiate · date geomorfologice și hidrografice. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Raport_arheologic_RCAI_' + x.name.replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Raport_arheologic_RCAI_' + x.name.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Raport arheologic generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }
@@ -178,7 +210,7 @@
     ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
     ov.innerHTML = '<div style="background:#0b1424;color:#e6edf7;width:min(560px,94vw);border:1px solid rgba(180,83,9,.5);border-radius:14px;font-family:system-ui,sans-serif;padding:18px 20px">' +
       '<div style="font-weight:800;font-size:16px">🏺 Raport de Cercetare Arheologică (RCAI) — ' + x.name + '</div>' +
-      '<div style="font-size:11px;color:#94a3b8;margin:4px 0 12px">' + (x.hasParcel ? 'Raport sit/parcelă' : 'Raport teritorial UAT') + ' · evaluarea potențialului arheologic și a riscului pentru investiție · document de rang superior</div>' +
+      '<div style="font-size:11px;color:#94a3b8;margin:4px 0 12px">' + (x.hasParcel ? 'Raport sit/parcelă' : 'Raport teritorial UAT') + ' · evaluarea potențialului arheologic și a riscului pentru investiție</div>' +
       '<div style="font-size:11.5px;color:#cbd5e1;line-height:1.5">Sinteză a cercetării documentare, cartografice și arheologice publice (RAN, LMI, hărți istorice, geomorfologie). Generează un raport PDF amplu, cu evoluție istorică pe perioade, context arheologic, stratigrafie estimativă, evaluarea potențialului și recomandări de avizare (DJC/MCIN).</div>' +
       '<div style="display:flex;gap:8px;margin-top:14px"><button onclick="window._RCAI.generatePDF(window.TCI&&window.TCI.cityKey)" style="flex:1;background:linear-gradient(180deg,#d97706,#92400e);color:#fff;border:0;border-radius:9px;padding:10px;font-weight:700;cursor:pointer">📄 Generează Raport Arheologic (PDF)</button>' +
       '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:10px 14px;cursor:pointer">Închide</button></div>' +

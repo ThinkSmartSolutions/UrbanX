@@ -310,7 +310,7 @@
     D.chapter('24. Surse și standarde');
     D.P('ANCPI / cărți funciare (Legea 7/1996 art. 51 — date publice); GDPR / Legea 190/2018 (agregare, fără date personale); Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR (abordarea prin comparație de piață); Codul Fiscal (impozit pe transfer și impozit local); curs BNR. Glosar: mediană = valoarea de mijloc; yield = randament locativ brut; PIR = price-to-income ratio; CUT/POT = coeficient/procent de utilizare a terenului. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Studiu_piata_' + (type || '') + '_' + (uat || '').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Studiu_piata_' + (type || '') + '_' + (uat || '').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     window._buildStratTOC && window._buildStratTOC(D, 1);
     pdf.save(fn); window.ss && ss('✅ Studiu de piață generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }
@@ -340,7 +340,7 @@
       pdf.setFontSize(8); pdf.setTextColor(150);
       var lines = pdf.splitTextSize ? pdf.splitTextSize('Date demonstrative. Nu constituie consultanță financiară sau investițională (Legea 297/2004). Prețuri agregate, fără date personale (GDPR). Sursa oficială: ANCPI / cărți funciare (date publice Legea 7/1996 art. 51) — integrare live = Faza 2.', 178) : [];
       pdf.text(lines, x, 270);
-      pdf.save('Raport_piata_' + (type || '') + '_' + (uat || '').replace(/[^\w]+/g, '_') + '.pdf');
+      pdf.save('Raport_piata_' + (type || '') + '_' + (uat || '').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '.pdf');
     } catch (e) { console.warn('[Market] PDF', e); alert('Eroare PDF: ' + e.message); }
   }
 

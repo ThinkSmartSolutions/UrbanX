@@ -11,6 +11,22 @@
 (function (G) {
   'use strict';
   function N(v, d) { try { return Number(v).toLocaleString('ro-RO', { maximumFractionDigits: d == null ? 0 : d }); } catch (e) { return '' + v; } }
+  // parse "1.234,5 €" / "12,3 %" / "45/100" → număr (pentru auto-grafic din tabele)
+  function _num(s) { if (typeof s === 'number') return s; if (s == null) return null; var m = ('' + s).replace(/\./g, '').replace(/,/g, '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
+  // dacă ultima coloană a unui tabel e numerică pe ≥2 rânduri → desenează și un barChart
+  function _autoChart(D, headers, rows, title) {
+    try {
+      if (!D.barChart || !rows || rows.length < 2 || rows.length > 14) return;
+      var li = (headers ? headers.length : (rows[0] ? rows[0].length : 0)) - 1; if (li < 1) return;
+      var vals = rows.map(function (r) { return _num(r[li]); });
+      var ok = vals.filter(function (v) { return v != null; }).length;
+      if (ok < rows.length || ok < 2) return;             // toate rândurile numerice
+      var uniq = {}; vals.forEach(function (v) { uniq[v] = 1; }); if (Object.keys(uniq).length < 2) return;
+      var pal = [[59, 130, 246], [34, 197, 94], [249, 115, 22], [168, 85, 247], [234, 179, 8], [14, 165, 233]];
+      var data = rows.map(function (r, i) { var lb = ('' + (r[0] || ('#' + (i + 1)))).replace(/\s+/g, ' ').trim().slice(0, 16); return [lb, vals[i], pal[i % pal.length]]; });
+      D.barChart(data, { title: title || ((headers && headers[li]) || 'Valori') + ' — reprezentare grafică', h: Math.min(58, 26 + data.length * 4), source: 'Date din tabelul de mai sus' });
+    } catch (e) {}
+  }
   function cl(v, lo, hi) { return Math.max(lo == null ? 2 : lo, Math.min(hi == null ? 99 : hi, Math.round(v))); }
 
   // 12 funcțiuni de reconversie. Pondere pe: centralitate (c0), accesibilitate (a0),
@@ -106,7 +122,7 @@
     var cy0 = 134;
     pdf.setDrawColor(146, 64, 14); pdf.setLineWidth(0.4); pdf.setFillColor(40, 26, 10);
     pdf.roundedRect(26, cy0, W - 52, 92, 3, 3, 'FD');
-    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('STUDIU TERITORIAL DE RANG SUPERIOR', W / 2, cy0 + 9, { align: 'center' });
+    pdf.setTextColor(251, 191, 36); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5); pdf.text('STUDIU DE RECONVERSIE URBANĂ (HBU)', W / 2, cy0 + 9, { align: 'center' });
     pdf.setFont(FONT, 'normal'); pdf.setFontSize(9); pdf.setTextColor(220, 205, 180);
     var capLines = ['Analiză de reconversie pe metodologia Highest & Best Use (IVS/ANEVAR):', 'profil sit · regim urbanistic · cele 4 teste HBU · scor de compatibilitate pentru', '12 funcțiuni · analiză financiară (GDV/CAPEX/NPV/ROI) și sensibilitate · constrângeri', 'și due diligence · patrimoniu industrial · etapizare · finanțare · monitorizare · Nota UrbanX.'];
     capLines.forEach(function (l, i) { pdf.text(l, W / 2, cy0 + 18 + i * 6, { align: 'center' }); });
@@ -166,6 +182,19 @@
       ['Profit potențial', N(f.profit) + ' €'],
       ['Randament (ROI)', N(f.roi) + ' %']
     ], [CW * 0.55, CW * 0.45]);
+    if (D.barChart) D.barChart([
+      ['GDV', Math.round(f.gdv / 1000), [34, 197, 94]],
+      ['CAPEX', Math.round(f.capex / 1000), [239, 68, 68]],
+      ['Demolare', Math.round(f.demol / 1000), [249, 115, 22]],
+      ['Soft', Math.round(f.soft / 1000), [234, 179, 8]],
+      ['Cost total', Math.round(f.totalCost / 1000), [185, 28, 28]],
+      ['Profit', Math.round(f.profit / 1000), [22, 163, 74]]
+    ], { title: 'Structura financiară a scenariului recomandat (mii €)', h: 54, source: 'Model HBU UrbanX — metoda valorii reziduale' });
+    if (D.barChart) D.barChart([
+      ['Pesimist −15%', Math.round((f.adc * R.top.valEur * 0.85 - f.totalCost * 1.15) / (f.totalCost * 1.15) * 100), [239, 68, 68]],
+      ['Bază', f.roi, [59, 130, 246]],
+      ['Optimist +15%', Math.round((f.adc * R.top.valEur * 1.15 - f.totalCost) / f.totalCost * 100), [34, 197, 94]]
+    ], { title: 'Randament (ROI %) — analiză de sensibilitate', h: 44, source: 'Model HBU UrbanX' });
     D.P('Analiza folosește metoda valorii reziduale: din valoarea brută de dezvoltare (GDV) se scad costurile totale pentru a obține profitul și randamentul. Valorile sunt orientative, calibrate pe repere de piață românești; un ROI peste 15–20% indică un proiect atractiv pentru dezvoltatori, în timp ce un ROI sub pragul de risc poate justifica instrumente de sprijin public (regenerare urbană, parteneriat public-privat).');
 
     // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 80-100 pag ──
@@ -180,6 +209,7 @@
             else if (bl.type === 'bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
             else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) {
               var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; }));
+              _autoChart(D, bl.headers, bl.rows);
             }
           } catch (e) {}
         });
@@ -302,7 +332,7 @@
     D.chapter('Surse și standarde');
     D.P('Metodologie HBU (Highest & Best Use) — Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR; Legea 350/2001 (urbanism); POR Axa 5 (regenerare urbană); PNRR; repere de cost și valoare de piață RO. Date amplasament: ' + (x.hasParcel ? N(x.lat, 4) + '°N, ' + N(x.lon, 4) + '°E' : 'centru UAT (selectați o parcelă pentru analiză punctuală)') + '. Metodologie UrbanX · ThinkSmart Solutions.');
 
-    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
+    var fn = ('Studiu_reconversie_HBU_' + (x.name || 'UAT').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && ss('✅ Studiu de reconversie generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }
