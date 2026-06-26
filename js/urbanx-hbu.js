@@ -139,6 +139,24 @@
     ], [CW * 0.55, CW * 0.45]);
     D.P('Analiza folosește metoda valorii reziduale: din valoarea brută de dezvoltare (GDV) se scad costurile totale pentru a obține profitul și randamentul. Valorile sunt orientative, calibrate pe repere de piață românești; un ROI peste 15–20% indică un proiect atractiv pentru dezvoltatori, în timp ce un ROI sub pragul de risc poate justifica instrumente de sprijin public (regenerare urbană, parteneriat public-privat).');
 
+    // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 80-100 pag ──
+    try {
+      var deep = G._HBU_DEEP || [];
+      deep.forEach(function (ch) {
+        if (!ch || !ch.title) return;
+        D.chapter(ch.title);
+        (ch.blocks || []).forEach(function (bl) {
+          try {
+            if (bl.type === 'p' && bl.text) D.P(bl.text);
+            else if (bl.type === 'bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
+            else if (bl.type === 'table' && bl.headers && bl.rows && bl.rows.length && D.table) {
+              var nc = bl.headers.length || 1; D.table(bl.headers, bl.rows, bl.headers.map(function () { return CW / nc; }));
+            }
+          } catch (e) {}
+        });
+      });
+    } catch (e) {}
+
     D.chapter('Constrângeri și due diligence');
     D.bullets([
       'Urbanistice: regimul PUG/PUZ trebuie verificat — reconversia poate necesita modificare de PUZ (schimbare funcțiune, indici);',
