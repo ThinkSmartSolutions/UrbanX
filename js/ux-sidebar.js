@@ -168,7 +168,7 @@
             var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (i.info ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
             if (!i.info) return main;
             return '<div style="display:flex;align-items:stretch;gap:3px">' + main +
-              '<button title="Info" onclick="event.stopPropagation();window._showInfoDrawer&&window._showInfoDrawer(\'' + i.info + '\')" style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:5px;padding:0 9px;cursor:pointer;font-size:12px">ⓘ</button></div>';
+              '<button title="Info" onclick="event.stopPropagation();UXSidebar.close&&UXSidebar.close();infoDrawerOpen(\'' + i.info + '\')" style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:5px;padding:0 9px;cursor:pointer;font-size:12px">ⓘ</button></div>';
           }).join('') + '</div>' : '') +
           '</div>';
       }).join('');

@@ -1442,7 +1442,7 @@ document.addEventListener('click', function(){
     <span style="font-size:16px">📋</span>
     <div><div>Registru Indicatori Urbani</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">8 domenii · definiție, formulă, sursă pe fiecare</div></div>
   </button>
-  <button onclick="window._showInfoDrawer('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
+  <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
   <!-- RCAI — Raport Cercetare Arheologică (rang superior, parcelă) -->
@@ -1451,7 +1451,7 @@ document.addEventListener('click', function(){
     <span style="font-size:16px">🏺</span>
     <div><div>Raport Cercetare Arheologică (RCAI)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">potențial arheologic · risc investiție · evoluție istorică · avize DJC/MCIN</div></div>
   </button>
-  <button onclick="window._showInfoDrawer('rcai')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
+  <button onclick="infoDrawerOpen('rcai_parcela')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">① Analize de Bază</div>
@@ -1892,7 +1892,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260616c"></script>
 <script src="js/11-viewer3d.js?v=20260624wgl"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260621ux"></script>
+<script src="js/13-info-drawer.js?v=20260626idstd"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260625flr"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -3404,7 +3404,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       💶 Hartă Valori Imobiliare (€/mp)
       <div style="font-size:10px;color:rgba(134,239,172,.65)">Heatmap valoric pe hartă · rentă urbană · re-click = ascunde</div>
     </button>
-    <button onclick="window._showInfoDrawer('valori')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.25);color:#34d399;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="infoDrawerOpen('valori')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.25);color:#34d399;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
     <button onclick="window._ValueMap&&window._ValueMap.generatePDF();_closeAllMenusAndOverlay()"
@@ -3413,7 +3413,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       📄 Studiu Valori Imobiliare (PDF)
       <div style="font-size:10px;color:rgba(134,239,172,.55)">Raport · metodă, hărți, predicții, surse, disclaimer</div>
     </button>
-    <button onclick="window._showInfoDrawer('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="infoDrawerOpen('valori_pdf')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(16,124,92,.2);color:#86efac;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
   <!-- Profil climatic (Open-Meteo ERA5) -->
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
@@ -3423,7 +3423,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       🌦 Profil Climatic & Studiu (SECAP)
       <div style="font-size:10px;color:rgba(147,197,253,.65)">temperaturi, precipitații, grade-zile, zile tropicale · date reale Open-Meteo</div>
     </button>
-    <button onclick="window._showInfoDrawer('clima')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(37,99,235,.25);color:#93c5fd;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="infoDrawerOpen('clima')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(37,99,235,.25);color:#93c5fd;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
   <!-- HBU / Reconversie urbană -->
   <div style="display:flex;align-items:stretch;gap:2px;margin-bottom:2px">
@@ -3433,7 +3433,7 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
       🏗 Reconversie urbană (HBU) & Studiu
       <div style="font-size:10px;color:rgba(251,191,36,.6)">industrial→rezidențial/mixt/hotelier/birouri · scor 12 funcțiuni + financiar</div>
     </button>
-    <button onclick="window._showInfoDrawer('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
+    <button onclick="infoDrawerOpen('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:0 9px;cursor:pointer;font-size:12px;flex-shrink:0">ⓘ</button>
   </div>
 
   <!-- ═══ PROIECTARE & LOTIZARE ═══ -->
@@ -6351,7 +6351,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260626ivu"></script>
     <script src="js/ux-launcher.js?v=20260624risk4"></script>
-    <script src="js/ux-sidebar.js?v=20260626nav3"></script>
+    <script src="js/ux-sidebar.js?v=20260626nav4"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>

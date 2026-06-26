@@ -636,6 +636,101 @@ const RAPORT_INFO = {
     ],
     nu: ['Nu se aplică parcelelor izolate fără vecini cu ferestre orientate spre amplasament', 'Nu înlocuiește expertiza tehnică a unui specialist certificat în cazul litigiilor'],
   },
+  // ── Module noi (folosesc drawer-ul STANDARD) ──
+  rcai_parcela: {
+    ico: '🏺', label: 'Raport Cercetare Arheologică — Parcelă', badge: 'recomandat', badgeLabel: 'Patrimoniu · risc investiție', color: '180,83,9',
+    fn: "window._RCAI&&window._RCAI.generatePDF(window.TCI&&window.TCI.cityKey,'S')",
+    ce: 'Evaluează potențialul arheologic al amplasamentului/zonei selectate și riscul pe care patrimoniul îngropat îl poate genera pentru investiție. Integrează cercetarea documentară, cartografică (planuri istorice) și arheologică (situri RAN, monumente LMI, cercetări anterioare), geomorfologia și o stratigrafie estimativă, cu evaluarea potențialului și scenarii de risc.',
+    dece: 'Anticipă obligațiile arheologice (supraveghere, diagnostic, cercetare preventivă, descărcare de sarcină) înainte de demararea lucrărilor, evitând sistarea șantierului. Orientează beneficiarul, proiectantul și autoritatea de avizare (DJC/MCIN) conform OG 43/2000 și Legii 422/2001.',
+    legal: 'OG 43/2000 · Legea 422/2001 · norme MCIN · Convenția de la Valletta',
+    output: [
+      { ico: '🏺', txt: 'Evaluarea potențialului arheologic (ridicat/mediu/redus) al amplasamentului' },
+      { ico: '🗺', txt: 'Analiză cartografică — planuri istorice suprapuse pe situația actuală' },
+      { ico: '📊', txt: 'Context arheologic: situri RAN, monumente LMI, cercetări anterioare' },
+      { ico: '📐', txt: 'Stratigrafie estimativă pe niveluri, cu adâncimi și probabilitate' },
+      { ico: '⚠️', txt: 'Analiza riscului pentru investiție — scenarii A/B/C/D cu cost și durată' }
+    ],
+    nu: ['Selectează o parcelă pe hartă pentru raport punctual', 'Document de pre-cercetare — nu înlocuiește raportul unui arheolog autorizat MCIN și nu are valoare juridică în avizare'],
+  },
+  hbu: {
+    ico: '🏗', label: 'Reconversie urbană (HBU)', badge: 'recomandat', badgeLabel: 'Investițional · regenerare', color: '217,119,6',
+    fn: "window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey)",
+    ce: 'Determină cea mai bună utilizare (Highest & Best Use) pentru un amplasament subutilizat sau industrial: evaluează 12 funcțiuni de reconversie cu scor de compatibilitate (localizare, accesibilitate, cerere, constrângeri) și o pre-analiză financiară (GDV/CAPEX/profit/ROI) pentru scenariul recomandat.',
+    dece: 'Fundamentează decizia de reconversie/achiziție și negocierile cu administrația sau investitorii, eliminând incertitudinea prin metodologia IVS/ANEVAR și repere de piață. Sprijină regenerarea urbană și densificarea în locul expansiunii periferice.',
+    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR',
+    output: [
+      { ico: '📊', txt: 'Scor de compatibilitate pentru 12 funcțiuni de reconversie' },
+      { ico: '💰', txt: 'Analiză financiară: GDV, CAPEX, profit, ROI și sensibilitate' },
+      { ico: '⚠️', txt: 'Constrângeri și due diligence (contaminare, seismic, patrimoniu, PUZ)' },
+      { ico: '🎯', txt: 'Scenariul recomandat cu etapizare și instrumente de finanțare' }
+    ],
+    nu: ['Selectează o parcelă pentru analiză punctuală; altfel se analizează centrul UAT', 'Pre-analiză — necesită studiu de fezabilitate și due diligence'],
+  },
+  clima: {
+    ico: '🌦', label: 'Profil Climatic & Studiu (SECAP)', badge: 'recomandat', badgeLabel: 'Climă · adaptare', color: '37,99,235',
+    fn: "window._ClimateEngine&&window._ClimateEngine.generatePDF(window.TCI&&window.TCI.cityKey)",
+    ce: 'Caracterizează regimul climatic al UAT din date publice reale (Open-Meteo / Copernicus ERA5): temperaturi și precipitații medii lunare, grade-zile de încălzire/răcire (HDD/CDD), profil sezonier, zile tropicale și de îngheț, indice de confort climatic.',
+    dece: 'Fundamentează SECAP, eficiența energetică (nZEB) și măsurile de adaptare la căldură și la apele pluviale (infrastructură verde-albastră). Sprijină capitolele de mediu și risc din SIDU/MP/PMUD.',
+    legal: 'Open-Meteo / Copernicus C3S · EN ISO 15927 (grade-zile) · IPCC AR6 · cadru SECAP',
+    output: [
+      { ico: '🌡', txt: 'Regim termic și pluviometric — diagrame lunare' },
+      { ico: '📐', txt: 'Grade-zile încălzire/răcire (HDD/CDD) și indice de confort' },
+      { ico: '🌳', txt: 'Implicații de adaptare: insulă de căldură, ape pluviale, spații verzi' },
+      { ico: '📈', txt: 'Semnal de schimbare climatică și scenarii' }
+    ],
+    nu: ['Date orientative (reanaliză) — pentru proiectare se folosesc datele oficiale ANM', 'Nu substituie un studiu climatologic de specialitate'],
+  },
+  economie: {
+    ico: '💰', label: 'Analiză economică a UAT', badge: 'recomandat', badgeLabel: 'Finanțe locale', color: '13,148,136',
+    fn: "window._Economy&&window._Economy.generatePDF(window.TCI&&window.TCI.cityKey)",
+    ce: 'Analizează situația economică și financiară a UAT, micro și macro: structura veniturilor bugetului local (venituri proprii, cote IPV, sume TVA, subvenții, fonduri UE), autonomia fiscală și dependența de bugetul de stat, cheltuielile de funcționare vs. dezvoltare.',
+    dece: 'Oferă administrației un tablou al capacității de a-și finanța prioritățile și de a co-finanța proiecte europene; investitorilor — contextul economic; proiectanților — repere pentru fundamentare.',
+    legal: 'Legea 273/2006 (finanțe publice locale) · Ministerul Finanțelor · INS · Eurostat',
+    output: [
+      { ico: '📊', txt: 'Structura veniturilor bugetului local (diagramă)' },
+      { ico: '🏛', txt: 'Autonomie fiscală vs. dependență de bugetul de stat și județean' },
+      { ico: '🔧', txt: 'Cheltuieli funcționare vs. dezvoltare; capacitate de investiție' },
+      { ico: '📈', txt: 'Benchmark pe categorii de UAT și recomandări de consolidare' }
+    ],
+    nu: ['Valori orientative (model L.273/2006) — pentru cifre oficiale: execuția bugetară MFP', 'Nu substituie analiza unui expert în finanțe publice'],
+  },
+  valori: {
+    ico: '💶', label: 'Hartă Valori Imobiliare (€/mp)', badge: 'optional', badgeLabel: 'Rentă urbană', color: '16,124,92',
+    fn: "window._ValueMap&&window._ValueMap.show('apartament')",
+    ce: 'Afișează pe hartă valoarea estimată €/mp printr-un model de rentă urbană (von Thünen/Alonso): valoarea scade radial de la centru și se modulează pe zone funcționale. Re-click pe buton = ascunde stratul.',
+    dece: 'Util pentru pre-evaluare, identificarea terenurilor subutilizate semicentrale și calibrarea bazei de impozitare. Pentru raportul complet folosește „Studiu Valori Imobiliare (PDF)".',
+    legal: 'Model rentă urbană UrbanX · ANCPI (L.7/1996) · standardele ANEVAR/IVS',
+    output: [
+      { ico: '🗺', txt: 'Heatmap valoric €/mp pe hartă' },
+      { ico: '📊', txt: 'Distribuție valorică pe benzi (periferie/median/central)' },
+      { ico: '📈', txt: 'Scenarii de evoluție a valorii (orizont 3–5 ani)' }
+    ],
+    nu: ['Valori orientative — nu substituie o evaluare ANEVAR', 'Acoperirea datelor de piață variază teritorial'],
+  },
+  valori_pdf: {
+    ico: '📄', label: 'Studiu Valori Imobiliare (PDF)', badge: 'recomandat', badgeLabel: 'Evaluare de piață', color: '16,124,92',
+    fn: "window._ValueMap&&window._ValueMap.generatePDF()",
+    ce: 'Generează studiul complet de valori imobiliare: metodologie și formulă, distribuție valorică, factori determinanți, scenarii de evoluție, hartă a valorilor și secțiunea Nota UrbanX (IVU).',
+    dece: 'Susține deciziile de investiție și politicile fiscale locale cu o pre-evaluare structurată, în format unitar SIDU.',
+    legal: 'Model rentă urbană · ANCPI · ANEVAR/IVS · Eurostat',
+    output: [
+      { ico: '🗺', txt: 'Captura hărții de valori' }, { ico: '📊', txt: 'Distribuție valorică și factori determinanți' },
+      { ico: '📈', txt: 'Predicții pe scenarii' }, { ico: '🏆', txt: 'Secțiunea Nota UrbanX (IVU)' }
+    ],
+    nu: ['Valori orientative — nu substituie o evaluare ANEVAR'],
+  },
+  registru: {
+    ico: '📋', label: 'Registru Indicatori Urbani', badge: 'optional', badgeLabel: 'Audit indicatori', color: '124,58,237',
+    fn: "window.IndicatorsRegistry&&window.IndicatorsRegistry.generate(window.TCI&&window.TCI.cityKey)",
+    ce: 'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii, fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (IVU).',
+    dece: 'Demonstrează transparența și acoperirea metodologică a platformei; baza cantitativă a documentelor strategice.',
+    legal: 'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
+    output: [
+      { ico: '📊', txt: 'Indicatori pe 8 domenii cu definiție, formulă și sursă' },
+      { ico: '🎯', txt: 'Praguri, ținte și benchmarking' }, { ico: '🏆', txt: 'Secțiunea Nota UrbanX (IVU)' }
+    ],
+    nu: ['Valorile per-UAT se calculează în modulele dedicate'],
+  },
   acustic: {
     ico: '🔇', label: 'Studiu Acustic Urban',
     badge: 'obligatoriu', badgeLabel: 'Zone cu trafic / industrie',
