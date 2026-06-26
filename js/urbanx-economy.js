@@ -205,6 +205,9 @@
     ], [CW * 0.55, CW * 0.45]);
     D.P('Acești indicatori, urmăriți anual, oferă un tablou de bord al sănătății financiare a UAT și se corelează cu dimensiunea economică a Notei UrbanX (IVU). O administrație care își îmbunătățește acești indicatori demonstrează o guvernanță fiscală solidă — un criteriu tot mai important pentru finanțatori și pentru încrederea investitorilor.');
 
+    // ── Corp dezvoltat (analiză TERITORIALĂ de rang superior, 80-100 pag) ──
+    try { if (G._deepRender && G._ECON_DEEP) G._deepRender(D, G._ECON_DEEP, CW); } catch (ex) {}
+
     // Nota UrbanX (IVU)
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (ex) {}
 

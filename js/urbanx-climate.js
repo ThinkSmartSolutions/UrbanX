@@ -206,6 +206,9 @@
     D.P('Profilul climatic nu este un document izolat, ci o componentă fundamentală a planificării integrate. El alimentează: (1) capitolul de mediu și risc din SIDU; (2) infrastructura verde-albastră și zonele de adaptare din Masterplan; (3) emisiile din transport și clădiri din PMUD; (4) baza de calcul a SECAP (grade-zile, potențial de reducere a emisiilor); (5) studiul de carbon și indicele UHI ale platformei. Această integrare asigură coerența: aceleași date climatice reale stau la baza tuturor deciziilor cu componentă climatică.');
     D.P('Prin includerea sistematică a profilului climatic în toate documentele teritoriale, platforma asigură că adaptarea climatică nu rămâne un capitol declarativ, ci devine un fir cantitativ care traversează diagnoza, viziunea, portofoliul de proiecte și sistemul de monitorizare — la nivelul de exigență cerut de finanțările europene pentru tranziția verde.');
 
+    // ── Corp dezvoltat (studiu TERITORIAL de rang superior, 80-100 pag) ──
+    try { if (G._deepRender && G._CLIMA_DEEP) G._deepRender(D, G._CLIMA_DEEP, D.dims.CW); } catch (e) {}
+
     // Nota UrbanX (IVU) — standard transversal
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 

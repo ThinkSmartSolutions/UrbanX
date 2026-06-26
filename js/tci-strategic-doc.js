@@ -318,6 +318,45 @@
     };
   }
 
+  // ── Render corp dezvoltat (capitole _DEEP) + auto-grafic din tabele numerice ──
+  // Reutilizabil de orice studiu (climate, economy, etc.) ca să atingă rangul superior.
+  function _num(s){ if(typeof s==='number')return s; if(s==null)return null; var m=(''+s).replace(/\./g,'').replace(/,/g,'.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; }
+  function deepRender(D, deepArr, CW){
+    if(!D || !deepArr || !deepArr.length) return 0;
+    var n=0;
+    deepArr.forEach(function(ch){
+      if(!ch || !ch.title) return;
+      try{
+        D.chapter(ch.title); n++;
+        (ch.blocks||[]).forEach(function(bl){
+          try{
+            if(bl.type==='p' && bl.text) D.P(bl.text);
+            else if(bl.type==='bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
+            else if(bl.type==='table' && bl.headers && bl.rows && bl.rows.length && D.table){
+              var nc=bl.headers.length||1; D.table(bl.headers, bl.rows, bl.headers.map(function(){return CW/nc;}));
+              // auto-grafic dacă ultima coloană e numerică pe ≥2 rânduri
+              try{
+                if(D.barChart && bl.rows.length>=2 && bl.rows.length<=14){
+                  var li=bl.headers.length-1;
+                  if(li>=1){
+                    var vals=bl.rows.map(function(r){return _num(r[li]);});
+                    var ok=vals.filter(function(v){return v!=null;}).length;
+                    var uniq={}; vals.forEach(function(v){uniq[v]=1;});
+                    if(ok===bl.rows.length && Object.keys(uniq).length>=2){
+                      var pal=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
+                      D.barChart(bl.rows.map(function(r,i){return [(''+(r[0]||('#'+(i+1)))).replace(/\s+/g,' ').trim().slice(0,16), vals[i], pal[i%pal.length]];}), {title:((bl.headers[li])||'Valori')+' — reprezentare grafică', max:0, source:'Date din tabelul de mai sus'});
+                    }
+                  }
+                }
+              }catch(e){}
+            }
+          }catch(e){}
+        });
+      }catch(e){}
+    });
+    return n;
+  }
+
   // ── Construieste cuprinsul la final si il muta dupa coperta ──────────────
   function buildTOC(D, coverPages) {
     var TF = (D && D.pdf && D.pdf.__unicodeFont) ? 'DejaVuRO' : 'helvetica';
@@ -427,5 +466,6 @@
 
   window._makeStratDoc = makeDoc;
   window._buildStratTOC = buildTOC;
+  window._deepRender = deepRender;
   console.log('[StratDoc] ✅ motor documente strategice incarcat');
 })(window);
