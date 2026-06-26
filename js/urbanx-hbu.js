@@ -132,6 +132,10 @@
     ]);
     D.P('Aceste constrângeri pot modifica semnificativ fezabilitatea și costurile; studiul HBU este o pre-analiză de orientare, iar decizia finală necesită studiu de fezabilitate, expertiză tehnică și due diligence juridic și de mediu.');
 
+    D.chapter('Cadrul legal și procedura de avizare');
+    D.P('Reconversia presupune, de regulă, schimbarea funcțiunii și a indicatorilor urbanistici față de PUG-ul în vigoare, ceea ce impune elaborarea și aprobarea unui Plan Urbanistic Zonal (PUZ) conform Legii 350/2001. Procedura include: certificatul de urbanism, avizul de oportunitate, elaborarea PUZ și a regulamentului local aferent, avizele de specialitate (mediu, utilități, ISU, circulație, după caz patrimoniu), consultarea și informarea publicului, și aprobarea prin hotărâre a consiliului local. Durata tipică este de 12–24 luni și trebuie inclusă în calendarul și bugetul proiectului.');
+    D.P('Pentru siturile cu valoare de patrimoniu sau aflate în zone protejate, sunt necesare avize suplimentare (Ministerul Culturii / direcțiile județene pentru cultură). Pentru terenurile potențial contaminate, certificarea privind calitatea solului condiționează funcțiunile sensibile. Alinierea propunerii la documentele strategice superioare (SIDU, PUG) crește predictibilitatea avizării și eligibilitatea pentru finanțare.');
+
     D.chapter('Cererea de piață');
     D.P('Ierarhia funcțiunilor reflectă cererea estimată pe segmente: în orașele cu polarizare economică ridicată, birourile, hotelurile și funcțiunile tech au cerere susținută în zonele centrale și bine conectate; rezidențialul și mixtul au cerere largă și stabilă; logistica și producția ușoară sunt favorizate periferic, lângă infrastructura majoră de transport. Corelarea cu studiul de piață imobiliară (Market) și cu harta de valori a platformei rafinează aceste estimări cu prețuri €/mp reale pe segment.');
 
