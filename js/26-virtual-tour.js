@@ -241,11 +241,13 @@
 
       // ── Camere din releveu ──
       if(hasRelevee){
-        // Etajul propriu daca are camere; altfel replicam primul etaj cu camere (de obicei
-        // parterul) — fix #4: etajele superioare apareau GOALE cand releveul detalia doar parterul.
-        let rvFloor = RV.floors[fIdx];
+        // LAYOUT PROPRIU per etaj: releveul construieste lazy doar parterul; aici fortam
+        // construirea layout-ului REAL al fiecarui etaj prin _rvGetFloor(fIdx) — care respecta
+        // functiunea per nivel (parter comercial / etaje rezidentiale). NU mai replicam parterul
+        // (gresit pt cladiri mixte — corectie ceruta de Florin).
+        let rvFloor = (window._rvGetFloor ? window._rvGetFloor(fIdx) : RV.floors[fIdx]);
         if(!rvFloor || !Array.isArray(rvFloor.rects) || rvFloor.rects.length === 0){
-          rvFloor = RV.floors.find(f => f && Array.isArray(f.rects) && f.rects.length > 0) || RV.floors[0];
+          rvFloor = RV.floors[0]; // ultim resort doar daca generarea etajului a esuat
         }
         if(rvFloor && Array.isArray(rvFloor.rects)){
           rvFloor.rects.forEach(r => {
@@ -1581,8 +1583,10 @@
       fg.add(wW);
 
       // ── PEREȚII CAMERELOR INTERIOR + MOBILIER ──
-      if(RV && Array.isArray(RV.floors) && RV.floors[fIdx]){
-        const rvFloor = RV.floors[fIdx];
+      // LAYOUT PROPRIU per etaj (parter comercial / etaje rezidentiale) via _rvGetFloor —
+      // etajele superioare erau goale fiindca releveul construia lazy doar parterul.
+      const rvFloor = (window._rvGetFloor ? window._rvGetFloor(fIdx) : (RV && RV.floors && RV.floors[fIdx]));
+      if(rvFloor){
         if(Array.isArray(rvFloor.rects)){
           // Wall material interior - albe ca în referință
           const intWallMat = new THREE.MeshStandardMaterial({

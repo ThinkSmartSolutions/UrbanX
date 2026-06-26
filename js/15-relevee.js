@@ -626,6 +626,9 @@ function _rvGetFloor(idx){
   if(_RV.floors[idx]==null){ try{ _RV.floors[idx] = _rvFloor(_RV.building, idx); }catch(e){} }
   return _RV.floors[idx] || _RV.floors[0];
 }
+// Expus pentru dollhouse / plan 3D — ca sa construiasca LAYOUT-UL PROPRIU al fiecarui etaj
+// (parter comercial / etaje rezidentiale), NU sa replice parterul (gresit pt cladiri mixte).
+window._rvGetFloor = _rvGetFloor;
 
 function _rvFloor(b, floorIdx){
   const {bW, bD, cores, P} = b;
