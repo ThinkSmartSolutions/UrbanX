@@ -2795,7 +2795,7 @@ setInterval(()=>{
   <script src="js/urbanx-rank.js?v=20260617h"></script><!-- nota/clasament UrbanX (+toate modulele) -->
   <script src="js/urbanx-ivu.js?v=20260626ivu3"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
   <script src="js/tci-risk-module.js?v=20260624A"></script>
-  <script src="js/tci-strategic-doc.js?v=20260624D"></script>
+  <script src="js/tci-strategic-doc.js?v=20260626toc"></script>
   <script src="js/tci-strategic-masterplan-content.js?v=20260624D"></script>
   <script src="js/tci-strategic-pmud-content.js?v=20260625logo"></script>
   <script src="js/tci-strategic-sidu-content.js?v=20260626ivu"></script>
@@ -3921,6 +3921,36 @@ window._launchEUBenchmark = function() {
 // ── INFO DRAWER ENGINE ────────────────────────────────────────────────────
 
 const _INFO_DATA = {
+
+  // ── Module teritoriale noi (valori / registru / IVU) ──────────────────────
+  'valori': {
+    icon:'💶', title:'Hartă Valori Imobiliare', subtitle:'Heatmap €/mp pe hartă · rentă urbană',
+    badge:'TERITORIAL · MODEL DE RENTĂ', badgeColor:'#10b981',
+    desc:'Afișează pe hartă valoarea estimată €/mp printr-un model de rentă urbană (von Thünen/Alonso): valoarea scade radial de la centru și se modulează pe zone funcționale. Re-click pe buton = ascunde stratul. Util pentru pre-evaluare, identificarea terenurilor subutilizate semicentrale și calibrarea bazei de impozitare.',
+    tip:'Valori orientative — nu substituie o evaluare ANEVAR. Pentru raportul complet (≥10 pag) folosește „Studiu Valori Imobiliare (PDF)".',
+    source:'Model rentă urbană UrbanX · ANCPI · standardele ANEVAR/IVS',
+  },
+  'valori_pdf': {
+    icon:'📄', title:'Studiu Valori Imobiliare (PDF)', subtitle:'Raport ≥10 pag · metodă, hărți, predicții',
+    badge:'STUDIU COMPLET · ≥10 PAGINI', badgeColor:'#10b981',
+    desc:'Generează studiul complet de valori imobiliare: metodologie și formulă, distribuție valorică pe benzi, factori determinanți, scenarii de evoluție 3–5 ani, hartă a valorilor, secțiunea Nota UrbanX (IVU), surse și disclaimer. Format unitar SIDU.',
+    tip:'Documentul include captura hărții de valori și predicții pe scenarii.',
+    source:'Model rentă urbană · ANCPI · ANEVAR/IVS · Eurostat',
+  },
+  'registru': {
+    icon:'📋', title:'Registru Indicatori Urbani', subtitle:'Audit complet al indicatorilor monitorizați',
+    badge:'AUDIT · 8 DOMENII', badgeColor:'#7c3aed',
+    desc:'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii (demografie, indici compoziți, modele spațiale, mediu, mobilitate, infrastructură, risc, imobiliar), fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (IVU).',
+    tip:'Documentează CE se măsoară, CUM și DIN CE sursă — baza de transparență a platformei.',
+    source:'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
+  },
+  'ivu': {
+    icon:'🏆', title:'IVU — Indicele de Vitalitate Urbană', subtitle:'Score Card explicabil + catalog comparator',
+    badge:'STANDARD UrbanX · NOTA URBANX', badgeColor:'#10b981',
+    desc:'Indice compozit transparent (0–100, calificativ A+..D) care exprimă performanța globală a unui UAT pe 6 dimensiuni ponderate, fiecare cu formulă și sursă. Include: Fișă de scor (de ce nota + cum poate crește), Catalog comparator între orașe (best-per-dimensiune + verdict) și benchmark european pe categorie de mărime. Apare ca secțiune în toate documentele generate.',
+    tip:'Buton 🏆 IVU în bara de sus, lângă selectorul de UAT.',
+    source:'ISO 37120 · Eurostat · OECD Better Life · INFP P100 · EEA',
+  },
 
   // ── BARA DE SUS ──────────────────────────────────────────────────────────
   'harta': {
@@ -6236,7 +6266,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urban-models/superbloc.js?v=20260624vis"></script>
     <script src="js/urban-models/models-extra.js?v=20260625net"></script>
     <script src="js/indices-report.js?v=20260626ivu"></script>
-    <script src="js/indicators-registry.js?v=20260626rg5"></script>
+    <script src="js/indicators-registry.js?v=20260626rg6"></script>
     <script src="js/risk-sim-seismic.js?v=20260626iso2"></script>
     <script src="js/risk-sim-flood.js?v=20260625clar"></script>
     <script src="js/risk-sim-shelters.js?v=20260625popup"></script>

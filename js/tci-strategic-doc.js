@@ -62,6 +62,9 @@
     // Primitive de continut
     function chapter(title, opts2) {
       opts2 = opts2 || {}; const first = chapterNo === 0; chapterNo++; subNo = 0; subsubNo = 0;
+      // Evită dublarea numerelor: capitolul se numerotează automat (chapterNo).
+      // Dacă titlul vine deja cu un număr manual ("4. ..." sau "4. A. ..."), îl strip.
+      title = String(title || '').replace(/^\s*\d+\.\s*/, '');
       // Capitolele CURG continuu (nu forteaza pagina noua) -> pagini dense, fara continut partial.
       // Primul capitol incepe pe pagina noua (dupa coperta); restul doar daca nu mai e loc.
       if (first) newPage();

@@ -122,6 +122,25 @@
       pdf.setTextColor(255, 255, 255); pdf.setFontSize(22); pdf.text('REGISTRU DE INDICATORI URBANI', W / 2, 88, { align: 'center' });
       pdf.setTextColor(196, 181, 253); pdf.setFontSize(14); pdf.text(D.S2(total + ' indicatori monitorizați · ' + uat), W / 2, 102, { align: 'center' });
       pdf.setTextColor(170, 160, 200); pdf.setFontSize(11); pdf.text('8 domenii · definiție, metodă și sursă pentru fiecare indicator', W / 2, 114, { align: 'center' });
+      // panou „ce conține" — domeniile + numărul de indicatori (umple coperta, fără spațiu gol)
+      var cy = 140;
+      pdf.setDrawColor(124, 58, 237); pdf.setLineWidth(0.4); pdf.setFillColor(26, 18, 46);
+      pdf.roundedRect(28, cy, W - 56, 12 + DOMENII.length * 7.2 + 6, 3, 3, 'FD');
+      pdf.setTextColor(196, 181, 253); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9.5);
+      pdf.text('STRUCTURA REGISTRULUI', W / 2, cy + 8, { align: 'center' });
+      pdf.setFontSize(9.5);
+      DOMENII.forEach(function (g, i) {
+        var yy = cy + 16 + i * 7.2;
+        pdf.setTextColor(220, 214, 240); pdf.setFont(FONT, 'normal');
+        pdf.text(g.d, 34, yy);
+        pdf.setTextColor(150, 230, 190); pdf.setFont(FONT, 'bold');
+        pdf.text(g.items.length + ' indicatori', W - 34, yy, { align: 'right' });
+      });
+      var by = cy + 16 + DOMENII.length * 7.2 + 8;
+      pdf.setTextColor(150, 140, 185); pdf.setFont(FONT, 'normal'); pdf.setFontSize(9);
+      pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + '  ·  Instrument de pre-analiză generat algoritmic', W / 2, by, { align: 'center' });
+      pdf.setTextColor(120, 112, 150); pdf.setFontSize(7.5);
+      pdf.text('Surse: ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · OECD · INS TEMPO · Eurostat · ANCPI · INFP · OpenAQ · OSM', W / 2, by + 8, { align: 'center', maxWidth: W - 50 });
       D.setSuppress && D.setSuppress(false);
 
       D.chapter('1. Scopul registrului');
