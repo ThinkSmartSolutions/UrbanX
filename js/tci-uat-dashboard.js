@@ -281,20 +281,23 @@ G._UATDashboard = {
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
               ${[
-                ['🏫','Școli',poi.scoli],
-                ['🏥','Spitale',poi.spitale],
-                ['🚌','Stații TP',poi.transport],
-                ['🎓','Univers.',poi.universitati],
-                ['🌳','Parcuri',poi.parcuri],
-                ['🛒','Supermark.',poi.supermarketuri],
-              ].map(([icon,l,v])=>`
-                <div style="text-align:center;background:rgba(15,25,60,.8);border-radius:6px;padding:6px">
+                ['🏫','Școli',poi.scoli,'scoli'],
+                ['🏥','Spitale',poi.spitale,'spitale'],
+                ['🚌','Stații TP',poi.transport,'transport'],
+                ['🎓','Univers.',poi.universitati,'universitati'],
+                ['🌳','Parcuri',poi.parcuri,'parcuri'],
+                ['🛒','Supermark.',poi.supermarketuri,'supermarketuri'],
+              ].map(([icon,l,v,key])=>`
+                <div onclick="window._InfraMap&&window._InfraMap.show('${key}')" title="Click — afișează ${l} pe hartă (OSM)"
+                  style="text-align:center;background:rgba(15,25,60,.8);border-radius:6px;padding:6px;cursor:pointer;transition:background .15s"
+                  onmouseover="this.style.background='rgba(40,70,140,.9)'" onmouseout="this.style.background='rgba(15,25,60,.8)'">
                   <div style="font-size:16px">${icon}</div>
                   <div style="color:#c8d7f0;font-size:13px;font-weight:700">${v||0}</div>
-                  <div style="color:#475569;font-size:9px">${l}</div>
+                  <div style="color:#475569;font-size:9px">${l} ▸</div>
                 </div>
               `).join('')}
             </div>
+            <div style="color:#475569;font-size:9px;margin-top:4px;text-align:center">click pe un card → afișare pe hartă</div>
             <div style="color:#475569;font-size:9px;margin-top:6px">
               OSM Overpass · ${poi.source} · ${new Date(poi.timestamp).toLocaleDateString('ro-RO')}
             </div>
