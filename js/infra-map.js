@@ -10,14 +10,16 @@
 
   var PROXY = function () { return G._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev'; };
 
-  // cheie card -> { q: filtru Overpass, color, label }
+  // cheie card -> { f: [filtre Overpass — union], color, label }
   var TYPES = {
-    scoli:          { f: '[amenity=school]',                 c: '#f59e0b', l: 'Școli' },
-    spitale:        { f: '[amenity~"^(hospital|clinic)$"]',  c: '#ef4444', l: 'Spitale/Clinici' },
-    transport:      { f: '[highway=bus_stop]',               c: '#60a5fa', l: 'Stații transport', extra: '[railway~"^(tram_stop|station)$"]' },
-    universitati:   { f: '[amenity~"^(university|college)$"]', c: '#a78bfa', l: 'Universități' },
-    parcuri:        { f: '[leisure=park]',                   c: '#22c55e', l: 'Parcuri' },
-    supermarketuri: { f: '[shop=supermarket]',               c: '#06b6d4', l: 'Supermarketuri' },
+    scoli:          { f: ['[amenity=school]'],                 c: '#f59e0b', l: 'Școli' },
+    spitale:        { f: ['[amenity~"^(hospital|clinic)$"]'],  c: '#ef4444', l: 'Spitale/Clinici' },
+    transport:      { f: ['[highway=bus_stop]', '[public_transport=platform]', '[public_transport=stop_position]', '[railway~"^(tram_stop|station|halt)$"]', '[amenity=bus_station]'], c: '#60a5fa', l: 'Stații transport' },
+    universitati:   { f: ['[amenity~"^(university|college)$"]'], c: '#a78bfa', l: 'Universități' },
+    parcuri:        { f: ['[leisure=park]'],                   c: '#22c55e', l: 'Parcuri' },
+    supermarketuri: { f: ['[shop=supermarket]'],               c: '#06b6d4', l: 'Supermarketuri' },
+    monumente:      { f: ['[historic]', '[tourism=attraction]', '[heritage]'], c: '#eab308', l: 'Monumente & patrimoniu' },
+    turism:         { f: ['[amenity=theatre]', '[amenity=cinema]', '[tourism=museum]', '[amenity=arts_centre]', '[tourism~"^(hotel|gallery|viewpoint|artwork)$"]', '[amenity~"^(restaurant|cafe)$"]'], c: '#f472b6', l: 'Turism & agrement' },
   };
 
   var _active = null; // cheia tipului afisat curent
@@ -53,8 +55,9 @@
     var c = _center(); if (!c) { G.ss && G.ss('Harta indisponibilă'); return; }
     G.ss && G.ss('🔎 Aduc ' + T.l + ' din OSM…');
     var r = 2500; // raza ~2km (ca eticheta cardului)
-    var filt = T.f + (T.extra ? ');nwr(around:' + r + ',' + c.lat + ',' + c.lon + ')' + T.extra : '');
-    var q = '[out:json][timeout:25];(nwr(around:' + r + ',' + c.lat + ',' + c.lon + ')' + filt + ';);out center;';
+    var filters = Array.isArray(T.f) ? T.f : [T.f];
+    var parts = filters.map(function (fl) { return 'nwr(around:' + r + ',' + c.lat + ',' + c.lon + ')' + fl + ';'; }).join('');
+    var q = '[out:json][timeout:25];(' + parts + ');out center tags;';
     var data = null;
     try {
       var resp = await fetch(PROXY() + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });

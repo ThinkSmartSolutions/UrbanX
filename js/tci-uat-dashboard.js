@@ -287,6 +287,8 @@ G._UATDashboard = {
                 ['🎓','Univers.',poi.universitati,'universitati'],
                 ['🌳','Parcuri',poi.parcuri,'parcuri'],
                 ['🛒','Supermark.',poi.supermarketuri,'supermarketuri'],
+                ['🏛️','Monumente',poi.monumente,'monumente'],
+                ['🎭','Turism',poi.turism,'turism'],
               ].map(([icon,l,v,key])=>`
                 <div onclick="window._InfraMap&&window._InfraMap.show('${key}')" title="Click — afișează ${l} pe hartă (OSM)"
                   style="text-align:center;background:rgba(15,25,60,.8);border-radius:6px;padding:6px;cursor:pointer;transition:background .15s"
