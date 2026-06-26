@@ -70,6 +70,11 @@
     G.ss && G.ss('🏺 Aduc monumentele reale (OSM) și generez RCAI…');
     var heritage = await _fetchHeritage(x.lat, x.lon, mode === 'T' ? 12000 : 2500);
     var mapImg = null; try { mapImg = await _captureMap(x.lat, x.lon, heritage); } catch (e) {}
+    // LMI OFICIAL (INP) per județ — date reale (cod + denumire)
+    var lmi = []; try {
+      var jud = (cityKey || '').split('-')[1] || (x.judet || '').slice(0, 2).toUpperCase();
+      if (jud) { var lr = await fetch('./data/lmi/' + jud + '.json', { signal: AbortSignal.timeout(15000) }); if (lr.ok) lmi = await lr.json(); }
+    } catch (e) {}
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: 'RAPORT DE CERCETARE ARHEOLOGICĂ', cityName: x.name, accent: [180, 83, 9] });
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
@@ -121,6 +126,16 @@
       if (heritage.length > 40) D.P('(Au fost listate primele 40 de obiective din cele ' + heritage.length + ' identificate, în ordinea distanței.)');
     } else {
       D.P('Interogarea surselor deschise (OSM) nu a returnat obiective de patrimoniu denumite în raza analizată la momentul generării. Aceasta NU exclude existența unor situri sau monumente — multe nu sunt cartografiate în sursele deschise. Se impune consultarea inventarelor oficiale: Lista Monumentelor Istorice (LMI/MCIN) și Repertoriul Arheologic Național (RAN/CIMEC), precum și a Direcției Județene pentru Cultură.');
+    }
+
+    // ── DATE OFICIALE: Lista Monumentelor Istorice (LMI / INP) pe județ ──
+    if (lmi && lmi.length) {
+      D.chapter('Monumente istorice clasate — LMI oficial (INP)');
+      D.P('Conform Listei Monumentelor Istorice (LMI) — sursă oficială Institutul Național al Patrimoniului (INP) / Ministerul Culturii — pe județul de referință sunt înregistrate ' + lmi.length + ' poziții de monumente clasate (extras din setul deschis INP). Fiecare monument are un cod LMI oficial (format JJ-categorie-tip-grupă-număr) care îi atestă regimul de protecție și impune restricții și avize specifice pentru intervenții în monument sau în zona sa de protecție (Legea 422/2001).');
+      var lrows = lmi.slice(0, 60).map(function (m) { return [m.cod, m.nume]; });
+      if (D.table) D.table(['Cod LMI', 'Denumire monument'], lrows, [CW * 0.28, CW * 0.72]);
+      if (lmi.length > 60) D.P('(Sunt listate primele 60 din ' + lmi.length + ' poziții LMI ale județului; lista completă se consultă în LMI oficial publicat de Ministerul Culturii.)');
+      D.P('Sursă: Lista Monumentelor Istorice (LMI), Institutul Național al Patrimoniului — set de date deschise (data.gov.ro / cultura.ro). Codurile de grupă „A" indică monumente de interes național, iar „B" de interes local. Prezența unor monumente clasate în proximitatea amplasamentului ridică nivelul de prudență și poate impune avize suplimentare de la Direcția Județeană pentru Cultură.');
     }
 
     // ── Corpul dezvoltat (capitole generate, calitate SIDU) — rang superior 100+ pag ──
