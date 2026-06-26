@@ -183,6 +183,15 @@
     ]);
     D.P('Aceste recomandări se integrează în pachetul de adaptare climatică al platformei (UHI, LOISIR spații verzi, gospodărire ape pluviale, carbon) și alimentează capitolele de mediu și risc din documentele strategice.');
 
+    D.chapter('Indicele de confort climatic — metodologie');
+    D.P('Pentru o citire sintetică, profilul climatic este rezumat printr-un indice de confort climatic (0–100), care penalizează abaterea de la temperatura optimă de confort și frecvența extremelor. Indicele are rol orientativ și de comunicare, nu înlocuiește indicii bioclimatici standard (PET, UTCI), care necesită date de umiditate, vânt și radiație.');
+    if (D.formula) D.formula('Indice de confort climatic', 'Confort = 72 − 2,2·|T_med − 12| − 0,5·zile_tropicale − 0,25·zile_îngheț + bonus_pluvial', 'T_med = temperatura medie anuală; bonus_pluvial = +8 dacă precipitațiile sunt în intervalul echilibrat 450–750 mm/an. Rezultat: ' + c.comfort + '/100');
+    D.P('Pentru ' + (ll.name || 'UAT') + ', indicele de confort climatic este ' + c.comfort + '/100, reflectând un climat temperat cu sezonalitate marcată și un număr semnificativ de zile cu temperaturi extreme (calde și reci). Valoarea se interpretează comparativ — în catalogul UrbanX, orașele din zone cu ierni mai blânde și veri mai puțin caniculare obțin scoruri superioare. Indicele alimentează dimensiunea „Mediu și climă" a Notei UrbanX (IVU).');
+
+    D.chapter('Integrarea în documentele strategice');
+    D.P('Profilul climatic nu este un document izolat, ci o componentă fundamentală a planificării integrate. El alimentează: (1) capitolul de mediu și risc din SIDU; (2) infrastructura verde-albastră și zonele de adaptare din Masterplan; (3) emisiile din transport și clădiri din PMUD; (4) baza de calcul a SECAP (grade-zile, potențial de reducere a emisiilor); (5) studiul de carbon și indicele UHI ale platformei. Această integrare asigură coerența: aceleași date climatice reale stau la baza tuturor deciziilor cu componentă climatică.');
+    D.P('Prin includerea sistematică a profilului climatic în toate documentele teritoriale, platforma asigură că adaptarea climatică nu rămâne un capitol declarativ, ci devine un fir cantitativ care traversează diagnoza, viziunea, portofoliul de proiecte și sistemul de monitorizare — la nivelul de exigență cerut de finanțările europene pentru tranziția verde.');
+
     // Nota UrbanX (IVU) — standard transversal
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
