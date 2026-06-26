@@ -143,7 +143,175 @@
     ov.appendChild(m); document.body.appendChild(ov);
   }
 
+  function _nf(n) { try { return Math.round(n).toLocaleString('ro-RO'); } catch (e) { return '' + n; } }
+
+  // ── STUDIU GENUIN (≥10 pag) pe motorul strategic _makeStratDoc ─────────────
+  function _marketStudy(uat, type) {
+    var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
+    var pdf = new jsPDFns({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var D = window._makeStratDoc(pdf, { docTitle: 'STUDIU DE PIAȚĂ IMOBILIARĂ', cityName: uat, accent: [16, 185, 129] });
+    var W = 210, ML = D.dims.ML, CW = D.dims.CW, FONT = 'DejaVuRO', N = _nf;
+    var s = snapshot(uat, type), tName = TYPES[type] || type;
+    var allRows = _uats().map(function (u) { return { u: u, s: snapshot(u, type) }; }).filter(function (r) { return r.s.count; });
+    var tr = trend(uat, type);
+
+    // ── COPERTĂ ──
+    D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+    pdf.setFillColor(6, 24, 18); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(16, 185, 129); pdf.rect(0, 60, W, 1.4, 'F');
+    try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+    pdf.setTextColor(110, 231, 183); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · MARKET INTELLIGENCE IMOBILIAR', W / 2, 44, { align: 'center' });
+    pdf.setTextColor(255, 255, 255); pdf.setFontSize(24); pdf.text('STUDIU DE PIAȚĂ IMOBILIARĂ', W / 2, 90, { align: 'center' });
+    pdf.setTextColor(110, 231, 183); pdf.setFontSize(14); pdf.text(D.S2(tName + ' · ' + uat), W / 2, 104, { align: 'center' });
+    if (s.count) { pdf.setTextColor(150, 190, 170); pdf.setFontSize(11); pdf.text('Preț median ' + N(s.median_m2_eur) + ' €/mp · variație 12 luni ' + (s.change_12m_pct >= 0 ? '+' : '') + s.change_12m_pct + '%', W / 2, 116, { align: 'center' }); }
+    D.setSuppress && D.setSuppress(false);
+
+    D.chapter('1. Rezumat executiv');
+    if (s.count) {
+      D.P('Prezentul studiu analizează piața imobiliară pentru segmentul „' + tName + '" în ' + uat + ', pe baza unui eșantion de ' + N(s.count) + ' tranzacții. Prețul median observat este de ' + N(s.median_m2_eur) + ' €/mp (' + N(s.median_m2_ron) + ' RON/mp), cu un interval de ' + N(s.min_m2_eur) + '–' + N(s.max_m2_eur) + ' €/mp. Dinamica recentă indică o variație de ' + (s.change_3m_pct >= 0 ? '+' : '') + s.change_3m_pct + '% pe ultimele 3 luni și ' + (s.change_12m_pct >= 0 ? '+' : '') + s.change_12m_pct + '% pe 12 luni.');
+      D.callout && D.callout('Concluzie de piață', 'Segmentul „' + tName + '" în ' + uat + ' se află într-o fază ' + (s.change_12m_pct > 5 ? 'de creștere susținută' : s.change_12m_pct > 0 ? 'de creștere moderată' : s.change_12m_pct < -5 ? 'de corecție' : 'de stabilizare') + '. Prețurile sunt agregate și au caracter informativ; nu constituie consultanță de investiții.');
+    } else {
+      D.P('Nu există tranzacții înregistrate pentru combinația „' + tName + '" în ' + uat + ' la momentul raportului. Studiul prezintă cadrul metodologic și contextul de piață aplicabil; indicatorii sintetici se vor completa pe măsura colectării de tranzacții.');
+    }
+
+    D.chapter('2. Metodologie');
+    D.P('Analiza folosește mediana prețului unitar (€/mp) ca indicator principal de tendință centrală, întrucât este robustă la valori extreme — spre deosebire de medie, care este distorsionată de tranzacții atipice (proprietăți de lux sau vânzări sub presiune). Indicatorii calculați: mediana, media aritmetică, intervalul min–max, și variațiile procentuale pe 3 și 12 luni (comparând mediana tranzacțiilor recente cu cea a perioadelor anterioare). Conversia €↔RON folosește un curs orientativ de ' + CURS.toFixed(1) + ' RON/€; evaluările oficiale folosesc cursul BNR din ziua evaluării.');
+    D.formula && D.formula('Variația prețului median', 'Δ% = (Med_recent − Med_anterior) / Med_anterior × 100', 'Med = mediana €/mp pe fereastra temporală respectivă');
+    D.P('Pentru segmentarea temporală, tranzacțiile se grupează în ferestre (0–3 luni „recent", 3–6 luni, ≥9 luni „acum un an"), iar variațiile se calculează între mediane de fereastră. Această abordare reduce zgomotul lunar și surprinde tendința reală, evitând concluziile bazate pe o singură lună atipică.');
+
+    D.chapter('3. Surse de date și cadru legal');
+    D.P('Datele de tranzacții provin, în varianta de producție, din registrele publice ANCPI (eTranzacții / cărți funciare), accesibile conform Legii 7/1996 art. 51 privind caracterul public al cărții funciare. Prețurile sunt agregate statistic, fără date personale (nume, CNP), în conformitate cu GDPR și Legea 190/2018 — se publică doar valori unitare și indicatori derivați, niciodată tranzacții nominale.');
+    D.callout && D.callout('Transparență privind datele', s.data_quality === 'demonstrativ' ? 'Eșantionul curent este DEMONSTRATIV (seed). Integrarea live ANCPI eTranzacții este prevăzută ca Faza 2 (componentă server). Indicatorii ilustrează metodologia, nu valori de piață validate.' : 'Eșantionul include tranzacții reale introduse local; calitatea datelor: ' + s.data_quality + '.');
+    D.source && D.source('ANCPI · Legea 7/1996 art.51 · GDPR / Legea 190/2018 · curs BNR');
+
+    D.chapter('4. Contextul pieței imobiliare din România');
+    D.P('Piața imobiliară românească este caracterizată de eterogenitate teritorială accentuată: polii de creștere (Cluj-Napoca, București, Timișoara, Iași, Brașov) concentrează cererea și înregistrează cele mai ridicate valori și ritmuri de apreciere, în timp ce orașele mici și mediul rural rămân la valori semnificativ mai joase. Cererea este susținută de urbanizare, de fluxul de forță de muncă către poli și de rolul imobiliarului ca refugiu pentru economii într-un context inflaționist.');
+    D.P('Oferta nouă este sensibilă la costul materialelor și al finanțării, iar autorizarea (PUZ/autorizație de construire) introduce decalaje de 1–3 ani între semnalul de preț și livrarea de stoc nou. Această inelasticitate pe termen scurt amplifică volatilitatea prețurilor în fazele de cerere ridicată. Creditul ipotecar și nivelul dobânzilor sunt determinanți macro majori ai accesibilității și, implicit, ai cererii efective.');
+
+    D.chapter('5. Indicatori sintetici de piață');
+    if (s.count) {
+      D.table && D.table(['Indicator', 'Valoare'], [
+        ['Preț median', N(s.median_m2_eur) + ' €/mp  (' + N(s.median_m2_ron) + ' RON/mp)'],
+        ['Preț mediu', N(s.avg_m2_eur) + ' €/mp'],
+        ['Interval (min–max)', N(s.min_m2_eur) + ' – ' + N(s.max_m2_eur) + ' €/mp'],
+        ['Variație 3 luni', (s.change_3m_pct >= 0 ? '+' : '') + s.change_3m_pct + '%'],
+        ['Variație 12 luni', (s.change_12m_pct >= 0 ? '+' : '') + s.change_12m_pct + '%'],
+        ['Eșantion', N(s.count) + ' tranzacții · calitate: ' + s.data_quality],
+      ], [CW * 0.42, CW * 0.58]);
+      D.P('Diferența dintre mediană (' + N(s.median_m2_eur) + ' €/mp) și medie (' + N(s.avg_m2_eur) + ' €/mp) indică ' + (s.avg_m2_eur > s.median_m2_eur * 1.05 ? 'o asimetrie spre dreapta — câteva tranzacții de valoare ridicată trag media în sus, mediana fiind mai reprezentativă pentru tranzacția tipică.' : 'o distribuție relativ simetrică, cei doi indicatori fiind apropiați.'));
+    } else { D.P('Indicatorii sintetici se completează la colectarea tranzacțiilor.'); }
+
+    D.chapter('6. Analiza trendului pe 12 luni');
+    if (D.lineChart && tr.length >= 2) {
+      try { D.lineChart([{ name: tName, color: [16, 185, 129], points: tr.map(function (p) { return p.val; }) }], tr.map(function (p) { return 'L-' + p.m; }), { title: 'Evoluția prețului median €/mp (12 luni)', h: 52, source: 'Mediană lunară pe eșantionul disponibil' }); } catch (e) {}
+    }
+    D.P('Trendul lunar al medianei surprinde dinamica recentă a segmentului. Un trend ascendent susținut indică presiune a cererii sau ofertă insuficientă; aplatizarea sau corecția pot semnala saturarea cererii la nivelul de preț atins, ori înăsprirea condițiilor de creditare. Interpretarea trendului trebuie corelată cu volumul tranzacțiilor: o creștere de preț pe volum în scădere este mai fragilă decât una pe volum în creștere.');
+
+    D.chapter('7. Comparație între UAT-uri');
+    if (D.table && allRows.length) {
+      D.table(['UAT', '€/mp median', '3 luni', '12 luni'], allRows.map(function (r) {
+        return [r.u, N(r.s.median_m2_eur), (r.s.change_3m_pct >= 0 ? '+' : '') + r.s.change_3m_pct + '%', (r.s.change_12m_pct >= 0 ? '+' : '') + r.s.change_12m_pct + '%'];
+      }), [CW * 0.34, CW * 0.24, CW * 0.21, CW * 0.21]);
+    }
+    if (D.barChart && allRows.length) {
+      D.barChart(allRows.map(function (r, i) { return [r.u, r.s.median_m2_eur, i === 0 ? [16, 185, 129] : [148, 163, 184]]; }), { title: 'Preț median €/mp pe UAT (' + tName + ')', h: 46, source: 'Comparație inter-UAT, același segment' });
+    }
+    D.P('Comparația inter-UAT pe același segment evidențiază poziționarea relativă și ecartul de valoare între piețe. Diferențele reflectă nivelul de dezvoltare economică, presiunea demografică și atractivitatea fiecărui UAT. Ritmurile de variație (3 și 12 luni) arată unde se concentrează momentul de piață — un UAT cu creștere accelerată poate semnala atât oportunitate, cât și risc de supraîncălzire.');
+
+    D.chapter('8. Factori determinanți ai prețului');
+    D.P('Prețul unitar al unei proprietăți se formează din interacțiunea mai multor factori, a căror pondere estimată (pe baza literaturii de evaluare hedonică și a observațiilor de piață locale) este: localizare/accesibilitate ~40–50%, suprafață și calitatea/vechimea construcției ~20–25%, dotări de cartier (școli, comerț, transport public, spații verzi) ~15–20%, regimul urbanistic și potențialul edificabil (POT/CUT) ~10–15%.');
+    D.bullets([
+      'Localizare: distanța la centru, la noduri de transport și la dotări — corelată cu indicii Walk Score și Orașul-15-minute din platformă;',
+      'Reglementare urbanistică: un CUT/POT mai permisiv crește valoarea terenului prin potențialul de dezvoltare;',
+      'Infrastructură: proximitatea școlilor, spitalelor și transportului public adaugă primă de valoare;',
+      'Calitatea construcției: an, materiale, eficiență energetică (certificatul energetic devine factor de preț).'
+    ]);
+
+    D.chapter('9. Cererea, oferta și echilibrul de piață');
+    D.P('Prețul este rezultanta echilibrului dintre cerere (susținută de venituri, credit, demografie și așteptări) și ofertă (stocul existent plus pipeline-ul de proiecte autorizate). Pe termen scurt oferta este inelastică — construcția necesită ani — astfel încât șocurile de cerere se transmit direct în preț. Pe termen mediu, oferta nouă temperează creșterile, dacă autorizarea și infrastructura permit dezvoltarea.');
+    D.P('Indicatori utili de monitorizare a echilibrului: numărul de autorizații de construire emise, stocul de locuințe nevândute, durata medie de expunere pe piață (time-on-market) și raportul preț cerut/preț tranzacționat. O durată de expunere în creștere și un discount preț cerut–tranzacționat în creștere anticipează încetinirea pieței înaintea ajustării prețului median.');
+
+    D.chapter('10. Accesibilitatea locuirii (affordability)');
+    D.P('Accesibilitatea măsoară raportul dintre prețul locuinței și veniturile gospodăriilor — un indicator-cheie al sustenabilității pieței. Indicatorul price-to-income (preț locuință / venit anual) și efortul lunar de rambursare a creditului raportat la venit (debt-service-to-income) determină câtă cerere efectivă poate susține piața la un nivel de preț dat.');
+    D.formula && D.formula('Indice de accesibilitate', 'PIR = Preț_locuință / (Venit_mediu_anual_gospodărie)', 'PIR > 7–8 = piață scump accesibilă; PIR < 5 = accesibilă');
+    D.P('Când prețurile cresc mai repede decât veniturile, accesibilitatea se deteriorează și cererea efectivă se restrânge — chiar dacă dorința de cumpărare persistă. Politica de creditare (avans, dobândă, programe guvernamentale tip „Noua Casă") modifică direct accesibilitatea și, prin ea, cererea. Un raport preț/venit ridicat și în creștere este un semnal de avertizare privind sustenabilitatea pe termen mediu.');
+
+    D.chapter('11. Randamentul investițional și piața chiriilor');
+    D.P('Pentru proprietățile de investiție, randamentul locativ brut (yield) este indicatorul central: raportul dintre chiria anuală și prețul de achiziție. El permite compararea imobiliarului cu alte clase de active și semnalează gradul de supra/subevaluare al pieței față de fundamentul ei locativ.');
+    D.formula && D.formula('Randament locativ brut', 'Yield_brut = (Chirie_lunară × 12) / Preț_achiziție × 100', 'randament net scade costurile de administrare, vacanță și impozite');
+    D.P('Un yield brut tipic pe piața rezidențială românească se situează în intervalul 5–7% pentru orașele mari, comprimându-se în zonele centrale scumpe (unde aprecierea capitalului compensează randamentul locativ mai mic). Un yield în scădere accentuată semnalează că prețurile cresc mai repede decât chiriile — un avertisment de supraevaluare relativă, întrucât valoarea se îndepărtează de fundamentul ei generator de venit.');
+
+    D.chapter('12. Ciclul imobiliar și poziționarea');
+    D.P('Piețele imobiliare urmează cicluri (expansiune → vârf → corecție → redresare) determinate de interacțiunea dintre credit, ofertă nouă și sentimentul de piață. Poziționarea în ciclu orientează deciziile: în expansiune timpurie randamentele ajustate la risc sunt favorabile; aproape de vârf, riscul de corecție crește. Variația pe 12 luni de ' + (s.count ? ((s.change_12m_pct >= 0 ? '+' : '') + s.change_12m_pct + '%') : 'n/a') + ' coroborată cu volumul și cu accesibilitatea ajută la localizarea aproximativă în ciclu.');
+    D.P('Semnale de vârf de ciclu: accelerarea prețului decuplată de venituri, comprimarea yield-ului sub costul finanțării, creșterea ponderii cumpărătorilor speculativi și expansiunea agresivă a creditării. Semnale de redresare: stabilizarea volumelor, revenirea accesibilității și reluarea creditării după o perioadă de corecție.');
+
+    D.chapter('13. Segmentarea pe tipuri de proprietate');
+    D.P('Fiecare segment (apartament, casă, teren, comercial, birou) are dinamică proprie. Rezidențialul este cel mai lichid și mai sensibil la creditarea persoanelor fizice; terenul are volatilitate ridicată și este puternic dependent de reglementarea urbanistică (un teren cu PUZ aprobat și CUT ridicat valorează mult mai mult); comercialul și birourile depind de ciclul economic și de tendințele de muncă (remote/hibrid afectează cererea de birouri). Analiza pe segment evită concluziile eronate dintr-o medie agregată pe tipuri eterogene.');
+
+    D.chapter('14. Legătura cu evaluarea ANEVAR / IVS');
+    D.P('Indicatorii de piață din acest studiu alimentează abordarea prin comparație de piață (Sales Comparison Approach) din Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR. Evaluatorul autorizat pornește de la prețuri de tranzacție comparabile, ajustate pentru diferențe (localizare, suprafață, stare, dată), pentru a estima valoarea de piață a unei proprietăți-țintă. Mediana și intervalul de preț pe segment oferă reperul de pornire și benzile de plauzibilitate.');
+    D.P('Acest studiu NU substituie un raport de evaluare ANEVAR: nu individualizează proprietatea, nu aplică ajustări specifice și nu angajează responsabilitatea unui evaluator autorizat. Are rol de pre-analiză de piață și de orientare, conform disclaimerului final.');
+
+    D.chapter('15. Impactul reglementărilor urbanistice asupra valorii');
+    D.P('Regimul urbanistic (POT, CUT, regim de înălțime, funcțiuni admise) este un determinant major al valorii terenului: capacitatea edificabilă suplimentară se capitalizează direct în preț. O modificare de PUZ care crește CUT-ul poate genera un salt de valoare („plusvaloare urbanistică") — fenomen care fundamentează instrumentele de captare a plusvalorii (vezi studiul LVC al platformei). Invers, servituțile, zonele de protecție și restricțiile reduc valoarea.');
+    D.P('Pentru investitori și administrații, corelarea hărții de valoare (studiul Hartă valori imobiliare al platformei) cu zonarea PUG identifică terenurile subutilizate semicentrale — oportunități de densificare cu beneficiu fiscal și de regenerare urbană.');
+
+    D.chapter('16. Fiscalitate și costuri de tranzacționare');
+    D.P('Costul total al unei tranzacții depășește prețul afișat: cumpărătorul suportă onorariul notarial, taxele de intabulare (OCPI/ANCPI) și, după caz, comisionul de agenție; vânzătorul suportă impozitul pe venitul din transferul proprietăților imobiliare (conform Codului Fiscal). Aceste costuri (orientativ 3–6% cumulat) afectează randamentul net al investiției și trebuie incluse în analiza de rentabilitate.');
+    D.P('Impozitul local pe clădiri și terenuri, bazat pe valoarea impozabilă, leagă piața de finanțele publice locale: o piață cu valori în creștere extinde baza de impozitare și capacitatea administrației de a finanța servicii și infrastructură — care, la rândul lor, susțin valoarea (buclă de feedback pozitiv prin captarea plusvalorii).');
+
+    D.chapter('17. Riscuri de piață');
+    D.bullets([
+      'Macroeconomic: creșterea dobânzilor și înăsprirea creditării reduc cererea efectivă;',
+      'Supraevaluare: yield comprimat sub costul finanțării și preț decuplat de venituri;',
+      'Lichiditate: în corecție, durata de vânzare crește și discounturile se adâncesc;',
+      'Reglementar: schimbări de regim fiscal sau urbanistic pot reprețui rapid segmente întregi;',
+      'Calitatea datelor: eșantion mic sau neechilibrat → indicatori instabili (vezi cap. 20).'
+    ]);
+    D.P('Gestionarea riscului presupune diversificare (segmente, localizări), marjă de siguranță în ipotezele de randament și monitorizarea indicatorilor de avertizare timpurie (accesibilitate, yield, volum, time-on-market) descriși mai sus.');
+
+    D.chapter('18. Scenarii și prognoză (orizont 3 ani)');
+    var base = s.count ? s.median_m2_eur : 1500;
+    if (D.lineChart) {
+      try {
+        var yrs = [0, 1, 2, 3];
+        D.lineChart([
+          { name: 'Optimist (+6%/an)', color: [34, 197, 94], points: yrs.map(function (y) { return Math.round(base * Math.pow(1.06, y)); }) },
+          { name: 'Moderat (+3%/an)', color: [234, 179, 8], points: yrs.map(function (y) { return Math.round(base * Math.pow(1.03, y)); }) },
+          { name: 'Conservator (0%/an)', color: [148, 163, 184], points: yrs.map(function (y) { return Math.round(base * Math.pow(1.0, y)); }) },
+        ], yrs.map(function (y) { return 'an+' + y; }), { title: 'Proiecție preț median €/mp — 3 scenarii', h: 52, source: 'Proiecție UrbanX · creștere compusă (orientativ)' });
+      } catch (e) {}
+    }
+    D.P('Scenariile reflectă incertitudinea macroeconomică. Diferența de ritm anual se compune semnificativ pe trei ani: un ecart de 3 puncte procentuale/an generează o diferență de valoare de aproape 10% la final de orizont. Proiecțiile au caracter strict orientativ și nu reprezintă recomandări de investiție — vezi limitările.');
+
+    D.chapter('19. Recomandări');
+    D.bullets([
+      'Pentru cumpărători/investitori: corelați prețul cu yield-ul și accesibilitatea, nu doar cu trendul; includeți costurile de tranzacționare în randamentul net;',
+      'Pentru administrații: folosiți indicatorii pentru calibrarea valorilor impozabile și identificarea terenurilor subutilizate (densificare + bază fiscală);',
+      'Pentru dezvoltatori: corelați segmentul și localizarea cu accesibilitatea cererii, nu doar cu prețul de vârf;',
+      'Pentru toți: monitorizați volumul tranzacțiilor odată cu prețul — un preț în creștere pe volum în scădere este fragil.'
+    ]);
+
+    D.chapter('20. Calitatea datelor și limitări metodologice');
+    D.P('Robustețea indicatorilor depinde de mărimea și reprezentativitatea eșantionului. Eșantioane mici (sub câteva zeci de tranzacții pe segment/perioadă) produc mediane instabile și variații procentuale zgomotoase. Sursa preferată este registrul ANCPI (prețuri efective de tranzacție); listările de pe portaluri reflectă prețuri CERUTE, sistematic mai mari decât cele tranzacționate. Eșantionul curent are calitatea „' + s.data_quality + '".');
+    D.P('Alte limitări: agregarea pe UAT maschează diferențele intra-urbane (centru vs periferie); neajustarea pentru caracteristici (suprafață, etaj, stare) introduce eterogenitate; decalajul de înregistrare în CF poate întârzia reflectarea tranzacțiilor recente. Pentru evaluări individuale se impune metoda comparabilelor ajustate, realizată de evaluator autorizat.');
+
+    D.chapter('21. Limitări și disclaimer');
+    D.P('Studiu generat algoritmic (UrbanX Market Intelligence) pe date ' + (s.data_quality === 'demonstrativ' ? 'DEMONSTRATIVE (seed); integrarea ANCPI eTranzacții este Faza 2.' : 'agregate local.') + ' Prețurile sunt agregate, fără date personale (GDPR / Legea 190/2018). Documentul NU constituie consultanță financiară sau investițională (Legea 297/2004) și NU substituie un raport de evaluare ANEVAR/IVS întocmit de evaluator autorizat. Cifrele sunt orientative și necesită validare profesională.');
+
+    D.chapter('22. Surse și standarde');
+    D.P('ANCPI / cărți funciare (Legea 7/1996 art. 51 — date publice); GDPR / Legea 190/2018 (agregare, fără date personale); Standardele Internaționale de Evaluare (IVS) și standardele ANEVAR (abordarea prin comparație de piață); Codul Fiscal (impozit pe transfer și impozit local); curs BNR. Glosar: mediană = valoarea de mijloc; yield = randament locativ brut; PIR = price-to-income ratio; CUT/POT = coeficient/procent de utilizare a terenului. Metodologie UrbanX · ThinkSmart Solutions.');
+
+    var fn = ('Studiu_piata_' + (type || '') + '_' + (uat || '').replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    window._buildStratTOC && window._buildStratTOC(D, 1);
+    pdf.save(fn); window.ss && ss('✅ Studiu de piață generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
+  }
+
   function generatePDF(uat, type) {
+    if (typeof window._makeStratDoc === 'function') { try { return _marketStudy(uat, type); } catch (e) { console.error('[Market PDF]', e); } }
+    return _genSimpleMarket(uat, type);
+  }
+
+  function _genSimpleMarket(uat, type) {
     try {
       var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!jsPDFns) { alert('jsPDF indisponibil'); return; }
       var pdf = new jsPDFns({ unit: 'mm', format: 'a4' });
