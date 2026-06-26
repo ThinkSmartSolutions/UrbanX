@@ -153,7 +153,7 @@
         ['Interval estimat', N(vmin) + ' – ' + N(vmax) + ' €/mp'],
         ['Mediană estimată', N(vmed) + ' €/mp'],
       ], [CW * 0.5, CW * 0.5]);
-      D.formula && D.formula('V(d) = V_baza × max(0,45 ; 1,15 − 0,28·d) × m_zona', 'd = distanța la centru [km] · m_zona ∈ [0,82 ; 1,18]');
+      D.formula && D.formula('Formula valorii unitare', 'V(d) = V_baza × max(0,45 ; 1,15 − 0,28·d) × m_zona', 'd = distanța la centru [km] · m_zona ∈ [0,82 ; 1,18] · V_baza = preț median UAT');
       D.P && D.P('Prețul de referință este calibrat pe nivelurile de piață 2024–2025 pentru municipiile reședință de județ, pe baza datelor publice de tranzacționare și a ofertelor agregate. Pentru analize pe tranzacții reale se recomandă coroborarea cu grila notarială și cu baza ANCPI.');
 
       if (mapShot) {
@@ -204,18 +204,47 @@
         ['Conservator (+2%/an central)', N(Math.round(vmax * 1.10)), N(Math.round(vmin * 1.05))],
       ], [CW * 0.46, CW * 0.27, CW * 0.27]);
       D.P && D.P('Scenariile reflectă incertitudinea macroeconomică. În toate cazurile, ecartul centru–periferie se menține sau se accentuează ușor, întrucât oferta de teren central este inelastică, iar cererea pentru locații accesibile crește odată cu maturizarea pieței și extinderea infrastructurii de transport public.');
+      if (D.lineChart) {
+        try {
+          var yrs = [0, 1, 2, 3, 4, 5];
+          D.lineChart([
+            { name: 'Optimist', color: [34, 197, 94], points: yrs.map(function (y) { return Math.round(vmax * Math.pow(1.06, y)); }) },
+            { name: 'Moderat', color: [234, 179, 8], points: yrs.map(function (y) { return Math.round(vmax * Math.pow(1.04, y)); }) },
+            { name: 'Conservator', color: [148, 163, 184], points: yrs.map(function (y) { return Math.round(vmax * Math.pow(1.02, y)); }) },
+          ], yrs.map(function (y) { return 'an+' + y; }), { title: 'Proiecție valoare zonă centrală (€/mp) — 3 scenarii', h: 52, source: 'Proiecție UrbanX · creștere compusă anuală' });
+        } catch (e) {}
+      }
+      D.P && D.P('Graficul evidențiază efectul dobânzii compuse: o diferență aparent mică de ritm anual (2% vs 6%) conduce, pe orizontul de cinci ani, la un ecart de valoare de peste 20% — relevant pentru deciziile de investiție și pentru calendarul intervențiilor publice care vizează captarea plusvalorii.');
 
       D.chapter && D.chapter('8. Benchmarking — poziționare relativă');
       D.P && D.P('Raportat la nivelul național, valoarea mediană estimată pentru ' + uat + ' (' + N(vmed) + ' €/mp) se situează în categoria orașelor cu piață ' + (vmed >= 1700 ? 'matură și tensionată (alături de Cluj-Napoca, București)' : vmed >= 1300 ? 'în creștere accelerată (alături de Iași, Brașov, Constanța)' : 'în dezvoltare, cu potențial de recuperare') + '. Față de capitalele regionale europene comparabile (Cracovia, Debrețin, Graz — 2.000–3.500 €/mp), nivelul local rămâne sub valoarea de echilibru, ceea ce indică un potențial de apreciere pe termen mediu condiționat de calitatea infrastructurii și a guvernanței urbane.');
 
-      D.chapter && D.chapter('9. Aplicații');
-      D.P && D.P('Harta de valoare susține: fundamentarea taxării locale diferențiate pe zone (impozit pe clădiri/teren); mecanisme de captare a plusvalorii (Land Value Capture) la aprobarea PUZ-urilor cu majorare de CUT; analiza de fezabilitate a dezvoltărilor (coroborare cu modulul Fezabilitate); prioritizarea investițiilor publice în zonele cu potențial de creștere a valorii prin infrastructură.');
+      D.chapter && D.chapter('9. Aplicații practice');
+      D.P && D.P('Harta de valoare are aplicații directe în administrația publică locală și în mediul privat de dezvoltare. La nivel municipal, ea fundamentează deciziile de politică fiscală și de investiții, oferind o bază obiectivă, transparentă și ușor de actualizat pentru diferențierea teritorială a valorii.');
+      D.bullets && D.bullets([
+        'Taxare locală diferențiată — impozit pe clădiri/teren modulat pe zone de valoare (echitate fiscală: cei din zone scumpe contribuie proporțional);',
+        'Captarea plusvalorii (Land Value Capture) — contribuție la aprobarea PUZ cu majorare de CUT, întrucât reglementarea creează plusvaloare privată din decizie publică (L.350/2001 art.56, mecanism voluntar de mediere);',
+        'Fezabilitate dezvoltări — input direct pentru modulul Fezabilitate (GDV = SU vandabilă × €/mp zonal);',
+        'Prioritizarea investițiilor publice — infrastructura (transport, parcuri) crește valoarea zonelor deservite; harta identifică zonele cu cel mai mare efect de levier;',
+        'Expropriere/despăgubire — reper orientativ pentru negocierea coridoarelor de utilitate publică.',
+      ]);
+      D.P && D.P('Integrarea cu celelalte module UrbanX amplifică utilitatea: corelarea cu indicele Walk Score și Orașul-15-minute explică o parte din variația de valoare prin accesibilitate, iar suprapunerea cu harta de risc (seismic/inundații) permite ajustarea valorii pentru expunerea la hazard — o practică tot mai cerută de finanțatori și asigurători.');
 
       D.chapter && D.chapter('10. Limitări și disclaimer');
-      D.P && D.P('Studiul este ORIENTATIV și are scop de fundamentare/planificare. NU constituie evaluare imobiliară în sensul standardelor ANEVAR și nu poate fi utilizat pentru tranzacții, garanții bancare sau expertize judiciare. Valorile sunt estimate dintr-un model parametric calibrat pe medii de piață, nu din tranzacții individuale verificate. Pentru valori certificate consultați un evaluator ANEVAR atestat. Datele de infrastructură provin din OpenStreetMap (acoperire variabilă).');
+      D.P && D.P('Studiul este ORIENTATIV și are scop de fundamentare/planificare. NU constituie evaluare imobiliară în sensul standardelor ANEVAR și nu poate fi utilizat pentru tranzacții, garanții bancare sau expertize judiciare. Valorile sunt estimate dintr-un model parametric calibrat pe medii de piață, nu din tranzacții individuale verificate.');
+      D.P && D.P('Limitări metodologice specifice: (1) modelul monocentric subestimează valoarea sub-centrelor secundare (cartiere de prestigiu periferice, zone comerciale de margine); (2) nu încorporează atribute hedonice individuale (an construcție, finisaje, etaj, orientare) care pot modifica valoarea unei unități cu ±20%; (3) prețul de bază este o medie de piață, cu o latență de 6–12 luni față de tranzacțiile curente; (4) acoperirea OSM a dotărilor variază între localități. Pentru valori certificate consultați un evaluator ANEVAR atestat (Legea 350/2001, standardele ANEVAR/IVS).');
 
-      D.chapter && D.chapter('11. Surse și bibliografie');
-      D.P && D.P('von Thünen J.H. (1826) „Der isolierte Staat"; Alonso W. (1964) „Location and Land Use" (bid-rent theory); date de piață publice 2024–2025; grilă notarială (UNNPR); ANCPI — date cadastrale; OpenStreetMap (infrastructură); BNR (curs valutar). Metodologie internă UrbanX · ThinkSmart Solutions.');
+      D.chapter && D.chapter('11. Surse, bibliografie și glosar');
+      D.P && D.P('Fundamentare teoretică și surse de date utilizate în prezentul studiu:');
+      D.bullets && D.bullets([
+        'von Thünen J.H. (1826) — „Der isolierte Staat" (teoria rentei funciare și a gradientului de localizare);',
+        'Alonso W. (1964) — „Location and Land Use" (bid-rent theory, fundamentul economiei urbane moderne);',
+        'IAAO — „Standard on Mass Appraisal of Real Property" (evaluare de masă pentru taxare);',
+        'Date de piață publice 2024–2025 (oferte agregate, indici imobiliari); grila notarială UNNPR;',
+        'ANCPI — date cadastrale și de carte funciară; OpenStreetMap — infrastructură urbană; BNR — curs valutar de referință.',
+      ]);
+      D.P && D.P('Glosar: €/mp = euro pe metru pătrat construit; CBD = Central Business District (nucleul de oportunitate); rentă urbană = surplusul de valoare al unei locații față de marginea construibilă; LVC = Land Value Capture (captarea plusvalorii generate de decizia publică); evaluare de masă = estimarea valorii unui număr mare de proprietăți printr-un model unitar, distinctă de evaluarea individuală ANEVAR.');
+      D.P && D.P('Document elaborat cu platforma UrbanX · ThinkSmart Solutions SRL. Metodologie proprietară, parametri calibrați pe piața românească. Pentru actualizări și analize pe tranzacții reale, contactați echipa UrbanX.');
 
       var fn = ('Studiu_Valori_' + (window._asciiFile ? window._asciiFile(uat) : uat) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
       window._buildStratTOC && window._buildStratTOC(D, 1);
