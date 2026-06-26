@@ -247,6 +247,12 @@
         if (pk.length) { D.P('Parametri de intrare', { bold: true, fs: 11, gap: 1 }); D.table(['Parametru', 'Valoare'], pk.map(function (k) { return [k, String(scn.params[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
         if (rk.length) { D.P('Rezultate ale modelului', { bold: true, fs: 11, gap: 1 }); D.table(['Indicator', 'Valoare'], rk.map(function (k) { return [k, String(scn.results[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
         D.callout('Statut juridic', 'Studiu de oportunitate ORIENTATIV generat de UrbanX SimLab (Legea 350/2001, art. 5). Valorile sunt estimari calibrate pe parametrii introdusi; deciziile finale necesita documentatii de specialitate avizate de proiectant atestat.');
+        // patrimoniu / avize LMI (restrictii legale de construire) + Nota IVU (brand UrbanX)
+        D.callout('Patrimoniu si avize de construire', 'Daca amplasamentul este monument istoric (LMI) sau in zona sa de protectie, sunt necesare avize de patrimoniu — Directia Judeteana pentru Cultura (grupa B, interes local) sau Ministerul Culturii / Comisia Nationala a Monumentelor Istorice (grupa A, interes national), conform Legii 422/2001. Verificarea punctuala se face in Studiul de Restrictii de parcela.');
+        try {
+          var _ivu = (G.UrbanXIVU && G.UrbanXIVU.scoreFor) ? G.UrbanXIVU.scoreFor(G.TCI && G.TCI.cityKey) : null;
+          if (_ivu && _ivu.R) D.callout('Nota UrbanX (IVU)', 'UAT-ul de referinta are Nota UrbanX (Indicele de Vitalitate Urbana) de ' + _ivu.R.score + '/100 (calificativ ' + _ivu.R.grade + ', categorie de marime: ' + (_ivu.R.tierLabel || '') + '). IVU este un indice compozit (0-100) dezvoltat de UrbanX, calculat din date reale pe sase dimensiuni, cu formula transparenta si recalculabila.');
+        } catch (e) {}
         var _af = G._asciiFile || function (s) { return String(s || ''); };
         pdf.save('Studiu_SimLab_' + _af(simT).replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf');
         // curatam amprenta indicelui desenata special pentru captura
