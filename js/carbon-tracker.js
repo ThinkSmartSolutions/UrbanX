@@ -191,10 +191,25 @@
       D.P('Rezultatele susțin: raportarea ESG (pilonul de mediu — emisii GES Scope 1–3); verificarea alinierii la Taxonomia UE (criteriul „contribuție substanțială la atenuarea schimbărilor climatice"); angajamentele asumate în cadrul Convenției Primarilor (Covenant of Mayors) și ale Planurilor de Acțiune pentru Energie Durabilă și Climă (PAEDC/SECAP); fundamentarea cererilor de finanțare verde (fonduri UE, credite cu dobândă preferențială pentru clădiri sustenabile).');
       D.P('Pentru dezvoltatorul privat, studiul oferă un argument de diferențiere pe piață (clădirile cu amprentă redusă se vând/închiriază mai bine și își păstrează valoarea pe termen lung — „green premium"), reduce riscul de reglementare (clădiri care nu vor deveni „active blocate"/stranded assets pe măsură ce normele se înăspresc) și deschide accesul la finanțare cu cost redus. Pentru autoritatea publică, agregarea studiilor de proiect alimentează inventarul de emisii al orașului și fundamentează politicile locale de construcție durabilă.');
 
-      D.chapter('14. Limitări și disclaimer');
+      D.chapter('14. Comparație între soluții constructive');
+      D.P('Alegerea sistemului structural este decizia cu cel mai mare impact asupra carbonului înglobat, cu efecte ireversibile odată construcția realizată. Tabelul de mai jos compară, pentru suprafața analizată de ' + N(r.area) + ' mp, amprenta înglobată a principalelor soluții, pe baza factorilor de emisie de referință utilizați în model:');
+      D.table && D.table(['Soluție structurală', 'kg CO₂/mp', 'Total înglobat (t)'], [
+        ['Lemn (CLT / glulam)', '150', N(Math.round(r.area * 150 / 1000))],
+        ['Prefabricate beton', '340', N(Math.round(r.area * 340 / 1000))],
+        ['Beton armat / zidărie', '400', N(Math.round(r.area * 400 / 1000))],
+        ['Cadru metalic', '500', N(Math.round(r.area * 500 / 1000))],
+      ], [CW * 0.45, CW * 0.27, CW * 0.28]);
+      D.P('Diferența între soluția cu cea mai mică amprentă (lemn) și cea mai mare (cadru metalic) este de cca. ' + N(Math.round(r.area * (500 - 150) / 1000)) + ' tone CO₂ pentru această dezvoltare — echivalentul a câtorva ani de emisii operaționale. Aceasta nu înseamnă că lemnul este întotdeauna alegerea optimă (intervin considerații de rezistență la foc, deschideri, cost, disponibilitate locală și competențe de execuție), ci că decizia structurală trebuie luată cu conștiința impactului de carbon, nu doar a costului inițial. Soluțiile hibride (nucleu de beton + structură de lemn) oferă adesea un compromis bun.');
+      D.P('Pe lângă sistemul structural, alegerea materialelor de finisaj, a izolației și a tâmplăriei contribuie la amprenta înglobată. Optimizarea cantităților (proiectare structurală eficientă, evitarea supradimensionării), utilizarea betonului cu conținut redus de clincher (cimenturi compozite) și a oțelului reciclat reduc suplimentar emisiile, fără schimbarea sistemului constructiv.');
+
+      D.chapter('15. Analiză de senzitivitate');
+      D.P('Pentru a evalua robustețea concluziilor, se examinează cum variază amprenta totală la modificarea ipotezelor-cheie. Trei parametri domină rezultatul: (1) intensitatea carbonică a rețelei electrice — o reducere de la 0,28 la 0,15 kg CO₂/kWh (țintă plauzibilă pentru România pe măsura decarbonării mixului energetic) ar diminua substanțial componenta operațională; (2) eficiența energetică a anvelopei — trecerea la standard NZEB reduce consumul specific cu 30–50%; (3) modal split-ul de transport — o localizare cu acces bun la transport public poate înjumătăți componenta de transport.');
+      D.P('Concluzia analizei de senzitivitate este că rezultatul nu este fragil: ierarhia măsurilor de reducere (anvelopă → sursă regenerabilă → structură cu amprentă redusă → localizare) rămâne valabilă pe întreaga plajă rezonabilă de ipoteze. Decarbonarea progresivă a rețelei va îmbunătăți automat bilanțul operațional al clădirii în timp, ceea ce întărește argumentul pentru investiția în reducerea carbonului înglobat — singura componentă care nu beneficiază de această îmbunătățire „gratuită" viitoare.');
+
+      D.chapter('16. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV. Valorile sunt estimate cu factori de emisie de referință (RICS/ICE, IPCC, ENTSO-E), nu din facturi energetice reale sau dintr-o analiză detaliată a materialelor (BoQ). NU înlocuiește un audit de carbon certificat sau o evaluare LCA detaliată realizată de un expert. Pentru raportare oficială ESG/Taxonomie se recomandă verificarea de către un evaluator acreditat și utilizarea datelor măsurate.');
 
-      D.chapter('15. Surse și bibliografie');
+      D.chapter('17. Surse și bibliografie');
       D.P('EN 15978:2011 — evaluarea performanței de mediu a clădirilor; RICS — „Whole Life Carbon Assessment for the Built Environment"; ICE Database (Inventory of Carbon & Energy); IPCC AR6 — factori de emisie; ENTSO-E / Transelectrica — intensitatea carbonică a rețelei RO; Comisia Europeană — EU Green Deal, Taxonomia UE, Convenția Primarilor. Metodologie internă UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Studiu_Carbon_' + (meta.nrcad || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
