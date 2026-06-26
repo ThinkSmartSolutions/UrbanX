@@ -152,6 +152,34 @@
     D.chapter('Surse de finanțare');
     D.P('Reconversia siturilor subutilizate este o prioritate a politicilor europene și naționale: Programul Operațional Regional (Axa de regenerare urbană), PNRR (componenta de regenerare și eficiență energetică), fonduri pentru brownfield, precum și capital privat și parteneriate. Eligibilitatea depinde de funcțiunea propusă, de componenta de spațiu public și de obiectivele de sustenabilitate (eficiență energetică, infrastructură verde).');
 
+    D.chapter('Patrimoniu industrial și reconversie adaptivă');
+    D.P('Multe situri industriale conțin construcții cu valoare arhitecturală sau de memorie locală (hale cu structuri metalice remarcabile, coșuri, ansambluri de epocă). Reconversia adaptivă — păstrarea și reutilizarea structurii existente în loc de demolare — reduce amprenta de carbon (carbonul înglobat este conservat), scurtează durata și poate genera identitate și valoare de piață superioară (loft-uri, huburi creative, spații culturale). Demolarea totală este justificată doar când structura este degradată sau incompatibilă cu funcțiunea propusă.');
+    D.P('Decizia între demolare și reconversie adaptivă se ia după o expertiză tehnică a structurii și o evaluare a valorii de patrimoniu industrial. Acolo unde structura permite, reconversia adaptivă este, de regulă, atât mai sustenabilă, cât și mai atractivă din punct de vedere urban și comercial — un argument tot mai puternic în contextul obiectivelor de decarbonare.');
+
+    D.chapter('Riscuri și măsuri de mitigare');
+    D.bullets([
+      'Risc de contaminare (sol/apă): investigare preliminară + decontaminare; cost și durată potențial mari — afectează direct fezabilitatea funcțiunilor sensibile;',
+      'Risc urbanistic: respingerea/întârzierea modificării de PUZ; mitigare prin dialog timpuriu cu autoritatea și aliniere la SIDU;',
+      'Risc de piață: supraoferta pe segmentul ales; mitigare prin mix funcțional și etapizare;',
+      'Risc de cost: depășiri la demolare/structură; mitigare prin expertiză tehnică în faza 0 și marjă de contingență;',
+      'Risc de absorbție: ritm de vânzare/închiriere mai lent; mitigare prin pre-comercializare și fazare.'
+    ]);
+    D.P('Gestionarea proactivă a acestor riscuri în faza de pre-analiză și fezabilitate este ceea ce diferențiază un proiect de reconversie reușit de unul blocat. Matricea de risc trebuie actualizată pe parcursul proiectului.');
+
+    D.chapter('Comparabile și precedente');
+    D.P('Reconversia siturilor industriale are precedente bine documentate la nivel european și românesc: foste platforme industriale transformate în cartiere mixte, hub-uri tehnologice, spații culturale sau parcuri. Aceste precedente oferă repere pentru indicii de densitate realizabili, pentru mixul funcțional optim și pentru instrumentele de finanțare și guvernanță utilizate. Analiza comparabilelor locale (tranzacții și proiecte similare din același oraș sau regiune) calibrează ipotezele de valoare și cost ale studiului, reducând incertitudinea estimărilor financiare.');
+
+    D.chapter('Indicatori de monitorizare');
+    if (D.table) D.table(['Indicator', 'Țintă / prag'], [
+      ['Suprafață reconvertită (din situl țintă)', '> 80% utilizare activă'],
+      ['Mix funcțional (entropie utilizare)', 'echilibrat (evită monofuncțional)'],
+      ['Spațiu public nou generat', '> 15% din suprafață'],
+      ['Locuri de muncă create', 'monitorizat anual'],
+      ['Creștere bază de impozitare locală', 'pozitivă vs. starea industrială'],
+      ['Plusvaloare captată (LVC)', 'reinvestită în infrastructură/spațiu public']
+    ], [CW * 0.6, CW * 0.4]);
+    D.P('Monitorizarea post-implementare validează ipotezele studiului și permite ajustarea politicilor de regenerare. Indicatorii se raportează periodic și se corelează cu Nota UrbanX (IVU) a orașului — o reconversie reușită îmbunătățește dimensiunile economică, de mediu și de calitate a vieții.');
+
     // Nota UrbanX (IVU)
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
