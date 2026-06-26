@@ -20,18 +20,18 @@
     'cultural': { t: 'STRATEGIA CULTURALĂ', ico: '🎭', ac: [124, 58, 237], badge: 'SECTORIAL', legal: 'Legea 422/2001 · OUG 118/2006 (așezăminte) · Agenda 21 a culturii', surse: 'LMI/INP · RAN · instituții culturale · OSM', ce: 'Strategia culturală: patrimoniu construit și mobil, instituții și așezăminte culturale, industrii creative, vitalitate culturală și acces la cultură pe teritoriu.' },
     'environment': { t: 'STRATEGIA DE MEDIU ȘI BIODIVERSITATE', ico: '🌿', ac: [22, 163, 74], badge: 'SECTORIAL', legal: 'OUG 195/2005 · OUG 57/2007 (arii protejate) · Dir. 92/43/CEE', surse: 'Copernicus · EEA · ANPM · OSM · Natura 2000', ce: 'Strategia de mediu: calitatea aerului/apei/solului, arii protejate și biodiversitate, spații verzi pe locuitor, infrastructură verde-albastră și servicii ecosistemice.' },
     'digitalization': { t: 'STRATEGIA DE DIGITALIZARE (eGOV)', ico: '💻', ac: [2, 132, 199], badge: 'SECTORIAL', legal: 'Legea 242/2022 (interoperabilitate) · PNRR C7 · eIDAS · GDPR', surse: 'ADR · PNRR · INS · servicii publice locale', ce: 'Strategia de transformare digitală a administrației: servicii eGov, interoperabilitate, infrastructură de date, conectivitate, competențe digitale și securitate cibernetică.' },
-    'sfu': { t: 'STUDIU DE FEZABILITATE URBANĂ (SFU)', ico: '📐', ac: [180, 83, 9], badge: 'SPECIALIZAT', legal: 'HG 907/2016 · Legea 350/2001 · POR/PNRR', surse: 'ANCPI · OSM · INS · costuri de referință', ce: 'Studiu de fezabilitate pentru o intervenție urbană: analiza opțiunilor, fezabilitate tehnică și financiară, cost-beneficiu, riscuri și recomandarea variantei optime.' },
+    'sfu': { parcel:1, t: 'STUDIU DE FEZABILITATE URBANĂ (SFU)', ico: '📐', ac: [180, 83, 9], badge: 'SPECIALIZAT', legal: 'HG 907/2016 · Legea 350/2001 · POR/PNRR', surse: 'ANCPI · OSM · INS · costuri de referință', ce: 'Studiu de fezabilitate pentru o intervenție urbană: analiza opțiunilor, fezabilitate tehnică și financiară, cost-beneficiu, riscuri și recomandarea variantei optime.' },
     'sct': { t: 'STUDIU DE CAPACITATE DE TRANSPORT (SCT)', ico: '🚦', ac: [37, 99, 235], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · normative trafic · PMUD', surse: 'OSM rețea · GTFS · recensământ trafic', ce: 'Analiza capacității rețelei de transport: niveluri de serviciu, congestie, capacitate intersecții, transport public și impactul unei dezvoltări asupra traficului.' },
-    'sim': { t: 'STUDIU DE IMPACT ASUPRA MOBILITĂȚII (SIM)', ico: '🚗', ac: [29, 78, 216], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · Ghid PMUD · normative trafic', surse: 'OSM · GTFS · trip generation', ce: 'Evaluarea impactului unei dezvoltări asupra mobilității: trafic generat, distribuție modală, efecte asupra rețelei și măsuri de atenuare (transport public, parcare, acces).' },
-    'scsp': { t: 'STUDIU DE CALITATE A SPAȚIULUI PUBLIC (SCSP)', ico: '🏛️', ac: [13, 148, 136], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · standarde spațiu public · 3-30-300', surse: 'OSM · Copernicus · observații teren', ce: 'Evaluarea calității spațiilor publice: accesibilitate, confort, vitalitate, vegetație (regula 3-30-300), siguranță, mobilier urban și recomandări de ameliorare.' },
-    'srgu': { t: 'STUDIU DE REGENERARE URBANĂ REZIDENȚIALĂ (SRgU)', ico: '🏢', ac: [217, 70, 39], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · POR Axa 5 · Legea 152/1998', surse: 'INS · OSM · fond locativ · termoficare', ce: 'Strategia de regenerare a ansamblurilor rezidențiale: starea fondului, eficiență energetică, spații publice, dotări, mobilitate și instrumente de finanțare a regenerării.' },
+    'sim': { parcel:1, t: 'STUDIU DE IMPACT ASUPRA MOBILITĂȚII (SIM)', ico: '🚗', ac: [29, 78, 216], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · Ghid PMUD · normative trafic', surse: 'OSM · GTFS · trip generation', ce: 'Evaluarea impactului unei dezvoltări asupra mobilității: trafic generat, distribuție modală, efecte asupra rețelei și măsuri de atenuare (transport public, parcare, acces).' },
+    'scsp': { parcel:1, t: 'STUDIU DE CALITATE A SPAȚIULUI PUBLIC (SCSP)', ico: '🏛️', ac: [13, 148, 136], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · standarde spațiu public · 3-30-300', surse: 'OSM · Copernicus · observații teren', ce: 'Evaluarea calității spațiilor publice: accesibilitate, confort, vitalitate, vegetație (regula 3-30-300), siguranță, mobilier urban și recomandări de ameliorare.' },
+    'srgu': { parcel:1, t: 'STUDIU DE REGENERARE URBANĂ REZIDENȚIALĂ (SRgU)', ico: '🏢', ac: [217, 70, 39], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · POR Axa 5 · Legea 152/1998', surse: 'INS · OSM · fond locativ · termoficare', ce: 'Strategia de regenerare a ansamblurilor rezidențiale: starea fondului, eficiență energetică, spații publice, dotări, mobilitate și instrumente de finanțare a regenerării.' },
     'atlas': { t: 'ATLAS URBAN — MONOGRAFIE TERITORIALĂ', ico: '🗺️', ac: [71, 85, 105], badge: 'SPECIALIZAT', legal: 'metodologie monografică · INS · Legea 350/2001', surse: 'INS · OSM · Copernicus · arhive', ce: 'Monografia teritorială completă a UAT: cadru natural, evoluție istorică, demografie, economie, locuire, infrastructură, mediu și patrimoniu — referința documentară a localității.' },
-    'srm': { t: 'STUDIU DE RISC MULTIHAZARD (SRM)', ico: '⚠️', ac: [220, 38, 38], badge: 'SPECIALIZAT', legal: 'Legea 575/2001 · P100-1/2022 · Dir. 2007/60/CE · HG 447/2003', surse: 'INFP · ANAR/INHGA · Copernicus · EEA', ce: 'Evaluarea integrată a hazardurilor: seismic, inundații, alunecări, secetă, caniculă și incendii — expunere, vulnerabilitate, scenarii de risc și măsuri de reducere.' },
+    'srm': { parcel:1, t: 'STUDIU DE RISC MULTIHAZARD (SRM)', ico: '⚠️', ac: [220, 38, 38], badge: 'SPECIALIZAT', legal: 'Legea 575/2001 · P100-1/2022 · Dir. 2007/60/CE · HG 447/2003', surse: 'INFP · ANAR/INHGA · Copernicus · EEA', ce: 'Evaluarea integrată a hazardurilor: seismic, inundații, alunecări, secetă, caniculă și incendii — expunere, vulnerabilitate, scenarii de risc și măsuri de reducere.' },
     'sda': { t: 'STUDIU DE DEMOGRAFIE APROFUNDATĂ (SDA)', ico: '👥', ac: [147, 51, 234], badge: 'SPECIALIZAT', legal: 'metodologie INS · Eurostat · Strategia demografică', surse: 'INS Recensământ 2021 · Eurostat · TEMPO', ce: 'Analiza demografică detaliată: structură pe vârste și gen, migrație, natalitate/mortalitate, îmbătrânire, gospodării și proiecții ale populației pe orizont 2040.' },
     'scpt': { t: 'STUDIU DE COMPETITIVITATE TERITORIALĂ (SCpT)', ico: '📈', ac: [13, 110, 80], badge: 'SPECIALIZAT', legal: 'Strategia Națională · RIS3 · politica de coeziune UE', surse: 'INS · Eurostat · ONRC · RIS3', ce: 'Evaluarea competitivității teritoriului: capital uman, mediu de afaceri, inovare, specializare inteligentă, atractivitate investițională și poziționare regională.' },
     'siva': { t: 'STUDIU DE INFRASTRUCTURĂ VERDE ȘI ALBASTRĂ (SIVA)', ico: '💧', ac: [16, 185, 129], badge: 'SPECIALIZAT', legal: 'Strategia UE biodiversitate 2030 · OUG 195/2005 · 3-30-300', surse: 'Copernicus · EEA · OSM · ANAR', ce: 'Strategia rețelei verzi-albastre: parcuri și coridoare ecologice, ape de suprafață, managementul pluvial, conectivitate ecologică și servicii ecosistemice urbane.' },
     'seu': { t: 'STUDIU DE ENERGIE URBANĂ (SEU)', ico: '⚡', ac: [234, 88, 12], badge: 'SPECIALIZAT', legal: 'Dir. 2018/2001 (RED II) · SECAP · Legea 121/2014 (eficiență)', surse: 'Open-Meteo · INS · PNRR · operatori energie', ce: 'Strategia energetică locală: consum și mix energetic, eficiența clădirilor, potențial regenerabil (solar/geotermal/biomasă), comunități de energie și decarbonare.' },
-    'sppc': { t: 'STUDIU DE PATRIMONIU CONSTRUIT ȘI PEISAJ (SPPC)', ico: '🏰', ac: [161, 98, 7], badge: 'SPECIALIZAT', legal: 'Legea 422/2001 · Convenția de la Florența (peisaj) · OG 43/2000', surse: 'LMI/INP · RAN · OSM · Copernicus', ce: 'Evaluarea patrimoniului construit și a peisajului cultural: monumente LMI, zone protejate, peisaj urban și natural, vulnerabilități și măsuri de protejare și valorificare.' }
+    'sppc': { parcel:1, t: 'STUDIU DE PATRIMONIU CONSTRUIT ȘI PEISAJ (SPPC)', ico: '🏰', ac: [161, 98, 7], badge: 'SPECIALIZAT', legal: 'Legea 422/2001 · Convenția de la Florența (peisaj) · OG 43/2000', surse: 'LMI/INP · RAN · OSM · Copernicus', ce: 'Evaluarea patrimoniului construit și a peisajului cultural: monumente LMI, zone protejate, peisaj urban și natural, vulnerabilități și măsuri de protejare și valorificare.' }
   };
 
   function _resolveCity(cityKey) {
@@ -40,16 +40,21 @@
       (G._TCIMasterplanPDF && G._TCIMasterplanPDF._resolveCity && G._TCIMasterplanPDF._resolveCity(cityKey)) || null;
   }
 
-  async function generate(id, cityKey) {
+  async function generate(id, cityKey, mode) {
     var S = STUDIES[id]; if (!S) { G.ss && G.ss('Studiu SPS necunoscut: ' + id); return; }
     cityKey = cityKey || (G.TCI && G.TCI.cityKey);
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
     var city = _resolveCity(cityKey) || {}; var cityName = city.name || 'UAT';
-    G.ss && G.ss(S.ico + ' Generez ' + S.t + '…');
     if (typeof G._loadReguli === 'function') { try { await G._loadReguli(cityKey); } catch (e) {} }
+    // mod PARCELĂ (ca la HBU): doar pentru studiile aplicabile pe parcelă, dacă e selectată o parcelă și mode!=='T'
+    var territorial = (mode === 'T');
+    var PC = (S.parcel && !territorial && G._ParcelCtx) ? G._ParcelCtx.get(cityKey) : null;
+    var onParcel = !!(PC && PC.hasParcel);
+    G.ss && G.ss(S.ico + ' Generez ' + S.t + (onParcel ? ' — parcelă' : '') + '…');
+    var nbImg = null; if (onParcel && PC.lat && G._DocMapCaptures && G._DocMapCaptures.capturePOI) { try { nbImg = await G._DocMapCaptures.capturePOI(cityKey, { lat: PC.lat, lon: PC.lon, radius: 600 }); } catch (e) {} }
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    var D = G._makeStratDoc(pdf, { docTitle: S.t, cityName: cityName, accent: S.ac });
+    var D = G._makeStratDoc(pdf, { docTitle: S.t + (onParcel ? ' — PARCELĂ' : ''), cityName: cityName, accent: S.ac });
     if (D) D.__cityKey = cityKey;
     var W = 210, CW = D.dims.CW, FONT = 'DejaVuRO';
 
@@ -58,7 +63,7 @@
     pdf.setFillColor(14, 18, 30); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(S.ac[0], S.ac[1], S.ac[2]); pdf.rect(0, 58, W, 1.4, 'F');
     try { if (G._drawUrbanxLogo) { G._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
     pdf.setTextColor(S.ac[0], S.ac[1], S.ac[2]); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · STRATEGIC PLANNING SUITE', W / 2, 44, { align: 'center' });
-    pdf.setTextColor(160, 170, 190); pdf.setFontSize(9.5); pdf.text(S.badge, W / 2, 72, { align: 'center' });
+    pdf.setTextColor(160, 170, 190); pdf.setFontSize(9.5); pdf.text(S.badge + (onParcel ? ' · APLICAT PE PARCELĂ' : ''), W / 2, 72, { align: 'center' });
     pdf.setTextColor(255, 255, 255); pdf.setFont(FONT, 'bold'); pdf.setFontSize(19);
     var tl = pdf.splitTextToSize(S.t, W - 50); pdf.text(tl, W / 2, 90, { align: 'center' });
     pdf.setTextColor(S.ac[0] + 40 > 255 ? 255 : S.ac[0] + 40, 191, 90); pdf.setFontSize(14); pdf.setTextColor(245, 200, 100);
@@ -86,8 +91,39 @@
     D.chapter('Metodologie și surse de date');
     D.P('Studiul aplică o metodologie transparentă: colectarea datelor din surse oficiale și deschise (' + S.surse + '), analiza diagnostic pe dimensiunile relevante, formularea obiectivelor și a țintelor cuantificabile, și fundamentarea recomandărilor pe evidențe. Cadrul legal de referință: ' + S.legal + '. Limitările sunt explicitate; valorile estimate au caracter orientativ și se confirmă pe sursele oficiale.');
 
+    // ── SECȚIUNE PUNCTUALĂ pe PARCELĂ (ca la HBU) — doar studiile aplicabile pe parcelă ──
+    if (onParcel && PC) {
+      var z = PC.zone || {};
+      D.chapter('Amplasamentul analizat — parcela și zona');
+      D.P('Acest studiu este aplicat PUNCTUAL: analizează parcela selectată și zona (UTR/subzona) din care face parte, nu întregul UAT. Datele de regim urbanistic de mai jos sunt cele aplicabile efectiv amplasamentului și fundamentează analiza din capitolele următoare.');
+      if (D.table) D.table(['Atribut amplasament', 'Valoare'], [
+        ['Identificator cadastral (CF/nr. cad.)', PC.nrcad || 'neidentificat'],
+        ['Suprafață', PC.area ? N(PC.area) + ' mp' : '—'],
+        ['Coordonate (centroid)', PC.lat != null ? N(PC.lat, 5) + '°N, ' + N(PC.lon, 5) + '°E' : '—'],
+        ['UTR / zonă', (z.utrNr || '—') + (z.code ? ' · ' + z.code : '') + (z.denumire ? ' — ' + z.denumire : '')],
+        ['POT / CUT reglementat', (z.pot != null ? N(z.pot) + '% ' : '—') + ' / ' + (z.cut != null ? N(z.cut, 2) : '—')],
+        ['Înălțime maximă', z.hmax != null ? N(z.hmax, 1) + ' m' : '—']
+      ], [CW * 0.5, CW * 0.5]);
+      if (PC.edif && (PC.edif.amprenta != null || PC.edif.adc != null)) {
+        D.P('Capacitate de edificare estimată pe parcelă: amprentă maximă la sol ' + (PC.edif.amprenta != null ? N(PC.edif.amprenta) + ' mp' : '—') + ', arie desfășurată construită ' + (PC.edif.adc != null ? N(PC.edif.adc) + ' mp' : '—') + (PC.edif.niv ? ', cca. ' + PC.edif.niv + ' niveluri' : '') + '.');
+      }
+      // avize patrimoniu pe parcelă (zona de protecție)
+      if (G._LMI && G._LMI.avizForParcel && PC.lat != null) {
+        try { var av = await G._LMI.avizForParcel(PC.lat, PC.lon); if (av && av.nota) { D.P('Patrimoniu/avize: ' + av.nota + (av.nivel ? ' Nivel de avizare estimat: ' + av.nivel + '.' : '')); } } catch (e) {}
+      }
+      // vecinătate imediată (dotări <600m) — captură
+      if (nbImg && nbImg.img) {
+        try {
+          D.P('Harta de mai jos marchează dotările identificate în jurul amplasamentului (date OSM, rază ~600 m), relevante pentru accesibilitatea la servicii.');
+          var iw = CW, ih = Math.round(iw * 0.6); if (D.ensure) D.ensure(ih + 10);
+          var yy = (D.y != null ? D.y : 60); pdf.addImage(nbImg.img, 'JPEG', D.dims.ML, yy, iw, ih, '', 'FAST');
+          if (D.setY) D.setY(yy + ih + 2); if (D.source) D.source('Dotări în proximitate (~600 m) · © OpenStreetMap');
+        } catch (e) {}
+      }
+    }
+
     // ── Captură POI (context teritorial) — reutilizarea datelor din carduri ──
-    try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Context teritorial — dotări și echipare (OSM)'); } catch (e) {}
+    try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, onParcel ? 'Context urban extins — dotări (OSM)' : 'Context teritorial — dotări și echipare (OSM)'); } catch (e) {}
 
     // ── Corp dezvoltat (rang superior 80-100 pag) ──
     try {
@@ -107,7 +143,7 @@
     D.P('Document generat algoritmic de UrbanX ca instrument de pre-analiză și fundamentare strategică. Valorile sunt estimări calibrate pe date reale și NU substituie documentațiile de specialitate avizate conform legii. Deciziile finale rămân responsabilitatea autorității și a specialiștilor atestați.');
 
     var translit = function (c) { return { 'ă': 'a', 'Ă': 'A', 'â': 'a', 'Â': 'A', 'î': 'i', 'Î': 'I', 'ș': 's', 'Ș': 'S', 'ş': 's', 'Ş': 'S', 'ț': 't', 'Ț': 'T', 'ţ': 't', 'Ţ': 'T' }[c] || c; };
-    var fn = ('Studiu_SPS_' + id + '_' + cityName.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^a-zA-Z0-9._-]/g, '_');
+    var fn = ('Studiu_SPS_' + id + '_' + (onParcel ? 'parcela_' : '') + cityName.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^a-zA-Z0-9._-]/g, '_');
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && G.ss('✅ ' + S.t + ' generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }

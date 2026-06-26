@@ -346,25 +346,32 @@
     try{
       if(!D || !D.barChart) return false;
       var c=_gctx(D);
+      var PAL=[[37,99,235],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233],[236,72,153],[20,184,166]];
       var opts=[];
-      if(c.ivuDims&&c.ivuDims.length){
-        opts.push(function(){ var pal=[[37,99,235],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
-          D.barChart(c.ivuDims.map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,14), Math.round(d.score), pal[i%pal.length]];}),{title:'Nota UrbanX pe dimensiuni (0-100) — '+(c.name||''),max:100,source:'IVU UrbanX · date reale'}); });
-      }
-      if(c.pop){
-        opts.push(function(){ var g=c.growth/100; var p2031=Math.round(c.pop*(1+g)), p2041=Math.round(c.pop*(1+g)*(1+g));
-          D.barChart([['2021 (real)',Math.round(c.pop),[100,116,139]],['2031 (prognoză)',p2031,[59,130,246]],['2041 (prognoză)',p2041,[37,99,235]]],{title:'Proiecție demografică — '+(c.name||'UAT')+' (trend '+(c.growth>=0?'+':'')+c.growth.toFixed(1)+'%/deceniu)',max:0,source:'INS Recensământ 2021 + prognoză liniară UrbanX'}); });
-      }
-      if(c.score!=null && c.avg!=null){
-        opts.push(function(){ D.barChart([[(c.name||'Oraș').slice(0,14),c.score,[34,197,94]],['Media națională',c.avg,[148,163,184]]],{title:'Nota UrbanX — poziție față de media națională',max:100,source:'IVU UrbanX · catalog național'}); });
-      }
-      if(c.ivuDims&&c.ivuDims.length>=4){
-        opts.push(function(){ var sorted=c.ivuDims.slice().sort(function(a,b){return b.score-a.score;}); var top=sorted.slice(0,2), low=sorted.slice(-2);
-          D.barChart(top.concat(low).map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,14),Math.round(d.score), i<2?[34,197,94]:[239,68,68]];}),{title:'Puncte forte vs. vulnerabilități (IVU)',max:100,source:'IVU UrbanX'}); });
-      }
+      // 1. BAR — IVU pe dimensiuni
+      if(c.ivuDims&&c.ivuDims.length) opts.push(function(){
+        D.barChart(c.ivuDims.map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,14), Math.round(d.score), PAL[i%PAL.length]];}),{title:'Nota UrbanX pe dimensiuni (0-100) — '+(c.name||''),max:100,source:'IVU UrbanX · date reale'}); });
+      // 2. PIE — compoziția dimensiunilor IVU
+      if(c.ivuDims&&c.ivuDims.length&&D.pie) opts.push(function(){
+        D.pie(c.ivuDims.map(function(d,i){return [(''+d.label).split(' ')[0].slice(0,12), Math.round(d.score), PAL[i%PAL.length]];}),{title:'Profil IVU — contribuția dimensiunilor',source:'IVU UrbanX'}); });
+      // 3. LINE — proiecție demografică 2011→2041
+      if(c.pop&&D.lineChart) opts.push(function(){ var g=c.growth/100; var p2011=Math.round(c.pop/(1+(g||0.001))), p2031=Math.round(c.pop*(1+g)), p2041=Math.round(c.pop*(1+g)*(1+g));
+        D.lineChart([{name:'Populație',color:[37,99,235],points:[p2011,Math.round(c.pop),p2031,p2041]}],['2011','2021','2031','2041'],{title:'Proiecție demografică — '+(c.name||'UAT')+' (trend '+(c.growth>=0?'+':'')+(c.growth||0).toFixed(1)+'%/deceniu)',source:'INS Recensământ + prognoză UrbanX'}); });
+      // 4. BAR comparativ — oraș vs media națională vs țintă
+      if(c.score!=null && c.avg!=null) opts.push(function(){
+        D.barChart([[(c.name||'Oraș').slice(0,12),c.score,[34,197,94]],['Media națională',c.avg,[148,163,184]],['Țintă (A)',80,[59,130,246]]],{title:'Nota UrbanX — poziție și țintă',max:100,source:'IVU UrbanX · catalog național'}); });
+      // 5. PIE — forte vs vulnerabilități
+      if(c.ivuDims&&c.ivuDims.length>=4&&D.pie) opts.push(function(){ var s=c.ivuDims.slice().sort(function(a,b){return b.score-a.score;});
+        var top=Math.round((s[0].score+s[1].score)/2), low=Math.round((s[s.length-1].score+s[s.length-2].score)/2);
+        D.pie([['Puncte forte',top,[34,197,94]],['Vulnerabilități',low,[239,68,68]]],{title:'Echilibru forte / vulnerabilități (IVU)',source:'IVU UrbanX'}); });
+      // 6. LINE — traiectoria IVU spre țintă
+      if(c.score!=null&&D.lineChart) opts.push(function(){
+        D.lineChart([{name:'IVU',color:[168,85,247],points:[c.score,Math.round((c.score+80)/2),80]}],['2026','2030','2035'],{title:'Traiectoria Notei UrbanX spre țintă (scenariu strategic)',source:'Model UrbanX'}); });
+      // 7. BAR — priorități de intervenție (dimensiuni sortate crescător)
+      if(c.ivuDims&&c.ivuDims.length>=3) opts.push(function(){ var s=c.ivuDims.slice().sort(function(a,b){return a.score-b.score;}).slice(0,5);
+        D.barChart(s.map(function(d){var v=Math.round(d.score);return [(''+d.label).split(' ')[0].slice(0,14),v, v<50?[239,68,68]:v<65?[234,179,8]:[34,197,94]];}),{title:'Priorități de intervenție — dimensiuni cu potențial',max:100,source:'IVU UrbanX'}); });
       if(!opts.length) return false;
       var pick=opts[(D.__gci||0)%opts.length]; D.__gci=(D.__gci||0)+1;
-      // asigură spațiu (graficul are ~50mm)
       if(D.ensure) D.ensure(54);
       pick(); return true;
     }catch(e){ return false; }
