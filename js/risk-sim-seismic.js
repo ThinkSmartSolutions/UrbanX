@@ -91,17 +91,20 @@
     }
     levels.sort(function (a, b) { return b.rad - a.rad; }); // mari întâi (jos), mici deasupra
     var fills = [], lines = [], labels = [];
-    levels.forEach(function (lv) {
+    levels.forEach(function (lv, idx) {
       var poly;
       try { poly = G.turf.circle([VR.lon, VR.lat], lv.rad, { steps: 96, units: 'kilometers' }); } catch (e) { return; }
       var c = shakeColor(lv.I), desc = emsDescriptor(lv.I);
       poly.properties = { col: c, I: lv.I };
       fills.push(poly);
       lines.push(Object.assign({}, poly, { properties: { col: c } }));
-      // eticheta benzii — pe marginea de N a inelului
-      var latLbl = VR.lat + (lv.rad / 111);
-      labels.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [VR.lon, latLbl] },
-        properties: { txt: 'Int. ' + roman(lv.I) + ' — ' + desc.dmg, col: c } });
+      // eticheta benzii — desfăcută în evantai pe arcul de NV→NE (ca să NU se suprapună)
+      var bearing = -50 + idx * (100 / Math.max(1, levels.length - 1));
+      var lp;
+      try { lp = G.turf.destination([VR.lon, VR.lat], lv.rad, bearing, { units: 'kilometers' }).geometry.coordinates; }
+      catch (e) { lp = [VR.lon, VR.lat + lv.rad / 111]; }
+      labels.push({ type: 'Feature', geometry: { type: 'Point', coordinates: lp },
+        properties: { txt: 'Intensitate ' + roman(lv.I) + '  ·  ' + desc.dmg } });
     });
     var epi = { type: 'Feature', geometry: { type: 'Point', coordinates: [VR.lon, VR.lat] }, properties: {} };
     var city = { type: 'Feature', geometry: { type: 'Point', coordinates: [lon, lat] },
@@ -114,19 +117,19 @@
     setOrAdd('seis-epi-src', epi); setOrAdd('seis-city-src', city); setOrAdd('seis-link-src', link);
     var addLayer = function (def, before) { try { if (!map.getLayer(def.id)) map.addLayer(def, before); } catch (e) {} };
     addLayer({ id: 'seis-iso-fill', type: 'fill', source: 'seis-iso-src',
-      paint: { 'fill-color': ['get', 'col'], 'fill-opacity': 0.28 } });
+      paint: { 'fill-color': ['get', 'col'], 'fill-opacity': 0.22 } });
     addLayer({ id: 'seis-iso-line', type: 'line', source: 'seis-isoline-src',
-      paint: { 'line-color': ['get', 'col'], 'line-width': 1.6, 'line-opacity': 0.9 } });
+      paint: { 'line-color': ['get', 'col'], 'line-width': 2, 'line-opacity': 0.95 } });
     addLayer({ id: 'seis-link', type: 'line', source: 'seis-link-src',
       paint: { 'line-color': '#fca5a5', 'line-width': 1.5, 'line-dasharray': [3, 2], 'line-opacity': 0.6 } });
     addLayer({ id: 'seis-iso-lbl', type: 'symbol', source: 'seis-isolbl-src',
-      layout: { 'text-field': ['get', 'txt'], 'text-size': 11, 'text-anchor': 'center', 'text-allow-overlap': false },
-      paint: { 'text-color': ['get', 'col'], 'text-halo-color': '#0a0e1f', 'text-halo-width': 1.6 } });
+      layout: { 'text-field': ['get', 'txt'], 'text-size': 13, 'text-anchor': 'center', 'text-allow-overlap': true },
+      paint: { 'text-color': '#ffffff', 'text-halo-color': '#0b0f1c', 'text-halo-width': 2.4 } });
     addLayer({ id: 'seis-epi', type: 'circle', source: 'seis-epi-src',
       paint: { 'circle-radius': 7, 'circle-color': '#7f1d1d', 'circle-stroke-color': '#fecaca', 'circle-stroke-width': 2 } });
     addLayer({ id: 'seis-epi-lbl', type: 'symbol', source: 'seis-epi-src',
-      layout: { 'text-field': '★ Epicentru Vrancea (h=95 km)', 'text-size': 11, 'text-offset': [0, 1.4], 'text-anchor': 'top' },
-      paint: { 'text-color': '#fecaca', 'text-halo-color': '#450a0a', 'text-halo-width': 1.5 } });
+      layout: { 'text-field': '★ Epicentru Vrancea (h=95 km)', 'text-size': 12.5, 'text-offset': [0, 1.4], 'text-anchor': 'top', 'text-allow-overlap': true },
+      paint: { 'text-color': '#ffffff', 'text-halo-color': '#450a0a', 'text-halo-width': 2.2 } });
     addLayer({ id: 'seis-city', type: 'circle', source: 'seis-city-src',
       paint: { 'circle-radius': 8, 'circle-color': shakeColor(res.I), 'circle-stroke-color': '#fff', 'circle-stroke-width': 2.5 } });
     addLayer({ id: 'seis-city-lbl', type: 'symbol', source: 'seis-city-src',

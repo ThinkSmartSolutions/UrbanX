@@ -12,6 +12,7 @@
   function N(v) { try { return Math.round(v).toLocaleString('ro-RO'); } catch (e) { return '' + v; } }
   function el(t, a, h) { var e = document.createElement(t); if (a) Object.keys(a).forEach(function (k) { e.setAttribute(k, a[k]); }); if (h != null) e.innerHTML = h; return e; }
   function gradeColor(s) { return s >= 80 ? '#22c55e' : s >= 65 ? '#84cc16' : s >= 50 ? '#f59e0b' : '#ef4444'; }
+  var TIER_RO = { metropola: 'Metropolă', mare: 'Oraș mare', mediu: 'Oraș mediu', mic: 'Oraș mic' };
 
   // ── calcul IVU pentru un cityKey (sincron) ───────────────────────────────
   function scoreFor(cityKey) {
@@ -139,13 +140,13 @@
     var cat = catalog();
     if (!cat.length) return '<div style="color:#64748b;padding:14px">Catalogul se populează din _RO_CITIES_DB.</div>';
     return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">Oraș</th><th style="padding:5px;color:#94a3b8">IVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Tier</th></tr>' +
+      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">Oraș</th><th style="padding:5px;color:#94a3b8">IVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Categorie</th></tr>' +
       cat.map(function (s, i) {
         return '<tr style="border-top:1px solid rgba(255,255,255,.06);cursor:pointer" onclick="window.UrbanXIVU.show(\'' + s.key + '\')">' +
           '<td style="padding:5px;color:#64748b">' + (i + 1) + '</td><td style="padding:5px;color:#e2e8f0">' + s.name + '</td>' +
           '<td style="padding:5px;text-align:center;font-weight:800;color:' + gradeColor(s.R.score) + '">' + s.R.score + '</td>' +
           '<td style="padding:5px;text-align:center;color:' + gradeColor(s.R.score) + '">' + s.R.grade + '</td>' +
-          '<td style="padding:5px;text-align:center;color:#94a3b8;font-size:10px">' + (s.R.tier || '') + '</td></tr>';
+          '<td style="padding:5px;text-align:center;color:#94a3b8;font-size:10px">' + (TIER_RO[s.R.tier] || s.R.tier || '') + '</td></tr>';
       }).join('') + '</table></div>' +
       '<div style="font-size:10px;color:#64748b;margin-top:8px">Click pe un oraș → Score Card detaliat. Catalog ordonat după IVU.</div>';
   }
@@ -157,7 +158,7 @@
     var body = ov.querySelector('#ivu-body');
     var s = _active ? scoreFor(_active) : null;
     var tabBtn = function (id, lbl) { return '<button onclick="window.UrbanXIVU.tab(\'' + id + '\')" style="background:' + (_tab === id ? 'rgba(16,185,129,.2)' : 'transparent') + ';color:' + (_tab === id ? '#6ee7b7' : '#94a3b8') + ';border:1px solid ' + (_tab === id ? 'rgba(16,185,129,.4)' : 'rgba(255,255,255,.12)') + ';border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:12px">' + lbl + '</button>'; };
-    ov.querySelector('#ivu-tabs').innerHTML = tabBtn('card', '🏙️ Score Card') + tabBtn('compare', '🔀 Comparator') + tabBtn('catalog', '📊 Catalog național');
+    ov.querySelector('#ivu-tabs').innerHTML = tabBtn('card', '🏙️ Fișă de scor') + tabBtn('compare', '🔀 Comparator') + tabBtn('catalog', '📊 Catalog național');
     ov.querySelector('#ivu-sub').textContent = _active && s ? s.name : 'selectează un oraș';
     if (_tab === 'card') body.innerHTML = s ? scoreCardHTML(s) : '<div style="color:#64748b;padding:20px;text-align:center">Niciun oraș activ. Deschide din Catalog național sau selectează un UAT pe hartă.</div>';
     else if (_tab === 'compare') body.innerHTML = comparatorHTML();
@@ -172,7 +173,7 @@
       ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
       var m = el('div', { style: 'background:#0b1424;color:#e6edf7;width:min(820px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(16,185,129,.4);border-radius:14px;font-family:system-ui,sans-serif' });
       m.innerHTML = '<div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">' +
-        '<div><div style="font-weight:800;font-size:17px">🏆 IVU — Indicele de Vitalitate Urbană <span style="font-size:10px;color:#6ee7b7;background:rgba(16,185,129,.15);padding:2px 7px;border-radius:10px;margin-left:4px">powered by UrbanX</span></div>' +
+        '<div><div style="font-weight:800;font-size:17px">🏆 IVU — Indicele de Vitalitate Urbană <span style="font-size:10px;color:#6ee7b7;background:rgba(16,185,129,.15);padding:2px 7px;border-radius:10px;margin-left:4px">marca UrbanX</span></div>' +
         '<div style="font-size:11px;color:#94a3b8" id="ivu-sub"></div></div>' +
         '<button onclick="document.getElementById(\'ivu-ov\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;cursor:pointer">✕</button></div>' +
         '<div style="padding:14px 20px"><div id="ivu-tabs" style="display:flex;gap:8px;margin-bottom:14px"></div><div id="ivu-body"></div>' +

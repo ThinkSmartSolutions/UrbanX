@@ -233,6 +233,7 @@
       D.P('Concluzia comparației: în cadrul legal românesc actual, singurul instrument direct aplicabil este acordul negociat (pe modelul Section 106 britanic), restul necesitând reforme legislative. Aceasta confirmă recomandarea studiului — utilizarea riguroasă a negocierii voluntare pe termen scurt, susținută de un cadru legislativ dedicat pe termen lung. Tranziția poate urma modelul țărilor care au evoluat de la acorduri ad-hoc către sisteme predictibile (UK a trecut de la Section 106 negociat la CIL standardizat tocmai pentru a reduce arbitrariul).');
       D.P('Indiferent de instrument, factorii de succes rămân aceiași: predictibilitate, transparență, calibrare prudentă a cotei și legarea clară a fondurilor de infrastructura care deservește zona. Alegerea instrumentului se face în funcție de cadrul legal disponibil și de capacitatea administrativă locală.');
 
+      try { if (window.UrbanXIVU && window.UrbanXIVU.renderSection) window.UrbanXIVU.renderSection(D); } catch (e) {}
       D.chapter('23. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (L350/2001 art.56). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
 

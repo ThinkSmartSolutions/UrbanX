@@ -277,6 +277,7 @@
     ]);
     D.P('Pragurile transformă studiul dintr-un document static într-un instrument de management adaptiv: măsurile se activează când indicatorii o impun, evitând atât supra-dimensionarea preventivă (cost inutil), cât și reacția întârziată (congestie instalată). Monitorizarea periodică post-ocupare validează ipotezele studiului și permite recalibrarea.');
 
+    try { if (window.UrbanXIVU && window.UrbanXIVU.renderSection) window.UrbanXIVU.renderSection(D); } catch (e) {}
     D.chapter('25. Limitări și disclaimer');
     D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
 
