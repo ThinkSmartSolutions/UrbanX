@@ -4268,6 +4268,29 @@ function _showInfoDrawer(key) {
   });
 }
 
+// Override robust: modal info self-contained (drawer-ul legacy nu se afisa vizibil).
+// Citeste _INFO_DATA (in scope). Folosit de butoanele (i) noi din meniuri.
+window._showInfoDrawer = function (key) {
+  try {
+    var data = _INFO_DATA[key]; if (!data) { console.warn('[uxinfo] cheie necunoscuta:', key); return; }
+    var old = document.getElementById('uxinfo-modal'); if (old) old.remove();
+    var bc = data.badgeColor || '#D4AF37';
+    var ov = document.createElement('div'); ov.id = 'uxinfo-modal';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.80);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+    ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    var h = '<div style="background:#0b1424;color:#e6edf7;width:min(560px,94vw);max-height:90vh;overflow:auto;border:1px solid ' + bc + '66;border-radius:14px;font-family:system-ui,sans-serif;padding:18px 20px">';
+    h += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div style="font-weight:800;font-size:16px;line-height:1.3">' + (data.icon || '') + ' ' + data.title + '</div><button onclick="document.getElementById(\'uxinfo-modal\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:5px 10px;cursor:pointer;flex-shrink:0">✕</button></div>';
+    if (data.subtitle) h += '<div style="font-size:11px;color:#94a3b8;margin-top:3px">' + data.subtitle + '</div>';
+    if (data.badge) h += '<div style="margin-top:10px"><span style="padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;background:' + bc + '22;border:1px solid ' + bc + '66;color:' + bc + '">' + data.badge + '</span></div>';
+    if (data.desc) h += '<p style="font-size:12.5px;color:rgba(200,215,240,.9);line-height:1.6;margin:12px 0">' + data.desc + '</p>';
+    if (data.options && data.options.length) { h += '<div style="margin:10px 0">'; data.options.forEach(function (o) { h += '<div style="padding:7px 10px;margin-bottom:4px;border-radius:6px;background:rgba(255,255,255,.04);border-left:2px solid ' + (o.color || bc) + '"><div style="font-size:11px;font-weight:700;color:#dce8fa">' + o.label + '</div><div style="font-size:10px;color:#94a3b8;margin-top:1px">' + o.desc + '</div></div>'; }); h += '</div>'; }
+    if (data.tip) h += '<div style="padding:9px 11px;border-radius:6px;background:' + (data.tipColor || '#60a5fa') + '1a;border:1px solid ' + (data.tipColor || '#60a5fa') + '44;margin:10px 0;font-size:11px;color:#cbd5e1;line-height:1.5">💡 ' + data.tip + '</div>';
+    if (data.source) h += '<div style="font-size:9px;color:#64748b;border-top:1px solid rgba(255,255,255,.06);padding-top:8px;margin-top:10px"><span style="color:rgba(100,120,150,.6)">Surse: </span>' + data.source + '</div>';
+    h += '</div>';
+    ov.innerHTML = h; document.body.appendChild(ov);
+  } catch (e) { console.warn('[uxinfo]', e); }
+};
+
 function _closeInfoDrawer() {
   const drawer = document.getElementById('info-drawer');
   const overlay = document.getElementById('info-drawer-overlay');
@@ -6328,7 +6351,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/ux-navigation.js?v=20260622b"></script>
     <script src="js/carbon-tracker.js?v=20260626ivu"></script>
     <script src="js/urbanx-climate.js?v=20260626clima4"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
-    <script src="js/urbanx-hbu-content.js?v=20260626hbuc2"></script><!-- continut dezvoltat HBU (workflow multi-agent) -->
+    <script src="js/urbanx-hbu-content.js?v=20260626hbuc3"></script><!-- continut dezvoltat HBU (workflow multi-agent) -->
     <script src="js/urbanx-hbu.js?v=20260626hbu8"></script><!-- HBU/SRU reconversie urbana (12 functiuni + financiar + studiu) -->
     <script src="js/urbanx-economy.js?v=20260626eco5"></script><!-- Analiza economica UAT (buget local + dependenta stat) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
