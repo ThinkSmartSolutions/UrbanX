@@ -71,8 +71,14 @@
       'nwr(around:' + radius + ',' + lat + ',' + lon + ')[heritage];' +
       ');out center tags;';
     try {
-      var r = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
-      var j = await r.json(); var out = [], seen = {};
+      // retry pe 504/empty (Overpass intermitent supraîncărcat)
+      var j = null;
+      for (var attempt = 0; attempt < 3 && !(j && j.elements && j.elements.length); attempt++) {
+        if (attempt) await new Promise(function (rs) { setTimeout(rs, 1500 * attempt); });
+        try { var r = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) }); if (r.ok) { var ct = await r.text(); if (ct && ct.charAt(0) === '{') j = JSON.parse(ct); } } catch (e2) {}
+      }
+      if (!j) return [];
+      var out = [], seen = {};
       (j.elements || []).forEach(function (el) {
         var t = el.tags || {}; var nm = t.name || t['name:ro']; if (!nm || seen[nm]) return;
         var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
@@ -89,7 +95,12 @@
   // verdict de avizare pentru o parcelă: cel mai strict nivel din monumentele apropiate
   async function avizForParcel(lat, lon) {
     var near = await nearPoint(lat, lon, 200); // zona de protecție tipică ~100-200m
-    if (!near.length) return { necesar: false, nivel: null, monumente: [], nota: 'Nu s-au identificat monumente în raza de 200 m (OSM). Verificați totuși LMI/DJC oficial.' };
+    if (!near.length) {
+      // fallback: lista LMI a județului (fără proximitate, dar onest)
+      var s = await summary(G.TCI && G.TCI.cityKey);
+      var jl = s.total ? (' Județul are ' + s.total + ' monumente LMI (' + s.grupaA + ' grupa A · ' + s.grupaB + ' grupa B) — verificați harta și DJC pentru proximitate.') : '';
+      return { necesar: null, nivel: null, monumente: [], nota: 'Nu s-au putut prelua monumente în raza de 200 m (OSM indisponibil temporar).' + jl + ' Verificați LMI/DJC oficial.' };
+    }
     var hasA = near.some(function (m) { return m.aviz && m.aviz.grupa === 'A'; });
     var hasMon = near.some(function (m) { return m.aviz || m.dist <= 100; });
     return {
