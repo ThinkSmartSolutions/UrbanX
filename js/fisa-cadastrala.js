@@ -403,7 +403,56 @@
       '<button onclick="this.closest(\'.ap-u\').remove();Cadastru._apRecalc()" style="background:none;border:0;color:#94a3b8;cursor:pointer">✕</button></div>');
   }
   function _apRecalc() { var t = 0; document.querySelectorAll('.ap-cota-i').forEach(function (i) { t += parseFloat(i.value || 0); }); var e = document.getElementById('ap-cota'); if (e) { var ok = Math.abs(t - 100) < 0.5; e.textContent = t.toFixed(1) + '% ' + (ok ? '✓' : '(trebuie 100%)'); e.style.color = ok ? '#22c55e' : '#fbbf24'; } }
-  function _apGen() { G.ss && G.ss('Releveu apartamentare — folosește „Export ANCPI" pt dosarul cu geometrie reală (UI individuale = Faza 2 cu plan etaj).'); }
+  function _apGen() {
+    var rows = document.querySelectorAll('#ap-unitati .ap-u');
+    if (!rows.length) { G.ss && G.ss('Adăugați cel puțin o unitate individuală (UI)'); return; }
+    var units = [], totSU = 0;
+    rows.forEach(function (r) {
+      var inp = r.querySelectorAll('input');
+      var nr = (inp[0] && inp[0].value) || '?';
+      var su = parseFloat((inp[1] && inp[1].value) || 0) || 0;
+      var cota = parseFloat((inp[2] && inp[2].value) || 0) || 0;
+      units.push({ nr: nr, su: su, cota: cota }); totSU += su;
+    });
+    // cote-părți indivize: dacă nu sunt completate, se calculează proporțional cu suprafața utilă
+    units.forEach(function (u) { if (!u.cota && totSU > 0) u.cota = +(u.su / totSU * 100).toFixed(2); });
+    var sumCota = units.reduce(function (s, u) { return s + u.cota; }, 0);
+    var nrCad = (document.getElementById('ap-nr') || {}).value || '—';
+    var niv = (document.getElementById('ap-niv') || {}).value || '—';
+    var nf = window._nf || function (n) { return '' + n; };
+    var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { G.ss && G.ss('jsPDF indisponibil'); return; }
+    try {
+      var pdf = new J({ unit: 'mm', format: 'a4' });
+      var F = (G._registerROFont && G._registerROFont(pdf)) ? 'DejaVuRO' : 'helvetica'; pdf.setFont(F, 'normal');
+      var W = 210, x = 16, y = 22;
+      pdf.setFontSize(9); pdf.setTextColor(120); pdf.text('UrbanX · Documentație cadastrală (draft)', x, 13);
+      pdf.setFontSize(17); pdf.setTextColor(20); pdf.text('RELEVEU DE APARTAMENTARE', x, y); y += 8;
+      pdf.setFontSize(11); pdf.setTextColor(70); pdf.text('Imobil nr. cadastral: ' + nrCad + ' · ' + niv + ' niveluri · ' + units.length + ' unități individuale', x, y); y += 9;
+      // tabel
+      pdf.setFontSize(9.5); pdf.setTextColor(20); pdf.setFont(F, 'bold');
+      var cols = [x, x + 30, x + 90, x + 130]; // UI, descriere, S utilă, cotă-parte
+      pdf.text('U.I.', cols[0], y); pdf.text('S. utilă (mp)', cols[2], y); pdf.text('Cotă-parte indiviză', cols[3], y); y += 2;
+      pdf.setDrawColor(180); pdf.line(x, y, W - x, y); y += 5; pdf.setFont(F, 'normal');
+      units.forEach(function (u) {
+        pdf.setTextColor(30); pdf.text(String(u.nr), cols[0], y);
+        pdf.text(nf(Math.round(u.su * 100) / 100), cols[2], y);
+        pdf.text(u.cota.toFixed(2) + ' %', cols[3], y); y += 6;
+        if (y > 250) { pdf.addPage(); y = 22; }
+      });
+      pdf.setDrawColor(120); pdf.line(x, y, W - x, y); y += 5;
+      pdf.setFont(F, 'bold'); pdf.setTextColor(20);
+      pdf.text('TOTAL', cols[0], y); pdf.text(nf(Math.round(totSU * 100) / 100) + ' mp', cols[2], y); pdf.text(sumCota.toFixed(2) + ' %', cols[3], y); y += 10;
+      pdf.setFont(F, 'normal'); pdf.setFontSize(9.5); pdf.setTextColor(60);
+      if (Math.abs(sumCota - 100) > 0.5) { pdf.setTextColor(200, 80, 0); pdf.text('⚠ Suma cotelor-părți = ' + sumCota.toFixed(2) + '% (trebuie să fie 100%). Verificați înainte de depunere.', x, y); y += 8; pdf.setTextColor(60); }
+      var note = pdf.splitTextToSize('Spațiile comune (casa scării, holuri, lift, instalații, teren) se atribuie în coproprietate forțată, proporțional cu cota-parte indiviză a fiecărei unități. Cotele-părți se calculează din suprafața utilă conform Legii nr. 196/2018 privind înființarea, organizarea și funcționarea asociațiilor de proprietari, coroborată cu Legea cadastrului nr. 7/1996 și Ordinul ANCPI nr. 700/2014. Releveul pe unitate (plan de etaj cotat) se anexează din modulul Planșe/Releveu.', W - 2 * x);
+      pdf.text(note, x, y); y += note.length * 5 + 4;
+      pdf.setFontSize(8); pdf.setTextColor(150);
+      var disc = pdf.splitTextToSize('DRAFT ORIENTATIV — generat de platforma UrbanX. Documentația oficială de apartamentare necesită măsurători topografice (TransDatRO), plan de amplasament și delimitare, releveu pe unitate și viza unui topograf/cadastrist autorizat ANCPI. Nu înlocuiește documentația avizată.', W - 2 * x);
+      pdf.text(disc, x, 272);
+      pdf.save('Releveu_apartamentare_' + String(nrCad).replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf');
+      G.ss && G.ss('✅ Releveu apartamentare generat (' + units.length + ' U.I., total ' + nf(Math.round(totSU)) + ' mp)');
+    } catch (e) { console.error('[Apartamentare]', e); G.ss && G.ss('❌ Eroare apartamentare: ' + (e.message || e)); }
+  }
   function _renderComasare() {
     return '<div style="max-width:720px"><h4 style="margin:0 0 4px;font-size:15px">Comasare (alipire)</h4>' +
       '<p style="font-size:11px;color:#94a3b8;margin:0 0 14px">Unește parcele adiacente cu același proprietar. Selectează ≥2 parcele pe hartă (mod multi), apoi generează.</p>' +
