@@ -23,6 +23,8 @@
     meta = meta || {};
     var J = jsPDFctor();
     if (!J) { window.ss && ss('❌ jsPDF indisponibil'); return; }
+    var Nn = function (x) { try { return Math.round(x).toLocaleString('ro-RO'); } catch (e) { return String(x); } };
+    if (typeof window._makeStratDoc === 'function') { try { return _fluxStudy(res, meta, J, Nn); } catch (e) { console.error('[Flux PDF]', e); } }
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
     var FONT = 'DejaVuRO';
@@ -131,5 +133,123 @@
     window.ss && ss('✅ Studiu de trafic generat: ' + fn);
     return fn;
   };
+  // ── STUDIU GENUIN (≥10 pag) pe motorul strategic _makeStratDoc ───────────────
+  function _fluxStudy(res, meta, J, N) {
+    var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    var D = window._makeStratDoc(pdf, { docTitle: 'STUDIU DE TRAFIC', cityName: (meta.site_name || 'Sit'), accent: [16, 160, 110] });
+    var W = 210, ML = D.dims.ML, CW = D.dims.CW, FONT = 'DejaVuRO';
+    var g = res.trips_detail, ms = res.modal_split, c = res.trips_by_mode_pm, p = res.parking_demand;
+    D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+    pdf.setFillColor(6, 22, 16); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(16, 160, 110); pdf.rect(0, 60, W, 1.4, 'F');
+    try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+    pdf.setTextColor(120, 230, 170); pdf.setFont(FONT, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · FLUX — MOBILITATE URBANĂ', W / 2, 44, { align: 'center' });
+    pdf.setTextColor(255, 255, 255); pdf.setFontSize(26); pdf.text('STUDIU DE TRAFIC', W / 2, 90, { align: 'center' });
+    pdf.setTextColor(120, 230, 170); pdf.setFontSize(13); pdf.text(D.S2((meta.site_name || 'Sit') + (meta.city_name ? ' · ' + meta.city_name : '')), W / 2, 102, { align: 'center' });
+    pdf.setTextColor(150, 190, 170); pdf.setFontSize(11); pdf.text('Impact de trafic preliminar · ' + N(g.daily) + ' deplasări/zi generate', W / 2, 114, { align: 'center' });
+    D.setSuppress && D.setSuppress(false);
+
+    D.chapter('1. Rezumat executiv');
+    D.P('Prezentul studiu estimează impactul de trafic generat de dezvoltarea propusă pe situl „' + (meta.site_name || 'analizat') + '", pe baza metodologiei ITE (Institute of Transportation Engineers) de generare a deplasărilor, adaptată la contextul românesc. Dezvoltarea generează un total estimat de ' + N(g.daily) + ' deplasări zilnice, cu un vârf de ' + N(g.pm_total) + ' deplasări/oră la ora de vârf PM. Studiul evaluează repartiția modală, încărcarea intersecțiilor adiacente, necesarul de parcare, emisiile induse și conformitatea cu normativele aplicabile.');
+    D.callout && D.callout('Concluzie', 'Impactul de trafic este ' + ((res.intersections || []).some(function (i) { return i.over_capacity; }) ? 'SEMNIFICATIV — cel puțin o intersecție depășește capacitatea și necesită măsuri de atenuare.' : 'gestionabil cu măsurile uzuale de organizare a circulației și de management al cererii.') + ' Detalierea și avizarea revin unui studiu de trafic elaborat de proiectant atestat.');
+
+    D.chapter('2. Metodologie');
+    D.P('Studiul aplică metoda standard de evaluare a impactului de trafic (Traffic Impact Study): (1) estimarea generării de deplasări pe baza ratelor ITE Trip Generation pe tip de funcțiune și suprafață/unități; (2) repartiția modală (modal split) calibrată pe contextul local; (3) distribuția și asignarea deplasărilor auto pe rețeaua adiacentă; (4) analiza nivelului de serviciu (LOS) și a raportului volum/capacitate (v/c) la intersecții; (5) verificarea necesarului de parcare și a emisiilor induse. Cadrul normativ de referință: NP 068/2002, STAS 10144, GD 525/1996, Legea 350/2001.');
+    D.P('Ratele de generare ITE reprezintă media observată pe un eșantion mare de dezvoltări similare; ele se adaptează la contextul românesc prin ajustarea repartiției modale (ponderea transportului public și a deplasărilor nemotorizate este, în orașele românești, diferită de cea din mediile suburbane americane pe care se bazează ratele originale). Rezultatele au caracter preliminar și se validează prin recensăminte de circulație de teren.');
+
+    D.chapter('3. Funcțiuni propuse pe sit');
+    var luRows = (meta.land_uses || []).map(function (lu) {
+      return [(lu.label || (G.Flux.LAND_USE_LABELS && G.Flux.LAND_USE_LABELS[lu.land_use]) || lu.land_use), lu.units ? (N(lu.units) + ' unități') : (N(lu.gross_floor_area_sqm) + ' mp ADC')];
+    });
+    if (D.table && luRows.length) D.table(['Funcțiune', 'Dimensiune'], luRows, [CW * 0.6, CW * 0.4]);
+    D.P('Programul funcțional determină profilul de generare a deplasărilor: funcțiunile rezidențiale au vârf pronunțat dimineața (ieșiri) și seara (intrări), cele de birouri profil invers, iar cele comerciale un profil mai uniform cu vârf la prânz și după-amiază. Mixul funcțional poate atenua vârfurile prin complementaritatea profilurilor.');
+
+    D.chapter('4. Generarea deplasărilor');
+    D.table && D.table(['Indicator', 'Valoare'], [
+      ['Vârf AM total', N(g.am_total) + ' depl/h (intrări ' + N(g.am_in) + ' / ieșiri ' + N(g.am_out) + ')'],
+      ['Vârf PM total', N(g.pm_total) + ' depl/h (intrări ' + N(g.pm_in) + ' / ieșiri ' + N(g.pm_out) + ')'],
+      ['Total zilnic', N(g.daily) + ' deplasări'],
+    ], [CW * 0.4, CW * 0.6]);
+    D.P('Orele de vârf (AM și PM) sunt momentele critice pentru analiza de capacitate, întrucât atunci se suprapune traficul generat de dezvoltare cu traficul de fond al rețelei. Vârful PM este de regulă dimensionant pentru dezvoltările rezidențiale și mixte. Valorile reprezintă deplasări totale (toate modurile), defalcate ulterior pe moduri de transport.');
+
+    D.chapter('5. Repartiția modală');
+    D.table && D.table(['Mod de transport', 'Pondere', 'Deplasări PM'], [
+      ['Autoturism', Math.round(ms.auto * 100) + '%', N(c.auto)],
+      ['Transport public', Math.round(ms.pt * 100) + '%', N(c.pt)],
+      ['Bicicletă', Math.round(ms.bicycle * 100) + '%', '—'],
+      ['Pietonal', Math.round(ms.pedestrian * 100) + '%', '—'],
+    ], [CW * 0.42, CW * 0.28, CW * 0.30]);
+    D.P('Repartiția modală este variabila cu cel mai mare efect asupra impactului auto: o creștere a ponderii transportului public și a deplasărilor nemotorizate reduce direct numărul de vehicule pe rețea. Ea depinde de accesibilitatea la transport public, de calitatea infrastructurii pietonale/ciclabile și de politica de parcare — toate pârghii pe care planificarea le poate influența. Corelarea cu indicele Walk Score și Orașul-15-minute ale platformei oferă o estimare a potențialului de transfer modal.');
+
+    D.chapter('6. Distribuția și asignarea traficului');
+    D.P('Deplasările auto generate se distribuie pe direcțiile de proveniență/destinație (în funcție de localizarea zonelor rezidențiale, de muncă și de servicii) și se asignează pe rutele rețelei adiacente. Distribuția se estimează tipic pe baza modelului gravitațional sau a datelor de mobilitate existente, iar asignarea ține cont de ierarhia și capacitatea străzilor. Concentrarea pe puține accese poate crea puncte de congestie chiar dacă volumul total este moderat.');
+    D.P('Pentru o evaluare riguroasă, distribuția se calibrează pe matricea origine-destinație a zonei, iar asignarea se verifică cu un model de trafic (de tip Visum/Aimsun) în studiul detaliat. La nivel preliminar, se identifică intersecțiile critice unde se concentrează traficul indus.');
+
+    D.chapter('7. Încărcarea intersecțiilor (LOS · v/c)');
+    if (D.table && res.intersections && res.intersections.length) {
+      D.table(['Intersecție', 'v/c', 'LOS', 'Veh/h adăugate'], res.intersections.map(function (i) {
+        return [i.name, i.vc_ratio.toFixed(2), i.los + (i.over_capacity ? ' ⚠' : ''), '+' + N(i.added_veh_hr)];
+      }), [CW * 0.4, CW * 0.18, CW * 0.18, CW * 0.24]);
+    } else { D.P('Nu au fost definite intersecții adiacente pentru analiză în acest scenariu preliminar.'); }
+    D.P('Nivelul de serviciu (LOS — Level of Service, scara A–F) și raportul volum/capacitate (v/c) măsoară gradul de saturație al intersecțiilor. LOS A–C indică funcționare confortabilă, D–E aproape de saturație, iar F suprasaturație (cozi, întârzieri mari). Un v/c peste 0,85–0,90 semnalează necesitatea unor măsuri: resemaforizare, benzi suplimentare, sensuri giratorii sau redistribuirea accesurilor. Intersecțiile marcate „peste capacitate" condiționează avizarea dezvoltării.');
+
+    D.chapter('8. Necesarul de parcare');
+    D.table && D.table(['Indicator', 'Locuri'], [
+      ['Necesar normativ (GD 525/1996)', N(p.required_normative)],
+      ['După reducere proximitate TP (-' + p.pt_reduction_pct + '%)', N(p.required_after_reduction)],
+    ], [CW * 0.6, CW * 0.4]);
+    D.P('Necesarul de parcare se calculează conform normativului local (bazat pe GD 525/1996), pe tip de funcțiune. Proximitatea transportului public justifică o reducere a normativului (parking maximums în loc de minimums) — o politică modernă care descurajează dependența de automobil și eliberează spațiu/cost. Supradimensionarea parcării induce trafic suplimentar și costuri mari de subsol; subdimensionarea creează presiune pe parcarea stradală.');
+
+    D.chapter('9. Emisii de CO₂ induse');
+    D.table && D.table(['Indicator', 'Valoare'], [
+      ['Emisii zilnice', N(res.emissions.total_kg_day) + ' kg CO₂/zi'],
+      ['Echivalent anual', N(res.emissions.total_tonnes_year) + ' t CO₂/an'],
+    ], [CW * 0.5, CW * 0.5]);
+    D.P('Emisiile de transport induse se estimează din deplasările auto, distanța medie și factorul de emisie al parcului auto, conform metodologiei IPCC. Ele se corelează cu studiul de amprentă de carbon al dezvoltării (modulul Carbon Tracker): transportul este una dintre cele trei componente majore ale amprentei pe ciclu de viață. Reducerea lor se obține prin transferul modal și prin electrificarea parcului auto (pe măsură ce rețeaua se decarbonează).');
+
+    D.chapter('10. Managementul cererii de transport (TDM)');
+    D.P('Managementul cererii de transport (Transport Demand Management) cuprinde măsuri care reduc sau redistribuie cererea de deplasări auto, în loc să crească oferta de infrastructură rutieră (abordare nesustenabilă pe termen lung). Măsuri tipice: încurajarea transportului public (abonamente subvenționate, stații apropiate), infrastructură pentru biciclete și micromobilitate, program de lucru flexibil/escalonat, carpooling, și politica de parcare (preț, plafonare).');
+    D.P('Pentru dezvoltarea analizată, un pachet TDM bine proiectat poate reduce ponderea deplasărilor auto cu 10–25%, atenuând impactul asupra intersecțiilor critice. Eficacitatea TDM crește cu calitatea alternativelor: nu se poate descuraja automobilul fără a oferi opțiuni credibile de transport public și nemotorizat.');
+
+    D.chapter('11. Transport public și mobilitate dulce');
+    D.P('Integrarea dezvoltării cu transportul public este factorul-cheie pentru un impact de trafic sustenabil. Proximitatea unei stații de transport public de capacitate (tramvai, autobuz frecvent) justifică densități mai mari și un normativ de parcare redus — principiul dezvoltării orientate pe transit (TOD). Infrastructura pietonală (trotuare continue, treceri sigure) și ciclabilă (piste protejate, parcare pentru biciclete) completează oferta de mobilitate dulce.');
+    D.P('Studiul recomandă verificarea accesibilității sitului la transport public (acoperire în raza de 300–500 m de o stație) și prevederea de facilități pentru mobilitate dulce. Acolo unde transportul public lipsește, dezvoltarea ar trebui corelată cu extinderea acestuia, pentru a evita dependența integrală de automobil.');
+
+    D.chapter('12. Siguranța circulației');
+    D.P('Generarea de trafic suplimentar ridică probleme de siguranță rutieră la accese și la intersecțiile adiacente, în special pentru pietoni și bicicliști. Studiul detaliat trebuie să verifice: vizibilitatea la accese, configurarea sigură a intersecțiilor, trecerile de pietoni (semaforizate/marcate), separarea fluxurilor vulnerabile și viteza de operare. Principiul „Vision Zero" — eliminarea deceselor și rănirilor grave — orientează proiectarea modernă a infrastructurii.');
+
+    D.chapter('13. Verificarea conformității normative');
+    (res.compliance || []).forEach(function (ch) {
+      D.P('[' + ch.status + '] ' + ch.ref + ' — ' + ch.detail);
+    });
+    if (!(res.compliance || []).length) D.P('Verificările de conformitate se detaliază în studiul de trafic complet, conform NP 068/2002, STAS 10144, GD 525/1996 și HG 874/2019.');
+
+    D.chapter('14. Măsuri de atenuare propuse');
+    D.bullets && D.bullets([
+      'Optimizarea configurației și a semaforizării intersecțiilor critice;',
+      'Pachet TDM (transport public, mobilitate dulce, politică de parcare);',
+      'Etapizarea dezvoltării corelată cu capacitatea rețelei;',
+      'Amenajarea accesurilor pentru fluență și siguranță;',
+      'Contribuție la infrastructura de transport (corelare cu modulul Land Value Capture).',
+    ]);
+    D.P('Măsurile de atenuare transformă un impact potențial problematic într-unul gestionabil. Ele se negociază în cadrul avizării și pot constitui obligații ale dezvoltatorului (de la amenajări de intersecții până la contribuții la transportul public), în logica „cel ce generează impactul contribuie la atenuarea lui".');
+
+    D.chapter('15. Monitorizare post-implementare');
+    D.P('După darea în folosință, se recomandă monitorizarea traficului real generat și compararea cu estimările, pentru calibrarea modelelor și pentru declanșarea de măsuri corective dacă impactul depășește prognoza. Indicatorii de urmărit: volumele la accese și la intersecțiile critice, repartiția modală reală, gradul de ocupare a parcării și eventualele probleme de siguranță. Monitorizarea închide bucla între estimare și realitate.');
+
+    D.chapter('16. Concluzii și recomandări');
+    D.P('Dezvoltarea generează ' + N(g.daily) + ' deplasări/zi, cu un vârf PM de ' + N(g.pm_total) + ' depl/h. ' + ((res.intersections || []).some(function (i) { return i.over_capacity; }) ? 'Cel puțin o intersecție adiacentă depășește capacitatea, ceea ce impune măsuri de atenuare obligatorii înainte de aprobare.' : 'Impactul asupra rețelei este gestionabil cu măsurile uzuale.') + ' Recomandarea centrală: maximizarea transferului modal către transport public și mobilitate dulce, susținută de un pachet TDM și de o politică de parcare echilibrată.');
+    D.P('Acest studiu preliminar fundamentează decizia de a comanda un studiu de trafic detaliat (cu recensăminte de teren și model de trafic) și identifică din timp punctele critice și măsurile de atenuare, reducând riscul de respingere la avizare.');
+
+    D.chapter('17. Limitări și disclaimer');
+    D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
+
+    D.chapter('18. Surse și standarde');
+    D.P('ITE — Trip Generation Manual (ed. 10/11); NP 068/2002 — normativ proiectare străzi; STAS 10144 — caracteristici geometrice; GD 525/1996 — RGU (parcare); HG 874/2019; IPCC 2023 — factori de emisie. Glosar: LOS = Level of Service (nivel de serviciu, A–F); v/c = raport volum/capacitate; TDM = Transport Demand Management; TOD = Transit-Oriented Development; modal split = repartiția pe moduri de transport. Metodologie UrbanX · ThinkSmart Solutions.');
+
+    var fn = ('Studiu_Trafic_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+    window._buildStratTOC && window._buildStratTOC(D, 1);
+    pdf.save(fn); window.ss && ss('✅ Studiu de trafic generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
+  }
+
   console.log('[Flux] generator PDF încărcat (window.Flux.generatePDF)');
 })(window);
