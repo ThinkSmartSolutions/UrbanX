@@ -165,6 +165,10 @@
     ]);
     D.P('Într-un scenariu prudent, administrația își consolidează veniturile proprii și menține o rezervă, reducând expunerea la deciziile de la centru. Într-un scenariu de creștere, dezvoltarea economică și valorificarea fondului imobiliar lărgesc baza fiscală, crescând autonomia. Planificarea bugetară multianuală cu scenarii alternative este instrumentul de gestionare a acestor riscuri.');
 
+    D.chapter('Transparență bugetară și buget participativ');
+    D.P('Transparența finanțelor publice locale este atât o obligație legală (publicarea bugetului, a execuției și a achizițiilor), cât și un instrument de încredere civică și de bună guvernanță. Portalurile de date deschise (open budget) și platformele de buget participativ — prin care cetățenii propun și votează proiecte finanțate dintr-o cotă a bugetului de investiții — cresc legitimitatea deciziilor și implicarea comunității. Această dimensiune se corelează cu modulul de participare publică al platformei și cu axa de satisfacție a cetățenilor.');
+    D.P('Pentru ' + e.name + ', integrarea datelor bugetare reale (din execuțiile MFP) într-un tablou de bord public ar permite monitorizarea în timp a indicatorilor de autonomie și dependență prezentați în acest studiu, transformând analiza dintr-un instantaneu într-un proces continuu de raportare și ajustare.');
+
     D.chapter('Indicatori de monitorizare a sănătății financiare');
     if (D.table) D.table(['Indicator', 'Prag / țintă sănătoasă'], [
       ['Grad de autonomie fiscală', '> 50% (venituri proprii + cote IPV)'],
