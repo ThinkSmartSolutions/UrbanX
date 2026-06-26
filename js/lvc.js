@@ -220,10 +220,23 @@
       D.P('Trecerea de la o contribuție negociată ad-hoc la o politică locală coerentă de captare a plusvalorii poate parcurge etape graduale, în limita cadrului legal actual. Etapa 1 — pilotare: aplicarea metodologiei (ca în acest studiu) la câteva documentații de urbanism cu majorare de parametri, pentru calibrarea ratei și a procesului. Etapa 2 — instituționalizare: adoptarea unui regulament local care să stabilească transparent metoda de calcul, rata de recuperare și destinația fondurilor. Etapa 3 — operaționalizare: constituirea fondului dedicat, a registrului public și a procedurii standard de negociere.');
       D.P('Pe termen lung, etapa 4 presupune susținerea unui cadru legislativ național dedicat (dincolo de art. 56 al L350/2001), care să confere predictibilitate și forță juridică mecanismului — aliniat recomandărilor OCDE și Băncii Mondiale. Această evoluție graduală permite administrației să acumuleze experiență și legitimitate înainte de a generaliza instrumentul, reducând rezistența și riscul juridic.');
 
-      D.chapter('22. Limitări și disclaimer');
+      D.chapter('22. Tabel comparativ al instrumentelor LVC');
+      D.P('Sinteza comparativă de mai jos pune față în față principalele instrumente de captare a plusvalorii utilizate internațional, cu mecanismul, exemplul reprezentativ și gradul de aplicabilitate în contextul legal românesc actual:');
+      D.table && D.table(['Instrument', 'Mecanism', 'Exemplu', 'Aplicabilitate RO'], [
+        ['Acord negociat (planning gain)', 'Contribuție la aprobarea PUZ', 'UK — Section 106', 'Da (L350/2001 art.56)'],
+        ['Taxă de infrastructură (levy)', 'Cotă fixă pe mp construit', 'UK — CIL', 'Necesită cadru legal nou'],
+        ['Vânzarea drepturilor de a construi', 'Licitarea CUT suplimentar', 'Brazilia — CEPAC', 'Necesită cadru legal nou'],
+        ['Reajustare funciară', 'Pooling + restituire parcele servite', 'Japonia, Coreea', 'Necesită cadru legal nou'],
+        ['Increment fiscal (TIF)', 'Auto-finanțare din plusvaloare fiscală', 'SUA', 'Necesită impozit ad valorem'],
+        ['Zonă de dezvoltare concertată', 'Dezvoltare + echipamente integrate', 'Franța — ZAC', 'Parțial (parteneriate)'],
+      ], [CW * 0.28, CW * 0.30, CW * 0.20, CW * 0.22]);
+      D.P('Concluzia comparației: în cadrul legal românesc actual, singurul instrument direct aplicabil este acordul negociat (pe modelul Section 106 britanic), restul necesitând reforme legislative. Aceasta confirmă recomandarea studiului — utilizarea riguroasă a negocierii voluntare pe termen scurt, susținută de un cadru legislativ dedicat pe termen lung. Tranziția poate urma modelul țărilor care au evoluat de la acorduri ad-hoc către sisteme predictibile (UK a trecut de la Section 106 negociat la CIL standardizat tocmai pentru a reduce arbitrariul).');
+      D.P('Indiferent de instrument, factorii de succes rămân aceiași: predictibilitate, transparență, calibrare prudentă a cotei și legarea clară a fondurilor de infrastructura care deservește zona. Alegerea instrumentului se face în funcție de cadrul legal disponibil și de capacitatea administrativă locală.');
+
+      D.chapter('23. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (L350/2001 art.56). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
 
-      D.chapter('23. Surse, bibliografie și glosar');
+      D.chapter('24. Surse, bibliografie și glosar');
       D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea nr. 350/2001 (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
