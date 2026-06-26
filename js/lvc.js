@@ -105,25 +105,107 @@
   function generatePDF(r, meta) {
     meta = meta || {};
     var Jc = (typeof jsPDF !== 'undefined') ? jsPDF : (window.jspdf && window.jspdf.jsPDF) || window.jsPDF; if (!Jc) return;
+    var N = function (x) { try { return Math.round(x).toLocaleString('ro-RO'); } catch (e) { return String(x); } };
+    if (typeof window._makeStratDoc !== 'function') return _genSimpleLVC(r, meta, Jc, N);
+    try {
+      var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      var D = window._makeStratDoc(pdf, { docTitle: 'STUDIU LAND VALUE CAPTURE', cityName: (meta.site_name || 'Sit'), accent: [124, 58, 237] });
+      var W = 210, ML = D.dims.ML, CW = D.dims.CW, F = 'DejaVuRO';
+      D.setSuppress && D.setSuppress(true); D.setPage && D.setPage(1);
+      pdf.setFillColor(14, 10, 30); pdf.rect(0, 0, W, 297, 'F'); pdf.setFillColor(124, 58, 237); pdf.rect(0, 60, W, 1.4, 'F');
+      try { if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, W / 2 - 9, 16, 18); pdf.__hasCoverLogo = 1; } } catch (e) {}
+      pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(9); pdf.text('URBANX · LAND VALUE CAPTURE', W / 2, 44, { align: 'center' });
+      pdf.setTextColor(255, 255, 255); pdf.setFontSize(24); pdf.text('STUDIU LAND VALUE CAPTURE', W / 2, 90, { align: 'center' });
+      pdf.setTextColor(196, 181, 253); pdf.setFontSize(13); pdf.text(D.S2('Captarea plusvalorii urbane · ' + (meta.site_name || 'Sit') + (meta.city ? ' · ' + meta.city : '')), W / 2, 102, { align: 'center' });
+      pdf.setTextColor(180, 170, 210); pdf.setFontSize(11); pdf.text('Plusvaloare +' + r.uplift_pct + '% · contribuție propusă ' + N(r.total_contribution_eur) + ' EUR', W / 2, 114, { align: 'center' });
+      D.setSuppress && D.setSuppress(false);
+
+      D.chapter('1. Rezumat executiv');
+      D.P('Prezentul studiu cuantifică plusvaloarea funciară generată de o decizie de planificare urbană (de regulă o majorare a coeficientului de utilizare a terenului prin PUZ) și estimează contribuția prin care o parte din această plusvaloare poate fi recuperată pentru comunitate — mecanism cunoscut internațional drept Land Value Capture (LVC). Pentru situl analizat, valoarea terenului crește de la ' + N(r.baseline_eur_m2) + ' la ' + N(r.value_after_eur_m2) + ' EUR/mp (+' + r.uplift_pct + '%), generând o plusvaloare totală de ' + N(r.total_uplift_eur) + ' EUR; la o rată de recuperare de ' + r.recovery_rate_pct + '%, contribuția propusă este de ' + N(r.total_contribution_eur) + ' EUR.');
+      D.callout && D.callout('Principiu', 'Când o decizie publică (reglementarea urbanistică) creează valoare privată, este echitabil ca o parte din acel câștig „nemeritat" (unearned increment) să se întoarcă la comunitatea care l-a generat, pentru a finanța infrastructura și serviciile care fac posibilă dezvoltarea.');
+
+      D.chapter('2. Ce este Land Value Capture');
+      D.P('Land Value Capture (captarea plusvalorii funciare) este o familie de instrumente de politică publică prin care autoritățile recuperează o parte din creșterea valorii terenului generată de investiții publice (infrastructură, transport) sau de decizii de reglementare (rezonare, majorare de densitate). Ideea are rădăcini în economia clasică (Henry George, „Progress and Poverty", 1879) și se bazează pe observația că valoarea terenului crește în mare parte din factori externi proprietarului — locație, accesibilitate, decizii ale comunității — nu din efortul său propriu.');
+      D.P('Spre deosebire de impozitarea generală, LVC vizează precis acel surplus de valoare („betterment") creat de acțiunea publică, restituindu-l comunității pentru a finanța chiar infrastructura care îl produce — un cerc virtuos de autofinanțare a dezvoltării urbane. Instrumentele variază de la taxe și contribuții obligatorii până la negocieri voluntare în cadrul aprobărilor de urbanism.');
+
+      D.chapter('3. Metodologie de calcul');
+      D.P('Estimarea parcurge patru pași: (1) determinarea valorii de bază a terenului (înainte de decizia de planificare); (2) estimarea valorii după decizie (reflectând potențialul edificabil sporit); (3) calculul plusvalorii (uplift) ca diferență; (4) aplicarea unei rate de recuperare care stabilește ce procent din plusvaloare se recuperează pentru comunitate. Rata de recuperare este o decizie de politică (tipic 10–30%), calibrată astfel încât să nu descurajeze investiția privată.');
+      D.formula && D.formula('Contribuția LVC', 'Contribuție = (V_după − V_înainte) × Suprafață teren × Rată recuperare', 'rezultat în EUR, repartizabil pe mp ADC construit');
+      D.P('Valorile de bază și de după pot fi estimate prin metoda comparabilelor (tranzacții cu terenuri similare cu/fără potențialul respectiv) sau prin metoda reziduală (din studiul de fezabilitate al dezvoltării permise). Corelarea cu modulul Valori Imobiliare și cu modulul Fezabilitate ale platformei oferă o triangulare a estimării.');
+
+      D.chapter('4. Date de intrare și rezultate');
+      D.table && D.table(['Indicator', 'Valoare'], [
+        ['Valoare teren înainte', N(r.baseline_eur_m2) + ' EUR/mp'],
+        ['Valoare teren după', N(r.value_after_eur_m2) + ' EUR/mp'],
+        ['Plusvaloare unitară', N(r.uplift_eur_m2) + ' EUR/mp (+' + r.uplift_pct + '%)'],
+        ['Suprafață teren', N(r.land_area_m2) + ' mp'],
+        ['Plusvaloare totală', N(r.total_uplift_eur) + ' EUR'],
+        ['Rată de recuperare', r.recovery_rate_pct + '%'],
+        ['CONTRIBUȚIE PROPUSĂ', N(r.total_contribution_eur) + ' EUR'],
+        ['Contribuție pe mp ADC', N(r.contribution_per_built_m2) + ' EUR/mp'],
+      ], [CW * 0.55, CW * 0.45]);
+      D.P('Contribuția de ' + N(r.contribution_per_built_m2) + ' EUR/mp ADC reprezintă un cost suplimentar pentru dezvoltator, ce se compară cu marja sa de dezvoltare: dacă rămâne sub plusvaloarea netă obținută din rezonare, dezvoltatorul rămâne avantajat de decizia publică, iar comunitatea își recuperează partea echitabilă.');
+
+      D.chapter('5. Cadrul legal românesc');
+      D.P('România NU dispune, la nivelul anului 2025, de un mecanism legal direct și obligatoriu de captare a plusvalorii (de tipul CIL britanic sau ZAC francez). Singurul temei utilizabil este Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, art. 56, care permite negocierea unor contribuții ale dezvoltatorului în cadrul acordului la aprobarea documentațiilor de urbanism (PUZ). Contribuția are astfel caracter VOLUNTAR și negociat, nu de taxă impusă.');
+      D.P('În practică, unele municipii au utilizat acorduri de acest tip pentru obținerea de terenuri pentru infrastructură, spații verzi sau dotări, în schimbul aprobării unor parametri urbanistici superiori. Generalizarea necesită însă un cadru legal clar, predictibil și transparent — recomandat de organisme precum Banca Mondială și OCDE ca pârghie esențială de finanțare a urbanizării. Prezentul studiu oferă baza cuantificată pentru o astfel de negociere.');
+
+      D.chapter('6. Instrumente de captare a plusvalorii');
+      D.P('Literatura și practica internațională recunosc două mari categorii de instrumente. (A) Instrumente bazate pe TAXE/CONTRIBUȚII: taxa de betterment (pe creșterea valorii), taxele de impact (impact fees — pentru costul infrastructurii induse de dezvoltare), contribuțiile pentru dezvoltare (development charges), taxa pe terenul nedezvoltat. (B) Instrumente bazate pe DEZVOLTARE: vânzarea drepturilor de construire suplimentare (ca în São Paulo — CEPAC), reajustarea funciară (land readjustment — Japonia, Coreea), finanțarea prin incrementul fiscal (Tax Increment Financing — SUA) și acordurile negociate (planning gain — UK Section 106).');
+      D.bullets && D.bullets([
+        'UK — CIL (Community Infrastructure Levy) ~100–400 EUR/mp + acorduri Section 106;',
+        'Franța — ZAC (zone d\'aménagement concerté) și taxe d\'aménagement;',
+        'SUA — Tax Increment Financing (TIF) și impact fees;',
+        'Brazilia (São Paulo) — CEPAC, vânzarea la licitație a drepturilor de construire;',
+        'Japonia/Coreea — reajustare funciară (land readjustment).',
+      ]);
+
+      D.chapter('7. Comparabile internaționale');
+      D.P('Experiența internațională arată că LVC, bine proiectat, poate finanța o parte semnificativă din infrastructura urbană fără a împovăra bugetul general. În Marea Britanie, CIL și acordurile Section 106 generează miliarde de lire anual pentru infrastructură și locuințe accesibile. În Franța, sistemul ZAC integrează dezvoltarea cu finanțarea echipamentelor publice. Modelul brazilian CEPAC a finanțat regenerări urbane majore prin vânzarea transparentă, la licitație, a drepturilor de construire.');
+      D.P('Lecția comună: succesul depinde de predictibilitate (reguli clare, cunoscute dinainte), de transparență (cum se calculează și unde se cheltuie banii) și de calibrarea cotei astfel încât să nu blocheze dezvoltarea. O cotă prea mare descurajează investiția; una prea mică ratează oportunitatea de finanțare. Intervalul de 10–30% din plusvaloare, utilizat în acest studiu, se înscrie în practica internațională prudentă.');
+
+      D.chapter('8. Justificarea economică și echitatea');
+      D.P('Argumentul economic central este că plusvaloarea generată de rezonare este un „câștig nemeritat" (unearned increment): proprietarul nu a făcut nimic pentru a o produce — ea rezultă dintr-o decizie a comunității. Recuperarea unei părți este deci echitabilă și eficientă: echitabilă, pentru că redistribuie un câștig de origine publică; eficientă, pentru că nu distorsionează deciziile economice (impozitarea rentei funciare este, teoretic, cea mai puțin distorsionantă formă de taxare — argumentul lui Henry George).');
+      D.P('Pentru comunitate, LVC transformă presiunea de dezvoltare dintr-o povară (aglomerare, cerere de infrastructură) într-o resursă de finanțare. Pentru dezvoltator, contribuția este acceptabilă atât timp cât rămâne mult sub plusvaloarea pe care o obține din parametrii superiori — el rămâne, net, avantajat. Echilibrul corect produce un joc cu sumă pozitivă pentru ambele părți.');
+
+      D.chapter('9. Utilizarea fondurilor captate');
+      D.P('Pentru ca LVC să fie acceptat și legitim, destinația fondurilor trebuie să fie clară și legată de dezvoltare: infrastructură (drumuri, rețele, transport public), spații verzi și publice, dotări (școli, creșe), locuințe accesibile și reabilitare urbană. Practica recomandă constituirea unui fond dedicat, cu raportare publică, pentru a evita diluarea în bugetul general și pentru a menține încrederea contribuabililor.');
+      D.P('Idealul este ca fondurile captate dintr-o zonă să finanțeze, măcar parțial, infrastructura care deservește acea zonă — închizând cercul între cei care beneficiază de dezvoltare și cei care o finanțează. Această trasabilitate întărește acceptabilitatea politică a mecanismului.');
+
+      D.chapter('10. Negocierea contribuției');
+      D.P('În cadrul legal actual (negociere voluntară), studiul LVC oferă administrației o poziție obiectivă de pornire: cuantificarea transparentă a plusvalorii și a contribuției echitabile. Aceasta evită două capcane: subevaluarea (administrația cedează parametri fără contrapartidă adecvată) și supraevaluarea (o cerere excesivă blochează proiectul). Negocierea pornește de la plusvaloarea documentată și ajunge la o contribuție acceptabilă pentru ambele părți.');
+      D.P('Contribuția poate lua forme diverse: plată în bani către un fond de infrastructură, cedare de teren pentru dotări/spații verzi, realizarea pe cheltuiala dezvoltatorului a unor lucrări de infrastructură, sau o combinație. Forma se alege în funcție de nevoile concrete ale comunității și de structura proiectului.');
+
+      D.chapter('11. Riscuri, obiecții și gestionarea lor');
+      D.P('Principalele obiecții și riscuri: (1) descurajarea investiției — gestionată prin calibrarea prudentă a cotei și prin predictibilitate; (2) transferul costului către cumpărători (prețuri mai mari) — limitat de faptul că prețul de piață e dat de cerere, nu de costuri, contribuția erodând în principal renta funciară; (3) lipsa de transparență și riscul de arbitrariu — gestionat prin reguli clare și raportare publică; (4) incertitudinea juridică în absența unui cadru dedicat — de aceea se recomandă consultanță juridică și, pe termen lung, un cadru legislativ explicit.');
+      D.P('Evaluarea corectă a plusvalorii este ea însăși o sursă de risc: supraestimarea descurajează, subestimarea ratează oportunitatea. De aceea se recomandă evaluare ANEVAR independentă și triangularea cu metoda reziduală din studiul de fezabilitate.');
+
+      D.chapter('12. Guvernanță și transparență');
+      D.P('Credibilitatea LVC depinde de guvernanță: reguli publicate dinainte (nu negociate caz cu caz în mod opac), o metodologie transparentă de evaluare, un fond dedicat cu raportare anuală a încasărilor și cheltuielilor, și un mecanism de contestare. Implicarea publicului și a actorilor economici în definirea regulilor crește acceptabilitatea. Digitalizarea (o platformă publică de evidență a contribuțiilor și a destinației lor) este o bună practică emergentă.');
+
+      D.chapter('13. Aplicabilitate la nivel local');
+      D.P('Pentru o administrație locală din România, pașii practici sunt: (1) adoptarea unei politici/regulament local privind contribuțiile la dezvoltare (în limita L350/2001); (2) stabilirea unei metodologii transparente de calcul al plusvalorii; (3) definirea ratei de recuperare și a destinației fondurilor; (4) aplicarea consecventă la documentațiile de urbanism cu majorare de parametri. Studiul de față poate constitui anexa tehnică de fundamentare a unei astfel de politici sau a unei negocieri individuale.');
+
+      D.chapter('14. Concluzii și recomandări');
+      D.P('Pentru situl analizat, plusvaloarea de ' + N(r.total_uplift_eur) + ' EUR (+' + r.uplift_pct + '%) generată de decizia de planificare justifică o contribuție de ' + N(r.total_contribution_eur) + ' EUR (' + r.recovery_rate_pct + '% recuperare), echivalentă cu ' + N(r.contribution_per_built_m2) + ' EUR/mp ADC. Această contribuție este echitabilă, sustenabilă pentru proiect și aliniată practicii internaționale.');
+      D.P('Recomandări: (1) utilizarea acestui studiu ca bază obiectivă de negociere în cadrul L350/2001; (2) constituirea unui fond local dedicat, cu raportare publică; (3) pe termen lung, susținerea unui cadru legislativ național de LVC, predictibil și transparent; (4) validarea valorilor prin evaluare ANEVAR independentă înainte de finalizarea acordului.');
+
+      D.chapter('15. Limitări și disclaimer');
+      D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (L350/2001 art.56). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
+
+      D.chapter('16. Surse, bibliografie și glosar');
+      D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea nr. 350/2001 (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
+
+      var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      window._buildStratTOC && window._buildStratTOC(D, 1);
+      pdf.save(fn); G.ss && ss('✅ Studiu LVC generat: ' + pdf.getNumberOfPages() + ' pagini');
+    } catch (e) { console.error('[LVC PDF]', e); try { return _genSimpleLVC(r, meta, Jc, N); } catch (e2) {} }
+  }
+  function _genSimpleLVC(r, meta, Jc, N) {
     var pdf = new Jc({ orientation: 'portrait', unit: 'mm', format: 'a4' }); try { window._registerROFont && window._registerROFont(pdf); } catch (e) {}
-    var F = 'DejaVuRO', W = 210, H = 297, today = new Date().toLocaleDateString('ro-RO'); var N = function (x) { return Math.round(x).toLocaleString('ro-RO'); };
-    pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, 26, 'F'); pdf.setFillColor(124, 58, 237); pdf.rect(0, 0, W, 3, 'F');
-    pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(8); pdf.text('URBANX · LAND VALUE CAPTURE', W / 2, 10, { align: 'center' });
-    pdf.setTextColor(255, 255, 255); pdf.setFontSize(14); pdf.text('Notă de negociere — contribuție dezvoltator', W / 2, 19, { align: 'center' });
-    pdf.setTextColor(180, 170, 210); pdf.setFontSize(8); pdf.text((meta.site_name || '') + ' · ' + (meta.city || '') + ' · ' + today, W / 2, 24, { align: 'center' });
-    var y = 38; function kv(l, v) { pdf.setTextColor(90, 100, 120); pdf.setFont(F, 'normal'); pdf.setFontSize(9.5); pdf.text(l, 16, y); pdf.setTextColor(20, 30, 50); pdf.setFont(F, 'bold'); pdf.text(String(v), 120, y); y += 8; }
-    kv('Valoare teren înainte', N(r.baseline_eur_m2) + ' EUR/mp');
-    kv('Valoare teren după', N(r.value_after_eur_m2) + ' EUR/mp');
-    kv('Plusvaloare', '+' + r.uplift_pct + '% (' + N(r.uplift_eur_m2) + ' EUR/mp)');
-    kv('Plusvaloare totală', N(r.total_uplift_eur) + ' EUR (pe ' + N(r.land_area_m2) + ' mp teren)');
-    kv('Rată recuperare', r.recovery_rate_pct + '%');
-    kv('CONTRIBUȚIE PROPUSĂ', N(r.total_contribution_eur) + ' EUR (' + N(r.contribution_per_built_m2) + ' EUR/mp ADC)');
-    y += 4; pdf.setFillColor(40, 24, 60); pdf.rect(12, y, W - 24, 26, 'F'); pdf.setDrawColor(124, 58, 237); pdf.setLineWidth(0.4); pdf.rect(12, y, W - 24, 26, 'S');
-    pdf.setTextColor(196, 181, 253); pdf.setFont(F, 'bold'); pdf.setFontSize(8.5); pdf.text('Cadru legal & avertisment', W / 2, y + 6, { align: 'center' });
-    pdf.setTextColor(210, 200, 225); pdf.setFont(F, 'normal'); pdf.setFontSize(7.5);
-    pdf.text(pdf.splitTextToSize('România nu are un mecanism legal direct de Land Value Capture (CIL/ZAC) la nivel de 2025. Contribuția propusă este VOLUNTARĂ și se poate negocia în cadrul acordului de mediere la aprobarea PUZ (Legea 350/2001, Art. 56). Valorile sunt estimative; recomandăm evaluare ANEVAR + consultanță juridică. Comparabile internaționale: UK CIL ~100-400 EUR/mp, Franța ZAC.', W - 30), W / 2, y + 11, { align: 'center' });
-    pdf.save(('LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_'));
-    G.ss && ss('✅ Notă LVC generată');
+    var F = 'DejaVuRO', y = 22; pdf.setFont(F, 'bold'); pdf.setFontSize(14); pdf.text('Studiu Land Value Capture', 16, y); y += 10; pdf.setFont(F, 'normal'); pdf.setFontSize(10);
+    [['Plusvaloare', '+' + r.uplift_pct + '%'], ['Plusvaloare totală', N(r.total_uplift_eur) + ' EUR'], ['Contribuție', N(r.total_contribution_eur) + ' EUR']].forEach(function (kv) { pdf.text(kv[0] + ': ' + kv[1], 16, y); y += 8; });
+    pdf.save('LVC_' + (meta.site_name || 'sit') + '.pdf');
   }
 
   G.LVC = { compute: compute, openPanel: openPanel, generatePDF: generatePDF, TRIGGERS: TRIGGERS };
