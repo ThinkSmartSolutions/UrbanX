@@ -144,8 +144,20 @@
         ['TOTAL', N(r.lifetime_t), '100%'],
       ], [CW * 0.46, CW * 0.27, CW * 0.27]);
       D.P('Intensitatea de ' + N(r.per_m2_lifetime_kg) + ' kg CO₂/mp plasează dezvoltarea în clasa „' + r.green_label + '". Ținta UE 2030 prevede o reducere de -55% față de 1990; clădirile noi trebuie să tindă către neutralitate climatică până în 2050 (Green Deal).');
+      D.P('Pentru a contextualiza acest rezultat, este utilă raportarea la praguri și benchmark-uri recunoscute. Standardul RICS și inițiativa LETI (Low Energy Transformation Initiative) propun, pentru clădiri rezidențiale, ținte de carbon înglobat sub 500 kg CO₂/mp (bună practică) și sub 300 kg CO₂/mp (best practice 2030). Valorile operaționale corespunzătoare unei clădiri NZEB se situează tipic sub 15–20 kg CO₂/mp/an. Comparând estimarea curentă cu aceste praguri se identifică „distanța până la țintă" și componenta cu cel mai mare potențial de reducere.');
 
-      D.chapter('7. Scenarii de reducere (decarbonare)');
+      D.chapter('7. Praguri și benchmark de referință');
+      D.table && D.table(['Reper (carbon înglobat)', 'kg CO₂/mp', 'Sursă'], [
+        ['Beton armat / zidărie (tipic)', '350–500', 'RICS / ICE'],
+        ['Cadru metalic', '450–600', 'RICS / ICE'],
+        ['Structură lemn (CLT/glulam)', '120–200', 'RICS / ICE'],
+        ['Țintă bună practică 2030', '< 300', 'LETI / RICS'],
+        ['Această dezvoltare (înglobat)', N(Math.round(r.embodied_t * 1000 / Math.max(1, r.area))), 'estimare UrbanX'],
+      ], [CW * 0.46, CW * 0.27, CW * 0.27]);
+      D.P('Tabelul arată unde se poziționează dezvoltarea față de reperele de piață. O valoare apropiată de limita superioară a intervalului semnalează oportunitatea unei optimizări structurale; o valoare în zona „bună practică" confirmă o proiectare deja eficientă. Aceeași logică se aplică, separat, componentei operaționale (raportată la pragul NZEB) și celei de transport (raportată la modal split-ul țintă al orașului).');
+      D.P('Benchmarking-ul nu are doar rol descriptiv, ci și unul contractual și de finanțare: tot mai mulți finanțatori și autorități de reglementare condiționează aprobările sau dobânzile preferențiale de atingerea unor praguri de carbon, iar Taxonomia UE folosește exact astfel de criterii cuantificate. Documentarea poziției față de benchmark devine astfel parte din due-diligence-ul proiectului.');
+
+      D.chapter('8. Scenarii de reducere (decarbonare)');
       D.P('Pe baza structurii amprentei, se conturează un plan de reducere cu impact gradual:');
       D.bullets && D.bullets([
         'Anvelopă NZEB (izolare, tâmplărie performantă) — reduce operaționalul cu 30–50%;',
@@ -157,13 +169,13 @@
       D.P('Cumulat, un pachet ambițios poate reduce amprenta totală cu 40–60% față de scenariul de referință, apropiind dezvoltarea de clasa A și de cerințele de raportare ESG/Taxonomie UE.');
       D.P('Ierarhia intervențiilor urmează principiul „evită – reduce – compensează". Prioritatea o au măsurile pasive (orientare, formă compactă, izolare, masă termică), care nu generează costuri de operare și nu se uzează; urmează măsurile active eficiente (pompe de căldură, ventilație cu recuperare); apoi producția de energie regenerabilă la fața locului (fotovoltaic); și abia la final, pentru emisiile reziduale care nu pot fi eliminate tehnic, compensarea (offset) prin certificate verzi sau plantări — privită însă ca soluție de ultimă instanță, nu ca substitut al reducerii reale.');
       D.P('Analiza cost-eficacitate a fiecărei măsuri (cost per tonă de CO₂ evitată) orientează ordinea de implementare în limita unui buget dat. În general, măsurile de anvelopă și sursele regenerabile au cel mai bun raport cost/tonă pe durata de viață, în timp ce intervențiile asupra structurii (trecerea la lemn) reduc semnificativ carbonul înglobat, dar depind de disponibilitatea materialului și de competențele locale de execuție. Un plan realist eșalonează aceste măsuri pe faze, corelat cu ciclul de mentenanță și de reabilitare a clădirii.');
-      D.chapter('8. Cadru de raportare și aplicații');
+      D.chapter('9. Cadru de raportare și aplicații');
       D.P('Rezultatele susțin: raportarea ESG (pilonul de mediu — emisii GES Scope 1–3); verificarea alinierii la Taxonomia UE (criteriul „contribuție substanțială la atenuarea schimbărilor climatice"); angajamentele asumate în cadrul Convenției Primarilor (Covenant of Mayors) și ale Planurilor de Acțiune pentru Energie Durabilă și Climă (PAEDC/SECAP); fundamentarea cererilor de finanțare verde (fonduri UE, credite cu dobândă preferențială pentru clădiri sustenabile).');
 
-      D.chapter('9. Limitări și disclaimer');
+      D.chapter('10. Limitări și disclaimer');
       D.P('Studiul este ORIENTATIV. Valorile sunt estimate cu factori de emisie de referință (RICS/ICE, IPCC, ENTSO-E), nu din facturi energetice reale sau dintr-o analiză detaliată a materialelor (BoQ). NU înlocuiește un audit de carbon certificat sau o evaluare LCA detaliată realizată de un expert. Pentru raportare oficială ESG/Taxonomie se recomandă verificarea de către un evaluator acreditat și utilizarea datelor măsurate.');
 
-      D.chapter('10. Surse și bibliografie');
+      D.chapter('11. Surse și bibliografie');
       D.P('EN 15978:2011 — evaluarea performanței de mediu a clădirilor; RICS — „Whole Life Carbon Assessment for the Built Environment"; ICE Database (Inventory of Carbon & Energy); IPCC AR6 — factori de emisie; ENTSO-E / Transelectrica — intensitatea carbonică a rețelei RO; Comisia Europeană — EU Green Deal, Taxonomia UE, Convenția Primarilor. Metodologie internă UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Studiu_Carbon_' + (meta.nrcad || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
