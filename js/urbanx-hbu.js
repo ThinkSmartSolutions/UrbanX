@@ -146,6 +146,7 @@
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
     var territorial = (mode === 'T');
+    if (!territorial && typeof G._loadReguli === 'function') { try { await G._loadReguli(cityKey); } catch (e) {} }
     var PC = (G._ParcelCtx && !territorial) ? G._ParcelCtx.get(cityKey) : null;
     var onParcel = !territorial; // studiu PUNCTUAL (parcelă + zona ei)
     var R = compute(cityKey), x = R.x, f = R.fin;

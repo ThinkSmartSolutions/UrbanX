@@ -121,6 +121,7 @@
 
     // ── SECȚIUNE PUNCTUALĂ: amplasamentul analizat + avize pe parcelă (doar raportul de parcelă) ──
     if (mode !== 'T') {
+      if (typeof G._loadReguli === 'function') { try { await G._loadReguli(cityKey); } catch (e) {} }
       var PC = G._ParcelCtx ? G._ParcelCtx.get(cityKey) : null;
       D.chapter('Amplasamentul analizat');
       D.P('Acest raport este PUNCTUAL: evaluează potențialul arheologic pentru amplasamentul (parcela) selectat și zona imediată din care face parte, nu pentru întregul teritoriu administrativ. Concluziile și recomandările de avizare privesc strict acest sit.');
