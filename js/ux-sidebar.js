@@ -46,7 +46,13 @@
     aiMemoriu: function () { try { var k = (G.TCI && G.TCI.cityKey) || 'RO-IS-01'; G._AIUrbanNarrative && G._AIUrbanNarrative.open(k); } catch (e) {} },
     pptx: call('generatePPTX'),
     film: function () { try { G._switchToCinemaV2 && G._switchToCinemaV2(); setTimeout(function () { G._launchCinemaV2 && G._launchCinemaV2(); }, 100); } catch (e) {} },
-    tciClasic: call('_switchToTCIClassic')
+    tciClasic: call('_switchToTCIClassic'),
+    // ── module noi teritoriale (valori / climă / reconversie / economie) ──
+    valoriMap: function () { try { G._ValueMap && G._ValueMap.show('apartament'); G._closeAllMenusAndOverlay && G._closeAllMenusAndOverlay(); } catch (e) {} },
+    valoriPdf: function () { try { G._ValueMap && G._ValueMap.generatePDF(); } catch (e) {} },
+    clima: function () { try { G._ClimateEngine && G._ClimateEngine.openPanel(); } catch (e) {} },
+    hbu: function () { try { G._HBU && G._HBU.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} },
+    economie: function () { try { G._Economy && G._Economy.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} }
   };
 
   // ── NAV — PLANIFICARE URBANĂ: doar UAT / teritoriu / predicții (parcela+avizare = Flux de avizare) ──
@@ -64,11 +70,16 @@
       { label: 'Analytics — Walk/15-min/ROI/UHI/SDG/seismic', moduleId: 'analytics' },
       { label: 'Raport indici urbani (PDF, 12 indici)', moduleId: 'indici' },
       { label: 'Market — piața imobiliară (UAT)', moduleId: 'market' },
+      { label: '💶 Hartă Valori Imobiliare (€/mp)', moduleId: 'valoriMap', info: 'valori' },
+      { label: '📄 Studiu Valori Imobiliare (PDF)', moduleId: 'valoriPdf', info: 'valori_pdf' },
+      { label: '🏗 Reconversie urbană (HBU) & studiu', moduleId: 'hbu', info: 'hbu' },
+      { label: '💰 Analiză economică UAT (buget local)', moduleId: 'economie', info: 'economie' },
       { label: 'Carbon & emisii (UAT)', moduleId: 'carbon' },
       { label: 'Metodologie & surse de date', moduleId: 'metodologie' } ] },
     { id: 'mobilitate', label: 'Mobilitate', ico: '🚦', color: '#0EA5A5', items: [
       { label: 'Flux — studiu de trafic (calculator)', moduleId: 'mobility' } ] },
     { id: 'mediu', label: 'Mediu, climă & verde', ico: '🌿', color: '#639922', items: [
+      { label: '🌦 Profil Climatic & Studiu (SECAP)', moduleId: 'clima', info: 'clima' },
       { label: 'LOISIR — spații verzi & plămân urban', moduleId: 'loisir' },
       { label: 'UHI — insulă de căldură urbană', moduleId: 'uhi' },
       { label: 'Superbloc (model Barcelona)', moduleId: 'superbloc' } ] },
@@ -127,7 +138,10 @@
           '<span class="uxsb-gico">' + g.ico + '</span><span class="uxsb-glabel">' + g.label + '</span><span class="uxsb-gchev">' + (act ? '▲' : '▼') + '</span></button>' +
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
             var ia = State.activeModule === i.moduleId;
-            return '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
+            var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (i.info ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
+            if (!i.info) return main;
+            return '<div style="display:flex;align-items:stretch;gap:3px">' + main +
+              '<button title="Info" onclick="event.stopPropagation();window._showInfoDrawer&&window._showInfoDrawer(\'' + i.info + '\')" style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:5px;padding:0 9px;cursor:pointer;font-size:12px">ⓘ</button></div>';
           }).join('') + '</div>' : '') +
           '</div>';
       }).join('');

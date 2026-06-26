@@ -3978,6 +3978,13 @@ const _INFO_DATA = {
     tip:'Documentează CE se măsoară, CUM și DIN CE sursă — baza de transparență a platformei.',
     source:'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
   },
+  'economie': {
+    icon:'💰', title:'Analiză economică a UAT', subtitle:'Buget local · dependență de bugetul de stat',
+    badge:'TERITORIAL · FINANȚE LOCALE', badgeColor:'#0d9488',
+    desc:'Analizează situația economică și financiară a UAT, micro și macro: structura veniturilor bugetului local (venituri proprii, cote din impozitul pe venit, sume defalcate din TVA, subvenții, fonduri UE), gradul de autonomie fiscală și dependența de bugetul de stat, cheltuielile de funcționare vs. dezvoltare, capacitatea de investiție și absorbția fondurilor UE. Generează studiu PDF ≥10 pag.',
+    tip:'Valorile sunt orientative (model pe structura Legii 273/2006). Pentru cifre oficiale: execuția bugetară MFP + bugetul local aprobat.',
+    source:'Legea 273/2006 (finanțe publice locale) · Ministerul Finanțelor · INS · Eurostat',
+  },
   'hbu': {
     icon:'🏗', title:'Reconversie urbană (HBU) & Studiu', subtitle:'Highest & Best Use — funcțiunea optimă',
     badge:'INVESTIȚIONAL · REGENERARE', badgeColor:'#d97706',
@@ -6305,7 +6312,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260626ivu"></script>
     <script src="js/ux-launcher.js?v=20260624risk4"></script>
-    <script src="js/ux-sidebar.js?v=20260625qa"></script>
+    <script src="js/ux-sidebar.js?v=20260626nav"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>
@@ -6322,6 +6329,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/carbon-tracker.js?v=20260626ivu"></script>
     <script src="js/urbanx-climate.js?v=20260626clima3"></script><!-- Profil climatic Open-Meteo ERA5 (indice+studiu+capitol) -->
     <script src="js/urbanx-hbu.js?v=20260626hbu4"></script><!-- HBU/SRU reconversie urbana (12 functiuni + financiar + studiu) -->
+    <script src="js/urbanx-economy.js?v=20260626eco"></script><!-- Analiza economica UAT (buget local + dependenta stat) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
 </body>
 </html>
