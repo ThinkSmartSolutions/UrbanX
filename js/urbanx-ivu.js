@@ -206,5 +206,35 @@
     scoreFor: scoreFor, catalog: catalog, rankOf: rankOf
   };
   G.UrbanXIVU = IVU;
+
+  // ── Notă IVU pentru COPERTĂ (brand UrbanX) — apelabilă din orice generator ──
+  // Desenează o casetă compactă pe copertă: scor + calificativ + „dezvoltat de UrbanX".
+  // Returnează înălțimea desenată (0 dacă nu există scor) ca să poată fi poziționată.
+  G._ivuCoverNote = function (pdf, cityKey, opts) {
+    try {
+      opts = opts || {};
+      if (pdf.__ivuStamped) return 0; pdf.__ivuStamped = 1; // idempotent (o singură notă pe copertă)
+      var s = null; try { s = scoreFor(cityKey || (G.TCI && G.TCI.cityKey)); } catch (e) {}
+      var W = opts.W || 210, ml = opts.x != null ? opts.x : 26, w = opts.w || (W - 2 * ml);
+      var y = opts.y != null ? opts.y : 250;
+      var ac = opts.accent || [37, 99, 235];
+      var FONT = opts.font || 'DejaVuRO';
+      var h = 16;
+      pdf.setDrawColor(ac[0], ac[1], ac[2]); pdf.setLineWidth(0.4);
+      pdf.setFillColor(opts.bg ? opts.bg[0] : 18, opts.bg ? opts.bg[1] : 24, opts.bg ? opts.bg[2] : 40);
+      pdf.roundedRect(ml, y, w, h, 2, 2, 'FD');
+      pdf.setTextColor(ac[0], ac[1], ac[2]); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8.5);
+      pdf.text('NOTA URBANX (IVU)', ml + 5, y + 6);
+      pdf.setFont(FONT, 'normal'); pdf.setFontSize(8); pdf.setTextColor(210, 210, 220);
+      var line2;
+      if (s && s.R) line2 = 'Indicele de Vitalitate Urbană: ' + s.R.score + '/100 · calificativ ' + s.R.grade + ' (' + (s.R.tierLabel || '') + ')';
+      else line2 = 'Indicele de Vitalitate Urbană — indice compozit (0–100) pe dimensiuni cheie';
+      pdf.text(line2, ml + 5, y + 11.5);
+      pdf.setFontSize(7); pdf.setTextColor(150, 150, 165);
+      pdf.text('Indice compozit dezvoltat de UrbanX · formulă transparentă, recalculabilă · detaliat în capitolul „Nota UrbanX (IVU)".', ml + 5, y + 15, { maxWidth: w - 10 });
+      return h;
+    } catch (e) { return 0; }
+  };
+
   console.log('[IVU] ✅ Indicele de Vitalitate Urbană (City Intelligence & Comparator) încărcat');
 })(window);

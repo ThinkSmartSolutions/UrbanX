@@ -183,6 +183,7 @@
     pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Instrument de pre-analiză generat algoritmic', W / 2, cy0 + 102, { align: 'center' });
     pdf.setTextColor(140, 122, 96); pdf.setFontSize(7.5);
     pdf.text('Surse: metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · ANPM · repere de piață RO', W / 2, cy0 + 110, { align: 'center', maxWidth: W - 50 });
+    if (D) D.__cityKey = cityKey; // pt nota IVU pe copertă (stampilată universal în _buildStratTOC)
     D.setSuppress && D.setSuppress(false);
 
     D.chapter('Rezumat executiv');

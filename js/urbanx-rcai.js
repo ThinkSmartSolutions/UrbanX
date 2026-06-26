@@ -110,6 +110,7 @@
     ['Obiectivul studiului · cadru legislativ (OG 43/2000, Legea 422/2001, norme MCIN)', 'metodologia cercetării · amplasament · analiză geomorfologică (terase, izvoare, pâraie)', 'evoluția istorică pe perioade (preistorie → antichitate → medieval → modern → comunist)', 'analiză cartografică (planuri istorice) · context arheologic (situri RAN, monumente LMI)', 'cercetări anterioare · stratigrafie estimativă · evaluarea potențialului arheologic', 'analiza riscului pentru investiție (scenarii) · recomandări și avize · concluzii', 'Nota UrbanX Patrimoniu · bibliografie · anexe'].forEach(function (l, i) { pdf.text(l, W / 2, cyr + 18 + i * 6.2, { align: 'center' }); });
     pdf.setTextColor(170, 150, 120); pdf.setFontSize(8.5);
     pdf.text('Generat: ' + new Date().toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' }) + ' · Document de pre-cercetare · UrbanX TSS-FG', W / 2, cyr + 104, { align: 'center', maxWidth: W - 50 });
+    if (D) D.__cityKey = cityKey; // pt nota IVU pe copertă (stampilată universal în _buildStratTOC)
     D.setSuppress && D.setSuppress(false);
 
     D.chapter('Rezumat executiv');

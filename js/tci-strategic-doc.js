@@ -322,6 +322,15 @@
   function buildTOC(D, coverPages) {
     var TF = (D && D.pdf && D.pdf.__unicodeFont) ? 'DejaVuRO' : 'helvetica';
     const { pdf, dims } = D; const { W, ML, MR, MT, MB, CW, ACCENT, INK, MUT } = dims, H = 297;
+    // ── Notă IVU pe COPERTĂ (brand UrbanX) — universal pentru toate documentele strategice ──
+    try {
+      if (G._ivuCoverNote && !pdf.__ivuStamped) {
+        var _last = pdf.getNumberOfPages(); pdf.setPage(1);
+        var _ck = (D && D.__cityKey) || (G.TCI && G.TCI.cityKey);
+        G._ivuCoverNote(pdf, _ck, { y: 273, accent: ACCENT, bg: [20, 22, 34], font: TF, W: W, x: ML, w: CW });
+        pdf.setPage(_last);
+      }
+    } catch (e) { console.warn('[StratDoc IVU cover]', e); }
     const entries = D.toc;
     const perPage = 46; const tocPages = Math.max(1, Math.ceil(entries.length / perPage));
     // numerele de pagina cresc cu tocPages (cuprinsul se insereaza inainte de continut)
