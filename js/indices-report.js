@@ -162,6 +162,9 @@
       });
       D.callout('Nota', 'Indici orientativi, calculati cu parametri impliciti pe baza de formule transparente si surse metodologice citate. Pentru analiza pe date reale (OSM/populatie) si scenarii, folositi panoul fiecarui indice si SimLab.');
 
+      // ── Nota UrbanX (IVU) — standard transversal ──
+      try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
+
       G._buildStratTOC && G._buildStratTOC(D, 1);
       var _af = G._asciiFile || function (s) { return String(s || ''); };
       pdf.save('Raport_Indici_Urbani_' + _af(uat).replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf');
