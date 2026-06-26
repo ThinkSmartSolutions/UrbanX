@@ -261,6 +261,12 @@
       const fl = origFloor.apply(this, arguments);
       if (!fl?.rects || !b) return fl;
 
+      // OPRIT din default (Florin): markerele tehnice (coloane sanitare = cerc albastru "S",
+      // ghene = patrat albastru "G") apareau ca "cerculete albastre" confuze, plasate crud doar
+      // pe baile de pe marginea de sus/stanga (x<=0.3||y<=0.3). Nu sunt notatie standard de plan
+      // si nu se puteau explica. Raman optionale prin window._UX_TECH_COLUMNS=true.
+      if (!window._UX_TECH_COLUMNS) return fl;
+
       // Adaugă elemente tehnice în nucleele existente
       const cores = b.cores || [];
       cores.forEach(core => {
