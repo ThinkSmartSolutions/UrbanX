@@ -23,6 +23,7 @@
     muzee:          { f: ['[tourism=museum]', '[tourism=gallery]'], c: '#c084fc', l: 'Muzee & galerii' },
     caini:          { f: ['[leisure=dog_park]'], c: '#84cc16', l: 'Parcuri pentru câini' },
     ciclism:        { f: ['[highway=cycleway]', '[bicycle=designated]', '[cycleway~"^(lane|track)$"]'], c: '#14b8a6', l: 'Piste de biciclete', geom: 'line' },
+    farmacii:       { f: ['[amenity=pharmacy]'], c: '#10b981', l: 'Farmacii' },
   };
 
   var _active = null; // cheia tipului afisat curent

@@ -319,6 +319,7 @@ const OSM = {
         nwr["tourism"~"^(museum|hotel|gallery|viewpoint)$"]${a};
         nwr["leisure"="dog_park"]${a};
         way["highway"="cycleway"]${a};
+        nwr["amenity"="pharmacy"]${a};
       );
       out tags;`;
 
@@ -328,7 +329,7 @@ const OSM = {
         signal: AbortSignal.timeout(20000)
       });
       const data = await res.json();
-      const c = { school:0, kindergarten:0, hospital:0, clinic:0, university:0, park:0, supermarket:0, transport:0, monumente:0, turism:0, muzee:0, caini:0, ciclism:0 };
+      const c = { school:0, kindergarten:0, hospital:0, clinic:0, university:0, park:0, supermarket:0, transport:0, monumente:0, turism:0, muzee:0, caini:0, ciclism:0, pharmacy:0 };
       (data.elements||[]).forEach(el => {
         const t = el.tags || {};
         if(t.amenity==='school') c.school++;
@@ -339,6 +340,7 @@ const OSM = {
         else if(t.leisure==='park') c.park++;
         else if(t.amenity==='supermarket'||t.shop==='supermarket') c.supermarket++;
         else if(t.highway==='bus_stop'||t.public_transport==='platform'||t.public_transport==='stop_position'||/^(tram_stop|station|halt)$/.test(t.railway||'')) c.transport++;
+        else if(t.amenity==='pharmacy') c.pharmacy++;
         else if(t.leisure==='dog_park') c.caini++;
         else if(t.highway==='cycleway') c.ciclism++;
         else if(/^(museum|gallery)$/.test(t.tourism||'')) c.muzee++;
@@ -358,6 +360,7 @@ const OSM = {
         muzee: c.muzee,
         caini: c.caini,
         ciclism: c.ciclism,
+        farmacii: c.pharmacy,
         total_poi: c.school+c.kindergarten+c.hospital+c.clinic+c.university+c.park+c.supermarket+c.transport,
         radius_m: radius,
         source: 'OSM Overpass',

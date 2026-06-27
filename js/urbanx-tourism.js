@@ -48,12 +48,31 @@ var MODELS = [
 ];
 
 // VIA TRANSILVANICA — traseu real ~1.400 km (Putna → Drobeta-Turnu Severin),
-// Asociația Tășuleasa Social. Waypoints aproximativi (lon,lat).
+// Asociația Tășuleasa Social. Waypoints (lon,lat) ancorate pe localități reale de pe
+// traseu, prin cele 7 regiuni („Terra"): Bucovina → Colinele Transilvane → Terra
+// Siculorum → Terra Saxonum → Terra Dacica → Terra Banatica → Terra Romana.
 var VIA = [
-  [25.612,47.872],[25.360,47.340],[24.880,47.220],[24.490,47.133],[24.710,46.770],
-  [24.792,46.219],[24.350,46.162],[23.890,46.110],[23.570,46.067],[23.570,45.960],
-  [23.160,45.890],[22.900,45.880],[22.760,45.300],[22.660,44.630]
+  [25.601,47.871], // Putna (SV) — Bucovina
+  [25.711,47.780], // Sucevița (SV)
+  [25.357,47.348], // Vatra Dornei (SV)
+  [24.498,47.133], // Bistrița (BN) — Colinele Transilvane
+  [24.706,46.775], // Reghin (MS)
+  [25.120,46.550], // Praid (HR) — Terra Siculorum
+  [25.295,46.305], // Odorheiu Secuiesc (HR)
+  [24.792,46.219], // Sighișoara (MS) — Terra Saxonum
+  [24.961,46.196], // Saschiz (MS)
+  [24.622,45.973], // Agnita (SB)
+  [24.351,46.166], // Mediaș (SB)
+  [23.580,46.067], // Alba Iulia (AB) — Terra Dacica
+  [23.197,45.842], // Orăștie (HD)
+  [22.949,45.606], // Hațeg (HD)
+  [22.785,45.510], // Sarmizegetusa (HD)
+  [22.363,44.903], // Mehadia (CS) — Terra Banatica
+  [22.930,45.050], // Tismana (GJ) — Terra Romana
+  [22.659,45.003], // Baia de Aramă (MH)
+  [22.656,44.631]  // Drobeta-Turnu Severin (MH)
 ];
+// Județele traversate de Via Transilvanica (cele 7 regiuni de mai sus).
 var VIA_JUDETE = ['SV','BN','MS','HR','SB','AB','HD','CS','GJ','MH'];
 
 function _hav(la1,lo1,la2,lo2){var R=6371,d=Math.PI/180,dla=(la2-la1)*d,dlo=(lo2-lo1)*d;var a=Math.sin(dla/2)*Math.sin(dla/2)+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin(dlo/2)*Math.sin(dlo/2);return 2*R*Math.asin(Math.min(1,Math.sqrt(a)));}
