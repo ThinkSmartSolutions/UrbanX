@@ -409,6 +409,7 @@ const lotizareFeatures = pugFeatures.filter(f => f.properties.utr !== 'CE');
 7. **Deploy automat** după orice modificare
 8. **ZERO duplicare de conținut între studii/rapoarte.** Niciun studiu sau raport nu se suprapune ca și conținut cu altul. Fiecare livrabil are un SCOP DISTINCT și conținut diferit. Înainte de a adăuga conținut într-un studiu, verifică să nu existe deja în altul — dacă există, nu-l copia (trimite-l prin referință la livrabilul dedicat).
 9. **TERITORIU ≠ PARCELĂ. Rang superior ≠ rang inferior.** Un studiu de rang superior (TERITORIAL — UAT/zonă/strategie) NU este același lucru cu un studiu de rang inferior (PE PARCELĂ — punctual, cifre concrete pe lot). Sunt DIFERITE ca scop, nivel de analiză și conținut — tratează-le diferit, nu le converge. Ex.: SFU (fezabilitate urbană, teritorial/strategic) ≠ SF/DALI (fezabilitate de investiție pe parcelă, deviz HG 907) — NU pune pro-forma de parcelă în studiul teritorial și invers.
+10. **URBANISMUL ARE 3 COMPONENTE — orice temă trebuie reprezentată pe toate trei:** (1) **ANALITICĂ** — date reale, cifre, diagnoză, text fundamentat (sursă+formulă); (2) **GRAFICĂ** — vizual pe hartă (straturi reale, nu decor) și/sau grafice; (3) **PREDICȚIE** — proiecție/scenarii/orizont viitor (cu strategie, nu declin pasiv). Se aplică și în CINEMATIC: fiecare scenă trebuie să aibă vizual pe hartă + cifre/etichete + o proiecție. Când modific un motor (ex. _UrbanFauna), verific că NARAȚIUNEA scenei din cinematic e actualizată, nu doar desenul.
 
 ---
 

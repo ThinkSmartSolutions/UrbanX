@@ -3260,13 +3260,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       }
 
       case 'b18s1': { // FAUNA URBANA & SIGURANTA
-        titlu('Fauna urbana & siguranta','Caini fara stapan · padocuri · risc ursi · impact pe nota UrbanX'); linie();
+        titlu('Fauna urbana & siguranta','Caini fara stapan · fauna salbatica multi-specie · impact pe nota UrbanX'); linie();
         var FA=(window._UrbanFauna)?window._UrbanFauna.strays(city):null;
-        var BR=(window._UrbanFauna)?window._UrbanFauna.bearRisk(city.judet):{present:false};
+        var WL=(window._UrbanFauna&&window._UrbanFauna.wildlife)?window._UrbanFauna.wildlife(city.judet):[];
+        var TOP=(WL&&WL.length)?WL[0]:null;
+        var WLd=WL.filter(function(e){return e.level!=='scăzut';});
         if(FA){
           cifra(N2(FA.est)+' caini','Fara stapan (est.) · '+FA.perK+'/1000 loc','#f59e0b');
-          cifra2(BR.present?('URSI: '+BR.level):'fara ursi', 'Risc faunistic salbatic', BR.present?'#ef4444':'#22c55e');
-          // mini prognoza pe ecran
+          cifra2(TOP?(TOP.name+': '+TOP.level):'fauna salbatica redusa','Specia dominanta pt comunitate', TOP?(TOP.color||'#ef4444'):'#22c55e');
+          // mini prognoza pe ecran (predictie)
           var rows=[['Azi',FA.est,'#f59e0b'],['2030 fara actiune',FA.pred2030NoAction,'#ef4444'],['2030 cu sterilizare',FA.pred2030Action,'#22c55e']];
           var mx=FA.pred2030NoAction||1;
           rows.forEach(function(r,i){
@@ -3278,9 +3280,21 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             ctx.fillText(r[0]+': '+N2(r[1]),bx+W*0.012,by+H*0.027);
             ctx.globalAlpha=1;
           });
+          // lista speciilor salbatice relevante pe ecran (analitic)
+          if(WLd.length){
+            var sa3=Math.min(1,(t-0.4)/0.2)*sA;
+            if(sa3>0){ ctx.globalAlpha=sa3; ctx.textAlign='left';
+              ctx.fillStyle='rgba(230,236,250,0.92)'; ctx.font='700 '+Math.min(W*0.0105,14)+'px "Space Grotesk",sans-serif';
+              ctx.fillText('Faună sălbatică în județ:', W*0.04, H*0.66);
+              WLd.slice(0,5).forEach(function(e,i){ ctx.fillStyle=e.color||'#ef4444';
+                ctx.fillText('• '+e.name+' — '+e.level, W*0.05, H*(0.70+i*0.035)); });
+              ctx.globalAlpha=1;
+            }
+          }
         }
-        narativ('Fauna urbana influenteaza calitatea vietii, siguranta si atractivitatea turistica — de aceea conteaza in nota UrbanX. Cainii fara stapan: fara sterilizare sustinuta, populatia si reclamatiile cresc ~60% pana in 2030; cu program CNVSU + adoptie scad ~60%. '+(BR.present?('Urs: '+BR.note+' Romania are cea mai mare populatie de ursi bruni din UE (~8.000). Necesita containere anti-urs, interzicerea hranirii, RO-Alert.'):'Fara prezenta semnificativa a ursilor.'));
-        concluzie('Gestionarea umana a faunei (sterilizare + adapost + management urs) = oras mai sigur, mai curat, mai atractiv');
+        var spList=WLd.map(function(e){return e.name+' ('+e.level+')';}).join(', ');
+        narativ('Fauna urbana si salbatica influenteaza calitatea vietii, siguranta si atractivitatea turistica — de aceea conteaza in nota UrbanX. Cainii fara stapan: fara sterilizare ~+60% pana in 2030; cu CNVSU + adoptie ~-60%. Fauna salbatica e SPECIFICA judetului — in unele UAT problema sunt ursii, in altele lupii, mistretii, vulpile sau sacalii (in expansiune dinspre campie). Specii relevante aici: '+(spList||'fara risc semnificativ')+'. Masurile se adapteaza speciei: containere anti-urs, protectia turmelor (lup), garduri si biosecuritate PPA (mistret), vaccinare antirabica orala (vulpe).');
+        concluzie('Gestionarea faunei (sterilizare + adapost + management multi-specie adaptat pe judet) = oras mai sigur, curat, atractiv');
         break;
       }
 
