@@ -34,6 +34,32 @@
     'sppc': { parcel:1, t: 'STUDIU DE PATRIMONIU CONSTRUIT ȘI PEISAJ (SPPC)', ico: '🏰', ac: [161, 98, 7], badge: 'SPECIALIZAT', legal: 'Legea 422/2001 · Convenția de la Florența (peisaj) · OG 43/2000', surse: 'LMI/INP · RAN · OSM · Copernicus', ce: 'Evaluarea patrimoniului construit și a peisajului cultural: monumente LMI, zone protejate, peisaj urban și natural, vulnerabilități și măsuri de protejare și valorificare.' }
   };
 
+  // ── DELIMITAREA STUDIULUI (REGULA: zero duplicare; teritoriu≠parcelă) ──
+  // Fiecare studiu isi declara EXPLICIT scopul si trimite la studiul-sora pentru temele
+  // adiacente, ca niciun livrabil să nu pară că dublează altul (CLAUDE.md §12.8-9).
+  var DEMARC = {
+    environment: 'Acoperă POLITICA de mediu (calitatea aerului/apei/solului, arii protejate, biodiversitate la nivel de UAT). NU detaliază proiectarea rețelei verzi-albastre — vezi SIVA; adaptarea climatică/SECAP — vezi Strategia Climatică; sistemul energetic — vezi SEU.',
+    siva: 'Acoperă REȚEAUA FIZICĂ verde-albastră (parcuri, coridoare ecologice, ape de suprafață, management pluvial, conectivitate). NU tratează politica generală de mediu/biodiversitate — vezi Strategia de Mediu; nici energia — vezi SEU.',
+    seu: 'Acoperă SISTEMUL ENERGETIC local (consum, mix, eficiență clădiri, regenerabil, decarbonare energetică). NU acoperă inventarul de emisii GES și adaptarea climatică — vezi Strategia Climatică/SECAP.',
+    sct: 'Acoperă CAPACITATEA rețelei de transport (oferta: LOS, intersecții, debite). NU este planul strategic de mobilitate al UAT — vezi PMUD; nici impactul unei dezvoltări punctuale — vezi SIM.',
+    sim: 'Acoperă IMPACTUL unei dezvoltări asupra mobilității (cererea generată, trip generation, măsuri de atenuare). NU evaluează capacitatea de ansamblu a rețelei — vezi SCT; nu înlocuiește PMUD.',
+    cultural: 'Acoperă VIAȚA culturală și instituțiile (așezăminte, industrii creative, acces la cultură). NU tratează protecția fizică a patrimoniului construit/peisajului — vezi SPPC; nici valorificarea turistică — vezi Strategia de Turism.',
+    sppc: 'Acoperă PROTECȚIA patrimoniului construit și a peisajului cultural (monumente LMI, zone protejate). NU acoperă viața culturală/instituțiile — vezi Strategia Culturală; cercetarea arheologică — vezi RCAI; turismul — vezi Strategia de Turism.',
+    tourism: 'Acoperă VALORIFICAREA turistică (atracții, cazare, circuite, marketing teritorial). NU tratează protecția patrimoniului — vezi SPPC; nici politica culturală — vezi Strategia Culturală.',
+    housing: 'Acoperă POLITICA de locuire (stoc, accesibilitate, locuințe sociale/ANL, nevoia pe segmente). NU tratează regenerarea fizică a ansamblurilor existente — vezi SRgU.',
+    srgu: 'Acoperă REGENERAREA FIZICĂ a ansamblurilor rezidențiale existente (stare fond, eficiență energetică, spații publice, dotări). NU este strategia generală de locuire — vezi Strategia de Locuire.',
+    sda: 'Acoperă exclusiv DEMOGRAFIA aprofundată (structură, migrație, proiecții). Pentru economie/competitivitate — vezi SCpT; pentru monografia completă — vezi Atlasul Urban.',
+    scpt: 'Acoperă COMPETITIVITATEA economică teritorială (capital uman, mediu de afaceri, inovare, RIS3). NU detaliază demografia — vezi SDA; nici dezvoltarea economică operațională — vezi Strategia Economică.',
+    atlas: 'Este o MONOGRAFIE DE SINTEZĂ și referință documentară: rezumă și trimite la studiile tematice dedicate (demografie→SDA, mediu→Mediu/SIVA, mobilitate→PMUD/SCT, patrimoniu→SPPC, locuire→Locuire) fără a le înlocui.',
+    srm: 'Acoperă RISCUL MULTIHAZARD la nivel TERITORIAL (seismic/inundații/alunecări/secetă/caniculă/incendii — expunere, scenarii, măsuri). NU înlocuiește simulările punctuale de pe hartă (Riscuri & Protecție civilă) și nici studiul de risc la nivel de parcelă.',
+    scsp: 'Acoperă CALITATEA SPAȚIILOR PUBLICE (accesibilitate, confort, vitalitate, vegetație 3-30-300, mobilier). NU tratează rețeaua ecologică amplă — vezi SIVA; nici mobilitatea — vezi SCT/PMUD.',
+    sfu: 'Acoperă FEZABILITATEA URBANĂ a unei intervenții (analiza opțiunilor, fezabilitate tehnică/financiară și cost-beneficiu la nivel strategic). NU este Studiul de Fezabilitate de investiție pe parcelă cu deviz HG 907/2016 și scenarii ROI — acela e livrabilul dedicat SF/DALI.',
+    'smart-city': 'Acoperă orașul INTELIGENT (ISO 37120, digital twin, IoT, servicii inteligente). Pentru digitalizarea administrației/eGov — vezi Strategia de Digitalizare.',
+    digitalization: 'Acoperă DIGITALIZAREA administrației (eGov, interoperabilitate, infrastructură de date, competențe digitale). NU acoperă orașul inteligent/IoT — vezi Strategia Smart City.',
+    sdl: 'Este documentul-umbrelă de dezvoltare pentru comune/orașe mici: integrează și trimite la studiile tematice (mediu, mobilitate, locuire etc.) fără a le rescrie în detaliu.',
+    metropolitan: 'Acoperă coordonarea INTER-UAT (policentrism, servicii partajate, mobilitate metropolitană, guvernanță). NU rescrie strategiile sectoriale ale fiecărui UAT membru.'
+  };
+
   function _resolveCity(cityKey) {
     var db = G._RO_CITIES_DB || {};
     return db[cityKey] || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[cityKey]) ||
@@ -88,6 +114,8 @@
     D.chapter('Rezumat executiv');
     D.P('Prezentul document — ' + S.t + ' pentru ' + cityName + (city.judet ? ', județul ' + city.judet : '') + ' — este un document strategic din suita UrbanX (Strategic Planning Suite). El integrează date reale (statistice, geospațiale și live) într-o analiză coerentă, cu diagnoză, viziune, ținte și recomandări, la standardul de calitate cerut documentelor strategice teritoriale.');
     D.callout && D.callout('Domeniul studiului', S.ce);
+    // Delimitare explicită față de studiile-soră (regula zero-duplicare)
+    if (DEMARC[id]) D.callout && D.callout('Delimitarea studiului (ce acoperă · ce NU — vezi studiul dedicat)', DEMARC[id]);
     D.chapter('Metodologie și surse de date');
     D.P('Studiul aplică o metodologie transparentă: colectarea datelor din surse oficiale și deschise (' + S.surse + '), analiza diagnostic pe dimensiunile relevante, formularea obiectivelor și a țintelor cuantificabile, și fundamentarea recomandărilor pe evidențe. Cadrul legal de referință: ' + S.legal + '. Limitările sunt explicitate; valorile estimate au caracter orientativ și se confirmă pe sursele oficiale.');
 
