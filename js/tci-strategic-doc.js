@@ -305,6 +305,36 @@
       slices.forEach((d, i) => { const col = d[2] || PAL[i % PAL.length], pc = Math.round((+d[1]||0)/tot*100); pdf.setFillColor(col[0],col[1],col[2]); pdf.rect(lx, ly - 2.4, 3.2, 3.2, 'F'); pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'normal'); pdf.text(S2(String(d[0]) + ' — ' + pc + '%'), lx + 4.5, ly, { maxWidth: CW - (lx - ML) - 6 }); ly += 5.2; });
       y += boxH; if (opts.source) source(opts.source);
     }
+    // DONUT (pie cu gaura) — variatie vizuala pt compozitii
+    function donut(slices, opts) {
+      opts = opts || {}; const R = opts.r || 22, ri = R * 0.56, ttl = opts.title; const boxH = R * 2 + (ttl ? 6 : 0) + 8;
+      ensure(boxH + (opts.source ? 7 : 0));
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf = fitFont(FONT, 'bold', 8, ttl, CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      const cx = ML + R + 4, cy = y + R, tot = slices.reduce((s, d) => s + (+d[1] || 0), 0) || 1;
+      let a0 = -Math.PI / 2;
+      slices.forEach((d, i) => { const frac = (+d[1] || 0) / tot, a1 = a0 + frac * 2 * Math.PI, col = d[2] || PAL[i % PAL.length];
+        pdf.setFillColor(col[0], col[1], col[2]); const steps = Math.max(2, Math.ceil(frac * 40));
+        for (let s = 0; s < steps; s++) { const t0 = a0 + (a1 - a0) * s / steps, t1 = a0 + (a1 - a0) * (s + 1) / steps; pdf.triangle(cx, cy, cx + R * Math.cos(t0), cy + R * Math.sin(t0), cx + R * Math.cos(t1), cy + R * Math.sin(t1), 'F'); }
+        a0 = a1; });
+      pdf.setFillColor(255, 255, 255); pdf.circle(cx, cy, ri, 'F');   // gaura
+      let ly = y + 2; const lx = cx + R + 8; pdf.setFontSize(6.4);
+      slices.forEach((d, i) => { const col = d[2] || PAL[i % PAL.length], pc = Math.round((+d[1] || 0) / tot * 100); pdf.setFillColor(col[0], col[1], col[2]); pdf.rect(lx, ly - 2.4, 3.2, 3.2, 'F'); pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'normal'); pdf.text(S2(String(d[0]) + ' — ' + pc + '%'), lx + 4.5, ly, { maxWidth: CW - (lx - ML) - 6 }); ly += 5.2; });
+      y += boxH; if (opts.source) source(opts.source);
+    }
+    // HBAR (bare orizontale) — ideal pt etichete lungi (nu se suprapun ca la bar vertical)
+    function hbar(data, opts) {
+      opts = opts || {}; const ttl = opts.title, n = data.length;
+      const rowH = Math.min(8, Math.max(5, 46 / Math.max(1, n))), h = n * rowH + 3;
+      ensure(h + (ttl ? 6 : 0) + (opts.source ? 7 : 0) + 4);
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf = fitFont(FONT, 'bold', 8, ttl, CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      const labW = Math.min(56, Math.max(24, CW * 0.34)), x0 = ML + labW, plotW = CW - labW - 16;
+      const mv = opts.max || Math.max.apply(null, data.map(d => +d[1] || 0)) * 1.14 || 1;
+      data.forEach((d, i) => { const v = +d[1] || 0, bw = plotW * Math.max(0, v) / mv, by = y + i * rowH, col = d[2] || ACCENT;
+        pdf.setTextColor.apply(pdf, SUB); pdf.setFont(FONT, 'normal'); pdf.setFontSize(6); pdf.text(S2(String(d[0])), ML, by + rowH * 0.64, { maxWidth: labW - 2 });
+        pdf.setFillColor(col[0], col[1], col[2]); pdf.rect(x0, by + rowH * 0.2, bw, rowH * 0.6, 'F');
+        pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'bold'); pdf.setFontSize(6); pdf.text(opts.vfmt ? opts.vfmt(v) : N(v), x0 + bw + 1.5, by + rowH * 0.64); });
+      y += h; if (opts.source) source(opts.source);
+    }
     // Ajusteaza marimea fontului ca textul sa incapa in latimea data (anti-overflow)
     function fitFont(font, style, base, str, maxW) {
       var fs = base; pdf.setFont(font, style); pdf.setFontSize(fs);
@@ -356,7 +386,7 @@
 
     return {
       pdf, get y(){return y}, setY, ensure, newPage, chapter, h2, h3, P, bullets, table, source, callout, kpis, spacer, useMP, fullPage,
-      barChart, lineChart, pie, formula, sourceBadges, PAL,
+      barChart, lineChart, pie, donut, hbar, formula, sourceBadges, PAL,
       toc, get page(){return pageNum}, setPage:(p)=>{pageNum=p;}, _band:band, _foot:foot,
       setSuppress:(v)=>{suppressChrome=v;}, S2, N, RN, Pct, dims:{W,H,ML,MR,MT,MB,CW,ACCENT,INK,SUB,MUT},
     };
@@ -451,7 +481,25 @@
                     var uniq={}; vals.forEach(function(v){uniq[v]=1;});
                     if(ok===bl.rows.length && Object.keys(uniq).length>=2){
                       var pal=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
-                      D.barChart(bl.rows.map(function(r,i){return [(''+(r[0]||('#'+(i+1)))).replace(/\s+/g,' ').trim().slice(0,16), vals[i], pal[i%pal.length]];}), {title:((bl.headers[li])||'Valori')+' — reprezentare grafică', max:0, source:'Date din tabelul de mai sus'});
+                      // DIVERSIFICARE: alege tipul de grafic ca să NU fie aceeași bară peste tot.
+                      // serie temporală -> linie; compoziție (≤6, toate pozitive) -> donut;
+                      // etichete lungi sau prin rotație -> bare orizontale; altfel bară verticală.
+                      var labels0=bl.rows.map(function(r){return (''+(r[0]||'')).trim();});
+                      var title=((bl.headers[li])||'Valori')+' — reprezentare grafică';
+                      var cd=bl.rows.map(function(r,i){return [(''+(r[0]||('#'+(i+1)))).replace(/\s+/g,' ').trim().slice(0,28), vals[i], pal[i%pal.length]];});
+                      var isTime=labels0.length>=3 && labels0.every(function(l){return /(19|20)\d{2}/.test(l);});
+                      var allPos=vals.every(function(v){return v!=null && v>=0;});
+                      var avgLen=labels0.reduce(function(a,l){return a+l.length;},0)/labels0.length;
+                      var tci=(D.__tci=(D.__tci||0)+1);
+                      if(isTime && D.lineChart){
+                        D.lineChart([{name:(bl.headers[li]||'Serie').slice(0,24),color:[37,99,235],points:vals}], labels0.map(function(l){return (l.match(/(19|20)\d{2}/)||[l])[0];}), {title:title, source:'Date din tabelul de mai sus'});
+                      } else if(tci%3===2 && D.donut && allPos && bl.rows.length>=2 && bl.rows.length<=6){
+                        D.donut(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:'Date din tabelul de mai sus'});
+                      } else if((tci%3===1 || avgLen>14) && D.hbar){
+                        D.hbar(cd, {title:title, source:'Date din tabelul de mai sus'});
+                      } else {
+                        D.barChart(cd.map(function(r){return [r[0].slice(0,16), r[1], r[2]];}), {title:title, max:0, source:'Date din tabelul de mai sus'});
+                      }
                       hadVisual=true;
                     }
                   }
