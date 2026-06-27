@@ -71,6 +71,7 @@ SCENES = [
   {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b31s1',dur:20000,label:'VALOARE IMOBILIARA €/mp',bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT II — ORASUL SUB PRESIUNE
   {id:'b4s1',dur:20000,label:'RETEA RUTIERA',         bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s2',dur:24000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -1219,6 +1220,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly([cx,cy],13.4,52,-18,5000,17000,'dusk');
         break;
 
+      case 'b31s1': // VALOARE IMOBILIARA — gradient renta urbana (€/mp) pe harta
+        lp('day');
+        onIdle(function(){try{SE._addValueHeat&&SE._addValueHeat(map, city);}catch(e){}});
+        fly([cx,cy],12.4,38,0,4000,0,'day');
+        fly([cx,cy],13.3,54,28,6000,9000,'day');
+        fly([cx,cy],12.7,46,-22,5000,16000,'dusk');
+        break;
+
       // BLOC 5 ───────────────────────────────────────────────────────────
       case 'b5s1':
         lp('night');
@@ -2362,6 +2371,23 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         });
         narativ('Acestea sunt dotarile REALE din jurul orasului (OpenStreetMap) — exact datele care alimenteaza si tabloul de bord. „Orasul de 15 minute" (Carlos Moreno): scoala, sanatatea, cumparaturile, recreerea si transportul accesibile in 15 minute pe jos sau cu bicicleta. Distributia si densitatea dotarilor decid daca un cartier e autonom sau dependent de masina. Predictie: completarea „deserturilor" de dotari (farmacii, gradinite, statii TP) creste accesibilitatea, reduce traficul si urca valoarea zonei.');
         concluzie('Dotari echilibrate la 15 minute pe jos = cartiere autonome, mai putin trafic, calitate a vietii mai mare');
+        break;
+      }
+
+      case 'b31s1': { // VALOARE IMOBILIARA €/mp — gradient renta urbana
+        titlu('Valoare imobiliara · €/mp','Gradient de renta urbana (model mass-appraisal IAAO) — centru → periferie'); linie();
+        var VS=SE._valStats||{};
+        if(VS.base){
+          cifra(N2(VS.mid)+' €/mp','Valoare mediana estimata (construit)','#fbbf24');
+          cifra2(N2(VS.vmin)+'–'+N2(VS.vmax)+' €/mp','Periferie → centru','#d73027');
+          var dlt=VS.vmin>0?Math.round((VS.vmax/VS.vmin-1)*100):0;
+          var av=Math.min(1,(t-0.3)/0.2)*sA; if(av>0){ ctx.globalAlpha=av; ctx.textAlign='left';
+            ctx.fillStyle='rgba(230,236,250,0.92)'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif';
+            ctx.fillText('Diferenta centru–periferie: +'+dlt+'%', W*0.04, H*0.44); ctx.globalAlpha=1; }
+        } else { cifra('…','Se calculeaza suprafata de valoare','#fbbf24'); }
+        var MK=null; try{ var nm=(window.TCI&&window.TCI.cityName)||''; if(window.Market&&nm){ MK=window.Market.snapshot(nm,'apartament'); } }catch(e){}
+        narativ('Harta de valoare arata renta urbana: pretul descreste radial dinspre centru spre periferie, modulat de functiunea zonei si de acces. Verde = accesibil, rosu = scump. Model de evaluare de masa (IAAO mass-appraisal), ancorat pe pretul de referinta al pietei locale — ORIENTATIV, nu inlocuieste o evaluare ANEVAR.'+((MK&&MK.count)?(' Piata (date Market): mediana '+N2(MK.median_m2_eur)+' €/mp, '+(MK.change_12m_pct>=0?'+':'')+MK.change_12m_pct+'% in 12 luni.'):'')+' Predictie: investitiile in transport public si regenerare aplatizeaza gradientul si ridica valorile periferice.');
+        concluzie('Valoarea = renta de acces. Investitia publica (transport, spatiu public) muta gradientul si creeaza valoare la periferie');
         break;
       }
 

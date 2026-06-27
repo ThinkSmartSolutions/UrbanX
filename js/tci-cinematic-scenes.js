@@ -1577,6 +1577,23 @@ G._CinemaEngine={
     counts.total=feats.length; this._amenityCounts=counts;
   },
 
+  // ── VALOARE IMOBILIARA (€/mp) — gradient de renta urbana (model mass-appraisal
+  // IAAO), reutilizeaza _ValueMap.buildSurface; stats in SE._valStats pt overlay.
+  _addValueHeat(map, city){
+    if(!window._ValueMap||!window._ValueMap.buildSurface) return;
+    var ck=this._cityKey||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
+    var base=window._ValueMap._cityBase?window._ValueMap._cityBase(ck):1200;
+    city=city||this._city||{};
+    var surf=window._ValueMap.buildSurface({lat:city.lat||47.16, lon:city.lon||27.58}, base);
+    if(!surf) return;
+    var mid=(surf.vmin+surf.vmax)/2;
+    this._safeAdd(map,'v8-val',{type:'geojson',data:surf.fc},{
+      id:'v8-val-l',type:'fill',source:'v8-val',
+      paint:{'fill-color':['interpolate',['linear'],['get','val'],surf.vmin,'#1a9850',mid,'#fee08b',surf.vmax,'#d73027'],'fill-opacity':0.5}
+    });
+    this._valStats={base:base, vmin:surf.vmin, vmax:surf.vmax, mid:Math.round(mid)};
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1697,7 +1714,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-sb-l','v8-sb','v8-sb-perim-l','v8-sb-perim','v8-sb-st-l','v8-sb-st','v8-sb-pl-l','v8-sb-pl',
-     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity',
+     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity','v8-val-l','v8-val',
      'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
