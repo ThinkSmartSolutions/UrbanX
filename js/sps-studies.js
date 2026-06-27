@@ -132,6 +132,15 @@
       else { D.chapter('Conținut dezvoltat'); D.P('Corpul dezvoltat al acestui studiu (capitole detaliate pe toate dimensiunile) este în curs de integrare. Structura, copertă, sursele și Nota UrbanX sunt complete; capitolele aprofundate se adaugă progresiv la standardul de 80-100 pagini.'); }
     } catch (e) {}
 
+    // ── Planșe cu HĂRȚI REALE ale UAT (modele urbane + indici desenați pe hartă) ──
+    // aceleași capturi ca în Masterplan/SIDU/PMUD; sărite grațios dacă harta nu e live.
+    try {
+      if (G._DocMapCaptures && G._DocMapCaptures.capture && G._DocMapCaptures.renderPlates) {
+        var _shots = await G._DocMapCaptures.capture(cityKey);
+        if (_shots && _shots.length) G._DocMapCaptures.renderPlates(D, _shots, 'Planșe — modele urbane și indici pe harta ' + cityName);
+      }
+    } catch (e) {}
+
     // ── Nota UrbanX (IVU) ──
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
