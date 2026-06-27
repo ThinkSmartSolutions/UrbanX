@@ -79,14 +79,27 @@
       G.Heritage._mapOn = false; var b = document.getElementById('heritage-hide'); if (b) b.remove(); return;
     }
     var data = G.Heritage.registry.mapGeoJSON();
+    if (!data.features.length) { G.ss && ss('Niciun monument cu coordonate în inventar.'); return; }
     if (map.getSource(SRC)) map.getSource(SRC).setData(data);
     else {
       map.addSource(SRC, { type: 'geojson', data: data });
-      map.addLayer({ id: LYR, type: 'circle', source: SRC, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 16, 11], 'circle-color': ['get', 'color'], 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5, 'circle-opacity': 0.92 } });
-      map.addLayer({ id: LBL, type: 'symbol', source: SRC, layout: { 'text-field': '🏛️', 'text-size': 13, 'text-allow-overlap': true } });
+      map.addLayer({ id: LYR, type: 'circle', source: SRC, paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 11, 7, 16, 11], 'circle-color': ['get', 'color'], 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5, 'circle-opacity': 0.92 } });
+      // Etichetă = NUMELE monumentului (glife latine). NU folosi emoji în text-field:
+      // 🏛️ (U+1F3DB) e peste U+FFFF → eroarea Mapbox „glyphs > 65535 not supported",
+      // care lăsa stratul fără randare. Numele e și mai util decât o pictogramă.
+      map.addLayer({ id: LBL, type: 'symbol', source: SRC, layout: { 'text-field': ['get', 'name'], 'text-size': 11, 'text-offset': [0, 1.2], 'text-anchor': 'top', 'text-allow-overlap': false, 'text-optional': true }, paint: { 'text-color': '#fde68a', 'text-halo-color': '#0b1020', 'text-halo-width': 1.4 } });
     }
     G.Heritage._mapOn = true;
     if (!document.getElementById('heritage-hide')) { var hb = el('button', { id: 'heritage-hide' }, '✕ Ascunde patrimoniu'); hb.style.cssText = 'position:fixed;bottom:170px;right:10px;z-index:3200;background:rgba(8,15,35,.92);color:#e6edf7;border:1px solid rgba(220,38,38,.5);border-radius:9px;padding:8px 11px;font-size:12px;cursor:pointer;font-family:system-ui,sans-serif'; hb.onclick = function () { toggleMap(); }; document.body.appendChild(hb); }
+    // Mută harta ca să VEZI monumentele (altfel rămân în spatele panoului / în afara cadrului).
+    try {
+      var xs = data.features.map(function (f) { return f.geometry.coordinates[0]; });
+      var ys = data.features.map(function (f) { return f.geometry.coordinates[1]; });
+      var sw = [Math.min.apply(null, xs), Math.min.apply(null, ys)];
+      var ne = [Math.max.apply(null, xs), Math.max.apply(null, ys)];
+      if (sw[0] === ne[0] && sw[1] === ne[1]) { map.flyTo({ center: sw, zoom: 15 }); }
+      else { map.fitBounds([sw, ne], { padding: { top: 90, bottom: 200, left: 80, right: 80 }, maxZoom: 15, duration: 900 }); }
+    } catch (e) {}
     G.ss && ss('🏛️ ' + data.features.length + ' monumente pe hartă');
   }
   G.Heritage = G.Heritage || {}; G.Heritage.openPanel = openPanel; G.Heritage.toggleMap = toggleMap;
