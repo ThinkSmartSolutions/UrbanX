@@ -648,12 +648,23 @@
       }
     } catch (e) {}
     _umDrawLegend(result, _c);
-    // (b) INDICI REALI: la indicii de accesibilitate/retea desenam STRAZILE REALE din OSM
-    // (nu doar un cerc) — arata efectiv reteaua pe care se masoara accesul.
-    try { if (_NET_IDX.indexOf(modelId) >= 0) _umDrawRealNetwork(mapInstance, center, sizeM, _c, calcId); } catch (e) {}
+    // (b) INDICI REALI pe hartă: în interiorul amprentei desenăm ÎNTOTDEAUNA elemente
+    // OSM REALE — rețeaua stradală pe care se măsoară indicele și/sau zonele verzi reale —
+    // ca să NU rămână un cerc decorativ gol. Fiecare indice își alege straturile relevante.
+    try {
+      var feat = _FEAT_IDX[modelId] || ['roads'];
+      if (feat.indexOf('roads') >= 0) _umDrawRealNetwork(mapInstance, center, sizeM, _c, calcId);
+      if (feat.indexOf('green') >= 0) _umDrawRealGreen(mapInstance, center, sizeM, calcId);
+    } catch (e) {}
   }
-  // indici care reprezinta accesibilitate/retea -> beneficiaza de reteaua stradala reala
-  var _NET_IDX = ['city15', 'tod', 'walkscore', 'spacesyntax', 'corridor', 'gvi'];
+  // ce straturi OSM REALE desenează fiecare indice în interiorul amprentei:
+  // accesibilitate/rețea -> străzi reale; verde/climă/spațiu public -> verde + străzi.
+  var _FEAT_IDX = {
+    city15: ['roads'], tod: ['roads'], walkscore: ['roads'], spacesyntax: ['roads'],
+    corridor: ['roads'], noise: ['roads'], mixuse: ['roads'],
+    gvi: ['green', 'roads'], r330300: ['green', 'roads'], sponge: ['green', 'roads'],
+    lst: ['green', 'roads'], sdg117: ['green', 'roads']
+  };
   function _umDrawRealNetwork(map, center, sizeM, color, calcId) {
     if (!window._OSMConnector || !map || !center) return;
     var nid = calcId + '-net';
@@ -677,10 +688,39 @@
       } catch (e) {}
     }).catch(function () {});
   }
+  // zonele verzi REALE (parcuri/grădini/păduri OSM) din interiorul amprentei — pentru
+  // indicii de mediu/verde (3-30-300, GVI, sponge, LST, SDG spațiu public).
+  function _umDrawRealGreen(map, center, sizeM, calcId) {
+    if (!window._OSMConnector || !window._OSMConnector.fetchGreen || !map || !center) return;
+    var gid = calcId + '-grn';
+    var supr_ha = Math.max(200, Math.PI * Math.pow(sizeM / 1000, 2) * 100);
+    _OSMConnector.fetchGreen({ lat: center.lat, lon: center.lng, name: 'idx', suprafata_ha: supr_ha }).then(function (geo) {
+      if (!geo || !geo.features || !geo.features.length) return;
+      var feats = geo.features;
+      try {
+        if (window.turf && turf.booleanPointInPolygon) {
+          var c = turf.circle([center.lng, center.lat], Math.max(0.1, sizeM / 1000), { units: 'kilometers', steps: 48 });
+          feats = geo.features.filter(function (f) {
+            try { var co = f.geometry.coordinates[0]; var p = co[Math.floor(co.length / 2)] || co[0]; return turf.booleanPointInPolygon(turf.point(p), c); } catch (e) { return true; }
+          });
+        }
+      } catch (e) {}
+      if (!feats.length) return;
+      var fc = { type: 'FeatureCollection', features: feats };
+      try { if (map.getSource(gid)) map.getSource(gid).setData(fc); else map.addSource(gid, { type: 'geojson', data: fc }); } catch (e) {}
+      try {
+        if (!map.getLayer(gid)) map.addLayer({ id: gid, type: 'fill', source: gid, paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.5 } });
+        if (!map.getLayer(gid + '-o')) map.addLayer({ id: gid + '-o', type: 'line', source: gid, paint: { 'line-color': '#16a34a', 'line-width': 1, 'line-opacity': 0.8 } });
+      } catch (e) {}
+    }).catch(function () {});
+  }
   function removeModelFromMap(mapInstance) {
     try { document.getElementById('um-map-legend') && document.getElementById('um-map-legend').remove(); } catch (e) {}
     if (!mapInstance) return;
     ['um-iso', 'um-tod', 'um-sponge', 'um-corridor', 'um-330', 'um-sdg117', 'um-walk', 'um-gvi', 'um-ss', 'um-noise', 'um-lst', 'um-mix'].forEach(function (id) {
+      try { if (mapInstance.getLayer(id + '-grn-o')) mapInstance.removeLayer(id + '-grn-o'); } catch (e) {}
+      try { if (mapInstance.getLayer(id + '-grn')) mapInstance.removeLayer(id + '-grn'); } catch (e) {}
+      try { if (mapInstance.getSource(id + '-grn')) mapInstance.removeSource(id + '-grn'); } catch (e) {}
       try { if (mapInstance.getLayer(id + '-net')) mapInstance.removeLayer(id + '-net'); } catch (e) {}
       try { if (mapInstance.getSource(id + '-net')) mapInstance.removeSource(id + '-net'); } catch (e) {}
       try { if (mapInstance.getLayer(id + '-ln')) mapInstance.removeLayer(id + '-ln'); } catch (e) {}

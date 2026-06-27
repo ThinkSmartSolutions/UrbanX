@@ -86,7 +86,7 @@
 
     // ── Rezumat + metodologie ──
     D.chapter('Rezumat executiv');
-    D.P('Prezentul document — ' + S.t + ' pentru ' + cityName + (city.judet ? ', județul ' + city.judet : '') + ' — este un studiu strategic de rang superior din suita UrbanX (Strategic Planning Suite). El integrează date reale (statistice, geospațiale și live) într-o analiză coerentă, cu diagnoză, viziune, ținte și recomandări, la standardul de calitate cerut documentelor strategice teritoriale.');
+    D.P('Prezentul document — ' + S.t + ' pentru ' + cityName + (city.judet ? ', județul ' + city.judet : '') + ' — este un document strategic din suita UrbanX (Strategic Planning Suite). El integrează date reale (statistice, geospațiale și live) într-o analiză coerentă, cu diagnoză, viziune, ținte și recomandări, la standardul de calitate cerut documentelor strategice teritoriale.');
     D.callout && D.callout('Domeniul studiului', S.ce);
     D.chapter('Metodologie și surse de date');
     D.P('Studiul aplică o metodologie transparentă: colectarea datelor din surse oficiale și deschise (' + S.surse + '), analiza diagnostic pe dimensiunile relevante, formularea obiectivelor și a țintelor cuantificabile, și fundamentarea recomandărilor pe evidențe. Cadrul legal de referință: ' + S.legal + '. Limitările sunt explicitate; valorile estimate au caracter orientativ și se confirmă pe sursele oficiale.');
