@@ -407,6 +407,8 @@ const lotizareFeatures = pugFeatures.filter(f => f.properties.utr !== 'CE');
 5. **Municipiile NU în `_EXTRA_UATS`** — sunt în `_RO_CITIES_DB`
 6. **Verifică 3 locuri** la orice UAT nou: `_PUG_REGISTRY` + `MUNI_RLU_PATCH`/`COMUNE_CONFIG` + `06-aedis.js`
 7. **Deploy automat** după orice modificare
+8. **ZERO duplicare de conținut între studii/rapoarte.** Niciun studiu sau raport nu se suprapune ca și conținut cu altul. Fiecare livrabil are un SCOP DISTINCT și conținut diferit. Înainte de a adăuga conținut într-un studiu, verifică să nu existe deja în altul — dacă există, nu-l copia (trimite-l prin referință la livrabilul dedicat).
+9. **TERITORIU ≠ PARCELĂ. Rang superior ≠ rang inferior.** Un studiu de rang superior (TERITORIAL — UAT/zonă/strategie) NU este același lucru cu un studiu de rang inferior (PE PARCELĂ — punctual, cifre concrete pe lot). Sunt DIFERITE ca scop, nivel de analiză și conținut — tratează-le diferit, nu le converge. Ex.: SFU (fezabilitate urbană, teritorial/strategic) ≠ SF/DALI (fezabilitate de investiție pe parcelă, deviz HG 907) — NU pune pro-forma de parcelă în studiul teritorial și invers.
 
 ---
 

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://thinksmartsolutions.github.io/UrbanX/*\")",
+      "Bash(curl -s -L \"https://thinksmartsolutions.github.io/UrbanX/*\")"
+    ]
+  }
+}
