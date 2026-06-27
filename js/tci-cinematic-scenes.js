@@ -1537,6 +1537,46 @@ G._CinemaEngine={
     if(this._cinLabels) this._cinLabels(map, f.labels||[]);
   },
 
+  // ── DOTARI URBANE (OSM) — aceleasi date ca tabloul de bord (infrastructura urbana):
+  // scoli/spitale/farmacii/parcuri/transport/comert desenate color-codat pe harta +
+  // numaratori live in SE._amenityCounts pt overlay. Sustine scena „oras 15 minute".
+  async _addUrbanAmenities(map, city){
+    city=city||this._city||{}; var cx=city.lon||25, cy=city.lat||45.5;
+    var COL={scoli:'#f59e0b',spitale:'#ef4444',farmacii:'#10b981',parcuri:'#22c55e',transport:'#60a5fa',comert:'#06b6d4'};
+    var a='(around:2600,'+cy+','+cx+')';
+    var fl=['nwr["amenity"="school"]'+a,'nwr["amenity"="kindergarten"]'+a,'nwr["amenity"="hospital"]'+a,'nwr["amenity"="clinic"]'+a,
+      'nwr["amenity"="pharmacy"]'+a,'nwr["leisure"="park"]'+a,'node["highway"="bus_stop"]'+a,
+      'node["railway"~"^(tram_stop|station|halt)$"]'+a,'nwr["shop"="supermarket"]'+a];
+    var q='[out:json][timeout:25];('+fl.join(';')+';);out center tags;';
+    var feats=[], counts={};
+    try{
+      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
+      var j=await resp.json();
+      (j.elements||[]).forEach(function(el){
+        var tg=el.tags||{}, cat=null;
+        if(tg.amenity==='school'||tg.amenity==='kindergarten')cat='scoli';
+        else if(tg.amenity==='hospital'||tg.amenity==='clinic')cat='spitale';
+        else if(tg.amenity==='pharmacy')cat='farmacii';
+        else if(tg.leisure==='park')cat='parcuri';
+        else if(tg.highway==='bus_stop'||/^(tram_stop|station|halt)$/.test(tg.railway||''))cat='transport';
+        else if(tg.shop==='supermarket')cat='comert';
+        if(!cat)return;
+        var lat=el.lat!=null?el.lat:(el.center&&el.center.lat), lon=el.lon!=null?el.lon:(el.center&&el.center.lon);
+        if(lat==null||lon==null)return;
+        feats.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{c:COL[cat],k:cat}});
+        counts[cat]=(counts[cat]||0)+1;
+      });
+    }catch(e){}
+    if(!this._playing) return;
+    if(feats.length){
+      this._safeAdd(map,'v8-amenity',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+        id:'v8-amenity-l',type:'circle',source:'v8-amenity',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,3.5,15,8],'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':1,'circle-stroke-color':'rgba(4,10,24,0.9)'}
+      });
+    }
+    counts.total=feats.length; this._amenityCounts=counts;
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1657,7 +1697,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-sb-l','v8-sb','v8-sb-perim-l','v8-sb-perim','v8-sb-st-l','v8-sb-st','v8-sb-pl-l','v8-sb-pl',
-     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt',
+     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity',
      'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',

@@ -67,6 +67,7 @@ SCENES = [
   {id:'b2s3',dur:20000,label:'MIGRATIE & EMIGRARE',   bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b2s4',dur:18000,label:'PROFIL LOCUITOR',    bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b17s1',dur:26000,label:'CARTIERE — NIVEL STRADA',bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b30s1',dur:22000,label:'DOTARI URBANE · 15-MIN',bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s1',dur:20000,label:'ECONOMIA REALA',        bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
@@ -1210,6 +1211,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.C,12.9,54,120,6000,18000,'day');
         break;
 
+      case 'b30s1': // DOTARI URBANE & ORAS 15 MIN — POI reale OSM (ca tabloul de bord)
+        lp('day');
+        onIdle(function(){try{SE._addUrbanAmenities&&SE._addUrbanAmenities(map, city);}catch(e){}});
+        fly([cx,cy],13,46,0,4000,0,'day');
+        fly([cx,cy],14.6,60,25,6000,9000,'day');
+        fly([cx,cy],13.4,52,-18,5000,17000,'dusk');
+        break;
+
       // BLOC 5 ───────────────────────────────────────────────────────────
       case 'b5s1':
         lp('night');
@@ -2339,6 +2348,22 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         concluzie('Suprafata construibila reala = intravilan minus restrictii CFR+monumente+cimitire+retele = 15-25% mai mica decat in PUG');
         negativ('Nerespectarea restrictiilor legale = nulitate autorizatie + amenzi + obligatie demolare + litigii 5-15 ani');
         break;
+
+      case 'b30s1': { // DOTARI URBANE & ORAS 15 MIN — POI reale OSM (ca tabloul de bord)
+        titlu('Dotari urbane & orasul de 15 minute','Scoli · spitale · farmacii · parcuri · transport · comert (OSM, ~2.6km)'); linie();
+        var AC=SE._amenityCounts||{};
+        cifra((AC.total!=null?N2(AC.total):'…')+' dotari','In proximitate (OpenStreetMap, ~2.6km)','#34d399');
+        var arows=[['Scoli & gradinite',AC.scoli,'#f59e0b'],['Spitale/clinici',AC.spitale,'#ef4444'],['Farmacii',AC.farmacii,'#10b981'],['Parcuri',AC.parcuri,'#22c55e'],['Statii transport',AC.transport,'#60a5fa'],['Comert (super)',AC.comert,'#06b6d4']];
+        arows.forEach(function(r,i){
+          var a=Math.min(1,(t-0.18-i*0.05)/0.16)*sA; if(a<=0||r[1]==null)return; ctx.globalAlpha=a; ctx.textAlign='left';
+          ctx.fillStyle=r[2]; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif';
+          ctx.fillText('● '+r[0]+': '+N2(r[1]), W*0.04, H*(0.40+i*0.05));
+          ctx.globalAlpha=1;
+        });
+        narativ('Acestea sunt dotarile REALE din jurul orasului (OpenStreetMap) — exact datele care alimenteaza si tabloul de bord. „Orasul de 15 minute" (Carlos Moreno): scoala, sanatatea, cumparaturile, recreerea si transportul accesibile in 15 minute pe jos sau cu bicicleta. Distributia si densitatea dotarilor decid daca un cartier e autonom sau dependent de masina. Predictie: completarea „deserturilor" de dotari (farmacii, gradinite, statii TP) creste accesibilitatea, reduce traficul si urca valoarea zonei.');
+        concluzie('Dotari echilibrate la 15 minute pe jos = cartiere autonome, mai putin trafic, calitate a vietii mai mare');
+        break;
+      }
 
       case 'b5s1':
         titlu('Risc Seismic','P100-1/2013 \u00b7 model HAZUS/EMS-98 \u00b7 PNRR C10-I2'); linie();
