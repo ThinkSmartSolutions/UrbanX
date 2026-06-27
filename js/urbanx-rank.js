@@ -138,6 +138,17 @@ G._UrbanRank = {
       {val:R.grade, label:'Calificativ', sub:'scala A+..D'},
       {val:'#'+R.rankInPeers+'/'+R.peerCount, label:'În categoria de mărime', sub:R.tierLabel},
     ]);
+    // Grilă de culori A→G (stil certificat energetic) cu indicator la nota UAT
+    try {
+      if (window._ivuScaleBar && D.ensure && D.pdf) {
+        var _tf = (D.pdf.__unicodeFont) ? 'DejaVuRO' : 'helvetica';
+        D.ensure(16); var _y = D.y;
+        D.pdf.setTextColor(60,72,94); D.pdf.setFont(_tf,'bold'); D.pdf.setFontSize(7.5);
+        D.pdf.text(D.S2 ? D.S2('Scala calificativului (0–100):') : 'Scala calificativului (0-100):', D.dims.ML, _y + 3);
+        window._ivuScaleBar(D.pdf, D.dims.ML, _y + 9, Math.min(110, D.dims.CW * 0.62), R.score, { font: _tf });
+        if (D.setY) D.setY(_y + 18);
+      }
+    } catch (e) {}
     D.formula('Formula notei', R.formula, 'Toate ponderile însumează 100%. Sub-scorurile sunt normalizate 0–100.');
     D.h2('Descompunerea notei pe dimensiuni');
     if(D.barChart){

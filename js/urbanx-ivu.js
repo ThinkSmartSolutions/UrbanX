@@ -226,6 +226,39 @@
   };
   G.UrbanXIVU = IVU;
 
+  // ── Grilă de culori IVU (stil certificat energetic A→G) — bandă cu zone
+  // colorate roșu→verde și un indicator (triunghi) la poziția notei. Reutilizabilă
+  // pe copertă și în capitolul IVU. (x,y,w) în mm; score 0-100.
+  G._ivuScaleBar = function (pdf, x, y, w, score, opts) {
+    try {
+      opts = opts || {};
+      var font = opts.font || 'helvetica';
+      var s = Math.max(0, Math.min(100, +score || 0));
+      var h = opts.h || 5.5;
+      // benzi IVU: D <50 · C 50-65 · B 65-80 · A 80-100 (roșu → verde)
+      var bands = [
+        { lab: 'D', from: 0, to: 50, col: [239, 68, 68] },
+        { lab: 'C', from: 50, to: 65, col: [245, 158, 11] },
+        { lab: 'B', from: 65, to: 80, col: [132, 204, 22] },
+        { lab: 'A', from: 80, to: 100, col: [34, 197, 94] }
+      ];
+      bands.forEach(function (b) {
+        var bx = x + w * (b.from / 100), bw = w * ((b.to - b.from) / 100);
+        pdf.setFillColor(b.col[0], b.col[1], b.col[2]); pdf.rect(bx, y, bw, h, 'F');
+        pdf.setTextColor(255, 255, 255); pdf.setFont(font, 'bold'); pdf.setFontSize(6.3);
+        pdf.text(b.lab, bx + bw / 2, y + h - 1.5, { align: 'center' });
+      });
+      // indicator (triunghi) la poziția notei + valoarea
+      var px = x + w * (s / 100);
+      var mc = opts.markCol || [15, 23, 42];
+      pdf.setFillColor(mc[0], mc[1], mc[2]);
+      pdf.triangle(px, y - 0.2, px - 1.9, y - 2.7, px + 1.9, y - 2.7, 'F');
+      var lc = opts.labelCol || [40, 50, 70];
+      pdf.setTextColor(lc[0], lc[1], lc[2]); pdf.setFont(font, 'bold'); pdf.setFontSize(7.2);
+      pdf.text(String(Math.round(s)), px, y - 3.4, { align: 'center' });
+    } catch (e) {}
+  };
+
   // ── Notă IVU pentru COPERTĂ (brand UrbanX) — apelabilă din orice generator ──
   // Desenează o casetă compactă pe copertă: scor + calificativ + „dezvoltat de UrbanX".
   // Returnează înălțimea desenată (0 dacă nu există scor) ca să poată fi poziționată.
@@ -238,7 +271,9 @@
       var y = opts.y != null ? opts.y : 250;
       var ac = opts.accent || [37, 99, 235];
       var FONT = opts.font || 'DejaVuRO';
-      var h = 16;
+      var hasScore = !!(s && s.R);
+      var h = hasScore ? 25 : 16;        // mai înalt când avem scor (loc pt grila A-G)
+      if (y + h > 292) y = 292 - h;      // nu depăși marginea de jos a paginii A4
       pdf.setDrawColor(ac[0], ac[1], ac[2]); pdf.setLineWidth(0.4);
       pdf.setFillColor(opts.bg ? opts.bg[0] : 18, opts.bg ? opts.bg[1] : 24, opts.bg ? opts.bg[2] : 40);
       pdf.roundedRect(ml, y, w, h, 2, 2, 'FD');
@@ -246,11 +281,18 @@
       pdf.text('NOTA URBANX (IVU)', ml + 5, y + 6);
       pdf.setFont(FONT, 'normal'); pdf.setFontSize(8); pdf.setTextColor(210, 210, 220);
       var line2;
-      if (s && s.R) line2 = 'Indicele de Vitalitate Urbană: ' + s.R.score + '/100 · calificativ ' + s.R.grade + ' (' + (s.R.tierLabel || '') + ')';
+      if (hasScore) line2 = 'Indicele de Vitalitate Urbană: ' + s.R.score + '/100 · calificativ ' + s.R.grade + ' (' + (s.R.tierLabel || '') + ')';
       else line2 = 'Indicele de Vitalitate Urbană — indice compozit (0–100) pe dimensiuni cheie';
       pdf.text(line2, ml + 5, y + 11.5);
-      pdf.setFontSize(7); pdf.setTextColor(150, 150, 165);
-      pdf.text('Indice compozit dezvoltat de UrbanX · formulă transparentă, recalculabilă · detaliat în capitolul „Nota UrbanX (IVU)".', ml + 5, y + 15, { maxWidth: w - 10 });
+      // grilă de culori A→G cu indicator la notă (doar când avem scor real)
+      if (hasScore && G._ivuScaleBar) {
+        var barW = Math.min(96, w - 10);
+        G._ivuScaleBar(pdf, ml + 5, y + 16.5, barW, s.R.score, { font: FONT, markCol: [255, 255, 255], labelCol: [225, 228, 235] });
+      }
+      pdf.setFontSize(6.6); pdf.setTextColor(150, 150, 165);
+      pdf.text(hasScore ? 'Indice compozit UrbanX · formulă transparentă, recalculabilă · scala A–D · detaliat în capitolul „Nota UrbanX (IVU)".'
+                        : 'Indice compozit dezvoltat de UrbanX · formulă transparentă · detaliat în capitolul „Nota UrbanX (IVU)".',
+        hasScore ? ml + 5 + Math.min(96, w - 10) + 4 : ml + 5, hasScore ? y + 18 : y + 15, { maxWidth: hasScore ? (w - Math.min(96, w - 10) - 14) : (w - 10) });
       return h;
     } catch (e) { return 0; }
   };
