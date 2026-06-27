@@ -326,6 +326,103 @@ const RAPORT_INFO = {
     ],
     nu: ['Lista completă de proiecte SIDU per UAT + corelarea geometrică detaliată în PUG = etapă cu date (server)', 'Nu emite autorizații — PUG-ul o face; corelarea e obligatorie'],
   },
+  // ═══ DOCUMENTE STRATEGICE TERITORIALE (generatoare PDF) ═══
+  sidu_doc: {
+    ico: '🏛', label: 'SIDU — Strategia Integrată de Dezvoltare Urbană', badge: 'strategic', badgeLabel: 'Document strategic · nivel superior · 10-15 ani', color: '96,165,250',
+    fn: "window.SIDU&&window.SIDU.generateDocument&&window.SIDU.generateDocument(window.TCI&&window.TCI.cityKey)",
+    ce: 'Generează DOCUMENTUL SIDU complet (PDF) — strategia umbrelă de nivel superior pe 10-15 ani, structurată în cele 5 secțiuni oficiale: (1) Context și analiză a situației existente (demografie, economie, mobilitate, mediu, locuire, servicii); (2) Viziune și obiective strategice; (3) Portofoliul de proiecte pe domenii (cu cost, sursă de finanțare POR/PNRR, orizont termen scurt/mediu/lung, listă scurtă/lungă/metropolitană); (4) Plan de acțiune și implementare; (5) Monitorizare și evaluare (indicatori). Documentul integrează toate domeniile și CONDUCE Masterplanul și PMUD, cu capturi de hartă reale ale UAT-ului și secțiunea Nota UrbanX (IVU).',
+    dece: 'SIDU e „constituția" de dezvoltare a orașului (ex. Iași: 331 proiecte) și condiție pentru accesarea fondurilor POR/PNRR. Spre deosebire de registrul interactiv (modulul „SIDU — registru & coerență"), acesta este livrabilul formal — documentul scris pe care îl depui și prezinți. Decalajul real în RO e că SIDU/PMUD nu sunt transpuse în PUG; documentul evidențiază portofoliul ce trebuie corelat.',
+    legal: 'Ghid SIDU (POR/MDLPA) · Legea 350/2001 (PUG/PUZ) · cadrul celor 5 secțiuni (Context→Viziune→Portofoliu→Plan acțiune→Monitorizare) aliniat la modelele oficiale (ex. estibucuresti.pmb.ro/sidu).',
+    output: [
+      { ico: '📑', txt: 'Document PDF dezvoltat: copertă, cuprins, 5 secțiuni, capitole cu analiză și diagnoză' },
+      { ico: '📋', txt: 'Portofoliu de proiecte pe domenii (cost, finanțare, termen scurt/mediu/lung)' },
+      { ico: '🗺', txt: 'Capturi de hartă reale ale UAT (zonare PUG, dotări, modele/indici)' },
+      { ico: '📊', txt: 'Grafice și tabele pe capitole (date reale + prognoză)' },
+      { ico: '🎯', txt: 'Secțiunea Nota UrbanX (IVU) — scor, formulă transparentă, benchmark' },
+    ],
+    nu: ['Document strategic orientativ la nivel teritorial — nu substituie SIDU oficial elaborat și aprobat de consultant/UAT', 'Lista completă de proiecte per UAT + corelarea geometrică în PUG = etapă cu date (server)'],
+  },
+  masterplan: {
+    ico: '🏙', label: 'Masterplan Urban', badge: 'strategic', badgeLabel: 'Document strategic · fundamentare PUG/PUZ', color: '167,139,250',
+    fn: 'generateMasterplan()',
+    ce: 'Generează Masterplanul Urban (PDF) — documentul de fundamentare a viziunii spațiale de dezvoltare a orașului/zonei: concept urbanistic, zonare funcțională propusă, structura mobilității și a spațiilor publice/verzi, etapizarea dezvoltării și indicatorii-țintă. Integrează capturi de hartă reale, capitole din modulele de decizie (regenerare/superbloc, climă, spații verzi) și cadrul strategic SIDU, cu secțiunea Nota UrbanX (IVU).',
+    dece: 'Masterplanul traduce strategia (SIDU) în organizare spațială concretă — „cum arată orașul peste 10-20 de ani" — și fundamentează deciziile de PUG/PUZ. Fără un masterplan coerent, intervențiile sunt punctuale și necorelate; cu el, investițiile publice și private se ordonează după o viziune comună.',
+    legal: 'Legea 350/2001 (amenajarea teritoriului și urbanism) · masterplan ca instrument de fundamentare a documentațiilor de urbanism (PUG/PUZ) · ghid POR/MDLPA dezvoltare urbană.',
+    output: [
+      { ico: '📑', txt: 'Document PDF dezvoltat: concept, zonare funcțională, mobilitate, spații publice' },
+      { ico: '🗺', txt: 'Capturi de hartă reale ale UAT + modele urbane proiectate' },
+      { ico: '🟧', txt: 'Capitole din module: regenerare/superbloc, spații verzi (LOISIR), climă' },
+      { ico: '📊', txt: 'Indicatori-țintă + etapizarea dezvoltării + grafice pe capitole' },
+      { ico: '🎯', txt: 'Cadru strategic SIDU + secțiunea Nota UrbanX (IVU)' },
+    ],
+    nu: ['Document de fundamentare orientativ — masterplanul final și PUG/PUZ se elaborează de echipă atestată RUR', 'Nu emite autorizații — fundamentează reglementarea, care se aplică prin PUG'],
+  },
+  portofoliu: {
+    ico: '📂', label: 'Portofoliu strategic 2025-2055', badge: 'recomandat', badgeLabel: 'Predicție · investiții pe orizonturi', color: '96,165,250',
+    fn: 'generatePortfolio()',
+    ce: 'Construiește un portofoliu strategic de proiecte și investiții pe orizonturi (2025→2055), grupate pe domenii și etape (termen scurt/mediu/lung), cu estimări de cost, surse de finanțare și impact așteptat. Oferă o imagine de ansamblu a traiectoriei de dezvoltare a UAT-ului.',
+    dece: 'Deciziile de investiții au nevoie de un orizont lung și de o ierarhizare a proiectelor — ce se face întâi, ce depinde de ce, ce surse de finanțare sunt realiste. Portofoliul leagă proiectele de strategia SIDU și de proiecția urbanistică pe 10/20/30 de ani.',
+    legal: 'Instrument de planificare strategică (orientativ) · aliniat la portofoliile SIDU (POR/MDLPA) · nu este angajament bugetar.',
+    output: [
+      { ico: '📋', txt: 'Listă proiecte pe domenii și orizonturi (scurt/mediu/lung)' },
+      { ico: '💶', txt: 'Estimări de cost și surse de finanțare orientative' },
+      { ico: '📈', txt: 'Traiectorie de dezvoltare 2025-2055 + impact așteptat' },
+    ],
+    nu: ['Orientativ — nu substituie programul de investiții aprobat al UAT', 'Costurile sunt estimative, se validează cu bugetul local și ghidurile de finanțare'],
+  },
+  analytics: {
+    ico: '📊', label: 'Analytics — indici urbani live', badge: 'recomandat', badgeLabel: 'Tablou de bord · Walk/15-min/ROI/UHI/SDG/seismic', color: '83,74,183',
+    fn: "try{var t=document.getElementById('tab-analytics');if(t)t.click();}catch(e){}",
+    ce: 'Tabloul de bord de analiză cu indici urbani calculați live: Walkability, accesibilitate 15-minute, ROI, insulă de căldură (UHI), aliniere la SDG 11, expunere seismică și altele. Fiecare indice are definiție, formulă și sursă, cu vizualizare pe hartă a elementelor reale (străzi, dotări, spații verzi).',
+    dece: 'Indicii urbani transformă datele brute (rețea OSM, populație, relief) în măsuri comparabile și acționabile — „cât de mergibil e cartierul", „ce rază acoperă serviciile în 15 minute". Sunt baza obiectivă pentru prioritizarea intervențiilor și pentru raportul de indici.',
+    legal: 'Metodologii recunoscute: Walk Score · conceptul orașului 15-minute (C. Moreno) · ONU SDG 11 · ISO 37120 (indicatori orașe). Surse: OSM · INS · Eurostat.',
+    output: [
+      { ico: '🚶', txt: 'Walkability + accesibilitate 15-minute (izocrone pe rețea reală)' },
+      { ico: '🌡', txt: 'UHI, expunere seismică, aliniere SDG 11' },
+      { ico: '🗺', txt: 'Vizualizare pe hartă a elementelor reale per indice' },
+      { ico: '📄', txt: 'Trecere directă la „Raport indici urbani" (PDF, 12 indici)' },
+    ],
+    nu: ['Indici orientativi calculați din date deschise — nu măsurători de teren', 'Acuratețea depinde de completitudinea datelor OSM/INS pentru UAT'],
+  },
+  indici: {
+    ico: '📈', label: 'Raport indici urbani (PDF, 12 indici)', badge: 'recomandat', badgeLabel: 'Raport PDF · definiție+formulă+sursă', color: '83,74,183',
+    fn: "window.UrbanIndicesReport&&window.UrbanIndicesReport.generate()",
+    ce: 'Generează raportul PDF cu cei 12 indici urbani — fiecare cu definiție, formulă transparentă, sursa datelor, valorile calculate și o captură de hartă a elementelor reale măsurate (rețea, dotări, spații verzi). Raport unitar care strânge la un loc analizele din tabloul Analytics.',
+    dece: 'Un raport scris, cu formule și surse vizibile, e ce poți atașa unei documentații sau prezenta într-o ședință — spre deosebire de un tablou interactiv. Transparența formulei și a sursei face indicii verificabili și apărabili.',
+    legal: 'Metodologii: Walk Score · oraș 15-minute · ONU SDG 11 · ISO 37120 · indicatori UE. Surse citate per indice (OSM/INS/Eurostat/GHSL).',
+    output: [
+      { ico: '📑', txt: 'PDF cu 12 indici: definiție + formulă + sursă + valori' },
+      { ico: '🗺', txt: 'Captură de hartă a elementelor reale per indice' },
+      { ico: '🎯', txt: 'Poziționare vs. media națională / benchmark' },
+    ],
+    nu: ['Indici orientativi din date deschise — nu substituie studii de specialitate', 'Valorile reflectă completitudinea datelor disponibile pentru UAT'],
+  },
+  metodologie: {
+    ico: '📚', label: 'Metodologie & surse de date', badge: 'recomandat', badgeLabel: 'Transparență · cum se calculează tot', color: '148,163,184',
+    fn: "try{var t=document.getElementById('tab-methodology');if(t)t.click();}catch(e){}",
+    ce: 'Documentează metodologia platformei: ce surse de date folosește UrbanX (INS TEMPO, Eurostat, OpenStreetMap, GHSL, OpenAQ, INFP etc.), cum sunt calculați indicii și indicatorii, ce formule și ce ipoteze stau în spate, plus limitările cunoscute. Transparență completă asupra modului în care se obține fiecare cifră.',
+    dece: 'Orice valoare prezentată trebuie să fie verificabilă și apărabilă. Această secțiune răspunde la „de unde știți asta?" — sursa, formula, data datelor și gradul de încredere — și marchează onest ce este estimare vs. măsurătoare.',
+    legal: 'Surse oficiale: INS (TEMPO-Online) · Eurostat · OpenStreetMap (ODbL) · GHSL (Comisia Europeană) · INFP · OpenAQ. Metodologiile citate per indicator.',
+    output: [
+      { ico: '🗂', txt: 'Inventar surse de date cu cadență și vechime (vezi „Prospețimea datelor")' },
+      { ico: '🧮', txt: 'Formulele și ipotezele pentru indici și indicatori' },
+      { ico: '⚠️', txt: 'Limitări cunoscute + marcaj estimare vs. măsurătoare' },
+    ],
+    nu: ['Secțiune informativă — nu generează un document de avizare', 'Pentru date la zi vezi modulul „Prospețimea datelor"'],
+  },
+  dataFresh: {
+    ico: '🗓', label: 'Prospețimea datelor (surse la zi)', badge: 'recomandat', badgeLabel: 'Registru surse · cadență + vechime', color: '96,165,250',
+    fn: "window._DataFreshness&&window._DataFreshness.openPanel()",
+    ce: 'Registrul surselor de date folosite de platformă, cu pentru fiecare: data ultimului snapshot, cadența de actualizare, vechimea curentă și starea (la zi / de reîmprospătat). Semnalează explicit sursele învechite (ex. LMI 2012) ca să știi cât de mult te poți baza pe o cifră.',
+    dece: 'O analiză e atât de bună cât de proaspete sunt datele din spate. Acest panou face vizibilă vechimea fiecărei surse, ca să nu prezinți o decizie pe date depășite fără să știi — disciplină de integritate a datelor.',
+    legal: 'Instrument de transparență a datelor (nu document oficial). Sursele și licențele sunt cele din secțiunea Metodologie.',
+    output: [
+      { ico: '🗂', txt: 'Listă surse: snapshot, cadență, vechime, stare' },
+      { ico: '🔴', txt: 'Semnalarea surselor învechite (ex. LMI 2012)' },
+      { ico: '✅', txt: 'Indicator la-zi / de-reîmprospătat per sursă' },
+    ],
+    nu: ['Reflectă starea datelor integrate în platformă — nu reîmprospătează automat sursele externe', 'Actualizarea efectivă a unor surse = pipeline server (Faza 2)'],
+  },
   studyzone: {
     ico: '📐', label: 'Zonă de studiu flexibilă', badge: 'recomandat', badgeLabel: 'Fundație · fără nr. cadastral', color: '34,211,238',
     fn: 'window.StudyZone&&window.StudyZone.openBuilder&&window.StudyZone.openBuilder()',
@@ -1214,6 +1311,19 @@ const RAPORT_INFO = {
   get stabilitate(){ return this.stabilitate_taluzuri; },
 };
 
+// Expune registrul + harta alias moduleId→cheie RAPORT_INFO, ca UXSidebar să poată
+// afișa AUTOMAT butonul ⓘ pentru ORICE studiu/raport cu conținut info (cerut de Florin:
+// info drawer pe fiecare studiu/raport, inclusiv SIDU/Masterplan/PMUD).
+try { window.RAPORT_INFO = RAPORT_INFO; } catch(e){}
+window._MOD_INFO_ALIAS = {
+  'sidu-doc': 'sidu_doc',        // documentul SIDU (≠ modulul „sidu" registru)
+  intelligence: 'ux_capacitate', // Capacitate & conformitate UAT
+  mobility: 'flux_trafic',       // Flux — studiu de trafic
+  proiectie: 'proiectie_urb',    // Proiecție urbanistică 10/20/30
+  aiMemoriu: 'memoriu',          // AI Memoriu justificativ
+  monumente: 'heritage'          // Inventar patrimoniu & monumente (GIS)
+};
+
 // Info-drawer SPS construit DINAMIC din _SPS.STUDIES (cheie 'sps:<id>') — evită
 // 20 de intrări hardcodate. Doar studiile aplicabile pe parcelă au mod parcelă.
 function _spsInfoEntry(id){
@@ -1251,7 +1361,10 @@ function infoDrawerOpen(key) {
   if(!d) return;
   // Închidem TOATE meniurile dropdown înainte (inclusiv UrbanX Pro / tci-adv-menu)
   try { if (typeof _closeAllMenusAndOverlay === 'function') _closeAllMenusAndOverlay(); } catch(e){}
-  try { toggleRapoarteMenu(true); } catch(e){}
+  // Închide meniul Rapoarte DOAR dacă e deschis. toggleRapoarteMenu() e un TOGGLE
+  // fără argument — apelat necondiționat (cum era înainte cu „true") îl DESCHIDEA
+  // peste drawer când venea din UXSidebar (meniu închis). Bug raportat de Florin.
+  try { var _rm = document.getElementById('rapoarte-menu'); if (_rm && _rm.style.display === 'block') toggleRapoarteMenu(); } catch(e){}
   const drawer = document.getElementById('info-drawer');
   const backdrop = document.getElementById('info-drawer-backdrop');
   const titleEl = document.getElementById('info-drawer-title');

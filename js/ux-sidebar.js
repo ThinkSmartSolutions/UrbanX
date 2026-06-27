@@ -172,8 +172,14 @@
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
             if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + i.sep + '</div>';
             var ia = State.activeModule === i.moduleId;
-            // info-drawer: explicit (i.info) SAU automat pentru orice studiu SPS (sps:<id>)
-            var infoKey = i.info || ((i.moduleId && i.moduleId.indexOf('sps:') === 0) ? i.moduleId : null);
+            // info-drawer: explicit (i.info) · automat pentru SPS (sps:<id>) · automat pentru
+            // ORICE modul cu intrare RAPORT_INFO (direct sau prin alias) — fiecare studiu/raport
+            // primește ⓘ fără a fi marcat manual (cerut de Florin).
+            var mid = i.moduleId;
+            var infoKey = i.info
+              || ((mid && mid.indexOf('sps:') === 0) ? mid : null)
+              || (mid && G._MOD_INFO_ALIAS && G._MOD_INFO_ALIAS[mid])
+              || ((mid && G.RAPORT_INFO && G.RAPORT_INFO[mid]) ? mid : null);
             var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (infoKey ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
             if (!infoKey) return main;
             return '<div style="display:flex;align-items:stretch;gap:3px">' + main +
