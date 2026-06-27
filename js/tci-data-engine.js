@@ -289,7 +289,10 @@ const EUROSTAT = {
 const OSM = {
 
   async getInfrastructure(city, radius=2000) {
-    const key = `osm_infra_${city.lat?.toFixed(3)}_${city.lon?.toFixed(3)}`;
+    // v2 = schema POI extinsă cu „farmacii". Versionarea cheii invalidează cache-ul
+    // vechi (localStorage) salvat înainte de adăugarea farmaciilor — altfel cardul
+    // Farmacii arăta 0 din cache stale, deși pe hartă (_InfraMap) apăreau toate.
+    const key = `osm_infra_v2_${city.lat?.toFixed(3)}_${city.lon?.toFixed(3)}`;
     const cached = CACHE.get(key);
     if(cached) return cached;
 
