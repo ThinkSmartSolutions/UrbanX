@@ -21,7 +21,7 @@
     'environment': { t: 'STRATEGIA DE MEDIU ȘI BIODIVERSITATE', ico: '🌿', ac: [22, 163, 74], badge: 'SECTORIAL', legal: 'OUG 195/2005 · OUG 57/2007 (arii protejate) · Dir. 92/43/CEE', surse: 'Copernicus · EEA · ANPM · OSM · Natura 2000', ce: 'Strategia de mediu: calitatea aerului/apei/solului, arii protejate și biodiversitate, spații verzi pe locuitor, infrastructură verde-albastră și servicii ecosistemice.' },
     'digitalization': { t: 'STRATEGIA DE DIGITALIZARE (eGOV)', ico: '💻', ac: [2, 132, 199], badge: 'SECTORIAL', legal: 'Legea 242/2022 (interoperabilitate) · PNRR C7 · eIDAS · GDPR', surse: 'ADR · PNRR · INS · servicii publice locale', ce: 'Strategia de transformare digitală a administrației: servicii eGov, interoperabilitate, infrastructură de date, conectivitate, competențe digitale și securitate cibernetică.' },
     'sfu': { parcel:1, t: 'STUDIU DE FEZABILITATE URBANĂ (SFU)', ico: '📐', ac: [180, 83, 9], badge: 'SPECIALIZAT', legal: 'HG 907/2016 · Legea 350/2001 · POR/PNRR', surse: 'ANCPI · OSM · INS · costuri de referință', ce: 'Studiu de fezabilitate pentru o intervenție urbană: analiza opțiunilor, fezabilitate tehnică și financiară, cost-beneficiu, riscuri și recomandarea variantei optime.' },
-    'sct': { t: 'STUDIU DE CAPACITATE DE TRANSPORT (SCT)', ico: '🚦', ac: [37, 99, 235], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · normative trafic · PMUD', surse: 'OSM rețea · GTFS · recensământ trafic', ce: 'Analiza capacității rețelei de transport: niveluri de serviciu, congestie, capacitate intersecții, transport public și impactul unei dezvoltări asupra traficului.' },
+    'sct': { parcel:1, t: 'STUDIU DE CAPACITATE DE TRANSPORT (SCT)', ico: '🚦', ac: [37, 99, 235], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · normative trafic · PMUD', surse: 'OSM rețea · GTFS · recensământ trafic', ce: 'Analiza capacității rețelei de transport: niveluri de serviciu, congestie, capacitate intersecții, transport public și impactul unei dezvoltări asupra traficului.' },
     'sim': { parcel:1, t: 'STUDIU DE IMPACT ASUPRA MOBILITĂȚII (SIM)', ico: '🚗', ac: [29, 78, 216], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · Ghid PMUD · normative trafic', surse: 'OSM · GTFS · trip generation', ce: 'Evaluarea impactului unei dezvoltări asupra mobilității: trafic generat, distribuție modală, efecte asupra rețelei și măsuri de atenuare (transport public, parcare, acces).' },
     'scsp': { parcel:1, t: 'STUDIU DE CALITATE A SPAȚIULUI PUBLIC (SCSP)', ico: '🏛️', ac: [13, 148, 136], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · standarde spațiu public · 3-30-300', surse: 'OSM · Copernicus · observații teren', ce: 'Evaluarea calității spațiilor publice: accesibilitate, confort, vitalitate, vegetație (regula 3-30-300), siguranță, mobilier urban și recomandări de ameliorare.' },
     'srgu': { parcel:1, t: 'STUDIU DE REGENERARE URBANĂ REZIDENȚIALĂ (SRgU)', ico: '🏢', ac: [217, 70, 39], badge: 'SPECIALIZAT', legal: 'Legea 350/2001 · POR Axa 5 · Legea 152/1998', surse: 'INS · OSM · fond locativ · termoficare', ce: 'Strategia de regenerare a ansamblurilor rezidențiale: starea fondului, eficiență energetică, spații publice, dotări, mobilitate și instrumente de finanțare a regenerării.' },
@@ -29,8 +29,8 @@
     'srm': { parcel:1, t: 'STUDIU DE RISC MULTIHAZARD (SRM)', ico: '⚠️', ac: [220, 38, 38], badge: 'SPECIALIZAT', legal: 'Legea 575/2001 · P100-1/2022 · Dir. 2007/60/CE · HG 447/2003', surse: 'INFP · ANAR/INHGA · Copernicus · EEA', ce: 'Evaluarea integrată a hazardurilor: seismic, inundații, alunecări, secetă, caniculă și incendii — expunere, vulnerabilitate, scenarii de risc și măsuri de reducere.' },
     'sda': { t: 'STUDIU DE DEMOGRAFIE APROFUNDATĂ (SDA)', ico: '👥', ac: [147, 51, 234], badge: 'SPECIALIZAT', legal: 'metodologie INS · Eurostat · Strategia demografică', surse: 'INS Recensământ 2021 · Eurostat · TEMPO', ce: 'Analiza demografică detaliată: structură pe vârste și gen, migrație, natalitate/mortalitate, îmbătrânire, gospodării și proiecții ale populației pe orizont 2040.' },
     'scpt': { t: 'STUDIU DE COMPETITIVITATE TERITORIALĂ (SCpT)', ico: '📈', ac: [13, 110, 80], badge: 'SPECIALIZAT', legal: 'Strategia Națională · RIS3 · politica de coeziune UE', surse: 'INS · Eurostat · ONRC · RIS3', ce: 'Evaluarea competitivității teritoriului: capital uman, mediu de afaceri, inovare, specializare inteligentă, atractivitate investițională și poziționare regională.' },
-    'siva': { t: 'STUDIU DE INFRASTRUCTURĂ VERDE ȘI ALBASTRĂ (SIVA)', ico: '💧', ac: [16, 185, 129], badge: 'SPECIALIZAT', legal: 'Strategia UE biodiversitate 2030 · OUG 195/2005 · 3-30-300', surse: 'Copernicus · EEA · OSM · ANAR', ce: 'Strategia rețelei verzi-albastre: parcuri și coridoare ecologice, ape de suprafață, managementul pluvial, conectivitate ecologică și servicii ecosistemice urbane.' },
-    'seu': { t: 'STUDIU DE ENERGIE URBANĂ (SEU)', ico: '⚡', ac: [234, 88, 12], badge: 'SPECIALIZAT', legal: 'Dir. 2018/2001 (RED II) · SECAP · Legea 121/2014 (eficiență)', surse: 'Open-Meteo · INS · PNRR · operatori energie', ce: 'Strategia energetică locală: consum și mix energetic, eficiența clădirilor, potențial regenerabil (solar/geotermal/biomasă), comunități de energie și decarbonare.' },
+    'siva': { parcel:1, t: 'STUDIU DE INFRASTRUCTURĂ VERDE ȘI ALBASTRĂ (SIVA)', ico: '💧', ac: [16, 185, 129], badge: 'SPECIALIZAT', legal: 'Strategia UE biodiversitate 2030 · OUG 195/2005 · 3-30-300', surse: 'Copernicus · EEA · OSM · ANAR', ce: 'Strategia rețelei verzi-albastre: parcuri și coridoare ecologice, ape de suprafață, managementul pluvial, conectivitate ecologică și servicii ecosistemice urbane.' },
+    'seu': { parcel:1, t: 'STUDIU DE ENERGIE URBANĂ (SEU)', ico: '⚡', ac: [234, 88, 12], badge: 'SPECIALIZAT', legal: 'Dir. 2018/2001 (RED II) · SECAP · Legea 121/2014 (eficiență)', surse: 'Open-Meteo · INS · PNRR · operatori energie', ce: 'Strategia energetică locală: consum și mix energetic, eficiența clădirilor, potențial regenerabil (solar/geotermal/biomasă), comunități de energie și decarbonare.' },
     'sppc': { parcel:1, t: 'STUDIU DE PATRIMONIU CONSTRUIT ȘI PEISAJ (SPPC)', ico: '🏰', ac: [161, 98, 7], badge: 'SPECIALIZAT', legal: 'Legea 422/2001 · Convenția de la Florența (peisaj) · OG 43/2000', surse: 'LMI/INP · RAN · OSM · Copernicus', ce: 'Evaluarea patrimoniului construit și a peisajului cultural: monumente LMI, zone protejate, peisaj urban și natural, vulnerabilități și măsuri de protejare și valorificare.' }
   };
 
@@ -148,7 +148,30 @@
     pdf.save(fn); G.ss && G.ss('✅ ' + S.t + ' generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }
 
-  G._SPS = { generate: generate, STUDIES: STUDIES };
+  // ── Meniul Rapoarte: doar studiile SPS APLICABILE PE PARCELĂ (parcel:1) ──
+  // Populeaza #rapoarte-sps-parcel din STUDIES (sursa unica). Click → generate
+  // (auto mod parcela daca e selectata o parcela), ℹ️ → info-drawer dinamic.
+  function renderParcelMenu() {
+    try {
+      var host = document.getElementById('rapoarte-sps-parcel'); if (!host) return;
+      var ids = Object.keys(STUDIES).filter(function (id) { return STUDIES[id].parcel; });
+      host.innerHTML = ids.map(function (id) {
+        var S = STUDIES[id];
+        var m = S.t.match(/\(([^)]+)\)\s*$/); var abbr = m ? m[1] : '';
+        var name = S.t.replace(/\s*\([^)]*\)\s*$/, '').replace(/^STUDIU DE\s+|^STUDIU\s+|^STRATEGIA DE\s+|^STRATEGIA\s+/i, '');
+        name = name.charAt(0) + name.slice(1).toLowerCase();
+        var label = (abbr ? abbr + ' — ' : '') + name;
+        var tip = (S.ce || '').replace(/"/g, '’');
+        return '<div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background=\'rgba(255,255,255,.05)\'" onmouseout="this.style.background=\'none\'">' +
+          '<button onclick="window._SPS&&window._SPS.generate(\'' + id + '\',window.TCI&&window.TCI.cityKey);window.toggleRapoarteMenu&&toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px" title="' + tip + '">' + (S.ico || '📘') + ' ' + label + '</button>' +
+          '<button onclick="infoDrawerOpen(\'sps:' + id + '\')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.2);color:#fbbf24;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0">ⓘ</button>' +
+          '</div>';
+      }).join('');
+    } catch (e) {}
+  }
+
+  G._SPS = { generate: generate, STUDIES: STUDIES, renderParcelMenu: renderParcelMenu };
   window._SPS = G._SPS;
+  try { if (document.readyState !== 'loading') renderParcelMenu(); else document.addEventListener('DOMContentLoaded', renderParcelMenu); } catch (e) {}
   console.log('[SPS] ✅ Strategic Planning Suite — ' + Object.keys(STUDIES).length + ' studii (window._SPS.generate)');
 })(window);

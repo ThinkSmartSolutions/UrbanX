@@ -1214,8 +1214,40 @@ const RAPORT_INFO = {
   get stabilitate(){ return this.stabilitate_taluzuri; },
 };
 
+// Info-drawer SPS construit DINAMIC din _SPS.STUDIES (cheie 'sps:<id>') — evită
+// 20 de intrări hardcodate. Doar studiile aplicabile pe parcelă au mod parcelă.
+function _spsInfoEntry(id){
+  try{
+    var S = window._SPS && window._SPS.STUDIES && window._SPS.STUDIES[id];
+    if(!S) return null;
+    var isParcel = !!S.parcel;
+    var out = [
+      { ico:'📑', txt:'Studiu strategic dezvoltat: copertă, cuprins, metodologie și capitole cu analiză, diagnoză, viziune și recomandări' },
+      { ico:'📊', txt:'Grafice și tabele pe capitole (date reale + prognoză)' },
+      { ico:'🗺', txt:'Capturi de hartă: teritoriul UAT, zonare PUG și dotări în proximitate' },
+      { ico:'🎯', txt:'Secțiunea „Nota UrbanX (IVU)" — scor, formulă transparentă și benchmark' },
+      { ico:'📚', txt:'Surse citate: ' + (S.surse || 'INS · Eurostat · OSM') }
+    ];
+    if(isParcel) out.push({ ico:'📍', txt:'Mod PARCELĂ: dacă ai o parcelă selectată, studiul se aplică punctual (CF/UTR/POT/CUT + edificabil)' });
+    return {
+      ico: S.ico || '📘',
+      label: S.t || id,
+      badge: 'recomandat',
+      badgeLabel: (S.badge || 'STUDIU') + (isParcel ? ' · teritoriu/parcelă' : ' · teritorial'),
+      ce: S.ce || '',
+      dece: 'Fundamentează deciziile de planificare ' + (isParcel ? 'la nivel de parcelă/zonă și ' : '') + 'la nivelul UAT, conform cadrului legal aplicabil.',
+      legal: S.legal || '—',
+      output: out,
+      nu: isParcel
+        ? ['Document orientativ — nu substituie documentația de urbanism aprobată sau studiile de specialitate avizate', 'Pe parcelă, indicatorii preiau regimul PUG al zonei — se verifică cu Certificatul de Urbanism oficial']
+        : ['Document strategic orientativ la nivel teritorial (UAT) — nu substituie un studiu de specialitate avizat'],
+      fn: "window._SPS&&window._SPS.generate('" + id + "',window.TCI&&window.TCI.cityKey)"
+    };
+  }catch(e){ return null; }
+}
 function infoDrawerOpen(key) {
-  const d = RAPORT_INFO[key];
+  let d = RAPORT_INFO[key];
+  if(!d && key && key.indexOf('sps:')===0) d = _spsInfoEntry(key.slice(4));
   if(!d) return;
   // Închidem TOATE meniurile dropdown înainte (inclusiv UrbanX Pro / tci-adv-menu)
   try { if (typeof _closeAllMenusAndOverlay === 'function') _closeAllMenusAndOverlay(); } catch(e){}

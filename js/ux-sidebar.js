@@ -172,10 +172,12 @@
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
             if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + i.sep + '</div>';
             var ia = State.activeModule === i.moduleId;
-            var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (i.info ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
-            if (!i.info) return main;
+            // info-drawer: explicit (i.info) SAU automat pentru orice studiu SPS (sps:<id>)
+            var infoKey = i.info || ((i.moduleId && i.moduleId.indexOf('sps:') === 0) ? i.moduleId : null);
+            var main = '<button class="uxsb-item' + (ia ? ' active' : '') + '" style="' + (ia ? 'color:' + g.color : '') + (infoKey ? ';flex:1' : '') + '" onclick="UXSidebar.openModule(\'' + i.moduleId + '\')">' + i.label + '</button>';
+            if (!infoKey) return main;
             return '<div style="display:flex;align-items:stretch;gap:3px">' + main +
-              '<button title="Info" onclick="event.stopPropagation();UXSidebar.close&&UXSidebar.close();infoDrawerOpen(\'' + i.info + '\')" style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:5px;padding:0 9px;cursor:pointer;font-size:12px">ⓘ</button></div>';
+              '<button title="Info" onclick="event.stopPropagation();UXSidebar.close&&UXSidebar.close();infoDrawerOpen(\'' + infoKey + '\')" style="flex-shrink:0;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:5px;padding:0 9px;cursor:pointer;font-size:12px">ⓘ</button></div>';
           }).join('') + '</div>' : '') +
           '</div>';
       }).join('');

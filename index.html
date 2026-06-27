@@ -1463,6 +1463,11 @@ document.addEventListener('click', function(){
   <button onclick="infoDrawerOpen('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
+  <!-- SPS aplicabile pe parcelă (cele 9 studii strategice cu mod parcelă) -->
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">Studii strategice pe parcelă (SPS)</div>
+  <div style="padding:0 8px 4px;font-size:9px;color:#475569">Pe parcela selectată se aplică punctual; fără parcelă rămân teritoriale.</div>
+  <div id="rapoarte-sps-parcel"></div>
+
   <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">① Analize de Bază</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateStudiuAmplasament();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;" title="Studiu TERITORIAL: UTR, context urban, restricții, LMI, utilități. ≠ Memoriu Tehnic care e ARHITECTURAL.">🗺 Studiu de Amplasament & Context Teritorial</button>
@@ -1901,7 +1906,7 @@ document.addEventListener('click', function(){
     <script src="js/10-studies-restrictii.js?v=20260626lmiaviz"></script>
 <script src="js/11-viewer3d.js?v=20260624wgl"></script>
 <script src="js/12-admin.js?v=2026050601"></script>
-<script src="js/13-info-drawer.js?v=20260626gfx"></script>
+<script src="js/13-info-drawer.js?v=20260627spsinfo"></script>
 <script src="js/14-docx-export.js?v=2026050601"></script>
 <script src="js/15-relevee.js?v=20260625flr"></script>
     <script src="js/15-relevee-canvas-upgrade.js?v=20260517"></script>
@@ -6360,7 +6365,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260626gfx"></script>
     <script src="js/ux-launcher.js?v=20260624risk4"></script>
-    <script src="js/ux-sidebar.js?v=20260627nobifa"></script>
+    <script src="js/ux-sidebar.js?v=20260627spsinfo"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>
@@ -6387,7 +6392,7 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <script src="js/urbanx-rcai-parcel-content.js?v=20260626ivu"></script><!-- continut RCAI parcela (punctual) -->
     <script src="js/urbanx-rcai.js?v=20260626gfxch"></script><!-- RCAI Raport Cercetare Arheologica (parcela + teritorial) -->
     <script src="js/sps-studies-content.js?v=20260627sps15"></script><!-- continut dezvoltat SPS (_SPS_DEEP, pe loturi) -->
-    <script src="js/sps-studies.js?v=20260627norang"></script><!-- motor 20 studii SPS rang superior (#21) -->
+    <script src="js/sps-studies.js?v=20260627parcelmenu"></script><!-- motor 20 studii SPS rang superior (#21) -->
     <script src="js/urbanx-economy-content.js?v=20260626deep3"></script><!-- corp dezvoltat economic (50 cap) -->
     <script src="js/urbanx-economy.js?v=20260626poi"></script><!-- Analiza economica UAT (studiu teritorial 80-100 pag) -->
     <script src="js/portfolio-dd.js?v=20260622rag"></script>
