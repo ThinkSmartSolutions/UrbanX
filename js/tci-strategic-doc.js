@@ -65,17 +65,27 @@
       // Evită dublarea numerelor: capitolul se numerotează automat (chapterNo).
       // Dacă titlul vine deja cu un număr manual ("4. ..." sau "4. A. ..."), îl strip.
       title = String(title || '').replace(/^\s*\d+\.\s*/, '');
-      // Capitolele CURG continuu (nu forteaza pagina noua) -> pagini dense, fara continut partial.
-      // Primul capitol incepe pe pagina noua (dupa coperta); restul doar daca nu mai e loc.
+      // ── Banda capitol cu ÎNĂLȚIME DINAMICĂ: titlurile lungi se sparg pe 2-3 linii
+      // si banda creste ca sa NU le taie (bug paginare titluri). Masuram liniile la
+      // fontul real de titlu inainte de a desena banda.
+      var _tfs = 13;
+      pdf.setFont(FONT, 'bold'); pdf.setFontSize(_tfs);
+      var _tlines = pdf.splitTextToSize(S2(title), CW - 12);
+      // reduce fontul daca titlul are >3 linii (titluri foarte lungi) ca sa ramana compact
+      while (_tlines.length > 3 && _tfs > 10) { _tfs -= 0.5; pdf.setFontSize(_tfs); _tlines = pdf.splitTextToSize(S2(title), CW - 12); }
+      var _tlh = _tfs * 0.42 + 0.4;                       // inaltime linie titlu (mm)
+      var bandH = 7 + _tlines.length * _tlh + 3.5;        // eticheta CAPITOLUL + linii titlu + padding
+      if (bandH < 16) bandH = 16;
+      // Capitolele CURG continuu; primul incepe pe pagina noua, restul doar daca nu mai e loc.
       if (first) newPage();
-      else { ensure(54); if (y > MT + 6) y += 5; }
-      // banda capitol
-      pdf.setFillColor(12, 24, 56); pdf.rect(ML, y, CW, 16, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2.4, 16, 'F');
+      else { ensure(bandH + 38); if (y > MT + 6) y += 5; }
+      // banda capitol (inaltime = bandH)
+      pdf.setFillColor(12, 24, 56); pdf.rect(ML, y, CW, bandH, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2.4, bandH, 'F');
       pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7);
-      pdf.text(S2('CAPITOLUL ' + chapterNo), ML + 6, y + 6);
-      pdf.setTextColor(255, 255, 255); pdf.setFontSize(13);
-      pdf.text(S2(title), ML + 6, y + 12.5, { maxWidth: CW - 10 });
-      y += 22;
+      pdf.text(S2('CAPITOLUL ' + chapterNo), ML + 6, y + 5.2);
+      pdf.setTextColor(255, 255, 255); pdf.setFont(FONT, 'bold'); pdf.setFontSize(_tfs);
+      for (var _i = 0; _i < _tlines.length; _i++) pdf.text(_tlines[_i], ML + 6, y + 9.5 + _i * _tlh);
+      y += bandH + 6;
       toc.push({ title: chapterNo + '. ' + title, level: 1, page: pageNum });
       return chapterNo;
     }
@@ -151,11 +161,21 @@
     }
     function table(headers, rows, colWs, o) {
       o = o || {}; const RH = o.rh || 6, fs = o.fs || 7, hfs = o.hfs || 6.8;
-      const cw = colWs || headers.map(() => CW / headers.length);
+      let cw = colWs || headers.map(() => CW / headers.length);
+      // SIGURANȚĂ: daca suma latimilor de coloana depaseste latimea utila (CW),
+      // scaleaza proportional ca tabelul sa NU iasa din pagina (anti-overflow).
+      var _csum = cw.reduce(function (a, b) { return a + b; }, 0);
+      if (_csum > CW + 0.5) { var _ck = CW / _csum; cw = cw.map(function (c) { return c * _ck; }); }
       function drawHead() {
-        ensure(RH + 2); pdf.setFillColor(14, 26, 54); pdf.rect(ML, y, CW, RH, 'F');
-        let cx = ML; headers.forEach((hh, i) => { pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(hfs); pdf.text(S2(hh), cx + 1.6, y + RH * 0.7, {maxWidth:cw[i]-3}); cx += cw[i]; });
-        y += RH;
+        // ÎNĂLȚIME ANTET DINAMICĂ: capetele de coloană lungi se sparg pe mai multe
+        // linii si banda creste, ca sa NU se suprapuna peste primul rand (bug paginare).
+        pdf.setFont(FONT, 'bold'); pdf.setFontSize(hfs);
+        var hcells = headers.map(function (hh, i) { return pdf.splitTextToSize(S2(String(hh == null ? '' : hh)), cw[i] - 3); });
+        var hmaxL = hcells.reduce(function (m, ls) { return Math.max(m, ls.length); }, 1);
+        var headH = Math.max(RH, hmaxL * 3.3 + 2.6);
+        ensure(headH + 2); pdf.setFillColor(14, 26, 54); pdf.rect(ML, y, CW, headH, 'F');
+        var cx = ML; hcells.forEach(function (ls, i) { pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(hfs); ls.forEach(function (ln, li) { pdf.text(ln, cx + 1.6, y + 3.6 + li * 3.3); }); cx += cw[i]; });
+        y += headH;
       }
       drawHead();
       rows.forEach((r, ri) => {
@@ -223,12 +243,28 @@
       ensure(h + (ttl?6:0) + (opts.source?7:0) + 6);
       if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf=fitFont(FONT,'bold',8,ttl,CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
       const x0 = ML + 12, plotW = CW - 14, plotH = h - 10, top = y;
-      const mv = opts.max || Math.max.apply(null, data.map(d => +d[1] || 0)) * 1.12 || 1;
-      const baseY = _axes(x0, top, plotW, plotH, mv, opts.yfmt);
+      // suporta valori NEGATIVE: axa pleaca de la min (<=0) la max -> linie de zero
+      var _vals = data.map(d => +d[1] || 0);
+      var _max = Math.max.apply(null, _vals), _min = Math.min.apply(null, _vals);
+      if (opts.max) _max = opts.max;
+      if (_min > 0) _min = 0; if (_max < 0) _max = 0;
+      if (_max === _min) _max = _min + 1;
+      var span = (_max - _min) * 1.08 || 1;
+      const baseY = top + plotH;                          // baza grila (jos)
+      const zeroY = baseY - plotH * (0 - _min) / span;    // pozitia valorii 0
+      // grila + axe (cu eticheta min/max corecte pt negative)
+      pdf.setDrawColor(205,210,220); pdf.setLineWidth(0.2);
+      pdf.line(x0, top, x0, baseY); pdf.line(x0, zeroY, x0 + plotW, zeroY);
+      pdf.setFontSize(5.4); pdf.setFont(FONT,'normal'); pdf.setTextColor.apply(pdf, MUT);
+      for (let g = 0; g <= 4; g++) { const gy = baseY - plotH * g / 4; const gv = _min + span * g / 4; pdf.setDrawColor(234,237,242); pdf.setLineWidth(0.1); if(g>0) pdf.line(x0, gy, x0 + plotW, gy); pdf.text((opts.yfmt?opts.yfmt(gv):N(Math.round(gv))), x0 - 1.5, gy + 1, { align: 'right' }); }
       const n = data.length, gap = plotW / n, bw = Math.min(gap * 0.62, 16);
-      data.forEach((d, i) => { const v = +d[1] || 0, bh = plotH * v / mv, bx = x0 + gap * i + (gap - bw) / 2, col = d[2] || ACCENT;
-        pdf.setFillColor(col[0], col[1], col[2]); pdf.rect(bx, baseY - bh, bw, bh, 'F');
-        pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'bold'); pdf.setFontSize(5.6); pdf.text(opts.vfmt?opts.vfmt(v):N(v), bx + bw/2, baseY - bh - 1.2, { align: 'center' });
+      data.forEach((d, i) => { const v = +d[1] || 0, bh = plotH * v / span, bx = x0 + gap * i + (gap - bw) / 2, col = d[2] || ACCENT;
+        pdf.setFillColor(col[0], col[1], col[2]);
+        if (v >= 0) pdf.rect(bx, zeroY - bh, bw, bh, 'F'); else pdf.rect(bx, zeroY, bw, -bh, 'F');
+        // eticheta valoare — peste bara pozitiva / sub bara negativa, clamp in plot
+        var ly = v >= 0 ? zeroY - bh - 1.2 : zeroY - bh + 3.2;
+        ly = Math.max(top + 2.4, Math.min(ly, baseY - 0.5));
+        pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT,'bold'); pdf.setFontSize(5.6); pdf.text(opts.vfmt?opts.vfmt(v):N(v), bx + bw/2, ly, { align: 'center' });
         pdf.setTextColor.apply(pdf, SUB); pdf.setFont(FONT,'normal'); pdf.setFontSize(5.4); pdf.text(S2(String(d[0])), bx + bw/2, baseY + 3, { align: 'center', maxWidth: gap }); });
       y = baseY + 6; if (opts.source) source(opts.source);
     }
@@ -278,10 +314,18 @@
     function formula(title, expr, where) {
       const wlines = where ? pdf.splitTextToSize(S2(where), CW - 12) : [];
       // formula: micsoreaza fontul ca sa incapa; daca tot e prea lata, o sparge pe linii
-      // courier (monospace) NU are glife pt →/×/−/² etc -> sanitizam la ASCII.
-      var exprS = S2(expr).replace(/→/g,' -> ').replace(/×/g,' x ').replace(/−/g,'-').replace(/²/g,'2').replace(/·/g,'*').replace(/\s+/g,' ').trim();
-      var fs = fitFont('courier', 'bold', 9.5, exprS, CW - 12);
-      var exprLines = (pdf.getTextWidth(exprS) > CW - 12) ? pdf.splitTextToSize(exprS, CW - 12) : [exprS];
+      // courier (monospace) NU are glife pt →/×/−/²/Σ etc -> sanitizam la ASCII.
+      var maxFW = CW - 12;
+      var exprS = S2(expr).replace(/Σ/g,'Suma ').replace(/→/g,' -> ').replace(/×/g,' x ').replace(/−/g,'-').replace(/²/g,'2').replace(/·/g,' * ').replace(/\s+/g,' ').trim();
+      // Sparge pe linii LA fontul ales si re-verifica fiecare linie (metrica fontului
+      // custom poate subestima latimea) — reduce fontul pana cand NICIO linie nu iese.
+      var fs = 9.2; pdf.setFont('courier', 'bold'); pdf.setFontSize(fs);
+      var exprLines = pdf.splitTextToSize(exprS, maxFW), _g = 0;
+      while (_g++ < 14) {
+        var _over = false; for (var _li = 0; _li < exprLines.length; _li++) { if (pdf.getTextWidth(exprLines[_li]) > maxFW) { _over = true; break; } }
+        if (!_over || fs <= 5) break;
+        fs -= 0.4; pdf.setFontSize(fs); exprLines = pdf.splitTextToSize(exprS, maxFW);
+      }
       var elh = 4.6;
       const hh = 8 + exprLines.length * elh + wlines.length * 3.6 + 4; ensure(hh + 2);
       pdf.setFillColor(245, 248, 252); pdf.rect(ML, y, CW, hh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2, hh, 'F');
