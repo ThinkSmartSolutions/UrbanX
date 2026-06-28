@@ -6294,6 +6294,8 @@ function toggleRapoarteMenu(){
   // Pozitionare corecta: display:block INTAI, apoi calculeaza offsetWidth real
   m.style.visibility = 'hidden';
   m.style.display = 'block';
+  // 001 Faza 3b: filtrare pe rol (implicit FULL → nimic ascuns; doar rol restrictiv filtreaza)
+  try { window.UXRoles && window.UXRoles.filterRapoarte && window.UXRoles.filterRapoarte(m); } catch (e) {}
 
   requestAnimationFrame(()=>{
     const r = btn ? btn.getBoundingClientRect() : {bottom:48, right:window.innerWidth - 20, top:42};

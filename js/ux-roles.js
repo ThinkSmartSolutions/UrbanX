@@ -17,15 +17,16 @@
       'harta','dashboardUAT','ghsl','coridoare','monumente','intelligence','analytics','indici','market',
       'valoriMap','valoriPdf','carbon','metodologie','sidu-doc','masterplan','pmud','portofoliu','proiectie',
       'aiMemoriu','dataFresh','sps:*','clima','economie','hbuT','rcaiT','sesizari','sesizari-map','participare',
-      'film','tciClasic','riscSeismic','riscFlood','riscAla','retele','importPug'] },
+      'film','tciClasic','riscSeismic','riscFlood','riscAla','retele','importPug','studymap'] },
     BIROU_ARHITECTURA: { label: 'Birou Arhitectură / Urbanism', level: 3, access: '*' }, // profesional — toate
     CTATU:         { label: 'CTATU / Specialist', level: 2, access: [
       'harta','dashboardUAT','ghsl','coridoare','monumente','intelligence','simlab','analytics','indici','market',
       'valoriMap','valoriPdf','carbon','metodologie','mobility','loisir','uhi','superbloc','riscSeismic','riscFlood',
-      'riscAla','retele','sidu-doc','masterplan','pmud','sps:*','clima','economie','hbuT','rcaiT','proiectie','dataFresh'] },
+      'riscAla','retele','sidu-doc','masterplan','pmud','sps:*','clima','economie','hbuT','rcaiT','proiectie','dataFresh',
+      'studymap','rap:*'] },
     CETATEAN:      { label: 'Cetățean', level: 1, access: [
       'harta','dashboardUAT','monumente','indici','valoriMap','loisir','uhi','riscSeismic','riscFlood','riscAla',
-      'sesizari','sesizari-map','participare','film','tciClasic'] },
+      'sesizari','sesizari-map','participare','film','tciClasic','studymap'] },
     PUBLIC:        { label: 'Vizitator', level: 0, access: [
       'harta','dashboardUAT','monumente','indici','participare','film','tciClasic'] }
   };
@@ -58,16 +59,56 @@
     return false;
   }
 
+  // ── Meniul RAPOARTE (studii de parcelă, HTML static) — mapare onclick→moduleId ──
+  // Filtrare pură JS (NU edităm HTML-ul): citim onclick-ul fiecărui rând, mapăm la
+  // moduleId prin cea mai TIMPURIE potrivire de substring, ascundem rândul + antetul gol.
+  var RAP_MOD = {
+    'openStudyMap': 'studymap', 'IndicatorsRegistry': 'indici',
+    'generateStudiuAmplasament': 'rap:amplasament', 'runExport': 'rap:raport_complet',
+    'generateSolarStudy': 'rap:insorire', 'generateShadowStudy': 'rap:umbre', 'generateSSF': 'rap:isu',
+    'generateGeotehnicalStudy': 'rap:geotehnic', 'generateAACR': 'rap:aacr', 'generateStudiuPMR': 'rap:pmr',
+    'generateStudiuIluminat': 'rap:iluminat', 'generateStabilitateTaluzuri': 'rap:taluzuri',
+    'generateEnvironmentalImpact': 'rap:eim', 'generateWaterStudy': 'rap:apa', 'generateGreenStudy': 'rap:verde',
+    'generateNoiseStudy': 'rap:acustic', 'generateWindStudy': 'rap:vant', 'generateStudiuApePluviale': 'rap:apepluv',
+    'generatePrestudiuBransamente': 'rap:bransamente', 'generateCarbonStudy': 'rap:carbon',
+    'generateTrafficStudy': 'rap:trafic', 'generateMobilityStudy': 'rap:mobilitate', 'generateDensityStudy': 'rap:densitate',
+    'generateIstoricStudy': 'rap:patrimoniu', 'generateExistingBldStudy': 'rap:existente', '_RCAI': 'rap:rcai',
+    'generateStudiuFezabilitate': 'rap:fezabilitate', '_HBU': 'rap:hbu', 'generateREPA': 'rap:repa',
+    'generateCPE': 'rap:cpe', 'openTCI': 'proiectie', 'generateProiectieUrbanistica': 'proiectie',
+    'generateHealthImpactStudy': 'rap:sanatate', 'generateSeismicStudy': 'rap:seismic',
+    'generateStudiuRestrictii': 'rap:restrictii'
+  };
+  function _ocToMod(oc) { var best = null, bi = Infinity; for (var k in RAP_MOD) { var idx = oc.indexOf(k); if (idx >= 0 && idx < bi) { bi = idx; best = RAP_MOD[k]; } } return best; }
+  function _isHeader(el) { return el.tagName === 'DIV' && /text-transform:\s*uppercase/.test(el.getAttribute('style') || '') && !el.querySelector('button'); }
+  function _disp0(el) { if (!el.hasAttribute('data-disp0')) el.setAttribute('data-disp0', el.style.display || ''); return el.getAttribute('data-disp0'); }
+  function filterRapoarte(menu) {
+    try {
+      menu = menu || G.document.getElementById('rapoarte-menu'); if (!menu) return;
+      var kids = Array.prototype.slice.call(menu.children);
+      var lastHeader = null, headerHasVisible = false;
+      kids.forEach(function (el) {
+        if (_isHeader(el)) { if (lastHeader) lastHeader.style.display = headerHasVisible ? _disp0(lastHeader) : 'none'; lastHeader = el; headerHasVisible = false; return; }
+        var btn = el.tagName === 'BUTTON' ? el : el.querySelector('button'); if (!btn) return;
+        var mid = _ocToMod(btn.getAttribute('onclick') || '');
+        var ok = mid ? canSee(mid) : true;     // moduleId necunoscut → vizibil (safe)
+        el.style.display = ok ? _disp0(el) : 'none';
+        if (ok) headerHasVisible = true;
+      });
+      if (lastHeader) lastHeader.style.display = headerHasVisible ? _disp0(lastHeader) : 'none';
+    } catch (e) { console.warn('[UXRoles] filterRapoarte', e); }
+  }
+
   // pt dev/demo: schimbă rolul previzualizat și re-randează sertarul
   function setPreview(roleId) {
     try {
       if (!roleId || roleId === 'FULL') localStorage.removeItem(PREVIEW_KEY);
       else if (ROLES[roleId]) localStorage.setItem(PREVIEW_KEY, roleId);
       if (G.UXSidebar && G.UXSidebar.render) G.UXSidebar.render();
+      var rm = G.document.getElementById('rapoarte-menu'); if (rm && rm.style.display === 'block') filterRapoarte(rm);
       G.ss && G.ss('Rol previzualizat: ' + (current().label));
     } catch (e) {}
   }
 
-  G.UXRoles = { ROLES: ROLES, current: current, currentId: currentId, canSee: canSee, setPreview: setPreview };
+  G.UXRoles = { ROLES: ROLES, current: current, currentId: currentId, canSee: canSee, setPreview: setPreview, filterRapoarte: filterRapoarte };
   console.log('[UXRoles] strat roluri/acces încărcat (implicit: acces complet) · window.UXRoles');
 })(window);
