@@ -503,15 +503,26 @@
                       var isTime=labels0.length>=3 && labels0.every(function(l){return /(19|20)\d{2}/.test(l);});
                       var allPos=vals.every(function(v){return v!=null && v>=0;});
                       var avgLen=labels0.reduce(function(a,l){return a+l.length;},0)/labels0.length;
-                      var tci=(D.__tci=(D.__tci||0)+1);
+                      // DIVERSIFICARE REALĂ (Florin: nu repeta același tipar): seria temporală →
+                      // linie; altfel rotație UNIFORMĂ printre TOATE stilurile eligibile
+                      // (bară · bare orizontale · donut · pie), nu cădere mereu pe bară.
+                      var src='Date din tabelul de mai sus';
                       if(isTime && D.lineChart){
-                        D.lineChart([{name:(bl.headers[li]||'Serie').slice(0,24),color:[37,99,235],points:vals}], labels0.map(function(l){return (l.match(/(19|20)\d{2}/)||[l])[0];}), {title:title, source:'Date din tabelul de mai sus'});
-                      } else if(tci%3===2 && D.donut && allPos && bl.rows.length>=2 && bl.rows.length<=6){
-                        D.donut(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:'Date din tabelul de mai sus'});
-                      } else if((tci%3===1 || avgLen>14) && D.hbar){
-                        D.hbar(cd, {title:title, source:'Date din tabelul de mai sus'});
+                        D.lineChart([{name:(bl.headers[li]||'Serie').slice(0,24),color:[37,99,235],points:vals}], labels0.map(function(l){return (l.match(/(19|20)\d{2}/)||[l])[0];}), {title:title, source:src});
+                      } else if(avgLen>16 && D.hbar){
+                        D.hbar(cd, {title:title, source:src});           // etichete lungi → bare orizontale (lizibil)
                       } else {
-                        D.barChart(cd.map(function(r){return [r[0].slice(0,16), r[1], r[2]];}), {title:title, max:0, source:'Date din tabelul de mai sus'});
+                        var elig=[];
+                        if(D.barChart) elig.push('bar');
+                        if(D.hbar) elig.push('hbar');
+                        if(D.donut && allPos && bl.rows.length>=2 && bl.rows.length<=6) elig.push('donut');
+                        if(D.pie && allPos && bl.rows.length>=2 && bl.rows.length<=5) elig.push('pie');
+                        if(!elig.length) elig=['bar'];
+                        var st=elig[(D.__tci=(D.__tci||0)+1)%elig.length];
+                        if(st==='donut') D.donut(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:src});
+                        else if(st==='pie') D.pie(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:src});
+                        else if(st==='hbar') D.hbar(cd, {title:title, source:src});
+                        else D.barChart(cd.map(function(r){return [r[0].slice(0,16), r[1], r[2]];}), {title:title, max:0, source:src});
                       }
                       hadVisual=true;
                     }
