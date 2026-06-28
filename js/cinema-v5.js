@@ -980,6 +980,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         lp('day');
         try{map.jumpTo({center:[24.5,45.9],zoom:7,pitch:15,bearing:0});}catch(e){}
         // Avioane live deasupra Romaniei
+        // rețeaua națională REALĂ (autostrăzi + aeroporturi din _RegioInfra) + avioane live
+        onIdle(function(){try{SE._addNationalNetwork&&SE._addNationalNetwork(map);}catch(e){}});
         setTimeout(function(){
           if(!SE._playing) return;
           if(window._LiveOpenSky) window._LiveOpenSky.showOnMap(map,city);
@@ -1716,9 +1718,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.SV,13.5,52,10,4000,0,'dawn');
         fly(Z.C,13.8,55,45,13000,4500,'day');
         break;
-      case 'b14s2': // Metabolism urban — diagrama "orasul ca organism" pe BAZA CURATA (fara mash gri)
+      case 'b14s2': // Metabolism urban — arterele orasului (energie/feroviar/apa/rutier) OSM real
         lp('night');
         try{map.setPaintProperty('building-extrusion','fill-extrusion-color','#0e1320'); map.setPaintProperty('building-extrusion','fill-extrusion-opacity',0.42);}catch(e){}
+        onIdle(function(){try{SE._addUrbanMetabolism&&SE._addUrbanMetabolism(map,city);}catch(e){}});
         fly([cx,cy],12.4,42,0,4000,0,'night');
         rot(7,0.003);
         fly([cx,cy],12.8,46,16,14000,4500,'night');

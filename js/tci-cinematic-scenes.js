@@ -1632,6 +1632,45 @@ G._CinemaEngine={
     counts.total=feats.length; this._heritageCounts=counts;
   },
 
+  // ── REȚEA NAȚIONALĂ (b1s3) — autostrăzi + aeroporturi REALE din _RegioInfra ──
+  _addNationalNetwork(map){
+    if(!window._RegioInfra) return;
+    var R=window._RegioInfra, SC={finalizat:'#22c55e',executie:'#f59e0b',proiectare:'#94a3b8',planificat:'#94a3b8'};
+    var lines=[];
+    (R.HIGHWAYS||[]).forEach(function(h){ if(h.traseu&&h.traseu.length>1) lines.push({type:'Feature',geometry:{type:'LineString',coordinates:h.traseu},properties:{c:SC[h.status]||'#94a3b8'}}); });
+    (R.METROS||[]).forEach(function(m){ if(m.traseu&&m.traseu.length>1) lines.push({type:'Feature',geometry:{type:'LineString',coordinates:m.traseu},properties:{c:'#22d3ee'}}); });
+    if(lines.length) this._safeAdd(map,'v8-natnet',{type:'geojson',data:{type:'FeatureCollection',features:lines}},{
+      id:'v8-natnet-l',type:'line',source:'v8-natnet',
+      paint:{'line-color':['get','c'],'line-width':['interpolate',['linear'],['zoom'],6,2.5,11,5.5],'line-opacity':0.92}});
+    var aps=(R.AIRPORTS||[]).map(function(a){ return {type:'Feature',geometry:{type:'Point',coordinates:[a.lon,a.lat]},properties:{c:a.tip==='hub'?'#fbbf24':'#60a5fa'}}; });
+    if(aps.length) this._safeAdd(map,'v8-natair',{type:'geojson',data:{type:'FeatureCollection',features:aps}},{
+      id:'v8-natair-l',type:'circle',source:'v8-natair',
+      paint:{'circle-radius':['interpolate',['linear'],['zoom'],6,3.5,11,7],'circle-color':['get','c'],'circle-opacity':0.96,'circle-stroke-width':1.2,'circle-stroke-color':'rgba(8,15,35,0.9)'}});
+  },
+
+  // ── METABOLISM URBAN (b14s2) — arterele orașului (OSM): energie·cale ferată·apă·drumuri ──
+  async _addUrbanMetabolism(map, city){
+    city=city||this._city||{}; var cx=city.lon||25, cy=city.lat||45.5;
+    var a='(around:3500,'+cy+','+cx+')';
+    var q='[out:json][timeout:25];(way["power"~"^(line|minor_line)$"]'+a+';way["railway"~"^(rail|light_rail|subway|tram)$"]'+a+';way["waterway"~"^(river|canal|stream)$"]'+a+';way["highway"~"^(motorway|trunk|primary)$"]'+a+';);out geom tags;';
+    var feats=[], counts={energie:0,feroviar:0,apa:0,rutier:0};
+    try{
+      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
+      var j=await resp.json();
+      (j.elements||[]).forEach(function(el){
+        if(!el.geometry||el.geometry.length<2)return; var tg=el.tags||{}, col='#888', k=null;
+        if(tg.power){col='#ef4444';k='energie';} else if(tg.railway){col='#a855f7';k='feroviar';} else if(tg.waterway){col='#38bdf8';k='apa';} else if(tg.highway){col='#f59e0b';k='rutier';}
+        if(!k)return; counts[k]++;
+        feats.push({type:'Feature',geometry:{type:'LineString',coordinates:el.geometry.map(function(g){return [g.lon,g.lat];})},properties:{c:col}});
+      });
+    }catch(e){}
+    if(!this._playing) return;
+    if(feats.length) this._safeAdd(map,'v8-metab',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+      id:'v8-metab-l',type:'line',source:'v8-metab',
+      paint:{'line-color':['get','c'],'line-width':['interpolate',['linear'],['zoom'],11,1.3,15,3.2],'line-opacity':0.85}});
+    this._metabCounts=counts;
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1752,7 +1791,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-sb-l','v8-sb','v8-sb-perim-l','v8-sb-perim','v8-sb-st-l','v8-sb-st','v8-sb-pl-l','v8-sb-pl',
-     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity','v8-val-l','v8-val','v8-herit-l','v8-herit',
+     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity','v8-val-l','v8-val','v8-herit-l','v8-herit','v8-natnet-l','v8-natnet','v8-natair-l','v8-natair','v8-metab-l','v8-metab',
      'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
