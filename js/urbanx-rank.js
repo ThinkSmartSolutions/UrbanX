@@ -11,6 +11,26 @@
 'use strict';
 function cl(v,lo,hi){ return Math.max(lo==null?2:lo, Math.min(hi==null?99:hi, Math.round(v))); }
 
+// Acoperire forestieră pe județ (% din suprafață) — date naționale (INS/Romsilva, orientativ).
+// Folosit pt componenta „păduri din jurul UAT" în dimensiunea Mediu/biodiversitate.
+var _FOREST_BY_JUDET = {
+  SV:52,NT:44,HR:37,CV:46,VN:38,BV:38,MM:43,BC:42,GJ:46,CS:46,HD:43,VL:48,AG:40,AB:35,MS:33,SB:35,BN:36,
+  AR:30,BH:28,CJ:25,SJ:28,MH:30,PH:35,DB:30,BZ:24,SM:18,TM:13,VS:14,IS:10,DJ:9,TL:9,GL:8,OT:8,BT:7,CT:6,BR:5,TR:5,IL:3,CL:4,B:5,IF:6
+};
+// city.judet vine ca NUME complet ("Suceava","Iași") — mapăm la cod ca să citim acoperirea forestieră
+var _JUD_CODE = { 'iasi':'IS','suceava':'SV','cluj':'CJ','botosani':'BT','neamt':'NT','bacau':'BC','vaslui':'VS',
+  'galati':'GL','vrancea':'VN','brasov':'BV','timis':'TM','sibiu':'SB','mures':'MS','bihor':'BH','arad':'AR',
+  'prahova':'PH','dolj':'DJ','constanta':'CT','harghita':'HR','covasna':'CV','maramures':'MM','gorj':'GJ',
+  'caras-severin':'CS','hunedoara':'HD','valcea':'VL','arges':'AG','dambovita':'DB','buzau':'BZ','satu mare':'SM',
+  'salaj':'SJ','mehedinti':'MH','alba':'AB','bistrita-nasaud':'BN','tulcea':'TL','olt':'OT','braila':'BR',
+  'teleorman':'TR','ialomita':'IL','calarasi':'CL','giurgiu':'GR','ilfov':'IF','bucuresti':'B' };
+function _judCode(j){ if(!j)return null; var s=String(j).trim();
+  if(_FOREST_BY_JUDET[s]!=null)return s;                                   // deja cod ('SV')
+  var n=s.toLowerCase().replace(/ș|ş/g,'s').replace(/ț|ţ/g,'t').replace(/ă|â/g,'a').replace(/î/g,'i').replace(/municipiul\s+/,'').trim();
+  return _JUD_CODE[n]||null;
+}
+function _forestPct(city){ var c=_judCode(city&&city.judet); return (c&&_FOREST_BY_JUDET[c]!=null)?_FOREST_BY_JUDET[c]:27; }
+
 // Benchmark orientativ orașe europene (scoruri de referință pe baza clasamentelor
 // publice de calitate a vieții: Mercer, EU Urban Audit, Numbeo, EIU). NU calculate
 // cu formula UrbanX — servesc drept reper de context pentru tier-uri echivalente.
@@ -51,59 +71,65 @@ G._UrbanRank = {
     pred = pred||{}; city = city||{};
     var idx = (G._UrbanIndices && G._UrbanIndices.compute) ? G._UrbanIndices.compute(pred,city) : [];
     function gv(k,d){ var f=idx.filter(function(x){return x.key===k;})[0]; return f?f.value:(d==null?50:d); }
+    var pop=(city.pop2021||city.pop||0), key=city&&(city.key||city.cityKey);
 
-    var econ    = cl(pred.pctUE||40);                                   // % din media UE
+    // ── BONUSURI din motoarele reale (calculate ÎNTÂI, ca să alimenteze fațetele) ──
     var econNote='', resilNote='';
-    // digital -> competitivitate economica ; sanatate -> rezilienta
-    try{ if(G._UrbanServices){ var _ck2=city&&(city.key||city.cityKey);
-      var db=G._UrbanServices.digitalBonus(_ck2,city)||0; if(db){ econ=cl(econ+db); econNote=' + '+db+' pct digital'; } } }catch(e){}
-    var quality = cl((gv('happiness',55)+gv('uhi',55))/2);              // calitate viata
-    // penalizare faună (câini fără stăpân + risc urși) pe calitatea vieții/siguranță
-    var faunaPen = 0, faunaNote = '';
-    try{ if(G._UrbanFauna){ var fm=G._UrbanFauna.qolModifier(city); faunaPen=fm.penalty||0;
-      faunaNote=' − '+faunaPen+' pct faună (câini fără stăpân ~'+fm.strays.perK+'/1000'+(fm.bear.present?', risc urși '+fm.bear.level:'')+')'; } }catch(e){}
-    // bonus cultură/turism (vibrație culturală + atractivitate)
-    var tourBonus = 0, tourNote = '';
-    try{ if(G._UrbanTourism){ tourBonus=G._UrbanTourism.rankBonus(city&&(city.key||city.cityKey), city)||0;
-      if(tourBonus) tourNote=' + '+tourBonus+' pct cultură/turism'; } }catch(e){}
-    var sportBonus=0;
-    try{ if(G._UrbanVitality){ sportBonus=G._UrbanVitality.sportBonus(city&&(city.key||city.cityKey), city)||0;
-      if(sportBonus) tourNote+=' + '+sportBonus+' pct sport'; } }catch(e){}
-    // penalizare locuire neaccesibilă (alungă tinerii)
-    var houPen=0;
-    try{ if(G._UrbanHousing){ var hm=G._UrbanHousing.qolModifier(city,pred); houPen=hm.penalty||0;
-      if(houPen) tourNote+=' − '+houPen+' pct locuire neaccesibilă'; } }catch(e){}
-    quality = cl(quality - faunaPen + tourBonus + sportBonus - houPen);
-    var enviro  = cl((gv('uhi',55) + cl((pred.svM2||11)*4.6) + cl(82-(pred.co2cap||4.6)*6))/3);
-    var demo    = cl(50 + (pred.r10||0)*18);                            // trend demografic
-    // bonus educație (capital uman/talent) + sport (vibrație) — atractivitate
-    var eduNote='', sportNote='';
-    try{ if(G._UrbanVitality){ var _ck=city&&(city.key||city.cityKey);
-      var eb=G._UrbanVitality.eduBonus(_ck,city)||0; if(eb){ demo=cl(demo+eb); eduNote=' + '+eb+' pct educație/talent'; } } }catch(e){}
-    var resil   = cl(82 - (pred.ag||0.2)*120);                          // rezilienta (seismic)
-    try{ if(G._UrbanServices){ var hb=G._UrbanServices.healthBonus(city&&(city.key||city.cityKey),city)||0; if(hb){ resil=cl(resil+hb); resilNote=' + '+hb+' pct sănătate'; } } }catch(e){}
+    var econ = cl(pred.pctUE||40);
+    try{ if(G._UrbanServices){ var db=G._UrbanServices.digitalBonus(key,city)||0; if(db){ econ=cl(econ+db); econNote=' + '+db+' pct digital'; } } }catch(e){}
+    var faunaPen=0, faunaNote='';
+    try{ if(G._UrbanFauna){ var fm=G._UrbanFauna.qolModifier(city); faunaPen=fm.penalty||0; faunaNote=' (câini fără stăpân ~'+fm.strays.perK+'/1000'+(fm.bear.present?', risc urși '+fm.bear.level:'')+')'; } }catch(e){}
+    var tourBonus=0; try{ if(G._UrbanTourism) tourBonus=G._UrbanTourism.rankBonus(key,city)||0; }catch(e){}
+    var sportBonus=0; try{ if(G._UrbanVitality) sportBonus=G._UrbanVitality.sportBonus(key,city)||0; }catch(e){}
+    var eduBonus=0; try{ if(G._UrbanVitality) eduBonus=G._UrbanVitality.eduBonus(key,city)||0; }catch(e){}
+    var houPen=0; try{ if(G._UrbanHousing){ var hm=G._UrbanHousing.qolModifier(city,pred); houPen=hm.penalty||0; } }catch(e){}
+    var healthBonus=0; try{ if(G._UrbanServices) healthBonus=G._UrbanServices.healthBonus(key,city)||0; }catch(e){}
+    var nSpec=0; try{ if(G._UrbanFauna&&G._UrbanFauna.wildlife) nSpec=(G._UrbanFauna.wildlife(city.judet)||[]).length; }catch(e){}
+
+    // ── NATURĂ: parcuri/verde + păduri (jud.) + biodiversitate (floră/faună) ──
+    var forestPct = _forestPct(city);
+    var greenScore  = cl((pred.svM2||11)*4.6);              // parcuri + spații verzi /cap
+    var forestScore = cl(20 + forestPct*1.5);              // păduri din jurul UAT
+    var bioScore    = cl(40 + nSpec*7 + (forestPct>=35?12:0)); // biodiversitate (specii + habitat)
+
+    // ── FAȚETE CALITATEA VIEȚII (pe categorii — fiecare cu scor + formulă demonstrate) ──
+    var hap=gv('happiness',55), uhiv=gv('uhi',55), walk=gv('walk15', gv('walkscore',55)), seism=(pred.ag||0.2);
+    var QF=[]; function qf(label,score,formula){ score=cl(score); QF.push({label:label,score:score,formula:formula}); return score; }
+    qf('Bunăstare generală', (hap+uhiv)/2, 'media(Happiness Index, Urban Health Index)');
+    qf('Cultură & turism', 48 + tourBonus*4, 'atracții/UNESCO/muzee/teatre/festivaluri (motor Turism) → +'+tourBonus+' pct');
+    qf('Sport & recreere', 50 + sportBonus*5, 'infrastructură sportivă & evenimente (motor Vitalitate) → +'+sportBonus+' pct');
+    qf('Verde & natură', (greenScore+forestScore+bioScore)/3, 'parcuri+verde/cap ('+greenScore+') · pădure jud. '+forestPct+'% ('+forestScore+') · biodiversitate '+nSpec+' specii ('+bioScore+')');
+    qf('Viață de noapte & socializare', 42 + tourBonus*3 + (pop>=150000?14:pop>=60000?9:pop>=25000?4:0), 'masă urbană ('+(pop>=150000?'mare':pop>=60000?'medie':'mică')+') + ofertă culturală (proxy)');
+    qf('Siguranță', 74 - faunaPen*2 - seism*40, 'risc faună urbană'+faunaNote+' − accelerație seismică');
+    qf('Prietenos cu seniorii', 55 + healthBonus*2 + greenScore*0.15 + walk*0.15 - faunaPen, 'acces sănătate (+'+healthBonus+') + verde + walkability − risc faună');
+    qf('Prietenos cu familiile', 52 + eduBonus*3 + greenScore*0.12 - houPen - faunaPen*0.5, 'educație (+'+eduBonus+') + parcuri − locuire neaccesibilă − risc');
+    var quality = cl(QF.reduce(function(s,f){return s+f.score;},0)/QF.length);
+    var qNote = ' [fațete: '+QF.map(function(f){return f.label.split(' ')[0]+' '+f.score;}).join(' · ')+']';
+
+    // ── MEDIU, VERDE & BIODIVERSITATE ──
+    var enviro = cl((uhiv + greenScore + cl(82-(pred.co2cap||4.6)*6) + forestScore + bioScore)/5);
+    var enviroNote = ' — UHI · parcuri+verde/cap · CO₂ · pădure '+forestPct+'% · biodiv. '+nSpec+' specii';
+
+    // ── DEMOGRAFIE & CAPITAL UMAN ──
+    var demo = cl(50 + (pred.r10||0)*18); var eduNote='';
+    if(eduBonus){ demo=cl(demo+eduBonus); eduNote=' + '+eduBonus+' pct educație/talent'; }
+
+    // ── REZILIENȚĂ & RISC ──
+    var resil = cl(82 - seism*120);
+    if(healthBonus){ resil=cl(resil+healthBonus); resilNote=' + '+healthBonus+' pct sănătate'; }
     try{ if(G._UrbanEnergy){ var enb=G._UrbanEnergy.bonus(city,pred)||0; if(enb){ resil=cl(resil+enb); resilNote+=' + '+enb+' pct energie'; } } }catch(e){}
     try{ if(G._UrbanResources){ var rd=G._UrbanResources.modifier(city); if(rd.delta){ resil=cl(resil+rd.delta); resilNote+=' '+(rd.delta>0?'+':'−')+' '+Math.abs(rd.delta)+' pct resurse'; } } }catch(e){}
-    var connect = cl(gv('gravity',50));                                 // gravitatia oportunitatilor
 
-    // bonus conectivitate din infrastructura regionala reala (aeroport/autostrada)
-    var cbon=0;
-    try{
-      if(G._RegioInfra){
-        var ap=G._RegioInfra.nearestAirports(city.lat||47, city.lon||27, 60, 1)[0];
-        if(ap && ap.distKm<=15) cbon+=7; else if(ap && ap.distKm<=40) cbon+=4;
-        var hw=G._RegioInfra.relevantHighways(city.lat||47, city.lon||27, 60);
-        if(hw.some(function(h){return h.status==='finalizat';})) cbon+=5;
-        else if(hw.length) cbon+=3;
-      }
-    }catch(e){}
-    connect = cl(connect + cbon);
+    // ── CONECTIVITATE & POZIȚIE ──
+    var connect = cl(gv('gravity',50)); var cbon=0;
+    try{ if(G._RegioInfra){ var apr=G._RegioInfra.nearestAirports(city.lat||47,city.lon||27,60,1)[0]; if(apr&&apr.distKm<=15)cbon+=7; else if(apr&&apr.distKm<=40)cbon+=4; var hw=G._RegioInfra.relevantHighways(city.lat||47,city.lon||27,60); if(hw.some(function(h){return h.status==='finalizat';}))cbon+=5; else if(hw.length)cbon+=3; } }catch(e){}
+    connect = cl(connect+cbon);
 
     var dims = [
       {label:'Economie & convergență UE', score:econ,    w:0.20, formula:'% din PIB/cap media UE27'+econNote, src:'Eurostat / INS + DESI'},
-      {label:'Calitate a vieții',         score:quality, w:0.20, formula:'media(Happiness, Urban Health Index)'+faunaNote+tourNote, src:'OECD Better Life / WHR + bunăstare animală + cultură/turism'},
+      {label:'Calitate a vieții',         score:quality, w:0.20, formula:'media celor 8 fațete (bunăstare · cultură/turism · sport · verde/natură · viață de noapte · siguranță · seniori · familii)'+qNote, src:'OECD Better Life + Turism + Vitalitate + Faună + Sănătate'},
       {label:'Conectivitate & poziție',   score:connect, w:0.15, formula:'Gravitația oportunităților + bonus aeroport/autostradă reală', src:'model UrbanX + CNAIR/AACR'},
-      {label:'Mediu & climă',             score:enviro,  w:0.15, formula:'media(UHI, spații verzi/cap, traiectorie CO₂)', src:'EEA / WHO'},
+      {label:'Mediu, verde & biodiversitate', score:enviro, w:0.15, formula:'media(UHI, parcuri+verde/cap, traiectorie CO₂, pădure județeană, biodiversitate)'+enviroNote, src:'EEA / WHO / INS-Romsilva + Faună'},
       {label:'Demografie & capital uman', score:demo,    w:0.15, formula:'50 + ritm populație 10 ani × 18'+eduNote, src:'INS / recensământ 2021 + ARACIS'},
       {label:'Reziliență & risc',         score:resil,   w:0.15, formula:'82 − accelerație seismică(g) × 120'+resilNote, src:'INFP P100 / ANAR + sănătate'},
     ];
@@ -112,15 +138,16 @@ G._UrbanRank = {
 
     var tier = tierOf(city);
     var peers = (EU_PEERS[tier]||[]).slice();
-    // pozitia orasului in setul de referinta echivalent
     var withCity = peers.concat([{n:(city.name||'Acest oraș'),s:score,self:true}]).sort(function(a,b){return b.s-a.s;});
     var rank = withCity.findIndex(function(x){return x.self;})+1;
 
     return {
-      score:score, grade:grade, dims:dims, tier:tier, tierLabel:TIER_LABEL[tier],
+      score:score, grade:grade, dims:dims, qualityFacets:QF,
+      nature:{ forestPct:forestPct, species:nSpec, greenScore:greenScore, forestScore:forestScore, bioScore:bioScore },
+      tier:tier, tierLabel:TIER_LABEL[tier],
       peers:peers, peersWithCity:withCity, rankInPeers:rank, peerCount:withCity.length,
-      formula:'Nota UrbanX = Σ (dimensiune × pondere): Economie 20% · Calitate vieții 20% · Conectivitate 15% · Mediu 15% · Demografie 15% · Reziliență 15%',
-      source:'Index compozit UrbanX pe baza ISO 37120 + Eurostat + OECD + INFP + EEA (toate sub-scorurile din date reale analizate de platformă).'
+      formula:'Nota UrbanX = Σ (dimensiune × pondere): Economie 20% · Calitate vieții 20% (8 fațete) · Conectivitate 15% · Mediu/verde/biodiversitate 15% · Demografie 15% · Reziliență 15%',
+      source:'Index compozit UrbanX pe baza ISO 37120 + Eurostat + OECD + INFP + EEA + INS-Romsilva (toate sub-scorurile din date reale/modele analizate de platformă).'
     };
   },
 
@@ -158,6 +185,17 @@ G._UrbanRank = {
       D.barChart(R.dims.map(function(d){return [d.label.split(' ')[0], d.score, [110,130,200]];}), {title:'Scor pe dimensiune (0–100)', max:100, vfmt:function(v){return String(Math.round(v));}});
     }
     D.bullets(R.dims.map(function(d){ return [d.label+' ('+Math.round(d.w*100)+'%)', 'scor '+d.score+'/100 — '+d.formula+' (sursă: '+d.src+').']; }));
+    // DEMONSTRAȚIE: fațetele calității vieții (pe categorii) — notare arătată, nu declarată
+    if(R.qualityFacets && R.qualityFacets.length){
+      D.h2('Calitatea vieții — descompunere pe categorii');
+      D.P('Dimensiunea „Calitate a vieții" (20% din notă) este media a 8 fațete, fiecare cu scor și formulă proprie — nota este demonstrată, nu declarată. Include explicit cultura/turismul, sportul, verdele/natura, viața de noapte și prietenia față de seniori și familii.');
+      if(D.barChart) D.barChart(R.qualityFacets.map(function(f){return [f.label.split(' ')[0], f.score, [110,180,140]];}),{title:'Fațetele calității vieții (0–100)', max:100, vfmt:function(v){return String(Math.round(v));}});
+      D.bullets(R.qualityFacets.map(function(f){ return [f.label+' — '+f.score+'/100', f.formula]; }));
+    }
+    if(R.nature){
+      D.h2('Natură, parcuri & biodiversitate');
+      D.P('Componenta de mediu include explicit: parcuri și spații verzi pe cap de locuitor (scor '+R.nature.greenScore+'/100), acoperirea forestieră a județului ('+R.nature.forestPct+'% → scor '+R.nature.forestScore+'/100) și biodiversitatea — '+R.nature.species+' specii de faună sălbatică inventariate în județ (scor '+R.nature.bioScore+'/100). Pădurile din jurul UAT, flora și fauna sălbatică sunt astfel parte cuantificată din notă, nu omise.');
+    }
     D.h2('Benchmark cu orașe europene echivalente');
     D.P('Comparația se face DOAR în interiorul categoriei de mărime ('+R.tierLabel+') — nu se compară un oraș mic cu o metropolă. Scorurile orașelor europene sunt repere orientative din clasamente publice (Mercer, EU Urban Audit, Numbeo), nu calculate cu formula UrbanX.');
     if(D.barChart){
