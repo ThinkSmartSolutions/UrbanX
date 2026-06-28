@@ -437,6 +437,15 @@ G._CinemaEngine={
     }catch(e){console.warn('[v8] layer err:',lyrDef.id,e.message);}
   },
 
+  // OPTIM: fetch OSM cu CACHE (per query) — re-redarea cinematicului / re-intrarea în scenă
+  // nu mai re-interoghează Overpass (instant + mai puțină încărcare pe proxy).
+  _osmCache:{},
+  async _osmFetchJSON(q){
+    if(this._osmCache[q]) return this._osmCache[q];
+    var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
+    var j=await resp.json(); this._osmCache[q]=j; return j;
+  },
+
   // Bare 3D din PUG — cresc animat cu t
   _add3DGrowth(map){
     // EXISTENT vs PROPUS, cinematic:
@@ -1550,8 +1559,7 @@ G._CinemaEngine={
     var q='[out:json][timeout:25];('+fl.join(';')+';);out center tags;';
     var feats=[], counts={};
     try{
-      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
-      var j=await resp.json();
+      var j=await this._osmFetchJSON(q);
       (j.elements||[]).forEach(function(el){
         var tg=el.tags||{}, cat=null;
         if(tg.amenity==='school'||tg.amenity==='kindergarten')cat='scoli';
@@ -1606,8 +1614,7 @@ G._CinemaEngine={
     var q='[out:json][timeout:25];('+fl.join(';')+';);out center tags;';
     var feats=[], counts={};
     try{
-      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
-      var j=await resp.json();
+      var j=await this._osmFetchJSON(q);
       (j.elements||[]).forEach(function(el){
         var tg=el.tags||{}, h=tg.historic||'', cat=null;
         if(h==='monument'||h==='memorial')cat='monumente';
@@ -1655,8 +1662,7 @@ G._CinemaEngine={
     var q='[out:json][timeout:25];(way["power"~"^(line|minor_line)$"]'+a+';way["railway"~"^(rail|light_rail|subway|tram)$"]'+a+';way["waterway"~"^(river|canal|stream)$"]'+a+';way["highway"~"^(motorway|trunk|primary)$"]'+a+';);out geom tags;';
     var feats=[], counts={energie:0,feroviar:0,apa:0,rutier:0};
     try{
-      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
-      var j=await resp.json();
+      var j=await this._osmFetchJSON(q);
       (j.elements||[]).forEach(function(el){
         if(!el.geometry||el.geometry.length<2)return; var tg=el.tags||{}, col='#888', k=null;
         if(tg.power){col='#ef4444';k='energie';} else if(tg.railway){col='#a855f7';k='feroviar';} else if(tg.waterway){col='#38bdf8';k='apa';} else if(tg.highway){col='#f59e0b';k='rutier';}
