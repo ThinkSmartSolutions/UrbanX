@@ -515,6 +515,9 @@ function htmlMobRapoarte(){
     ${btn('generateSSF()','248,113,113','🔥','Studiu Siguranță la Foc (ISU)','Aviz ISU Moldova, P118-2/2013, evacuare','isu')}
     ${btn('generateGeotehnicalStudy()','167,139,250','🪨','Pre-Studiu Geotehnic','Seismicitate, NFA, capacitate portantă','geotehnic')}
     ${btn('generateAACR()','96,165,250','✈','Studiu AACR — Aviz Aeroport','ICAO Anexa 14, H maxim admis','aacr')}
+    ${btn('generateStudiuPMR()','34,211,238','♿','Accesibilitate PMR','Legea 448/2006 · NP 051/2012 · ISO 21542','pmr')}
+    ${btn('generateStudiuIluminat()','251,191,36','💡','Iluminat Natural EN 17037','Factor lumină zi · OMS 119 · Adâncime cameră','iluminat')}
+    ${btn('generateStabilitateTaluzuri()','180,76,4','⛰','Studiu Stabilitate Taluzuri & Versanți','Bishop · Fellenius · EC7 · NP 074/2014 · Cotă AMSL real','stabilitate')}
   </div>
 
   ${cat('④ Studii Mediu & Infrastructură','74,222,128')}
@@ -525,6 +528,8 @@ function htmlMobRapoarte(){
     ${btn('generateGreenStudy()','74,222,128','🌳','Studiu Spații Verzi','SV necesar, plantare, permeabilitate','verde')}
     ${btn('generateNoiseStudy()','167,139,250','🔇','Studiu Acustic Urban','Zgomot, SR 10009/2017, noapte','acustic')}
     ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
+    ${btn('generateStudiuApePluviale()','56,189,248','🌧','Gospodărire Ape Pluviale','SR EN 752 · Debit calcul · Cisternă recuperare','ape_pluviale')}
+    ${btn('generatePrestudiuBransamente()','96,165,250','🔌','Pre-studiu Bransamente & Utilități','Apă · Canal · Electric · Gaze · ISU · PV','bransamente')}
   </div>
 
   ${cat('⑤ Studii Mobilitate & Impact','244,114,182')}
@@ -545,19 +550,8 @@ function htmlMobRapoarte(){
     ${btn('generateStudiuFezabilitate()','212,175,55','📊','Studiu Fezabilitate / DALI','Viabilitate economică, HG 907/2016','fezabilitate')}
     ${btn('generateCPE()','52,211,153','⚡','Certificat Performanță Energetică','Clasa A-G · EP kWh/m²an · NZEB · Legea 372/2005','cpe')}
     ${btn('generateProiectieUrbanistica()','100,130,220','🏙','Proiecție Urbanistică 10/20/30 ani','INSE · Scenarii S1/S2/S3 · Demografic · ESG Proiectat','proiectie_urb')}
-    ${btn('generateStabilitateTaluzuri()','180,76,4','⛰','Studiu Stabilitate Taluzuri','Bishop · Fellenius · EC7 · NP 074/2014 · Cotă AMSL real','stabilitate')}
-    ${btn('generatePrestudiuBransamente()','96,165,250','🔌','Pre-studiu Bransamente & Utilități','Apă · Canal · Electric · Gaze · ISU · PV','bransamente')}
-  </div>
-
-  ${cat('⑧ Studii Noi 2026','34,211,238')}
-  <div class="card" style="display:flex;flex-direction:column;gap:6px">
-    ${btn('generateStudiuPMR()','34,211,238','♿','Accesibilitate PMR','Legea 448/2006 · NP 051/2012 · ISO 21542','pmr')}
-    ${btn('generateStudiuIluminat()','251,191,36','💡','Iluminat Natural EN 17037','Factor lumină zi · OMS 119 · Adâncime cameră','iluminat')}
     ${btn('generateREPA()','129,140,248','📋','Raport Pre-Autorizare (REPA)','Checklist AC · Avize necesare · Listă documente','repa')}
-    ${btn('generateStudiuApePluviale()','56,189,248','🌧','Gospodărire Ape Pluviale','SR EN 752 · Debit calcul · Cisternă recuperare','ape_pluviale')}
     ${btn('generateSeismicStudy()','248,113,113','🌍','Studiu Seismic & Risc Seismic','P100-1/2013 · ag · Tc · Clasa importanță','seismic')}
-    ${btn('()=>{ss("🔜 Studiu Carbon — în dezvoltare. Disponibil în curând.");}','74,222,128','🌱','Bilanț Carbon & CO₂','Amprentă carbon · NZEB · ESG — în dezvoltare','carbon')}
-    ${btn('()=>{ss("🔜 Studiu Biodiversitate — în dezvoltare. Disponibil în curând.");}','134,239,172','🦋','Biodiversitate Urbană','Natura 2000 · Indice verde — în dezvoltare','biodiv')}
   </div>
   </div>`;
 }
