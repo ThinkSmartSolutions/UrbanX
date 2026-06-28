@@ -146,6 +146,41 @@
           }
         } catch (e) {}
       }
+      // ── GEOMORFOLOGIE REALĂ din DEM (Terrain-RGB) — terase/relief/poziție vs vale,
+      // calculată pe amplasament (NU narativ generic). Relevant arheologic: locuirea
+      // istorică preferă terasele uscate lângă apă. Cerut de Florin (date dinamice).
+      if (x.lat != null && typeof G._getElevGrid === 'function') {
+        try {
+          var eg = await G._getElevGrid(x.lat, x.lon, 800, 16);
+          if (eg && eg.grid && eg.grid.length) {
+            var gN = eg.gridN || eg.grid.length, mid = Math.floor(gN / 2);
+            var cElev = eg.grid[mid][mid];
+            var relief = +(eg.elevMax - eg.elevMin).toFixed(1);
+            var relPos = relief > 0 ? Math.round((cElev - eg.elevMin) / relief * 100) : 50;
+            var cell_m = (2 * 800) / (gN - 1);
+            var dzx = Math.abs(eg.grid[mid][Math.min(gN - 1, mid + 1)] - eg.grid[mid][Math.max(0, mid - 1)]);
+            var dzy = Math.abs(eg.grid[Math.min(gN - 1, mid + 1)][mid] - eg.grid[Math.max(0, mid - 1)][mid]);
+            var slopePct = +(Math.max(dzx, dzy) / (2 * cell_m) * 100).toFixed(1);
+            var lo = { v: 1e9, gy: mid, gx: mid };
+            for (var yy = 0; yy < gN; yy++) for (var xx = 0; xx < gN; xx++) { if (eg.grid[yy][xx] < lo.v) lo = { v: eg.grid[yy][xx], gy: yy, gx: xx }; }
+            var dValeM = Math.round(Math.hypot(lo.gx - mid, lo.gy - mid) * cell_m);
+            var poz = relPos >= 66 ? 'terasă/versant înalt' : relPos >= 33 ? 'terasă medie / pantă' : 'zonă joasă / luncă';
+            var potClass = (relPos >= 40 && relPos <= 90 && dValeM >= 60 && dValeM <= 700) ? 'RIDICAT' : (relPos < 25 ? 'MODERAT (zonă joasă, umedă)' : 'MEDIU');
+            D.chapter('Analiză geomorfologică a amplasamentului (model digital de elevație)');
+            D.P('Relieful și hidrografia condiționează direct locuirea istorică: așezările preistorice și antice preferau terasele înalte, uscate și apărate, în proximitatea unei surse de apă (pâraie, izvoare la baza teraselor). Analiza de mai jos este CALCULATĂ din modelul digital de elevație (Mapbox Terrain-RGB), pe o rază de ~800 m în jurul amplasamentului — nu este un text generic.');
+            if (D.table) D.table(['Parametru geomorfologic (din DEM)', 'Valoare'], [
+              ['Cotă teren amplasament (AMSL)', N(cElev, 1) + ' m'],
+              ['Relief local (max−min, rază 800 m)', N(relief, 1) + ' m (' + N(eg.elevMin, 1) + '–' + N(eg.elevMax, 1) + ' m)'],
+              ['Poziție relativă în relief', relPos + '% → ' + poz],
+              ['Pantă locală estimată', slopePct + '%'],
+              ['Distanță estimată la firul de vale', '~' + N(dValeM) + ' m']
+            ], [CW * 0.6, CW * 0.4]);
+            D.P('Interpretare arheologică: amplasamentul se află pe ' + poz + ' (poziție relativă ' + relPos + '% în relieful local), la cca. ' + N(dValeM) + ' m de cel mai jos punct din zonă (probabil firul de vale / curs de apă istoric). ' + (potClass === 'RIDICAT' ? 'Această configurație — terasă uscată în apropierea apei — este TIPICĂ pentru locuirea preistorică și antică; potențialul arheologic din perspectivă geomorfologică este RIDICAT.' : potClass.indexOf('MODERAT') === 0 ? 'Zona joasă/umedă este mai puțin favorabilă locuirii continue, dar nu o exclude (așezări de luncă, vaduri, poduri); potențialul este moderat, condiționat de cota apei istorice.' : 'Configurația indică un potențial geomorfologic MEDIU pentru locuirea istorică.'));
+            if (D.callout) D.callout('Potențial arheologic (criteriu geomorfologic)', potClass);
+            if (D.source) D.source('Model digital de elevație Mapbox Terrain-RGB · analiză UrbanX (rază 800 m, grilă ' + gN + '×' + gN + ')');
+          }
+        } catch (e) { console.warn('[RCAI geomorf]', e.message); }
+      }
     }
 
     // ── DATE REALE: monumente și situri identificate (OSM heritage / LMI) ──
