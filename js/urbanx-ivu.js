@@ -26,10 +26,44 @@
     Object.keys(db).forEach(function (k) { out[k] = db[k]; });
     return out;
   }
+  // Construiește un city object ONEST din registrul SIRUTA (3181 UAT) când UAT-ul
+  // nu are date bogate — estimare din ATRIBUTELE PROPRII (pop/regiune/centroid),
+  // NU fallback la Iași (ar fabrica date — vezi regula contaminare comune).
+  var _HUB = { NV: 1.08, NE: 0.78, SE: 0.82, SB: 0.88, SV: 0.85, V: 1.10, C: 1.00, BI: 1.25, B: 1.25, S: 0.80 };
+  var _PIBR = { NE: 8200, NV: 14500, V: 17200, C: 16800, SE: 10400, S: 9800, SV: 8900, B: 28400, BI: 28400, SB: 9800 };
+  function _cityFromRegistry(cityKey) {
+    var R = (G._UAT_REGISTRY && G._UAT_REGISTRY[cityKey]); if (!R) return null;
+    var tip = { m: 'municipiu', o: 'oras', c: 'comuna', C: 'capitala' }[R.t] || 'comuna';
+    var pop = R.p || (R.t === 'c' ? 2500 : R.t === 'o' ? 9000 : R.t === 'm' ? 40000 : 1500);
+    return {
+      key: cityKey, name: R.n, siruta: R.s, judet: R.j, tip: tip,
+      lat: R.c ? R.c[1] : null, lon: R.c ? R.c[0] : null,
+      regiune: R.r, pop2021: pop, pop2011: Math.round(pop / 0.985),
+      rata_reala_2011_2021: 1.0, coef_hub: _HUB[R.r] || 0.85,
+      pib_eur_cap: _PIBR[R.r] || 10000, _estimat: true
+    };
+  }
+  // SIRUTA difera intre registru si datele bogate (nestandardizat) → reconciliem dupa NUME.
+  function _normNm(s) { return String(s || '').toLowerCase().replace(/[șş]/g, 's').replace(/[țţ]/g, 't').replace(/[ăâ]/g, 'a').replace(/î/g, 'i').replace(/^(municipiul|orasul|oras|comuna|sat)\s+/, '').trim(); }
+  var _richNameIdx = null;
+  function _richByName(name) {
+    if (!_richNameIdx) {
+      _richNameIdx = {}; var all = _allUats();
+      Object.keys(all).forEach(function (k) { var nm = _normNm(all[k].name || ''); if (nm && !_richNameIdx[nm]) { if (!all[k].key) all[k].key = k; _richNameIdx[nm] = all[k]; } });
+    }
+    return _richNameIdx[_normNm(name)] || null;
+  }
   function _resolveCityData(cityKey) {
     var all = _allUats();
     if (all[cityKey]) return all[cityKey];
-    // fallback: rezolvare prin motorul masterplan (comune/sate cu SIRUTA)
+    var R = (G._UAT_REGISTRY && G._UAT_REGISTRY[cityKey]);
+    if (R) {
+      // daca avem DATE BOGATE cu acelasi nume (Cluj/Iasi/comune cu RLU) → foloseste-le, nu estima
+      var rich = _richByName(R.n); if (rich) return rich;
+      // altfel ONEST: construieste din registrul SIRUTA propriu (NU fallback Iasi)
+      var reg = _cityFromRegistry(cityKey); if (reg) return reg;
+    }
+    // fallback final: motorul masterplan (poate cădea pe Iași — ultim resort)
     try { if (G._TCIMasterplanPDF && G._TCIMasterplanPDF._resolveCity) return G._TCIMasterplanPDF._resolveCity(cityKey); } catch (e) {}
     return null;
   }
@@ -123,15 +157,12 @@
   // ── Comparator catalog ───────────────────────────────────────────────────
   var _sel = [];
   function comparatorHTML() {
-    var db = G._RO_CITIES_DB || {};
-    var opts = Object.keys(db).sort(function (a, b) { return (db[a].name || '').localeCompare(db[b].name || ''); })
-      .map(function (k) { return '<option value="' + k + '">' + (db[k].name || k) + '</option>'; }).join('');
     var rows = _sel.map(scoreFor).filter(Boolean);
     var table = '';
     if (rows.length) {
       var dimLabels = rows[0].R.dims.map(function (d) { return d.label; });
       var head = '<tr><th style="text-align:left;padding:5px;color:#94a3b8;font-size:11px">Indicator</th>' +
-        rows.map(function (r) { return '<th style="padding:5px;color:#e2e8f0;font-size:11px">' + r.name + ' <span onclick="window.UrbanXIVU.rm(\'' + r.key + '\')" style="cursor:pointer;color:#ef4444">✕</span></th>'; }).join('') + '</tr>';
+        rows.map(function (r) { return '<th style="padding:5px;color:#e2e8f0;font-size:11px">' + r.name + (r.city && r.city._estimat ? ' <span title="Scor estimat din populatie/regiune — UAT fara date detaliate" style="color:#fbbf24;font-size:9px">~est</span>' : '') + ' <span onclick="window.UrbanXIVU.rm(\'' + r.key + '\')" style="cursor:pointer;color:#ef4444">✕</span></th>'; }).join('') + '</tr>';
       var scoreRow = '<tr style="border-top:2px solid rgba(255,255,255,.12)"><td style="padding:5px;font-weight:700;color:#6ee7b7">Nota UrbanX (IVU)</td>' +
         rows.map(function (r) { return '<td style="padding:5px;text-align:center;font-weight:800;color:' + gradeColor(r.R.score) + '">' + r.R.score + ' <span style="font-size:10px">' + r.R.grade + '</span></td>'; }).join('') + '</tr>';
       var dimRows = dimLabels.map(function (lbl, i) {
@@ -150,8 +181,26 @@
     } else {
       table = '<div style="color:#64748b;font-size:12px;padding:14px;text-align:center">Adaugă 2-4 orașe pentru comparație.</div>';
     }
-    return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><select id="ivu-add" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:8px;padding:8px">' + opts + '</select>' +
-      '<button onclick="window.UrbanXIVU.add()" style="background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer">+ Adaugă</button></div>' + table;
+    return '<div style="margin-bottom:10px;position:relative">' +
+      '<input id="ivu-search" type="text" autocomplete="off" placeholder="🔍 Caută ORICE UAT din România (municipiu · oraș · comună)…" ' +
+      'oninput="window.UrbanXIVU.search(this.value)" ' +
+      'style="width:100%;box-sizing:border-box;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:8px;padding:9px 12px;font-size:13px">' +
+      '<div id="ivu-results" style="position:absolute;left:0;right:0;top:42px;z-index:20;background:#0c1424;border:1px solid rgba(255,255,255,.14);border-radius:8px;max-height:240px;overflow-y:auto;display:none"></div>' +
+      '<div style="font-size:10px;color:#64748b;margin-top:5px">Catalog complet: ' + ((G._UAT_REGISTRY ? Object.keys(G._UAT_REGISTRY).length : 0)) + ' UAT-uri (SIRUTA). UAT-urile fără date detaliate primesc scor <b>estimat</b> din populație/regiune.</div>' +
+      '</div>' + table;
+  }
+  // type-ahead peste registrul SIRUTA complet (3181 UAT)
+  function _renderResults(q) {
+    var box = document.getElementById('ivu-results'); if (!box) return;
+    var res = (G._searchSIRUTA && q && q.length >= 2) ? G._searchSIRUTA(q, 12) : [];
+    if (!res.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+    box.innerHTML = res.map(function (r) {
+      var dup = _sel.indexOf(r.key) >= 0;
+      return '<div onclick="window.UrbanXIVU.add(\'' + r.key + '\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center' + (dup ? ';opacity:.4' : '') + '" onmouseover="this.style.background=\'rgba(16,185,129,.12)\'" onmouseout="this.style.background=\'transparent\'">' +
+        '<span style="color:#e6edf7;font-size:13px">' + r.name + (dup ? ' ✓' : '') + '</span>' +
+        '<span style="color:#64748b;font-size:11px">' + (r.tip || '') + ' · ' + r.judet + (r.pop2021 ? ' · ' + r.pop2021.toLocaleString('ro-RO') + ' loc.' : '') + '</span></div>';
+    }).join('');
+    box.style.display = 'block';
   }
 
   // ── Catalog național (toate orașele ranked) ──────────────────────────────
@@ -220,7 +269,8 @@
     },
     tab: function (t) { _tab = t; _render(); },
     show: function (k) { _active = k; _tab = 'card'; _render(); },
-    add: function () { var s = document.getElementById('ivu-add'); if (s && s.value && _sel.indexOf(s.value) < 0 && _sel.length < 4) _sel.push(s.value); _tab = 'compare'; _render(); },
+    add: function (k) { if (k && _sel.indexOf(k) < 0 && _sel.length < 4) _sel.push(k); _tab = 'compare'; _render(); },
+    search: function (q) { try { _renderResults(q); } catch (e) {} },
     rm: function (k) { _sel = _sel.filter(function (x) { return x !== k; }); _render(); },
     scoreFor: scoreFor, catalog: catalog, rankOf: rankOf
   };
