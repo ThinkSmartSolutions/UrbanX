@@ -3256,10 +3256,15 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
       case 'b16s1': { // NOTA UrbanX — clasament transparent + benchmark european
         titlu('Nota UrbanX','Index transparent · toti indicatorii reali · benchmark european'); linie();
-        // CONSECVENTA cinematic == PDF: aceeasi rezolvare de city (cu key + pib imbogatit) + acelasi pred
-        var _ncity=city, _npred=pred;
-        try{ if(window._TCIMasterplanPDF&&window._TCIMasterplanPDF._resolveCity){ _ncity=window._TCIMasterplanPDF._resolveCity(SE._cityKey)||city; if(_ncity&&!_ncity.key)_ncity.key=SE._cityKey; if(window._PredEngine&&_PredEngine.calc)_npred=_PredEngine.calc(_ncity); } }catch(e){}
-        var R=(window._UrbanRank&&window._UrbanRank.compute)?window._UrbanRank.compute(_npred,_ncity):null;
+        // SURSA UNICA de adevar: window.UrbanXIVU.scoreFor(cityKey) — IDENTIC cu PDF + panoul IVU.
+        // (rezolva orasul + pred + bonusurile turism/verde/etc consecvent → aceeasi nota peste tot)
+        var R=null;
+        try{ var _s=(window.UrbanXIVU&&window.UrbanXIVU.scoreFor)?window.UrbanXIVU.scoreFor(SE._cityKey):null; if(_s)R=_s.R; }catch(e){}
+        if(!R){ // fallback (doar daca IVU indisponibil)
+          var _ncity=city,_npred=pred;
+          try{ if(window._TCIMasterplanPDF&&window._TCIMasterplanPDF._resolveCity){ _ncity=window._TCIMasterplanPDF._resolveCity(SE._cityKey)||city; if(_ncity&&!_ncity.key)_ncity.key=SE._cityKey; if(window._PredEngine&&_PredEngine.calc)_npred=_PredEngine.calc(_ncity); } }catch(e){}
+          R=(window._UrbanRank&&window._UrbanRank.compute)?window._UrbanRank.compute(_npred,_ncity):null;
+        }
         if(R){
           // dimensiunile notei — bare orizontale cu pondere si scor
           R.dims.forEach(function(d,i){

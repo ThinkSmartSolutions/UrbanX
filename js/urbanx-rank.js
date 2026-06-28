@@ -127,7 +127,10 @@ G._UrbanRank = {
   // Capitol PDF (Masterplan + PMUD)
   renderChapter: function(D, pred, city){
     if(!D || !D.pdf) return;
-    var R = this.compute(pred, city);
+    // SURSA UNICA: dacă avem cityKey, folosim UrbanXIVU.scoreFor (identic cu cinematic + panou IVU)
+    var R = null;
+    try { var _k = city && (city.key || city.cityKey); if (_k && G.UrbanXIVU && G.UrbanXIVU.scoreFor) { var _s = G.UrbanXIVU.scoreFor(_k); if (_s) R = _s.R; } } catch (e) {}
+    if (!R) R = this.compute(pred, city);
     D.chapter('Nota UrbanX — clasament și benchmark european');
     D.h2('Ce reprezintă nota UrbanX');
     D.P('Nota UrbanX este un indice compozit (0–100) care exprimă, într-o singură cifră reproductibilă, performanța globală a unui UAT pe dimensiunile cheie ale dezvoltării urbane durabile. Spre deosebire de clasamentele de imagine, fiecare sub-scor provine din date oficiale și are formulă explicită — deci nota poate fi recalculată și verificată oricând. Scopul: un standard transparent de evaluare comparabilă a orașelor.');
