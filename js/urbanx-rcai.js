@@ -95,6 +95,35 @@
     } catch (e) { return []; }
   }
 
+  // SITURI ARHEOLOGICE REALE din RAN (CIMEC) — serviciul ArcGIS oficial eism.geo-spatial.ro,
+  // confirmat funcțional 28 iun 2026 (layer 0 + 6 = Repertoriul Arheologic Național). Via /proxy.
+  async function _fetchRAN(lat, lon, radius) {
+    var dLat = radius / 111320, dLon = radius / (111320 * Math.cos(lat * Math.PI / 180));
+    var bbox = (lon - dLon) + ',' + (lat - dLat) + ',' + (lon + dLon) + ',' + (lat + dLat);
+    var base = 'https://eism.geo-spatial.ro/eismgeo/rest/services/Patrimoniu/PatrimoniuWM/MapServer';
+    var qs = '/query?where=1%3D1&geometry=' + bbox + '&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=*&returnGeometry=true&outSR=4326&f=json';
+    var out = [];
+    var layers = [0, 6];
+    for (var i = 0; i < layers.length; i++) {
+      try {
+        var resp = await fetch(PROXY + '/proxy?url=' + encodeURIComponent(base + '/' + layers[i] + qs), { signal: AbortSignal.timeout(30000) });
+        var j = await resp.json(); var feats = (j && j.features) || [];
+        feats.forEach(function (f) {
+          var a = f.attributes || {}, g = f.geometry || {};
+          var nm = a.NUMESIT || a.Nume || a.Toponim; var cod = a.CODSIT || a.CodRAN || '';
+          if (!nm) return;
+          var la = g.y, lo = g.x;
+          var dist = (la != null && G.turf) ? Math.round(G.turf.distance([lon, lat], [lo, la], { units: 'meters' })) : null;
+          out.push({ cod: cod, nume: nm, dist: dist });
+        });
+      } catch (e) {}
+    }
+    var seen = {}, dd = [];
+    out.forEach(function (s) { var k = s.cod || s.nume; if (seen[k]) return; seen[k] = 1; dd.push(s); });
+    dd.sort(function (a, b) { return (a.dist || 1e9) - (b.dist || 1e9); });
+    return dd;
+  }
+
   async function generatePDF(cityKey, mode) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
@@ -208,6 +237,21 @@
           }
         } catch (e) { console.warn('[RCAI geomorf]', e.message); }
       }
+      // ── SITURI ARHEOLOGICE REALE din RAN/CIMEC (serviciul oficial eism.geo-spatial.ro) ──
+      try {
+        var ran = await _fetchRAN(x.lat, x.lon, 2500);
+        D.chapter('Situri arheologice RAN în proximitate (Repertoriul Arheologic Național)');
+        if (ran && ran.length) {
+          D.P('Interogarea Repertoriului Arheologic Național (RAN) prin serviciul oficial CIMEC (eism.geo-spatial.ro) a returnat ' + ran.length + ' situri arheologice înregistrate în proximitatea amplasamentului (rază ~2,5 km). Sunt date OFICIALE, cu cod RAN, și constituie cel mai direct indicator al potențialului arheologic al sitului.');
+          if (D.table) D.table(['Cod RAN', 'Denumire sit', 'Distanță'], ran.slice(0, 22).map(function (s) { return [s.cod || '—', String(s.nume || '').slice(0, 72), s.dist != null ? N(s.dist) + ' m' : '—']; }), [CW * 0.18, CW * 0.62, CW * 0.20]);
+          if (ran.length > 22) D.P('… și încă ' + (ran.length - 22) + ' situri RAN în zonă (lista completă în RAN/CIMEC).');
+          var near = ran.filter(function (s) { return s.dist != null && s.dist < 300; }).length;
+          if (D.callout) D.callout('Implicație pentru investiție', near ? near + ' sit(uri) RAN la sub 300 m de amplasament — potențial arheologic RIDICAT; cercetare arheologică preventivă foarte probabil necesară (OG 43/2000).' : 'Situri RAN înregistrate în zonă — potențial arheologic real; descărcare de sarcină arheologică recomandată înainte de autorizare.');
+          if (D.source) D.source('Repertoriul Arheologic Național (RAN) · CIMEC / eism.geo-spatial.ro — date oficiale, interogare live');
+        } else {
+          D.P('Interogarea RAN/CIMEC (eism.geo-spatial.ro) nu a returnat situri înregistrate în raza analizată la momentul generării. Aceasta NU exclude existența vestigiilor neînregistrate — se impune diagnostic arheologic conform OG 43/2000 și consultarea Direcției Județene pentru Cultură.');
+        }
+      } catch (e) { console.warn('[RCAI RAN]', e.message); }
     }
 
     // ── DATE REALE: monumente și situri identificate (OSM heritage / LMI) ──
