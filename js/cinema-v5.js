@@ -72,6 +72,7 @@ SCENES = [
   {id:'b3s2',dur:20000,label:'MOTOARE ECONOMICE',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b31s1',dur:20000,label:'VALOARE IMOBILIARA €/mp',bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b32s1',dur:21000,label:'PATRIMONIU & IDENTITATE',bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT II — ORASUL SUB PRESIUNE
   {id:'b4s1',dur:20000,label:'RETEA RUTIERA',         bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s2',dur:24000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -1226,6 +1227,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly([cx,cy],12.4,38,0,4000,0,'day');
         fly([cx,cy],13.3,54,28,6000,9000,'day');
         fly([cx,cy],12.7,46,-22,5000,16000,'dusk');
+        break;
+
+      case 'b32s1': // PATRIMONIU & IDENTITATE — monumente/situri istorice reale (OSM historic=*)
+        lp('dusk');
+        onIdle(function(){try{SE._addHeritageMap&&SE._addHeritageMap(map, city);}catch(e){}});
+        fly([cx,cy],13,44,0,4000,0,'dusk');
+        fly([cx,cy],14.4,58,22,6000,9000,'dusk');
+        fly([cx,cy],13.6,50,-16,5000,16000,'night');
         break;
 
       // BLOC 5 ───────────────────────────────────────────────────────────
@@ -2388,6 +2397,22 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         var MK=null; try{ var nm=(window.TCI&&window.TCI.cityName)||''; if(window.Market&&nm){ MK=window.Market.snapshot(nm,'apartament'); } }catch(e){}
         narativ('Harta de valoare arata renta urbana: pretul descreste radial dinspre centru spre periferie, modulat de functiunea zonei si de acces. Verde = accesibil, rosu = scump. Model de evaluare de masa (IAAO mass-appraisal), ancorat pe pretul de referinta al pietei locale — ORIENTATIV, nu inlocuieste o evaluare ANEVAR.'+((MK&&MK.count)?(' Piata (date Market): mediana '+N2(MK.median_m2_eur)+' €/mp, '+(MK.change_12m_pct>=0?'+':'')+MK.change_12m_pct+'% in 12 luni.'):'')+' Predictie: investitiile in transport public si regenerare aplatizeaza gradientul si ridica valorile periferice.');
         concluzie('Valoarea = renta de acces. Investitia publica (transport, spatiu public) muta gradientul si creeaza valoare la periferie');
+        break;
+      }
+
+      case 'b32s1': { // PATRIMONIU & IDENTITATE — monumente/situri istorice reale (OSM)
+        titlu('Patrimoniu & identitate urbana','Monumente, situri si cladiri istorice (OpenStreetMap historic=*, ~3km)'); linie();
+        var HC=SE._heritageCounts||{};
+        cifra((HC.total!=null?N2(HC.total):'…')+' obiective','Patrimoniu cultural in proximitate (OSM)','#fbbf24');
+        var hrows=[['Monumente & memoriale',HC.monumente,'#fbbf24'],['Cladiri istorice',HC.cladiri,'#f59e0b'],['Biserici/manastiri',HC.culte,'#a78bfa'],['Situri arheologice',HC.situri,'#fb923c'],['Castele/cetati',HC.castele,'#f472b6']];
+        hrows.forEach(function(r,i){
+          var a=Math.min(1,(t-0.18-i*0.05)/0.16)*sA; if(a<=0||r[1]==null)return; ctx.globalAlpha=a; ctx.textAlign='left';
+          ctx.fillStyle=r[2]; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif';
+          ctx.fillText('● '+r[0]+': '+N2(r[1]), W*0.04, H*(0.40+i*0.05));
+          ctx.globalAlpha=1;
+        });
+        narativ('Patrimoniul construit si arheologic este memoria si identitatea orasului — si o resursa economica reala. Obiectivele de aici sunt cele inregistrate public (OpenStreetMap historic=*), reflectand tesutul istoric care intra sub regim de protectie (Lista Monumentelor Istorice, zone construite protejate, avize ale Directiei Judetene pentru Cultura). Orice interventie in proximitate impune cercetare arheologica preventiva (RCAI) si avizare specifica. Predictie: regenerarea centrata pe patrimoniu (reabilitare, pietonalizare, iluminat scenic, trasee culturale) creste atractivitatea turistica si valoarea zonei, transformand conservarea din cost in investitie.');
+        concluzie('Patrimoniul protejat + pus in valoare = identitate, turism si valoare imobiliara — nu o frana, ci un motor de regenerare');
         break;
       }
 

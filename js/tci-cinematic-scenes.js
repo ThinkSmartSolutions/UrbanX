@@ -1594,6 +1594,44 @@ G._CinemaEngine={
     this._valStats={base:base, vmin:surf.vmin, vmax:surf.vmax, mid:Math.round(mid)};
   },
 
+  // ── PATRIMONIU & IDENTITATE — monumente/situri istorice REALE (OSM historic=*),
+  // acelasi pattern ca _addUrbanAmenities. Puncte color-codate + SE._heritageCounts.
+  async _addHeritageMap(map, city){
+    city=city||this._city||{}; var cx=city.lon||25, cy=city.lat||45.5;
+    var COL={monumente:'#fbbf24',cladiri:'#f59e0b',culte:'#a78bfa',situri:'#fb923c',castele:'#f472b6'};
+    var a='(around:3000,'+cy+','+cx+')';
+    var fl=['nwr["historic"="monument"]'+a,'nwr["historic"="memorial"]'+a,'nwr["historic"="building"]'+a,
+      'nwr["historic"="archaeological_site"]'+a,'nwr["historic"="castle"]'+a,'nwr["historic"="fort"]'+a,
+      'nwr["historic"="ruins"]'+a,'nwr["amenity"="place_of_worship"]["heritage"]'+a,'nwr["building"="church"]["heritage"]'+a];
+    var q='[out:json][timeout:25];('+fl.join(';')+';);out center tags;';
+    var feats=[], counts={};
+    try{
+      var resp=await fetch('https://urbanx-proxy.3dtravelsoftart.workers.dev/osm?q='+encodeURIComponent(q),{signal:AbortSignal.timeout(28000)});
+      var j=await resp.json();
+      (j.elements||[]).forEach(function(el){
+        var tg=el.tags||{}, h=tg.historic||'', cat=null;
+        if(h==='monument'||h==='memorial')cat='monumente';
+        else if(h==='building'||h==='ruins')cat='cladiri';
+        else if(h==='archaeological_site')cat='situri';
+        else if(h==='castle'||h==='fort')cat='castele';
+        else if(tg.amenity==='place_of_worship'||tg.building==='church')cat='culte';
+        if(!cat)return;
+        var lat=el.lat!=null?el.lat:(el.center&&el.center.lat), lon=el.lon!=null?el.lon:(el.center&&el.center.lon);
+        if(lat==null||lon==null)return;
+        feats.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{c:COL[cat],k:cat}});
+        counts[cat]=(counts[cat]||0)+1;
+      });
+    }catch(e){}
+    if(!this._playing) return;
+    if(feats.length){
+      this._safeAdd(map,'v8-herit',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{
+        id:'v8-herit-l',type:'circle',source:'v8-herit',
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,3.5,15,8.5],'circle-color':['get','c'],'circle-opacity':0.94,'circle-stroke-width':1.2,'circle-stroke-color':'rgba(20,10,40,0.9)'}
+      });
+    }
+    counts.total=feats.length; this._heritageCounts=counts;
+  },
+
   // ── VERDE + OAZE DE RACOARE + AER (model Singapore / regula 3-30-300) ──────
   // Insula de caldura urbana (heatmap rosu peste fondul construit dens) +
   // parcurile reale OSM ca OAZE DE RACOARE (verde, halo rece). Contrastul
@@ -1714,7 +1752,7 @@ G._CinemaEngine={
      'v8-proj-line-l','v8-proj-line','v8-proj-pt-l','v8-proj-pt',
      'v8-uhi-l','v8-uhi','v8-oasis-h-l','v8-oasis-h','v8-oasis-l','v8-oasis',
      'v8-sb-l','v8-sb','v8-sb-perim-l','v8-sb-perim','v8-sb-st-l','v8-sb-st','v8-sb-pl-l','v8-sb-pl',
-     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity','v8-val-l','v8-val',
+     'v8-ri-line-l','v8-ri-line','v8-ri-apt-l','v8-ri-apt','v8-amenity-l','v8-amenity','v8-val-l','v8-val','v8-herit-l','v8-herit',
      'v8-age-l','v8-age','v8-sc-l','v8-sc','v8-sc-h-l','v8-sc-h','v8-sc-w-l','v8-sc-w','v8-modal-l','v8-modal','v8-modal-c-l','v8-modal-c','v8-cost-l','v8-cost','v8-fauna-l','v8-fauna','v8-via-l','v8-via','v8-cult-l','v8-cult','v8-vit-l','v8-vit','v8-srv-l','v8-srv','v8-part-l','v8-part','v8-house-l','v8-house','v8-energy-l','v8-energy','v8-res-l','v8-res','v8-monz-l','v8-monz','v8-mon2-l','v8-mon2',
      // cleanup v6/v7 layers
      'v6-gr-l','v6-gr','v6-bld-l','v6-bld','v6-den-l','v6-den','v6-tr-l','v6-tr',
