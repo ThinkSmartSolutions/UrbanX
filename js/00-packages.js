@@ -197,6 +197,7 @@ const _USER = {
     else this.setPackage('PROFESSIONAL'); // default dev
   },
 };
+window._USER = _USER;   // expus pe window (UXRoles/_authSuccess citesc G._USER pt rol)
 
 // ── Workspace Manager — gestioneaza modulele active ───────────────────────
 const _WorkspaceManager = {

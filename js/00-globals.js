@@ -1107,6 +1107,19 @@ function _authSuccess(user) {
   _authUser = user;
   _isAdmin = user?.email && ADMIN_EMAILS.includes(user.email);
 
+  // 001: propagă ROLUL real (din Supabase user/app_metadata) către _USER → filtrarea pe rol.
+  // Fără rol asignat → rămâne null → UXRoles implicit FULL (vede tot; zero regresie).
+  try {
+    const _meta = (user && (user.app_metadata || user.user_metadata)) || {};
+    if (window._USER) {
+      window._USER.email = user?.email || window._USER.email;
+      window._USER.isAdmin = !!_isAdmin;
+      window._USER.role = _meta.role || _meta.rol || (_isAdmin ? 'SUPER_ADMIN' : window._USER.role);
+    }
+    // dacă sertarul e deschis, re-aplică filtrarea imediat
+    if (window.UXSidebar && window.UXSidebar.render && document.getElementById('ux-sidebar-body')) window.UXSidebar.render();
+  } catch (e) { console.warn('[001 role]', e); }
+
   const ov = document.getElementById('auth-overlay');
   if(ov) {
     ov.style.transition = 'opacity .4s ease';
