@@ -160,11 +160,18 @@
     // ── Captură POI (context teritorial) — reutilizarea datelor din carduri ──
     try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, onParcel ? 'Context urban extins — dotări (OSM)' : 'Context teritorial — dotări și echipare (OSM)'); } catch (e) {}
 
-    // ── Corp dezvoltat (rang superior 80-100 pag) ──
+    // ── Corp dezvoltat ──
+    // REGULA teritoriu≠parcelă: pe PARCELĂ NU randăm cele ~75 capitole TERITORIALE
+    // (ar fi același conținut ca documentul teritorial — „toate la fel"). Randăm o
+    // ANALIZĂ FOCALIZATĂ pe amplasament, specifică temei. Pe teritoriu = corpul complet.
     try {
-      var deep = (G._SPS_DEEP && G._SPS_DEEP[id]) || [];
-      if (deep.length && G._deepRender) G._deepRender(D, deep, CW);
-      else { D.chapter('Conținut dezvoltat'); D.P('Corpul dezvoltat al acestui studiu (capitole detaliate pe toate dimensiunile) este în curs de integrare. Structura, copertă, sursele și Nota UrbanX sunt complete; capitolele aprofundate se adaugă progresiv la standardul de 80-100 pagini.'); }
+      if (onParcel) {
+        _renderParcelFocus(D, id, S, PC, CW);
+      } else {
+        var deep = (G._SPS_DEEP && G._SPS_DEEP[id]) || [];
+        if (deep.length && G._deepRender) G._deepRender(D, deep, CW);
+        else { D.chapter('Conținut dezvoltat'); D.P('Corpul dezvoltat al acestui studiu (capitole detaliate pe toate dimensiunile) este în curs de integrare. Structura, copertă, sursele și Nota UrbanX sunt complete; capitolele aprofundate se adaugă progresiv la standardul de 80-100 pagini.'); }
+      }
     } catch (e) {}
 
     // ── Planșe cu HĂRȚI REALE ale UAT (modele urbane + indici desenați pe hartă) ──
@@ -212,6 +219,53 @@
           '</div>';
       }).join('');
     } catch (e) {}
+  }
+
+  // ── Conținut FOCALIZAT pe parcelă, per temă (DISTINCT de versiunea teritorială) ──
+  var PARCEL_FOCUS = {
+    sfu: { rel: 'Fezabilitatea urbană la nivel de amplasament evaluează dacă o intervenție pe ACEASTĂ parcelă este realizabilă tehnic, conformă cu regimul PUG și viabilă — punctual, nu la scara orașului.',
+      diag: ['Conformitatea funcțiunii propuse cu zona (UTR/subzonă) și indicatorii POT/CUT aplicabili.', 'Capacitatea de edificare reală (amprentă/ADC) raportată la suprafața parcelei.', 'Constrângeri de amplasament: accese, vecinătăți, servituți, retrageri.', 'Disponibilitatea utilităților la limita parcelei.'],
+      rec: ['Stabilirea variantei optime de intervenție pentru parcelă (reabilitare / mixt / reconfigurare).', 'Pre-dimensionarea pe edificabilul real, nu pe maxime teoretice.', 'Pentru devizul HG 907 și scenariile financiare ROI — vezi livrabilul SF/DALI (dedicat parcelei).'] },
+    sct: { rel: 'Capacitatea de transport raportată la amplasament privește accesul parcelei la rețea și impactul punctual al traficului generat — nu modelul de trafic al întregului oraș.',
+      diag: ['Ierarhia și capacitatea străzilor adiacente parcelei (acces).', 'Nivelul de serviciu (LOS) la intersecțiile din proximitate.', 'Accesul la transport public în rază de mers pe jos.', 'Numărul de deplasări generate de o dezvoltare pe parcelă.'],
+      rec: ['Dimensionarea acceselor și a parcării la cererea generată de parcelă.', 'Soluții de atenuare locală (sens, marcaje) dacă LOS-ul scade.', 'Pentru studiul de trafic complet la nivel UAT — vezi PMUD / SCT teritorial.'] },
+    sim: { rel: 'Impactul asupra mobilității evaluează efectele unei dezvoltări CONCRETE pe parcelă asupra rețelei imediate (trafic generat, distribuție modală, parcare).',
+      diag: ['Trip generation estimat pentru funcțiunea și mărimea propusă pe parcelă.', 'Distribuția pe moduri (auto/TP/activ) în zona amplasamentului.', 'Presiunea pe parcare și pe accesele din vecinătate.', 'Conexiunile pietonale/velo de la parcelă la dotări.'],
+      rec: ['Plan de management al mobilității pentru dezvoltarea de pe parcelă.', 'Asigurarea locurilor de parcare conform normativului local.', 'Conectarea la rețeaua de transport public și piste.'] },
+    scsp: { rel: 'Calitatea spațiului public se evaluează pentru spațiile DIN și DIN JURUL parcelei — fronturi, accese pietonale, vegetație, confort — la scara amplasamentului.',
+      diag: ['Calitatea frontului stradal și a accesului pietonal la parcelă.', 'Vegetația și umbrirea în proximitate (regula 3-30-300).', 'Confortul și siguranța spațiului public adiacent.', 'Mobilierul urban și iluminatul din zonă.'],
+      rec: ['Activarea parterului și a frontului către spațiul public.', 'Plantare de aliniament și spații verzi de proximitate.', 'Continuitate pietonală sigură de la parcelă la dotări.'] },
+    srgu: { rel: 'Regenerarea rezidențială la nivel de amplasament privește potențialul de reabilitare/reconfigurare al ACESTEI parcele și al ansamblului imediat — nu strategia de regenerare a orașului.',
+      diag: ['Starea fondului construit pe și lângă parcelă (vechime, uzură).', 'Eficiența energetică și potențialul de reabilitare.', 'Spațiile publice, dotările și parcarea aferente ansamblului.', 'Oportunitatea de densificare calitativă pe parcelă.'],
+      rec: ['Pachet de reabilitare/regenerare adaptat parcelei.', 'Eficientizare energetică (anvelopă, termoficare).', 'Pentru programul de regenerare la scara cartierului/UAT — vezi versiunea teritorială.'] },
+    srm: { rel: 'Riscul multihazard la nivel de amplasament evaluează expunerea ACESTEI parcele la hazarduri (seismic, inundații, alunecări) — punctual, pentru fundamentarea măsurilor pe sit.',
+      diag: ['Expunerea seismică a amplasamentului (zona ag, P100).', 'Riscul de inundație/băltire pe parcelă (relief, ape).', 'Stabilitatea terenului (alunecări) în zona parcelei.', 'Vulnerabilitatea construcțiilor existente pe parcelă.'],
+      rec: ['Măsuri de reducere a riscului adaptate sitului (fundare, drenaj).', 'Verificarea încadrării în hărțile de hazard oficiale.', 'Pentru evaluarea multihazard la scara UAT — vezi versiunea teritorială.'] },
+    siva: { rel: 'Infrastructura verde-albastră la nivel de amplasament privește vegetația, permeabilitatea și managementul apei pluviale PE parcelă și conectarea la rețeaua ecologică din jur.',
+      diag: ['Gradul de permeabilitate și suprafața verde pe parcelă.', 'Managementul apei pluviale (retenție, infiltrare) pe sit.', 'Conectarea la coridoarele verzi/albastre din proximitate.', 'Vegetația existentă și canopy-ul pe și lângă parcelă.'],
+      rec: ['Soluții bazate pe natură pe parcelă (acoperiș verde, pavaj permeabil, grădini de ploaie).', 'Atingerea pragului de spațiu verde și permeabilitate.', 'Conectarea la rețeaua verde-albastră a zonei.'] },
+    seu: { rel: 'Energia urbană la nivel de amplasament privește performanța energetică a construcției de pe parcelă și potențialul regenerabil al sitului — nu mixul energetic al orașului.',
+      diag: ['Performanța energetică (nZEB) a construcției propuse/existente.', 'Potențialul solar al parcelei (orientare, umbrire).', 'Racordarea la termoficare/rețele energetice.', 'Consumul estimat și măsurile de eficiență.'],
+      rec: ['Soluții nZEB + regenerabil (fotovoltaic) pe parcelă.', 'Eficientizarea anvelopei și a instalațiilor.', 'Pentru strategia energetică la scara UAT — vezi versiunea teritorială.'] },
+    sppc: { rel: 'Patrimoniul construit și peisajul la nivel de amplasament evaluează valoarea patrimonială a construcțiilor de pe parcelă și constrângerile dacă parcela e în/lângă o zonă protejată.',
+      diag: ['Statutul de monument/zonă protejată al parcelei sau al vecinătăților (LMI).', 'Zonele de protecție și servituțile aplicabile.', 'Valoarea peisajeră și de ansamblu a frontului.', 'Avizele de specialitate necesare (DJC/MCIN).'],
+      rec: ['Intervenții compatibile cu valoarea patrimonială și cu zona de protecție.', 'Obținerea avizelor de specialitate înainte de proiectare.', 'Pentru inventarul de patrimoniu la scara UAT — vezi versiunea teritorială.'] }
+  };
+  function _renderParcelFocus(D, id, S, PC, CW) {
+    var F = PARCEL_FOCUS[id];
+    D.chapter('Analiză focalizată pe amplasament — ' + (S.t.replace(/^STUDIU DE\s+|^STUDIU\s+/i, '').replace(/\s*\([^)]*\)\s*$/, '')));
+    D.P('Această secțiune aplică tema studiului PUNCTUAL pe parcela selectată' + (PC && PC.nrcad ? ' (' + PC.nrcad + ')' : '') + ', NU la scara întregului UAT. Versiunea teritorială completă (diagnoză + strategie pe oraș) se generează din meniul Teritoriu — sunt documente diferite, cu scop diferit.');
+    if (!F) { D.P('Analiza pe amplasament pentru această temă se fundamentează pe regimul urbanistic al parcelei și pe contextul imediat (vezi secțiunea „Amplasamentul analizat").'); return; }
+    D.h2 && D.h2('Relevanța temei pentru amplasament');
+    D.P(F.rel);
+    D.h2 && D.h2('Diagnoza amplasamentului');
+    D.bullets && D.bullets(F.diag.map(function (x) { return ['•', x]; }));
+    D.h2 && D.h2('Recomandări pentru parcelă');
+    D.bullets && D.bullets(F.rec.map(function (x) { return ['→', x]; }));
+    if (PC && PC.zone) {
+      D.h2 && D.h2('Parametri de referință ai amplasamentului');
+      D.P('Indicatorii urbanistici aplicabili (POT ' + (PC.zone.pot != null ? PC.zone.pot + '%' : '—') + ' / CUT ' + (PC.zone.cut != null ? PC.zone.cut : '—') + ', H max ' + (PC.zone.hmax != null ? PC.zone.hmax + ' m' : '—') + ') fundamentează recomandările de mai sus și se confirmă cu Certificatul de Urbanism.');
+    }
   }
 
   G._SPS = { generate: generate, STUDIES: STUDIES, renderParcelMenu: renderParcelMenu };
