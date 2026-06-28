@@ -2350,7 +2350,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hcX=_pdfHealthCheck('ShadowStudy',params,nrcad,utr,[]);if(_hcX.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcX);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Umbre_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Umbre_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu de Umbre generat!');
 }
 
@@ -2632,7 +2632,7 @@ async function generateNoiseStudy(){
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Acustic Urban',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Acustic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Acustic_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu Acustic Urban generat!');
 }
 
@@ -2850,7 +2850,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Vant Confort Pietonal',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Vant_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Vant_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu Vant & Confort Pietonal generat!');
 }
 
@@ -3131,7 +3131,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hcX=_pdfHealthCheck('GreenStudy',params,nrcad,utr,[]);if(_hcX.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcX);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Spatii_Verzi_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Spatii_Verzi_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu Spatii Verzi generat!');
 }
 
@@ -3334,7 +3334,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Mobilitate & Parcaje',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Mobilitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Mobilitate_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu Mobilitate & Parcaje generat!');
 }
 
@@ -3539,7 +3539,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hcX=_pdfHealthCheck('DensityStudy',params,nrcad,utr,[]);if(_hcX.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcX);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Densitate_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Densitate_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Studiu Densitate Urbana generat!');
 }
 
@@ -3750,7 +3750,7 @@ async function generateMemoriu(){
   // #21 Version footer
   try{_pdfVersionFooter(pdf,W,H);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Memoriu_Tehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Memoriu_Tehnic_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Memoriu Tehnic Preliminar generat!');
 }
 
@@ -4063,7 +4063,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu AACR Aviz Aeroport',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_AACR_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_AACR_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu AACR generat!');
 }
 
@@ -4265,7 +4265,7 @@ async function generateExistingBldStudy(){
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
   ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','P 130/1999 — Normativ privind urmarirea comportarii in timp a constructiilor.','NP 131/2014 — Normativ privind expertizarea tehnica a constructiilor existente.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','HG 1061/2008 — Transportul deseurilor periculoase si nepericuloase.','OUG 92/2021 — Regimul deseurilor. Transpunere Directiva 2008/98/CE.','Legea 10/1995 republicata — Calitatea in constructii.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
-  _pdfSaveMobile(pdf,'Studiu_Constructii_Existente_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Constructii_Existente_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu Construcții Existente generat!');
 }
 
@@ -4561,7 +4561,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Pre-Studiu Geotehnic',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'PreStudiu_Geotehnic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'PreStudiu_Geotehnic_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Pre-Studiu Geotehnic generat!');
 }
 
@@ -4947,7 +4947,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Impact Trafic',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Trafic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Trafic_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu de Trafic + Analiza Acces ISU generat!');
 }
 
@@ -5604,7 +5604,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   // #3 WHY IT MATTERS — ISU
   try{cy=_pdfWhyItMatters(pdf,W,cy,'isu_aviz');}catch(_e){}
 
-  _pdfSaveMobile(pdf,'SSF_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'SSF_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Scenariu de Siguranta la Foc (SSF) generat — '+ (_rvBldSSF?'13':'12')+' pagini (cu schemă funcțională din Relevee Instant)!');
 }
 
@@ -6028,7 +6028,7 @@ async function generateEnvironmentalImpact(){
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Impact Mediu (EIM)',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_EIM_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_EIM_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu de Impact asupra Mediului generat! (10 pagini)');
 }
 
@@ -6349,7 +6349,7 @@ async function generateIstoricStudy(){
   // Health Check (Audit #16)
   try{const _hcX=_pdfHealthCheck('IstoricStudy',params,nrcad,utr,[]);if(_hcX.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcX);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Patrimoniu_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Patrimoniu_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu Istoric & Patrimoniu generat!');
 }
 
@@ -6887,7 +6887,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Insorire OMS 119',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Insorire_'+nrcad+'_'+year+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Insorire_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||year)+'.pdf');
   ss('OK Studiu de Însorire generat cu analiză per cameră din Relevee Instant!');
 }
 
@@ -7897,7 +7897,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     ]);
   }catch(_e){}
 
-  _pdfSaveMobile(pdf,'SF_DALI_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'SF_DALI_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu Fezabilitate / DALI generat!');
 }
 
@@ -8636,7 +8636,7 @@ async function generateStudiuAmplasament(){
     ]);
   }catch(_e){}
 
-  _pdfSaveMobile(pdf,'Studiu_Amplasament_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Amplasament_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu de Amplasament generat!');
 }
 
@@ -9002,7 +9002,7 @@ async function runExport(){
   pdf.text('Nu inlocuieste Certificatul de Urbanism, avizele sau Autorizatia de Construire.',22,cy+21);
 
   if(prog) prog.style.display='none';
-  _pdfSaveMobile(pdf,'Raport_Urbanistic_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Raport_Urbanistic_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('Raport Urbanistic generat (4 pagini) — Bilant PUG + Avize + Pasi urmatori');
 }
 
@@ -9334,7 +9334,7 @@ async function generateWaterStudy(){
     {criteriu:'Distanta fata de curs apa',valoare:apaCfg.distanta_curs_principal+'m',status:_dtga_aproape?'MASURI':'OK',obs:_dtga_aproape?'Sub 200m — Aviz de amplasament obligatoriu cf. Legii 107/1996; construire permisa dupa aviz':'Distanta suficienta fata de curs principal',remediere:_dtga_aproape?'Obtineti Aviz de amplasament de la '+S2(apaCfg.DA)+' cf. Legii 107/1996 Art.40 — avizul este procedura standard si nu blocheaza constructia, ci stabileste masurile tehnice de protectie':'Verificati ca nu exista cursuri de apa temporare necartografiate'},
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   try{ try{const _hcZ=_pdfHealthCheck('WaterStudy',params,nrcad,utr,[]);if(_hcZ.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcZ);}catch(_e){}
-  _pdfSaveMobile(pdf,'DTGA_Ape_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf'); }catch(e){ _pdfSaveMobile(pdf,'DTGA_Ape_partial.pdf'); }
+  _pdfSaveMobile(pdf,'DTGA_Ape_'+S2(nrcad)+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf'); }catch(e){ _pdfSaveMobile(pdf,'DTGA_Ape_partial.pdf'); }
   ss('✅ Studiu Gospodărire Ape DTGA generat (9 pagini) — '+S2(apaCfg.DA));
 }
 
@@ -9703,7 +9703,7 @@ const {pdf,W,H,DARK,DARK2,GOLD,BLUE,TEAL,GREEN,RED,ORANGE,LIGHT,S2,dateStr,nrcad
   ftr();
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Pre-studiu Bransamente - Estimatii');
   try{const _hcZ=_pdfHealthCheck('PrestudiuBransamente',params,nrcad,utr,[]);if(_hcZ.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcZ);}catch(_e){}
-  _pdfSaveMobile(pdf,'PreStudiu_Bransamente_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'PreStudiu_Bransamente_'+S2(nrcad)+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('✅ Pre-studiu Bransamente generat — 4 pagini · Apă · Canal · Electric · Gaze · ISU · PV');
 }
 
@@ -9882,7 +9882,7 @@ async function generateHealthImpactStudy(){
   ]);
   sign();
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'eim',nrcad);
-  _pdfSaveMobile(pdf,'Studiu_Sanatate_'+S2(nrcad)+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Studiu_Sanatate_'+S2(nrcad)+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('✅ Studiu Impact Sănătate generat — 6 pag. · Aer · Zgomot · Însorire · Radon · EM · Apă');
 }
 
@@ -10267,7 +10267,7 @@ async function generateCPE(){
     {text:'Evaluare fotovoltaica (randament real, orientare, umbrire) pentru eligibilitate NZEB', prio:'RECOMANDAT'},
   ]);
 
-  _pdfSaveMobile(pdf,'CPE_Clasa'+cls.cls+'_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'CPE_Clasa'+cls.cls+'_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK CPE generat — Clasa '+cls.cls+' (EP='+epSpec+' kWh/m\u00b2an) · '+( isNZEB?'CONFORM NZEB':'Neconform NZEB'));
 }
 window.generateCPE = generateCPE;
@@ -10592,7 +10592,7 @@ async function generateStabilitateTaluzuri(){
   // Health Check (Audit #16)
   try{const _hcX=_pdfHealthCheck('StabilitateTaluzuri',params,nrcad,utr,[]);if(_hcX.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hcX);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Stabilitate_Taluzuri_'+nrcad+'_'+new Date().getFullYear()+'.pdf');
+  _pdfSaveMobile(pdf,'Stabilitate_Taluzuri_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu Stabilitate Taluzuri — Fs='+fsUmed.toFixed(2)+' ('+stability.cls+') · Cota teren '+elevTeren.toFixed(1)+'m AMSL · 5 pag.');
 }
 window.generateStabilitateTaluzuri = generateStabilitateTaluzuri;
@@ -11279,7 +11279,7 @@ async function generateProiectieUrbanistica() {
   // #21 Version footer
   try{_pdfVersionFooter(pdf,W,H);}catch(_e){}
 
-  _pdfSaveMobile(pdf,'Proiectie_Urbanistica_'+nrcad+'_'+year+'.pdf');
+  _pdfSaveMobile(pdf,'Proiectie_Urbanistica_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||year)+'.pdf');
   ss('✅ Proiectie Urbanistica generata — 12 pagini · Demografic · Indicatori · ESG · '+year+'—'+(year+30));
 }
 window.generateProiectieUrbanistica = generateProiectieUrbanistica;

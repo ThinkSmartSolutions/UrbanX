@@ -376,9 +376,8 @@
         // TOC
         window._buildStratTOC && window._buildStratTOC(D, 1);
 
-        const _af = window._asciiFile || (s => String(s || ''));
-        const fn = ('SIDU_' + _af(city.name || cityKey) + '_' + new Date().toISOString().slice(0, 10) + '.pdf')
-                     .replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fn = window._stratFileName ? window._stratFileName('SIDU', { territorial: true, localitate: city.name || cityKey })
+                   : ('SIDU_' + (window._asciiFile?window._asciiFile(city.name||cityKey):cityKey) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
         pdf.save(fn);
         window.ss && ss('✅ SIDU generat: ' + pdf.getNumberOfPages() + ' pagini · ' + city.name);
         return fn;

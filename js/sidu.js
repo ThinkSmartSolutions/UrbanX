@@ -328,7 +328,7 @@
 
       try { G.__siduPages = pdf.getNumberOfPages(); } catch (e) {}
       var slug = (G._asciiFile ? G._asciiFile(city.name) : (city.name || 'UAT')).replace(/[^a-zA-Z0-9._-]/g, '_');
-      pdf.save('SIDU_' + slug + '_' + iso + '.pdf');
+      pdf.save(G._stratFileName ? G._stratFileName('SIDU', { territorial: true, localitate: city.name }) : ('SIDU_' + slug + '.pdf'));
       G.ss && G.ss('📜 Document SIDU generat: ' + pdf.getNumberOfPages() + ' pagini · ' + city.name);
     } catch (e) { try { G.__siduErr = (e && e.stack) || (e && e.message) || String(e); } catch (_) {} console.warn('[SIDU] document', e); alert('Eroare la generarea documentului SIDU: ' + e.message); }
   }

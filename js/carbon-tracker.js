@@ -220,7 +220,7 @@
       D.chapter('18. Surse și bibliografie');
       D.P('EN 15978:2011 — evaluarea performanței de mediu a clădirilor; RICS — „Whole Life Carbon Assessment for the Built Environment"; ICE Database (Inventory of Carbon & Energy); IPCC AR6 — factori de emisie; ENTSO-E / Transelectrica — intensitatea carbonică a rețelei RO; Comisia Europeană — EU Green Deal, Taxonomia UE, Convenția Primarilor. Metodologie internă UrbanX · ThinkSmart Solutions.');
 
-      var fn = ('Studiu_Carbon_' + (meta.nrcad || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+      var fn = (window._stratFileName ? window._stratFileName('Studiu_Carbon', { nrcad: meta.nrcad, localitate: meta.uat }) : ('Studiu_Carbon_' + (meta.nrcad || 'sit') + '.pdf'));
       window._buildStratTOC && window._buildStratTOC(D, 1);
       pdf.save(fn);
       G.ss && G.ss('✅ Studiu amprentă de carbon generat: ' + pdf.getNumberOfPages() + ' pagini');
@@ -246,7 +246,7 @@
       if (!adc) { G.ss && G.ss('Parcela nu are suprafață definită — selectați alta.'); return; }
       G.ss && G.ss('🌍 Se generează Studiul de amprentă de carbon…');
       var r = compute({ built_area_m2: adc, use: 'locuire', structural_type: 'masonry_rc' });
-      generatePDF(r, { nrcad: pre && pre.nrcad });
+      generatePDF(r, { nrcad: pre && pre.nrcad, uat: (ap && ap.uat) || (S && S.uat && S.uat.name) });
     } catch (e) { console.error('[generateCarbonStudy]', e); G.ss && G.ss('Eroare la Studiul de Carbon.'); }
   }
   G.Carbon = { compute: compute, openPanel: openPanel, generatePDF: generatePDF, generateStudiuCarbon: generateCarbonStudy };

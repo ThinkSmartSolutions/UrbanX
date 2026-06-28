@@ -194,7 +194,8 @@
     D.P('Document generat algoritmic de UrbanX ca instrument de pre-analiză și fundamentare strategică. Valorile sunt estimări calibrate pe date reale și NU substituie documentațiile de specialitate avizate conform legii. Deciziile finale rămân responsabilitatea autorității și a specialiștilor atestați.');
 
     var translit = function (c) { return { 'ă': 'a', 'Ă': 'A', 'â': 'a', 'Â': 'A', 'î': 'i', 'Î': 'I', 'ș': 's', 'Ș': 'S', 'ş': 's', 'Ş': 'S', 'ț': 't', 'Ț': 'T', 'ţ': 't', 'Ţ': 'T' }[c] || c; };
-    var fn = ('Studiu_SPS_' + id + '_' + (onParcel ? 'parcela_' : '') + cityName.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^\w]+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^a-zA-Z0-9._-]/g, '_');
+    var fn = (G._stratFileName ? G._stratFileName('SPS_' + id, { territorial: !onParcel, localitate: cityName, nrcad: (onParcel && G._activeParcel && G._activeParcel.nrcad) })
+              : ('SPS_' + id + '_' + cityName.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g, translit).replace(/[^\w]+/g, '_') + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_'));
     G._buildStratTOC && G._buildStratTOC(D, 1);
     pdf.save(fn); G.ss && G.ss('✅ ' + S.t + ' generat: ' + pdf.getNumberOfPages() + ' pagini'); return fn;
   }

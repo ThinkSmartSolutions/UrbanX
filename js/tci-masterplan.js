@@ -183,9 +183,8 @@ G._TCIMasterplanPDF = {
     this._pg12_methodology(ctx);   // metodologia rămâne ultima
     this._addPageNumbers(ctx);
 
-    const _af = window._asciiFile || ((s)=>String(s||''));
-    const fn = ('masterplan_'+_af(city.name||cityKey)+'_'+ctx.iso+'.pdf')
-               .replace(/[^a-zA-Z0-9._-]/g,'_');
+    const fn = window._stratFileName ? window._stratFileName('Masterplan', { territorial: true, localitate: city.name || cityKey })
+               : ('Masterplan_'+(window._asciiFile?window._asciiFile(city.name||cityKey):cityKey)+'.pdf').replace(/[^a-zA-Z0-9._-]/g,'_');
     pdf.save(fn);
     ss?.('✅ Masterplan generat: '+fn+' · '+city.name+' · '+scenario);
     return fn;
@@ -2929,8 +2928,8 @@ G._TCIPmudPDF = {
       this._c8_monitoring(c);
       this._methodology(c);
       MP._addPageNumbers(c);
-      const _af2 = window._asciiFile || ((s)=>String(s||''));
-      const fn=('PMUD_'+_af2(city.name||cityKey)+'_'+new Date().toISOString().slice(0,10)+'.pdf').replace(/[^a-zA-Z0-9._-]/g,'_');
+      const fn = window._stratFileName ? window._stratFileName('PMUD', { territorial: true, localitate: city.name || cityKey })
+                 : ('PMUD_'+(window._asciiFile?window._asciiFile(city.name||cityKey):cityKey)+'.pdf').replace(/[^a-zA-Z0-9._-]/g,'_');
       pdf.save(fn);
       ss?.('✅ PMUD generat: '+fn);
       return fn;

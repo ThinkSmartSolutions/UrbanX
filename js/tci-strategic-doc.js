@@ -18,6 +18,25 @@
   const _DIA = {'ă':'a','â':'a','î':'i','ș':'s','ş':'s','ț':'t','ţ':'t','Ă':'A','Â':'A','Î':'I','Ș':'S','Ş':'S','Ț':'T','Ţ':'T'};
   const _ascii = s => String(s == null ? '' : s).replace(/[ăâîșşțţĂÂÎȘŞȚŢ]/g, c => _DIA[c] || c);
   G._asciiFile = _ascii; // expus pt PMUD / masterplan legacy
+  // NUME DE FISIER SCURT, convenție unică (Florin 28 iun):
+  //   parcelă/rang inferior:    <Scurt>_<nrCadastral>_<Localitate>.pdf  (ex. RCAI_149112_Iasi.pdf)
+  //   teritorial/rang superior: <Scurt>_<UAT>_<An>.pdf                  (ex. RCAI_Iasi_2026.pdf)
+  function _stratFileName(short, opts) {
+    opts = opts || {};
+    var loc = _ascii(opts.localitate || opts.uat || '').replace(/^(municipiul|comuna|ora[sș]ul?|sat)\s+/i, '').replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+    var parts;
+    if (opts.mode === 'T' || opts.territorial) {
+      parts = [short, loc, opts.year || (new Date().getFullYear())];
+    } else {
+      var nr = _ascii(opts.nrcad || 'parcela').replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+      parts = [short, nr, loc];
+    }
+    return (parts.filter(Boolean).join('_') + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_');
+  }
+  G._stratFileName = _stratFileName;
+  // slug localitate pt nume de fișier (folosit și de motorul proiectant 10-studies)
+  function _locSlug(s) { return _ascii(s == null ? '' : s).replace(/^(municipiul|comuna|ora[sș]ul?|sat)\s+/i, '').replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, ''); }
+  G._locSlug = _locSlug;
   const N = (v,d=0)=> isNaN(+v)?'-':Number(v).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d});
   const RN = (v,d=2)=> isNaN(+v)?'-':Number(v).toFixed(d);
   const Pct = (v,d=1)=> (v>=0?'+':'')+Number(v).toFixed(d)+'%';
@@ -652,7 +671,7 @@
         // CUPRINS dupa coperta
         buildTOC(D, coverPages);
 
-        const fn = ('Masterplan_Strategic_' + _ascii(city.name || cityKey) + '_' + ctx.iso + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fn = _stratFileName('Masterplan', { territorial: true, localitate: city.name || cityKey });
         pdf.save(fn);
         window.ss && ss('✅ Masterplan Strategic extins generat: ' + pdf.getNumberOfPages() + ' pagini · ' + city.name);
         return fn;
