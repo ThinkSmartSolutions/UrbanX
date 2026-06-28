@@ -1551,7 +1551,7 @@ function infoDrawerOpen(key) {
     ${nuRows}
 
     <button id="info-drawer-gen-btn" onclick="${d.fn};infoDrawerClose()">
-      ${d.ico} Generează ${d.label}
+      ${d.ico} ${(window.T ? window.T('Generează') : 'Generează')} ${(window.T ? window.T(d.label) : d.label)}
     </button>
     <p style="font-size:10px;color:#334155;text-align:center;margin-top:8px">Document orientativ · UrbanX TSS·FG · Valori preliminare</p>
   `;

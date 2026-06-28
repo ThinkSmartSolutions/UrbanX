@@ -278,6 +278,32 @@
   };
   ['en', 'fr', 'de'].forEach(function (l) { for (var k in _WAVE2[l]) DICT[l][k] = _WAVE2[l][k]; });
 
+  // — Faza 3: anteturile info-drawer-ului (reutilizate în ~100 de drawere → o dată, peste tot) —
+  var _WAVE3 = {
+    en: {
+      'Ce analizează': 'What it analyzes', 'De ce este necesar': 'Why it is needed', 'Bază legală': 'Legal basis',
+      'Ce primești în raport': 'What you get in the report', 'Când NU se aplică': 'When it does NOT apply',
+      'Document orientativ · UrbanX TSS·FG · Valori preliminare': 'Indicative document · UrbanX TSS·FG · Preliminary values',
+      'Nota UrbanX': 'UrbanX Score', 'Scor actual': 'Current score', 'Clasament național': 'National ranking',
+      'Cum poate crește scorul?': 'How can the score improve?', 'Acuratețe': 'Accuracy', 'Surse': 'Sources'
+    },
+    fr: {
+      'Ce analizează': 'Ce qu\'elle analyse', 'De ce este necesar': 'Pourquoi c\'est nécessaire', 'Bază legală': 'Base légale',
+      'Ce primești în raport': 'Ce que vous obtenez dans le rapport', 'Când NU se aplică': 'Quand cela ne s\'applique PAS',
+      'Document orientativ · UrbanX TSS·FG · Valori preliminare': 'Document indicatif · UrbanX TSS·FG · Valeurs préliminaires',
+      'Nota UrbanX': 'Note UrbanX', 'Scor actual': 'Score actuel', 'Clasament național': 'Classement national',
+      'Cum poate crește scorul?': 'Comment améliorer le score ?', 'Acuratețe': 'Précision', 'Surse': 'Sources'
+    },
+    de: {
+      'Ce analizează': 'Was sie analysiert', 'De ce este necesar': 'Warum es nötig ist', 'Bază legală': 'Rechtsgrundlage',
+      'Ce primești în raport': 'Was Sie im Bericht erhalten', 'Când NU se aplică': 'Wann es NICHT gilt',
+      'Document orientativ · UrbanX TSS·FG · Valori preliminare': 'Orientierungsdokument · UrbanX TSS·FG · Vorläufige Werte',
+      'Nota UrbanX': 'UrbanX-Note', 'Scor actual': 'Aktuelle Punktzahl', 'Clasament național': 'Nationale Rangliste',
+      'Cum poate crește scorul?': 'Wie kann die Punktzahl steigen?', 'Acuratețe': 'Genauigkeit', 'Surse': 'Quellen'
+    }
+  };
+  ['en', 'fr', 'de'].forEach(function (l) { for (var k in _WAVE3[l]) DICT[l][k] = _WAVE3[l][k]; });
+
   var _lang = 'ro';
   function _init() {
     // implicit RO (platformă RO) — limba se schimbă DOAR la alegerea explicită a userului.
