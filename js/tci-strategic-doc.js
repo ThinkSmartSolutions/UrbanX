@@ -73,19 +73,24 @@
       var _tlines = pdf.splitTextToSize(S2(title), CW - 12);
       // reduce fontul daca titlul are >3 linii (titluri foarte lungi) ca sa ramana compact
       while (_tlines.length > 3 && _tfs > 10) { _tfs -= 0.5; pdf.setFontSize(_tfs); _tlines = pdf.splitTextToSize(S2(title), CW - 12); }
-      var _tlh = _tfs * 0.42 + 0.4;                       // inaltime linie titlu (mm)
-      var bandH = 7 + _tlines.length * _tlh + 3.5;        // eticheta CAPITOLUL + linii titlu + padding
-      if (bandH < 16) bandH = 16;
+      // Spațiere aerisită (cerut Florin): eticheta CAPITOLUL respiră față de titlu,
+      // padding generos sus/jos, linii de titlu mai aerate — aplicat la TOATE studiile/rapoartele.
+      var _tlh = _tfs * 0.44 + 1.2;                       // ~6.9mm/linie la 13pt (mai aerisit)
+      var _topPad = 6.5;                                  // y → baseline „CAPITOLUL"
+      var _title1 = _topPad + 7.6;                        // gap clar label → titlu (~7.6mm)
+      var bandH = _title1 + (_tlines.length - 1) * _tlh + 6.5;  // + padding jos
+      if (bandH < 21) bandH = 21;
       // Capitolele CURG continuu; primul incepe pe pagina noua, restul doar daca nu mai e loc.
       if (first) newPage();
-      else { ensure(bandH + 38); if (y > MT + 6) y += 5; }
+      else { ensure(bandH + 40); if (y > MT + 6) y += 7; }   // spațiu și ÎNAINTE de bandă
       // banda capitol (inaltime = bandH)
       pdf.setFillColor(12, 24, 56); pdf.rect(ML, y, CW, bandH, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2.4, bandH, 'F');
-      pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7);
-      pdf.text(S2('CAPITOLUL ' + chapterNo), ML + 6, y + 5.2);
+      pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7); pdf.setCharSpace && pdf.setCharSpace(0.3);
+      pdf.text(S2('CAPITOLUL ' + chapterNo), ML + 6.5, y + _topPad);
+      try { pdf.setCharSpace && pdf.setCharSpace(0); } catch (e) {}
       pdf.setTextColor(255, 255, 255); pdf.setFont(FONT, 'bold'); pdf.setFontSize(_tfs);
-      for (var _i = 0; _i < _tlines.length; _i++) pdf.text(_tlines[_i], ML + 6, y + 9.5 + _i * _tlh);
-      y += bandH + 6;
+      for (var _i = 0; _i < _tlines.length; _i++) pdf.text(_tlines[_i], ML + 6.5, y + _title1 + _i * _tlh);
+      y += bandH + 7;
       toc.push({ title: chapterNo + '. ' + title, level: 1, page: pageNum });
       return chapterNo;
     }
