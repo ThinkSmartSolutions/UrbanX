@@ -18,6 +18,7 @@ function _adminOpen() {
       tabBar.style.cssText='display:flex;gap:2px;padding:8px 22px 0;background:#080f1c;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.06)';
       tabBar.innerHTML=[
         ['users','\uD83D\uDC65 Utilizatori'],
+        ['roles','\uD83D\uDD10 Roluri & Acces'],
         ['uat','\uD83D\uDDFA UAT & Date'],
         ['guide','\uD83D\uDCD6 Ghid Admin'],
       ].map(([id,l])=>'<button id="adm-tab-'+id+'" onclick="_admTab(\''+id+'\')"'
@@ -32,7 +33,7 @@ function _adminOpen() {
 
 function _admTab(tab){
   // Stiluri tabs
-  ['users','uat','guide'].forEach(t=>{
+  ['users','roles','uat','guide'].forEach(t=>{
     const btn=document.getElementById('adm-tab-'+t);
     if(!btn) return;
     const active=t===tab;
@@ -43,6 +44,14 @@ function _admTab(tab){
   // Conținut
   const body=document.getElementById('adm-body');
   if(!body) return;
+  if(tab==='roles'){
+    // deschide managerul de roluri (fereastra proprie) + scurtatura in panou
+    try{ window.UXRoles && window.UXRoles.openManager && window.UXRoles.openManager(); }catch(e){}
+    body.innerHTML='<div style="padding:24px;text-align:center"><div style="font-size:15px;color:#e6edf7;font-weight:700;margin-bottom:8px">🔐 Roluri & Acces</div>'
+      +'<div style="color:#94a3b8;font-size:13px;margin-bottom:16px">Creezi/editezi roluri și le aloci acces pe module, și asignezi roluri utilizatorilor (pe email).</div>'
+      +'<button onclick="window.UXRoles&&window.UXRoles.openManager&&window.UXRoles.openManager()" style="background:linear-gradient(180deg,#a855f7,#7c3aed);color:#fff;border:0;border-radius:9px;padding:11px 22px;font-weight:700;cursor:pointer;font-size:13px">Deschide managerul de roluri</button></div>';
+    return;
+  }
   if(tab==='users'){
     body.innerHTML=`
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
