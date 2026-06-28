@@ -77,6 +77,24 @@
     } catch (e) { cleanup(); console.warn('[RCAI map]', e); return null; }
   }
 
+  // cursuri de apă REALE (OSM) lângă amplasament — relevant arheologic (locuirea pe terase deasupra apei)
+  async function _fetchWaterways(lat, lon, radius) {
+    var q = '[out:json][timeout:25];(way(around:' + radius + ',' + lat + ',' + lon + ')[waterway~"^(river|stream|canal)$"];);out tags center 80;';
+    try {
+      var resp = await fetch(PROXY + '/osm?q=' + encodeURIComponent(q), { signal: AbortSignal.timeout(30000) });
+      var j = await resp.json(); var els = (j && j.elements) || [];
+      var seen = {}, out = [];
+      els.forEach(function (el) {
+        var t = el.tags || {}; var nm = t.name || t['name:ro']; if (!nm || seen[nm]) return; seen[nm] = 1;
+        var la = el.lat != null ? el.lat : (el.center && el.center.lat), lo = el.lon != null ? el.lon : (el.center && el.center.lon);
+        var dist = (la != null && G.turf) ? Math.round(G.turf.distance([lon, lat], [lo, la], { units: 'meters' })) : null;
+        out.push({ name: nm, tip: t.waterway, dist: dist });
+      });
+      out.sort(function (a, b) { return (a.dist || 1e9) - (b.dist || 1e9); });
+      return out;
+    } catch (e) { return []; }
+  }
+
   async function generatePDF(cityKey, mode) {
     var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF;
     if (!J || typeof G._makeStratDoc !== 'function') { G.ss && G.ss('Motor PDF indisponibil'); return; }
@@ -178,6 +196,15 @@
             D.P('Interpretare arheologică: amplasamentul se află pe ' + poz + ' (poziție relativă ' + relPos + '% în relieful local), la cca. ' + N(dValeM) + ' m de cel mai jos punct din zonă (probabil firul de vale / curs de apă istoric). ' + (potClass === 'RIDICAT' ? 'Această configurație — terasă uscată în apropierea apei — este TIPICĂ pentru locuirea preistorică și antică; potențialul arheologic din perspectivă geomorfologică este RIDICAT.' : potClass.indexOf('MODERAT') === 0 ? 'Zona joasă/umedă este mai puțin favorabilă locuirii continue, dar nu o exclude (așezări de luncă, vaduri, poduri); potențialul este moderat, condiționat de cota apei istorice.' : 'Configurația indică un potențial geomorfologic MEDIU pentru locuirea istorică.'));
             if (D.callout) D.callout('Potențial arheologic (criteriu geomorfologic)', potClass);
             if (D.source) D.source('Model digital de elevație Mapbox Terrain-RGB · analiză UrbanX (rază 800 m, grilă ' + gN + '×' + gN + ')');
+            // Hidrografie REALĂ (OSM) — cursurile de apă din proximitate, numite + distanță
+            try {
+              var wways = await _fetchWaterways(x.lat, x.lon, 2000);
+              if (wways && wways.length) {
+                var top = wways.slice(0, 4).map(function (w) { return w.name + (w.dist != null ? ' (~' + N(w.dist) + ' m, ' + w.tip + ')' : ''); });
+                D.h2 && D.h2('Rețeaua hidrografică în proximitate (date reale OSM)');
+                D.P('Cursuri de apă identificate în jurul amplasamentului: ' + top.join('; ') + '. Hidrografia este determinantă pentru locuirea istorică — așezările preistorice și antice se dezvoltau pe terasele de deasupra văilor, în apropierea surselor de apă. Coroborat cu poziția geomorfologică de mai sus, proximitatea unui curs de apă susține interpretarea potențialului arheologic al sitului.');
+              }
+            } catch (e) { console.warn('[RCAI hidro]', e.message); }
           }
         } catch (e) { console.warn('[RCAI geomorf]', e.message); }
       }
