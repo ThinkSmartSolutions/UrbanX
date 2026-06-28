@@ -170,14 +170,31 @@
       if (!show) return '';
       var cur = R.currentId(); var roles = R.ROLES || {};
       var opts = Object.keys(roles).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + roles[k].label + '</option>'; }).join('');
+      var T = G.T || function (s) { return s; };
+      var optsT = Object.keys(roles).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + T(roles[k].label) + '</option>'; }).join('');
       return '<div style="display:flex;align-items:center;gap:6px;margin:2px 0 8px;padding:5px 7px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:7px">' +
-        '<span style="font-size:9px;color:#a78bfa;text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex-shrink:0">👤 Rol</span>' +
-        '<select onchange="UXRoles.setPreview(this.value)" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:5px;padding:3px 5px;font-size:11px">' + opts + '</select></div>';
+        '<span style="font-size:9px;color:#a78bfa;text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex-shrink:0">👤 ' + T('Rol') + '</span>' +
+        '<select onchange="UXRoles.setPreview(this.value)" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:5px;padding:3px 5px;font-size:11px">' + optsT + '</select></div>';
+    } catch (e) { return ''; }
+  }
+
+  // Selector LIMBĂ (i18n) — RO/EN/FR/DE, vizibil mereu în capul sertarului.
+  function _langSwitcher() {
+    try {
+      var I = G.UrbanXI18n; if (!I) return '';
+      var cur = I.getCurrentLang();
+      var flags = { ro: '🇷🇴', en: '🇬🇧', fr: '🇫🇷', de: '🇩🇪' };
+      var btns = I.LANGS.map(function (l) {
+        var on = l === cur;
+        return '<button onclick="UrbanXI18n.setLang(\'' + l + '\')" title="' + l.toUpperCase() + '" style="flex:1;background:' + (on ? 'rgba(56,138,221,.25)' : 'transparent') + ';border:1px solid ' + (on ? 'rgba(56,138,221,.5)' : 'rgba(255,255,255,.1)') + ';color:' + (on ? '#cfe3ff' : '#94a3b8') + ';border-radius:5px;padding:3px 0;cursor:pointer;font-size:12px;font-weight:700">' + (flags[l] || '') + ' ' + l.toUpperCase() + '</button>';
+      }).join('');
+      return '<div style="display:flex;gap:4px;margin:2px 0 6px">' + btns + '</div>';
     } catch (e) { return ''; }
   }
 
   function render() {
     var el = D.getElementById('ux-sidebar-body'); if (!el) return;
+    var T = G.T || function (s) { return s; };   // i18n (fallback RO dacă lipsește)
     // 001 Faza 3: filtrare pe rol (NON-destructivă — implicit rol FULL → totul vizibil).
     var _cs = (G.UXRoles && G.UXRoles.canSee) ? G.UXRoles.canSee : function () { return true; };
     var groups = NAV.map(function (g) {
@@ -193,13 +210,13 @@
     var quick = QUICK.filter(function (a) { return a.moduleId === '_search' || _cs(a.moduleId); });
     el.innerHTML =
       '<div class="uxsb-uat">📍 ' + ((G.TCI && (G.TCI.cityName)) || (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name) || 'UAT') + '</div>' +
-      _roleSwitcher() +
-      '<div class="uxsb-qa">' + quick.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + a.label + '</span></button>'; }).join('') + '</div>' +
+      _langSwitcher() + _roleSwitcher() +
+      '<div class="uxsb-qa">' + quick.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + T(a.label) + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + T(a.label) + '</span></button>'; }).join('') + '</div>' +
       groups.map(function (g) {
         var act = State.activeGroup === g.id;
         return '<div class="uxsb-group">' +
           '<button class="uxsb-ghead' + (act ? ' active' : '') + '" style="' + (act ? 'border-left-color:' + g.color : '') + '" onclick="UXSidebar.toggleGroup(\'' + g.id + '\')">' +
-          '<span class="uxsb-gico">' + g.ico + '</span><span class="uxsb-glabel">' + g.label + '</span><span class="uxsb-gchev">' + (act ? '▲' : '▼') + '</span></button>' +
+          '<span class="uxsb-gico">' + g.ico + '</span><span class="uxsb-glabel">' + T(g.label) + '</span><span class="uxsb-gchev">' + (act ? '▲' : '▼') + '</span></button>' +
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
             if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + i.sep + '</div>';
             var ia = State.activeModule === i.moduleId;
