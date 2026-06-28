@@ -347,20 +347,23 @@
       // courier (monospace) NU are glife pt →/×/−/²/Σ etc -> sanitizam la ASCII.
       var maxFW = CW - 12;
       var exprS = S2(expr).replace(/Σ/g,'Suma ').replace(/→/g,' -> ').replace(/×/g,' x ').replace(/−/g,'-').replace(/²/g,'2').replace(/·/g,' * ').replace(/\s+/g,' ').trim();
-      // Sparge pe linii LA fontul ales si re-verifica fiecare linie (metrica fontului
-      // custom poate subestima latimea) — reduce fontul pana cand NICIO linie nu iese.
-      var fs = 9.2; pdf.setFont('courier', 'bold'); pdf.setFontSize(fs);
-      var exprLines = pdf.splitTextToSize(exprS, maxFW), _g = 0;
+      // Folosim FONTUL EMBEDDED (DejaVuRO), NU 'courier' — courier nu e embedded, deci
+      // jsPDF rupea liniile cu metrica helvetica (îngustă) dar randa cu un fallback ~2x mai
+      // lat → formula ieșea din pagină. Cu fontul real, splitTextToSize rupe corect.
+      // Marjă de siguranță 0.92 pt eventuale subestimări de metrică.
+      var safeW = maxFW * 0.92;
+      var fs = 8.6; pdf.setFont(FONT, 'bold'); pdf.setFontSize(fs);
+      var exprLines = pdf.splitTextToSize(exprS, safeW), _g = 0;
       while (_g++ < 14) {
         var _over = false; for (var _li = 0; _li < exprLines.length; _li++) { if (pdf.getTextWidth(exprLines[_li]) > maxFW) { _over = true; break; } }
         if (!_over || fs <= 5) break;
-        fs -= 0.4; pdf.setFontSize(fs); exprLines = pdf.splitTextToSize(exprS, maxFW);
+        fs -= 0.4; pdf.setFontSize(fs); exprLines = pdf.splitTextToSize(exprS, safeW);
       }
       var elh = 4.6;
       const hh = 8 + exprLines.length * elh + wlines.length * 3.6 + 4; ensure(hh + 2);
       pdf.setFillColor(245, 248, 252); pdf.rect(ML, y, CW, hh, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2, hh, 'F');
       pdf.setTextColor.apply(pdf, SUB); pdf.setFont(FONT, 'bold'); pdf.setFontSize(6.6); pdf.text(S2('FORMULA · ' + title), ML + 5, y + 4.5);
-      pdf.setTextColor.apply(pdf, INK); pdf.setFont('courier', 'bold'); pdf.setFontSize(fs);
+      pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'bold'); pdf.setFontSize(fs);
       exprLines.forEach((l, i) => pdf.text(l, ML + 6, y + 10 + i * elh));
       var wy = y + 10 + exprLines.length * elh + 1;
       pdf.setFont(FONT, 'italic'); pdf.setFontSize(6.4); pdf.setTextColor.apply(pdf, MUT);

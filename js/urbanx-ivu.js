@@ -272,7 +272,7 @@
       var ac = opts.accent || [37, 99, 235];
       var FONT = opts.font || 'DejaVuRO';
       var hasScore = !!(s && s.R);
-      var h = hasScore ? 25 : 16;        // mai înalt când avem scor (loc pt grila A-G)
+      var h = hasScore ? 30 : 16;        // mai înalt când avem scor (loc pt grila A-G fără suprapunere)
       if (y + h > 292) y = 292 - h;      // nu depăși marginea de jos a paginii A4
       pdf.setDrawColor(ac[0], ac[1], ac[2]); pdf.setLineWidth(0.4);
       pdf.setFillColor(opts.bg ? opts.bg[0] : 18, opts.bg ? opts.bg[1] : 24, opts.bg ? opts.bg[2] : 40);
@@ -285,14 +285,16 @@
       else line2 = 'Indicele de Vitalitate Urbană — indice compozit (0–100) pe dimensiuni cheie';
       pdf.text(line2, ml + 5, y + 11.5);
       // grilă de culori A→G cu indicator la notă (doar când avem scor real)
+      // Bara coborâtă la y+21 → eticheta „65" (bară−3.4 = y+17.6) NU se mai suprapune
+      // peste line2 (y+11.5). Spațiu de respirație, nu aglomerat.
       if (hasScore && G._ivuScaleBar) {
         var barW = Math.min(96, w - 10);
-        G._ivuScaleBar(pdf, ml + 5, y + 16.5, barW, s.R.score, { font: FONT, markCol: [255, 255, 255], labelCol: [225, 228, 235] });
+        G._ivuScaleBar(pdf, ml + 5, y + 22, barW, s.R.score, { font: FONT, markCol: [255, 255, 255], labelCol: [225, 228, 235] });
       }
-      pdf.setFontSize(6.6); pdf.setTextColor(150, 150, 165);
-      pdf.text(hasScore ? 'Indice compozit UrbanX · formulă transparentă, recalculabilă · scala A–D · detaliat în capitolul „Nota UrbanX (IVU)".'
+      pdf.setFontSize(6.4); pdf.setTextColor(150, 150, 165);
+      pdf.text(hasScore ? 'Indice compozit · scala A–D · detaliat în capitolul „Nota UrbanX (IVU)".'
                         : 'Indice compozit dezvoltat de UrbanX · formulă transparentă · detaliat în capitolul „Nota UrbanX (IVU)".',
-        hasScore ? ml + 5 + Math.min(96, w - 10) + 4 : ml + 5, hasScore ? y + 18 : y + 15, { maxWidth: hasScore ? (w - Math.min(96, w - 10) - 14) : (w - 10) });
+        hasScore ? ml + 5 + Math.min(96, w - 10) + 5 : ml + 5, hasScore ? y + 23 : y + 15, { maxWidth: hasScore ? (w - Math.min(96, w - 10) - 15) : (w - 10) });
       return h;
     } catch (e) { return 0; }
   };
