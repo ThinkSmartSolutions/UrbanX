@@ -39,6 +39,9 @@
     };
   }
   function _cloudPush(s) { var sb = _sb(); if (!sb) return; try { sb.from('urban_sesizari').insert([_toRow(s)]).then(function () {}, function () {}); } catch (e) {} }
+  // moderare admin → cloud (RLS permite update/delete doar adminului)
+  function _cloudUpdate(s) { var sb = _sb(); if (!sb || !s) return; try { sb.from('urban_sesizari').update({ status: s.status }).eq('client_id', s.id).then(function () {}, function () {}); } catch (e) {} }
+  function _cloudDelete(id) { var sb = _sb(); if (!sb) return; try { sb.from('urban_sesizari').delete().eq('client_id', id).then(function () {}, function () {}); } catch (e) {} }
   // încarcă din cloud + îmbină în cache-ul local (dedupe după client_id), best-effort
   function pullCloud(cb) {
     var sb = _sb(); if (!sb) { cb && cb(false); return; }
@@ -83,10 +86,10 @@
     setStatus: function (id, status, note) {
       var a = regAll(); var s = a.filter(function (x) { return x.id === id; })[0]; if (!s) return null;
       s.status = status; if (note) s.resolution_note = note; if (status === 'rezolvata') s.resolved_at = Date.now();
-      regSave(a); return s;
+      regSave(a); _cloudUpdate(s); return s;
     },
     upvote: function (id) { var a = regAll(); var s = a.filter(function (x) { return x.id === id; })[0]; if (s) { s.upvotes = (s.upvotes || 0) + 1; regSave(a); } return s; },
-    remove: function (id) { regSave(regAll().filter(function (x) { return x.id !== id; })); },
+    remove: function (id) { regSave(regAll().filter(function (x) { return x.id !== id; })); _cloudDelete(id); },
     // sesizări legate de o parcelă (după nrcad sau proximitate centroid)
     forParcel: function (parcel) {
       if (!parcel) return [];
