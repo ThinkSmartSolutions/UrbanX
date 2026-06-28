@@ -1120,6 +1120,22 @@ function _authSuccess(user) {
     if (window.UXSidebar && window.UXSidebar.render && document.getElementById('ux-sidebar-body')) window.UXSidebar.render();
   } catch (e) { console.warn('[001 role]', e); }
 
+  // 001: rolul ASIGNAT din tabelul Supabase `user_roles` (admin poate seta altor useri).
+  // NO-OP dacă tabelul nu există încă (eroarea e prinsă) → fallback la metadata/FULL.
+  try {
+    if (_supabase && user?.id) {
+      _supabase.from('user_roles').select('role,uat_siruta').eq('user_id', user.id).maybeSingle()
+        .then(function (res) {
+          if (res && res.data && res.data.role && window._USER) {
+            window._USER.role = res.data.role;
+            if (res.data.uat_siruta) window._USER.uatSiruta = res.data.uat_siruta;
+            if (window.UXSidebar && window.UXSidebar.render && document.getElementById('ux-sidebar-body')) window.UXSidebar.render();
+            console.log('[001 role] rol din user_roles:', res.data.role);
+          }
+        }).catch(function () { });
+    }
+  } catch (e) { }
+
   const ov = document.getElementById('auth-overlay');
   if(ov) {
     ov.style.transition = 'opacity .4s ease';
