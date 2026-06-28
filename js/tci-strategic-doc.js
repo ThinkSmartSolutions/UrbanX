@@ -384,7 +384,7 @@
         var elig = []; if (D2.barChart) elig.push('bar'); if (D2.hbar) elig.push('hbar');
         if (D2.donut && allPos && rows.length <= 6) elig.push('donut');
         if (D2.pie && allPos && rows.length <= 5) elig.push('pie');
-        if (D2.radar && allPos && rows.length >= 5 && rows.length <= 8) elig.push('radar');
+        if (D2.radar && allPos && rows.length >= 4 && rows.length <= 8) elig.push('radar');
         if (!elig.length) elig = ['bar'];
         var st = elig[(D2.__tci = (D2.__tci || 0) + 1) % elig.length];
         if (st === 'donut') D2.donut(data.map(function (r) { return [r[0].slice(0, 14), r[1], r[2]]; }), { title: ttl, source: src });
