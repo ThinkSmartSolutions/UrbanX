@@ -211,7 +211,6 @@
     var quick = QUICK.filter(function (a) { return a.moduleId === '_search' || _cs(a.moduleId); });
     el.innerHTML =
       '<div class="uxsb-uat">📍 ' + ((G.TCI && (G.TCI.cityName)) || (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name) || 'UAT') + '</div>' +
-      _langSwitcher() + _roleSwitcher() +
       '<div class="uxsb-qa">' + quick.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + T(a.label) + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + T(a.label) + '</span></button>'; }).join('') + '</div>' +
       groups.map(function (g) {
         var act = State.activeGroup === g.id;

@@ -403,17 +403,41 @@
     try { localStorage.setItem(KEY, lang); } catch (e) {}
     try { if (G.UXSidebar && G.UXSidebar.render && document.getElementById('ux-sidebar-body')) G.UXSidebar.render(); } catch (e) {}
     try { applyAll(); } catch (e) {}                          // traduce tot DOM-ul existent
+    try { _refreshTopbarLabel(); } catch (e) {}
     try { G.document.dispatchEvent(new CustomEvent('urbanx:langChanged', { detail: { lang: lang } })); } catch (e) {}
     G.ss && G.ss('🌐 ' + lang.toUpperCase());
   }
   // permite adăugarea incrementală de traduceri (sau dintr-un pipeline MT)
   function extend(lang, map) { if (!DICT[lang]) DICT[lang] = {}; for (var k in map) DICT[lang][k] = map[k]; }
 
-  G.UrbanXI18n = { t: t, setLang: setLang, getCurrentLang: getCurrentLang, LANGS: LANGS, extend: extend, applyAll: applyAll };
+  G.UrbanXI18n = { t: t, setLang: setLang, getCurrentLang: getCurrentLang, LANGS: LANGS, extend: extend, applyAll: applyAll, _ddToggle: _ddToggle };
   G.T = t;   // shortcut global
 
+  // Selector de limbă GLOBAL în topbar (limba e a întregii platforme, nu a Teritoriului)
+  var FLAGS = { ro: '🇷🇴', en: '🇬🇧', fr: '🇫🇷', de: '🇩🇪' };
+  function _injectTopbarSwitcher() {
+    try {
+      var tb = document.getElementById('topbar'); if (!tb || document.getElementById('ux-lang-btn')) return;
+      var wrap = document.createElement('div'); wrap.style.cssText = 'position:relative;display:inline-flex;flex-shrink:0';
+      wrap.innerHTML =
+        '<button id="ux-lang-btn" class="tb-btn" title="Limbă / Language" style="display:inline-flex;align-items:center;gap:4px">🌐 <span id="ux-lang-cur">' + (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase() + '</span> ▾</button>' +
+        '<div id="ux-lang-dd" style="display:none;position:absolute;top:38px;right:0;z-index:9500;background:#0c1424;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:5px;min-width:140px;box-shadow:0 12px 30px rgba(0,0,0,.5)">' +
+        LANGS.map(function (l) { return '<button onclick="UrbanXI18n.setLang(\'' + l + '\');UrbanXI18n._ddToggle(false)" style="display:block;width:100%;text-align:left;background:' + (l === _lang ? 'rgba(56,138,221,.2)' : 'transparent') + ';border:0;color:#e6edf7;border-radius:6px;padding:7px 10px;cursor:pointer;font-size:12px">' + (FLAGS[l] || '') + ' ' + ({ ro: 'Română', en: 'English', fr: 'Français', de: 'Deutsch' }[l]) + '</button>'; }).join('') +
+        '</div>';
+      wrap.querySelector('#ux-lang-btn').addEventListener('click', function (e) { e.stopPropagation(); _ddToggle(); });
+      var anchor = document.getElementById('btn-admin') || document.getElementById('btn-launcher');
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor); else tb.appendChild(wrap);
+      document.addEventListener('click', function () { _ddToggle(false); });
+    } catch (e) {}
+  }
+  function _ddToggle(force) {
+    var dd = document.getElementById('ux-lang-dd'); if (!dd) return;
+    dd.style.display = (force === false) ? 'none' : (dd.style.display === 'none' ? 'block' : 'none');
+  }
+  function _refreshTopbarLabel() { var c = document.getElementById('ux-lang-cur'); if (c) c.textContent = (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase(); }
+
   // Startup: pornește observerul + traduce DOM-ul existent dacă limba ≠ RO.
-  function _boot() { try { _startObserver(); if (_lang !== 'ro') applyAll(); } catch (e) {} }
+  function _boot() { try { _startObserver(); _injectTopbarSwitcher(); if (_lang !== 'ro') applyAll(); } catch (e) {} }
   if (G.document && document.readyState !== 'loading') setTimeout(_boot, 0);
   else if (G.document) document.addEventListener('DOMContentLoaded', _boot);
   console.log('[i18n] încărcat · limbă: ' + _lang + ' · RO/EN/FR/DE (fallback RO + DOM auto)');
