@@ -161,10 +161,22 @@
 
   function render() {
     var el = D.getElementById('ux-sidebar-body'); if (!el) return;
-    var groups = NAV; // (rol: toate vizibile; itemii admin sunt acțiuni publice de planificare)
+    // 001 Faza 3: filtrare pe rol (NON-destructivă — implicit rol FULL → totul vizibil).
+    var _cs = (G.UXRoles && G.UXRoles.canSee) ? G.UXRoles.canSee : function () { return true; };
+    var groups = NAV.map(function (g) {
+      var items = g.items.filter(function (i) { return i.sep ? true : _cs(i.moduleId); });
+      // scoate separatoarele orfane (fără niciun item real după ele)
+      var clean = [];
+      for (var k = 0; k < items.length; k++) {
+        if (items[k].sep) { var nxt = items[k + 1]; if (!nxt || nxt.sep) continue; }
+        clean.push(items[k]);
+      }
+      return { id: g.id, label: g.label, ico: g.ico, color: g.color, items: clean };
+    }).filter(function (g) { return g.items.some(function (i) { return !i.sep; }); });
+    var quick = QUICK.filter(function (a) { return a.moduleId === '_search' || _cs(a.moduleId); });
     el.innerHTML =
       '<div class="uxsb-uat">📍 ' + ((G.TCI && (G.TCI.cityName)) || (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name) || 'UAT') + '</div>' +
-      '<div class="uxsb-qa">' + QUICK.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + a.label + '</span></button>'; }).join('') + '</div>' +
+      '<div class="uxsb-qa">' + quick.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + a.label + '</span></button>'; }).join('') + '</div>' +
       groups.map(function (g) {
         var act = State.activeGroup === g.id;
         return '<div class="uxsb-group">' +
