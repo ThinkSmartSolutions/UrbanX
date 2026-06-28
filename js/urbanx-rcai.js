@@ -26,7 +26,7 @@
       // DIVERSIFICARE (Florin: nu repeta acelasi tipar): linie(serie temporala) / hbar(etichete lungi) /
       // rotatie uniforma bar·hbar·donut·pie. (Aceeasi logica ca _deepRender.)
       if (isTime && D.lineChart) { D.lineChart([{ name: ((headers && headers[li]) || 'Serie').slice(0, 24), color: [37, 99, 235], points: vals }], labels0.map(function (l) { return (l.match(/(19|20)\d{2}/) || [l])[0]; }), { title: ttl, source: src }); return; }
-      if (avgLen > 16 && D.hbar) { D.hbar(data, { title: ttl, source: src }); return; }
+      // rotație completă (etichetele lungi se tratează prin hbar când e ales, nu forțat mereu)
       var elig = []; if (D.barChart) elig.push('bar'); if (D.hbar) elig.push('hbar');
       if (D.donut && allPos && rows.length <= 6) elig.push('donut'); if (D.pie && allPos && rows.length <= 5) elig.push('pie');
       if (!elig.length) elig = ['bar'];

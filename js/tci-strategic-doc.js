@@ -509,9 +509,8 @@
                       var src='Date din tabelul de mai sus';
                       if(isTime && D.lineChart){
                         D.lineChart([{name:(bl.headers[li]||'Serie').slice(0,24),color:[37,99,235],points:vals}], labels0.map(function(l){return (l.match(/(19|20)\d{2}/)||[l])[0];}), {title:title, source:src});
-                      } else if(avgLen>16 && D.hbar){
-                        D.hbar(cd, {title:title, source:src});           // etichete lungi → bare orizontale (lizibil)
                       } else {
+                        // rotație completă — hbar e în pool când e ales, nu forțat mereu la etichete lungi
                         var elig=[];
                         if(D.barChart) elig.push('bar');
                         if(D.hbar) elig.push('hbar');
