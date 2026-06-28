@@ -13,7 +13,14 @@
   // cateva caractere si eliminam ce nu e in subset (emoji etc.) ca sa nu apara casute.
   const _NORM = { ' ':' ','·':'-','‧':'-','„':'"','”':'"','“':'"','’':"'",'‚':"'",'…':'...','ş':'ș','Ş':'Ș','ţ':'ț','Ţ':'Ț' };
   const _KEEP = /[\t\n\r -ɏˆˇˉ˘-˝°²³«»–—‘’‚“”„†•…‰‹›€™→−✓]/;
-  const S2 = s => { if (s == null) return ''; var out = ''; var t = String(s); for (var i = 0; i < t.length; i++) { var c = t[i]; if (_NORM[c] !== undefined) { out += _NORM[c]; } else if (_KEEP.test(c)) { out += c; } } return out; };
+  const S2 = s => {
+    if (s == null) return '';
+    var t = String(s);
+    // i18n PDF: traduce string-urile CUNOSCUTE din dicționar când limba ≠ RO (titluri/anteturi/
+    // etichete/disclaimer). Proza interpolată cu date nu e în dicționar → rămâne RO (corect).
+    try { if (G.UrbanXI18n && G.UrbanXI18n.getCurrentLang() !== 'ro' && G.T) { var tt = t.trim(); if (tt) { var tr = G.T(tt); if (tr && tr !== tt) t = t.replace(tt, tr); } } } catch (e) {}
+    var out = ''; for (var i = 0; i < t.length; i++) { var c = t[i]; if (_NORM[c] !== undefined) { out += _NORM[c]; } else if (_KEEP.test(c)) { out += c; } } return out;
+  };
   // Transliterare RO->ASCII pt NUME DE FISIER (fara diacritice, fara underscore urat)
   const _DIA = {'ă':'a','â':'a','î':'i','ș':'s','ş':'s','ț':'t','ţ':'t','Ă':'A','Â':'A','Î':'I','Ș':'S','Ş':'S','Ț':'T','Ţ':'T'};
   const _ascii = s => String(s == null ? '' : s).replace(/[ăâîșşțţĂÂÎȘŞȚŢ]/g, c => _DIA[c] || c);

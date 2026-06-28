@@ -304,18 +304,9 @@ const _STUDY_CLASSES = {
 
 // Banner clasificare — apare pe prima pagina a fiecarui studiu
 function _pdfStudyClassBanner(pdf, W, cy, classKey, studyName) {
-  const cls = _STUDY_CLASSES[classKey] || _STUDY_CLASSES.ORIENTATIV;
-  pdf.setFillColor(...cls.bg);
-  pdf.rect(14, cy, W-28, 10, 'F');
-  pdf.setFillColor(...cls.col);
-  pdf.rect(14, cy, 3, 10, 'F');
-  pdf.setTextColor(...cls.col);
-  pdf.setFontSize(7); pdf.setFont('helvetica','bold');
-  pdf.text(cls.badge, 20, cy+6.5);
-  pdf.setFontSize(6.5); pdf.setFont('helvetica','normal');
-  pdf.setTextColor(60,80,100);
-  pdf.text(cls.label + ' — ' + studyName, 44, cy+6.5);
-  return cy+13;
+  // Florin: banner-ul de clasificare peste logo/copertă afecta credibilitatea — ELIMINAT.
+  // Onestitatea (document orientativ · verificare profesională) rămâne în footer-ul brand-guard.
+  return cy;
 }
 
 // #10 — KEY METRICS STRIP: POT/CUT/H/UTR pe fiecare pagina ca dashboard
@@ -560,6 +551,11 @@ function _pdfHealthCheck(studyName, params, nrcad, utr, sections) {
 
 // Afiseaza health check in PDF (ultima pagina)
 function _pdfRenderHealthCheck(pdf, W, H, healthResult) {
+  // Florin: pagina "DOCUMENT HEALTH CHECK / AVERTISMENT" făcea documentul să pară viciat /
+  // necredibil — NU se mai randează în PDF-ul livrat utilizatorului. (QA intern rămâne în consolă.)
+  try { if (healthResult && healthResult.issues && healthResult.issues.length) console.warn('[QA intern] ' + healthResult.status + ':', healthResult.issues.map(function(i){return i.msg||i;}).join(' · ')); } catch(e){}
+  return;
+  // eslint-disable-next-line no-unreachable
   const ok = healthResult.status==='OK';
   const warn = healthResult.status==='AVERTISMENT';
   const bg = ok?[235,252,240]:warn?[255,250,230]:[255,235,235];
@@ -2889,7 +2885,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   pdf.setTextColor(...GOLD);pdf.setFontSize(10);
   pdf.text('Bilantu spatii verzi · Plantare · Coeficient permeabilitate · Conf. Legii 24/2007',W/2,100,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,112,W-40,80,'F');pdf.setFillColor(...GOLD);pdf.rect(20,112,3,80,'F');
-  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['SV minim PUG ('+params?.sv+'%):',svMin.toLocaleString('en-US')+' mp'],['SV obligatoriu (min 20%):',svObl.toLocaleString('en-US')+' mp'],['Suprafata construita max (POT '+potMax+'%):',scMax.toLocaleString('en-US')+' mp'],['Suprafata libera estimata:',Math.max(0,areaNum-scMax).toLocaleString('en-US')+' mp'],['H propus:',aedisH.toFixed(1)+'m']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),106,124+i*9.5);});
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['SV minim PUG ('+(params?.sv||20)+'%):',svMin.toLocaleString('en-US')+' mp'],['SV obligatoriu (min 20%):',svObl.toLocaleString('en-US')+' mp'],['Suprafata construita max (POT '+potMax+'%):',scMax.toLocaleString('en-US')+' mp'],['Suprafata libera estimata:',Math.max(0,areaNum-scMax).toLocaleString('en-US')+' mp'],['H propus:',aedisH.toFixed(1)+'m']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(8);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,124+i*9.5);pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('helvetica','bold');pdf.text(S2(v),106,124+i*9.5);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · '+_getPUGVersion().hash+' · Document orientativ · UrbanX TSS·FG',W/2,H-12,{align:'center'});
   // Harta amplasament pe cover (Standard 3D) - banda jos
   if(caps.imgLocation&&caps.imgLocation.length>500){
@@ -3048,10 +3044,10 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA COMPLETA - CONCLUZII SPATII VERZI',10);ftr();
   cy=28;
   cy=sec('10. CONCLUZII FINALE - STUDIU SPATII VERZI SI PERMEABILITATE',cy);cy+=2;
-  cy=body('Studiul de spatii verzi si permeabilitate pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) a analizat conformitatea cu normele minime de spatii verzi (SV minim='+params?.sv+'% = '+svMin2+' mp). Propunerea tehnica asigura minim '+svProp2+' mp spatii verzi ('+(svProp2/areaNum2*100).toFixed(1)+'% din suprafata terenului), '+(svProp2>=svMin2?'CONFORM cu prevederile RLU pentru UTR '+utr+'.':'NECONFORM — necesita suplimentarea suprafetei verzi.')+'.',14,cy);cy+=4;
+  cy=body('Studiul de spatii verzi si permeabilitate pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) a analizat conformitatea cu normele minime de spatii verzi (SV minim='+(params?.sv||20)+'% = '+svMin2+' mp). Propunerea tehnica asigura minim '+svProp2+' mp spatii verzi ('+(svProp2/areaNum2*100).toFixed(1)+'% din suprafata terenului), '+(svProp2>=svMin2?'CONFORM cu prevederile RLU pentru UTR '+utr+'.':'NECONFORM — necesita suplimentarea suprafetei verzi.')+'.',14,cy);cy+=4;
   cy=tblRow(['Indicator','Valoare calculata','Cerinta normativa','Status'],cy,true,[70,42,42,28]);
   [['Suprafata teren (ST)',areaNum2.toLocaleString('en-US')+' mp','—','Informativ'],
-   ['Spatii verzi propuse',svProp2+' mp ('+Math.round(svProp2/areaNum2*100)+'%)','min. '+params?.sv+'% = '+svMin2.toLocaleString('en-US')+' mp',svProp2>=svMin2?'CONFORM':'NECONFORM'],
+   ['Spatii verzi propuse',svProp2+' mp ('+Math.round(svProp2/areaNum2*100)+'%)','min. '+(params?.sv||20)+'% = '+svMin2.toLocaleString('en-US')+' mp',svProp2>=svMin2?'CONFORM':'NECONFORM'],
    ['Suprafata construita (SC)',scMax2+' mp ('+params?.pot+'% POT)','max. '+params?.pot+'%','CONFORM'],
    ['Permeabilitate estimata',Math.round(svProp2/areaNum2*100)+'% pervios','min. '+Math.round(svMin2*0.6/areaNum2*100)+'% pervios','Verificare'],
    ['Arbori minim recomandati',Math.ceil(svProp2/200)+' buc','1 arbore/200mp SV','Recomandat'],
@@ -3529,7 +3525,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
    ['Retragere fata de strada',params?.rf+'m','min. '+params?.rf+'m','CONFORM'],
    ['Retragere laterala (rl)',params?.rl+'m','min. '+params?.rl+'m','CONFORM'],
    ['Retragere posterioara (rs)',params?.rs+'m','min. '+params?.rs+'m','CONFORM'],
-   ['Spatii verzi minime',params?.sv+'%','min. '+params?.sv+'%','Verificare proiect'],
+   ['Spatii verzi minime',params?.sv+'%','min. '+(params?.sv||20)+'%','Verificare proiect'],
   ].forEach(r=>cy=tblRow(r,cy,false,[70,38,38,36]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
@@ -3583,7 +3579,7 @@ async function generateMemoriu(){
   pdf.setTextColor(...GOLD);pdf.setFontSize(10);
   pdf.text('Document tehnic · Incadrare PUG · Indicatori urbanistici · Propunere volumetrica',W/2,98,{align:'center'});
   pdf.setFillColor(30,50,90);pdf.rect(20,110,W-40,100,'F');pdf.setFillColor(...GOLD);pdf.rect(20,110,3,100,'F');
-  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Coordonate GPS:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],['Functiune propusa:',fnLabel],['Regim inaltime propus:',niv+(niv===1?' nivel':niv<4?' niveluri':' niveluri')],['H total propus:',aedisH.toFixed(1)+' m'],['Stil arhitectural:',stilLabel],['Suprafata construita estimata:',scEst.toLocaleString('en-US')+' mp (POT '+params?.pot+'%)'],['Suprafata desfasurata estimata:',sdEst+' mp (CUT '+params?.cut+')'],['Spatii verzi minime:',svMin+' mp ('+params?.sv+'% din teren)'],['Parcaje obligatorii:',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,122+i*8);pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,122+i*8);});
+  [['Nr. cadastral:',nrcad],['Zona UTR:',utr],['Suprafata teren:',area+' mp'],['Coordonate GPS:',lat.toFixed(5)+'N / '+lon.toFixed(5)+'E'],['Functiune propusa:',fnLabel],['Regim inaltime propus:',niv+(niv===1?' nivel':niv<4?' niveluri':' niveluri')],['H total propus:',aedisH.toFixed(1)+' m'],['Stil arhitectural:',stilLabel],['Suprafata construita estimata:',scEst.toLocaleString('en-US')+' mp (POT '+params?.pot+'%)'],['Suprafata desfasurata estimata:',sdEst+' mp (CUT '+params?.cut+')'],['Spatii verzi minime:',svMin+' mp ('+(params?.sv||20)+'% din teren)'],['Parcaje obligatorii:',pkObl+' locuri']].forEach(([l,v],i)=>{pdf.setTextColor(150,170,200);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');pdf.text(S2(l),26,122+i*8);pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');pdf.text(S2(v),100,122+i*8);});
   pdf.setTextColor(100,120,150);pdf.setFontSize(7);pdf.text('Generat: '+S2(dateStr)+' · Document orientativ · UrbanX TSS·FG · Valori estimative',W/2,H-12,{align:'center'});
   if(caps.imgLocation&&caps.imgLocation.length>500){
     try{
@@ -7132,7 +7128,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   [['Suprafață construită la sol (SC)',scMax+' mp (POT='+params?.pot+'%)','RLU UTR '+utr,'Estimativ'],
    ['Suprafață desfășurată totală (SDA)',sdTotal+' mp (CUT='+params?.cut+')','RLU UTR '+utr,'Estimativ'],
    ['Înălțime maximă propusă',aedisH.toFixed(1)+' m (P+'+(niv-1)+' niv.)','Conf. AEDIS 3D','Orientativ'],
-   ['Suprafețe verzi minime',svMin+' mp ('+params?.sv+'%)','RLU UTR '+utr,'Obligatoriu'],
+   ['Suprafețe verzi minime',svMin+' mp ('+(params?.sv||20)+'%)','RLU UTR '+utr,'Obligatoriu'],
    ['Parcaje minime obligatorii',pkMin+' locuri ('+params?.pk+'/unitate)','NP 051/2012','Verificare'],
    ['Retragere față stradă',params?.rf+' m','RLU UTR '+utr,'Obligatoriu'],
    ['Retragere laterală',params?.rl+' m','RLU UTR '+utr,'Obligatoriu'],
@@ -7157,7 +7153,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   [['POT max',''+params?.pot+'%','Max. '+scMax+' mp SC la sol (din '+areaNum+' mp teren)','Nu se depășește'],
    ['CUT max',''+params?.cut,'Max. '+sdTotal+' mp SDA totală','Nu se depășește'],
    ['H max',''+( params?.h||'N/S')+'m','Conf. PUG + R.H. stradal','Verificare AACR'],
-   ['SV min',''+params?.sv+'%','Min. '+svMin+' mp spații verzi pe parcela','Obligatoriu'],
+   ['SV min',''+(params?.sv||20)+'%','Min. '+svMin+' mp spații verzi pe parcela','Obligatoriu'],
    ['Parcaje',''+params?.pk+' loc/unitate','Min. '+pkMin+' locuri conform NP 051/2012','Obligatoriu'],
    ['Retrageri','rf='+params?.rf+'m, rl='+params?.rl+'m, rs='+params?.rs+'m','Minim față de limitele de proprietate','Obligatoriu'],
    ['Funcțiuni admise','Conf. UTR '+utr,'Conform PUG '+uat+' în vigoare','Verificare PUG'],
@@ -7242,7 +7238,7 @@ async function generateStudiuFezabilitate(paramOverrides){
    ['Suprafață construită la sol (SC)','mp',scMax+'','POT='+params?.pot+'% x ST'],
    ['Suprafață desfășurată totală (SDA)','mp',sdTotal.toLocaleString('en-US'),'CUT='+params?.cut+' x ST — baza cost execuție'],
    ['Suprafață utilă estimată (SU)','mp',suTotal.toLocaleString('en-US'),(_suRatio*100).toFixed(0)+'% din SDA — baza calcul venituri'],
-   ['Suprafață spații verzi (SV)','mp',svMin+'','SV='+params?.sv+'% x ST (min.)'],
+   ['Suprafață spații verzi (SV)','mp',svMin+'','SV='+(params?.sv||20)+'% x ST (min.)'],
    ['Nr. niveluri (regim înălțime)','niv.','P+'+(niv-1),'Conf. AEDIS / RLU'],
    ['Înălțime maximă (Hmax)','m',aedisH.toFixed(1),'Conf. AEDIS orientativ'],
    ['Nr. locuri parcare obligatorii','locuri',pkMin+'','NP 051/2012 + RLU'],
@@ -7497,7 +7493,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   [['Suprafață teren (ST)',areaNum.toLocaleString('en-US')+' mp','100%','Conform CF'],
    ['Suprafață construită la sol (SC)',scMax.toLocaleString('en-US')+' mp',''+params?.pot+'%','CONFORM POT max='+params?.pot+'%'],
    ['Suprafață desfășurată totală (SDA)',sdTotal.toLocaleString('en-US')+' mp','CUT='+params?.cut,'CONFORM CUT max='+params?.cut],
-   ['Suprafețe verzi (SV)',svMin.toLocaleString('en-US')+' mp',''+params?.sv+'%','CONFORM SV min='+params?.sv+'%'],
+   ['Suprafețe verzi (SV)',svMin.toLocaleString('en-US')+' mp',''+(params?.sv||20)+'%','CONFORM SV min='+(params?.sv||20)+'%'],
    ['Suprafețe parcaje la sol',pkMin*30+' mp est.',''+Math.round(pkMin*30/areaNum*100)+'%','Verificare proiect'],
    ['Suprafețe circulații + alei',Math.round(areaNum*0.08)+' mp est.','~8%','Proiect peisagistic'],
    ['Suprafețe libere',Math.max(0,areaNum-scMax-svMin-pkMin*30-Math.round(areaNum*0.08))+' mp','—','Proiect specific'],
@@ -8521,7 +8517,7 @@ async function generateStudiuAmplasament(){
   cy=sec('9. RESTRICTII CUMULATE IDENTIFICATE PENTRU AMPLASAMENT',cy);cy+=2;
   cy=body('Pe baza tuturor datelor analizate în prezentul studiu de amplasament (cadastru, PUG, vecinătăți, monumente, riscuri naturale, climatice, infrastructură), se identifică următoarele restricții cumulate care trebuie respectate în elaborarea oricărui studiu sau proiect de specialitate pentru amplasamentul '+nrcad+' (UTR '+utr+').',14,cy);cy+=4;
   cy=tblRow(['Categorie restricție','Conținut restricție','Baza legală','Severitate'],cy,true,[45,90,38,9]);
-  [['Urbanistic PUG','POT max '+_pot+'%, CUT max '+_cut+', H max '+(params?.h||'N/S')+'m, SV min '+params?.sv+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
+  [['Urbanistic PUG','POT max '+_pot+'%, CUT max '+_cut+', H max '+(params?.h||'N/S')+'m, SV min '+(params?.sv||20)+'%, parcaje min '+params?.pk+'/unit.','RLU UTR '+utr,'OBLIG'],
    ['Retrageri min.','Rf='+_rf+'m, Rl='+_rl+'m, Rs='+_rs+'m față de limitele de proprietate','RLU UTR '+utr,'OBLIG'],
    ['Seismic','Structură antiseismică ag='+seism.ag+'g, Tc='+seism.Tc+'s, zona '+seism.zona,'P100-1/2022','OBLIG'],
    ['Însorire/Umbre','Alt. sol. 21 Dec 12:00 = '+altDec12.toFixed(1)+'° ('+(isConformSolar?'>=15° CONFORM':'<15° NECONFORM')+'). Dist. min. N: '+(aedisH/Math.tan(15*Math.PI/180)).toFixed(0)+'m','OMS 119/2014','OBLIG'],

@@ -47,9 +47,10 @@
       // pagina curenta ultima pagina; addImage adaugat pe pagina 1 prin setPage(1) NU se
       // serializeaza (XObject-ul de imagine e legat de pagina curenta la output), pe cand
       // operatiile vectoriale se scriu corect in stream-ul paginii 1 (la fel ca disclaimer-ul).
-      try {
-        if (!doc.__hasCoverLogo) { doc.setPage(1); vlogo(doc, W - 22, 6, 14); }
-      } catch (e) {}
+      // Florin: logo-ul vectorial (X cyan) în colțul dreapta-sus arăta ca un buton de „închide"
+      // și dubla logo-ul propriu al coperții → ELIMINAT. Branding-ul rămâne pe coperta proprie a
+      // documentului + disclaimer-ul de mai jos. (vlogo păstrat pt eventuale docuri fără copertă.)
+      // (dezactivat intenționat — nu mai ștampilăm X-ul în colț)
 
       // — DISCLAIMER pe ULTIMA pagina (sau pagina noua daca nu incape) —
       try {

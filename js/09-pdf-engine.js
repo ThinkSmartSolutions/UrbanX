@@ -20,7 +20,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const GRAY=[90,104,120],GRAY2=[138,150,166],GRAY3=[200,208,220],GRAY4=[226,230,238];
   const WHITE=[255,255,255];
 
-  const S2=t=>_pdfSafe(t);
+  const S2=t=>{ var s=t; try{ if(window.UrbanXI18n&&window.UrbanXI18n.getCurrentLang()!=='ro'&&window.T&&t!=null){ var tt=String(t).trim(); if(tt){ var tr=window.T(tt); if(tr&&tr!==tt) s=String(t).replace(tt,tr); } } }catch(e){} return _pdfSafe(s); };
   // Formatare numere cu separator de mii (virgula) + sufix optional
   // n(2489) => '2,489'  |  n(1742300,'EUR') => '1,742,300 EUR'  |  n(41.4,'%') => '41.4%'
   const n=(val,suffix,decimals)=>{
