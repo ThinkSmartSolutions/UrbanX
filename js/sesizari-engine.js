@@ -27,6 +27,34 @@
   function regAll() { try { return JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) { return []; } }
   function regSave(a) { try { localStorage.setItem(RKEY, JSON.stringify(a)); } catch (e) {} }
 
+  // ── Persistență CLOUD (Supabase urban_sesizari) — local rămâne cache offline ──
+  function _sb() { return window._supabase || null; }
+  function _toRow(s) {
+    return {
+      client_id: s.id, category: s.category, title: s.title || null, description: s.description || null,
+      priority: s.priority || 'medie', status: s.status || 'noua',
+      lat: s.geom ? s.geom[1] : null, lon: s.geom ? s.geom[0] : null,
+      uat: s.uat || null, nrcad: (s.linked_parcel && s.linked_parcel.nrcad) || null,
+      address_text: s.address_text || null, gdpr_consent: !!s.consent
+    };
+  }
+  function _cloudPush(s) { var sb = _sb(); if (!sb) return; try { sb.from('urban_sesizari').insert([_toRow(s)]).then(function () {}, function () {}); } catch (e) {} }
+  // încarcă din cloud + îmbină în cache-ul local (dedupe după client_id), best-effort
+  function pullCloud(cb) {
+    var sb = _sb(); if (!sb) { cb && cb(false); return; }
+    try {
+      sb.from('urban_sesizari').select('*').then(function (res) {
+        if (!res || !res.data) { cb && cb(false); return; }
+        var local = regAll(), seen = {}; local.forEach(function (x) { seen[x.id] = 1; });
+        res.data.forEach(function (r) {
+          var id = r.client_id || ('cloud_' + r.id); if (seen[id]) return; seen[id] = 1;
+          local.push({ id: id, category: r.category, title: r.title, description: r.description, priority: r.priority, status: r.status, uat: r.uat, geom: (r.lon != null && r.lat != null) ? [r.lon, r.lat] : null, linked_parcel: r.nrcad ? { nrcad: r.nrcad } : null, address_text: r.address_text, consent: r.gdpr_consent, created_at: r.created_at ? Date.parse(r.created_at) : Date.now(), upvotes: r.upvotes || 0 });
+        });
+        regSave(local); cb && cb(true);
+      }, function () { cb && cb(false); });
+    } catch (e) { cb && cb(false); }
+  }
+
   // Cross-check CAU: parcela are AC/CU în registru? (pt construire_ilegala)
   function crossCheckCAU(linkedParcel) {
     try {
@@ -50,7 +78,7 @@
         var cc = crossCheckCAU(s.linked_parcel); s.cau_check = cc;
         if (cc.checked && !cc.has_permit) { s.priority = 'mare'; s.flag_no_permit = true; }
       }
-      a.push(s); regSave(a); return s;
+      a.push(s); regSave(a); _cloudPush(s); return s;
     },
     setStatus: function (id, status, note) {
       var a = regAll(); var s = a.filter(function (x) { return x.id === id; })[0]; if (!s) return null;
@@ -90,6 +118,9 @@
     }
   };
 
+  registry.pullCloud = pullCloud;
   G.Sesizari = { registry: registry, CATEGORIES: CATEGORIES, STATUSES: STATUSES, PRIORITIES: PRIORITIES, crossCheckCAU: crossCheckCAU };
-  console.log('[Sesizari] motor încărcat (window.Sesizari)');
+  // sincronizare cloud la pornire (best-effort; local rămâne cache offline)
+  try { if (G.document) setTimeout(function () { pullCloud(function (ok) { if (ok && G.Sesizari && G.Sesizari._mapOn) try { G.Sesizari.toggleMap(true); } catch (e) {} }); }, 1500); } catch (e) {}
+  console.log('[Sesizari] motor încărcat (window.Sesizari) · sync cloud');
 })(window);
