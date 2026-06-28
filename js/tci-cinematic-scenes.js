@@ -1639,6 +1639,65 @@ G._CinemaEngine={
     counts.total=feats.length; this._heritageCounts=counts;
   },
 
+  // ── PROFIL TERITORIAL (b33s1) — natura aparte a UAT desenată din date REALE ──
+  // Detectează profilul (litoral/deltă/baraj/minier/silvic/portuar...) cu _UATProfile
+  // și desenează semnătura geografică reală (OSM: coastline, wetland, dam, quarry,
+  // forest, harbour). Pentru profiluri fără semnătură OSM (seismic) → inele de undă.
+  async _addTerritorialProfile(map, city){
+    city=city||this._city||{}; var cx=city.lon||25, cy=city.lat||45.5;
+    var det=(window._UATProfile&&window._UATProfile.detect)?window._UATProfile.detect(city):[];
+    this._profileInfo={ profiles:det.map(function(d){return {id:d.id,label:d.profile.label,icon:d.profile.icon,evidence:d.evidence,conf:d.confidence};}), drawn:0 };
+    if(!det.length){
+      // fără profil aparte — marcaj discret central + etichetă onestă
+      this._cinLabels(map,[{lon:cx,lat:cy,color:'#94a3b8',icon:'◎',title:'PROFIL STANDARD',sub:'fără specific teritorial aparte'}]);
+      return;
+    }
+    var COLP={litoral:'#22d3ee',delta:'#34d399',baraj:'#60a5fa',minier:'#b08968',salin:'#cbd5e1',portuar:'#38bdf8',termal:'#fb923c',silvic:'#22c55e',seismic:'#f59e0b',transfront:'#a78bfa'};
+    // interogări OSM pe profil (semnătura geografică reală)
+    var Q={
+      litoral:{r:9000,sel:['way["natural"="coastline"]'],type:'line'},
+      delta:{r:7000,sel:['way["natural"="wetland"]','way["natural"="water"]'],type:'fill'},
+      baraj:{r:13000,sel:['way["waterway"="dam"]','nwr["water"="reservoir"]','way["natural"="water"]'],type:'mix'},
+      minier:{r:9000,sel:['way["landuse"="quarry"]','nwr["man_made"="mineshaft"]'],type:'fill'},
+      portuar:{r:6000,sel:['way["landuse"="industrial"]','nwr["harbour"="yes"]','way["waterway"="dock"]'],type:'fill'},
+      silvic:{r:8000,sel:['way["natural"="wood"]','way["landuse"="forest"]'],type:'fill'},
+      termal:{r:6000,sel:['nwr["amenity"="spa"]','nwr["natural"="spring"]'],type:'pt'},
+      salin:{r:9000,sel:['nwr["historic"="mine"]','nwr["man_made"="adit"]'],type:'pt'}
+    };
+    var lbls=[], drawn=0;
+    for(var pi=0; pi<Math.min(2,det.length); pi++){
+      var d=det[pi], id=d.id, col=COLP[id]||'#cbd5e1', cfg=Q[id];
+      lbls.push({lon:cx, lat:cy+0.02+pi*0.02, color:col, icon:d.profile.icon||'◆', title:(d.profile.label||id).toUpperCase(), sub:d.evidence});
+      if(id==='seismic'){
+        // fără OSM — inele de undă seismică (vizual onest pt zona Vrancea)
+        var rings=[]; for(var g=1; g<=3; g++){ var rr=0.04*g, ring=[]; for(var k=0;k<=40;k++){ var an=k/40*2*Math.PI; ring.push([cx+rr*Math.cos(an)*1.4, cy+rr*Math.sin(an)]); } rings.push({type:'Feature',geometry:{type:'LineString',coordinates:ring},properties:{c:col}}); }
+        this._safeAdd(map,'v8-prof-seis',{type:'geojson',data:{type:'FeatureCollection',features:rings}},{id:'v8-prof-seis-l',type:'line',source:'v8-prof-seis',paint:{'line-color':['get','c'],'line-width':2.2,'line-opacity':0.7}});
+        drawn++; continue;
+      }
+      if(!cfg) continue;
+      var a='(around:'+cfg.r+','+cy+','+cx+')';
+      var q='[out:json][timeout:25];('+cfg.sel.map(function(s){return s+a;}).join(';')+';);out geom tags;';
+      try{
+        var j=await this._osmFetchJSON(q); if(!this._playing) return;
+        var lineF=[], fillF=[], ptF=[];
+        (j.elements||[]).forEach(function(el){
+          var tg=el.tags||{};
+          if(el.type==='node'&&el.lat!=null){ ptF.push({type:'Feature',geometry:{type:'Point',coordinates:[el.lon,el.lat]},properties:{c:col}}); return; }
+          if(!el.geometry||el.geometry.length<2) { if(el.center){ ptF.push({type:'Feature',geometry:{type:'Point',coordinates:[el.center.lon,el.center.lat]},properties:{c:col}}); } return; }
+          var coords=el.geometry.map(function(g){return [g.lon,g.lat];});
+          var closed=coords.length>3 && coords[0][0]===coords[coords.length-1][0] && coords[0][1]===coords[coords.length-1][1];
+          if((tg.natural==='water'||tg.natural==='wetland'||tg.natural==='wood'||tg.landuse==='forest'||tg.landuse==='quarry'||tg.landuse==='industrial'||tg.water==='reservoir') && closed){ fillF.push({type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{c:col}}); }
+          else { lineF.push({type:'Feature',geometry:{type:'LineString',coordinates:coords},properties:{c:col}}); }
+        });
+        if(fillF.length){ this._safeAdd(map,'v8-prof-'+id+'-f',{type:'geojson',data:{type:'FeatureCollection',features:fillF}},{id:'v8-prof-'+id+'-fl',type:'fill',source:'v8-prof-'+id+'-f',paint:{'fill-color':col,'fill-opacity':0.28}}); drawn++; }
+        if(lineF.length){ this._safeAdd(map,'v8-prof-'+id+'-ln',{type:'geojson',data:{type:'FeatureCollection',features:lineF}},{id:'v8-prof-'+id+'-lnl',type:'line',source:'v8-prof-'+id+'-ln',paint:{'line-color':col,'line-width':['interpolate',['linear'],['zoom'],8,2,13,5],'line-opacity':0.92}}); drawn++; }
+        if(ptF.length){ this._safeAdd(map,'v8-prof-'+id+'-pt',{type:'geojson',data:{type:'FeatureCollection',features:ptF}},{id:'v8-prof-'+id+'-ptl',type:'circle',source:'v8-prof-'+id+'-pt',paint:{'circle-radius':['interpolate',['linear'],['zoom'],8,4,13,9],'circle-color':col,'circle-opacity':0.95,'circle-stroke-width':1.2,'circle-stroke-color':'rgba(10,15,35,0.9)'}}); drawn++; }
+      }catch(e){}
+    }
+    this._profileInfo.drawn=drawn;
+    if(lbls.length) this._cinLabels(map, lbls);
+  },
+
   // ── REȚEA NAȚIONALĂ (b1s3) — autostrăzi + aeroporturi REALE din _RegioInfra ──
   _addNationalNetwork(map){
     if(!window._RegioInfra) return;

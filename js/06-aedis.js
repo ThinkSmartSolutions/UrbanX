@@ -6294,6 +6294,8 @@ function toggleRapoarteMenu(){
   // Pozitionare corecta: display:block INTAI, apoi calculeaza offsetWidth real
   m.style.visibility = 'hidden';
   m.style.display = 'block';
+  // Studii de profil teritorial: reîmprospătează lista pt UAT-ul curent (apar doar profilurile detectate)
+  try { window._ProfileStudies && window._ProfileStudies.renderMenu && window._ProfileStudies.renderMenu(); } catch (e) {}
   // 001 Faza 3b: filtrare pe rol (implicit FULL → nimic ascuns; doar rol restrictiv filtreaza)
   try { window.UXRoles && window.UXRoles.filterRapoarte && window.UXRoles.filterRapoarte(m); } catch (e) {}
 

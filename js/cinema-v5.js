@@ -73,6 +73,7 @@ SCENES = [
   {id:'b3s3',dur:18000,label:'INVESTITII & ROI',      bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b31s1',dur:20000,label:'VALOARE IMOBILIARA €/mp',bloc:1,blabel:'INTELEGEREA ORASULUI'},
   {id:'b32s1',dur:21000,label:'PATRIMONIU & IDENTITATE',bloc:1,blabel:'INTELEGEREA ORASULUI'},
+  {id:'b33s1',dur:22000,label:'PROFIL TERITORIAL',     bloc:1,blabel:'INTELEGEREA ORASULUI'},
   // ACT II — ORASUL SUB PRESIUNE
   {id:'b4s1',dur:20000,label:'RETEA RUTIERA',         bloc:2,blabel:'ORASUL SUB PRESIUNE'},
   {id:'b4s2',dur:24000,label:'CONECTIVITATE REG.',    bloc:2,blabel:'ORASUL SUB PRESIUNE'},
@@ -1237,6 +1238,14 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly([cx,cy],13,44,0,4000,0,'dusk');
         fly([cx,cy],14.4,58,22,6000,9000,'dusk');
         fly([cx,cy],13.6,50,-16,5000,16000,'night');
+        break;
+
+      case 'b33s1': // PROFIL TERITORIAL — natura aparte a UAT (litoral/deltă/baraj...) din date reale
+        lp('day');
+        onIdle(function(){try{SE._addTerritorialProfile&&SE._addTerritorialProfile(map, city);}catch(e){}});
+        fly([cx,cy],11.4,40,0,4000,0,'day');
+        fly([cx,cy],12.6,54,24,6500,9000,'day');
+        fly([cx,cy],11.8,46,-18,5000,17000,'dusk');
         break;
 
       // BLOC 5 ───────────────────────────────────────────────────────────
@@ -2416,6 +2425,30 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         });
         narativ('Patrimoniul construit si arheologic este memoria si identitatea orasului — si o resursa economica reala. Obiectivele de aici sunt cele inregistrate public (OpenStreetMap historic=*), reflectand tesutul istoric care intra sub regim de protectie (Lista Monumentelor Istorice, zone construite protejate, avize ale Directiei Judetene pentru Cultura). Orice interventie in proximitate impune cercetare arheologica preventiva (RCAI) si avizare specifica. Predictie: regenerarea centrata pe patrimoniu (reabilitare, pietonalizare, iluminat scenic, trasee culturale) creste atractivitatea turistica si valoarea zonei, transformand conservarea din cost in investitie.');
         concluzie('Patrimoniul protejat + pus in valoare = identitate, turism si valoare imobiliara — nu o frana, ci un motor de regenerare');
+        break;
+      }
+
+      case 'b33s1': { // PROFIL TERITORIAL — natura aparte a UAT + modificatorul IVU
+        titlu('Profil teritorial','Natura aparte a UAT, detectata din date reale (OSM / geografie)'); linie();
+        var PD=(window._UATProfile&&window._UATProfile.detect)?window._UATProfile.detect(city):[];
+        var PMOD=[]; try{ var _k=city&&(city.key||city.cityKey)||(window.TCI&&window.TCI.cityKey); if(_k&&window.UrbanXIVU&&window.UrbanXIVU.scoreFor){ var _s=window.UrbanXIVU.scoreFor(_k); if(_s&&_s.R&&_s.R.profiles) PMOD=_s.R.profiles; } }catch(e){}
+        if(PD.length){
+          cifra(PD.length+(PD.length===1?' profil':' profiluri'),'Specific teritorial identificat','#34d399');
+          PD.slice(0,5).forEach(function(p,i){
+            var a=Math.min(1,(t-0.18-i*0.05)/0.16)*sA; if(a<=0)return; ctx.globalAlpha=a; ctx.textAlign='left';
+            ctx.fillStyle='rgba(230,236,250,0.94)'; ctx.font='700 '+Math.min(W*0.012,16)+'px "Space Grotesk",sans-serif';
+            var md=PMOD.filter(function(m){return m.id===p.id;})[0];
+            var mtxt=md?('  ['+(md.delta>=0?'+':'')+md.delta+' '+md.dim.split(' ')[0]+']'):'';
+            ctx.fillText((p.profile.icon||'◆')+' '+p.profile.label+mtxt, W*0.04, H*(0.40+i*0.05));
+            ctx.globalAlpha=1;
+          });
+          narativ('Fiecare teritoriu are o natura aparte care ii schimba regulile jocului. UrbanX o detecteaza automat din semnale reale — linia tarmului (OpenStreetMap), poligoanele de zona umeda Natura 2000, barajele si lacurile de acumulare, carierele, padurea, portul — si o deseneaza pe harta. Acest profil nu e decorativ: el modifica TRANSPARENT Nota UrbanX, ajustand dimensiunea relevanta cu un mic delta (risc sau oportunitate) — vizibil in eticheta fiecarui profil. Un oras de litoral primeste un risc de eroziune costiera si nivel marin; unul portuar, un bonus de conectivitate; o localitate de delta pierde la constructie, dar castiga la capital natural. Predictie: studiile de profil dedicate (rang inferior pe amplasament, rang superior teritorial) fundamenteaza interventiile specifice — exact ce un PUG generic rateaza.');
+          concluzie('Profilul teritorial = regulile specifice ale locului. UrbanX il detecteaza, il deseneaza, il cuantifica in Nota si ii dedica studii proprii');
+        } else {
+          cifra('Profil standard','Fara specific teritorial aparte detectat','#94a3b8');
+          narativ('Acest UAT nu prezinta un profil teritorial special (litoral, delta, padure umeda, baraj, minier, salin, portuar, termal, silvic, seismic ridicat sau de frontiera) detectabil din datele disponibile. Analiza urmeaza cadrul standard UrbanX, pe cele sase dimensiuni ale Notei. Daca apar semnale noi (de exemplu un lac de acumulare in vecinatate sau o resursa balneara), platforma activeaza automat studiile de profil dedicate.');
+          concluzie('Profil standard — analiza pe cadrul general UrbanX, fara modificatori de profil teritorial');
+        }
         break;
       }
 

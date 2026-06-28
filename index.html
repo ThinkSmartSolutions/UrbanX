@@ -1445,7 +1445,11 @@ document.addEventListener('click', function(){
   <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
-
+  <!-- STUDII DE PROFIL TERITORIAL — apar DOAR pentru UAT-urile cu profil detectat (litoral/deltă/baraj...) -->
+  <div id="rapoarte-profile-wrap" style="display:none">
+    <div style="padding:5px 8px 3px;font-size:9px;color:#0e74a5;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(14,116,165,.18);margin-top:3px">◆ Studii de Profil Teritorial</div>
+    <div id="rapoarte-profile-list"></div>
+  </div>
 
   <!-- SPS = studii TERITORIALE (în meniul Teritoriu). NU se dublează aici ca „pe parcelă":
        fiecare temă pe parcelă e deja acoperită de un studiu de proiectant dedicat
@@ -2801,8 +2805,16 @@ setInterval(()=>{
   <script src="js/urbanx-housing.js?v=20260617"></script><!-- locuire & accesibilitate -->
   <script src="js/urbanx-energy.js?v=20260617"></script><!-- energie & climat -->
   <script src="js/urbanx-resources.js?v=20260617"></script><!-- apa, seceta & economie circulara -->
-  <script src="js/urbanx-rank.js?v=20260628nature"></script><!-- nota/clasament UrbanX (+toate modulele) -->
+  <script src="js/urbanx-rank.js?v=20260628prof"></script><!-- nota/clasament UrbanX (+toate modulele) -->
+  <script src="js/uat-profile.js?v=20260628prof"></script><!-- strat de profil teritorial (Delta/litoral/minier/baraj...) -->
   <script src="js/urbanx-ivu.js?v=20260628allats"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
+  <script src="js/profile-deep-litoral-inf.js?v=20260628prof"></script><!-- litoral · rang inferior -->
+  <script src="js/profile-deep-litoral-sup.js?v=20260628prof"></script><!-- litoral · rang superior -->
+  <script src="js/profile-deep-delta-inf.js?v=20260628prof"></script><!-- deltă · rang inferior -->
+  <script src="js/profile-deep-delta-sup.js?v=20260628prof"></script><!-- deltă · rang superior -->
+  <script src="js/profile-deep-baraj-inf.js?v=20260628prof"></script><!-- baraj · rang inferior -->
+  <script src="js/profile-deep-baraj-sup.js?v=20260628prof"></script><!-- baraj · rang superior -->
+  <script src="js/profile-studies.js?v=20260628prof"></script><!-- motor studii de profil (inf 60+ / sup 100+) -->
   <script src="js/tci-risk-module.js?v=20260624A"></script>
   <script src="js/tci-strategic-doc.js?v=20260628clean"></script>
   <script src="js/tci-strategic-masterplan-content.js?v=20260624D"></script>

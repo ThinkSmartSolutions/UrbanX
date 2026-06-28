@@ -65,7 +65,7 @@ var GRADES = [
 ];
 
 G._UrbanRank = {
-  EU_PEERS:EU_PEERS, GRADES:GRADES,
+  EU_PEERS:EU_PEERS, GRADES:GRADES, _forestPct:_forestPct,
   // pred = _PredEngine.calc ; city = _RO_CITIES_DB[key]/_EXTRA_UATS
   compute: function(pred, city){
     pred = pred||{}; city = city||{};
@@ -133,6 +133,25 @@ G._UrbanRank = {
       {label:'Demografie & capital uman', score:demo,    w:0.15, formula:'50 + ritm populație 10 ani × 18'+eduNote, src:'INS / recensământ 2021 + ARACIS'},
       {label:'Reziliență & risc',         score:resil,   w:0.15, formula:'82 − accelerație seismică(g) × 120'+resilNote, src:'INFP P100 / ANAR + sănătate'},
     ];
+    // ── MODIFICATOR DE PROFIL TERITORIAL ──────────────────────────────────
+    // Profilurile detectate (litoral/deltă/baraj/minier/salin/portuar/termal/
+    // silvic/seismic/transfrontalier) ajustează TRANSPARENT dimensiunea relevantă
+    // cu un delta mic (risc sau oportunitate), documentat în formulă și în Notă.
+    var profMods=[];
+    try{
+      if(G._UATProfile && G._UATProfile.detect && city){
+        var KEYMAP={enviro:'Mediu',resil:'Reziliență',quality:'Calitate',connect:'Conectivitate'};
+        G._UATProfile.detect(city).forEach(function(pp){
+          var iv=pp.profile&&pp.profile.ivu; if(!iv||iv.delta==null) return;
+          var pref=KEYMAP[iv.dim]; if(!pref) return;
+          var d=null; for(var _i=0;_i<dims.length;_i++){ if(dims[_i].label.indexOf(pref)===0){ d=dims[_i]; break; } }
+          if(!d) return;
+          var before=d.score; d.score=cl(d.score+iv.delta);
+          d.formula=d.formula+' · profil '+(pp.profile.label||pp.id)+' ('+(iv.delta>=0?'+':'')+iv.delta+'pct: '+iv.note+')';
+          profMods.push({id:pp.id,label:pp.profile.label,icon:pp.profile.icon,dim:d.label,delta:iv.delta,note:iv.note,before:before,after:d.score,evidence:pp.evidence});
+        });
+      }
+    }catch(e){}
     var score = Math.round(dims.reduce(function(s,d){return s+d.score*d.w;},0));
     var grade = gradeOf(score);
 
@@ -142,7 +161,7 @@ G._UrbanRank = {
     var rank = withCity.findIndex(function(x){return x.self;})+1;
 
     return {
-      score:score, grade:grade, dims:dims, qualityFacets:QF,
+      score:score, grade:grade, dims:dims, qualityFacets:QF, profiles:profMods,
       nature:{ forestPct:forestPct, species:nSpec, greenScore:greenScore, forestScore:forestScore, bioScore:bioScore },
       tier:tier, tierLabel:TIER_LABEL[tier],
       peers:peers, peersWithCity:withCity, rankInPeers:rank, peerCount:withCity.length,
@@ -185,6 +204,15 @@ G._UrbanRank = {
       D.barChart(R.dims.map(function(d){return [d.label.split(' ')[0], d.score, [110,130,200]];}), {title:'Scor pe dimensiune (0–100)', max:100, vfmt:function(v){return String(Math.round(v));}});
     }
     D.bullets(R.dims.map(function(d){ return [d.label+' ('+Math.round(d.w*100)+'%)', 'scor '+d.score+'/100 — '+d.formula+' (sursă: '+d.src+').']; }));
+    // DEMONSTRAȚIE: modificatorul de profil teritorial — risc/oportunitate, arătat transparent
+    if(R.profiles && R.profiles.length){
+      D.h2('Modificatorul de profil teritorial');
+      D.P('UAT-ul are unul sau mai multe profiluri teritoriale specifice, detectate din date reale. Fiecare profil ajustează transparent dimensiunea relevantă a notei cu un mic delta (risc negativ sau oportunitate pozitivă), reflectând natura aparte a teritoriului. Ajustarea este documentată mai jos și inclusă în scorurile de mai sus — nota nu ignoră specificul (litoral, deltă, baraj etc.), îl cuantifică.');
+      if(D.table) D.table(['Profil','Dimensiune ajustată','Δ (pct)','Scor: înainte → după'],
+        R.profiles.map(function(p){ return [(p.icon?p.icon+' ':'')+p.label, p.dim, (p.delta>=0?'+':'')+p.delta, p.before+' → '+p.after]; }),
+        [D.dims.CW*0.34, D.dims.CW*0.30, D.dims.CW*0.14, D.dims.CW*0.22]);
+      D.bullets(R.profiles.map(function(p){ return [(p.icon?p.icon+' ':'')+p.label, p.note+' (semnal: '+p.evidence+').']; }));
+    }
     // DEMONSTRAȚIE: fațetele calității vieții (pe categorii) — notare arătată, nu declarată
     if(R.qualityFacets && R.qualityFacets.length){
       D.h2('Calitatea vieții — descompunere pe categorii');
