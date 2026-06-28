@@ -422,6 +422,11 @@
   function _chapterGraphic(D, idx){
     try{
       if(!D || !D.barChart) return false;
+      // REGULĂ (Florin 28 iun): graficele IVU/UAT (profil urban, dimensiuni, proiecție demografică)
+      // NU se repetă în corpul capitolelor — apăreau de 8-10× și sunt irelevante în studii de
+      // parcelă (ex. RCAI arheologic). Rămân DOAR în capitolul dedicat „Nota UrbanX (IVU)".
+      // Graficele din DATELE proprii ale capitolului (tabele) rămân (le face _deepRender separat).
+      if(!D.__allowChapterIVU) return false;
       var c=_gctx(D);
       var PAL=[[37,99,235],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233],[236,72,153],[20,184,166]];
       var opts=[];

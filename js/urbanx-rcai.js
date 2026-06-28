@@ -163,9 +163,8 @@
     D.chapter('Rezumat executiv');
     D.P('Prezentul Raport de Cercetare Arheologică și de Evaluare a Potențialului Arheologic ' + (x.hasParcel ? 'pentru amplasamentul analizat din ' : 'pentru teritoriul administrativ al ') + x.name + (x.judet ? ', județul ' + x.judet : '') + ', sintetizează cercetarea documentară, cartografică și arheologică disponibilă public, în scopul evaluării potențialului arheologic și a riscului pe care patrimoniul îngropat îl poate genera pentru o investiție. Raportul are caracter de pre-cercetare și orientează beneficiarul, proiectantul și autoritatea de avizare asupra demersurilor necesare conform legislației în vigoare (OG 43/2000, Legea 422/2001).');
     D.callout && D.callout('Statut', 'Document de PRE-CERCETARE generat algoritmic. NU înlocuiește raportul de cercetare arheologică întocmit de un arheolog autorizat MCIN și nu are valoare juridică în procedurile de avizare ale DJC sau MCIN.');
-
-    D.chapter('Metodologia cercetării');
-    D.P('Cercetarea integrează patru paliere de analiză: (1) documentară — bibliografie istorică și arheologică, repertorii, cronici; (2) cartografică — interpretarea și suprapunerea planurilor istorice (planuri de încartiruire, ridicări militare, planuri cadastrale) pe situația actuală; (3) arheologică — analiza siturilor din Repertoriul Arheologic Național (RAN), a monumentelor din Lista Monumentelor Istorice (LMI) și a cercetărilor anterioare din Cronica Cercetărilor Arheologice; (4) geomorfologică — relieful, terasele, hidrografia istorică și implicațiile lor pentru locuirea istorică și conservarea vestigiilor. Limitările sunt explicitate: accesul la unele surse poate fi parțial, iar estimările (în special stratigrafia) au caracter orientativ, prin analogie cu situri cercetate în proximitate.');
+    // NB: „Metodologia cercetării" a fost MUTATĂ după datele reale (RAN/geomorfologie/LMI),
+    // ca un RCAI clasic — datele în față, metodologia+cadrul legal ca anexă (cerut de Florin).
 
     // ── SECȚIUNE PUNCTUALĂ: amplasamentul analizat + avize pe parcelă (doar raportul de parcelă) ──
     if (mode !== 'T') {
@@ -311,7 +310,11 @@
     // dotări urbane (POI OSM) la nivel teritorial — reutilizarea capturilor din carduri (#14)
     if (mode === 'T') { try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Context urban — dotări și repere (OSM)'); } catch (e) {} }
 
-    // ── Corpul dezvoltat: teritorial (_RCAI_DEEP, 100+ pag) sau parcelă (_RCAI_DEEP_PARCEL, ~50 pag punctual) ──
+    // ── Metodologie + cadru (DUPĂ datele reale, ca anexă metodologică — RCAI clasic) ──
+    D.chapter('Metodologia cercetării');
+    D.P('Cercetarea integrează patru paliere de analiză: (1) documentară — bibliografie istorică și arheologică, repertorii, cronici; (2) cartografică — interpretarea și suprapunerea planurilor istorice (planuri de încartiruire, ridicări militare, planuri cadastrale) pe situația actuală; (3) arheologică — analiza siturilor din Repertoriul Arheologic Național (RAN), a monumentelor din Lista Monumentelor Istorice (LMI) și a cercetărilor anterioare din Cronica Cercetărilor Arheologice; (4) geomorfologică — relieful, terasele, hidrografia istorică și implicațiile lor pentru locuirea istorică și conservarea vestigiilor. Datele factuale (situri RAN, monumente LMI, geomorfologie, hidrografie) sunt prezentate în capitolele anterioare; capitolele care urmează detaliază metodologia, cadrul legal și procedurile de cercetare/avizare.');
+
+    // ── Corpul dezvoltat (metodologie + proceduri, ca anexă): teritorial (_RCAI_DEEP) sau parcelă (_RCAI_DEEP_PARCEL) ──
     try {
       var deep = (mode === 'T') ? (G._RCAI_DEEP || []) : (G._RCAI_DEEP_PARCEL || G._RCAI_DEEP || []);
       deep.forEach(function (ch, _ci) {
