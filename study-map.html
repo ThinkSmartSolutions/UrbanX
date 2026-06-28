@@ -266,6 +266,9 @@ const STUDIES = {
   proiectie:  { label:'Proiecție\nUrbanistică', ico:'🏙', color:'#818CF8', cat:'urban', catColor:'rgba(129,140,248,.1)', x:680, y:600,
     desc:'Proiecție urbanistică 10/20/30 ani: scenarii S1/S2/S3, demografic INS, ESG proiectat.',
     norms:['L350/2001','INS','SUMP'], fn:'generateProiectieUrbanistica()' },
+  carbon:     { label:'Amprentă\nCarbon CO₂', ico:'🌍', color:'#4ADE80', cat:'tehnic', catColor:'rgba(74,222,128,.1)', x:840, y:600,
+    desc:'Amprenta de carbon pe ciclul de viață (înglobat + operațional + transport), etichetă A-D, țintă UE 2030, raportare ESG/Taxonomie UE. Metodologie EN 15978 / LCA. Necesită parcelă selectată.',
+    norms:['EN 15978','RICS WLC','EU Taxonomy'], fn:'generateCarbonStudy()' },
 };
 
 const EDGES = [
@@ -313,6 +316,8 @@ const EDGES = [
   { from:'ssf',       to:'hbu',         label:'GDV, cost, ROI', color:'rgba(245,158,11,.2)' },
   { from:'memoriu',   to:'repa',        label:'piese dosar', color:'rgba(212,175,55,.3)' },
   { from:'amplasament',to:'proiectie',  label:'context, UTR', color:'rgba(129,140,248,.25)' },
+  { from:'databus',   to:'carbon',      label:'SDA, fn, area', color:'rgba(99,102,241,.3)' },
+  { from:'cpe',       to:'carbon',      label:'consum operațional', color:'rgba(52,211,153,.2)' },
 ];
 
 const GOALS = {

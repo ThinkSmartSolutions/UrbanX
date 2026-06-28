@@ -530,6 +530,7 @@ function htmlMobRapoarte(){
     ${btn('generateWindStudy()','56,189,248','🌬','Studiu Vânt & Confort Pietonal','Criteriu Lawson, zone calm','vant')}
     ${btn('generateStudiuApePluviale()','56,189,248','🌧','Gospodărire Ape Pluviale','SR EN 752 · Debit calcul · Cisternă recuperare','ape_pluviale')}
     ${btn('generatePrestudiuBransamente()','96,165,250','🔌','Pre-studiu Bransamente & Utilități','Apă · Canal · Electric · Gaze · ISU · PV','bransamente')}
+    ${btn('generateCarbonStudy()','74,222,128','🌍','Studiu Amprentă Carbon (CO₂)','CO₂ ciclu viață · înglobat+operațional+transport · etichetă A-D · țintă UE 2030','carbon')}
   </div>
 
   ${cat('⑤ Studii Mobilitate & Impact','244,114,182')}

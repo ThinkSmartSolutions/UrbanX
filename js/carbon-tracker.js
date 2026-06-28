@@ -235,6 +235,21 @@
     [['Suprafață', N(r.area) + ' mp · ' + r.use], ['Înglobat', N(r.embodied_t) + ' t CO₂'], ['Operațional', N(r.operational_t_yr) + ' t/an'], ['Transport', N(r.transport_t_yr) + ' t/an'], ['TOTAL 30 ani', N(r.lifetime_t) + ' t CO₂'], ['Clasă', r.green_label]].forEach(function (kv) { pdf.text(kv[0] + ': ' + kv[1], 16, y); y += 8; });
     pdf.save('Carbon_' + (meta.nrcad || 'sit') + '.pdf');
   }
-  G.Carbon = { compute: compute, openPanel: openPanel, generatePDF: generatePDF };
+  // Studiu Carbon „dintr-un click" din meniul Rapoarte — NECESITĂ parcelă selectată
+  // (ca toate studiile de parcelă). Preia ADC din parcelă (area×CUT) → compute → PDF (18 cap).
+  function generateCarbonStudy() {
+    try {
+      var S = G.S; var ap = S && S.parcels && S.parcels[S.activeParcel == null ? 0 : S.activeParcel];
+      if (!ap || !ap.geo || !ap.geo.geometry) { G.ss && G.ss('📍 Selectați o parcelă pentru Studiul de amprentă de carbon.'); return; }
+      var pre = prefill();
+      var adc = pre ? Math.max(1, Math.round((pre.area || 0) * (pre.cut || 1))) : 0;
+      if (!adc) { G.ss && G.ss('Parcela nu are suprafață definită — selectați alta.'); return; }
+      G.ss && G.ss('🌍 Se generează Studiul de amprentă de carbon…');
+      var r = compute({ built_area_m2: adc, use: 'locuire', structural_type: 'masonry_rc' });
+      generatePDF(r, { nrcad: pre && pre.nrcad });
+    } catch (e) { console.error('[generateCarbonStudy]', e); G.ss && G.ss('Eroare la Studiul de Carbon.'); }
+  }
+  G.Carbon = { compute: compute, openPanel: openPanel, generatePDF: generatePDF, generateStudiuCarbon: generateCarbonStudy };
+  G.generateCarbonStudy = generateCarbonStudy;
   console.log('[Carbon] modul Carbon Tracker încărcat (window.Carbon)');
 })(window);
