@@ -1445,23 +1445,7 @@ document.addEventListener('click', function(){
   <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
-  <!-- RCAI — Raport Cercetare Arheologică (rang superior, parcelă) -->
-  <div style="display:flex;align-items:stretch;gap:4px;margin-bottom:8px">
-  <button onclick="window._RCAI&&window._RCAI.openPanel(window.TCI&&window.TCI.cityKey);toggleRapoarteMenu()" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;background:linear-gradient(135deg,rgba(180,83,9,.18),rgba(217,119,6,.06));border:1px solid rgba(217,119,6,.35);border-radius:8px;color:#fbbf24;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
-    <span style="font-size:16px">🏺</span>
-    <div><div>RCAI — Cercetare Arheologică (Parcelă/Zonă)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">pe parcela selectată · potențial arheologic · risc investiție · avize DJC/MCIN</div></div>
-  </button>
-  <button onclick="infoDrawerOpen('rcai_parcela')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
-  </div>
 
-  <!-- HBU — Reconversie (Parcelă/Zonă) — cea mai relevantă utilizare HBU -->
-  <div style="display:flex;align-items:stretch;gap:4px;margin-bottom:8px">
-  <button onclick="window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey);toggleRapoarteMenu()" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;background:linear-gradient(135deg,rgba(146,64,14,.18),rgba(217,119,6,.06));border:1px solid rgba(217,119,6,.35);border-radius:8px;color:#fbbf24;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
-    <span style="font-size:16px">🏗</span>
-    <div><div>HBU — Reconversie (Parcelă/Zonă)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">pe parcela selectată · cea mai bună utilizare · scor 12 funcțiuni + financiar</div></div>
-  </button>
-  <button onclick="infoDrawerOpen('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
-  </div>
 
   <!-- SPS = studii TERITORIALE (în meniul Teritoriu). NU se dublează aici ca „pe parcelă":
        fiecare temă pe parcelă e deja acoperită de un studiu de proiectant dedicat
@@ -1499,7 +1483,19 @@ document.addEventListener('click', function(){
     <button onclick="generateAACR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#60a5fa;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">✈ Studiu AACR (Aviz Aeroport)</button>
     <button onclick="infoDrawerOpen('aacr')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">④ Mediu &amp; Infrastructură</div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateStudiuPMR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">♿ Accesibilitate PMR</button>
+    <button onclick="infoDrawerOpen('pmr')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateStudiuIluminat();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌤 Iluminat Natural EN 17037</button>
+    <button onclick="infoDrawerOpen('iluminat')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⛰ Stabilitate Taluzuri & Versanți</button>
+    <button onclick="infoDrawerOpen('stabilitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
+  </div>
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">③ Mediu &amp; Infrastructură</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateEnvironmentalImpact();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#86efac;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🌿 Studiu Impact Mediu (EIM)</button>
     <button onclick="infoDrawerOpen('eim')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#86efac'" onmouseout="this.style.color='#475569'">ⓘ</button>
@@ -1520,7 +1516,15 @@ document.addEventListener('click', function(){
     <button onclick="generateWindStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🌬 Studiu Vânt &amp; Confort Pietonal</button>
     <button onclick="infoDrawerOpen('vant')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">⑤ Mobilitate &amp; Impact</div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateStudiuApePluviale();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌧 Gospodărire Ape Pluviale</button>
+    <button onclick="infoDrawerOpen('ape_pluviale')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generatePrestudiuBransamente();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#60a5fa;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🔌 Pre-studiu Bransamente &amp; Utilități</button>
+    <button onclick="infoDrawerOpen('bransamente')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">④ Mobilitate &amp; Impact</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateTrafficStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🚦 Studiu Impact Trafic</button>
     <button onclick="infoDrawerOpen('trafic')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
@@ -1533,7 +1537,7 @@ document.addEventListener('click', function(){
     <button onclick="generateDensityStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#94a3b8;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">📊 Studiu Densitate Urbană</button>
     <button onclick="infoDrawerOpen('densitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">⑥ Speciale &amp; Patrimoniu</div>
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">⑤ Patrimoniu &amp; Construcții existente</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateIstoricStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f59e0b;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🏛 Studiu Patrimoniu &amp; Istoric</button>
     <button onclick="infoDrawerOpen('patrimoniu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#f59e0b'" onmouseout="this.style.color='#475569'">ⓘ</button>
@@ -1542,10 +1546,30 @@ document.addEventListener('click', function(){
     <button onclick="generateExistingBldStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb7185;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🏚 Studiu Construcții Existente</button>
     <button onclick="infoDrawerOpen('existente')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fb7185'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
-  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">⑦ Tehnico-Economice</div>
+  <!-- RCAI — Raport Cercetare Arheologică (rang superior, parcelă) -->
+  <div style="display:flex;align-items:stretch;gap:4px;margin-bottom:8px">
+  <button onclick="window._RCAI&&window._RCAI.openPanel(window.TCI&&window.TCI.cityKey);toggleRapoarteMenu()" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;background:linear-gradient(135deg,rgba(180,83,9,.18),rgba(217,119,6,.06));border:1px solid rgba(217,119,6,.35);border-radius:8px;color:#fbbf24;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
+    <span style="font-size:16px">🏺</span>
+    <div><div>RCAI — Cercetare Arheologică (Parcelă/Zonă)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">pe parcela selectată · potențial arheologic · risc investiție · avize DJC/MCIN</div></div>
+  </button>
+  <button onclick="infoDrawerOpen('rcai_parcela')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
+  </div>
+  <div style="padding:5px 8px 3px;font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(255,255,255,.05);margin-top:3px">⑥ Tehnico-economic & avizare</div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateStudiuFezabilitate();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#d4af37;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;font-weight:700;">📊 Studiu Fezabilitate / DALI</button>
     <button onclick="infoDrawerOpen('fezabilitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#475569'">ⓘ</button>
+  </div>
+  <!-- HBU — Reconversie (Parcelă/Zonă) — cea mai relevantă utilizare HBU -->
+  <div style="display:flex;align-items:stretch;gap:4px;margin-bottom:8px">
+  <button onclick="window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey);toggleRapoarteMenu()" style="flex:1;display:flex;align-items:center;gap:8px;text-align:left;background:linear-gradient(135deg,rgba(146,64,14,.18),rgba(217,119,6,.06));border:1px solid rgba(217,119,6,.35);border-radius:8px;color:#fbbf24;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
+    <span style="font-size:16px">🏗</span>
+    <div><div>HBU — Reconversie (Parcelă/Zonă)</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">pe parcela selectată · cea mai bună utilizare · scor 12 funcțiuni + financiar</div></div>
+  </button>
+  <button onclick="infoDrawerOpen('hbu')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.3);color:#fbbf24;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
+    <button onclick="generateREPA();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700">📋 Raport Pre-Autorizare (REPA)</button>
+    <button onclick="infoDrawerOpen('repa')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateCPE();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⚡ Certificat Performanță Energetică</button>
@@ -1569,34 +1593,6 @@ document.addEventListener('click', function(){
     <button onclick="infoDrawerOpen('restrictii')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#475569'">ⓘ</button>
   </div>
   <!-- PMUD + Masterplan = exclusiv in meniul UrbanX Pro (crema rapoartelor, nivel municipiu) -->
-  <!-- Studii noi 2026 -->
-  <div style="border-top:1px solid rgba(212,175,55,.2);margin:8px 0 4px;padding-top:6px">
-    <div style="font-family:var(--mono,monospace);font-size:9px;color:#5a6788;letter-spacing:2px;text-transform:uppercase;padding:0 8px 4px">STUDII NOI 2026</div>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateStudiuPMR();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#a78bfa;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">♿ Accesibilitate PMR</button>
-    <button onclick="infoDrawerOpen('pmr')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateStudiuIluminat();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌤 Iluminat Natural EN 17037</button>
-    <button onclick="infoDrawerOpen('iluminat')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#fbbf24'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateREPA();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:700">📋 Raport Pre-Autorizare (REPA)</button>
-    <button onclick="infoDrawerOpen('repa')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#34d399'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateStudiuApePluviale();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#38bdf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🌧 Gospodărire Ape Pluviale</button>
-    <button onclick="infoDrawerOpen('ape_pluviale')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generateStabilitateTaluzuri();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fb923c;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⛰ Stabilitate Taluzuri & Versanți</button>
-    <button onclick="infoDrawerOpen('stabilitate')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
-  </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
-    <button onclick="generatePrestudiuBransamente();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#60a5fa;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px;">🔌 Pre-studiu Bransamente &amp; Utilități</button>
-    <button onclick="infoDrawerOpen('bransamente')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#475569'">ⓘ</button>
-  </div>
 </div>
 
 
