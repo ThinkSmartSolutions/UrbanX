@@ -162,7 +162,7 @@
   function _accessSummary(a) { return a === '*' ? 'ACCES COMPLET' : (Array.isArray(a) ? a.length + ' module' : '—'); }
   function openManager() {
     var ov = document.getElementById('uxrm-ov');
-    if (!ov) { ov = document.createElement('div'); ov.id = 'uxrm-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.8);z-index:9600;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)'; document.body.appendChild(ov); }
+    if (!ov) { ov = document.createElement('div'); ov.id = 'uxrm-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.82);z-index:10060;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)'; document.body.appendChild(ov); }
     loadDefs(_renderMgr); _renderMgr();
   }
   function _closeMgr() { var o = document.getElementById('uxrm-ov'); if (o) o.remove(); _mgr.edit = null; }

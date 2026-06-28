@@ -418,21 +418,26 @@
   function _injectTopbarSwitcher() {
     try {
       var tb = document.getElementById('topbar'); if (!tb || document.getElementById('ux-lang-btn')) return;
-      var wrap = document.createElement('div'); wrap.style.cssText = 'position:relative;display:inline-flex;flex-shrink:0';
-      wrap.innerHTML =
-        '<button id="ux-lang-btn" class="tb-btn" title="Limbă / Language" style="display:inline-flex;align-items:center;gap:4px">🌐 <span id="ux-lang-cur">' + (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase() + '</span> ▾</button>' +
-        '<div id="ux-lang-dd" style="display:none;position:absolute;top:38px;right:0;z-index:9500;background:#0c1424;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:5px;min-width:140px;box-shadow:0 12px 30px rgba(0,0,0,.5)">' +
-        LANGS.map(function (l) { return '<button onclick="UrbanXI18n.setLang(\'' + l + '\');UrbanXI18n._ddToggle(false)" style="display:block;width:100%;text-align:left;background:' + (l === _lang ? 'rgba(56,138,221,.2)' : 'transparent') + ';border:0;color:#e6edf7;border-radius:6px;padding:7px 10px;cursor:pointer;font-size:12px">' + (FLAGS[l] || '') + ' ' + ({ ro: 'Română', en: 'English', fr: 'Français', de: 'Deutsch' }[l]) + '</button>'; }).join('') +
-        '</div>';
-      wrap.querySelector('#ux-lang-btn').addEventListener('click', function (e) { e.stopPropagation(); _ddToggle(); });
+      var btn = document.createElement('button');
+      btn.id = 'ux-lang-btn'; btn.className = 'tb-btn'; btn.title = 'Limbă / Language';
+      btn.style.cssText = 'display:inline-flex;align-items:center;gap:4px;flex-shrink:0';
+      btn.innerHTML = '🌐 <span id="ux-lang-cur">' + (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase() + '</span> ▾';
       var anchor = document.getElementById('btn-admin') || document.getElementById('btn-launcher');
-      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor); else tb.appendChild(wrap);
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(btn, anchor); else tb.appendChild(btn);
+      // dropdown în BODY (ca să NU fie clipat de overflow-ul topbar-ului), poziționat fix
+      var dd = document.createElement('div'); dd.id = 'ux-lang-dd';
+      dd.style.cssText = 'display:none;position:fixed;z-index:10050;background:#0c1424;border:1px solid rgba(255,255,255,.16);border-radius:9px;padding:5px;min-width:150px;box-shadow:0 12px 30px rgba(0,0,0,.55)';
+      dd.innerHTML = LANGS.map(function (l) { return '<button onclick="UrbanXI18n.setLang(\'' + l + '\');UrbanXI18n._ddToggle(false)" style="display:block;width:100%;text-align:left;background:' + (l === _lang ? 'rgba(56,138,221,.2)' : 'transparent') + ';border:0;color:#e6edf7;border-radius:6px;padding:8px 11px;cursor:pointer;font-size:12px">' + (FLAGS[l] || '') + ' ' + ({ ro: 'Română', en: 'English', fr: 'Français', de: 'Deutsch' }[l]) + '</button>'; }).join('');
+      document.body.appendChild(dd);
+      btn.addEventListener('click', function (e) { e.stopPropagation(); _ddToggle(); });
       document.addEventListener('click', function () { _ddToggle(false); });
     } catch (e) {}
   }
   function _ddToggle(force) {
-    var dd = document.getElementById('ux-lang-dd'); if (!dd) return;
-    dd.style.display = (force === false) ? 'none' : (dd.style.display === 'none' ? 'block' : 'none');
+    var dd = document.getElementById('ux-lang-dd'), btn = document.getElementById('ux-lang-btn'); if (!dd || !btn) return;
+    var show = (force === false) ? false : (dd.style.display === 'none');
+    if (show) { var r = btn.getBoundingClientRect(); dd.style.top = (r.bottom + 4) + 'px'; dd.style.right = (window.innerWidth - r.right) + 'px'; dd.style.left = 'auto'; dd.style.display = 'block'; }
+    else dd.style.display = 'none';
   }
   function _refreshTopbarLabel() { var c = document.getElementById('ux-lang-cur'); if (c) c.textContent = (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase(); }
 
