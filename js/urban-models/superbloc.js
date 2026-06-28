@@ -164,7 +164,12 @@
     G.UrbanModelsStore.setActive(result);
     var mapInst = G.map;
     var center = mapInst ? mapInst.getCenter() : null;
-    if (center) { addSuperblocToMap(mapInst, { lat: center.lat, lng: center.lng }, _sbParams.latura_m); G.initMapTransitionListener(mapInst); }
+    if (center) {
+      addSuperblocToMap(mapInst, { lat: center.lat, lng: center.lng }, _sbParams.latura_m); G.initMapTransitionListener(mapInst);
+      // VIZIBIL: zoom + unghi pe superbloc (altfel un patrat de 400m e invizibil la scara orașului)
+      try { mapInst.easeTo({ center: [center.lng, center.lat], zoom: Math.max(mapInst.getZoom(), 15.4), pitch: 50, bearing: -18, duration: 1100 }); } catch (e) {}
+      try { G.ss && G.ss('🟧 Superbloc desenat pe hartă (perimetru = trafic · interior = pieton · piațete în noduri) — zoom automat'); } catch (e) {}
+    }
     G.UrbanModelsStore.setTransition(100);
     var sliderEl = document.getElementById('sb-slider'); if (sliderEl) { sliderEl.style.display = 'block'; G.renderBeforeAfterSlider('sb-slider', 100, false); }
     var metricsEl = document.getElementById('sb-metrics');

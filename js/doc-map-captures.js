@@ -140,14 +140,19 @@
         }
       } catch (e) {}
 
-      // 2. superbloc pe strazile reale (daca modulul exista)
+      // 2. superbloc — ZOOM la scara de cartier (~15.3) ca sa fie RELEVANT (la zoom de UAT
+      //    era un speck irelevant). Desenam perimetru(trafic)+interior(pieton)+piatete pe strazi.
       try {
         if (G.addSuperblocToMap) {
+          var _z0 = map.getZoom(), _p0 = map.getPitch(), _b0 = map.getBearing();
+          try { map.jumpTo({ center: [center.lng, center.lat], zoom: 15.4, pitch: 48, bearing: -18 }); } catch (e) {}
+          await _idle(map, 700);
           G.addSuperblocToMap(map, center, 400);
           if (G.UrbanModelsStore && G.UrbanModelsStore.setTransition) G.UrbanModelsStore.setTransition(100);
-          await _idle(map, 1100);
-          var sb = _grab(map, 'Model Superbloc (Barcelona) suprapus pe harta'); if (sb) shots.push(sb);
+          await _idle(map, 1200);
+          var sb = _grab(map, 'Model Superbloc (Barcelona) — perimetru = trafic, interior = pieton, piațete în noduri (scara cartier)'); if (sb) shots.push(sb);
           if (G.removeSuperblocFromMap) G.removeSuperblocFromMap(map);
+          try { map.jumpTo({ center: [center.lng, center.lat], zoom: _z0, pitch: _p0, bearing: _b0 }); } catch (e) {}
           await _idle(map, 400);
         }
       } catch (e) {}
