@@ -304,6 +304,13 @@
   };
   ['en', 'fr', 'de'].forEach(function (l) { for (var k in _WAVE3[l]) DICT[l][k] = _WAVE3[l][k]; });
 
+  var _WAVE4 = {
+    en: { '🔢 Număr cadastral UAT': '🔢 UAT cadastral number', 'Număr cadastral': 'Cadastral number', 'Adresă': 'Address', 'Suprafață': 'Area', 'Regim': 'Regime' },
+    fr: { '🔢 Număr cadastral UAT': '🔢 Numéro cadastral UAT', 'Număr cadastral': 'Numéro cadastral', 'Adresă': 'Adresse', 'Suprafață': 'Surface', 'Regim': 'Régime' },
+    de: { '🔢 Număr cadastral UAT': '🔢 UAT-Katasternummer', 'Număr cadastral': 'Katasternummer', 'Adresă': 'Adresse', 'Suprafață': 'Fläche', 'Regim': 'Regime' }
+  };
+  ['en', 'fr', 'de'].forEach(function (l) { for (var k in _WAVE4[l]) DICT[l][k] = _WAVE4[l][k]; });
+
   var _lang = 'ro';
   function _init() {
     // implicit RO (platformă RO) — limba se schimbă DOAR la alegerea explicită a userului.
