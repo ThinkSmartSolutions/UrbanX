@@ -3315,9 +3315,25 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             });
             ctx.globalAlpha=1;
           }
+          // FATETELE calitatii vietii (categorii) — demonstrate vizual (viata de noapte, seniori, familii...)
+          var fa=Math.min(1,(t-0.52)/0.18)*sA;
+          if(fa>0 && R.qualityFacets){
+            ctx.globalAlpha=fa; ctx.textAlign='left';
+            ctx.fillStyle='rgba(110,231,183,0.92)'; ctx.font='700 '+Math.min(W*0.0095,12)+'px "IBM Plex Mono",monospace';
+            ctx.fillText('CALITATEA VIETII — PE CATEGORII (demonstrat)', W*0.04, H*0.745);
+            R.qualityFacets.forEach(function(f,i){
+              var fx=W*(0.04+(i%2)*0.235), fy=H*(0.775+Math.floor(i/2)*0.044);
+              var fc=f.score>=70?'#22c55e':f.score>=55?'#fbbf24':'#ef4444';
+              ctx.fillStyle='rgba(210,218,236,0.85)'; ctx.font='500 '+Math.min(W*0.0092,12)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left';
+              ctx.fillText(f.label, fx, fy);
+              ctx.fillStyle=fc; ctx.font='800 '+Math.min(W*0.0092,12)+'px "IBM Plex Mono",monospace';
+              ctx.fillText(String(f.score), fx+W*0.195, fy);
+            });
+            ctx.globalAlpha=1;
+          }
           cifra(R.score+'/100','Nota UrbanX · calificativ '+R.grade,'#D4AF37');
           cifra2('#'+R.rankInPeers+'/'+R.peerCount,'In tier-ul echivalent');
-          narativ('Nota UrbanX = suma ponderata a dimensiunilor (Economie 20%, Calitate vietii 20%, Conectivitate 15%, Mediu 15%, Demografie 15%, Rezilienta 15%). Toate sub-scorurile provin din date reale analizate de platforma (ISO 37120, Eurostat, OECD, INFP, EEA). Comparatia se face DOAR cu orase europene echivalente ca marime — nu comparam un oras mic cu o metropola.');
+          narativ('Nota UrbanX = sumă ponderată a 6 dimensiuni (Economie 20%, Calitate vieții 20%, Conectivitate 15%, Mediu/verde/biodiversitate 15%, Demografie 15%, Reziliență 15%). Calitatea vieții e descompusă în 8 FAȚETE demonstrate: bunăstare, cultură/turism, sport, verde/natură, viață de noapte, siguranță, prietenos cu seniorii și cu familiile. Mediul include parcuri, păduri (acoperire județeană) și biodiversitate (specii de faună). Toate sub-scorurile din date reale; nota e reproductibilă și comparată DOAR cu orașe europene echivalente.');
           concluzie('O nota transparenta si reproductibila — UrbanX poate deveni un standard de evaluare comparabila a oraselor');
         } else { titlu('Nota UrbanX','modul indisponibil'); }
         break;
