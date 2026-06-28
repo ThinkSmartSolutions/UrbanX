@@ -246,6 +246,38 @@
   };
   ['en', 'fr', 'de'].forEach(function (l) { for (var k in _RAP[l]) DICT[l][k] = _RAP[l][k]; });
 
+  // — Faza 2: topbar + acțiuni comune (apar în zeci de panouri → traduse o dată, peste tot) + basemap —
+  var _WAVE2 = {
+    en: {
+      '🔍 Funcții': '🔍 Features', '🗺 Cadastru': '🗺 Cadastre', '❓ Ghid rapid': '❓ Quick guide',
+      '🗺 Hartă ▾': '🗺 Map ▾', '📋 Parcelă ▾': '📋 Plot ▾', '🏙 Teritoriu ▾': '🏙 Territory ▾', '📋 Rapoarte ▾': '📋 Reports ▾',
+      'Descarcă PDF': 'Download PDF', 'Descarcă': 'Download', 'Înapoi': 'Back', 'Înainte': 'Next', 'Salvează': 'Save',
+      'Anulează': 'Cancel', 'Detalii': 'Details', 'Se încarcă...': 'Loading...', 'Se generează...': 'Generating...',
+      'Eroare': 'Error', 'Succes': 'Success', 'Selectează': 'Select', 'Aplică': 'Apply', 'Resetează': 'Reset',
+      'Adaugă': 'Add', 'Generează PDF': 'Generate PDF', 'Generează raport': 'Generate report', 'Vizualizează': 'View',
+      'Nord': 'North', 'Satelit': 'Satellite', 'Parcelă': 'Plot', 'Teritoriu': 'Territory', 'Hartă': 'Map', 'Admin': 'Admin'
+    },
+    fr: {
+      '🔍 Funcții': '🔍 Fonctions', '🗺 Cadastru': '🗺 Cadastre', '❓ Ghid rapid': '❓ Guide rapide',
+      '🗺 Hartă ▾': '🗺 Carte ▾', '📋 Parcelă ▾': '📋 Parcelle ▾', '🏙 Teritoriu ▾': '🏙 Territoire ▾', '📋 Rapoarte ▾': '📋 Rapports ▾',
+      'Descarcă PDF': 'Télécharger PDF', 'Descarcă': 'Télécharger', 'Înapoi': 'Retour', 'Înainte': 'Suivant', 'Salvează': 'Enregistrer',
+      'Anulează': 'Annuler', 'Detalii': 'Détails', 'Se încarcă...': 'Chargement...', 'Se generează...': 'Génération...',
+      'Eroare': 'Erreur', 'Succes': 'Succès', 'Selectează': 'Sélectionner', 'Aplică': 'Appliquer', 'Resetează': 'Réinitialiser',
+      'Adaugă': 'Ajouter', 'Generează PDF': 'Générer PDF', 'Generează raport': 'Générer le rapport', 'Vizualizează': 'Visualiser',
+      'Nord': 'Nord', 'Satelit': 'Satellite', 'Parcelă': 'Parcelle', 'Teritoriu': 'Territoire', 'Hartă': 'Carte', 'Admin': 'Admin'
+    },
+    de: {
+      '🔍 Funcții': '🔍 Funktionen', '🗺 Cadastru': '🗺 Kataster', '❓ Ghid rapid': '❓ Schnellanleitung',
+      '🗺 Hartă ▾': '🗺 Karte ▾', '📋 Parcelă ▾': '📋 Parzelle ▾', '🏙 Teritoriu ▾': '🏙 Gebiet ▾', '📋 Rapoarte ▾': '📋 Berichte ▾',
+      'Descarcă PDF': 'PDF herunterladen', 'Descarcă': 'Herunterladen', 'Înapoi': 'Zurück', 'Înainte': 'Weiter', 'Salvează': 'Speichern',
+      'Anulează': 'Abbrechen', 'Detalii': 'Details', 'Se încarcă...': 'Wird geladen...', 'Se generează...': 'Wird generiert...',
+      'Eroare': 'Fehler', 'Succes': 'Erfolg', 'Selectează': 'Auswählen', 'Aplică': 'Anwenden', 'Resetează': 'Zurücksetzen',
+      'Adaugă': 'Hinzufügen', 'Generează PDF': 'PDF generieren', 'Generează raport': 'Bericht generieren', 'Vizualizează': 'Ansehen',
+      'Nord': 'Norden', 'Satelit': 'Satellit', 'Parcelă': 'Parzelle', 'Teritoriu': 'Gebiet', 'Hartă': 'Karte', 'Admin': 'Admin'
+    }
+  };
+  ['en', 'fr', 'de'].forEach(function (l) { for (var k in _WAVE2[l]) DICT[l][k] = _WAVE2[l][k]; });
+
   var _lang = 'ro';
   function _init() {
     // implicit RO (platformă RO) — limba se schimbă DOAR la alegerea explicită a userului.
