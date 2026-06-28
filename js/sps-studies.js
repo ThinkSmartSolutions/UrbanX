@@ -77,7 +77,14 @@
     var territorial = (mode === 'T');
     var PC = (S.parcel && !territorial && G._ParcelCtx) ? G._ParcelCtx.get(cityKey) : null;
     var onParcel = !!(PC && PC.hasParcel);
-    G.ss && G.ss(S.ico + ' Generez ' + S.t + (onParcel ? ' — parcelă' : '') + '…');
+    // REGULA teritoriu≠parcelă (Florin): din meniul Rapoarte (mod 'P') studiul PE PARCELĂ
+    // NECESITĂ o parcelă selectată — altfel NU se generează versiunea teritorială (ar dubla
+    // studiul din meniul Teritoriu, accesibil din două meniuri). Blocăm + cerem parcelă.
+    if (mode === 'P' && !onParcel) {
+      G.ss && G.ss('📍 Selectați mai întâi o parcelă pe hartă — „' + S.t + '" pe parcelă necesită un amplasament. Versiunea teritorială este în meniul Teritoriu.');
+      return;
+    }
+    G.ss && G.ss(S.ico + ' Generez ' + S.t + (onParcel ? ' — parcelă' : ' — teritorial') + '…');
     var nbImg = null; if (onParcel && PC.lat && G._DocMapCaptures && G._DocMapCaptures.capturePOI) { try { nbImg = await G._DocMapCaptures.capturePOI(cityKey, { lat: PC.lat, lon: PC.lon, radius: 600 }); } catch (e) {} }
     var pdf = new J({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     var D = G._makeStratDoc(pdf, { docTitle: S.t + (onParcel ? ' — PARCELĂ' : ''), cityName: cityName, accent: S.ac });
@@ -200,7 +207,7 @@
         var label = (abbr ? abbr + ' — ' : '') + name;
         var tip = (S.ce || '').replace(/"/g, '’');
         return '<div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background=\'rgba(255,255,255,.05)\'" onmouseout="this.style.background=\'none\'">' +
-          '<button onclick="window._SPS&&window._SPS.generate(\'' + id + '\',window.TCI&&window.TCI.cityKey);window.toggleRapoarteMenu&&toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px" title="' + tip + '">' + (S.ico || '📘') + ' ' + label + '</button>' +
+          '<button onclick="window._SPS&&window._SPS.generate(\'' + id + '\',window.TCI&&window.TCI.cityKey,\'P\');window.toggleRapoarteMenu&&toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#fbbf24;padding:4px 8px;cursor:pointer;border-radius:5px;font-size:11.5px" title="' + tip + ' — necesită o parcelă selectată">' + (S.ico || '📘') + ' ' + label + '</button>' +
           '<button onclick="infoDrawerOpen(\'sps:' + id + '\')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(217,119,6,.2);color:#fbbf24;border-radius:4px;padding:2px 6px;cursor:pointer;font-size:10px;flex-shrink:0">ⓘ</button>' +
           '</div>';
       }).join('');

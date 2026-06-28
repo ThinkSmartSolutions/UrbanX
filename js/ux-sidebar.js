@@ -150,8 +150,9 @@
     if (g) State.activeGroup = g.id;
     if (id === '_search') { var t = D.querySelector('.ptab[data-t="search"]'); if (t) t.click(); close(); return; }
     var fn = MODULE_OPEN[id];
-    // studii SPS generice: moduleId 'sps:<id>' → _SPS.generate(id)
-    if (!fn && id && id.indexOf('sps:') === 0) { var sid = id.slice(4); fn = function () { try { G._SPS && G._SPS.generate(sid, G.TCI && G.TCI.cityKey); } catch (e) {} }; }
+    // studii SPS generice din meniul TERITORIU → mod 'T' (TERITORIAL, mereu).
+    // Versiunea pe parcelă e DOAR în Rapoarte (mod 'P'), ca să nu se dubleze (teritoriu≠parcelă).
+    if (!fn && id && id.indexOf('sps:') === 0) { var sid = id.slice(4); fn = function () { try { G._SPS && G._SPS.generate(sid, G.TCI && G.TCI.cityKey, 'T'); } catch (e) {} }; }
     close(); // închide sertarul, apoi deschide modulul
     setTimeout(function () { if (fn) fn(); else G.ss && G.ss(id + ' — nedisponibil'); }, 20);
   }
