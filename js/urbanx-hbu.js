@@ -14,34 +14,8 @@
   // parse "1.234,5 €" / "12,3 %" / "45/100" → număr (pentru auto-grafic din tabele)
   function _num(s) { if (typeof s === 'number') return s; if (s == null) return null; var m = ('' + s).replace(/\./g, '').replace(/,/g, '.').match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
   // dacă ultima coloană a unui tabel e numerică pe ≥2 rânduri → desenează și un barChart
-  function _autoChart(D, headers, rows, title) {
-    try {
-      if (!D.barChart || !rows || rows.length < 2 || rows.length > 14) return;
-      var li = (headers ? headers.length : (rows[0] ? rows[0].length : 0)) - 1; if (li < 1) return;
-      var vals = rows.map(function (r) { return _num(r[li]); });
-      var ok = vals.filter(function (v) { return v != null; }).length;
-      if (ok < rows.length || ok < 2) return;             // toate rândurile numerice
-      var uniq = {}; vals.forEach(function (v) { uniq[v] = 1; }); if (Object.keys(uniq).length < 2) return;
-      var pal = [[59, 130, 246], [34, 197, 94], [249, 115, 22], [168, 85, 247], [234, 179, 8], [14, 165, 233]];
-      var labels0 = rows.map(function (r) { return ('' + (r[0] || '')).trim(); });
-      var data = rows.map(function (r, i) { var lb = ('' + (r[0] || ('#' + (i + 1)))).replace(/\s+/g, ' ').trim().slice(0, 28); return [lb, vals[i], pal[i % pal.length]]; });
-      var ttl = title || ((headers && headers[li]) || 'Valori') + ' — reprezentare grafică', src = 'Date din tabelul de mai sus';
-      var isTime = labels0.length >= 3 && labels0.every(function (l) { return /(19|20)\d{2}/.test(l); });
-      var allPos = vals.every(function (v) { return v != null && v >= 0; });
-      var avgLen = labels0.reduce(function (a, l) { return a + l.length; }, 0) / labels0.length;
-      // DIVERSIFICARE (Florin: nu repeta acelasi tipar) — la fel ca _deepRender / RCAI.
-      if (isTime && D.lineChart) { D.lineChart([{ name: ((headers && headers[li]) || 'Serie').slice(0, 24), color: [37, 99, 235], points: vals }], labels0.map(function (l) { return (l.match(/(19|20)\d{2}/) || [l])[0]; }), { title: ttl, source: src }); return; }
-      // rotație completă (etichetele lungi se tratează prin hbar când e ales, nu forțat mereu)
-      var elig = []; if (D.barChart) elig.push('bar'); if (D.hbar) elig.push('hbar');
-      if (D.donut && allPos && rows.length <= 6) elig.push('donut'); if (D.pie && allPos && rows.length <= 5) elig.push('pie');
-      if (!elig.length) elig = ['bar'];
-      var st = elig[(D.__tci = (D.__tci || 0) + 1) % elig.length];
-      if (st === 'donut') D.donut(data.map(function (r) { return [r[0].slice(0, 14), r[1], r[2]]; }), { title: ttl, source: src });
-      else if (st === 'pie') D.pie(data.map(function (r) { return [r[0].slice(0, 14), r[1], r[2]]; }), { title: ttl, source: src });
-      else if (st === 'hbar') D.hbar(data, { title: ttl, source: src });
-      else D.barChart(data.map(function (r) { return [r[0].slice(0, 16), r[1], r[2]]; }), { title: ttl, h: Math.min(58, 26 + data.length * 4), source: src });
-    } catch (e) {}
-  }
+  // delegă la PICKER-ul UNIC din motorul de documente (stil identic în toate studiile/rapoartele)
+  function _autoChart(D, headers, rows, title) { try { return window._pickChart && window._pickChart(D, headers, rows, title); } catch (e) {} }
   function cl(v, lo, hi) { return Math.max(lo == null ? 2 : lo, Math.min(hi == null ? 99 : hi, Math.round(v))); }
 
   // 12 funcțiuni de reconversie. Pondere pe: centralitate (c0), accesibilitate (a0),

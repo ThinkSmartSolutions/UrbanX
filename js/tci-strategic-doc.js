@@ -340,6 +340,62 @@
         pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'bold'); pdf.setFontSize(6); pdf.text(opts.vfmt ? opts.vfmt(v) : N(v), x0 + bw + 1.5, by + rowH * 0.64); });
       y += h; if (opts.source) source(opts.source);
     }
+    // RADAR / SPIDER — ideal pt scoruri multi-dimensionale (5-8 axe). Variatie vizuala (model Kanban depth).
+    function radar(axes, opts) { // axes:[[label,val,color?],...]
+      opts = opts || {}; var ttl = opts.title, n = axes.length; if (n < 3) { return barChart(axes, opts); }
+      var R = opts.r || 27, boxH = R * 2 + 16 + (ttl ? 6 : 0);
+      ensure(boxH + (opts.source ? 7 : 0));
+      if (ttl) { pdf.setTextColor.apply(pdf, INK); var _tf = fitFont(FONT, 'bold', 8, ttl, CW); pdf.setFontSize(_tf); pdf.text(S2(ttl), ML, y + 3.5); y += 6.5; }
+      var cx = ML + CW / 2, cy = y + R + 5;
+      var max = opts.max || Math.max.apply(null, axes.map(function (a) { return +a[1] || 0; })) || 1;
+      var ang = function (i) { return -Math.PI / 2 + i * 2 * Math.PI / n; };
+      // grilă concentrică (4 inele poligonale)
+      pdf.setDrawColor(224, 228, 235); pdf.setLineWidth(0.15);
+      for (var g = 1; g <= 4; g++) { var rr = R * g / 4; for (var i = 0; i < n; i++) { var a1 = ang(i), a2 = ang(i + 1); pdf.line(cx + rr * Math.cos(a1), cy + rr * Math.sin(a1), cx + rr * Math.cos(a2), cy + rr * Math.sin(a2)); } }
+      // axe radiale + etichete
+      pdf.setDrawColor(205, 210, 220); pdf.setLineWidth(0.2);
+      for (var i = 0; i < n; i++) { var a = ang(i), ex = cx + R * Math.cos(a), ey = cy + R * Math.sin(a); pdf.line(cx, cy, ex, ey);
+        var lx = cx + (R + 3.5) * Math.cos(a), ly = cy + (R + 3.5) * Math.sin(a), al = Math.abs(Math.cos(a)) < 0.35 ? 'center' : (Math.cos(a) > 0 ? 'left' : 'right');
+        pdf.setTextColor.apply(pdf, MUT); pdf.setFont(FONT, 'normal'); pdf.setFontSize(5.3); pdf.text(S2(String(axes[i][0]).slice(0, 16)), lx, ly + 1, { align: al, maxWidth: 32 }); }
+      // poligonul valorilor (contur + puncte + valori)
+      var col = opts.color || ACCENT, pts = axes.map(function (d, i) { var a = ang(i), rr = R * Math.min(1, (+d[1] || 0) / max); return [cx + rr * Math.cos(a), cy + rr * Math.sin(a)]; });
+      pdf.setDrawColor(col[0], col[1], col[2]); pdf.setLineWidth(0.7);
+      for (var i = 0; i < n; i++) { var j = (i + 1) % n; pdf.line(pts[i][0], pts[i][1], pts[j][0], pts[j][1]); }
+      pdf.setFillColor(col[0], col[1], col[2]);
+      axes.forEach(function (d, i) { pdf.circle(pts[i][0], pts[i][1], 0.8, 'F'); pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'bold'); pdf.setFontSize(5.3); pdf.text(N(+d[1] || 0), pts[i][0], pts[i][1] - 1.2, { align: 'center' }); });
+      y = cy + R + 9; if (opts.source) source(opts.source);
+    }
+    // ── PICKER UNIC de grafic (diversificat) — folosit IDENTIC de toate studiile/rapoartele
+    // (deepRender + _autoChart RCAI/HBU + orice studiu nou). Sursă unică = stil uniform peste tot.
+    function _pickChart(D2, headers, rows, title) {
+      try {
+        if (!D2 || !D2.barChart || !rows || rows.length < 2 || rows.length > 14) return false;
+        var li = (headers ? headers.length : (rows[0] ? rows[0].length : 0)) - 1; if (li < 1) return false;
+        var vals = rows.map(function (r) { return _num(r[li]); });
+        var ok = vals.filter(function (v) { return v != null; }).length; if (ok < rows.length || ok < 2) return false;
+        var uniq = {}; vals.forEach(function (v) { uniq[v] = 1; }); if (Object.keys(uniq).length < 2) return false;
+        var labels0 = rows.map(function (r) { return ('' + (r[0] || '')).trim(); });
+        var PALc = D2.PAL || [[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
+        var ttl = title || ((headers && headers[li]) || 'Valori') + ' — reprezentare grafică', src = 'Date din tabelul de mai sus';
+        var isTime = labels0.length >= 3 && labels0.every(function (l) { return /(19|20)\d{2}/.test(l); });
+        var allPos = vals.every(function (v) { return v != null && v >= 0; });
+        var data = rows.map(function (r, i) { return [('' + (r[0] || ('#' + (i + 1)))).replace(/\s+/g, ' ').trim().slice(0, 28), vals[i], PALc[i % PALc.length]]; });
+        if (isTime && D2.lineChart) { D2.lineChart([{ name: ((headers && headers[li]) || 'Serie').slice(0, 24), color: [37, 99, 235], points: vals }], labels0.map(function (l) { return (l.match(/(19|20)\d{2}/) || [l])[0]; }), { title: ttl, source: src }); return true; }
+        var elig = []; if (D2.barChart) elig.push('bar'); if (D2.hbar) elig.push('hbar');
+        if (D2.donut && allPos && rows.length <= 6) elig.push('donut');
+        if (D2.pie && allPos && rows.length <= 5) elig.push('pie');
+        if (D2.radar && allPos && rows.length >= 5 && rows.length <= 8) elig.push('radar');
+        if (!elig.length) elig = ['bar'];
+        var st = elig[(D2.__tci = (D2.__tci || 0) + 1) % elig.length];
+        if (st === 'donut') D2.donut(data.map(function (r) { return [r[0].slice(0, 14), r[1], r[2]]; }), { title: ttl, source: src });
+        else if (st === 'pie') D2.pie(data.map(function (r) { return [r[0].slice(0, 14), r[1], r[2]]; }), { title: ttl, source: src });
+        else if (st === 'radar') D2.radar(data, { title: ttl, source: src });
+        else if (st === 'hbar') D2.hbar(data, { title: ttl, source: src });
+        else D2.barChart(data.map(function (r) { return [r[0].slice(0, 16), r[1], r[2]]; }), { title: ttl, source: src });
+        return true;
+      } catch (e) { return false; }
+    }
+    window._pickChart = _pickChart;
     // Ajusteaza marimea fontului ca textul sa incapa in latimea data (anti-overflow)
     function fitFont(font, style, base, str, maxW) {
       var fs = base; pdf.setFont(font, style); pdf.setFontSize(fs);
@@ -394,7 +450,7 @@
 
     return {
       pdf, get y(){return y}, setY, ensure, newPage, chapter, h2, h3, P, bullets, table, source, callout, kpis, spacer, useMP, fullPage,
-      barChart, lineChart, pie, donut, hbar, formula, sourceBadges, PAL,
+      barChart, lineChart, pie, donut, hbar, radar, formula, sourceBadges, PAL,
       toc, get page(){return pageNum}, setPage:(p)=>{pageNum=p;}, _band:band, _foot:foot,
       setSuppress:(v)=>{suppressChrome=v;}, S2, N, RN, Pct, dims:{W,H,ML,MR,MT,MB,CW,ACCENT,INK,SUB,MUT},
     };
@@ -485,49 +541,8 @@
             }
             else if(bl.type==='table' && bl.headers && bl.rows && bl.rows.length && D.table){
               var nc=bl.headers.length||1; D.table(bl.headers, bl.rows, bl.headers.map(function(){return CW/nc;}));
-              try{
-                if(D.barChart && bl.rows.length>=2 && bl.rows.length<=14){
-                  var li=bl.headers.length-1;
-                  if(li>=1){
-                    var vals=bl.rows.map(function(r){return _num(r[li]);});
-                    var ok=vals.filter(function(v){return v!=null;}).length;
-                    var uniq={}; vals.forEach(function(v){uniq[v]=1;});
-                    if(ok===bl.rows.length && Object.keys(uniq).length>=2){
-                      var pal=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
-                      // DIVERSIFICARE: alege tipul de grafic ca să NU fie aceeași bară peste tot.
-                      // serie temporală -> linie; compoziție (≤6, toate pozitive) -> donut;
-                      // etichete lungi sau prin rotație -> bare orizontale; altfel bară verticală.
-                      var labels0=bl.rows.map(function(r){return (''+(r[0]||'')).trim();});
-                      var title=((bl.headers[li])||'Valori')+' — reprezentare grafică';
-                      var cd=bl.rows.map(function(r,i){return [(''+(r[0]||('#'+(i+1)))).replace(/\s+/g,' ').trim().slice(0,28), vals[i], pal[i%pal.length]];});
-                      var isTime=labels0.length>=3 && labels0.every(function(l){return /(19|20)\d{2}/.test(l);});
-                      var allPos=vals.every(function(v){return v!=null && v>=0;});
-                      var avgLen=labels0.reduce(function(a,l){return a+l.length;},0)/labels0.length;
-                      // DIVERSIFICARE REALĂ (Florin: nu repeta același tipar): seria temporală →
-                      // linie; altfel rotație UNIFORMĂ printre TOATE stilurile eligibile
-                      // (bară · bare orizontale · donut · pie), nu cădere mereu pe bară.
-                      var src='Date din tabelul de mai sus';
-                      if(isTime && D.lineChart){
-                        D.lineChart([{name:(bl.headers[li]||'Serie').slice(0,24),color:[37,99,235],points:vals}], labels0.map(function(l){return (l.match(/(19|20)\d{2}/)||[l])[0];}), {title:title, source:src});
-                      } else {
-                        // rotație completă — hbar e în pool când e ales, nu forțat mereu la etichete lungi
-                        var elig=[];
-                        if(D.barChart) elig.push('bar');
-                        if(D.hbar) elig.push('hbar');
-                        if(D.donut && allPos && bl.rows.length>=2 && bl.rows.length<=6) elig.push('donut');
-                        if(D.pie && allPos && bl.rows.length>=2 && bl.rows.length<=5) elig.push('pie');
-                        if(!elig.length) elig=['bar'];
-                        var st=elig[(D.__tci=(D.__tci||0)+1)%elig.length];
-                        if(st==='donut') D.donut(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:src});
-                        else if(st==='pie') D.pie(cd.map(function(r){return [r[0].slice(0,14), r[1], r[2]];}), {title:title, source:src});
-                        else if(st==='hbar') D.hbar(cd, {title:title, source:src});
-                        else D.barChart(cd.map(function(r){return [r[0].slice(0,16), r[1], r[2]];}), {title:title, max:0, source:src});
-                      }
-                      hadVisual=true;
-                    }
-                  }
-                }
-              }catch(e){}
+              // grafic diversificat din tabel — PICKER UNIC (același în toate studiile/rapoartele)
+              try{ if(window._pickChart && window._pickChart(D, bl.headers, bl.rows)) hadVisual=true; }catch(e){}
             }
           }catch(e){}
         });
