@@ -444,11 +444,77 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     return newPage(title,pgNum);
   };
 
+  // ── miniChart — grafic AUTO din tabel numeric, STIL IDENTIC cu motorul strategic ──
+  // Self-contained (nu depinde de _makeStratDoc). Rotatie bar·hbar·donut pe pdf.__pc.
+  // headers: [..,'Valoare'] | rows: [[label,..,val],...] | returneaza noul y.
+  const _CFONT=_roFont||'helvetica';
+  const _PALc=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233],[236,72,153]];
+  const _pcNum=s=>{ if(typeof s==='number') return s; if(s==null) return null; const m=(''+s).replace(/\./g,'').replace(/,/g,'.').match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; };
+  const miniChart=(headers,rows,title,y,opts)=>{
+    try{
+      opts=opts||{}; if(!rows||rows.length<2||rows.length>14) return y;
+      const li=(headers?headers.length:(rows[0]?rows[0].length:0))-1; if(li<1) return y;
+      const vals=rows.map(r=>_pcNum(r[li])); const ok=vals.filter(v=>v!=null).length;
+      if(ok<rows.length||ok<2) return y;
+      const uniq={}; vals.forEach(v=>uniq[v]=1); if(Object.keys(uniq).length<2) return y;
+      const labels=rows.map((r,i)=>S2(String(r[0]??('#'+(i+1)))).replace(/\s+/g,' ').trim());
+      const data=rows.map((r,i)=>[labels[i],vals[i],_PALc[i%_PALc.length]]);
+      const allPos=vals.every(v=>v!=null&&v>=0);
+      const ttl=title||((headers&&headers[li])||'Valori')+' — reprezentare grafica';
+      const ML=14, CW=W-28, h=opts.h||48;
+      y=_ensureSpace(y, h+12, opts.contTitle);
+      // titlu
+      pdf.setFont(_CFONT,'bold'); pdf.setFontSize(8.5); pdf.setTextColor(...NAVY); pdf.text(S2(ttl),ML,y+1); y+=5.5;
+      // alege tip (rotatie)
+      const elig=['bar','hbar']; if(allPos&&rows.length<=6) elig.push('donut');
+      pdf.__pc=(pdf.__pc||0)+1; const st=elig[pdf.__pc%elig.length];
+      const _max=Math.max(1,...vals.map(v=>Math.abs(v||0)));
+      if(st==='donut'){
+        const cx=ML+26, cy=y+22, ro=20, ri=10; let tot=vals.reduce((a,v)=>a+(v||0),0)||1, a0=-Math.PI/2;
+        data.forEach(d=>{ const frac=(d[1]||0)/tot, a1=a0+frac*2*Math.PI; pdf.setFillColor(...d[2]);
+          const steps=Math.max(2,Math.ceil(frac*40)); pdf.moveTo? null:null;
+          // sector aproximat cu triunghiuri
+          for(let s=0;s<steps;s++){ const t0=a0+(a1-a0)*s/steps, t1=a0+(a1-a0)*(s+1)/steps;
+            pdf.triangle(cx,cy, cx+ro*Math.cos(t0),cy+ro*Math.sin(t0), cx+ro*Math.cos(t1),cy+ro*Math.sin(t1),'F'); }
+          a0=a1; });
+        pdf.setFillColor(...LIGHT); pdf.circle(cx,cy,ri,'F');
+        // legenda
+        let ly=y+4, lx=ML+54; data.forEach(d=>{ pdf.setFillColor(...d[2]); pdf.rect(lx,ly-2.6,3,3,'F');
+          pdf.setFont(_CFONT,'normal'); pdf.setFontSize(6.6); pdf.setTextColor(40,52,70);
+          pdf.text(S2(d[0]).slice(0,26)+'  '+nK(d[1]),lx+4.5,ly); ly+=5.2; });
+        y=Math.max(cy+ro+4, ly)+2;
+      } else if(st==='hbar'){
+        const bx=ML+44, bw=CW-50; let by=y+2;
+        data.forEach(d=>{ const w=bw*Math.abs(d[1]||0)/_max;
+          pdf.setFont(_CFONT,'normal'); pdf.setFontSize(6.6); pdf.setTextColor(40,52,70);
+          pdf.text(S2(d[0]).slice(0,30),ML,by+2.6,{maxWidth:42});
+          pdf.setFillColor(...d[2]); pdf.rect(bx,by,Math.max(0.6,w),4.2,'F');
+          pdf.setFontSize(6.2); pdf.setTextColor(90,104,120); pdf.text(nK(d[1]),bx+w+1.5,by+3.4);
+          by+=6.6; });
+        y=by+2;
+      } else {
+        const x0=ML+10, plotW=CW-12, plotH=h-12, top=y, baseY=top+plotH;
+        pdf.setDrawColor(205,210,220); pdf.setLineWidth(0.2); pdf.line(x0,top,x0,baseY); pdf.line(x0,baseY,x0+plotW,baseY);
+        pdf.setFont(_CFONT,'normal'); pdf.setFontSize(5.4); pdf.setTextColor(138,150,166);
+        for(let g=0;g<=4;g++){ const gy=baseY-plotH*g/4; if(g>0){pdf.setDrawColor(234,237,242);pdf.setLineWidth(0.1);pdf.line(x0,gy,x0+plotW,gy);} pdf.text(nK(Math.round(_max*g/4)),x0-1.5,gy+1,{align:'right'}); }
+        const nb=data.length, gap=plotW/nb, bwid=Math.min(gap*0.6,14);
+        data.forEach((d,i)=>{ const bh=plotH*Math.abs(d[1]||0)/_max, bxx=x0+gap*i+(gap-bwid)/2;
+          pdf.setFillColor(...d[2]); pdf.rect(bxx,baseY-bh,bwid,bh,'F');
+          pdf.setFont(_CFONT,'bold'); pdf.setFontSize(5.6); pdf.setTextColor(40,52,70); pdf.text(nK(d[1]),bxx+bwid/2,baseY-bh-1.2,{align:'center'});
+          pdf.setFont(_CFONT,'normal'); pdf.setFontSize(5.2); pdf.setTextColor(90,104,120); pdf.text(S2(d[0]).slice(0,14),bxx+bwid/2,baseY+3,{align:'center',maxWidth:gap}); });
+        y=baseY+6;
+      }
+      pdf.setFont(_CFONT,'italic'); pdf.setFontSize(5.6); pdf.setTextColor(150,160,176); pdf.text(S2(opts.source||'Date din tabelul de mai sus'),ML,y); y+=4;
+      pdf.setTextColor(0,0,0);
+      return y;
+    }catch(e){ return y; }
+  };
+
   return {
     pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
-    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
-    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage
+    S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,n,nK,
+    hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage,miniChart
   };
 }
 

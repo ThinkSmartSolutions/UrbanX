@@ -2362,7 +2362,7 @@ async function generateNoiseStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela pentru studiu.');return;}
   ss('Se genereaza Studiu Acustic Urban...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',12);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign,miniChart}=_initStudyPdf('Studiu Acustic Urban','Studiu acustic',12);
   const zgomot=getZgomotConfig();
   const vant=getVantConfig();
   const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
@@ -2436,6 +2436,7 @@ async function generateNoiseStudy(){
   cy=body('Analiza s-a efectuat prin identificarea tuturor cladirilor si functiunilor OSM in raza de 200m fata de centrul parcelei '+nrcad+'. Nivelul la sursa Ls a fost estimat conform datelor tipice pentru fiecare categorie functionala, iar nivelul la parcela La a fost calculat prin legea de propagare acustica in camp liber: La = Ls - 20·log10(d) - 8 - 0.001·d (ISO 9613-2, propagare hemisferică + reflexie sol + absorbție atmosferică).',14,cy);cy+=4;
   cy=tblRow(['Nr.cad','Functiune','Dist(m)','Ls(dB)','La la parcela(dB)'],cy,true,[32,50,25,25,46]);
   surse.forEach(s=>{cy=tblRow([s.nrcad,s.fn.slice(0,20),s.dist,s.Ls,s.La],cy,false,[32,50,25,25,46]);});
+  cy+=4; cy=miniChart(['Sursa','La la parcela (dB)'], surse.slice(0,12).map(s=>[s.fn.slice(0,18),s.La]), 'Contributie acustica la parcela pe sursa de zgomot, dB(A)', cy, {source:'Estimare Leq SR 10009 · date OSM'});
   if(!surse.length)cy=body('Nu s-au detectat surse de zgomot semnificative in raza de 200m.',14,cy);
   cy+=3;cy=sec('2. NIVEL TOTAL ESTIMAT PRIN COMPUNERE ENERGETICA',cy);cy+=2;
   cy=tblRow(['Indicator','Valoare','Status'],cy,true,[80,52,46]);
@@ -2862,7 +2863,7 @@ async function generateGreenStudy(){
   if(!ap?.geo?.geometry){ss('Selectati o parcela.');return;}
   ss('Se genereaza Studiu Spatii Verzi...');
 
-  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
+  const {pdf,W,H,DARK,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,PURPLE,S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,hdr,ftr,sec,body,kv,tblRow,addImg,badge,sign,miniChart}=_initStudyPdf('Studiu de Spatii Verzi si Permeabilitate','Studiu spatii verzi',12);
   let cy = 28;
     cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Spatii Verzi - Analiza OSM');
 const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
@@ -2907,10 +2908,11 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Identificarea zonelor verzi existente si propuse');
   cy=sec('1. BILANT SPATII VERZI - CALCUL DETALIAT',cy);cy+=2;
-  cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG '+getUATLabel()+' (UTR '+utr+'), suprafata minima de spatii verzi este de '+params?.sv+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
+  cy=body('Conform Legii nr. 24/2007 privind reglementarea si administrarea spatiilor verzi din intravilanul localitatilor si PUG '+getUATLabel()+' (UTR '+utr+'), suprafata minima de spatii verzi este de '+(params?.sv||20)+'% din suprafata terenului, reprezentand '+svMin+' mp. Legea impune suplimentar un minim de 20% spatii verzi pentru orice constructie noua in intravilanul municipiului.',14,cy);cy+=4;
   cy=tblRow(['Indicator','Minim legal','Propus','Status'],cy,true,[70,42,42,24]);
   const svProp=Math.round(areaNum*0.22);
   [['Spatii verzi totale (mp)',svObl.toLocaleString('en-US')+' mp',svProp.toLocaleString('en-US')+' mp',svProp>=svObl?'OK':'DEFICIT'],['Procentaj spatii verzi (%)',Math.max(params?.sv||20,20)+'%',((svProp/areaNum)*100).toFixed(1)+'%',svProp>=svObl?'CONFORM':'NECONFORM'],['SV permeabil la apa (min 60% din SV)',(svObl*0.6).toFixed(0)+' mp',(svProp*0.65).toFixed(0)+' mp','CONFORM'],['Arbori plantati (min 1/200mp SV)',Math.ceil(svObl/200)+' buc',Math.ceil(svProp/200)+' buc','CONFORM']].forEach(r=>{cy=tblRow(r,cy,false,[70,42,42,24]);});
+  cy+=4; cy=miniChart(['Categorie','mp'],[['SV minim legal',svObl],['SV propus',svProp],['SV permeabil',Math.round(svProp*0.65)]],'Bilant spatii verzi — minim legal vs propus, mp',cy,{source:'Calcul UrbanX · Legea 24/2007'});
 
   // PAG 3: Viewer 3D zi + noapte
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - VIZUALIZARE AMENAJARE VERDE',3);ftr();
