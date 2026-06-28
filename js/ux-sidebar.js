@@ -218,7 +218,7 @@
           '<button class="uxsb-ghead' + (act ? ' active' : '') + '" style="' + (act ? 'border-left-color:' + g.color : '') + '" onclick="UXSidebar.toggleGroup(\'' + g.id + '\')">' +
           '<span class="uxsb-gico">' + g.ico + '</span><span class="uxsb-glabel">' + T(g.label) + '</span><span class="uxsb-gchev">' + (act ? '▲' : '▼') + '</span></button>' +
           (act ? '<div class="uxsb-items">' + g.items.map(function (i) {
-            if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + i.sep + '</div>';
+            if (i.sep) return '<div style="font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:8px 6px 3px;border-top:1px solid rgba(255,255,255,.08);margin-top:5px">' + T(i.sep) + '</div>';
             var ia = State.activeModule === i.moduleId;
             // info-drawer: explicit (i.info) · automat pentru SPS (sps:<id>) · automat pentru
             // ORICE modul cu intrare RAPORT_INFO (direct sau prin alias) — fiecare studiu/raport
