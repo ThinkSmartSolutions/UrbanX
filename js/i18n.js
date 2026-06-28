@@ -397,14 +397,30 @@
   function _dirtyRo() { return false; }
   function applyAll() { _xlTree(document.body); _xlAttrs(document); }
 
+  // LAZY: dicționarul MT (717KB) se încarcă DOAR la prima alegere a unei limbi ≠ RO.
+  var _autoLoaded = false, _autoLoading = false, _autoCbs = [];
+  function _ensureAutoDict(cb) {
+    if (_lang === 'ro' || _autoLoaded) { cb && cb(); return; }
+    if (cb) _autoCbs.push(cb);
+    if (_autoLoading) return; _autoLoading = true;
+    try {
+      var s = document.createElement('script'); s.src = 'js/i18n-auto.js?v=20260628mt4';
+      s.onload = function () { _autoLoaded = true; _autoLoading = false; var c = _autoCbs.slice(); _autoCbs = []; c.forEach(function (f) { try { f(); } catch (e) {} }); };
+      s.onerror = function () { _autoLoading = false; var c = _autoCbs.slice(); _autoCbs = []; c.forEach(function (f) { try { f(); } catch (e) {} }); };
+      document.head.appendChild(s);
+    } catch (e) { _autoLoading = false; }
+  }
   function setLang(lang) {
     if (LANGS.indexOf(lang) < 0) return;
     _lang = lang;
     try { localStorage.setItem(KEY, lang); } catch (e) {}
-    try { if (G.UXSidebar && G.UXSidebar.render && document.getElementById('ux-sidebar-body')) G.UXSidebar.render(); } catch (e) {}
-    try { applyAll(); } catch (e) {}                          // traduce tot DOM-ul existent
-    try { _refreshTopbarLabel(); } catch (e) {}
-    try { G.document.dispatchEvent(new CustomEvent('urbanx:langChanged', { detail: { lang: lang } })); } catch (e) {}
+    var _apply = function () {
+      try { if (G.UXSidebar && G.UXSidebar.render && document.getElementById('ux-sidebar-body')) G.UXSidebar.render(); } catch (e) {}
+      try { applyAll(); } catch (e) {}
+      try { _refreshTopbarLabel(); } catch (e) {}
+      try { G.document.dispatchEvent(new CustomEvent('urbanx:langChanged', { detail: { lang: lang } })); } catch (e) {}
+    };
+    if (lang !== 'ro') _ensureAutoDict(_apply); else _apply();   // încarcă dicționarul MT la nevoie
     G.ss && G.ss('🌐 ' + lang.toUpperCase());
   }
   // permite adăugarea incrementală de traduceri (sau dintr-un pipeline MT)
@@ -442,7 +458,7 @@
   function _refreshTopbarLabel() { var c = document.getElementById('ux-lang-cur'); if (c) c.textContent = (FLAGS[_lang] || '') + ' ' + _lang.toUpperCase(); }
 
   // Startup: pornește observerul + traduce DOM-ul existent dacă limba ≠ RO.
-  function _boot() { try { _startObserver(); _injectTopbarSwitcher(); if (_lang !== 'ro') applyAll(); } catch (e) {} }
+  function _boot() { try { _startObserver(); _injectTopbarSwitcher(); if (_lang !== 'ro') _ensureAutoDict(applyAll); } catch (e) {} }
   if (G.document && document.readyState !== 'loading') setTimeout(_boot, 0);
   else if (G.document) document.addEventListener('DOMContentLoaded', _boot);
   console.log('[i18n] încărcat · limbă: ' + _lang + ' · RO/EN/FR/DE (fallback RO + DOM auto)');
