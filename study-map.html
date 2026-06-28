@@ -119,7 +119,7 @@ svg#graph:active{cursor:grabbing;}
 
 <div class="main">
   <div class="canvas-wrap">
-    <svg id="graph" viewBox="0 0 900 620"></svg>
+    <svg id="graph" viewBox="0 0 1180 700"></svg>
   </div>
   <div class="info-panel" id="info-panel">
     <div class="info-empty">
@@ -230,6 +230,42 @@ const STUDIES = {
     desc:'Studiu de impact aviatic. Obligatoriu dacă amplasamentul e în apropierea unui aeroport. Verifică H maxim ICAO Anexa 14.',
     norms:['ICAO Anexa 14','L21/2020','HG 912/2010'],
     fn:'generateAACR()' },
+  iluminat:   { label:'Iluminat\nNatural', ico:'🌤', color:'#FBBF24', cat:'tehnic', catColor:'rgba(251,191,36,.1)', x:920, y:110,
+    desc:'Factor de lumină de zi (FLZ) și adâncimea camerei conform EN 17037 / OMS 119. Confort luminos în spațiile de locuit.',
+    norms:['EN 17037','OMS 119/2014','SR 6646'], fn:'generateStudiuIluminat()' },
+  pluviale:   { label:'Ape\nPluviale', ico:'🌧', color:'#38BDF8', cat:'tehnic', catColor:'rgba(56,189,248,.1)', x:920, y:235,
+    desc:'Managementul apelor pluviale: debit de calcul, retenție, cisternă de recuperare. SR EN 752 — sponge city.',
+    norms:['SR EN 752','NP 133/2013'], fn:'generateStudiuApePluviale()' },
+  taluzuri:   { label:'Stabilitate\nTaluzuri', ico:'⛰', color:'#FB923C', cat:'tehnic', catColor:'rgba(251,146,60,.1)', x:920, y:365,
+    desc:'Stabilitatea taluzurilor și versanților (Bishop, Fellenius). Cotă AMSL reală din DEM. Eurocod 7 / NP 074/2014.',
+    norms:['EC7','NP 074/2014','GT 019'], fn:'generateStabilitateTaluzuri()' },
+  bransamente:{ label:'Branșamente\nUtilități', ico:'🔌', color:'#60A5FA', cat:'tehnic', catColor:'rgba(96,165,250,.1)', x:920, y:495,
+    desc:'Pre-studiu de branșamente: apă, canal, electric, gaze, ISU. Verifică disponibilitatea utilităților la limita parcelei.',
+    norms:['Avize operatori','HG 907/2016'], fn:'generatePrestudiuBransamente()' },
+  pmr:        { label:'Accesibilitate\nPMR', ico:'♿', color:'#A78BFA', cat:'avize', catColor:'rgba(167,139,250,.1)', x:1055, y:110,
+    desc:'Accesibilitate pentru persoane cu mobilitate redusă: rampe, lifturi, gabarit. Legea 448/2006 · NP 051/2012.',
+    norms:['L448/2006','NP 051/2012','ISO 21542'], fn:'generateStudiuPMR()' },
+  sanatate:   { label:'Impact\nSănătate', ico:'🫁', color:'#F472B6', cat:'avize', catColor:'rgba(244,114,182,.1)', x:1055, y:235,
+    desc:'Evaluarea impactului asupra sănătății populației: aer, zgomot, radon. Aviz DSP. OMS 119/2014.',
+    norms:['OMS 119/2014','L95/2006','OMS 994'], fn:'generateHealthImpactStudy()' },
+  restrictii: { label:'Restricții &\nZone Risc', ico:'🚧', color:'#F87171', cat:'urban', catColor:'rgba(248,113,113,.1)', x:1055, y:365,
+    desc:'Sinteza restricțiilor de construire: zone de protecție (CFR, monumente, cimitire, rețele), servituți, zone de risc.',
+    norms:['L350/2001','RGU','PUG'], fn:'generateStudiuRestrictii()' },
+  seismic:    { label:'Risc\nSeismic', ico:'🌍', color:'#EF4444', cat:'tehnic', catColor:'rgba(239,68,68,.1)', x:1055, y:495,
+    desc:'Evaluarea riscului seismic al amplasamentului: ag, Tc, clasa de importanță. P100-1/2013.',
+    norms:['P100-1/2013','SR EN 1998'], fn:'generateSeismicStudy()' },
+  rcai:       { label:'RCAI\nArheologic', ico:'🏺', color:'#FBBF24', cat:'avize', catColor:'rgba(251,191,36,.1)', x:120, y:600,
+    desc:'Cercetare arheologică și potențial arheologic pe parcelă/zonă: situri RAN, monumente LMI, geomorfologie DEM, risc investiție. Aviz DJC/MCIN.',
+    norms:['OG 43/2000','L422/2001','norme MCIN'], fn:"window._RCAI&&window._RCAI.openPanel(window.TCI&&window.TCI.cityKey)" },
+  hbu:        { label:'HBU\nReconversie', ico:'🏗', color:'#D4AF37', cat:'economic', catColor:'rgba(212,175,55,.1)', x:305, y:600,
+    desc:'Cea mai bună utilizare (Highest & Best Use) pe parcelă/zonă: scor 12 funcțiuni + analiză financiară. IVS/ANEVAR.',
+    norms:['IVS','ANEVAR','L350/2001'], fn:"window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey)" },
+  repa:       { label:'Pre-Autorizare\n(REPA)', ico:'📋', color:'#34D399', cat:'documentatie', catColor:'rgba(52,211,153,.12)', x:490, y:600,
+    desc:'Raport de pre-autorizare: checklist AC, avize necesare, listă documente. Sinteza dosarului înainte de depunere.',
+    norms:['L50/1991','HG 907/2016'], fn:'generateREPA()' },
+  proiectie:  { label:'Proiecție\nUrbanistică', ico:'🏙', color:'#818CF8', cat:'urban', catColor:'rgba(129,140,248,.1)', x:680, y:600,
+    desc:'Proiecție urbanistică 10/20/30 ani: scenarii S1/S2/S3, demografic INS, ESG proiectat.',
+    norms:['L350/2001','INS','SUMP'], fn:'generateProiectieUrbanistica()' },
 };
 
 const EDGES = [
@@ -264,6 +300,19 @@ const EDGES = [
   { from:'ssf',       to:'memoriu',     label:'viabilitate ec.', color:'rgba(245,158,11,.25)' },
   { from:'mobilitate',to:'trafic',      label:'mod split, TP', color:'rgba(244,114,182,.2)' },
   { from:'apa',       to:'memoriu',     label:'aviz Apele Rom.', color:'rgba(6,182,212,.2)' },
+  { from:'insorire',  to:'iluminat',    label:'date solare / FLZ', color:'rgba(251,191,36,.25)' },
+  { from:'apa',       to:'pluviale',    label:'bilanț pluvial', color:'rgba(56,189,248,.25)' },
+  { from:'geotehnic', to:'taluzuri',    label:'pantă, NFA, cotă', color:'rgba(251,146,60,.25)' },
+  { from:'databus',   to:'bransamente', label:'SC, fn, necesar', color:'rgba(99,102,241,.3)' },
+  { from:'releveu',   to:'pmr',         label:'accese, gabarit', color:'rgba(167,139,250,.25)' },
+  { from:'eim',       to:'sanatate',    label:'aer, zgomot', color:'rgba(244,114,182,.2)' },
+  { from:'amplasament',to:'restrictii', label:'UTR, zone protecție', color:'rgba(248,113,113,.25)' },
+  { from:'geotehnic', to:'seismic',     label:'ag, Tc, sol', color:'rgba(239,68,68,.25)' },
+  { from:'patrimoniu',to:'rcai',        label:'LMI, zone protejate', color:'rgba(251,191,36,.3)' },
+  { from:'aedis',     to:'hbu',         label:'POT/CUT, edificabil', color:'rgba(212,175,55,.25)' },
+  { from:'ssf',       to:'hbu',         label:'GDV, cost, ROI', color:'rgba(245,158,11,.2)' },
+  { from:'memoriu',   to:'repa',        label:'piese dosar', color:'rgba(212,175,55,.3)' },
+  { from:'amplasament',to:'proiectie',  label:'context, UTR', color:'rgba(129,140,248,.25)' },
 ];
 
 const GOALS = {
@@ -570,7 +619,7 @@ function clearGoal(){
 // PAN + ZOOM
 // ═══════════════════════════════════════════════════════════════
 function setupPanZoom(){
-  let vb = {x:0,y:0,w:900,h:620};
+  let vb = {x:0,y:0,w:1180,h:700};
   let drag = null;
 
   svg.addEventListener('mousedown',e=>{
