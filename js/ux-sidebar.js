@@ -159,6 +159,23 @@
 
   function isAdmin() { try { return !!(G._USER && (G._USER.role === 'admin' || G._USER.role === 'primar' || G._USER.isAdmin)); } catch (e) { return true; } }
 
+  // Selector rol (previzualizare) — DOAR pt admin/dev sau când un preview e activ.
+  // Permite testarea filtrării pe rol fără consolă. Asignarea REALĂ = Supabase metadata.
+  function _roleSwitcher() {
+    try {
+      var R = G.UXRoles; if (!R) return '';
+      var hasPrev = false; try { hasPrev = !!localStorage.getItem('ux_role_preview'); } catch (e) {}
+      var show = hasPrev || (G._USER && (G._USER.isAdmin || G._USER.role));
+      try { if (!show && localStorage.getItem('ux_dev')) show = true; } catch (e) {}
+      if (!show) return '';
+      var cur = R.currentId(); var roles = R.ROLES || {};
+      var opts = Object.keys(roles).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + roles[k].label + '</option>'; }).join('');
+      return '<div style="display:flex;align-items:center;gap:6px;margin:2px 0 8px;padding:5px 7px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:7px">' +
+        '<span style="font-size:9px;color:#a78bfa;text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex-shrink:0">👤 Rol</span>' +
+        '<select onchange="UXRoles.setPreview(this.value)" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:5px;padding:3px 5px;font-size:11px">' + opts + '</select></div>';
+    } catch (e) { return ''; }
+  }
+
   function render() {
     var el = D.getElementById('ux-sidebar-body'); if (!el) return;
     // 001 Faza 3: filtrare pe rol (NON-destructivă — implicit rol FULL → totul vizibil).
@@ -176,6 +193,7 @@
     var quick = QUICK.filter(function (a) { return a.moduleId === '_search' || _cs(a.moduleId); });
     el.innerHTML =
       '<div class="uxsb-uat">📍 ' + ((G.TCI && (G.TCI.cityName)) || (G._RO_CITIES_DB && G.TCI && G._RO_CITIES_DB[G.TCI.cityKey] && G._RO_CITIES_DB[G.TCI.cityKey].name) || 'UAT') + '</div>' +
+      _roleSwitcher() +
       '<div class="uxsb-qa">' + quick.map(function (a) { return '<button class="uxsb-qabtn" onclick="UXSidebar.openModule(\'' + a.moduleId + '\')" title="' + a.label + '"><span class="uxsb-qaico">' + a.ico + '</span><span class="uxsb-qalbl">' + a.label + '</span></button>'; }).join('') + '</div>' +
       groups.map(function (g) {
         var act = State.activeGroup === g.id;
@@ -243,7 +261,7 @@
   function close() { var s = D.getElementById('ux-sidebar'), o = D.getElementById('ux-sidebar-overlay'); if (s) s.classList.remove('open'); if (o) o.classList.remove('open'); }
   function toggle() { var s = D.getElementById('ux-sidebar'); (s && s.classList.contains('open')) ? close() : open(); }
 
-  G.UXSidebar = { open: open, close: close, toggle: toggle, openModule: openModule, toggleGroup: toggleGroup, NAV: NAV };
+  G.UXSidebar = { open: open, close: close, toggle: toggle, openModule: openModule, toggleGroup: toggleGroup, render: render, NAV: NAV };
   // expune și openModule global (pt onclick din alte locuri, conform 001)
   G.openModule = G.openModule || openModule;
   console.log('[UXSidebar] sertar navigare structurat încărcat (7 grupe) — window.UXSidebar');
