@@ -983,6 +983,7 @@ function _initSupabase() {
       return false;
     }
     _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window._supabase = _supabase;   // expus pt UXRoles (manager roluri/utilizatori)
     return true;
   } catch(e) {
     console.warn('Supabase init failed:', e.message);
@@ -1123,8 +1124,8 @@ function _authSuccess(user) {
   // 001: rolul ASIGNAT din tabelul Supabase `user_roles` (admin poate seta altor useri).
   // NO-OP dacă tabelul nu există încă (eroarea e prinsă) → fallback la metadata/FULL.
   try {
-    if (_supabase && user?.id) {
-      _supabase.from('user_roles').select('role,uat_siruta').eq('user_id', user.id).maybeSingle()
+    if (_supabase && user?.email) {
+      _supabase.from('user_roles').select('role,uat_siruta').eq('email', user.email).maybeSingle()
         .then(function (res) {
           if (res && res.data && res.data.role && window._USER) {
             window._USER.role = res.data.role;

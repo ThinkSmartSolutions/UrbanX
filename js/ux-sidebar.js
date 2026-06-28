@@ -174,7 +174,8 @@
       var optsT = Object.keys(roles).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + T(roles[k].label) + '</option>'; }).join('');
       return '<div style="display:flex;align-items:center;gap:6px;margin:2px 0 8px;padding:5px 7px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:7px">' +
         '<span style="font-size:9px;color:#a78bfa;text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex-shrink:0">👤 ' + T('Rol') + '</span>' +
-        '<select onchange="UXRoles.setPreview(this.value)" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:5px;padding:3px 5px;font-size:11px">' + optsT + '</select></div>';
+        '<select onchange="UXRoles.setPreview(this.value)" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:5px;padding:3px 5px;font-size:11px">' + optsT + '</select>' +
+        '<button title="Gestionează roluri & acces" onclick="UXRoles.openManager&&UXRoles.openManager()" style="flex-shrink:0;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#c4b5fd;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:12px">⚙</button></div>';
     } catch (e) { return ''; }
   }
 

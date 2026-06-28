@@ -109,6 +109,150 @@
     } catch (e) {}
   }
 
-  G.UXRoles = { ROLES: ROLES, current: current, currentId: currentId, canSee: canSee, setPreview: setPreview, filterRapoarte: filterRapoarte };
-  console.log('[UXRoles] strat roluri/acces încărcat (implicit: acces complet) · window.UXRoles');
+  // ════════════════════════════════════════════════════════════════════════
+  // DASHBOARD ROLURI & ACCES (admin) — definiții editabile în Supabase + asignare per user
+  // ════════════════════════════════════════════════════════════════════════
+  function _sb() { return G._supabase || null; }
+  var _defsLoaded = false;
+
+  // catalog de module (token-uri de acces) grupate — pt checkbox-urile din editor
+  function catalog() {
+    var groups = [];
+    try {
+      var NAV = (G.UXSidebar && G.UXSidebar.NAV) || [];
+      NAV.forEach(function (g) {
+        var items = (g.items || []).filter(function (i) { return i.moduleId; })
+          .map(function (i) { return { id: i.moduleId, label: (i.label || i.moduleId) }; });
+        if (items.length) groups.push({ label: g.label, items: items });
+      });
+    } catch (e) {}
+    var seen = {}, rap = [];
+    for (var k in RAP_MOD) { var id = RAP_MOD[k]; if (!seen[id]) { seen[id] = 1; rap.push({ id: id, label: id }); } }
+    groups.push({ label: 'Rapoarte (parcelă)', items: rap });
+    return groups;
+  }
+
+  // încarcă definițiile de rol din Supabase (peste cele implicite). Async, non-blocant.
+  function loadDefs(cb) {
+    var sb = _sb(); if (!sb) { cb && cb(); return; }
+    try {
+      sb.from('role_definitions').select('role_id,label,level,access').then(function (res) {
+        if (res && res.data) res.data.forEach(function (r) {
+          ROLES[r.role_id] = { label: r.label || r.role_id, level: r.level == null ? 1 : r.level, access: r.access || [], _custom: true };
+        });
+        _defsLoaded = true;
+        try { if (G.UXSidebar && G.UXSidebar.render && document.getElementById('ux-sidebar-body')) G.UXSidebar.render(); } catch (e) {}
+        cb && cb();
+      }).catch(function () { cb && cb(); });
+    } catch (e) { cb && cb(); }
+  }
+  function saveRole(id, label, level, access) {
+    ROLES[id] = { label: label, level: level || 1, access: access, _custom: true };   // optimist local
+    var sb = _sb(); if (!sb) return Promise.resolve();
+    return sb.from('role_definitions').upsert({ role_id: id, label: label, level: level || 1, access: access, updated_at: new Date().toISOString() }, { onConflict: 'role_id' });
+  }
+  function deleteRole(id) { delete ROLES[id]; var sb = _sb(); if (sb) try { sb.from('role_definitions').delete().eq('role_id', id); } catch (e) {} }
+  function listAssignments(cb) { var sb = _sb(); if (!sb) { cb([]); return; } try { sb.from('user_roles').select('email,role,uat_siruta').then(function (r) { cb((r && r.data) || []); }).catch(function () { cb([]); }); } catch (e) { cb([]); } }
+  function assignRole(email, role, uat) { var sb = _sb(); if (!sb) return Promise.resolve(); return sb.from('user_roles').upsert({ email: email, role: role, uat_siruta: uat || null, updated_at: new Date().toISOString() }, { onConflict: 'email' }); }
+  function removeAssignment(email) { var sb = _sb(); if (sb) try { sb.from('user_roles').delete().eq('email', email); } catch (e) {} }
+
+  // ── UI ────────────────────────────────────────────────────────────────────
+  var _mgr = { tab: 'roles', edit: null };
+  function _esc(s) { return ('' + (s == null ? '' : s)).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  function _accessSummary(a) { return a === '*' ? 'ACCES COMPLET' : (Array.isArray(a) ? a.length + ' module' : '—'); }
+  function openManager() {
+    var ov = document.getElementById('uxrm-ov');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'uxrm-ov'; ov.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,16,.8);z-index:9600;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)'; document.body.appendChild(ov); }
+    loadDefs(_renderMgr); _renderMgr();
+  }
+  function _closeMgr() { var o = document.getElementById('uxrm-ov'); if (o) o.remove(); _mgr.edit = null; }
+  function _renderMgr() {
+    var ov = document.getElementById('uxrm-ov'); if (!ov) return;
+    var tb = function (id, l) { return '<button onclick="UXRoles._tab(\'' + id + '\')" style="background:' + (_mgr.tab === id ? 'rgba(124,58,237,.25)' : 'transparent') + ';color:' + (_mgr.tab === id ? '#c4b5fd' : '#94a3b8') + ';border:1px solid ' + (_mgr.tab === id ? 'rgba(124,58,237,.5)' : 'rgba(255,255,255,.12)') + ';border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:700;font-size:12px;margin-right:6px">' + l + '</button>'; };
+    var body = _mgr.tab === 'users' ? _usersHTML() : (_mgr.edit != null ? _editHTML() : _rolesHTML());
+    ov.innerHTML = '<div style="background:#0c1424;border:1px solid rgba(124,58,237,.3);border-radius:14px;width:min(820px,94vw);max-height:90vh;overflow-y:auto;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.6)">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div style="font-size:16px;font-weight:800;color:#e6edf7">🔐 Roluri & Acces</div>' +
+      '<button onclick="UXRoles._close()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;cursor:pointer">✕</button></div>' +
+      '<div style="margin-bottom:14px">' + tb('roles', '🎭 Roluri') + tb('users', '👥 Utilizatori') + '</div>' +
+      body + '</div>';
+  }
+  function _rolesHTML() {
+    var rows = Object.keys(ROLES).map(function (id) {
+      var r = ROLES[id];
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06)">' +
+        '<div style="flex:1"><b style="color:#e6edf7">' + _esc(r.label) + '</b> <span style="color:#64748b;font-size:11px">· ' + id + ' · ' + _accessSummary(r.access) + '</span></div>' +
+        '<button onclick="UXRoles._editRole(\'' + id + '\')" style="background:rgba(56,138,221,.2);color:#9dc3ff;border:1px solid rgba(56,138,221,.3);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px">Editează</button>' +
+        (r._custom ? '<button onclick="UXRoles._delRole(\'' + id + '\')" style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px">Șterge</button>' : '') +
+        '</div>';
+    }).join('');
+    return rows + '<div style="margin-top:14px;display:flex;gap:8px;align-items:center">' +
+      '<input id="uxrm-newid" placeholder="ID rol (ex. EVALUATOR)" style="background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:7px;padding:7px;font-size:12px;width:170px">' +
+      '<input id="uxrm-newlabel" placeholder="Nume afișat" style="flex:1;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:7px;padding:7px;font-size:12px">' +
+      '<button onclick="UXRoles._newRole()" style="background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer">+ Rol nou</button></div>';
+  }
+  function _editHTML() {
+    var id = _mgr.edit, r = ROLES[id] || { label: id, access: [] };
+    var full = r.access === '*';
+    var acc = Array.isArray(r.access) ? r.access : [];
+    var cat = catalog().map(function (g) {
+      return '<div style="margin-top:8px"><div style="font-size:10px;color:#a78bfa;text-transform:uppercase;font-weight:700;margin-bottom:3px">' + _esc(g.label) + '</div>' +
+        g.items.map(function (it) {
+          var on = full || acc.indexOf(it.id) >= 0 || acc.some(function (a) { return a.charAt(a.length - 1) === '*' && it.id.indexOf(a.slice(0, -1)) === 0; });
+          return '<label style="display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0;font-size:11px;color:#cbd5e1"><input type="checkbox" class="uxrm-mod" value="' + it.id + '"' + (on ? ' checked' : '') + (full ? ' disabled' : '') + '> ' + _esc(it.label).slice(0, 34) + '</label>';
+        }).join('') + '</div>';
+    }).join('');
+    return '<div style="font-weight:700;color:#e6edf7;margin-bottom:6px">Editezi: ' + _esc(r.label) + ' <span style="color:#64748b;font-size:11px">(' + id + ')</span></div>' +
+      '<label style="display:flex;align-items:center;gap:6px;color:#fbbf24;font-size:12px;font-weight:700;margin-bottom:6px"><input type="checkbox" id="uxrm-full"' + (full ? ' checked' : '') + ' onchange="UXRoles._toggleFull()"> Acces complet (toate modulele)</label>' +
+      '<div id="uxrm-cat" style="max-height:42vh;overflow-y:auto;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px;' + (full ? 'opacity:.45;pointer-events:none' : '') + '">' + cat + '</div>' +
+      '<div style="margin-top:12px;display:flex;gap:8px"><button onclick="UXRoles._saveEdit()" style="background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:7px;padding:8px 16px;font-weight:700;cursor:pointer">💾 Salvează</button>' +
+      '<button onclick="UXRoles._tab(\'roles\')" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:8px 14px;cursor:pointer">Înapoi</button></div>';
+  }
+  function _usersHTML() {
+    var roleOpts = Object.keys(ROLES).map(function (id) { return '<option value="' + id + '">' + _esc(ROLES[id].label) + '</option>'; }).join('');
+    var html = '<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap">' +
+      '<input id="uxrm-email" placeholder="email utilizator" style="flex:1;min-width:160px;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:7px;padding:7px;font-size:12px">' +
+      '<select id="uxrm-role" style="background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:7px;padding:7px;font-size:12px">' + roleOpts + '</select>' +
+      '<input id="uxrm-uat" placeholder="SIRUTA (opț.)" style="width:110px;background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:7px;padding:7px;font-size:12px">' +
+      '<button onclick="UXRoles._assign()" style="background:linear-gradient(180deg,#10b981,#059669);color:#fff;border:0;border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer">Asignează</button></div>' +
+      '<div id="uxrm-ulist" style="font-size:12px;color:#94a3b8">Se încarcă…</div>';
+    setTimeout(function () {
+      listAssignments(function (rows) {
+        var el = document.getElementById('uxrm-ulist'); if (!el) return;
+        el.innerHTML = rows.length ? rows.map(function (u) {
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="flex:1;color:#e6edf7">' + _esc(u.email) + '</span><span style="color:#c4b5fd">' + _esc(u.role) + (u.uat_siruta ? ' · ' + _esc(u.uat_siruta) : '') + '</span><button onclick="UXRoles._unassign(\'' + _esc(u.email) + '\')" style="background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);border-radius:5px;padding:2px 8px;cursor:pointer;font-size:11px">✕</button></div>';
+        }).join('') : '<div style="color:#64748b;padding:8px">Niciun utilizator asignat încă (sau tabelul user_roles nu e creat).</div>';
+      });
+    }, 30);
+    return html;
+  }
+
+  G.UXRoles = {
+    ROLES: ROLES, current: current, currentId: currentId, canSee: canSee, setPreview: setPreview, filterRapoarte: filterRapoarte,
+    catalog: catalog, loadDefs: loadDefs, saveRole: saveRole, deleteRole: deleteRole,
+    listAssignments: listAssignments, assignRole: assignRole, removeAssignment: removeAssignment, openManager: openManager,
+    _tab: function (t) { _mgr.tab = t; _mgr.edit = null; _renderMgr(); },
+    _close: _closeMgr,
+    _editRole: function (id) { _mgr.edit = id; _renderMgr(); },
+    _delRole: function (id) { if (G.confirm && !confirm('Ștergi rolul ' + id + '?')) return; deleteRole(id); _renderMgr(); },
+    _newRole: function () { var i = document.getElementById('uxrm-newid'), l = document.getElementById('uxrm-newlabel'); var id = (i.value || '').trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_'); if (!id) return; ROLES[id] = { label: (l.value || id).trim(), level: 1, access: [], _custom: true }; _mgr.edit = id; _renderMgr(); },
+    _toggleFull: function () { var f = document.getElementById('uxrm-full').checked; var c = document.getElementById('uxrm-cat'); if (c) { c.style.opacity = f ? '.45' : '1'; c.style.pointerEvents = f ? 'none' : 'auto'; c.querySelectorAll('.uxrm-mod').forEach(function (x) { x.disabled = f; }); } },
+    _saveEdit: function () {
+      var id = _mgr.edit; if (!id) return;
+      var full = document.getElementById('uxrm-full').checked;
+      var access = full ? '*' : [].map.call(document.querySelectorAll('.uxrm-mod:checked'), function (x) { return x.value; });
+      saveRole(id, ROLES[id].label, ROLES[id].level || 1, access);
+      try { if (G.UXSidebar && G.UXSidebar.render) G.UXSidebar.render(); } catch (e) {}
+      G.ss && G.ss('✅ Rol salvat: ' + id); _mgr.tab = 'roles'; _mgr.edit = null; _renderMgr();
+    },
+    _assign: function () {
+      var e = (document.getElementById('uxrm-email').value || '').trim(), r = document.getElementById('uxrm-role').value, u = (document.getElementById('uxrm-uat').value || '').trim();
+      if (!e) return; var p = assignRole(e, r, u); G.ss && G.ss('✅ ' + e + ' → ' + r);
+      if (p && p.then) p.then(function () { _renderMgr(); }); else _renderMgr();
+    },
+    _unassign: function (e) { removeAssignment(e); _renderMgr(); }
+  };
+  // încarcă definițiile custom la pornire (dacă Supabase + tabel există)
+  try { if (G.document) (document.readyState !== 'loading' ? setTimeout(loadDefs, 400) : document.addEventListener('DOMContentLoaded', function () { setTimeout(loadDefs, 400); })); } catch (e) {}
+  console.log('[UXRoles] strat roluri/acces + manager încărcat · window.UXRoles');
 })(window);
