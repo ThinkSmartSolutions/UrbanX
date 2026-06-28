@@ -1130,6 +1130,11 @@ function _authSuccess(user) {
           if (res && res.data && res.data.role && window._USER) {
             window._USER.role = res.data.role;
             if (res.data.uat_siruta) window._USER.uatSiruta = res.data.uat_siruta;
+            // UNIFICARE: rolul granular SUPER_ADMIN/ADMIN_UAT acordă și privilegiul de admin (panou)
+            if (res.data.role === 'SUPER_ADMIN' || res.data.role === 'ADMIN_UAT') {
+              _isAdmin = true; window._USER.isAdmin = true;
+              try { var ab = document.getElementById('btn-admin'); if (ab) ab.style.display = 'flex'; } catch (e) {}
+            }
             if (window.UXSidebar && window.UXSidebar.render && document.getElementById('ux-sidebar-body')) window.UXSidebar.render();
             console.log('[001 role] rol din user_roles:', res.data.role);
           }

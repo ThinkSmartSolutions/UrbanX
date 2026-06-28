@@ -81,15 +81,13 @@ function _admTab(tab){
         <div id="adm-invite-msg" style="font-size:11px;margin-top:7px"></div>
       </div>
       <div style="background:#080f1c;border:1px solid rgba(212,175,55,.15);border-radius:10px;padding:14px">
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">👑 Schimbă rol utilizator</div>
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">👑 Schimbă rolul unui utilizator (rol unic — acces + meniu)</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input id="adm-role-email" type="email" placeholder="email@exemplu.ro" style="flex:1;min-width:180px;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
-          <select id="adm-role-sel" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">
-            <option value="admin">👑 Admin</option>
-            <option value="user" selected>👤 User</option>
-          </select>
-          <button onclick="_adminSetRole()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700">Aplică</button>
+          <select id="adm-role-sel" style="padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#0b1220;color:#e2e8f0;font-size:13px;outline:none">${_admRoleOpts()}</select>
+          <button onclick="_adminSetGranularRole()" style="background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:#d4af37;border-radius:8px;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700">Aplică</button>
         </div>
+        <div style="font-size:10px;color:#64748b;margin-top:6px">Rol unic per utilizator. <b style="color:#c4b5fd">Super Administrator</b> = acces complet + admin. Definițiile rolurilor se editează în tab-ul „🔐 Roluri & Acces".</div>
         <div id="adm-role-msg" style="font-size:11px;margin-top:7px"></div>
       </div>`;
     _adminLoadUsers();
@@ -390,6 +388,33 @@ async function _adminSetRole() {
   } catch(e) {
     _admMsg(msg, '❌ ' + e.message, 'err');
   }
+}
+
+// ── UNIFICAT: rol granular (cele 7+ roluri) scris în user_roles via UXRoles ──
+function _admRoleOpts() {
+  try {
+    var R = (window.UXRoles && window.UXRoles.ROLES) || {};
+    return Object.keys(R).map(function (id) { return '<option value="' + id + '">' + (R[id].label || id) + '</option>'; }).join('');
+  } catch (e) { return '<option value="FULL">Acces complet</option>'; }
+}
+async function _adminSetGranularRole() {
+  const email = (document.getElementById('adm-role-email').value || '').trim();
+  const role  = document.getElementById('adm-role-sel').value;
+  const msg   = document.getElementById('adm-role-msg');
+  if(!email) { _admMsg(msg, '⚠ Introduceți un email.', 'warn'); return; }
+  try {
+    // 1) rolul granular (meniu + acces) → user_roles
+    if(window.UXRoles && window.UXRoles.assignRole) { const p = window.UXRoles.assignRole(email, role); if(p && p.then) await p; }
+    // 2) privilegiul de admin (panou) sincronizat: SUPER_ADMIN/ADMIN_UAT ⇒ admin; altfel user
+    const wantAdmin = (role === 'SUPER_ADMIN' || role === 'ADMIN_UAT');
+    try {
+      const { data: prof } = await _supabase.from('profiles').select('id').eq('email', email).single();
+      if(prof && prof.id) await _supabase.rpc('set_user_role', { target_id: prof.id, new_role: wantAdmin ? 'admin' : 'user' });
+    } catch(e2) {}
+    _admMsg(msg, `✅ ${email} → ${role}` + (wantAdmin ? ' (+ admin)' : ''), 'ok');
+    document.getElementById('adm-role-email').value = '';
+    setTimeout(() => _adminLoadUsers(), 600);
+  } catch(e) { _admMsg(msg, '❌ ' + e.message, 'err'); }
 }
 
 async function _adminInvite() {
