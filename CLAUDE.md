@@ -527,3 +527,37 @@ grep -rn "js/data/municipiul" index.html js/
 git remote -v
 ```
 
+---
+
+## 18. STUDIU/RAPORT NOU — STANDARD OBLIGATORIU (calitate + i18n + roluri)
+
+Orice studiu/raport NOU trebuie să se integreze automat în standardele platformei. Checklist:
+
+### A. Motor de document (calitate uniformă „gratis")
+- **Rang superior/teritorial:** folosește `window._makeStratDoc(pdf, {...})` (js/tci-strategic-doc.js). Primești
+  automat: gardă brand (logo+disclaimer), nota IVU pe copertă, picker grafic UNIC `_pickChart` (bar/hbar/donut/
+  pie/radar — în `_deepRender`), spațiere bandă-capitol, paginare.
+- **Rang inferior/parcelă (proiectant):** folosește `_initStudyPdf(...)` (js/09-pdf-engine.js) — antet/footer,
+  `tblRow`, `miniChart(headers,rows,title,y)` pt grafice (ACEEAȘI paletă). Trece numere RAW la miniChart.
+- **NUME FIȘIER:** `window._stratFileName(short,{mode/territorial,localitate/uat,nrcad,year})` —
+  parcelă=`Scurt_nrCad_Localitate`, teritorial=`Scurt_UAT_An`. NU inventa alt format.
+- **Grafic per capitol** (date reale/prognoză), **fără duplicare** de conținut între studii, **teritoriu≠parcelă**.
+
+### B. Meniu + acces (roluri)
+- Adaugă itemul în `UXSidebar.NAV` (teritorial) cu `moduleId` real în `MODULE_OPEN`, SAU în meniul Rapoarte
+  (parcelă) cu `onclick` la funcția `generate*`. Mapează `moduleId`-ul în `RAP_MOD` (ux-roles.js) dacă e raport de
+  parcelă, ca să fie filtrabil pe rol. Rolurile (window.UXRoles) îl preiau automat în managerul Admin.
+
+### C. TRADUCERE (i18n) — automat
+- Motorul `js/i18n.js` traduce automat din DOM orice string CUNOSCUT din dicționar (RO→EN/FR/DE), oriunde apare
+  (inclusiv conținut generat dinamic). Pentru a prinde string-urile NOI ale studiului:
+  ```bash
+  python3 -m http.server 8765        # în rădăcina repo (dacă nu rulează deja)
+  python3 scripts/i18n-sync.py       # scrape → traduce ce e nou → regenerează js/i18n-auto.js
+  ```
+  apoi bump `i18n-auto.js?v=...` în index.html și deploy. Atât — studiul nou e tradus în 4 limbi.
+- Conținutul PDF generat (proză lungă) = Faza 2 (pipeline MT pe documente), separat.
+
+> Regulă de aur: un studiu nou NU se face „de la zero" — se branșează la motoarele comune (A) + meniu/rol (B) +
+> rulezi i18n-sync (C). Așa moștenește automat calitatea, filtrul de rol și traducerea.
+
