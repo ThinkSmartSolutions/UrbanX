@@ -2103,6 +2103,49 @@ async function switchUAT(uatId){
   }
 }
 
+// ── Selectare ORICE UAT din registrul SIRUTA (toate 3181) — pt IVU + studii teritoriale ──
+// UAT-urile fără PUG complet nu au studii pe parcelă, dar au IVU + studii teritoriale din date INS.
+window._uatSearch = function(q){
+  var host = document.getElementById('uat-search-res'); if(!host) return;
+  var cur = document.getElementById('uat-curated-wrap');
+  q = (q||'').trim();
+  if(q.length < 2){ host.innerHTML=''; if(cur) cur.style.display='block'; return; }
+  if(cur) cur.style.display='none';
+  var res = (typeof _searchSIRUTA!=='undefined') ? _searchSIRUTA(q, 14) : [];
+  if(!res.length){ host.innerHTML='<div style="color:#64748b;font-size:11px;padding:8px">Niciun UAT găsit pentru „'+q+'".</div>'; return; }
+  var TIPLBL={municipiu:'municipiu',oras:'oraș',comuna:'comună',capitala:'capitală'};
+  host.innerHTML = res.map(function(u){
+    var nm = (u.name||'').toLowerCase().replace(/(^|\s|-)([a-zăâîșț])/g, function(m,p1,p2){return p1+p2.toUpperCase();});
+    var pop = u.pop2021? (' · '+Number(u.pop2021).toLocaleString('ro-RO')+' loc.') : '';
+    return '<div class="uat-sr" onclick="switchUATAny(\''+u.key+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,.06);margin-bottom:3px;background:rgba(255,255,255,.02)" onmouseover="this.style.background=\'rgba(212,175,55,.08)\'" onmouseout="this.style.background=\'rgba(255,255,255,.02)\'">'+
+      '<div><span style="color:#e2e8f0;font-size:12px;font-weight:600">'+nm+'</span>'+
+      '<div style="color:#64748b;font-size:9px;margin-top:1px">'+(TIPLBL[u.tip]||u.tip||'')+' · jud. '+(u.judet||'')+pop+'</div></div>'+
+      '<span style="color:#d4af37;font-size:11px">→</span></div>';
+  }).join('');
+};
+window.switchUATAny = async function(roKey){
+  try{
+    var u = (window._UAT_REGISTRY||{})[roKey]; if(!u){ ss('⚠️ UAT necunoscut'); return; }
+    var pugReg = window._PUG_REGISTRY || {};
+    // setează cheia activă + localStorage (IVU + studii teritoriale folosesc TCI.cityKey)
+    if(window.TCI) window.TCI.cityKey = roKey;
+    try{ localStorage.setItem('ux_last_city', roKey); }catch(e){}
+    if(window.S){ window.S.pug=null; window.S.pugIdx=[]; window.S._loadedCityKey=null; }
+    var nm = (u.n||'').toLowerCase().replace(/(^|\s|-)([a-zăâîșț])/g, function(m,p1,p2){return p1+p2.toUpperCase();});
+    document.title = 'UrbanX – '+nm;
+    var el=document.getElementById('uat-indicator'); if(el) el.textContent=nm;
+    if(u.c && window.map) map.flyTo({center:[u.c[0],u.c[1]], zoom: u.t==='c'?13:12, duration:1500});
+    // închide selectorul
+    var sel=document.getElementById('uat-selector'); if(sel) sel.remove();
+    var bk=document.getElementById('uat-selector-backdrop'); if(bk) bk.remove();
+    // dacă există PUG pentru acest UAT, încarcă-l (studii pe parcelă); altfel doar teritorial+IVU
+    if(pugReg[roKey]){ ss('✅ UAT activ: '+nm+' (cu PUG)'); }
+    else { ss('✅ UAT activ: '+nm+' · IVU + studii teritoriale (fără PUG local → fără studii pe parcelă)'); }
+    // reîmprospătează panoul IVU dacă e deschis
+    try{ if(window.UrbanXIVU && document.getElementById('ivu-panel')) window.UrbanXIVU.openPanel && window.UrbanXIVU.openPanel(roKey); }catch(e){}
+  }catch(e){ console.warn('[switchUATAny]', e); ss('Eroare selectare UAT'); }
+};
+
 // ── Detectare automată UAT din coordonate ────────────────────────────────
 async function detectUATFromCoords(lat, lng){
   try{
@@ -2201,11 +2244,19 @@ function showUATSelector(){
     <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
       <div>
         <span style="color:#d4af37;font-weight:800;font-size:13px">📍 Selectează UAT</span>
-        <span style="color:#475569;font-size:9px;margin-left:6px">${Object.keys(UAT_REGISTRY).length} UAT-uri</span>
+        <span style="color:#475569;font-size:9px;margin-left:6px">toate cele 3181 UAT-uri (RO)</span>
       </div>
       <button onclick="document.getElementById('uat-selector').remove();var b=document.getElementById('uat-selector-backdrop');if(b)b.remove()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;min-width:44px;min-height:44px">✕</button>
     </div>
-    <div style="overflow-y:auto;padding:10px 12px;flex:1">
+    <div style="padding:10px 12px 4px;flex-shrink:0">
+      <input id="uat-search-inp" type="text" placeholder="🔎 Caută orice UAT din România (ex. Constanța, Deva, Sinaia...)" autocomplete="off"
+        oninput="_uatSearch(this.value)" onkeydown="if(event.key==='Enter'){var r=document.querySelector('#uat-search-res .uat-sr');if(r)r.click();}"
+        style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(212,175,55,.25);border-radius:9px;color:#e2e8f0;padding:10px 12px;font-size:13px;outline:none">
+      <div id="uat-search-res" style="margin-top:6px"></div>
+      <div style="font-size:8.5px;color:#475569;margin-top:4px">UAT-urile cu PUG complet au studii pe parcelă; restul au IVU + studii teritoriale din date INS/SIRUTA.</div>
+    </div>
+    <div id="uat-curated-wrap" style="overflow-y:auto;padding:6px 12px 10px;flex:1">
+      <div style="font-size:8.5px;color:#475569;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:6px">UAT-uri cu date complete (PUG + cadastru)</div>
       ${regionSections}
       <div style="margin-top:10px;padding:10px;background:rgba(212,175,55,.04);border:1px solid rgba(212,175,55,.12);border-radius:8px">
         <div style="font-size:9px;color:#d4af37;font-weight:700;margin-bottom:4px">📦 Contribuie cu date pentru UAT-ul tău</div>

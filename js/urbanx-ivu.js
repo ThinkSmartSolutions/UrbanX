@@ -31,12 +31,14 @@
   // NU fallback la Iași (ar fabrica date — vezi regula contaminare comune).
   var _HUB = { NV: 1.08, NE: 0.78, SE: 0.82, SB: 0.88, SV: 0.85, V: 1.10, C: 1.00, BI: 1.25, B: 1.25, S: 0.80 };
   var _PIBR = { NE: 8200, NV: 14500, V: 17200, C: 16800, SE: 10400, S: 9800, SV: 8900, B: 28400, BI: 28400, SB: 9800 };
+  var _JUDNAME = { AB:'Alba', AR:'Arad', AG:'Argeș', BC:'Bacău', BH:'Bihor', BN:'Bistrița-Năsăud', BT:'Botoșani', BR:'Brăila', BV:'Brașov', BZ:'Buzău', CL:'Călărași', CS:'Caraș-Severin', CJ:'Cluj', CT:'Constanța', CV:'Covasna', DB:'Dâmbovița', DJ:'Dolj', GL:'Galați', GR:'Giurgiu', GJ:'Gorj', HR:'Harghita', HD:'Hunedoara', IL:'Ialomița', IS:'Iași', IF:'Ilfov', MM:'Maramureș', MH:'Mehedinți', MS:'Mureș', NT:'Neamț', OT:'Olt', PH:'Prahova', SM:'Satu Mare', SJ:'Sălaj', SB:'Sibiu', SV:'Suceava', TR:'Teleorman', TM:'Timiș', TL:'Tulcea', VL:'Vâlcea', VS:'Vaslui', VN:'Vrancea', B:'București' };
+  function _titleRO(s) { return ('' + (s || '')).toLowerCase().replace(/(^|[\s\-])([a-zăâîșț])/g, function (m, p1, p2) { return p1 + p2.toUpperCase(); }); }
   function _cityFromRegistry(cityKey) {
     var R = (G._UAT_REGISTRY && G._UAT_REGISTRY[cityKey]); if (!R) return null;
     var tip = { m: 'municipiu', o: 'oras', c: 'comuna', C: 'capitala' }[R.t] || 'comuna';
     var pop = R.p || (R.t === 'c' ? 2500 : R.t === 'o' ? 9000 : R.t === 'm' ? 40000 : 1500);
     return {
-      key: cityKey, name: R.n, siruta: R.s, judet: R.j, tip: tip,
+      key: cityKey, name: _titleRO(R.n), siruta: R.s, judet: _JUDNAME[R.j] || R.j, judet_code: R.j, tip: tip,
       lat: R.c ? R.c[1] : null, lon: R.c ? R.c[0] : null,
       regiune: R.r, pop2021: pop, pop2011: Math.round(pop / 0.985),
       rata_reala_2011_2021: 1.0, coef_hub: _HUB[R.r] || 0.85,
