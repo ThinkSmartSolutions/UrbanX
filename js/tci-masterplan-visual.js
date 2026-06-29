@@ -540,14 +540,9 @@ G._MasterplanVisualPatch = {
       pdf.setFillColor(...V.C.sky);
       pdf.rect(0, 7, 4, H - 14, 'F');
 
-      // Logo UrbanX
-      pdf.setFillColor(...V.C.gold);
-      pdf.roundedRect(12, 12, 18, 12, 2, 2, 'F');
-      pdf.setTextColor(...V.C.dark);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(7);
-      pdf.text('URBAN', 14, 18);
-      pdf.text('X', 22, 23);
+      // Logo UrbanX REAL (cyan X, identic cu SIDU/IVU) — nu placeholder text gold
+      if (window._drawUrbanxLogo) { window._drawUrbanxLogo(pdf, 12, 11, 15); }
+      else { pdf.setFillColor(...V.C.gold); pdf.roundedRect(12, 12, 15, 15, 2.5, 2.5, 'F'); pdf.setTextColor(...V.C.dark); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.text('X', 19.5, 22, { align: 'center' }); }
 
       // ThinkSmart Solutions
       pdf.setTextColor(...V.C.grayL);
