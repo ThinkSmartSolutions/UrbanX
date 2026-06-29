@@ -1,51 +1,51 @@
 window._REGIO_DEEP = window._REGIO_DEEP || {};
 window._REGIO_DEEP['p16'] = [
  {
-  "title": "Cele cinci criterii de convergenta nominala Maastricht",
+  "title": "Cele cinci criterii de convergență nominală Maastricht",
   "blocks": [
    {
     "type": "p",
-    "text": "Adoptarea monedei euro de catre Romania este conditionata de indeplinirea criteriilor de convergenta nominala stabilite prin Tratatul de la Maastricht (1992) si consolidate in Tratatul privind functionarea Uniunii Europene. Aceste criterii definesc pragurile macroeconomice pe care un stat membru trebuie sa le atinga in mod sustenabil, nu conjunctural, pentru a fi considerat pregatit sa renunte la moneda nationala. Banca Centrala Europeana si Comisia Europeana evalueaza periodic, prin Rapoartele de Convergenta, masura in care fiecare stat candidat respecta cele cinci conditii. Pentru Romania, anul 2024 ofera o imagine clara a distantei pana la conformitate, cu unele criterii respectate si altele grav neindeplinite, ceea ce influenteaza direct calendarul oricarei reforme structurale majore."
+    "text": "Adoptarea monedei euro de către România este condiționată de îndeplinirea criteriilor de convergență nominală stabilite prin Tratatul de la Maastricht (1992) și consolidate în Tratatul privind funcționarea Uniunii Europene. Aceste criterii definesc pragurile macroeconomice pe care un stat membru trebuie să le atingă în mod sustenabil, nu conjunctural, pentru a fi considerat pregătit să renunțe la moneda națională. Banca Centrală Europeană și Comisia Europeană evaluează periodic, prin Rapoartele de Convergență, măsura în care fiecare stat candidat respectă cele cinci condiții. Pentru România, anul 2024 oferă o imagine clară a distanței până la conformitate, cu unele criterii respectate și altele grav neîndeplinite, ceea ce influențează direct calendarul oricărei reforme structurale majore."
    },
    {
     "type": "p",
-    "text": "Cele cinci criterii vizeaza domenii complementare: stabilitatea preturilor (inflatia), soliditatea finantelor publice (deficitul si datoria), stabilitatea cursului de schimb (participarea la mecanismul ERM-II) si convergenta dobanzilor pe termen lung. Logica lor este coerenta: o economie care adera la euro renunta la politica monetara proprie a Bancii Nationale a Romaniei in favoarea politicii unice a Bancii Centrale Europene, deci trebuie sa demonstreze ca economia sa este suficient de aliniata cu zona euro pentru a nu suferi socuri asimetrice nesustenabile. Un stat cu inflatie ridicata sau deficit necontrolat ar importa, prin euro, o politica monetara nepotrivita pentru situatia sa, generand dezechilibre. De aceea criteriile nu sunt formalitati birocratice, ci garantii de sustenabilitate economica."
+    "text": "Cele cinci criterii vizează domenii complementare: stabilitatea prețurilor (inflația), soliditatea finanțelor publice (deficitul și datoria), stabilitatea cursului de schimb (participarea la mecanismul ERM-II) și convergența dobânzilor pe termen lung. Logica lor este coerentă: o economie care aderă la euro renunță la politica monetară proprie a Băncii Naționale a României în favoarea politicii unice a Băncii Centrale Europene, deci trebuie să demonstreze că economia sa este suficient de aliniată cu zona euro pentru a nu suferi șocuri asimetrice nesustenabile. Un stat cu inflație ridicată sau deficit necontrolat ar importa, prin euro, o politică monetară nepotrivită pentru situația sa, generând dezechilibre. De aceea criteriile nu sunt formalități birocratice, ci garanții de sustenabilitate economică."
    },
    {
     "type": "p",
-    "text": "Distinctia esentiala este intre conformitatea de moment si cea sustenabila. Tratatul cere ca pragurile sa fie atinse durabil, nu printr-o ajustare punctuala urmata de derapaj. In 2024, Romania respecta confortabil criteriul datoriei publice, situata in jurul valorii de cincizeci si doi la suta din produsul intern brut, sub plafonul de saizeci la suta, dar incalca grav criteriul deficitului bugetar, care atinge aproximativ opt virgula unu la suta din produsul intern brut, cel mai mare din intreaga Uniune Europeana si mult peste plafonul de trei la suta. La acestea se adauga neconformitatea pe inflatie si neparticiparea la ERM-II, ceea ce face ca aderarea la euro sa ramana un obiectiv de orizont mediu-lung, conditionat de o consolidare fiscala substantiala."
+    "text": "Distincția esențială este între conformitatea de moment și cea sustenabilă. Tratatul cere ca pragurile să fie atinse durabil, nu printr-o ajustare punctuală urmată de derapaj. În 2024, România respectă confortabil criteriul datoriei publice, situată în jurul valorii de cincizeci și doi la sută din produsul intern brut, sub plafonul de șaizeci la sută, dar încalcă grav criteriul deficitului bugetar, care atinge aproximativ opt virgulă unu la sută din produsul intern brut, cel mai mare din întreaga Uniune Europeană și mult peste plafonul de trei la sută. La acestea se adaugă neconformitatea pe inflație și neparticiparea la ERM-II, ceea ce face ca aderarea la euro să rămână un obiectiv de orizont mediu-lung, condiționat de o consolidare fiscală substanțială."
    },
    {
     "type": "table",
-    "headers": ["Criteriu Maastricht", "Prag de referinta", "Romania 2024", "Conform (1=da, 0=nu)"],
+    "headers": ["Criteriu Maastricht", "Prag de referință", "România 2024", "Conform (1=da, 0=nu)"],
     "rows": [
      ["Deficit bugetar (% PIB)", "Sub 3", "8,1", "0"],
-     ["Datorie publica (% PIB)", "Sub 60", "52", "1"],
-     ["Inflatie (% anual)", "Media celor 3 mai mici plus 1,5pp", "5,8", "0"],
-     ["Dobanda termen lung", "Media celor 3 mai mici plus 2pp", "Peste prag", "0"],
-     ["Stabilitate curs (ERM-II)", "Doi ani in mecanism", "Neparticipa", "0"]
+     ["Datorie publică (% PIB)", "Sub 60", "52", "1"],
+     ["Inflație (% anual)", "Media celor 3 mai mici plus 1,5pp", "5,8", "0"],
+     ["Dobândă termen lung", "Media celor 3 mai mici plus 2pp", "Peste prag", "0"],
+     ["Stabilitate curs (ERM-II)", "Doi ani în mecanism", "Neparticipă", "0"]
     ]
    }
   ]
  },
  {
-  "title": "Deficitul bugetar de 8,1% si procedura de deficit excesiv",
+  "title": "Deficitul bugetar de 8,1% și procedura de deficit excesiv",
   "blocks": [
    {
     "type": "p",
-    "text": "Cel mai sever dezechilibru al finantelor publice romanesti in 2024 este deficitul bugetar, estimat la aproximativ opt virgula unu la suta din produsul intern brut, valoare care plaseaza Romania pe ultimul loc in Uniunea Europeana din punctul de vedere al disciplinei fiscale. Formula deficitului bugetar exprimat ca pondere in produsul intern brut este simpla: deficit procent PIB egal cu (cheltuieli totale minus venituri totale) impartit la produsul intern brut, inmultit cu o suta. Cu un asemenea nivel, Romania depaseste de aproape trei ori plafonul Maastricht de trei la suta, ceea ce semnaleaza o problema structurala profunda a bugetului public, in care cheltuielile curente cresc mai rapid decat veniturile fiscale colectate."
+    "text": "Cel mai sever dezechilibru al finanțelor publice românești în 2024 este deficitul bugetar, estimat la aproximativ opt virgulă unu la sută din produsul intern brut, valoare care plasează România pe ultimul loc în Uniunea Europeană din punctul de vedere al disciplinei fiscale. Formula deficitului bugetar exprimat ca pondere în produsul intern brut este simplă: deficit procent PIB egal cu (cheltuieli totale minus venituri totale) împărțit la produsul intern brut, înmulțit cu o sută. Cu un asemenea nivel, România depășește de aproape trei ori plafonul Maastricht de trei la sută, ceea ce semnalează o problemă structurală profundă a bugetului public, în care cheltuielile curente cresc mai rapid decât veniturile fiscale colectate."
    },
    {
     "type": "p",
-    "text": "Consecinta directa a depasirii pragului este declansarea procedurii de deficit excesiv de catre Comisia Europeana, mecanism prevazut de Pactul de Stabilitate si Crestere. Romania se afla in procedura de deficit excesiv din 2020, iar in 2024 traiectoria nu indica o corectie suficienta. Procedura impune statului un calendar de reducere graduala a deficitului, sub supravegherea Consiliului Uniunii Europene, cu recomandari obligatorii privind ajustarea structurala anuala. Nerespectarea recomandarilor poate atrage, teoretic, sanctiuni financiare, desi acestea sunt rar aplicate. Mai concret, derapajul fiscal afecteaza credibilitatea Romaniei pe pietele financiare si scumpeste costul finantarii datoriei publice."
+    "text": "Consecința directă a depășirii pragului este declanșarea procedurii de deficit excesiv de către Comisia Europeană, mecanism prevăzut de Pactul de Stabilitate și Creștere. România se află în procedura de deficit excesiv din 2020, iar în 2024 traiectoria nu indică o corecție suficientă. Procedura impune statului un calendar de reducere graduală a deficitului, sub supravegherea Consiliului Uniunii Europene, cu recomandări obligatorii privind ajustarea structurală anuală. Nerespectarea recomandărilor poate atrage, teoretic, sancțiuni financiare, deși acestea sunt rar aplicate. Mai concret, derapajul fiscal afectează credibilitatea României pe piețele financiare și scumpește costul finanțării datoriei publice."
    },
    {
     "type": "p",
-    "text": "Reducerea deficitului de la peste opt la suta catre pragul de trei la suta necesita o consolidare fiscala de aproximativ cinci puncte procentuale din produsul intern brut, un efort considerabil care implica fie cresterea veniturilor fiscale (largirea bazei de impozitare, reducerea evaziunii, eliminarea unor facilitati fiscale), fie reducerea cheltuielilor curente (in special masa salariala bugetara si transferurile sociale), fie o combinatie a acestora. Aceasta consolidare este precondiția logica a oricarei discutii serioase despre aderarea la euro si, totodata, contextul fiscal in care orice reforma structurala costisitoare, inclusiv o eventuala reorganizare administrativ-teritoriala, trebuie evaluata cu prudenta maxima."
+    "text": "Reducerea deficitului de la peste opt la sută către pragul de trei la sută necesită o consolidare fiscală de aproximativ cinci puncte procentuale din produsul intern brut, un efort considerabil care implică fie creșterea veniturilor fiscale (lărgirea bazei de impozitare, reducerea evaziunii, eliminarea unor facilități fiscale), fie reducerea cheltuielilor curente (în special masa salarială bugetară și transferurile sociale), fie o combinație a acestora. Această consolidare este precondiția logică a oricărei discuții serioase despre aderarea la euro și, totodată, contextul fiscal în care orice reformă structurală costisitoare, inclusiv o eventuală reorganizare administrativ-teritorială, trebuie evaluată cu prudență maximă."
    },
    {
     "type": "table",
-    "headers": ["An", "Deficit bugetar (% PIB)", "Prag Maastricht (% PIB)", "Depasire (puncte proc.)"],
+    "headers": ["An", "Deficit bugetar (% PIB)", "Prag Maastricht (% PIB)", "Depășire (puncte proc.)"],
     "rows": [
      ["2021", "7,1", "3", "4,1"],
      ["2022", "6,2", "3", "3,2"],
@@ -60,15 +60,15 @@ window._REGIO_DEEP['p16'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Intelegerea deficitului bugetar romanesc impune descompunerea sa in cele doua componente fundamentale: veniturile bugetare colectate si cheltuielile bugetare angajate. Romania are una dintre cele mai reduse ponderi ale veniturilor fiscale in produsul intern brut din Uniunea Europeana, in jurul a treizeci si doua la suta, comparativ cu o medie europeana de peste patruzeci la suta. Aceasta colectare slaba reflecta o baza fiscala ingusta, un nivel ridicat al evaziunii, in special pe taxa pe valoarea adaugata, si numeroase facilitati fiscale care erodeaza incasarile. Pe partea de cheltuieli, presiunea provine din cresterea masei salariale din sectorul public si din cheltuielile cu pensiile si asistenta sociala."
+    "text": "Înțelegerea deficitului bugetar românesc impune descompunerea sa în cele două componente fundamentale: veniturile bugetare colectate și cheltuielile bugetare angajate. România are una dintre cele mai reduse ponderi ale veniturilor fiscale în produsul intern brut din Uniunea Europeană, în jurul a treizeci și doi la sută, comparativ cu o medie europeană de peste patruzeci la sută. Această colectare slabă reflectă o bază fiscală îngustă, un nivel ridicat al evaziunii, în special pe taxa pe valoarea adăugată, și numeroase facilități fiscale care erodează încasările. Pe partea de cheltuieli, presiunea provine din creșterea masei salariale din sectorul public și din cheltuielile cu pensiile și asistența socială."
    },
    {
     "type": "p",
-    "text": "Decalajul de tip eficienta a colectarii este ilustrat clar de deficitul de incasare a taxei pe valoarea adaugata, unul dintre cele mai mari din Uniune, indicand ca o parte semnificativa din taxa datorata nu ajunge la buget. Reducerea acestui decalaj reprezinta una dintre cele mai promitatoare cai de consolidare fiscala fara cresterea cotelor de impozitare, prin digitalizarea administratiei fiscale, generalizarea facturarii electronice si combaterea fraudei. Pe partea de cheltuieli, reforma sistemului de pensii si rationalizarea cheltuielilor de personal din administratia publica sunt directiile principale de actiune, ambele cu o sensibilitate sociala si politica ridicata care explica dificultatea ajustarii."
+    "text": "Decalajul de tip eficiență a colectării este ilustrat clar de deficitul de încasare a taxei pe valoarea adăugată, unul dintre cele mai mari din Uniune, indicând că o parte semnificativă din taxa datorată nu ajunge la buget. Reducerea acestui decalaj reprezintă una dintre cele mai promițătoare căi de consolidare fiscală fără creșterea cotelor de impozitare, prin digitalizarea administrației fiscale, generalizarea facturării electronice și combaterea fraudei. Pe partea de cheltuieli, reforma sistemului de pensii și raționalizarea cheltuielilor de personal din administrația publică sunt direcțiile principale de acțiune, ambele cu o sensibilitate socială și politică ridicată care explică dificultatea ajustării."
    },
    {
     "type": "p",
-    "text": "Aceasta structura a deficitului are o relevanta directa pentru dezbaterea despre regionalizare si descentralizare. Orice transfer de competente catre niveluri administrative inferioare trebuie insotit de transferul resurselor financiare corespunzatoare, dar intr-un context de deficit structural ridicat, marja de manevra fiscala este extrem de redusa. Descentralizarea fiscala prost calibrata risca sa adauge un nou nivel de cheltuieli fara o sursa de venit corespunzatoare, agravand deficitul agregat. De aceea, secventierea oricarei reforme structurale trebuie sa tina cont de constrangerea fiscala dura impusa de necesitatea reducerii deficitului catre pragul Maastricht."
+    "text": "Această structură a deficitului are o relevanță directă pentru dezbaterea despre regionalizare și descentralizare. Orice transfer de competențe către niveluri administrative inferioare trebuie însoțit de transferul resurselor financiare corespunzătoare, dar într-un context de deficit structural ridicat, marja de manevră fiscală este extrem de redusă. Descentralizarea fiscală prost calibrată riscă să adauge un nou nivel de cheltuieli fără o sursă de venit corespunzătoare, agravând deficitul agregat. De aceea, secvențierea oricărei reforme structurale trebuie să țină cont de constrângerea fiscală dură impusă de necesitatea reducerii deficitului către pragul Maastricht."
    },
    {
     "type": "chart",
@@ -76,31 +76,31 @@ window._REGIO_DEEP['p16'] = [
     "data": [
      ["Venituri fiscale (% PIB)", 32],
      ["Cheltuieli totale (% PIB)", 40],
-     ["Masa salariala publica (% PIB)", 9],
+     ["Masa salarială publică (% PIB)", 9],
      ["Cheltuieli pensii (% PIB)", 8],
-     ["Investitii publice (% PIB)", 6]
+     ["Investiții publice (% PIB)", 6]
     ]
    }
   ]
  },
  {
-  "title": "Criteriul inflatiei si formula de calcul",
+  "title": "Criteriul inflației și formula de calcul",
   "blocks": [
    {
     "type": "p",
-    "text": "Criteriul stabilitatii preturilor cere ca rata medie a inflatiei a unui stat membru, observata pe parcursul unui an, sa nu depaseasca cu mai mult de un punct si jumatate procentual media ratelor de inflatie ale celor trei state membre cu cele mai bune performante in materie de stabilitate a preturilor. Formula este explicita: prag inflatie egal cu media celor trei cele mai mici rate de inflatie plus un virgula cinci puncte procentuale. Inflatia se masoara prin indicele armonizat al preturilor de consum, calculat unitar la nivel european pentru a permite comparabilitatea. In 2024, inflatia Romaniei se situeaza in jurul a cinci virgula opt la suta, peste pragul de referinta, ceea ce constituie o neconformitate clara cu acest criteriu."
+    "text": "Criteriul stabilității prețurilor cere ca rata medie a inflației a unui stat membru, observată pe parcursul unui an, să nu depășească cu mai mult de un punct și jumătate procentual media ratelor de inflație ale celor trei state membre cu cele mai bune performanțe în materie de stabilitate a prețurilor. Formula este explicită: prag inflație egal cu media celor trei cele mai mici rate de inflație plus un virgulă cinci puncte procentuale. Inflația se măsoară prin indicele armonizat al prețurilor de consum, calculat unitar la nivel european pentru a permite comparabilitatea. În 2024, inflația României se situează în jurul a cinci virgulă opt la sută, peste pragul de referință, ceea ce constituie o neconformitate clară cu acest criteriu."
    },
    {
     "type": "p",
-    "text": "Inflatia romaneasca a cunoscut un varf in perioada 2022-2023, alimentat de socul preturilor la energie si alimente, de presiunile pe lantul de aprovizionare global si de o cerere interna sustinuta de cresterea salariala. Banca Nationala a Romaniei a raspuns prin majorarea ratei dobanzii de politica monetara, instrument prin care a urmarit temperarea cererii si ancorarea anticipatiilor inflationiste. Dezinflatia a inceput sa se manifeste in 2024, dar ritmul ramane mai lent decat in alte state din regiune, partial din cauza componentei structurale a inflatiei si a impactului ajustarilor de preturi administrate si fiscale asupra cosului de consum."
+    "text": "Inflația românească a cunoscut un vârf în perioada 2022-2023, alimentat de șocul prețurilor la energie și alimente, de presiunile pe lanțul de aprovizionare global și de o cerere internă susținută de creșterea salarială. Banca Națională a României a răspuns prin majorarea ratei dobânzii de politică monetară, instrument prin care a urmărit temperarea cererii și ancorarea anticipațiilor inflaționiste. Dezinflația a început să se manifeste în 2024, dar ritmul rămâne mai lent decât în alte state din regiune, parțial din cauza componentei structurale a inflației și a impactului ajustărilor de prețuri administrate și fiscale asupra coșului de consum."
    },
    {
     "type": "p",
-    "text": "Sustenabilitatea conformitatii pe criteriul inflatiei este la fel de importanta ca atingerea momentana a pragului. Banca Centrala Europeana evalueaza nu doar valoarea de la data raportului, ci si traiectoria si factorii care determina inflatia, pentru a evita situatia in care un stat atinge pragul conjunctural, urmat de un derapaj dupa aderare. Pentru Romania, ancorarea durabila a inflatiei la niveluri compatibile cu criteriul Maastricht depinde de coordonarea dintre politica monetara a Bancii Nationale si politica fiscala a Guvernului: o politica fiscala laxa, cu deficite mari, alimenteaza cererea si presiunile inflationiste, contracarand eforturile bancii centrale de a reduce inflatia."
+    "text": "Sustenabilitatea conformității pe criteriul inflației este la fel de importantă ca atingerea momentană a pragului. Banca Centrală Europeană evaluează nu doar valoarea de la data raportului, ci și traiectoria și factorii care determină inflația, pentru a evita situația în care un stat atinge pragul conjunctural, urmat de un derapaj după aderare. Pentru România, ancorarea durabilă a inflației la niveluri compatibile cu criteriul Maastricht depinde de coordonarea dintre politica monetară a Băncii Naționale și politica fiscală a Guvernului: o politică fiscală laxă, cu deficite mari, alimentează cererea și presiunile inflaționiste, contracarând eforturile băncii centrale de a reduce inflația."
    },
    {
     "type": "table",
-    "headers": ["An", "Inflatie Romania (%)", "Prag de referinta (%)", "Diferenta (puncte proc.)"],
+    "headers": ["An", "Inflație România (%)", "Prag de referință (%)", "Diferență (puncte proc.)"],
     "rows": [
      ["2021", "5,0", "2,4", "2,6"],
      ["2022", "13,8", "4,9", "8,9"],
@@ -111,19 +111,19 @@ window._REGIO_DEEP['p16'] = [
   ]
  },
  {
-  "title": "Politica monetara a Bancii Nationale a Romaniei",
+  "title": "Politica monetară a Băncii Naționale a României",
   "blocks": [
    {
     "type": "p",
-    "text": "Banca Nationala a Romaniei conduce politica monetara cu obiectivul principal de a asigura si mentine stabilitatea preturilor, definita printr-o tinta de inflatie. Pana la o eventuala aderare la euro, banca centrala isi pastreaza autonomia deplina asupra instrumentelor monetare, in primul rand rata dobanzii de politica monetara, dar si rezervele minime obligatorii ale bancilor comerciale si operatiunile de piata monetara. Prin aceste instrumente, banca influenteaza costul creditului in economie, ritmul de crestere a creditarii, cursul de schimb si, in ultima instanta, presiunile inflationiste. Independenta bancii centrale fata de Guvern este o conditie a credibilitatii politicii monetare si este consacrata legal."
+    "text": "Banca Națională a României conduce politica monetară cu obiectivul principal de a asigura și menține stabilitatea prețurilor, definită printr-o țintă de inflație. Până la o eventuală aderare la euro, banca centrală își păstrează autonomia deplină asupra instrumentelor monetare, în primul rând rata dobânzii de politică monetară, dar și rezervele minime obligatorii ale băncilor comerciale și operațiunile de piață monetară. Prin aceste instrumente, banca influențează costul creditului în economie, ritmul de creștere a creditării, cursul de schimb și, în ultimă instanță, presiunile inflaționiste. Independența băncii centrale față de Guvern este o condiție a credibilității politicii monetare și este consacrată legal."
    },
    {
     "type": "p",
-    "text": "In contextul inflatiei ridicate din 2022-2023, Banca Nationala a majorat semnificativ rata dobanzii de politica monetara, urmarind ancorarea anticipatiilor si temperarea cererii. Politica monetara opereaza insa cu un decalaj temporal de mai multe trimestre intre actiune si efect, ceea ce impune bancii centrale o atitudine anticipativa, bazata pe prognoze de inflatie. Banca gestioneaza totodata un echilibru delicat: o politica prea restrictiva ar putea franata excesiv economia, in timp ce una prea permisiva ar permite inflatiei sa se inradacineze. Comunicarea bancii centrale, prin rapoartele de inflatie si declaratiile de politica monetara, are rolul de a orienta anticipatiile pietelor."
+    "text": "În contextul inflației ridicate din 2022-2023, Banca Națională a majorat semnificativ rata dobânzii de politică monetară, urmărind ancorarea anticipațiilor și temperarea cererii. Politica monetară operează însă cu un decalaj temporal de mai multe trimestre între acțiune și efect, ceea ce impune băncii centrale o atitudine anticipativă, bazată pe prognoze de inflație. Banca gestionează totodată un echilibru delicat: o politică prea restrictivă ar putea frâna excesiv economia, în timp ce una prea permisivă ar permite inflației să se înrădăcineze. Comunicarea băncii centrale, prin rapoartele de inflație și declarațiile de politică monetară, are rolul de a orienta anticipațiile piețelor."
    },
    {
     "type": "p",
-    "text": "Aderarea la euro ar transfera politica monetara catre Banca Centrala Europeana, iar Banca Nationala a Romaniei ar deveni parte a Eurosistemului, participand la deciziile colective dar renuntand la autonomia individuala. Aceasta tranzitie presupune ca economia romaneasca sa fie suficient de convergenta cu zona euro incat politica monetara unica sa fie adecvata si situatiei sale. In conditiile in care Romania prezinta inca diferente structurale fata de nucleul zonei euro, momentul aderarii trebuie ales astfel incat renuntarea la politica monetara proprie sa nu lase economia vulnerabila la socuri asimetrice pe care nu le-ar mai putea contracara prin instrumente monetare nationale."
+    "text": "Aderarea la euro ar transfera politica monetară către Banca Centrală Europeană, iar Banca Națională a României ar deveni parte a Eurosistemului, participând la deciziile colective dar renunțând la autonomia individuală. Această tranziție presupune ca economia românească să fie suficient de convergentă cu zona euro încât politica monetară unică să fie adecvată și situației sale. În condițiile în care România prezintă încă diferențe structurale față de nucleul zonei euro, momentul aderării trebuie ales astfel încât renunțarea la politica monetară proprie să nu lase economia vulnerabilă la șocuri asimetrice pe care nu le-ar mai putea contracara prin instrumente monetare naționale."
    },
    {
     "type": "chart",
@@ -138,23 +138,23 @@ window._REGIO_DEEP['p16'] = [
   ]
  },
  {
-  "title": "Datoria publica si traiectoria sustenabila",
+  "title": "Datoria publică și traiectoria sustenabilă",
   "blocks": [
    {
     "type": "p",
-    "text": "Criteriul datoriei publice cere ca datoria publica bruta a administratiei publice sa nu depaseasca saizeci la suta din produsul intern brut, sau, in cazul depasirii, sa se reduca intr-un ritm satisfacator catre acest prag. Formula datoriei exprimate ca pondere in produsul intern brut este: datorie procent PIB egal cu stocul datoriei publice impartit la produsul intern brut, inmultit cu o suta. Romania respecta acest criteriu in 2024, cu o datorie publica situata in jurul a cincizeci si doi la suta din produsul intern brut, sub plafonul de saizeci la suta. Aceasta este, paradoxal, singura performanta clar conforma dintre cele cinci criterii, mostenita dintr-o pozitie istorica de indatorare relativ moderata."
+    "text": "Criteriul datoriei publice cere ca datoria publică brută a administrației publice să nu depășească șaizeci la sută din produsul intern brut, sau, în cazul depășirii, să se reducă într-un ritm satisfăcător către acest prag. Formula datoriei exprimate ca pondere în produsul intern brut este: datorie procent PIB egal cu stocul datoriei publice împărțit la produsul intern brut, înmulțit cu o sută. România respectă acest criteriu în 2024, cu o datorie publică situată în jurul a cincizeci și doi la sută din produsul intern brut, sub plafonul de șaizeci la sută. Aceasta este, paradoxal, singura performanță clar conformă dintre cele cinci criterii, moștenită dintr-o poziție istorică de îndatorare relativ moderată."
    },
    {
     "type": "p",
-    "text": "Conformitatea pe datorie nu trebuie insa interpretata ca un confort durabil, intrucat traiectoria este ascendenta. Deficitele bugetare anuale mari, de peste sase la suta, finanteaza un stoc de datorie in crestere rapida, iar dinamica datoriei depinde de relatia dintre rata dobanzii la care statul se imprumuta si rata de crestere economica nominala. Atata timp cat cresterea nominala depaseste costul mediu al datoriei, ponderea datoriei in produsul intern brut poate fi stabilizata in ciuda deficitelor, dar daca dobanzile cresc peste ritmul de crestere economica, datoria intra pe o traiectorie de crestere autoalimentata, fenomen cunoscut ca efectul bulgarelui de zapada al datoriei."
+    "text": "Conformitatea pe datorie nu trebuie însă interpretată ca un confort durabil, întrucât traiectoria este ascendentă. Deficitele bugetare anuale mari, de peste șase la sută, finanțează un stoc de datorie în creștere rapidă, iar dinamica datoriei depinde de relația dintre rata dobânzii la care statul se împrumută și rata de creștere economică nominală. Atâta timp cât creșterea nominală depășește costul mediu al datoriei, ponderea datoriei în produsul intern brut poate fi stabilizată în ciuda deficitelor, dar dacă dobânzile cresc peste ritmul de creștere economică, datoria intră pe o traiectorie de creștere autoalimentată, fenomen cunoscut ca efectul bulgărelui de zăpadă al datoriei."
    },
    {
     "type": "p",
-    "text": "Pentru a pastra conformitatea pe termen mediu si lung, Romania trebuie sa stabilizeze ponderea datoriei prin reducerea deficitului bugetar catre niveluri sustenabile. Cu deficite de peste opt la suta, datoria publica ar putea depasi pragul de saizeci la suta in cativa ani, transformand singurul criteriu respectat intr-o noua neconformitate. Aceasta interdependenta dintre deficit si datorie ilustreaza de ce consolidarea fiscala este precondiția centrala a intregului proces de convergenta: reducerea deficitului protejeaza simultan criteriul deficitului si pe cel al datoriei, in timp ce derapajul fiscal le compromite pe ambele."
+    "text": "Pentru a păstra conformitatea pe termen mediu și lung, România trebuie să stabilizeze ponderea datoriei prin reducerea deficitului bugetar către niveluri sustenabile. Cu deficite de peste opt la sută, datoria publică ar putea depăși pragul de șaizeci la sută în câțiva ani, transformând singurul criteriu respectat într-o nouă neconformitate. Această interdependență dintre deficit și datorie ilustrează de ce consolidarea fiscală este precondiția centrală a întregului proces de convergență: reducerea deficitului protejează simultan criteriul deficitului și pe cel al datoriei, în timp ce derapajul fiscal le compromite pe ambele."
    },
    {
     "type": "table",
-    "headers": ["An", "Datorie publica (% PIB)", "Prag Maastricht (% PIB)", "Marja sub prag (puncte proc.)"],
+    "headers": ["An", "Datorie publică (% PIB)", "Prag Maastricht (% PIB)", "Marjă sub prag (puncte proc.)"],
     "rows": [
      ["2021", "48,6", "60", "11,4"],
      ["2022", "47,5", "60", "12,5"],
@@ -165,28 +165,28 @@ window._REGIO_DEEP['p16'] = [
   ]
  },
  {
-  "title": "Dobanda pe termen lung si convergenta randamentelor",
+  "title": "Dobânda pe termen lung și convergența randamentelor",
   "blocks": [
    {
     "type": "p",
-    "text": "Criteriul dobanzii pe termen lung cere ca rata dobanzii nominale pe termen lung a unui stat membru, masurata pe randamentul obligatiunilor guvernamentale cu scadenta de aproximativ zece ani, sa nu depaseasca cu mai mult de doua puncte procentuale media ratelor corespunzatoare ale celor trei state membre cu cele mai bune performante in materie de stabilitate a preturilor. Formula este: prag dobanda egal cu media celor trei dobanzi de referinta plus doua puncte procentuale. Acest criteriu masoara increderea pietelor in soliditatea finantelor publice si in stabilitatea macroeconomica a tarii, intrucat randamentele reflecta prima de risc pe care investitorii o cer pentru a finanta datoria suverana."
+    "text": "Criteriul dobânzii pe termen lung cere ca rata dobânzii nominale pe termen lung a unui stat membru, măsurată pe randamentul obligațiunilor guvernamentale cu scadența de aproximativ zece ani, să nu depășească cu mai mult de două puncte procentuale media ratelor corespunzătoare ale celor trei state membre cu cele mai bune performanțe în materie de stabilitate a prețurilor. Formula este: prag dobândă egal cu media celor trei dobânzi de referință plus două puncte procentuale. Acest criteriu măsoară încrederea piețelor în soliditatea finanțelor publice și în stabilitatea macroeconomică a țării, întrucât randamentele reflectă prima de risc pe care investitorii o cer pentru a finanța datoria suverană."
    },
    {
     "type": "p",
-    "text": "In 2024, randamentele obligatiunilor guvernamentale romanesti pe termen lung se situeaza la niveluri ridicate, peste pragul de referinta, reflectand deficitul bugetar mare, traiectoria ascendenta a datoriei si inflatia inca neancorata. Acest criteriu este, intr-un fel, o sinteza a celorlalte: pietele financiare penalizeaza printr-o dobanda mai mare orice stat cu finante publice fragile, astfel incat conformitatea pe deficit si inflatie tinde sa atraga si conformitatea pe dobanda. Invers, derapajele fiscale scumpesc finantarea, generand un cerc vicios in care costul mai mare al datoriei adanceste deficitul prin cheltuieli cu dobanzile."
+    "text": "În 2024, randamentele obligațiunilor guvernamentale românești pe termen lung se situează la niveluri ridicate, peste pragul de referință, reflectând deficitul bugetar mare, traiectoria ascendentă a datoriei și inflația încă neancorată. Acest criteriu este, într-un fel, o sinteză a celorlalte: piețele financiare penalizează printr-o dobândă mai mare orice stat cu finanțe publice fragile, astfel încât conformitatea pe deficit și inflație tinde să atragă și conformitatea pe dobândă. Invers, derapajele fiscale scumpesc finanțarea, generând un cerc vicios în care costul mai mare al datoriei adâncește deficitul prin cheltuieli cu dobânzile."
    },
    {
     "type": "p",
-    "text": "Convergenta randamentelor catre nivelurile zonei euro este, totodata, un indicator al apropierii efective de aderare. Pe masura ce un stat se apropie de adoptarea euro, riscul de curs valutar dispare din perspectiva investitorilor, iar prima de risc se reduce, apropiind randamentele de cele ale tarilor din nucleul zonei euro. Pentru Romania, reducerea dobanzilor pe termen lung depinde direct de credibilitatea unui program de consolidare fiscala: un angajament ferm si credibil de reducere a deficitului ar reduce prima de risc si costul finantarii chiar inainte de implementarea integrala a masurilor, demonstrand ca asteptarile pietelor sunt orientate spre viitor."
+    "text": "Convergența randamentelor către nivelurile zonei euro este, totodată, un indicator al apropierii efective de aderare. Pe măsură ce un stat se apropie de adoptarea euro, riscul de curs valutar dispare din perspectiva investitorilor, iar prima de risc se reduce, apropiind randamentele de cele ale țărilor din nucleul zonei euro. Pentru România, reducerea dobânzilor pe termen lung depinde direct de credibilitatea unui program de consolidare fiscală: un angajament ferm și credibil de reducere a deficitului ar reduce prima de risc și costul finanțării chiar înainte de implementarea integrală a măsurilor, demonstrând că așteptările piețelor sunt orientate spre viitor."
    },
    {
     "type": "table",
-    "headers": ["Indicator dobanda", "Romania 2024", "Prag de referinta", "Conform (1=da, 0=nu)"],
+    "headers": ["Indicator dobândă", "România 2024", "Prag de referință", "Conform (1=da, 0=nu)"],
     "rows": [
-     ["Randament obligatiuni 10 ani", "Ridicat", "Media 3 plus 2pp", "0"],
-     ["Prima de risc suveran", "Crescuta", "Comparabila zona euro", "0"],
-     ["Cost mediu al datoriei", "In crestere", "Stabil", "0"],
-     ["Tendinta randamente", "Volatila", "Convergenta", "0"]
+     ["Randament obligațiuni 10 ani", "Ridicat", "Media 3 plus 2pp", "0"],
+     ["Prima de risc suveran", "Crescută", "Comparabilă zona euro", "0"],
+     ["Cost mediu al datoriei", "În creștere", "Stabil", "0"],
+     ["Tendință randamente", "Volatilă", "Convergență", "0"]
     ]
    }
   ]
@@ -196,485 +196,540 @@ window._REGIO_DEEP['p16'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Criteriul stabilitatii cursului de schimb impune participarea monedei nationale la Mecanismul Cursului de Schimb ERM-II pentru o perioada de cel putin doi ani, fara tensiuni grave si fara devalorizare a paritatii centrale fata de euro din proprie initiativa. ERM-II este o etapa obligatorie a sala de asteptare a euro: moneda nationala este legata de euro printr-o paritate centrala, cu o banda de fluctuatie standard de plus minus cincisprezece la suta, in cadrul careia cursul trebuie sa ramana stabil. In 2024, leul romanesc nu participa la ERM-II, ceea ce inseamna ca, chiar daca toate celelalte criterii ar fi indeplinite maine, ar mai fi necesari cel putin doi ani de participare inainte de aderarea efectiva la euro."
+    "text": "Criteriul stabilității cursului de schimb impune participarea monedei naționale la Mecanismul Cursului de Schimb ERM-II pentru o perioadă de cel puțin doi ani, fără tensiuni grave și fără devalorizare a parității centrale față de euro din proprie inițiativă. ERM-II este o etapă obligatorie a sălii de așteptare a euro: moneda națională este legată de euro printr-o paritate centrală, cu o bandă de fluctuație standard de plus minus cincisprezece la sută, în cadrul căreia cursul trebuie să rămână stabil. În 2024, leul românesc nu participă la ERM-II, ceea ce înseamnă că, chiar dacă toate celelalte criterii ar fi îndeplinite mâine, ar mai fi necesari cel puțin doi ani de participare înainte de aderarea efectivă la euro."
    },
    {
     "type": "p",
-    "text": "Decizia de a intra in ERM-II este una strategica, cu implicatii profunde, intrucat in aceasta perioada banca centrala trebuie sa apere stabilitatea cursului fata de euro, ceea ce ii limiteaza marja de manevra a politicii monetare. Intrarea prematura, inainte ca economia sa fie suficient de convergenta si finantele publice consolidate, ar expune leul la presiuni speculative si la tensiuni greu de gestionat. De aceea practica recomandata este intrarea in ERM-II abia dupa ce indeplinirea celorlalte criterii este aproape asigurata si sustenabila, astfel incat cei doi ani de participare sa fie o formalitate de confirmare, nu o perioada de risc valutar."
+    "text": "Decizia de a intra în ERM-II este una strategică, cu implicații profunde, întrucât în această perioadă banca centrală trebuie să apere stabilitatea cursului față de euro, ceea ce îi limitează marja de manevră a politicii monetare. Intrarea prematură, înainte ca economia să fie suficient de convergentă și finanțele publice consolidate, ar expune leul la presiuni speculative și la tensiuni greu de gestionat. De aceea practica recomandată este intrarea în ERM-II abia după ce îndeplinirea celorlalte criterii este aproape asigurată și sustenabilă, astfel încât cei doi ani de participare să fie o formalitate de confirmare, nu o perioadă de risc valutar."
    },
    {
     "type": "p",
-    "text": "Neparticiparea actuala la ERM-II reflecta o pozitie prudenta a autoritatilor romanesti, justificata de neconformitatea pe deficit si inflatie. Banca Nationala gestioneaza in prezent un curs de schimb relativ stabil fata de euro printr-o politica de flotare administrata, fara angajamentul formal al benzii ERM-II. Aceasta abordare ofera flexibilitate, dar nu poate fi confundata cu participarea oficiala la mecanism, care presupune un angajament international monitorizat. Secventierea logica plaseaza intrarea in ERM-II dupa consolidarea fiscala si dezinflatie, ca penultim pas inainte de adoptarea euro, ceea ce situeaza acest moment intr-un orizont temporal indepartat in raport cu realitatea fiscala din 2024."
+    "text": "Neparticiparea actuală la ERM-II reflectă o poziție prudentă a autorităților românești, justificată de neconformitatea pe deficit și inflație. Banca Națională gestionează în prezent un curs de schimb relativ stabil față de euro printr-o politică de flotare administrată, fără angajamentul formal al benzii ERM-II. Această abordare oferă flexibilitate, dar nu poate fi confundată cu participarea oficială la mecanism, care presupune un angajament internațional monitorizat. Secvențierea logică plasează intrarea în ERM-II după consolidarea fiscală și dezinflație, ca penultim pas înainte de adoptarea euro, ceea ce situează acest moment într-un orizont temporal îndepărtat în raport cu realitatea fiscală din 2024."
    },
    {
     "type": "table",
-    "headers": ["Etapa pre-euro", "Stare Romania 2024", "Durata necesara", "Indeplinit (1=da, 0=nu)"],
+    "headers": ["Etapă pre-euro", "Stare România 2024", "Durată necesară", "Îndeplinit (1=da, 0=nu)"],
     "rows": [
-     ["Consolidare fiscala", "In curs (deficit 8,1%)", "Mai multi ani", "0"],
-     ["Dezinflatie sustenabila", "In progres", "Continuu", "0"],
-     ["Intrare ERM-II", "Neparticipa", "Decizie strategica", "0"],
-     ["Participare ERM-II minima", "Nedemarata", "Doi ani", "0"]
+     ["Consolidare fiscală", "În curs (deficit 8,1%)", "Mai mulți ani", "0"],
+     ["Dezinflație sustenabilă", "În progres", "Continuu", "0"],
+     ["Intrare ERM-II", "Neparticipă", "Decizie strategică", "0"],
+     ["Participare ERM-II minimă", "Nedemarată", "Doi ani", "0"]
     ]
    }
   ]
  },
  {
-  "title": "Banca Centrala Europeana si rolul in evaluare",
+  "title": "Banca Centrală Europeană și rolul în evaluare",
   "blocks": [
    {
     "type": "p",
-    "text": "Banca Centrala Europeana, alaturi de Comisia Europeana, are responsabilitatea de a evalua periodic gradul de pregatire al statelor membre care nu au adoptat inca euro, prin Rapoarte de Convergenta publicate cel putin o data la doi ani sau la cererea unui stat candidat. Aceste rapoarte examineaza atat conformitatea cu criteriile nominale Maastricht, cat si compatibilitatea legislatiei nationale, in special a statutului bancii centrale, cu cerintele Tratatului si ale Statutului Sistemului European al Bancilor Centrale. Evaluarea Bancii Centrale Europene este una tehnica si riguroasa, axata pe sustenabilitatea conformitatii, nu doar pe atingerea momentana a pragurilor."
+    "text": "Banca Centrală Europeană, alături de Comisia Europeană, are responsabilitatea de a evalua periodic gradul de pregătire al statelor membre care nu au adoptat încă euro, prin Rapoarte de Convergență publicate cel puțin o dată la doi ani sau la cererea unui stat candidat. Aceste rapoarte examinează atât conformitatea cu criteriile nominale Maastricht, cât și compatibilitatea legislației naționale, în special a statutului băncii centrale, cu cerințele Tratatului și ale Statutului Sistemului European al Băncilor Centrale. Evaluarea Băncii Centrale Europene este una tehnică și riguroasă, axată pe sustenabilitatea conformității, nu doar pe atingerea momentană a pragurilor."
    },
    {
     "type": "p",
-    "text": "Independenta institutionala a bancii centrale nationale este o conditie distincta de criteriile economice. Statutul Bancii Nationale a Romaniei trebuie sa fie pe deplin compatibil cu principiile Eurosistemului inainte de aderare, garantand independenta functionala, institutionala, personala si financiara fata de orice instructiune guvernamentala. Banca Centrala Europeana analizeaza in detaliu interdictia finantarii monetare a deficitelor publice, accesul privilegiat al sectorului public la institutiile financiare si alinierea obiectivelor bancii nationale cu mandatul de stabilitate a preturilor. Aceste aspecte juridice completeaza evaluarea economica a convergentei nominale."
+    "text": "Independența instituțională a băncii centrale naționale este o condiție distinctă de criteriile economice. Statutul Băncii Naționale a României trebuie să fie pe deplin compatibil cu principiile Eurosistemului înainte de aderare, garantând independența funcțională, instituțională, personală și financiară față de orice instrucțiune guvernamentală. Banca Centrală Europeană analizează în detaliu interdicția finanțării monetare a deficitelor publice, accesul privilegiat al sectorului public la instituțiile financiare și alinierea obiectivelor băncii naționale cu mandatul de stabilitate a prețurilor. Aceste aspecte juridice completează evaluarea economică a convergenței nominale."
    },
    {
     "type": "p",
-    "text": "Rolul Bancii Centrale Europene depaseste evaluarea formala: ea formuleaza recomandari privind politicile necesare pentru atingerea convergentei sustenabile si avertizeaza asupra riscurilor de derapaj. Pentru Romania, rapoartele succesive au semnalat constant problema deficitului bugetar excesiv si a inflatiei, subliniind ca atingerea criteriilor printr-o ajustare conjuncturala nu este suficienta. Evaluarea Bancii Centrale Europene reprezinta o ancora externa de disciplina macroeconomica, care poate sprijini eforturile interne de reforma prin presiunea reputationala si prin claritatea diagnosticului tehnic, oferind autoritatilor nationale un cadru obiectiv de referinta pentru prioritizarea masurilor."
+    "text": "Rolul Băncii Centrale Europene depășește evaluarea formală: ea formulează recomandări privind politicile necesare pentru atingerea convergenței sustenabile și avertizează asupra riscurilor de derapaj. Pentru România, rapoartele succesive au semnalat constant problema deficitului bugetar excesiv și a inflației, subliniind că atingerea criteriilor printr-o ajustare conjuncturală nu este suficientă. Evaluarea Băncii Centrale Europene reprezintă o ancoră externă de disciplină macroeconomică, care poate sprijini eforturile interne de reformă prin presiunea reputațională și prin claritatea diagnosticului tehnic, oferind autorităților naționale un cadru obiectiv de referință pentru prioritizarea măsurilor."
    },
    {
     "type": "table",
-    "headers": ["Dimensiune evaluata de BCE", "Continut", "Stare Romania", "Atentie (1-5)"],
+    "headers": ["Dimensiune evaluată de BCE", "Conținut", "Stare România", "Atenție (1-5)"],
     "rows": [
-     ["Criterii nominale", "Cele cinci praguri Maastricht", "Partial neconform", "5"],
-     ["Independenta bancii nationale", "Statut compatibil Eurosistem", "Necesita verificare", "3"],
-     ["Interdictie finantare monetara", "Fara finantare directa deficit", "Conform principial", "2"],
-     ["Sustenabilitatea convergentei", "Durabilitate, nu conjunctura", "Insuficienta", "5"]
+     ["Criterii nominale", "Cele cinci praguri Maastricht", "Parțial neconform", "5"],
+     ["Independența băncii naționale", "Statut compatibil Eurosistem", "Necesită verificare", "3"],
+     ["Interdicție finanțare monetară", "Fără finanțare directă deficit", "Conform principial", "2"],
+     ["Sustenabilitatea convergenței", "Durabilitate, nu conjunctură", "Insuficientă", "5"]
     ]
    }
   ]
  },
  {
-  "title": "Impactul regionalizarii asupra criteriului deficitului",
+  "title": "Impactul regionalizării asupra criteriului deficitului",
   "blocks": [
    {
     "type": "p",
-    "text": "O reforma de regionalizare cu transfer de competente si resurse catre un nou nivel administrativ are un impact direct asupra criteriului deficitului bugetar, criteriul cel mai vulnerabil al Romaniei. In faza de tranzitie, infiintarea structurilor regionale genereaza costuri suplimentare: cheltuieli de personal, sedii, sisteme informatice si dublarea temporara a unor functii intre nivelul central si cel regional. Aceste costuri tranzitorii ar agrava, pe termen scurt, un deficit deja excesiv, intr-un moment in care prioritatea absoluta este reducerea sa catre pragul de trei la suta. Aceasta tensiune impune o atentie deosebita la calendarul si secventierea reformei administrative."
+    "text": "O reformă de regionalizare cu transfer de competențe și resurse către un nou nivel administrativ are un impact direct asupra criteriului deficitului bugetar, criteriul cel mai vulnerabil al României. În faza de tranziție, înființarea structurilor regionale generează costuri suplimentare: cheltuieli de personal, sedii, sisteme informatice și dublarea temporară a unor funcții între nivelul central și cel regional. Aceste costuri tranzitorii ar agrava, pe termen scurt, un deficit deja excesiv, într-un moment în care prioritatea absolută este reducerea sa către pragul de trei la sută. Această tensiune impune o atenție deosebită la calendarul și secvențierea reformei administrative."
    },
    {
     "type": "p",
-    "text": "Pe termen mediu si lung, regionalizarea bine proiectata poate genera insa castiguri de eficienta care reduc costurile administrative agregate: mai buna alocare a investitiilor, reducerea suprapunerilor de competente intre paliere, o absorbtie mai eficienta a fondurilor europene care reduce presiunea pe bugetul national. Echilibrul intre costul tranzitoriu inevitabil si castigul de eficienta potential depinde de calitatea proiectarii reformei. O reforma care doar adauga un nivel administrativ fara a rationaliza nivelurile existente ar agrava permanent deficitul, in timp ce una care simplifica si eficientizeaza structura administrativa ar putea fi neutra sau chiar pozitiva fiscal dupa perioada de tranzitie."
+    "text": "Pe termen mediu și lung, regionalizarea bine proiectată poate genera însă câștiguri de eficiență care reduc costurile administrative agregate: mai bună alocare a investițiilor, reducerea suprapunerilor de competențe între paliere, o absorbție mai eficientă a fondurilor europene care reduce presiunea pe bugetul național. Echilibrul între costul tranzitoriu inevitabil și câștigul de eficiență potențial depinde de calitatea proiectării reformei. O reformă care doar adaugă un nivel administrativ fără a raționaliza nivelurile existente ar agrava permanent deficitul, în timp ce una care simplifică și eficientizează structura administrativă ar putea fi neutră sau chiar pozitivă fiscal după perioada de tranziție."
    },
    {
     "type": "p",
-    "text": "Concluzia operationala este ca regionalizarea si consolidarea fiscala trebuie sincronizate cu grija, evitand ca cele doua reforme sa se contrazica. Lansarea unei reforme administrative costisitoare in plina procedura de deficit excesiv, fara compensare prin eficientizare, ar submina credibilitatea angajamentului de reducere a deficitului si ar putea declansa o reactie negativa a pietelor financiare si a Comisiei Europene. De aceea, secventierea recomandata plaseaza faza intensiva a regionalizarii dupa ce deficitul a fost adus sub control, sau o conditioneaza de masuri de neutralitate fiscala care sa garanteze ca reforma nu adanceste dezechilibrul bugetar in perioada critica de convergenta."
+    "text": "Concluzia operațională este că regionalizarea și consolidarea fiscală trebuie sincronizate cu grijă, evitând ca cele două reforme să se contrazică. Lansarea unei reforme administrative costisitoare în plină procedură de deficit excesiv, fără compensare prin eficientizare, ar submina credibilitatea angajamentului de reducere a deficitului și ar putea declanșa o reacție negativă a piețelor financiare și a Comisiei Europene. De aceea, secvențierea recomandată plasează faza intensivă a regionalizării după ce deficitul a fost adus sub control, sau o condiționează de măsuri de neutralitate fiscală care să garanteze că reforma nu adâncește dezechilibrul bugetar în perioada critică de convergență."
    },
    {
     "type": "table",
-    "headers": ["Faza regionalizare", "Efect asupra deficitului", "Orizont", "Magnitudine (puncte proc. PIB)"],
+    "headers": ["Fază regionalizare", "Efect asupra deficitului", "Orizont", "Magnitudine (puncte proc. PIB)"],
     "rows": [
-     ["Infiintare structuri", "Cost tranzitoriu (negativ)", "Scurt", "0,3"],
-     ["Dublare functii temporare", "Cost tranzitoriu (negativ)", "Scurt-mediu", "0,2"],
-     ["Eficientizare alocare", "Castig (pozitiv)", "Mediu", "0,2"],
-     ["Rationalizare paliere", "Castig (pozitiv)", "Lung", "0,4"]
+     ["Înființare structuri", "Cost tranzitoriu (negativ)", "Scurt", "0,3"],
+     ["Dublare funcții temporare", "Cost tranzitoriu (negativ)", "Scurt-mediu", "0,2"],
+     ["Eficientizare alocare", "Câștig (pozitiv)", "Mediu", "0,2"],
+     ["Raționalizare paliere", "Câștig (pozitiv)", "Lung", "0,4"]
     ]
    }
   ]
  },
  {
-  "title": "Impactul regionalizarii asupra inflatiei si datoriei",
+  "title": "Impactul regionalizării asupra inflației și datoriei",
   "blocks": [
    {
     "type": "p",
-    "text": "Impactul regionalizarii asupra criteriului inflatiei este indirect, mediat prin canalul fiscal. O reforma care creste cheltuielile publice agregate fara acoperire in venituri stimuleaza cererea agregata si poate adauga presiuni inflationiste, contracarand eforturile Bancii Nationale de ancorare a inflatiei. Invers, o reforma neutra fiscal sau care eficientizeaza cheltuielile nu ar avea un efect inflationist semnificativ. Magnitudinea efectului depinde de modul de finantare a structurilor regionale: finantarea prin redistribuire a cheltuielilor existente este neutra, in timp ce finantarea prin cheltuieli noi nete este expansionista si potential inflationista, mai ales daca survine intr-un context de cerere interna deja robusta."
+    "text": "Impactul regionalizării asupra criteriului inflației este indirect, mediat prin canalul fiscal. O reformă care crește cheltuielile publice agregate fără acoperire în venituri stimulează cererea agregată și poate adăuga presiuni inflaționiste, contracarând eforturile Băncii Naționale de ancorare a inflației. Invers, o reformă neutră fiscal sau care eficientizează cheltuielile nu ar avea un efect inflaționist semnificativ. Magnitudinea efectului depinde de modul de finanțare a structurilor regionale: finanțarea prin redistribuire a cheltuielilor existente este neutră, în timp ce finanțarea prin cheltuieli noi nete este expansionistă și potențial inflaționistă, mai ales dacă survine într-un context de cerere internă deja robustă."
    },
    {
     "type": "p",
-    "text": "Asupra datoriei publice, regionalizarea actioneaza prin acumularea cumulata a deficitelor: in masura in care costurile tranzitorii adancesc deficitul anual, ele se transmit in stocul de datorie. Un risc specific este indatorarea proprie a noilor entitati regionale, daca acestea primesc capacitatea de a contracta imprumuturi. Fara reguli fiscale stricte la nivel regional, descentralizarea poate genera o datorie subnationala care, consolidata la nivel national, contribuie la depasirea pragului de saizeci la suta. Experienta altor state arata ca disciplina bugetara a nivelurilor subnationale este esentiala pentru a evita ca descentralizarea sa devina o sursa de derapaj al datoriei agregate."
+    "text": "Asupra datoriei publice, regionalizarea acționează prin acumularea cumulată a deficitelor: în măsura în care costurile tranzitorii adâncesc deficitul anual, ele se transmit în stocul de datorie. Un risc specific este îndatorarea proprie a noilor entități regionale, dacă acestea primesc capacitatea de a contracta împrumuturi. Fără reguli fiscale stricte la nivel regional, descentralizarea poate genera o datorie subnațională care, consolidată la nivel național, contribuie la depășirea pragului de șaizeci la sută. Experiența altor state arată că disciplina bugetară a nivelurilor subnaționale este esențială pentru a evita ca descentralizarea să devină o sursă de derapaj al datoriei agregate."
    },
    {
     "type": "p",
-    "text": "Concluzia este ca regionalizarea trebuie insotita de un cadru de reguli fiscale regionale care sa garanteze ca noul nivel administrativ nu compromite criteriile Maastricht. Aceste reguli includ plafonarea deficitului regional, limitarea capacitatii de indatorare subnationala, mecanisme de monitorizare si raportare consolidata catre nivelul central. Numai astfel descentralizarea poate fi compatibila cu obiectivul de convergenta nominala. In esenta, autonomia financiara regionala trebuie echilibrata cu responsabilitatea fiscala, astfel incat libertatea de decizie a regiunilor sa nu se traduca intr-o erodare a disciplinei macroeconomice nationale necesare pentru aderarea la euro."
+    "text": "Concluzia este că regionalizarea trebuie însoțită de un cadru de reguli fiscale regionale care să garanteze că noul nivel administrativ nu compromite criteriile Maastricht. Aceste reguli includ plafonarea deficitului regional, limitarea capacității de îndatorare subnațională, mecanisme de monitorizare și raportare consolidată către nivelul central. Numai astfel descentralizarea poate fi compatibilă cu obiectivul de convergență nominală. În esență, autonomia financiară regională trebuie echilibrată cu responsabilitatea fiscală, astfel încât libertatea de decizie a regiunilor să nu se traducă într-o erodare a disciplinei macroeconomice naționale necesare pentru aderarea la euro."
    },
    {
     "type": "table",
-    "headers": ["Criteriu Maastricht", "Canal de impact regionalizare", "Directie risc", "Intensitate (1-5)"],
+    "headers": ["Criteriu Maastricht", "Canal de impact regionalizare", "Direcție risc", "Intensitate (1-5)"],
     "rows": [
-     ["Inflatie", "Cerere agregata (canal fiscal)", "Crestere", "2"],
-     ["Datorie publica", "Acumulare deficite tranzitorii", "Crestere", "3"],
-     ["Datorie publica", "Indatorare subnationala", "Crestere", "4"],
-     ["Dobanda termen lung", "Perceptie risc fiscal", "Crestere", "3"]
+     ["Inflație", "Cerere agregată (canal fiscal)", "Creștere", "2"],
+     ["Datorie publică", "Acumulare deficite tranzitorii", "Creștere", "3"],
+     ["Datorie publică", "Îndatorare subnațională", "Creștere", "4"],
+     ["Dobândă termen lung", "Percepție risc fiscal", "Creștere", "3"]
     ]
    }
   ]
  },
  {
-  "title": "Calendarul euro versus calendarul regionalizarii",
+  "title": "Calendarul euro versus calendarul regionalizării",
   "blocks": [
    {
     "type": "p",
-    "text": "Romania nu are o data tinta ferma pentru adoptarea euro, dupa ce termenele anuntate anterior au fost amanate succesiv din cauza neindeplinirii criteriilor de convergenta. Realitatea fiscala din 2024, cu deficitul cel mai mare din Uniune, plaseaza aderarea efectiva la euro intr-un orizont de mai multi ani, probabil dincolo de 2030, conditionat de o consolidare fiscala substantiala urmata de cei doi ani obligatorii in ERM-II. In paralel, dezbaterea despre regionalizare propune un calendar propriu, cu faze de pregatire constitutionala, pilotare si implementare, care s-ar putea suprapune temporal cu efortul de convergenta monetara, generand potentiale conflicte de prioritizare a resurselor si a capitalului politic."
+    "text": "România nu are o dată țintă fermă pentru adoptarea euro, după ce termenele anunțate anterior au fost amânate succesiv din cauza neîndeplinirii criteriilor de convergență. Realitatea fiscală din 2024, cu deficitul cel mai mare din Uniune, plasează aderarea efectivă la euro într-un orizont de mai mulți ani, probabil dincolo de 2030, condiționat de o consolidare fiscală substanțială urmată de cei doi ani obligatorii în ERM-II. În paralel, dezbaterea despre regionalizare propune un calendar propriu, cu faze de pregătire constituțională, pilotare și implementare, care s-ar putea suprapune temporal cu efortul de convergență monetară, generând potențiale conflicte de prioritizare a resurselor și a capitalului politic."
    },
    {
     "type": "p",
-    "text": "Conflictul principal intre cele doua calendare este de natura fiscala. Atat aderarea la euro, cat si regionalizarea solicita marja bugetara: prima cere reducerea deficitului, a doua genereaza costuri tranzitorii. Lansarea simultana a ambelor reforme intr-o perioada de constrangere fiscala dura ar fi imprudenta, intrucat ar suprasolicita capacitatea bugetara si administrativa a statului. Exista insa si sinergii: regionalizarea poate imbunatati absorbtia fondurilor europene si eficienta cheltuielilor, sprijinind indirect consolidarea fiscala, daca este proiectata cu acest obiectiv. Compatibilizarea celor doua agende impune o secventiere atenta, nu o renuntare la una in favoarea celeilalte."
+    "text": "Conflictul principal între cele două calendare este de natură fiscală. Atât aderarea la euro, cât și regionalizarea solicită marjă bugetară: prima cere reducerea deficitului, a doua generează costuri tranzitorii. Lansarea simultană a ambelor reforme într-o perioadă de constrângere fiscală dură ar fi imprudentă, întrucât ar suprasolicita capacitatea bugetară și administrativă a statului. Există însă și sinergii: regionalizarea poate îmbunătăți absorbția fondurilor europene și eficiența cheltuielilor, sprijinind indirect consolidarea fiscală, dacă este proiectată cu acest obiectiv. Compatibilizarea celor două agende impune o secvențiere atentă, nu o renunțare la una în favoarea celeilalte."
    },
    {
     "type": "p",
-    "text": "Recomandarea strategica este ca prioritatea absoluta a perioadei imediate sa fie consolidarea fiscala, comuna ambelor obiective, intrucat reducerea deficitului este precondiția deopotriva a euro si a unei regionalizari sustenabile fiscal. Dupa stabilizarea finantelor publice, regionalizarea poate avansa in fazele sale de pregatire si pilotare, iar intrarea in ERM-II poate fi decisa cand convergenta nominala este aproape asigurata. Aceasta succesiune evita conflictele si valorifica sinergiile, transformand cele doua reforme din concurente pentru resurse limitate in etape complementare ale unui proiect de modernizare a statului orientat spre integrare europeana deplina."
+    "text": "Recomandarea strategică este ca prioritatea absolută a perioadei imediate să fie consolidarea fiscală, comună ambelor obiective, întrucât reducerea deficitului este precondiția deopotrivă a euro și a unei regionalizări sustenabile fiscal. După stabilizarea finanțelor publice, regionalizarea poate avansa în fazele sale de pregătire și pilotare, iar intrarea în ERM-II poate fi decisă când convergența nominală este aproape asigurată. Această succesiune evită conflictele și valorifică sinergiile, transformând cele două reforme din concurente pentru resurse limitate în etape complementare ale unui proiect de modernizare a statului orientat spre integrare europeană deplină."
    },
    {
     "type": "table",
-    "headers": ["Reforma", "Orizont estimat", "Constrangere principala", "Prioritate de faza (1-5)"],
+    "headers": ["Reformă", "Orizont estimat", "Constrângere principală", "Prioritate de fază (1-5)"],
     "rows": [
-     ["Consolidare fiscala", "2025-2028", "Reducere deficit", "5"],
-     ["Pregatire regionalizare", "2027-2031", "Cadru constitutional", "3"],
-     ["Intrare ERM-II", "Dupa convergenta", "Stabilitate curs", "4"],
+     ["Consolidare fiscală", "2025-2028", "Reducere deficit", "5"],
+     ["Pregătire regionalizare", "2027-2031", "Cadru constituțional", "3"],
+     ["Intrare ERM-II", "După convergență", "Stabilitate curs", "4"],
      ["Adoptare euro", "Post-2030", "Toate criteriile", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Secventierea recomandata a reformelor structurale",
+  "title": "Secvențierea recomandată a reformelor structurale",
   "blocks": [
    {
     "type": "p",
-    "text": "Logica secventierii reformelor structurale majore ale Romaniei urmeaza o ordine determinata de relatiile de precondiționare dintre ele. Primul pas, indispensabil si comun tuturor obiectivelor, este consolidarea fiscala: reducerea deficitului bugetar de la peste opt la suta catre pragul de trei la suta, care elibereaza marja bugetara necesara oricarei alte reforme si protejeaza criteriile de datorie si dobanda. Fara acest pas, nici aderarea la euro, nici o regionalizare sustenabila nu sunt posibile. Consolidarea fiscala este, in acest sens, fundamentul pe care se construiesc toate celelalte etape ale modernizarii structurale a statului roman in perioada urmatoare."
+    "text": "Logica secvențierii reformelor structurale majore ale României urmează o ordine determinată de relațiile de precondiționare dintre ele. Primul pas, indispensabil și comun tuturor obiectivelor, este consolidarea fiscală: reducerea deficitului bugetar de la peste opt la sută către pragul de trei la sută, care eliberează marja bugetară necesară oricărei alte reforme și protejează criteriile de datorie și dobândă. Fără acest pas, nici aderarea la euro, nici o regionalizare sustenabilă nu sunt posibile. Consolidarea fiscală este, în acest sens, fundamentul pe care se construiesc toate celelalte etape ale modernizării structurale a statului român în perioada următoare."
    },
    {
     "type": "p",
-    "text": "Al doilea pas, dupa stabilizarea finantelor publice, este intrarea in mecanismul ERM-II, decizie care semnaleaza intrarea pe ultima linie dreapta catre euro si care presupune doi ani de stabilitate a cursului. In paralel cu sau dupa acest pas, descentralizarea fiscala in cadrul unei eventuale regionalizari poate avansa, intrucat ea presupune deja existenta unei discipline bugetare consolidate care sa permita transferul de resurse fara a destabiliza echilibrul national. Descentralizarea inaintea consolidarii ar fi riscanta, intrucat ar dispersa controlul fiscal exact in momentul in care acesta trebuie maxim concentrat pentru a aduce deficitul sub control."
+    "text": "Al doilea pas, după stabilizarea finanțelor publice, este intrarea în mecanismul ERM-II, decizie care semnalează intrarea pe ultima linie dreaptă către euro și care presupune doi ani de stabilitate a cursului. În paralel cu sau după acest pas, descentralizarea fiscală în cadrul unei eventuale regionalizări poate avansa, întrucât ea presupune deja existența unei discipline bugetare consolidate care să permită transferul de resurse fără a destabiliza echilibrul național. Descentralizarea înaintea consolidării ar fi riscantă, întrucât ar dispersa controlul fiscal exact în momentul în care acesta trebuie maxim concentrat pentru a aduce deficitul sub control."
    },
    {
     "type": "p",
-    "text": "Al patrulea si ultimul pas in aceasta secventa este adoptarea efectiva a monedei euro, care incununeaza intregul proces de convergenta. Ordinea recomandata, consolidare fiscala, apoi ERM-II, apoi descentralizare fiscala, apoi euro, nu este rigida, intrucat unele etape se pot suprapune partial, dar logica de precondiționare ramane: fiecare pas pregateste terenul pentru urmatorul. Aceasta secventiere transforma un ansamblu de reforme aparent concurente intr-o traiectorie coerenta, in care disciplina fiscala timpurie deblocheaza progresiv celelalte obiective, conducand statul catre o integrare europeana mai profunda si o structura administrativa mai eficienta, pe o cale prudenta si sustenabila."
+    "text": "Al patrulea și ultimul pas în această secvență este adoptarea efectivă a monedei euro, care încununează întregul proces de convergență. Ordinea recomandată, consolidare fiscală, apoi ERM-II, apoi descentralizare fiscală, apoi euro, nu este rigidă, întrucât unele etape se pot suprapune parțial, dar logica de precondiționare rămâne: fiecare pas pregătește terenul pentru următorul. Această secvențiere transformă un ansamblu de reforme aparent concurente într-o traiectorie coerentă, în care disciplina fiscală timpurie deblochează progresiv celelalte obiective, conducând statul către o integrare europeană mai profundă și o structură administrativă mai eficientă, pe o cale prudentă și sustenabilă."
    },
    {
     "type": "table",
-    "headers": ["Pas in secventa", "Reforma", "Precondiție", "Ordine recomandata (nr.)"],
+    "headers": ["Pas în secvență", "Reformă", "Precondiție", "Ordine recomandată (nr.)"],
     "rows": [
-     ["Pas 1", "Consolidare fiscala", "Vointa politica", "1"],
+     ["Pas 1", "Consolidare fiscală", "Voință politică", "1"],
      ["Pas 2", "Intrare ERM-II", "Deficit sub control", "2"],
-     ["Pas 3", "Descentralizare fiscala", "Disciplina bugetara", "3"],
+     ["Pas 3", "Descentralizare fiscală", "Disciplină bugetară", "3"],
      ["Pas 4", "Adoptare euro", "Toate criteriile sustenabile", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Riscul fiscal al descentralizarii necontrolate",
+  "title": "Riscul fiscal al descentralizării necontrolate",
   "blocks": [
    {
     "type": "p",
-    "text": "Descentralizarea fiscala comporta un risc specific, demonstrat de experienta mai multor state: transferul capacitatii de cheltuiala si de indatorare catre niveluri subnationale, fara reguli fiscale stricte si fara mecanisme de raspundere, poate genera deficite si datorii care, consolidate la nivel national, ameninta sustenabilitatea finantelor publice. Acest risc este cunoscut sub denumirea de capcana mandatelor neacoperite, in care nivelurilor inferioare li se transfera responsabilitati fara resurse corespunzatoare, fortandu-le sa se imprumute sau sa subfinanteze serviciile. In contextul romanesc, cu un deficit deja excesiv, acest risc este deosebit de acut si necesita garantii institutionale solide inainte de orice transfer de competente fiscale."
+    "text": "Descentralizarea fiscală comportă un risc specific, demonstrat de experiența mai multor state: transferul capacității de cheltuială și de îndatorare către niveluri subnaționale, fără reguli fiscale stricte și fără mecanisme de răspundere, poate genera deficite și datorii care, consolidate la nivel național, amenință sustenabilitatea finanțelor publice. Acest risc este cunoscut sub denumirea de capcana mandatelor neacoperite, în care nivelurilor inferioare li se transferă responsabilități fără resurse corespunzătoare, forțându-le să se împrumute sau să subfinanțeze serviciile. În contextul românesc, cu un deficit deja excesiv, acest risc este deosebit de acut și necesită garanții instituționale solide înainte de orice transfer de competențe fiscale."
    },
    {
     "type": "p",
-    "text": "Mecanismul prin care descentralizarea necontrolata adanceste deficitul agregat este multiplu. In primul rand, dublarea structurilor administrative creste cheltuielile de functionare. In al doilea rand, lipsa unei discipline bugetare la nivel subnational permite acumularea de arierate si de datorie ascunsa. In al treilea rand, asteptarea implicita ca nivelul central va salva financiar entitatile regionale aflate in dificultate, fenomen cunoscut ca problema constrangerii bugetare slabe, slabeste stimulentele de prudenta fiscala ale autoritatilor regionale. Fiecare dintre aceste canale poate transforma o reforma menita sa eficientizeze administratia intr-o sursa de derapaj fiscal national greu de controlat."
+    "text": "Mecanismul prin care descentralizarea necontrolată adâncește deficitul agregat este multiplu. În primul rând, dublarea structurilor administrative crește cheltuielile de funcționare. În al doilea rând, lipsa unei discipline bugetare la nivel subnațional permite acumularea de arierate și de datorie ascunsă. În al treilea rând, așteptarea implicită că nivelul central va salva financiar entitățile regionale aflate în dificultate, fenomen cunoscut ca problema constrângerii bugetare slabe, slăbește stimulentele de prudență fiscală ale autorităților regionale. Fiecare dintre aceste canale poate transforma o reformă menită să eficientizeze administrația într-o sursă de derapaj fiscal național greu de controlat."
    },
    {
     "type": "p",
-    "text": "Prevenirea riscului fiscal al descentralizarii impune un cadru robust de reguli fiscale subnationale: plafoane de deficit si de datorie pentru fiecare regiune, interdictia salvarii financiare automate de catre centru pentru a intari raspunderea fiscala, monitorizare consolidata in timp real a finantelor regionale si transparenta integrala a bugetelor. Numai cu aceste garantii descentralizarea poate fi compatibila cu obiectivul de convergenta. Regula de aur, conform careia imprumuturile subnationale pot finanta doar investitii, nu cheltuieli curente, este un instrument suplimentar de disciplina. In absenta acestor mecanisme, riscul ca regionalizarea sa compromita criteriile Maastricht este suficient de mare incat sa justifice amanarea descentralizarii fiscale pana dupa consolidarea nationala."
+    "text": "Prevenirea riscului fiscal al descentralizării impune un cadru robust de reguli fiscale subnaționale: plafoane de deficit și de datorie pentru fiecare regiune, interdicția salvării financiare automate de către centru pentru a întări răspunderea fiscală, monitorizare consolidată în timp real a finanțelor regionale și transparența integrală a bugetelor. Numai cu aceste garanții descentralizarea poate fi compatibilă cu obiectivul de convergență. Regula de aur, conform căreia împrumuturile subnaționale pot finanța doar investiții, nu cheltuieli curente, este un instrument suplimentar de disciplină. În absența acestor mecanisme, riscul ca regionalizarea să compromită criteriile Maastricht este suficient de mare încât să justifice amânarea descentralizării fiscale până după consolidarea națională."
    },
    {
     "type": "table",
-    "headers": ["Risc fiscal", "Mecanism", "Garantie de mitigare", "Severitate (1-5)"],
+    "headers": ["Risc fiscal", "Mecanism", "Garanție de mitigare", "Severitate (1-5)"],
     "rows": [
-     ["Mandate neacoperite", "Responsabilitati fara resurse", "Conexiune competenta-resursa", "4"],
-     ["Constrangere bugetara slaba", "Asteptare salvare de la centru", "Interdictie salvare automata", "5"],
-     ["Datorie subnationala", "Indatorare necontrolata", "Plafon deficit regional", "4"],
-     ["Arierate ascunse", "Lipsa transparenta", "Monitorizare consolidata", "3"]
+     ["Mandate neacoperite", "Responsabilități fără resurse", "Conexiune competență-resursă", "4"],
+     ["Constrângere bugetară slabă", "Așteptare salvare de la centru", "Interdicție salvare automată", "5"],
+     ["Datorie subnațională", "Îndatorare necontrolată", "Plafon deficit regional", "4"],
+     ["Arierate ascunse", "Lipsă transparență", "Monitorizare consolidată", "3"]
     ]
    }
   ]
  },
  {
-  "title": "Disciplina bugetara regionala si regulile fiscale",
+  "title": "Disciplina bugetară regională și regulile fiscale",
   "blocks": [
    {
     "type": "p",
-    "text": "Disciplina bugetara la nivel regional este conditia sine qua non a unei descentralizari compatibile cu criteriile Maastricht. Ea se construieste printr-un set de reguli fiscale aplicabile tuturor entitatilor regionale, ancorate legal si monitorizate de o autoritate independenta. Regula fundamentala este echilibrul bugetar structural: bugetul regional curent trebuie sa fie echilibrat sau in surplus, deficitele fiind permise doar pentru finantarea investitiilor, in limite stricte. Aceasta regula, inspirata din practica statelor federale si descentralizate cu finante solide, impiedica regiunile sa finanteze cheltuieli curente prin imprumuturi, evitand acumularea de datorie pentru consum administrativ in loc de investitie productiva."
+    "text": "Disciplina bugetară la nivel regional este condiția sine qua non a unei descentralizări compatibile cu criteriile Maastricht. Ea se construiește printr-un set de reguli fiscale aplicabile tuturor entităților regionale, ancorate legal și monitorizate de o autoritate independentă. Regula fundamentală este echilibrul bugetar structural: bugetul regional curent trebuie să fie echilibrat sau în surplus, deficitele fiind permise doar pentru finanțarea investițiilor, în limite stricte. Această regulă, inspirată din practica statelor federale și descentralizate cu finanțe solide, împiedică regiunile să finanțeze cheltuieli curente prin împrumuturi, evitând acumularea de datorie pentru consum administrativ în loc de investiție productivă."
    },
    {
     "type": "p",
-    "text": "Pe langa regula echilibrului, cadrul de disciplina include plafoane de indatorare exprimate ca pondere in veniturile proprii sau in produsul regional, mecanisme de alerta timpurie cand o regiune se apropie de limite si proceduri de redresare pentru regiunile aflate in dificultate fiscala. Coordonarea cu nivelul national se realizeaza printr-un pact fiscal intern, in care obiectivele agregate de deficit si datorie ale ansamblului national sunt repartizate pe niveluri, fiecare palier avand o cota de responsabilitate. Acest mecanism asigura ca suma comportamentelor fiscale regionale respecta angajamentul national fata de Comisia Europeana, evitand ca autonomia regionala sa erodeze tinta agregata."
+    "text": "Pe lângă regula echilibrului, cadrul de disciplină include plafoane de îndatorare exprimate ca pondere în veniturile proprii sau în produsul regional, mecanisme de alertă timpurie când o regiune se apropie de limite și proceduri de redresare pentru regiunile aflate în dificultate fiscală. Coordonarea cu nivelul național se realizează printr-un pact fiscal intern, în care obiectivele agregate de deficit și datorie ale ansamblului național sunt repartizate pe niveluri, fiecare palier având o cotă de responsabilitate. Acest mecanism asigură că suma comportamentelor fiscale regionale respectă angajamentul național față de Comisia Europeană, evitând ca autonomia regională să erodeze ținta agregată."
    },
    {
     "type": "p",
-    "text": "Monitorizarea si raportarea sunt componente esentiale ale disciplinei. Un sistem informatic integrat care consolideaza in timp real finantele tuturor regiunilor permite nivelului central sa detecteze devierile inainte ca acestea sa devina critice. Transparenta publica a bugetelor regionale adauga un strat de raspundere democratica, in care cetatenii si presa pot supraveghea gestiunea fondurilor regionale. Sanctiunile pentru incalcarea regulilor, gradate de la avertismente la reduceri ale transferurilor de la centru, completeaza arhitectura. Numai un asemenea sistem cuprinzator garanteaza ca descentralizarea fiscala sprijina, nu submineaza, obiectivul national de convergenta catre standardele Maastricht si aderarea la euro."
+    "text": "Monitorizarea și raportarea sunt componente esențiale ale disciplinei. Un sistem informatic integrat care consolidează în timp real finanțele tuturor regiunilor permite nivelului central să detecteze devierile înainte ca acestea să devină critice. Transparența publică a bugetelor regionale adaugă un strat de răspundere democratică, în care cetățenii și presa pot supraveghea gestiunea fondurilor regionale. Sancțiunile pentru încălcarea regulilor, gradate de la avertismente la reduceri ale transferurilor de la centru, completează arhitectura. Numai un asemenea sistem cuprinzător garantează că descentralizarea fiscală sprijină, nu subminează, obiectivul național de convergență către standardele Maastricht și aderarea la euro."
    },
    {
     "type": "chart",
     "chartType": "hbar",
     "data": [
      ["Echilibru bugetar curent", 90],
-     ["Plafon indatorare regionala", 80],
+     ["Plafon îndatorare regională", 80],
      ["Pact fiscal intern", 75],
-     ["Monitorizare consolidata", 85],
-     ["Transparenta publica", 70],
-     ["Sanctiuni gradate", 60]
+     ["Monitorizare consolidată", 85],
+     ["Transparență publică", 70],
+     ["Sancțiuni gradate", 60]
     ]
    }
   ]
  },
  {
-  "title": "Rolul Bancii Nationale in tranzitia catre euro",
+  "title": "Rolul Băncii Naționale în tranziția către euro",
   "blocks": [
    {
     "type": "p",
-    "text": "In tranzitia catre adoptarea euro, Banca Nationala a Romaniei joaca un rol multiplu si esential. Inainte de aderare, ea conduce politica monetara cu obiectivul de a aduce inflatia in conformitate cu criteriul Maastricht, ancorand anticipatiile si gestionand cursul de schimb. In faza ERM-II, banca centrala devine garantul stabilitatii cursului fata de paritatea centrala, interventiile sale fiind orientate spre mentinerea leului in banda convenita. Aceasta dubla responsabilitate, dezinflatie si stabilitate a cursului, poate genera tensiuni de politica monetara, motiv pentru care intrarea in ERM-II trebuie temporizata pana cand cele doua obiective devin compatibile."
+    "text": "În tranziția către adoptarea euro, Banca Națională a României joacă un rol multiplu și esențial. Înainte de aderare, ea conduce politica monetară cu obiectivul de a aduce inflația în conformitate cu criteriul Maastricht, ancorând anticipațiile și gestionând cursul de schimb. În faza ERM-II, banca centrală devine garantul stabilității cursului față de paritatea centrală, intervențiile sale fiind orientate spre menținerea leului în banda convenită. Această dublă responsabilitate, dezinflație și stabilitate a cursului, poate genera tensiuni de politică monetară, motiv pentru care intrarea în ERM-II trebuie temporizată până când cele două obiective devin compatibile."
    },
    {
     "type": "p",
-    "text": "Banca Nationala are totodata un rol consultativ si de avertizare fata de Guvern privind sustenabilitatea finantelor publice. Desi politica fiscala este apanajul Guvernului si Parlamentului, banca centrala semnaleaza public riscurile pe care deficitele mari le reprezinta pentru stabilitatea macroeconomica si pentru obiectivul de convergenta. Prin rapoartele sale si prin participarea la dialogul institutional, banca contribuie la fundamentarea deciziilor de politica economica. Independenta sa institutionala ii confera credibilitatea necesara pentru ca aceste avertismente sa fie luate in serios de piete si de factorii de decizie, functionand ca o ancora de disciplina macroeconomica."
+    "text": "Banca Națională are totodată un rol consultativ și de avertizare față de Guvern privind sustenabilitatea finanțelor publice. Deși politica fiscală este apanajul Guvernului și Parlamentului, banca centrală semnalează public riscurile pe care deficitele mari le reprezintă pentru stabilitatea macroeconomică și pentru obiectivul de convergență. Prin rapoartele sale și prin participarea la dialogul instituțional, banca contribuie la fundamentarea deciziilor de politică economică. Independența sa instituțională îi conferă credibilitatea necesară pentru ca aceste avertismente să fie luate în serios de piețe și de factorii de decizie, funcționând ca o ancoră de disciplină macroeconomică."
    },
    {
     "type": "p",
-    "text": "Dupa adoptarea euro, Banca Nationala a Romaniei se integreaza in Eurosistem, guvernatorul sau devenind membru al Consiliului Guvernatorilor Bancii Centrale Europene, participand astfel la deciziile de politica monetara pentru intreaga zona euro. Banca pastreaza functii importante de supraveghere bancara, de gestiune a sistemelor de plati si de stabilitate financiara la nivel national, dar pierde autonomia asupra ratei dobanzii si a cursului. Pregatirea pentru aceasta tranzitie include alinierea legislativa, integrarea tehnica in infrastructura Eurosistemului si construirea capacitatii institutionale de a contribui la politica monetara comuna, un proces complex care necesita ani de pregatire prealabila."
+    "text": "După adoptarea euro, Banca Națională a României se integrează în Eurosistem, guvernatorul său devenind membru al Consiliului Guvernatorilor Băncii Centrale Europene, participând astfel la deciziile de politică monetară pentru întreaga zonă euro. Banca păstrează funcții importante de supraveghere bancară, de gestiune a sistemelor de plăți și de stabilitate financiară la nivel național, dar pierde autonomia asupra ratei dobânzii și a cursului. Pregătirea pentru această tranziție include alinierea legislativă, integrarea tehnică în infrastructura Eurosistemului și construirea capacității instituționale de a contribui la politica monetară comună, un proces complex care necesită ani de pregătire prealabilă."
    },
    {
     "type": "table",
-    "headers": ["Faza", "Rol Banca Nationala", "Instrument principal", "Autonomie (1-5)"],
+    "headers": ["Fază", "Rol Banca Națională", "Instrument principal", "Autonomie (1-5)"],
     "rows": [
-     ["Pre-aderare", "Conduce politica monetara", "Rata dobanzii", "5"],
-     ["ERM-II", "Garanteaza stabilitate curs", "Interventii valutare", "3"],
-     ["Post-euro", "Membru Eurosistem", "Vot in Consiliul Guvernatorilor", "1"],
-     ["Permanent", "Supraveghere si stabilitate financiara", "Reglementare prudentiala", "4"]
+     ["Pre-aderare", "Conduce politica monetară", "Rata dobânzii", "5"],
+     ["ERM-II", "Garantează stabilitate curs", "Intervenții valutare", "3"],
+     ["Post-euro", "Membru Eurosistem", "Vot în Consiliul Guvernatorilor", "1"],
+     ["Permanent", "Supraveghere și stabilitate financiară", "Reglementare prudențială", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Ratingul suveran si costul finantarii datoriei",
+  "title": "Ratingul suveran și costul finanțării datoriei",
   "blocks": [
    {
     "type": "p",
-    "text": "Ratingul suveran, evaluarea pe care agentiile internationale de rating o acorda capacitatii unui stat de a-si onora datoriile, are un impact direct asupra costului finantarii si, prin urmare, asupra deficitului bugetar prin componenta cheltuielilor cu dobanzile. Romania se afla in 2024 la limita inferioara a categoriei recomandate pentru investitii, cu o perspectiva influentata negativ de deficitul bugetar excesiv. O eventuala retrogradare sub aceasta categorie ar scumpi semnificativ finantarea datoriei publice, ar reduce baza de investitori dispusi sa cumpere obligatiuni romanesti si ar putea declansa un cerc vicios in care costul mai mare al datoriei adanceste deficitul, justificand noi retrogradari."
+    "text": "Ratingul suveran, evaluarea pe care agențiile internaționale de rating o acordă capacității unui stat de a-și onora datoriile, are un impact direct asupra costului finanțării și, prin urmare, asupra deficitului bugetar prin componenta cheltuielilor cu dobânzile. România se află în 2024 la limita inferioară a categoriei recomandate pentru investiții, cu o perspectivă influențată negativ de deficitul bugetar excesiv. O eventuală retrogradare sub această categorie ar scumpi semnificativ finanțarea datoriei publice, ar reduce baza de investitori dispuși să cumpere obligațiuni românești și ar putea declanșa un cerc vicios în care costul mai mare al datoriei adâncește deficitul, justificând noi retrogradări."
    },
    {
     "type": "p",
-    "text": "Factorii care determina ratingul suveran sunt in mare parte aceiasi care stau la baza criteriilor Maastricht: nivelul si traiectoria deficitului si datoriei, performanta inflatiei, perspectivele de crestere economica, stabilitatea politica si calitatea institutiilor. Mentinerea categoriei recomandate pentru investitii este o prioritate strategica, intrucat o retrogradare ar avea efecte in cascada asupra intregii economii, scumpind nu doar finantarea statului, ci si pe cea a companiilor si a populatiei. Angajamentul credibil de consolidare fiscala este principalul instrument de protejare a ratingului si de reducere a costului finantarii, demonstrand investitorilor o traiectorie sustenabila."
+    "text": "Factorii care determină ratingul suveran sunt în mare parte aceiași care stau la baza criteriilor Maastricht: nivelul și traiectoria deficitului și datoriei, performanța inflației, perspectivele de creștere economică, stabilitatea politică și calitatea instituțiilor. Menținerea categoriei recomandate pentru investiții este o prioritate strategică, întrucât o retrogradare ar avea efecte în cascadă asupra întregii economii, scumpind nu doar finanțarea statului, ci și pe cea a companiilor și a populației. Angajamentul credibil de consolidare fiscală este principalul instrument de protejare a ratingului și de reducere a costului finanțării, demonstrând investitorilor o traiectorie sustenabilă."
    },
    {
     "type": "p",
-    "text": "Legatura intre rating, cost de finantare si convergenta este una de reciprocitate: progresul catre criteriile Maastricht imbunatateste ratingul, ceea ce reduce costul datoriei, ceea ce usureaza la randul sau respectarea criteriilor de deficit si dobanda. Invers, derapajul fiscal deterioreaza ratingul, scumpeste datoria si indeparteaza tara de criterii. Pentru orice reforma structurala, inclusiv regionalizarea, perceptia agentiilor de rating este relevanta: o reforma vazuta ca generatoare de riscuri fiscale necontrolate ar putea presa negativ asupra ratingului, in timp ce una proiectata cu garantii de disciplina si eficienta ar fi neutra sau pozitiva, fiind un argument suplimentar pentru proiectarea prudenta a descentralizarii."
+    "text": "Legătura între rating, cost de finanțare și convergență este una de reciprocitate: progresul către criteriile Maastricht îmbunătățește ratingul, ceea ce reduce costul datoriei, ceea ce ușurează la rândul său respectarea criteriilor de deficit și dobândă. Invers, derapajul fiscal deteriorează ratingul, scumpește datoria și îndepărtează țara de criterii. Pentru orice reformă structurală, inclusiv regionalizarea, percepția agențiilor de rating este relevantă: o reformă văzută ca generatoare de riscuri fiscale necontrolate ar putea presa negativ asupra ratingului, în timp ce una proiectată cu garanții de disciplină și eficiență ar fi neutră sau pozitivă, fiind un argument suplimentar pentru proiectarea prudentă a descentralizării."
    },
    {
     "type": "table",
-    "headers": ["Factor de rating", "Stare Romania 2024", "Impact asupra costului datoriei", "Pondere (1-5)"],
+    "headers": ["Factor de rating", "Stare România 2024", "Impact asupra costului datoriei", "Pondere (1-5)"],
     "rows": [
      ["Deficit bugetar", "Excesiv (8,1%)", "Scumpire", "5"],
-     ["Datorie publica", "Sub prag (52%)", "Stabilizare", "3"],
-     ["Crestere economica", "Moderata", "Sprijin", "3"],
-     ["Calitate institutii", "In imbunatatire", "Neutru-pozitiv", "4"]
+     ["Datorie publică", "Sub prag (52%)", "Stabilizare", "3"],
+     ["Creștere economică", "Moderată", "Sprijin", "3"],
+     ["Calitate instituții", "În îmbunătățire", "Neutru-pozitiv", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Convergenta reala versus convergenta nominala",
+  "title": "Convergența reală versus convergența nominală",
   "blocks": [
    {
     "type": "p",
-    "text": "Dincolo de criteriile nominale Maastricht, exista o dimensiune distincta si la fel de importanta a pregatirii pentru euro: convergenta reala, care masoara apropierea nivelului de dezvoltare economica al unei tari de media zonei euro. Convergenta reala se exprima prin produsul intern brut pe locuitor exprimat la paritatea puterii de cumparare, prin structura economiei, prin nivelul de productivitate si prin gradul de integrare comerciala cu zona euro. Romania a inregistrat o convergenta reala remarcabila in ultimele doua decenii, produsul intern brut pe locuitor apropiindu-se substantial de media europeana, dar ramane sub aceasta medie, cu disparitati regionale interne semnificative care complica imaginea de ansamblu."
+    "text": "Dincolo de criteriile nominale Maastricht, există o dimensiune distinctă și la fel de importantă a pregătirii pentru euro: convergența reală, care măsoară apropierea nivelului de dezvoltare economică al unei țări de media zonei euro. Convergența reală se exprimă prin produsul intern brut pe locuitor exprimat la paritatea puterii de cumpărare, prin structura economiei, prin nivelul de productivitate și prin gradul de integrare comercială cu zona euro. România a înregistrat o convergență reală remarcabilă în ultimele două decenii, produsul intern brut pe locuitor apropiindu-se substanțial de media europeană, dar rămâne sub această medie, cu disparități regionale interne semnificative care complică imaginea de ansamblu."
    },
    {
     "type": "p",
-    "text": "Distinctia intre convergenta reala si cea nominala este esentiala pentru decizia de aderare la euro. Un stat poate indeplini criteriile nominale, dar daca structura sa economica difera substantial de cea a zonei euro, riscul de socuri asimetrice este ridicat: o politica monetara unica adecvata pentru nucleul zonei euro poate fi nepotrivita pentru o economie cu un ciclu economic decuplat. De aceea, alegerea momentului optim de aderare tine cont nu doar de bifarea criteriilor nominale, ci si de gradul de convergenta reala si structurala, care reduce vulnerabilitatea la socuri pe care economia nu le-ar mai putea contracara prin politica monetara proprie dupa renuntarea la leu."
+    "text": "Distincția între convergența reală și cea nominală este esențială pentru decizia de aderare la euro. Un stat poate îndeplini criteriile nominale, dar dacă structura sa economică diferă substanțial de cea a zonei euro, riscul de șocuri asimetrice este ridicat: o politică monetară unică adecvată pentru nucleul zonei euro poate fi nepotrivită pentru o economie cu un ciclu economic decuplat. De aceea, alegerea momentului optim de aderare ține cont nu doar de bifarea criteriilor nominale, ci și de gradul de convergență reală și structurală, care reduce vulnerabilitatea la șocuri pe care economia nu le-ar mai putea contracara prin politica monetară proprie după renunțarea la leu."
    },
    {
     "type": "p",
-    "text": "Regionalizarea are o legatura directa cu convergenta reala prin obiectivul sau de reducere a disparitatilor interne. Decalajele uriase intre regiunea capitalei si regiunile estice sau sudice reprezinta o sursa de vulnerabilitate: o economie cu disparitati interne mari raspunde neuniform la politica monetara unica. O regionalizare reusita, care reduce decalajele si omogenizeaza dezvoltarea teritoriala, ar imbunatati convergenta reala si ar pregati economia pentru euro intr-un sens mai profund decat simpla bifare a criteriilor nominale. Astfel, cele doua agende, regionalizarea si aderarea la euro, se intalnesc pe terenul convergentei reale, oferind un argument suplimentar pentru o reforma teritoriala bine proiectata si orientata spre coeziune."
+    "text": "Regionalizarea are o legătură directă cu convergența reală prin obiectivul său de reducere a disparităților interne. Decalajele uriașe între regiunea capitalei și regiunile estice sau sudice reprezintă o sursă de vulnerabilitate: o economie cu disparități interne mari răspunde neuniform la politica monetară unică. O regionalizare reușită, care reduce decalajele și omogenizează dezvoltarea teritorială, ar îmbunătăți convergența reală și ar pregăti economia pentru euro într-un sens mai profund decât simpla bifare a criteriilor nominale. Astfel, cele două agende, regionalizarea și aderarea la euro, se întâlnesc pe terenul convergenței reale, oferind un argument suplimentar pentru o reformă teritorială bine proiectată și orientată spre coeziune."
    },
    {
     "type": "table",
-    "headers": ["Tip convergenta", "Indicator-cheie", "Stare Romania", "Distanta de media UE (1-5)"],
+    "headers": ["Tip convergență", "Indicator-cheie", "Stare România", "Distanță de media UE (1-5)"],
     "rows": [
-     ["Nominala (Maastricht)", "Cele cinci criterii", "Partial neconform", "4"],
-     ["Reala (dezvoltare)", "PIB pe locuitor (PPC)", "Sub medie, in crestere", "3"],
-     ["Structurala", "Productivitate, structura", "In tranzitie", "4"],
-     ["Teritoriala interna", "Disparitati regionale", "Mari", "5"]
+     ["Nominală (Maastricht)", "Cele cinci criterii", "Parțial neconform", "4"],
+     ["Reală (dezvoltare)", "PIB pe locuitor (PPC)", "Sub medie, în creștere", "3"],
+     ["Structurală", "Productivitate, structură", "În tranziție", "4"],
+     ["Teritorială internă", "Disparități regionale", "Mari", "5"]
     ]
    }
   ]
  },
  {
-  "title": "Coordonarea politicii fiscale cu politica monetara",
+  "title": "Coordonarea politicii fiscale cu politica monetară",
   "blocks": [
    {
     "type": "p",
-    "text": "Atingerea criteriilor de convergenta nu este posibila fara o coordonare eficienta intre politica fiscala, condusa de Guvern, si politica monetara, condusa de Banca Nationala. Cele doua politici interactioneaza profund: o politica fiscala laxa, cu deficite mari care stimuleaza cererea, alimenteaza inflatia si obliga banca centrala sa mentina dobanzi ridicate pentru a o tine sub control. Dobanzile ridicate scumpesc la randul lor finantarea datoriei publice, adancind deficitul. Acest cerc, cunoscut ca dominanta fiscala, in care politica monetara este constransa de presiunea fiscala, este exact ceea ce o tara aspiranta la euro trebuie sa evite, intrucat submineaza simultan criteriul inflatiei, al deficitului si al dobanzii."
+    "text": "Atingerea criteriilor de convergență nu este posibilă fără o coordonare eficientă între politica fiscală, condusă de Guvern, și politica monetară, condusă de Banca Națională. Cele două politici interacționează profund: o politică fiscală laxă, cu deficite mari care stimulează cererea, alimentează inflația și obligă banca centrală să mențină dobânzi ridicate pentru a o ține sub control. Dobânzile ridicate scumpesc la rândul lor finanțarea datoriei publice, adâncind deficitul. Acest cerc, cunoscut ca dominanță fiscală, în care politica monetară este constrânsă de presiunea fiscală, este exact ceea ce o țară aspirantă la euro trebuie să evite, întrucât subminează simultan criteriul inflației, al deficitului și al dobânzii."
    },
    {
     "type": "p",
-    "text": "Coordonarea optima presupune ca politica fiscala sa sustina, nu sa contracareze, efortul de dezinflatie al bancii centrale. O consolidare fiscala bine calibrata reduce cererea agregata, sprijinind reducerea inflatiei, ceea ce permite bancii centrale sa relaxeze treptat politica monetara, reducand dobanzile si costul datoriei. Aceasta sinergie, in care politica fiscala si cea monetara trag in aceeasi directie, accelereaza convergenta catre toate criteriile simultan. Independenta bancii centrale este compatibila cu aceasta coordonare, atata timp cat este vorba de aliniere voluntara a obiectivelor, nu de subordonare a politicii monetare imperativelor fiscale ale Guvernului."
+    "text": "Coordonarea optimă presupune ca politica fiscală să susțină, nu să contracareze, efortul de dezinflație al băncii centrale. O consolidare fiscală bine calibrată reduce cererea agregată, sprijinind reducerea inflației, ceea ce permite băncii centrale să relaxeze treptat politica monetară, reducând dobânzile și costul datoriei. Această sinergie, în care politica fiscală și cea monetară trag în aceeași direcție, accelerează convergența către toate criteriile simultan. Independența băncii centrale este compatibilă cu această coordonare, atâta timp cât este vorba de aliniere voluntară a obiectivelor, nu de subordonare a politicii monetare imperativelor fiscale ale Guvernului."
    },
    {
     "type": "p",
-    "text": "In contextul regionalizarii, coordonarea fiscal-monetara capata o dimensiune suplimentara: descentralizarea adauga noi actori fiscali, regiunile, ale caror comportamente bugetare agregate influenteaza cererea si presiunile inflationiste. Coordonarea trebuie astfel sa includa si nivelul subnational, prin pactul fiscal intern care aliniaza comportamentele regionale cu obiectivul macroeconomic national. Fara aceasta extindere a coordonarii, descentralizarea ar putea introduce o sursa difuza de expansiune fiscala greu de controlat de la centru, complicand sarcina bancii centrale. O guvernanta fiscala multinivel coerenta este, prin urmare, o conditie a compatibilizarii regionalizarii cu obiectivul de convergenta monetara."
+    "text": "În contextul regionalizării, coordonarea fiscal-monetară capătă o dimensiune suplimentară: descentralizarea adaugă noi actori fiscali, regiunile, ale căror comportamente bugetare agregate influențează cererea și presiunile inflaționiste. Coordonarea trebuie astfel să includă și nivelul subnațional, prin pactul fiscal intern care aliniază comportamentele regionale cu obiectivul macroeconomic național. Fără această extindere a coordonării, descentralizarea ar putea introduce o sursă difuză de expansiune fiscală greu de controlat de la centru, complicând sarcina băncii centrale. O guvernanță fiscală multinivel coerentă este, prin urmare, o condiție a compatibilizării regionalizării cu obiectivul de convergență monetară."
    },
    {
     "type": "table",
-    "headers": ["Scenariu coordonare", "Politica fiscala", "Efect asupra convergentei", "Eficacitate (1-5)"],
+    "headers": ["Scenariu coordonare", "Politică fiscală", "Efect asupra convergenței", "Eficacitate (1-5)"],
     "rows": [
-     ["Dominanta fiscala", "Laxa, deficite mari", "Negativ (cerc vicios)", "1"],
-     ["Necoordonare", "Divergenta obiective", "Lent", "2"],
-     ["Coordonare sinergica", "Consolidare aliniata", "Pozitiv (accelerare)", "5"],
-     ["Coordonare multinivel", "Include nivel regional", "Pozitiv si robust", "5"]
+     ["Dominanță fiscală", "Laxă, deficite mari", "Negativ (cerc vicios)", "1"],
+     ["Necoordonare", "Divergență obiective", "Lent", "2"],
+     ["Coordonare sinergică", "Consolidare aliniată", "Pozitiv (accelerare)", "5"],
+     ["Coordonare multinivel", "Include nivel regional", "Pozitiv și robust", "5"]
     ]
    }
   ]
  },
  {
-  "title": "Pactul de Stabilitate si Crestere si supravegherea europeana",
+  "title": "Pactul de Stabilitate și Creștere și supravegherea europeană",
   "blocks": [
    {
     "type": "p",
-    "text": "Disciplina fiscala a statelor membre ale Uniunii Europene este guvernata de Pactul de Stabilitate si Crestere, cadrul de reguli care impune limitele de trei la suta pentru deficit si saizeci la suta pentru datorie si stabileste procedurile de supraveghere si corectie. Reforma recenta a guvernantei economice europene a introdus o abordare bazata pe planuri fiscal-structurale pe termen mediu, in care fiecare stat negociaza cu Comisia Europeana o traiectorie de ajustare a cheltuielilor, adaptata situatiei sale specifice. Pentru Romania, aflata in procedura de deficit excesiv, acest cadru impune un calendar concret de reducere a deficitului, monitorizat anual, cu obligatia de a respecta o traiectorie de cheltuieli convenita."
+    "text": "Disciplina fiscală a statelor membre ale Uniunii Europene este guvernată de Pactul de Stabilitate și Creștere, cadrul de reguli care impune limitele de trei la sută pentru deficit și șaizeci la sută pentru datorie și stabilește procedurile de supraveghere și corecție. Reforma recentă a guvernanței economice europene a introdus o abordare bazată pe planuri fiscal-structurale pe termen mediu, în care fiecare stat negociază cu Comisia Europeană o traiectorie de ajustare a cheltuielilor, adaptată situației sale specifice. Pentru România, aflată în procedura de deficit excesiv, acest cadru impune un calendar concret de reducere a deficitului, monitorizat anual, cu obligația de a respecta o traiectorie de cheltuieli convenită."
    },
    {
     "type": "p",
-    "text": "Procedura de deficit excesiv, brat corectiv al Pactului, se declanseaza cand un stat depaseste pragul de deficit si nu il corecteaza intr-un ritm satisfacator. Ea presupune recomandari obligatorii ale Consiliului Uniunii Europene privind ajustarea fiscala anuala, raportari periodice si, in ultima instanta, posibilitatea unor sanctiuni financiare. Pentru Romania, ramanerea in aceasta procedura din 2020 reflecta dificultatea structurala de a reduce deficitul. Iesirea din procedura, prin aducerea deficitului sub trei la suta in mod sustenabil, este un pas necesar nu doar pentru aderarea la euro, ci si pentru restabilirea marjei de manevra fiscala si a credibilitatii pe pietele financiare."
+    "text": "Procedura de deficit excesiv, braț corectiv al Pactului, se declanșează când un stat depășește pragul de deficit și nu îl corectează într-un ritm satisfăcător. Ea presupune recomandări obligatorii ale Consiliului Uniunii Europene privind ajustarea fiscală anuală, raportări periodice și, în ultimă instanță, posibilitatea unor sancțiuni financiare. Pentru România, rămânerea în această procedură din 2020 reflectă dificultatea structurală de a reduce deficitul. Ieșirea din procedură, prin aducerea deficitului sub trei la sută în mod sustenabil, este un pas necesar nu doar pentru aderarea la euro, ci și pentru restabilirea marjei de manevră fiscală și a credibilității pe piețele financiare."
    },
    {
     "type": "p",
-    "text": "Supravegherea europeana functioneaza ca o ancora externa de disciplina, care poate sprijini eforturile interne de reforma. Angajamentele asumate fata de Comisia Europeana ofera Guvernului un argument suplimentar pentru masuri de consolidare adesea nepopulare, transferand o parte din presiunea politica catre cadrul european. Pentru regionalizare, cadrul Pactului este relevant intrucat impune ca orice reforma structurala sa fie compatibila cu traiectoria de ajustare convenita: o descentralizare care ar adanci deficitul peste calendarul agreat ar contraveni angajamentelor europene. Astfel, supravegherea europeana actioneaza ca o constrangere care disciplineaza si secventierea reformelor interne, integrandu-le intr-un cadru de sustenabilitate fiscala monitorizat extern."
+    "text": "Supravegherea europeană funcționează ca o ancoră externă de disciplină, care poate sprijini eforturile interne de reformă. Angajamentele asumate față de Comisia Europeană oferă Guvernului un argument suplimentar pentru măsuri de consolidare adesea nepopulare, transferând o parte din presiunea politică către cadrul european. Pentru regionalizare, cadrul Pactului este relevant întrucât impune ca orice reformă structurală să fie compatibilă cu traiectoria de ajustare convenită: o descentralizare care ar adânci deficitul peste calendarul agreat ar contraveni angajamentelor europene. Astfel, supravegherea europeană acționează ca o constrângere care disciplinează și secvențierea reformelor interne, integrându-le într-un cadru de sustenabilitate fiscală monitorizat extern."
    },
    {
     "type": "table",
-    "headers": ["Element al Pactului", "Functie", "Aplicare la Romania", "Forta (1-5)"],
+    "headers": ["Element al Pactului", "Funcție", "Aplicare la România", "Forță (1-5)"],
     "rows": [
-     ["Prag deficit 3%", "Limita preventiva", "Depasit (8,1%)", "5"],
-     ["Prag datorie 60%", "Limita preventiva", "Respectat (52%)", "3"],
-     ["Procedura deficit excesiv", "Brat corectiv", "Activa din 2020", "5"],
-     ["Plan fiscal-structural", "Traiectorie negociata", "In implementare", "4"]
+     ["Prag deficit 3%", "Limită preventivă", "Depășit (8,1%)", "5"],
+     ["Prag datorie 60%", "Limită preventivă", "Respectat (52%)", "3"],
+     ["Procedură deficit excesiv", "Braț corectiv", "Activă din 2020", "5"],
+     ["Plan fiscal-structural", "Traiectorie negociată", "În implementare", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Anticipatiile inflationiste si ancorarea lor",
+  "title": "Anticipațiile inflaționiste și ancorarea lor",
   "blocks": [
    {
     "type": "p",
-    "text": "Un determinant adesea subestimat al inflatiei este reprezentat de anticipatiile inflationiste, adica asteptarile agentilor economici, gospodarii si firme, privind evolutia viitoare a preturilor. Aceste anticipatii se autoindeplinesc partial: daca firmele se asteapta la inflatie ridicata, isi majoreaza preturile preventiv, iar angajatii cer salarii mai mari, alimentand chiar inflatia anticipata. Ancorarea anticipatiilor la un nivel scazut, compatibil cu tinta de inflatie, este de aceea unul dintre obiectivele centrale ale Bancii Nationale. O banca centrala credibila, care isi respecta tinta, beneficiaza de anticipatii bine ancorate, ceea ce face dezinflatia mai putin costisitoare in termeni de crestere economica sacrificata."
+    "text": "Un determinant adesea subestimat al inflației este reprezentat de anticipațiile inflaționiste, adică așteptările agenților economici, gospodării și firme, privind evoluția viitoare a prețurilor. Aceste anticipații se autoîndeplinesc parțial: dacă firmele se așteaptă la inflație ridicată, își majorează prețurile preventiv, iar angajații cer salarii mai mari, alimentând chiar inflația anticipată. Ancorarea anticipațiilor la un nivel scăzut, compatibil cu ținta de inflație, este de aceea unul dintre obiectivele centrale ale Băncii Naționale. O bancă centrală credibilă, care își respectă ținta, beneficiază de anticipații bine ancorate, ceea ce face dezinflația mai puțin costisitoare în termeni de creștere economică sacrificată."
    },
    {
     "type": "p",
-    "text": "In perioada de inflatie ridicata din 2022-2023, exista riscul ca anticipatiile sa se dezancoreze, adica agentii sa inceapa sa creada ca inflatia ridicata va persista, ceea ce ar fi facut dezinflatia mult mai dificila si mai costisitoare. Banca Nationala a actionat ferm prin majorarea dobanzilor si prin comunicare clara, tocmai pentru a preveni dezancorarea. Pentru convergenta catre criteriul Maastricht al inflatiei, mentinerea anticipatiilor bine ancorate este esentiala: ea permite reducerea durabila a inflatiei catre pragul de referinta fara a sacrifica excesiv cresterea economica, asigurand sustenabilitatea conformitatii pe care Banca Centrala Europeana o evalueaza in rapoartele de convergenta."
+    "text": "În perioada de inflație ridicată din 2022-2023, exista riscul ca anticipațiile să se dezancoreze, adică agenții să înceapă să creadă că inflația ridicată va persista, ceea ce ar fi făcut dezinflația mult mai dificilă și mai costisitoare. Banca Națională a acționat ferm prin majorarea dobânzilor și prin comunicare clară, tocmai pentru a preveni dezancorarea. Pentru convergența către criteriul Maastricht al inflației, menținerea anticipațiilor bine ancorate este esențială: ea permite reducerea durabilă a inflației către pragul de referință fără a sacrifica excesiv creșterea economică, asigurând sustenabilitatea conformității pe care Banca Centrală Europeană o evaluează în rapoartele de convergență."
    },
    {
     "type": "p",
-    "text": "Politica fiscala influenteaza si ea anticipatiile inflationiste: un Guvern care mentine deficite mari semnaleaza ca presiunile inflationiste vor persista, dezancorand asteptarile, in timp ce un angajament credibil de consolidare fiscala le linisteste. Aceasta confirma odata in plus interdependenta dintre politica fiscala si cea monetara in procesul de convergenta. Pentru ansamblul reformelor structurale, inclusiv regionalizarea, credibilitatea cadrului macroeconomic conteaza: un program coerent de consolidare fiscala si de reforma administrativa eficienta, comunicat transparent, ancoreaza anticipatiile si reduce primele de risc, sprijinind simultan obiectivul de stabilitate a preturilor si pe cel de finantare ieftina a datoriei publice."
+    "text": "Politica fiscală influențează și ea anticipațiile inflaționiste: un Guvern care menține deficite mari semnalează că presiunile inflaționiste vor persista, dezancorând așteptările, în timp ce un angajament credibil de consolidare fiscală le liniștește. Aceasta confirmă odată în plus interdependența dintre politica fiscală și cea monetară în procesul de convergență. Pentru ansamblul reformelor structurale, inclusiv regionalizarea, credibilitatea cadrului macroeconomic contează: un program coerent de consolidare fiscală și de reformă administrativă eficientă, comunicat transparent, ancorează anticipațiile și reduce primele de risc, sprijinind simultan obiectivul de stabilitate a prețurilor și pe cel de finanțare ieftină a datoriei publice."
    },
    {
     "type": "chart",
     "chartType": "bar",
     "data": [
-     ["Anticipatii 2021", 4],
-     ["Anticipatii 2022", 9],
-     ["Anticipatii 2023", 7],
-     ["Anticipatii 2024", 5]
+     ["Anticipații 2021", 4],
+     ["Anticipații 2022", 9],
+     ["Anticipații 2023", 7],
+     ["Anticipații 2024", 5]
     ]
    }
   ]
  },
  {
-  "title": "Beneficiile si costurile adoptarii euro",
+  "title": "Beneficiile și costurile adoptării euro",
   "blocks": [
    {
     "type": "p",
-    "text": "Adoptarea monedei euro aduce beneficii semnificative, dar si costuri si renuntari, care trebuie evaluate echilibrat. Printre beneficii se numara eliminarea riscului de curs valutar in comertul si investitiile cu zona euro, reducerea costurilor de tranzactie, integrarea mai profunda in piata financiara europeana, accesul la finantare potential mai ieftina si stabilitatea oferita de o moneda forte si credibila international. Pentru o economie deschisa si puternic integrata comercial cu zona euro, cum este cea romaneasca, aceste beneficii sunt substantiale si reprezinta motivatia economica principala a aspiratiei catre euro, dincolo de dimensiunea simbolica a integrarii europene depline."
+    "text": "Adoptarea monedei euro aduce beneficii semnificative, dar și costuri și renunțări, care trebuie evaluate echilibrat. Printre beneficii se numără eliminarea riscului de curs valutar în comerțul și investițiile cu zona euro, reducerea costurilor de tranzacție, integrarea mai profundă în piața financiară europeană, accesul la finanțare potențial mai ieftină și stabilitatea oferită de o monedă forte și credibilă internațional. Pentru o economie deschisă și puternic integrată comercial cu zona euro, cum este cea românească, aceste beneficii sunt substanțiale și reprezintă motivația economică principală a aspirației către euro, dincolo de dimensiunea simbolică a integrării europene depline."
    },
    {
     "type": "p",
-    "text": "Costul principal al adoptarii euro este renuntarea la politica monetara proprie si la cursul de schimb ca instrumente de ajustare la socuri economice. Un stat care adopta euro nu mai poate ajusta dobanda sau lasa moneda sa se deprecieze pentru a contracara o recesiune sau o pierdere de competitivitate. Daca economia sufera un soc asimetric, diferit de cel resimtit de restul zonei euro, ea trebuie sa se ajusteze prin alte mecanisme, mai dureroase: flexibilitatea preturilor si salariilor, mobilitatea fortei de munca, politica fiscala. De aceea convergenta reala si structurala suficienta este esentiala inainte de aderare, pentru a minimiza riscul socurilor asimetrice greu de gestionat fara instrumente monetare nationale."
+    "text": "Costul principal al adoptării euro este renunțarea la politica monetară proprie și la cursul de schimb ca instrumente de ajustare la șocuri economice. Un stat care adoptă euro nu mai poate ajusta dobânda sau lăsa moneda să se deprecieze pentru a contracara o recesiune sau o pierdere de competitivitate. Dacă economia suferă un șoc asimetric, diferit de cel resimțit de restul zonei euro, ea trebuie să se ajusteze prin alte mecanisme, mai dureroase: flexibilitatea prețurilor și salariilor, mobilitatea forței de muncă, politica fiscală. De aceea convergența reală și structurală suficientă este esențială înainte de aderare, pentru a minimiza riscul șocurilor asimetrice greu de gestionat fără instrumente monetare naționale."
    },
    {
     "type": "p",
-    "text": "Echilibrul intre beneficii si costuri depinde decisiv de momentul aderarii. O aderare prematura, inainte de convergenta reala suficienta si de consolidarea finantelor publice, ar maximiza costurile si riscurile, expunand economia la vulnerabilitati. O aderare la momentul potrivit, dupa o convergenta solida, ar maximiza beneficiile minimizand costurile. Pentru Romania, calculul cost-beneficiu inclina clar in favoarea unei abordari prudente, in care aderarea urmeaza consolidarea fiscala si o convergenta reala mai avansata, inclusiv prin reducerea disparitatilor teritoriale interne. Regionalizarea, prin contributia sa la coeziunea teritoriala, sustine indirect maximizarea beneficiilor nete ale viitoarei adoptari a euro."
+    "text": "Echilibrul între beneficii și costuri depinde decisiv de momentul aderării. O aderare prematură, înainte de convergența reală suficientă și de consolidarea finanțelor publice, ar maximiza costurile și riscurile, expunând economia la vulnerabilități. O aderare la momentul potrivit, după o convergență solidă, ar maximiza beneficiile minimizând costurile. Pentru România, calculul cost-beneficiu înclină clar în favoarea unei abordări prudente, în care aderarea urmează consolidarea fiscală și o convergență reală mai avansată, inclusiv prin reducerea disparităților teritoriale interne. Regionalizarea, prin contribuția sa la coeziunea teritorială, susține indirect maximizarea beneficiilor nete ale viitoarei adoptări a euro."
    },
    {
     "type": "table",
-    "headers": ["Element", "Tip", "Conditie de maximizare", "Importanta (1-5)"],
+    "headers": ["Element", "Tip", "Condiție de maximizare", "Importanță (1-5)"],
     "rows": [
-     ["Eliminare risc valutar", "Beneficiu", "Integrare comerciala", "5"],
-     ["Reducere cost tranzactii", "Beneficiu", "Comert intens zona euro", "4"],
-     ["Pierdere politica monetara", "Cost", "Convergenta reala", "5"],
-     ["Risc soc asimetric", "Cost", "Convergenta structurala", "4"]
+     ["Eliminare risc valutar", "Beneficiu", "Integrare comercială", "5"],
+     ["Reducere cost tranzacții", "Beneficiu", "Comerț intens zona euro", "4"],
+     ["Pierdere politică monetară", "Cost", "Convergență reală", "5"],
+     ["Risc șoc asimetric", "Cost", "Convergență structurală", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Stabilitatea financiara si supravegherea bancara",
+  "title": "Stabilitatea financiară și supravegherea bancară",
   "blocks": [
    {
     "type": "p",
-    "text": "Pe langa convergenta nominala si reala, pregatirea pentru euro implica si dimensiunea stabilitatii financiare si a integrarii in mecanismele de supraveghere bancara europeana. Aderarea la euro presupune, de regula, participarea la Uniunea Bancara, in cadrul careia supravegherea bancilor importante este preluata de Banca Centrala Europeana prin Mecanismul Unic de Supraveghere, iar gestiunea crizelor bancare urmeaza Mecanismul Unic de Rezolutie. Romania trebuie sa pregateasca sistemul sau bancar pentru aceasta integrare, asigurand robustetea bancilor, niveluri adecvate de capitalizare si o gestiune prudenta a riscurilor, astfel incat tranzitia sa nu releve vulnerabilitati ascunse."
+    "text": "Pe lângă convergența nominală și reală, pregătirea pentru euro implică și dimensiunea stabilității financiare și a integrării în mecanismele de supraveghere bancară europeană. Aderarea la euro presupune, de regulă, participarea la Uniunea Bancară, în cadrul căreia supravegherea băncilor importante este preluată de Banca Centrală Europeană prin Mecanismul Unic de Supraveghere, iar gestiunea crizelor bancare urmează Mecanismul Unic de Rezoluție. România trebuie să pregătească sistemul său bancar pentru această integrare, asigurând robustețea băncilor, niveluri adecvate de capitalizare și o gestiune prudentă a riscurilor, astfel încât tranziția să nu releve vulnerabilități ascunse."
    },
    {
     "type": "p",
-    "text": "Banca Nationala a Romaniei monitorizeaza stabilitatea financiara prin instrumente macroprudentiale, urmarind indicatori precum gradul de indatorare al gospodariilor, calitatea portofoliilor de credite, expunerile valutare si concentrarile de risc. Un sistem bancar solid este o conditie a unei aderari fara socuri, intrucat sub politica monetara unica, dezechilibrele financiare nu mai pot fi corectate prin instrumente monetare nationale si trebuie prevenite prin reglementare prudentiala. Sanatatea sectorului bancar romanesc, cu niveluri de capitalizare si lichiditate adecvate, reprezinta un atu in procesul de convergenta, reducand riscurile asociate tranzitiei catre Uniunea Bancara."
+    "text": "Banca Națională a României monitorizează stabilitatea financiară prin instrumente macroprudențiale, urmărind indicatori precum gradul de îndatorare al gospodăriilor, calitatea portofoliilor de credite, expunerile valutare și concentrările de risc. Un sistem bancar solid este o condiție a unei aderări fără șocuri, întrucât sub politica monetară unică, dezechilibrele financiare nu mai pot fi corectate prin instrumente monetare naționale și trebuie prevenite prin reglementare prudențială. Sănătatea sectorului bancar românesc, cu niveluri de capitalizare și lichiditate adecvate, reprezintă un atu în procesul de convergență, reducând riscurile asociate tranziției către Uniunea Bancară."
    },
    {
     "type": "p",
-    "text": "Stabilitatea financiara interactioneaza cu finantele publice prin mai multe canale. Un sistem bancar fragil ar putea solicita interventii publice costisitoare in caz de criza, adancind deficitul si datoria, exact ceea ce procesul de convergenta urmareste sa evite. Invers, finante publice solide consolideaza increderea in stabilitatea financiara, intrucat statul ramane un finantator de ultima instanta credibil. Pentru regionalizare, dimensiunea financiara este relevanta in masura in care entitatile regionale ar putea contracta datorie de la sistemul bancar: reguli prudente de indatorare regionala protejeaza simultan finantele publice si stabilitatea financiara, integrand reforma teritoriala in cadrul mai larg de pregatire pentru euro."
+    "text": "Stabilitatea financiară interacționează cu finanțele publice prin mai multe canale. Un sistem bancar fragil ar putea solicita intervenții publice costisitoare în caz de criză, adâncind deficitul și datoria, exact ceea ce procesul de convergență urmărește să evite. Invers, finanțe publice solide consolidează încrederea în stabilitatea financiară, întrucât statul rămâne un finanțator de ultimă instanță credibil. Pentru regionalizare, dimensiunea financiară este relevantă în măsura în care entitățile regionale ar putea contracta datorie de la sistemul bancar: reguli prudente de îndatorare regională protejează simultan finanțele publice și stabilitatea financiară, integrând reforma teritorială în cadrul mai larg de pregătire pentru euro."
    },
    {
     "type": "table",
-    "headers": ["Dimensiune stabilitate", "Mecanism european", "Pregatire Romania", "Maturitate (1-5)"],
+    "headers": ["Dimensiune stabilitate", "Mecanism european", "Pregătire România", "Maturitate (1-5)"],
     "rows": [
-     ["Supraveghere bancara", "Mecanism Unic de Supraveghere", "In pregatire", "3"],
-     ["Rezolutie crize", "Mecanism Unic de Rezolutie", "In aliniere", "3"],
-     ["Capitalizare banci", "Cerinte prudentiale", "Adecvata", "4"],
-     ["Instrumente macroprudentiale", "Coordonare cu BCE", "Operationale", "4"]
+     ["Supraveghere bancară", "Mecanism Unic de Supraveghere", "În pregătire", "3"],
+     ["Rezoluție crize", "Mecanism Unic de Rezoluție", "În aliniere", "3"],
+     ["Capitalizare bănci", "Cerințe prudențiale", "Adecvată", "4"],
+     ["Instrumente macroprudențiale", "Coordonare cu BCE", "Operaționale", "4"]
     ]
    }
   ]
  },
  {
-  "title": "Experienta statelor care au adoptat euro recent",
+  "title": "Experiența statelor care au adoptat euro recent",
   "blocks": [
    {
     "type": "p",
-    "text": "Experienta statelor membre care au adoptat euro in ultimele decenii ofera lectii valoroase pentru Romania. Tarile baltice, Estonia, Letonia si Lituania, au aderat dupa o consolidare fiscala riguroasa si o perioada de stabilitate a cursului, demonstrand ca o disciplina macroeconomica ferma este precondiția aderarii. Croatia, cel mai recent stat care a adoptat euro, a parcurs un proces atent de convergenta nominala si de pregatire institutionala, inclusiv participarea la ERM-II pentru perioada necesara. Aceste exemple confirma ca aderarea reusita urmeaza, nu precede, indeplinirea sustenabila a criteriilor, validand abordarea prudenta recomandata pentru Romania."
+    "text": "Experiența statelor membre care au adoptat euro în ultimele decenii oferă lecții valoroase pentru România. Țările baltice, Estonia, Letonia și Lituania, au aderat după o consolidare fiscală riguroasă și o perioadă de stabilitate a cursului, demonstrând că o disciplină macroeconomică fermă este precondiția aderării. Croația, cel mai recent stat care a adoptat euro, a parcurs un proces atent de convergență nominală și de pregătire instituțională, inclusiv participarea la ERM-II pentru perioada necesară. Aceste exemple confirmă că aderarea reușită urmează, nu precede, îndeplinirea sustenabilă a criteriilor, validând abordarea prudentă recomandată pentru România."
    },
    {
     "type": "p",
-    "text": "Contraexemplele sunt la fel de instructive. State care au aderat la euro inainte de a fi suficient de convergente real si structural au resimtit ulterior dificultati majore in fata socurilor asimetrice, neavand instrumentul cursului de schimb pentru ajustare. Lectia este ca bifarea criteriilor nominale nu garanteaza succesul daca economia nu este pregatita structural. Pentru Romania, aceasta inseamna ca, dincolo de aducerea deficitului sub trei la suta si a inflatiei in conformitate, trebuie urmarita si o convergenta reala si o coeziune teritoriala interna suficienta, astfel incat economia sa poata absorbi socurile fara instrumentele monetare nationale pe care le va fi cedat."
+    "text": "Contraexemplele sunt la fel de instructive. State care au aderat la euro înainte de a fi suficient de convergente real și structural au resimțit ulterior dificultăți majore în fața șocurilor asimetrice, neavând instrumentul cursului de schimb pentru ajustare. Lecția este că bifarea criteriilor nominale nu garantează succesul dacă economia nu este pregătită structural. Pentru România, aceasta înseamnă că, dincolo de aducerea deficitului sub trei la sută și a inflației în conformitate, trebuie urmărită și o convergență reală și o coeziune teritorială internă suficientă, astfel încât economia să poată absorbi șocurile fără instrumentele monetare naționale pe care le va fi cedat."
    },
    {
     "type": "p",
-    "text": "O lectie comparativa relevanta pentru agenda interna a Romaniei este modul in care statele care au combinat aderarea la euro cu reforme structurale ample, inclusiv administrative, au gestionat secventierea. In general, reformele administrative costisitoare au fost realizate fie inainte de faza intensiva de convergenta, fie dupa stabilizarea finantelor publice, evitand suprapunerea cu efortul de consolidare fiscala. Aceasta confirma recomandarea de a nu lansa o regionalizare costisitoare in plina procedura de deficit excesiv, ci de a o secventia astfel incat sa nu intre in conflict cu prioritatea reducerii deficitului, urmand modelul tarilor care au reusit sa concilieze ambele agende."
+    "text": "O lecție comparativă relevantă pentru agenda internă a României este modul în care statele care au combinat aderarea la euro cu reforme structurale ample, inclusiv administrative, au gestionat secvențierea. În general, reformele administrative costisitoare au fost realizate fie înainte de faza intensivă de convergență, fie după stabilizarea finanțelor publice, evitând suprapunerea cu efortul de consolidare fiscală. Aceasta confirmă recomandarea de a nu lansa o regionalizare costisitoare în plină procedură de deficit excesiv, ci de a o secvenția astfel încât să nu intre în conflict cu prioritatea reducerii deficitului, urmând modelul țărilor care au reușit să concilieze ambele agende."
    },
    {
     "type": "table",
-    "headers": ["Stat", "Abordare convergenta", "Element-cheie", "Relevanta pentru Romania (1-5)"],
+    "headers": ["Stat", "Abordare convergență", "Element-cheie", "Relevanță pentru România (1-5)"],
     "rows": [
-     ["Estonia", "Consolidare fiscala ferma", "Disciplina bugetara", "4"],
-     ["Letonia", "Stabilitate dupa criza", "Reforme structurale", "4"],
-     ["Lituania", "Perseverenta in criterii", "Sustenabilitate", "4"],
-     ["Croatia", "Pregatire institutionala", "Participare ERM-II", "5"]
+     ["Estonia", "Consolidare fiscală fermă", "Disciplină bugetară", "4"],
+     ["Letonia", "Stabilitate după criză", "Reforme structurale", "4"],
+     ["Lituania", "Perseverență în criterii", "Sustenabilitate", "4"],
+     ["Croația", "Pregătire instituțională", "Participare ERM-II", "5"]
     ]
    }
   ]
  },
  {
-  "title": "Riscurile derapajului fiscal in perioada de convergenta",
+  "title": "Riscurile derapajului fiscal în perioada de convergență",
   "blocks": [
    {
     "type": "p",
-    "text": "Perioada de convergenta catre criteriile Maastricht este una de fragilitate, in care un derapaj fiscal poate anula progresele acumulate si indeparta tara de obiectivul euro. Riscurile derapajului provin din mai multe surse: presiunile electorale pentru cheltuieli populiste, socurile economice externe care reduc veniturile fiscale, rezistenta sociala la masurile de austeritate si tentatia de a amana ajustarile dificile. Pentru Romania, cu un deficit deja excesiv, marja de eroare este minima: orice relaxare a disciplinei fiscale ar adanci un dezechilibru deja sever, ar scumpi finantarea si ar putea declansa retrogradari de rating, intr-un cerc vicios greu de inversat odata declansat."
+    "text": "Perioada de convergență către criteriile Maastricht este una de fragilitate, în care un derapaj fiscal poate anula progresele acumulate și îndepărta țara de obiectivul euro. Riscurile derapajului provin din mai multe surse: presiunile electorale pentru cheltuieli populiste, șocurile economice externe care reduc veniturile fiscale, rezistența socială la măsurile de austeritate și tentația de a amâna ajustările dificile. Pentru România, cu un deficit deja excesiv, marja de eroare este minimă: orice relaxare a disciplinei fiscale ar adânci un dezechilibru deja sever, ar scumpi finanțarea și ar putea declanșa retrogradări de rating, într-un cerc vicios greu de inversat odată declanșat."
    },
    {
     "type": "p",
-    "text": "Mecanismele de prevenire a derapajului includ regulile fiscale interne, ancorele externe oferite de Pactul de Stabilitate si Crestere si de procedura de deficit excesiv, precum si institutii independente de supraveghere fiscala, precum consiliile fiscale, care evalueaza obiectiv conformitatea bugetelor cu regulile. Credibilitatea angajamentului de consolidare este intarita de aceste mecanisme, care fac mai costisitor politic abandonul disciplinei. Transparenta bugetara si comunicarea clara a traiectoriei de ajustare ancoreaza asteptarile pietelor si reduc primele de risc, sprijinind un cerc virtuos in care credibilitatea disciplinei reduce costul finantarii, usurand la randul sau respectarea disciplinei."
+    "text": "Mecanismele de prevenire a derapajului includ regulile fiscale interne, ancorele externe oferite de Pactul de Stabilitate și Creștere și de procedura de deficit excesiv, precum și instituții independente de supraveghere fiscală, precum consiliile fiscale, care evaluează obiectiv conformitatea bugetelor cu regulile. Credibilitatea angajamentului de consolidare este întărită de aceste mecanisme, care fac mai costisitor politic abandonul disciplinei. Transparența bugetară și comunicarea clară a traiectoriei de ajustare ancorează așteptările piețelor și reduc primele de risc, sprijinind un cerc virtuos în care credibilitatea disciplinei reduce costul finanțării, ușurând la rândul său respectarea disciplinei."
    },
    {
     "type": "p",
-    "text": "In contextul regionalizarii, riscul de derapaj capata o dimensiune suplimentara prin multiplicarea actorilor fiscali. Descentralizarea fara reguli stricte ar adauga noi surse potentiale de derapaj, pe care nivelul central le-ar controla mai greu. De aceea, daca regionalizarea avanseaza in perioada de convergenta, ea trebuie insotita de un cadru de disciplina regionala robust si de monitorizare consolidata, astfel incat sa nu devina o portita de scapare a disciplinei fiscale nationale. Alternativ, secventierea care plaseaza descentralizarea fiscala dupa consolidarea nationala elimina acest risc, pastrand controlul fiscal concentrat exact in perioada critica de reducere a deficitului catre pragul Maastricht."
+    "text": "În contextul regionalizării, riscul de derapaj capătă o dimensiune suplimentară prin multiplicarea actorilor fiscali. Descentralizarea fără reguli stricte ar adăuga noi surse potențiale de derapaj, pe care nivelul central le-ar controla mai greu. De aceea, dacă regionalizarea avansează în perioada de convergență, ea trebuie însoțită de un cadru de disciplină regională robust și de monitorizare consolidată, astfel încât să nu devină o portiță de scăpare a disciplinei fiscale naționale. Alternativ, secvențierea care plasează descentralizarea fiscală după consolidarea națională elimină acest risc, păstrând controlul fiscal concentrat exact în perioada critică de reducere a deficitului către pragul Maastricht."
    },
    {
     "type": "table",
-    "headers": ["Sursa de derapaj", "Mecanism", "Instrument de prevenire", "Risc (1-5)"],
+    "headers": ["Sursă de derapaj", "Mecanism", "Instrument de prevenire", "Risc (1-5)"],
     "rows": [
      ["Presiuni electorale", "Cheltuieli populiste", "Reguli fiscale interne", "4"],
-     ["Socuri externe", "Scadere venituri", "Rezerve si flexibilitate", "3"],
-     ["Rezistenta sociala", "Amanare ajustari", "Comunicare si echitate", "3"],
-     ["Multiplicare actori fiscali", "Descentralizare necontrolata", "Cadru disciplina regionala", "4"]
+     ["Șocuri externe", "Scădere venituri", "Rezerve și flexibilitate", "3"],
+     ["Rezistență socială", "Amânare ajustări", "Comunicare și echitate", "3"],
+     ["Multiplicare actori fiscali", "Descentralizare necontrolată", "Cadru disciplină regională", "4"]
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Cursul de schimb și flotarea administrată",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "În absența participării la ERM-II, Banca Națională a României gestionează cursul de schimb al leului printr-un regim de flotare administrată, în care cursul evoluează în funcție de piață, dar banca centrală intervine pentru a tempera fluctuațiile excesive și a menține o stabilitate relativă față de euro. Acest regim oferă flexibilitate: leul se poate ajusta la șocuri externe, funcționând ca un amortizor de șocuri, dar evită volatilitatea brutală care ar destabiliza economia și ar alimenta inflația prin scumpirea importurilor. Stabilitatea relativă a cursului este, de altfel, un atu pentru o viitoare intrare în ERM-II, întrucât demonstrează capacitatea băncii centrale de a menține leul aproape de o paritate de referință."
+   },
+   {
+    "type": "p",
+    "text": "Cursul de schimb interacționează direct cu criteriile de convergență. O depreciere a leului scumpește importurile și alimentează inflația, complicând respectarea criteriului stabilității prețurilor. Totodată, întrucât o parte a datoriei publice și private este denominată în valută, deprecierea crește valoarea în lei a acestei datorii, afectând indirect ponderea datoriei în produsul intern brut. De aceea Banca Națională urmărește un echilibru: un curs prea rigid ar consuma rezervele valutare și ar limita capacitatea de ajustare, în timp ce o volatilitate prea mare ar transmite șocuri inflaționiste și ar deteriora încrederea investitorilor în stabilitatea macroeconomică a țării."
+   },
+   {
+    "type": "p",
+    "text": "Tranziția de la flotarea administrată la mecanismul ERM-II reprezintă un moment delicat al parcursului către euro. În ERM-II, banca centrală își asumă un angajament formal de a menține cursul în banda convenită, ceea ce reduce flexibilitatea actuală. Pentru ca această tranziție să fie lină, este necesar ca paritatea centrală aleasă la intrarea în ERM-II să reflecte un curs de echilibru sustenabil, nici supraevaluat, nici subevaluat, astfel încât economia să poată funcționa confortabil în jurul acestuia. Alegerea momentului și a parității de intrare este o decizie strategică majoră, care trebuie luată după consolidarea fiscală și ancorarea durabilă a inflației, pentru a evita tensiuni speculative asupra leului."
+   },
+   {
+    "type": "table",
+    "headers": ["Regim de curs", "Caracteristică", "Flexibilitate", "Etapă (nr.)"],
+    "rows": [
+     ["Flotare administrată", "Intervenții pentru stabilitate", "Ridicată", "1"],
+     ["Pregătire ERM-II", "Apropiere de paritate țintă", "Medie", "2"],
+     ["ERM-II", "Bandă fixă față de euro", "Scăzută", "3"],
+     ["Euro adoptat", "Curs irevocabil fixat", "Nulă", "4"]
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Tabloul de bord consolidat al convergenței României",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Sinteza poziției României față de criteriile de convergență la nivelul anului 2024 poate fi prezentată sub forma unui tablou de bord consolidat, care reunește toate dimensiunile relevante și permite o evaluare de ansamblu a distanței până la euro. Tabloul cuprinde cele cinci criterii nominale Maastricht, dar și indicatorii de convergență reală și de pregătire instituțională, oferind o imagine completă. Această perspectivă integrată evită capcana de a privi fiecare criteriu izolat și relevă interdependențele: deficitul excesiv afectează simultan datoria, dobânda și inflația, astfel încât consolidarea fiscală este pârghia centrală care îmbunătățește mai mulți indicatori deodată."
+   },
+   {
+    "type": "p",
+    "text": "Din cele cinci criterii nominale, România respectă clar doar unul, cel al datoriei publice, situată sub pragul de șaizeci la sută. Criteriul deficitului este grav încălcat, cu o valoare de aproximativ opt virgulă unu la sută, de aproape trei ori peste plafon. Criteriul inflației este neîndeplinit, deși în îmbunătățire prin dezinflația din 2024. Criteriul dobânzii pe termen lung este neconform, reflectând percepția de risc fiscal. Criteriul stabilității cursului nu este aplicabil deocamdată, întrucât leul nu participă la ERM-II. Această poziție de pornire definește o agendă clară: prioritatea absolută este consolidarea fiscală, care deblochează progresiv conformitatea pe deficit, datorie, inflație și dobândă."
+   },
+   {
+    "type": "p",
+    "text": "Tabloul de bord transformat într-un instrument de monitorizare continuă permite urmărirea progresului în timp și ajustarea politicilor. Actualizat periodic, el oferă factorilor de decizie, piețelor și partenerilor europeni o imagine transparentă a traiectoriei de convergență. Pentru regionalizare, tabloul reamintește constrângerea fundamentală: orice reformă structurală trebuie evaluată prin prisma efectului său asupra acestor indicatori, în special asupra deficitului. O regionalizare bine secvențiată și proiectată cu disciplină fiscală regională sprijină convergența reală prin reducerea disparităților, fără a compromite convergența nominală, integrându-se astfel într-o strategie coerentă de modernizare a statului orientată spre o integrare europeană deplină și sustenabilă."
+   },
+   {
+    "type": "table",
+    "headers": ["Criteriu / Dimensiune", "Valoare România 2024", "Țintă / Prag", "Conform (1=da, 0=nu)"],
+    "rows": [
+     ["Deficit bugetar (% PIB)", "8,1", "Sub 3", "0"],
+     ["Datorie publică (% PIB)", "52", "Sub 60", "1"],
+     ["Inflație (% anual)", "5,8", "Sub prag de referință", "0"],
+     ["Dobândă termen lung", "Ridicată", "Sub prag de referință", "0"],
+     ["Participare ERM-II", "Neparticipă", "Doi ani", "0"]
     ]
    }
   ]
@@ -684,24 +739,24 @@ window._REGIO_DEEP['p16'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Sincronizarea reformelor structurale interne cu ciclurile europene de programare si supraveghere este un element strategic care poate spori eficacitatea si finantarea acestora. Calendarul european include ciclurile de programare a politicii de coeziune, jaloanele Planului National de Redresare si Reziliencta, procesul anual al Semestrului European de coordonare a politicilor economice si calendarul rapoartelor de convergenta ale Bancii Centrale Europene. Alinierea reformelor interne la aceste cicluri permite valorificarea fondurilor europene pentru a finanta tranzitia, beneficierea de ancorele externe de disciplina si integrarea reformelor intr-un cadru coerent recunoscut de partenerii europeni si de pietele financiare."
+    "text": "Sincronizarea reformelor structurale interne cu ciclurile europene de programare și supraveghere este un element strategic care poate spori eficacitatea și finanțarea acestora. Calendarul european include ciclurile de programare a politicii de coeziune, jaloanele Planului Național de Redresare și Reziliență, procesul anual al Semestrului European de coordonare a politicilor economice și calendarul rapoartelor de convergență ale Băncii Centrale Europene. Alinierea reformelor interne la aceste cicluri permite valorificarea fondurilor europene pentru a finanța tranziția, beneficierea de ancorele externe de disciplină și integrarea reformelor într-un cadru coerent recunoscut de partenerii europeni și de piețele financiare."
    },
    {
     "type": "p",
-    "text": "Pentru consolidarea fiscala, sincronizarea cu Semestrul European si cu planul fiscal-structural pe termen mediu ofera un calendar de ajustare convenit, care disciplineaza efortul intern si il face previzibil pentru piete. Pentru regionalizare, alinierea la ciclurile politicii de coeziune permite ca noul nivel regional sa gestioneze de la inceput un program operational regional integral, valorificand expertiza Agentiilor de Dezvoltare Regionala si finantarea europeana pentru construirea capacitatii administrative. Aceasta sincronizare transforma regionalizarea dintr-un cost administrativ pur intr-o investitie sprijinita financiar de Uniune in capacitatea de absorbtie si de dezvoltare regionala."
+    "text": "Pentru consolidarea fiscală, sincronizarea cu Semestrul European și cu planul fiscal-structural pe termen mediu oferă un calendar de ajustare convenit, care disciplinează efortul intern și îl face previzibil pentru piețe. Pentru regionalizare, alinierea la ciclurile politicii de coeziune permite ca noul nivel regional să gestioneze de la început un program operațional regional integral, valorificând expertiza Agențiilor de Dezvoltare Regională și finanțarea europeană pentru construirea capacității administrative. Această sincronizare transformă regionalizarea dintr-un cost administrativ pur într-o investiție sprijinită financiar de Uniune în capacitatea de absorbție și de dezvoltare regională."
    },
    {
     "type": "p",
-    "text": "Coordonarea calendarelor reduce conflictele si maximizeaza sinergiile intre agende. Consolidarea fiscala, sincronizata cu Semestrul European, deblocheaza progresiv celelalte obiective; intrarea in ERM-II poate fi planificata in raport cu rapoartele de convergenta ale Bancii Centrale Europene; regionalizarea poate fi etapizata in raport cu ciclurile de coeziune. Aceasta arhitectura temporala integrata transforma un ansamblu de reforme aparent concurente intr-o traiectorie ordonata de modernizare a statului, in care fiecare reforma isi gaseste momentul optim si sprijinul european adecvat, conducand Romania catre o integrare europeana mai profunda printr-un parcurs prudent, sustenabil si bine fundamentat economic."
+    "text": "Coordonarea calendarelor reduce conflictele și maximizează sinergiile între agende. Consolidarea fiscală, sincronizată cu Semestrul European, deblochează progresiv celelalte obiective; intrarea în ERM-II poate fi planificată în raport cu rapoartele de convergență ale Băncii Centrale Europene; regionalizarea poate fi etapizată în raport cu ciclurile de coeziune. Această arhitectură temporală integrată transformă un ansamblu de reforme aparent concurente într-o traiectorie ordonată de modernizare a statului, în care fiecare reformă își găsește momentul optim și sprijinul european adecvat, conducând România către o integrare europeană mai profundă printr-un parcurs prudent, sustenabil și bine fundamentat economic."
    },
    {
     "type": "table",
-    "headers": ["Ciclu european", "Reforma sincronizata", "Beneficiu", "Relevanta (1-5)"],
+    "headers": ["Ciclu european", "Reformă sincronizată", "Beneficiu", "Relevanță (1-5)"],
     "rows": [
-     ["Semestrul European", "Consolidare fiscala", "Calendar de ajustare convenit", "5"],
-     ["Politica de coeziune", "Regionalizare", "Finantare capacitate regionala", "5"],
-     ["Rapoarte de convergenta BCE", "Intrare ERM-II", "Validare progres", "4"],
-     ["Plan Redresare si Rezilienta", "Reforme structurale", "Finantare si jaloane", "4"]
+     ["Semestrul European", "Consolidare fiscală", "Calendar de ajustare convenit", "5"],
+     ["Politica de coeziune", "Regionalizare", "Finanțare capacitate regională", "5"],
+     ["Rapoarte de convergență BCE", "Intrare ERM-II", "Validare progres", "4"],
+     ["Plan Redresare și Reziliență", "Reforme structurale", "Finanțare și jaloane", "4"]
     ]
    }
   ]

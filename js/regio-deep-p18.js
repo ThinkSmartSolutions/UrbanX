@@ -654,5 +654,60 @@ window._REGIO_DEEP['p18'] = [
     ]
    }
   ]
+ },
+ {
+  "title": "Comparația spread-urilor sub-suverane în context european",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Plasarea spread-urilor sub-suverane românești într-un context european comparativ oferă o ancoră realistă pentru calibrarea așteptărilor privind costul finanțării regionale. În țările unde entitățile sub-suverane emit de mult timp obligațiuni — landurile germane, comunitățile autonome spaniole, regiunile italiene — spread-urile față de obligațiunea suverană de referință variază considerabil, de la câteva puncte de bază pentru entitățile cu cea mai bună guvernanță și cu solidaritate fiscală puternică, până la peste o sută de puncte de bază pentru regiunile cu finanțe slabe și fără garanție implicită. Această variație reflectă atât bonitatea proprie a fiecărei entități, cât și arhitectura instituțională a fiecărei țări. Pentru România, comparația sugerează că regiunile cu o guvernanță fiscală solidă și cu acces la mecanisme de echilibrare pot aspira la spread-uri sub-suverane moderate, în timp ce regiunile slabe vor plăti prime semnificativ mai mari în absența unui sprijin instituțional adecvat."
+   },
+   {
+    "type": "p",
+    "text": "Lecția comparativă cea mai importantă este că spread-urile sub-suverane nu depind doar de cifrele fiscale ale fiecărei regiuni, ci în mod decisiv de cadrul instituțional care le încadrează. Comunitățile autonome spaniole au cunoscut spread-uri foarte largi în perioada crizei datoriilor suverane europene, când piața s-a îndoit de soliditatea finanțelor regionale și de capacitatea statului central de a le susține, fiind necesar un mecanism național de finanțare regională pentru a comprima aceste spread-uri. Regiunile italiene prezintă o dispersie de spread-uri legată de diferențele de management fiscal și de istoricul de îndatorare. Aceste exemple demonstrează că o reformă regională care nu construiește din timp un cadru credibil de disciplină fiscală și de sprijin instituțional riscă să se confrunte cu spread-uri sub-suverane volatile și costisitoare la primul episod de stres financiar."
+   },
+   {
+    "type": "p",
+    "text": "Proiecția strategică pozitivă pentru România desprinde din comparația europeană un set de principii de proiectare. Spread-urile sub-suverane se comprimă atunci când există reguli fiscale credibile, transparență ridicată, un mecanism de echilibrare care reduce decalajele de bonitate și o piață lichidă cu o bază diversificată de investitori. România poate aspira, pe un orizont de un deceniu, la spread-uri sub-suverane comparabile cu cele ale entităților europene cu guvernanță medie, dacă își construiește metodic acest cadru. Obiectivul nu este replicarea spread-urilor minime ale celor mai mature sisteme, irealist la început, ci o convergență graduală pe măsură ce regiunile își construiesc istoric de bonitate și piața câștigă încredere în noul sistem de finanțare regională."
+   },
+   {
+    "type": "table",
+    "headers": ["Țară / tip entitate", "Cadru de echilibrare", "Lichiditate piață", "Spread sub-suveran tipic (puncte bază)"],
+    "rows": [
+     ["Germania (Länder)", "Puternic", "Ridicată", "12"],
+     ["Spania (comunități autonome)", "Mediu", "Medie", "70"],
+     ["Italia (regiuni)", "Mediu", "Medie", "90"],
+     ["România (regiuni, estimat)", "De construit", "Inițial redusă", "130"]
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Riscul politic și predictibilitatea reglementară",
+  "blocks": [
+   {
+    "type": "p",
+    "text": "Dincolo de indicatorii fiscali și de arhitectura financiară, costul de finanțare al unei regiuni este profund influențat de riscul politic și de predictibilitatea cadrului reglementar în care operează. Investitorii și agențiile de rating penalizează imprevizibilitatea: schimbările frecvente ale regulilor fiscale, instabilitatea atribuirii veniturilor între centru și regiuni, sau intervențiile politice care subminează autonomia financiară regională ridică prima de risc cerută. O regiune care operează într-un cadru stabil, în care regulile de îndatorare, sursele de venit și mecanismele de echilibrare sunt previzibile pe termen lung, beneficiază de o încredere care se traduce în spread-uri mai mici. Predictibilitatea reglementară este, în acest sens, un activ economic concret, nu doar o virtute administrativă abstractă, întrucât reduce direct costul capitalului pentru întregul sector public regional."
+   },
+   {
+    "type": "p",
+    "text": "Riscul politic se manifestă pe mai multe planuri. La nivel național, instabilitatea privind însuși angajamentul de regionalizare — riscul ca reforma să fie inversată sau modificată substanțial la fiecare schimbare de guvern — descurajează investitorii pe termen lung care au nevoie de certitudine privind cadrul în care își plasează capitalul. La nivel regional, ciclul electoral poate genera presiuni de îndatorare imprudentă pentru proiecte vizibile, sau, dimpotrivă, blocaje decizionale care întârzie implementarea proiectelor finanțate. Calitatea guvernanței regionale — competența administrativă, transparența, absența corupției — este ea însăși un factor de rating monitorizat de agenții. O reformă care nu adresează aceste dimensiuni de risc politic riscă să producă regiuni cu autonomie formală dar cu o capacitate reală de a accesa finanțare ieftină limitată de neîncrederea pieței."
+   },
+   {
+    "type": "p",
+    "text": "Proiecția strategică pozitivă presupune că România construiește predictibilitatea reglementară ca pe o fundație a regionalizării financiare. Consacrarea cadrului fiscal regional în legislație stabilă, de preferință cu protecție constituțională sau cu majorități calificate de modificare, transmite pieței semnalul că regulile nu se schimbă arbitrar. Independența autorității fiscale de monitorizare față de ciclul politic consolidează încrederea. Transparența și standardele înalte de guvernanță regională reduc riscul perceput și prima asociată. Pe acest fundament, regiunile românești pot construi treptat o reputație de stabilitate și predictibilitate care le reduce costul de finanțare și le permite să își exercite autonomia financiară în condiții favorabile, transformând buna guvernanță într-un avantaj competitiv concret pe piața de capital."
+   },
+   {
+    "type": "chart",
+    "chartType": "hbar",
+    "data": [
+     ["Cadru legal stabil", 80],
+     ["Independență autoritate fiscală", 70],
+     ["Transparență guvernanță", 75],
+     ["Continuitate reformă", 65],
+     ["Absență interferență politică", 60]
+    ]
+   }
+  ]
  }
 ];
