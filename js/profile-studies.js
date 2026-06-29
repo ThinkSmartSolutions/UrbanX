@@ -189,7 +189,7 @@
         }
       } catch (e) {}
 
-      // ── Nota UrbanX (IVU) — include modificatorul de profil ──
+      // ── Nota UrbanX (iVU) — include modificatorul de profil ──
       try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
       D.chapter('Concluzii și pași următori');

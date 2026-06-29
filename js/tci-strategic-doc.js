@@ -516,7 +516,7 @@
       if(!D || !D.barChart) return false;
       // REGULĂ (Florin 28 iun): graficele IVU/UAT (profil urban, dimensiuni, proiecție demografică)
       // NU se repetă în corpul capitolelor — apăreau de 8-10× și sunt irelevante în studii de
-      // parcelă (ex. RCAI arheologic). Rămân DOAR în capitolul dedicat „Nota UrbanX (IVU)".
+      // parcelă (ex. RCAI arheologic). Rămân DOAR în capitolul dedicat „Nota UrbanX (iVU)".
       // Graficele din DATELE proprii ale capitolului (tabele) rămân (le face _deepRender separat).
       if(!D.__allowChapterIVU) return false;
       var c=_gctx(D);
@@ -537,7 +537,7 @@
       // 5. PIE — forte vs vulnerabilități
       if(c.ivuDims&&c.ivuDims.length>=4&&D.pie) opts.push(function(){ var s=c.ivuDims.slice().sort(function(a,b){return b.score-a.score;});
         var top=Math.round((s[0].score+s[1].score)/2), low=Math.round((s[s.length-1].score+s[s.length-2].score)/2);
-        D.pie([['Puncte forte',top,[34,197,94]],['Vulnerabilități',low,[239,68,68]]],{title:'Echilibru forte / vulnerabilități (IVU)',source:'IVU UrbanX'}); });
+        D.pie([['Puncte forte',top,[34,197,94]],['Vulnerabilități',low,[239,68,68]]],{title:'Echilibru forte / vulnerabilități (iVU)',source:'IVU UrbanX'}); });
       // 6. LINE — traiectoria IVU spre țintă
       if(c.score!=null&&D.lineChart) opts.push(function(){
         D.lineChart([{name:'IVU',color:[168,85,247],points:[c.score,Math.round((c.score+80)/2),80]}],['2026','2030','2035'],{title:'Traiectoria Notei UrbanX spre țintă (scenariu strategic)',source:'Model UrbanX'}); });

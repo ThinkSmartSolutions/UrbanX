@@ -165,7 +165,7 @@
       var dimLabels = rows[0].R.dims.map(function (d) { return d.label; });
       var head = '<tr><th style="text-align:left;padding:5px;color:#94a3b8;font-size:11px">Indicator</th>' +
         rows.map(function (r) { return '<th style="padding:5px;color:#e2e8f0;font-size:11px">' + r.name + (r.city && r.city._estimat ? ' <span title="Scor estimat din populatie/regiune — UAT fara date detaliate" style="color:#fbbf24;font-size:9px">~est</span>' : '') + ' <span onclick="window.UrbanXIVU.rm(\'' + r.key + '\')" style="cursor:pointer;color:#ef4444">✕</span></th>'; }).join('') + '</tr>';
-      var scoreRow = '<tr style="border-top:2px solid rgba(255,255,255,.12)"><td style="padding:5px;font-weight:700;color:#6ee7b7">Nota UrbanX (IVU)</td>' +
+      var scoreRow = '<tr style="border-top:2px solid rgba(255,255,255,.12)"><td style="padding:5px;font-weight:700;color:#6ee7b7">Nota UrbanX (iVU)</td>' +
         rows.map(function (r) { return '<td style="padding:5px;text-align:center;font-weight:800;color:' + gradeColor(r.R.score) + '">' + r.R.score + ' <span style="font-size:10px">' + r.R.grade + '</span></td>'; }).join('') + '</tr>';
       var dimRows = dimLabels.map(function (lbl, i) {
         var vals = rows.map(function (r) { return r.R.dims[i].score; });
@@ -210,7 +210,7 @@
     var cat = catalog();
     if (!cat.length) return '<div style="color:#64748b;padding:14px">Catalogul se populează din _RO_CITIES_DB.</div>';
     return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">Oraș</th><th style="padding:5px;color:#94a3b8">IVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Categorie</th></tr>' +
+      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">Oraș</th><th style="padding:5px;color:#94a3b8">iVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Categorie</th></tr>' +
       cat.map(function (s, i) {
         return '<tr style="border-top:1px solid rgba(255,255,255,.06);cursor:pointer" onclick="window.UrbanXIVU.show(\'' + s.key + '\')">' +
           '<td style="padding:5px;color:#64748b">' + (i + 1) + '</td><td style="padding:5px;color:#e2e8f0">' + s.name + '</td>' +
@@ -243,7 +243,7 @@
       ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
       var m = el('div', { style: 'background:#0b1424;color:#e6edf7;width:min(820px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(16,185,129,.4);border-radius:14px;font-family:system-ui,sans-serif' });
       m.innerHTML = '<div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">' +
-        '<div><div style="font-weight:800;font-size:17px">🏆 IVU — Indicele de Vitalitate Urbană <span style="font-size:10px;color:#6ee7b7;background:rgba(16,185,129,.15);padding:2px 7px;border-radius:10px;margin-left:4px">marca UrbanX</span></div>' +
+        '<div><div style="font-weight:800;font-size:17px">🏆 iVU — Indicele de Vitalitate Urbană <span style="font-size:10px;color:#6ee7b7;background:rgba(16,185,129,.15);padding:2px 7px;border-radius:10px;margin-left:4px">marca UrbanX</span></div>' +
         '<div style="font-size:11px;color:#94a3b8" id="ivu-sub"></div></div>' +
         '<button onclick="document.getElementById(\'ivu-ov\').remove()" style="background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;cursor:pointer">✕</button></div>' +
         '<div style="padding:14px 20px"><div id="ivu-tabs" style="display:flex;gap:8px;margin-bottom:14px"></div><div id="ivu-body"></div>' +
@@ -252,7 +252,7 @@
       _render();
     },
     // ── Secțiune IVU reutilizabilă în ORICE PDF (_makeStratDoc) ──────────────
-    // Injectează un capitol „Nota UrbanX (IVU)": scor + formulă + grafic pe
+    // Injectează un capitol „Nota UrbanX (iVU)": scor + formulă + grafic pe
     // dimensiuni + benchmark european. Apelabilă din orice generator de raport,
     // teritorial sau de parcelă (contextul UAT al amplasamentului).
     renderSection: function (D, cityKey) {
@@ -330,7 +330,7 @@
       pdf.setFillColor(opts.bg ? opts.bg[0] : 18, opts.bg ? opts.bg[1] : 24, opts.bg ? opts.bg[2] : 40);
       pdf.roundedRect(ml, y, w, h, 2, 2, 'FD');
       pdf.setTextColor(ac[0], ac[1], ac[2]); pdf.setFont(FONT, 'bold'); pdf.setFontSize(8.5);
-      pdf.text('NOTA URBANX (IVU)', ml + 5, y + 6);
+      pdf.text('NOTA URBANX (iVU)', ml + 5, y + 6);
       pdf.setFont(FONT, 'normal'); pdf.setFontSize(8); pdf.setTextColor(210, 210, 220);
       var line2;
       if (hasScore) line2 = 'Indicele de Vitalitate Urbană: ' + s.R.score + '/100 · calificativ ' + s.R.grade + ' (' + (s.R.tierLabel || '') + ')';
@@ -344,8 +344,8 @@
         G._ivuScaleBar(pdf, ml + 5, y + 22, barW, s.R.score, { font: FONT, markCol: [255, 255, 255], labelCol: [225, 228, 235] });
       }
       pdf.setFontSize(6.4); pdf.setTextColor(150, 150, 165);
-      pdf.text(hasScore ? 'Indice compozit · scala A–D · detaliat în capitolul „Nota UrbanX (IVU)".'
-                        : 'Indice compozit dezvoltat de UrbanX · formulă transparentă · detaliat în capitolul „Nota UrbanX (IVU)".',
+      pdf.text(hasScore ? 'Indice compozit · scala A–D · detaliat în capitolul „Nota UrbanX (iVU)".'
+                        : 'Indice compozit dezvoltat de UrbanX · formulă transparentă · detaliat în capitolul „Nota UrbanX (iVU)".',
         hasScore ? ml + 5 + Math.min(96, w - 10) + 5 : ml + 5, hasScore ? y + 23 : y + 15, { maxWidth: hasScore ? (w - Math.min(96, w - 10) - 15) : (w - 10) });
       return h;
     } catch (e) { return 0; }

@@ -25,6 +25,7 @@
     { g: G1, ico: '📐', l: 'Zonă de studiu (fără nr. cadastral)', d: 'desen / buffer râu / OSM / adresă+rază', k: 'study zone studiu bahlui', run: mod('StudyZone', 'openBuilder'), info: 'studyzone' },
     { g: G1, ico: '🔍', l: 'Caută parcelă (CF / adresă / GPS)', d: 'localizează o parcelă pe hartă', k: 'cauta search parcela cf adresa', run: function () { var t = D.querySelector('.ptab[data-t="search"]'); if (t) t.click(); } },
     // Strategie & Documente
+    { g: G2, ico: '🇷🇴', l: 'REGIONALIZAREA ROMÂNIEI — simulator + studiu', d: 'STI · hartă scenarii S1-S5 · mandate · studiu 600p', k: 'regionalizare sti simulator regiuni provincii mandate harta', run: function () { if (G._STIRegio && G._STIRegio.openPanel) G._STIRegio.openPanel(); } },
     { g: G2, ico: '📜', l: 'SIDU — Document strategic (PDF)', d: 'documentul-umbrelă (peste MP+PMUD)', k: 'sidu strategie document constitutie', run: function () { if (G.SIDU && G.SIDU.generateDocument) G.SIDU.generateDocument(G.TCI && G.TCI.cityKey); }, info: 'sidu' },
     { g: G2, ico: '🏛', l: 'SIDU — registru & coerență', d: 'portofoliu proiecte + verificare → PUG', k: 'sidu registru coerenta proiecte', run: mod('SIDU', 'openPanel'), info: 'sidu' },
     { g: G2, ico: '📋', l: 'Masterplan strategic (PDF)', d: 'document 100+ pagini · Legea 350/2001', k: 'masterplan pdf strategic', run: call('generateMasterplan') },

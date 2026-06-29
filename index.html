@@ -1278,8 +1278,8 @@ document.addEventListener('click', function(){
 
   <!-- UAT activ -->
   <button class="tb-btn" onclick="showUATSelector()" title="Schimbă UAT-ul activ" style="border-color:rgba(212,175,55,.4);color:#d4af37;display:flex;align-items:center;gap:4px">📍 <span id="uat-indicator">Iași</span></button>
-  <!-- IVU — Indicele de Vitalitate Urbană (standard transversal, lângă UAT) -->
-  <button class="tb-btn" onclick="window.UrbanXIVU&&window.UrbanXIVU.open()" title="IVU — Indicele de Vitalitate Urbană (Score Card + comparator)" style="border-color:rgba(16,185,129,.45);color:#6ee7b7;display:flex;align-items:center;gap:4px;font-weight:700">🏆 IVU</button>
+  <!-- iVU — Indicele de Vitalitate Urbană (standard transversal, lângă UAT) -->
+  <button class="tb-btn" onclick="window.UrbanXIVU&&window.UrbanXIVU.open()" title="iVU — Indicele de Vitalitate Urbană (Score Card + comparator)" style="border-color:rgba(16,185,129,.45);color:#6ee7b7;display:flex;align-items:center;gap:4px;font-weight:700">🏆 iVU</button>
 
   <div class="spacer"></div>
   <!-- Ascunde/afișează panel lateral — desktop (#12 audit) -->
@@ -2813,9 +2813,9 @@ setInterval(()=>{
   <script src="js/urbanx-housing.js?v=20260629inuat"></script><!-- locuire & accesibilitate -->
   <script src="js/urbanx-energy.js?v=20260617"></script><!-- energie & climat -->
   <script src="js/urbanx-resources.js?v=20260617"></script><!-- apa, seceta & economie circulara -->
-  <script src="js/urbanx-rank.js?v=20260628prof"></script><!-- nota/clasament UrbanX (+toate modulele) -->
+  <script src="js/urbanx-rank.js?v=20260629ivubrand"></script><!-- nota/clasament UrbanX (+toate modulele) -->
   <script src="js/uat-profile.js?v=20260628prof"></script><!-- strat de profil teritorial (Delta/litoral/minier/baraj...) -->
-  <script src="js/urbanx-ivu.js?v=20260629alluats"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
+  <script src="js/urbanx-ivu.js?v=20260629ivubrand"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
   <script src="js/ivu-parcela.js?v=20260629ivu2"></script><!-- iVU pe parcelă (nativ) — formulă + auto-scor OSM -->
   <script src="js/ivu-parcela-ui.js?v=20260629ivu2"></script><!-- iVU pe parcelă — panou + export PDF -->
   <script src="js/regio-deep-p01.js?v=20260629regio"></script><script src="js/regio-deep-p02.js?v=20260629regio"></script>
@@ -4033,14 +4033,14 @@ const _INFO_DATA = {
   'valori_pdf': {
     icon:'📄', title:'Studiu Valori Imobiliare (PDF)', subtitle:'Raport · metodă, hărți, predicții',
     badge:'STUDIU COMPLET · ≥10 PAGINI', badgeColor:'#10b981',
-    desc:'Generează studiul complet de valori imobiliare: metodologie și formulă, distribuție valorică pe benzi, factori determinanți, scenarii de evoluție 3–5 ani, hartă a valorilor, secțiunea Nota UrbanX (IVU), surse și disclaimer. Format unitar SIDU.',
+    desc:'Generează studiul complet de valori imobiliare: metodologie și formulă, distribuție valorică pe benzi, factori determinanți, scenarii de evoluție 3–5 ani, hartă a valorilor, secțiunea Nota UrbanX (iVU), surse și disclaimer. Format unitar SIDU.',
     tip:'Documentul include captura hărții de valori și predicții pe scenarii.',
     source:'Model rentă urbană · ANCPI · ANEVAR/IVS · Eurostat',
   },
   'registru': {
     icon:'📋', title:'Registru Indicatori Urbani', subtitle:'Audit complet al indicatorilor monitorizați',
     badge:'AUDIT · 8 DOMENII', badgeColor:'#7c3aed',
-    desc:'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii (demografie, indici compoziți, modele spațiale, mediu, mobilitate, infrastructură, risc, imobiliar), fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (IVU).',
+    desc:'Document de audit care enumeră toți indicatorii urbani monitorizați de platformă, grupați pe 8 domenii (demografie, indici compoziți, modele spațiale, mediu, mobilitate, infrastructură, risc, imobiliar), fiecare cu definiție, metodă/formulă și sursă oficială. Include secțiunea Nota UrbanX (iVU).',
     tip:'Documentează CE se măsoară, CUM și DIN CE sursă — baza de transparență a platformei.',
     source:'ISO 37120/37122 · UN-Habitat SDG 11 · EEA · OMS · INS · Eurostat',
   },
@@ -4073,10 +4073,10 @@ const _INFO_DATA = {
     source:'Open-Meteo · Copernicus C3S ERA5 · EN ISO 15927 (grade-zile) · IPCC AR6',
   },
   'ivu': {
-    icon:'🏆', title:'IVU — Indicele de Vitalitate Urbană', subtitle:'Score Card explicabil + catalog comparator',
+    icon:'🏆', title:'iVU — Indicele de Vitalitate Urbană', subtitle:'Score Card explicabil + catalog comparator',
     badge:'STANDARD UrbanX · NOTA URBANX', badgeColor:'#10b981',
     desc:'Indice compozit transparent (0–100, calificativ A+..D) care exprimă performanța globală a unui UAT pe 6 dimensiuni ponderate, fiecare cu formulă și sursă. Include: Fișă de scor (de ce nota + cum poate crește), Catalog comparator între orașe (best-per-dimensiune + verdict) și benchmark european pe categorie de mărime. Apare ca secțiune în toate documentele generate.',
-    tip:'Buton 🏆 IVU în bara de sus, lângă selectorul de UAT.',
+    tip:'Buton 🏆 iVU în bara de sus, lângă selectorul de UAT.',
     source:'ISO 37120 · Eurostat · OECD Better Life · INFP P100 · EEA',
   },
 
@@ -6407,11 +6407,11 @@ console.log('[FunctionEngine] v2.1 — point-in-polygon UTR lookup activ');
     <!-- Grup C: Investment Heatmap (15) + Carbon Tracker (14) -->
     <script src="js/investment-heatmap.js?v=20260621mkt"></script>
     <script src="js/market-engine.js?v=20260626gfx"></script>
-    <script src="js/ux-launcher.js?v=20260624risk4"></script>
+    <script src="js/ux-launcher.js?v=20260629flag"></script>
     <script src="js/i18n.js?v=20260628prof"></script>
     <!-- i18n-auto.js (717KB dicționar MT) e încărcat LAZY de i18n.js doar când userul alege EN/FR/DE -->>
     <script src="js/ux-roles.js?v=20260628mgr2"></script>
-    <script src="js/ux-sidebar.js?v=20260628clean"></script>
+    <script src="js/ux-sidebar.js?v=20260629flag"></script>
     <script src="js/ux-components.js?v=20260622b"></script>
     <!-- 003: modele urbane interactive (Superbloc parametric + store + before/after) -->
     <script src="js/urban-models/types.js?v=20260622"></script>

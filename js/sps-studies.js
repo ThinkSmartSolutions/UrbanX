@@ -183,7 +183,7 @@
       }
     } catch (e) {}
 
-    // ── Nota UrbanX (IVU) ──
+    // ── Nota UrbanX (iVU) ──
     try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
     D.chapter('Concluzii');
