@@ -104,6 +104,9 @@
         if (D.table) D.table(['Regiune (pol reprezentativ)', 'Nota UrbanX'], rows, [CW * 0.62, CW * 0.38]);
       } catch (e) {}
 
+      // ── Date concrete per județ: reședințe, mandate, sfere de influență (date reale) ──
+      try { if (G._RegioMunicipal && G._RegioMunicipal.renderSection) G._RegioMunicipal.renderSection(D); } catch (e) { console.warn('[Regionalizare] municipal', e); }
+
       // ── Planșe + Nota IVU națională ──
       try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, 'RO-B-01'); } catch (e) {}
 
