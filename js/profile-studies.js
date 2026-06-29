@@ -175,6 +175,10 @@
       // Graficele per capitol vin din DATELE proprii ale studiului (tabele/charturi). NU activăm
       // fallback-ul IVU în capitole (regula Florin: graficele IVU NU se repetă în corp — doar în Nota UrbanX).
       if (deep.length && G._deepRender) { G._deepRender(D, deep, CW); }
+      // Treceri navale + navigație/AIS — relevant pt profilurile portuar/litoral/deltă/baraj
+      try { if (G._NavalTreceri && (profileId === 'portuar' || profileId === 'litoral' || profileId === 'delta' || profileId === 'baraj')) G._NavalTreceri.renderSection(D, cityKey); } catch (e) {}
+      // Investiții majore anunțate cu impact teritorial (toate profilurile)
+      try { if (G._InvestMajore) G._InvestMajore.renderSection(D, cityKey); } catch (e) {}
       else { D.chapter('Conținut dezvoltat'); D.P('Corpul dezvoltat al acestui studiu de profil se află în integrare progresivă. Structura, copertă, sursele și Nota UrbanX sunt complete.'); }
 
       // ── Planșe cu HĂRȚI REALE ale UAT ──
