@@ -1391,11 +1391,12 @@ G._CinemaEngine={
   _addCostInaction(map){
     const cx=this._city?.lon||27, cy=this._city?.lat||47;
     const latC=Math.cos(cy*Math.PI/180)||0.7;
+    // offset-uri MICI (≤~1,6 km) ca să rămână ÎN interiorul UAT — nu pe comunele vecine (cerere Florin)
     const impacts=[
-      {dx: 0.0,  dy: 0.0,  c:'#ef4444', icon:'🏚', t:'SEISM — fond neconsolidat', loss:'−180 M€'},
-      {dx:-0.03, dy:-0.02, c:'#3b82f6', icon:'🌊', t:'INUNDAȚII — lunca neamenajată', loss:'−45 M€/eveniment'},
-      {dx: 0.035,dy: 0.01, c:'#f59e0b', icon:'🚗', t:'CONGESTIE — fără mobilitate', loss:'−2.400 ore/loc/an'},
-      {dx: 0.0,  dy: 0.035,c:'#a855f7', icon:'📉', t:'EXOD — fără investiții', loss:'−12% populație 2055'},
+      {dx: 0.0,   dy: 0.0,   c:'#ef4444', icon:'🏚', t:'SEISM — fond neconsolidat', loss:'−180 M€'},
+      {dx:-0.012, dy:-0.008, c:'#3b82f6', icon:'🌊', t:'INUNDAȚII — lunca neamenajată', loss:'−45 M€/eveniment'},
+      {dx: 0.014, dy: 0.004, c:'#f59e0b', icon:'🚗', t:'CONGESTIE — fără mobilitate', loss:'−2.400 ore/loc/an'},
+      {dx: 0.002, dy: 0.013, c:'#a855f7', icon:'📉', t:'EXOD — fără investiții', loss:'−12% populație 2055'},
     ];
     const pts=impacts.map(im=>({type:'Feature',geometry:{type:'Point',coordinates:[cx+im.dx/latC,cy+im.dy]},properties:{c:im.c}}));
     this._safeAdd(map,'v8-cost',{type:'geojson',data:{type:'FeatureCollection',features:pts}},{

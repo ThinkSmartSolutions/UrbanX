@@ -42,8 +42,8 @@ G._UrbanHousing = {
     // presiune locuire în centru (scump) + dezvoltare nouă la periferie (mai ieftin)
     pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{c:'#ef4444',k:'press'}});
     labels.push({lon:cx,lat:cy,color:'#ef4444',icon:'🏢',title:'PRESIUNE LOCUIRE CENTRU',sub:m.priceIncome+' ani venit/apartament'});
-    pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+0.03/latC,cy+0.022]},properties:{c:'#22c55e',k:'new'}});
-    labels.push({lon:cx+0.03/latC,lat:cy+0.022,color:'#22c55e',icon:'🏗',title:'DEZVOLTARE NOUĂ',sub:'ofertă ~'+N(m.supply)+' un./an vs cerere '+N(m.demand)});
+    pts.push({type:'Feature',geometry:{type:'Point',coordinates:[cx+0.014/latC,cy+0.011]},properties:{c:'#22c55e',k:'new'}});
+    labels.push({lon:cx+0.014/latC,lat:cy+0.011,color:'#22c55e',icon:'🏗',title:'DEZVOLTARE NOUĂ',sub:'ofertă ~'+N(m.supply)+' un./an vs cerere '+N(m.demand)});
     return {pts:pts, labels:labels};
   },
 
