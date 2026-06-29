@@ -27,6 +27,7 @@
     analytics: function () { try { var t = D.getElementById('tab-analytics'); if (t) t.click(); } catch (e) {} },
     metodologie: function () { try { var t = D.getElementById('tab-methodology'); if (t) t.click(); } catch (e) {} },
     simlab: mod('SimLab', 'openDashboard'), lotizare: mod('Ansamblu', 'openWizard'), superbloc: mod('Superbloc', 'openPanel'),
+    hartiIstorice: function () { try { G._HartiIstorice && G._HartiIstorice.openPanel(); } catch (e) {} },
     loisir: mod('Loisir', 'openPanel'), uhi: mod('UHI', 'openPanel'),
     sesizari: mod('Sesizari', 'openForm'), 'sesizari-map': mod('Sesizari', 'toggleMap'),
     participare: function () { try { G._PublicParticipation && G._PublicParticipation.toggle(); } catch (e) {} },
@@ -70,6 +71,7 @@
       { label: 'GHSL — suprafață construită 1975-2055', moduleId: 'ghsl' },
       { label: 'Coridoare de dezvoltare spațială', moduleId: 'coridoare' },
       { label: 'Inventar patrimoniu & monumente (GIS)', moduleId: 'monumente' },
+      { label: '🗺️ Hărți istorice (suprapunere pe teritoriu)', moduleId: 'hartiIstorice' },
       { label: 'Import PUG digital (GeoJSON/KML)', moduleId: 'importPug' } ] },
     { id: 'analiza', label: 'Analiză teritorială', ico: '📊', color: '#534AB7', items: [
       { label: 'Capacitate & conformitate UAT', moduleId: 'intelligence' },

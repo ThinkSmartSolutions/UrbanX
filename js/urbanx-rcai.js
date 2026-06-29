@@ -120,6 +120,17 @@
     G.ss && G.ss('🏺 Aduc monumentele reale (OSM) și generez RCAI…');
     var heritage = await _fetchHeritage(x.lat, x.lon, mode === 'T' ? 12000 : 2500);
     var mapImg = null; try { mapImg = await _captureMap(x.lat, x.lon, heritage); } catch (e) {}
+    // capturi DIACRONICE — amplasamentul peste hărți istorice reale (geo-spatial.org / RNGD)
+    var histImgs = [];
+    try {
+      if (G._HartiIstorice && G._HartiIstorice.captureOver && G.map && x.lat != null) {
+        G.ss && G.ss('🗺️ Capturez amplasamentul peste hărțile istorice…');
+        var _hz = (mode === 'T') ? 10.5 : 14.2, _HLS = G._HartiIstorice.LAYERS;
+        for (var _hi = 0; _hi < _HLS.length; _hi++) {
+          try { var _img = await G._HartiIstorice.captureOver(x.lat, x.lon, _HLS[_hi].id, { zoom: _hz, opacity: 1 }); if (_img) histImgs.push({ img: _img, L: _HLS[_hi] }); } catch (e) {}
+        }
+      }
+    } catch (e) { console.warn('[RCAI hist]', e); }
     // LMI OFICIAL (INP) per județ — date reale (cod + denumire)
     var lmi = []; try {
       var jud = (cityKey || '').split('-')[1] || (x.judet || '').slice(0, 2).toUpperCase();
@@ -295,6 +306,27 @@
 
     // restricții și niveluri de avizare LMI (serviciu comun _LMI)
     try { if (G._LMI && G._LMI.renderSection) await G._LMI.renderSection(D, cityKey); } catch (e) {}
+
+    // ── ANALIZĂ CARTOGRAFICĂ DIACRONICĂ — amplasamentul peste hărți istorice REALE ──
+    D.chapter('Analiză cartografică diacronică (hărți istorice)');
+    D.P('Suprapunerea amplasamentului peste cartografia istorică georeferențiată permite reconstituirea folosinței terenului și a structurii așezării în epoci succesive — element-cheie în evaluarea potențialului arheologic. Continuitatea locuirii, vechile vetre de sat, drumurile istorice, cursurile de apă modificate și parcelarul agricol vechi sunt indicii directe ale probabilității de a întâlni vestigii. Planșele de mai jos marchează poziția amplasamentului (● roșu) pe hărți militare și topografice de epocă.');
+    if (histImgs.length) {
+      histImgs.forEach(function (h) {
+        if (D.subsec) D.subsec(h.L.label + ' · ' + h.L.epoca); else if (D.h2) D.h2(h.L.label + ' · ' + h.L.epoca);
+        D.P(h.L.note);
+        try {
+          var iw = CW, ih = Math.round(iw * 0.62); if (D.ensure) D.ensure(ih + 14);
+          var yy = (D.y != null ? D.y : 60);
+          pdf.addImage(h.img, 'PNG', D.dims.ML, yy, iw, ih);
+          pdf.setDrawColor(180, 83, 9); pdf.setLineWidth(0.4); pdf.rect(D.dims.ML, yy, iw, ih, 'S');
+          if (D.setY) D.setY(yy + ih + 2);
+          if (D.source) D.source('Amplasament (● roșu) peste ' + h.L.label + ' (' + h.L.epoca + ') · sursă: geo-spatial.org / RNGD (WMS georeferențiat)');
+        } catch (e) {}
+      });
+      D.P('Interpretarea comparativă a planșelor (de la cea mai veche la cea mai recentă) evidențiază transformarea amplasamentului: extinderea/retragerea vetrei construite, modificarea rețelei de drumuri și a hidrografiei, schimbarea folosinței (agricol → construit). Zonele cu locuire istorică atestată cartografic, precum și vecinătatea unor vechi drumuri, vaduri sau biserici, ridică nivelul de prudență arheologică.');
+    } else {
+      D.P('Hărțile istorice georeferențiate (Planuri Directoare de Tragere 1:20.000 interbelice, ridicări militare austro-ungare ~1882–1918, topografie sovietică ~1975–1985) sunt disponibile în platformă ca straturi de suprapunere (modulul „Hărți istorice"). Pentru includerea automată a planșelor de epocă în acest raport, generați-l cu harta activă (live), centrată pe amplasament. Sursă: geo-spatial.org / RNGD.');
+    }
 
     // dotări urbane (POI OSM) la nivel teritorial — reutilizarea capturilor din carduri (#14)
     if (mode === 'T') { try { if (G._DocMapCaptures && G._DocMapCaptures.poiSection) await G._DocMapCaptures.poiSection(D, cityKey, 'Context urban — dotări și repere (OSM)'); } catch (e) {} }
