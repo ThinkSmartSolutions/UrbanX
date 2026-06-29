@@ -88,7 +88,9 @@
     G.ss && G.ss('📄 Generez fișa iVU pe amplasament...');
     var r = st.result, P = st.P, ev = st.evidence;
     try {
-      var d = _initStudyPdf('Fisa iVU pe Amplasament', 'Indice de Valoare Urbana · evaluare punctuala', 8);
+      // Titlu fără token „iVU" (coperta îl ar uppercase → „IVU", inconsecvent). Brandul iVU
+      // rămâne consecvent (litera mică) în subtitlu + scoruri + secțiuni.
+      var d = _initStudyPdf('Fișă de Evaluare a Amplasamentului', 'iVU · Indice de Valoare Urbană pe amplasament', 8);
       var pdf = d.pdf, W = d.W, H = d.H;
       // copertă
       d.cover('iVU ' + r.iVU + '/100 (' + r.grade + ')', null, [
@@ -96,7 +98,7 @@
         ['Scor pozitiv S⁺', N(r.Splus, 1)], ['Penalizare P⁻', N(r.Pminus, 1)]
       ], r.iVU >= 45, 'iVU ' + r.grade);
 
-      pdf.addPage(); var y = 20; d.hdr && d.hdr('FISA iVU — AMPLASAMENT', 2);
+      pdf.addPage(); var y = 20; d.hdr && d.hdr('Fișă de evaluare a amplasamentului', 2);
       y = d.sec('1. Amplasamentul evaluat', y);
       [['Identificator (CF/nr. cad.)', P.nrcad || '—'], ['Suprafață', P.area ? N(P.area) + ' mp' : '—'],
        ['Coordonate (centroid)', (P.lat != null ? N(P.lat, 5) + '°N, ' + N(P.lon, 5) + '°E' : '—')],
@@ -148,7 +150,8 @@
 
       if (d.sign) d.sign();
       var nm = (P.nrcad ? String(P.nrcad).replace(/[^\w]+/g, '_') : 'parcela');
-      var loc = ((G._locSlug && G.TCI) ? G._locSlug((G.UrbanXIVU && G.UrbanXIVU.scoreFor && G.UrbanXIVU.scoreFor(G.TCI.cityKey) || {}).name || '') : '') || 'UAT';
+      // localitatea = UAT-ul REAL al parcelei (d.uat din _initStudyPdf = getUATLabel), NU UAT-ul activ din panou
+      var loc = (G._locSlug ? G._locSlug(d.uat || '') : ('' + (d.uat || '')).replace(/[^\w]+/g, '_')) || 'UAT';
       pdf.save('iVU_' + nm + '_' + loc + '.pdf');
       G.ss && G.ss('✅ Fișa iVU generată: ' + pdf.getNumberOfPages() + ' pagini (iVU ' + r.iVU + '/100 ' + r.grade + ')');
     } catch (err) { console.error('[IVUParcela PDF]', err); G.ss && G.ss('❌ Eroare PDF iVU: ' + (err.message || err).toString().slice(0, 80)); }

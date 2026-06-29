@@ -156,7 +156,11 @@
     var P = _activeParcel();
     if (!P) { G.ss && G.ss('⚠️ Selectează o parcelă pe hartă pentru fișa iVU pe amplasament.'); return; }
     G.ss && G.ss('🔎 Calculez iVU pe amplasament (proximitate reală OSM)...');
-    var cityKey = (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
+    // UAT-ul PARCELEI (din PUG-ul încărcat S_UAT), NU UAT-ul activ din panoul IVU (pot diferi —
+    // ex. panou pe Galați, dar parcela e din PUG Iași). Altfel ieșea „Galați" pe document Iași.
+    var cityKey = null;
+    try { if (window.S_UAT && window.S_UAT.id && window._PUG_REGISTRY) cityKey = Object.keys(window._PUG_REGISTRY).find(function (k) { return window._PUG_REGISTRY[k].id === window.S_UAT.id; }); } catch (e) {}
+    cityKey = cityKey || (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
     var coefs = _uatCoefs(cityKey);
     var els = await _fetchOSM(P.lat, P.lon, 1500);
     var osmScores = _scoreFactorsFromOSM(els, P.lat, P.lon);
