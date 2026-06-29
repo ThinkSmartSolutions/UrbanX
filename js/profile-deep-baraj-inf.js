@@ -918,5 +918,128 @@ window._PROFILE_DEEP['baraj_inf'] = [
         ['Valoare netă față de teren obișnuit','rezultantă','96']
       ]}
     ]
+  },
+  {
+    title: 'Batardoul și golirea de avarie a lacului — implicații pentru amplasament',
+    blocks: [
+      { type:'p', text:'Batardoul este o ecluză provizorie de izolare a unei zone a lucrării hidrotehnice pentru intervenții, iar prezența și funcționarea sistemului de golire de avarie condiționează gestionarea situațiilor critice care afectează amplasamentele din aval. Golirea de avarie permite coborârea controlată a nivelului lacului atunci când o anomalie a barajului impune reducerea încărcării, dar generează în aval debite susținute pe durate lungi, pe vreme senină. Pentru lot, cunoașterea capacității și a regimului de golire de avarie este esențială, întrucât o astfel de manevră, deși de protecție a barajului, transformă temporar cursul aval într-o zonă inundabilă, independent de orice precipitație, conform documentației deținătorului.' },
+      { type:'p', text:'Capacitatea de golire de avarie se exprimă prin timpul necesar coborârii nivelului cu o anumită cotă și prin debitul maxim evacuat prin golirile de fund; un baraj bine proiectat poate goli o fracțiune semnificativă a volumului în câteva zile. Acest regim diferă fundamental de cel al unei viituri naturale: el este planificat, anunțat și susținut, ceea ce oferă timp de pregătire localității, dar afectează aval-ul pe o perioadă mai lungă. Studiul preia din regulamentul de exploatare parametrii de golire de avarie relevanți pentru lot și îi corelează cu cotele de inundabilitate aval, distingând clar acest scenariu de cel al undei de rupere catastrofale.' },
+      { type:'p', text:'Pentru amplasament, implicația practică este că o golire de avarie poate impune evacuarea preventivă a zonei joase chiar fără semne de inundație iminentă, doar pe baza deciziei de operare a barajului. Studiul recomandă includerea lotului în fluxul de informare privind manevrele de golire programate și pregătirea unui protocol de reacție specific, distinct de cel al alarmării la unda de rupere. Înțelegerea faptului că nivelul aval este controlat de operarea barajului, nu doar de hidrologia naturală, este o caracteristică definitorie a amplasamentelor din zona de influență a barajului și trebuie reflectată onest în managementul de risc al parcelei.' },
+      { type:'table', headers:['Parametru golire de avarie','U.M.','Valoare'], rows:[
+        ['Capacitate goliri de fund','mc/s','180'],
+        ['Coborâre nivel în 24 h','m','2,5'],
+        ['Durată golire semnificativă','zile','6'],
+        ['Debit susținut aval','mc/s','150'],
+        ['Preaviz manevră programată','ore','48']
+      ]}
+    ]
+  },
+  {
+    title: 'Comportarea barajului la umplerea rapidă și efectul resimțit local',
+    blocks: [
+      { type:'p', text:'Umplerea rapidă a lacului — în urma unor precipitații abundente, a topirii bruște a zăpezii sau a primei umpleri după construcție — supune corpul barajului și versanții cuvetei la solicitări tranzitorii deosebite, monitorizate atent în cadrul urmăririi comportării în timp. Creșterea rapidă a presiunii hidrostatice modifică regimul de infiltrații, presiunile interstițiale din fundație și starea de eforturi a construcției. Pentru amplasamentul perilacustru, umplerea rapidă înseamnă o variație accentuată a liniei țărmului și o saturare accelerată a versantului, cu efect direct asupra stabilității malului analizat în capitolele de geotehnică, conform datelor deținătorului și ale CONSIB.' },
+      { type:'p', text:'Prima umplere a unui lac nou este perioada cea mai sensibilă din viața unui baraj, urmărită cu un program intensificat de măsurători, întrucât comportarea reală a construcției și a fundației se validează abia atunci. Pentru lacurile vechi, umplerea rapidă rămâne un test periodic al stării de siguranță. Studiul nu evaluează comportarea structurală a barajului — competență exclusivă a expertului atestat — ci preia concluziile relevante pentru lot: dacă umplerile rapide au evidențiat anomalii și cum afectează ele regimul versantului perilacustru. O umplere rapidă bine suportată de baraj este un indicator favorabil al stării de siguranță relevant pentru riscul rezidual al amplasamentului.' },
+      { type:'p', text:'La nivelul malului din dreptul lotului, umplerea rapidă produce o saturare bruscă a bazei versantului fără timp de adaptare, care reduce temporar factorul de siguranță la alunecare și poate declanșa eroziune accelerată prin clapotaj la cota nouă. Studiul corelează frecvența umplerilor rapide cu rata de eroziune și cu riscul de instabilitate a malului, recomandând o gardă suplimentară la amenajări și monitorizarea malului după episoade de umplere rapidă. Astfel, fenomenul, deși gestionat la scara barajului de deținător, are un efect local concret asupra parcelei perilacustre, care trebuie integrat în managementul de risc al amplasamentului pe lângă scenariile de inundabilitate aval.' },
+      { type:'chart', data:[ ['Creștere nivel/24h (m)', 1.8], ['Episoade umplere rapidă/an', 3], ['Creștere infiltrații baraj (%)', 22], ['Scădere Fs mal la umplere (%)', 11] ], title:'Efectele umplerii rapide a lacului asupra barajului și malului', source:'Date UCC deținător / observații locale' }
+    ]
+  },
+  {
+    title: 'Instrumentația de monitorizare locală a malului și a construcțiilor',
+    blocks: [
+      { type:'p', text:'Instrumentația de monitorizare la nivelul amplasamentului, complementară urmăririi comportării barajului, oferă utilizatorului lotului o capacitate proprie de a detecta evoluții nefavorabile ale malului și ale construcțiilor. Spre deosebire de aparatura complexă a barajului, instrumentele locale sunt simple și accesibile: repere topografice de nivelment pentru deplasări, fisurometre pentru urmărirea fisurilor, foraje piezometrice de mică adâncime pentru nivelul apei subterane și înclinometre acolo unde versantul prezintă risc de alunecare. Pentru lot, un astfel de program de instrumentare proporțional cu riscul transformă recomandările studiului într-o supraveghere activă, capabilă să semnaleze din timp probleme reparabile.' },
+      { type:'p', text:'Forajele piezometrice locale măsoară nivelul și fluctuația apei subterane influențate de lac, date esențiale pentru verificarea ipotezelor de fundare și de stabilitate; o creștere neașteptată a presiunii apei în versant este un semnal de alarmă pentru riscul de alunecare. Reperele de nivelment, măsurate periodic cu instrumente topografice de precizie, detectează tasări sau deplasări de câțiva milimetri, imperceptibile vizual. Studiul recomandă pentru lot amplasarea instrumentelor în punctele critice — la baza versantului, pe construcție și pe lucrările de mal — și stabilirea unor praguri de alertă, corelate cu valorile din capitolele de geotehnică și de hidrogeologie ale prezentului studiu.' },
+      { type:'p', text:'Interpretarea datelor de instrumentație se face prin compararea cu valori de referință și prin urmărirea tendinței în timp, nu a valorilor izolate: o deplasare constantă mică este mai puțin îngrijorătoare decât o accelerare bruscă. Datele se consemnează într-un registru și se raportează, la nevoie, unui specialist geotehnician. Studiul recomandă pentru lot un program de citire cu frecvență adaptată riscului, intensificat după evenimente (umplere rapidă, cutremur, precipitații extreme). Instrumentația locală, deși modestă ca dotare, oferă o capacitate reală de avertizare timpurie asupra comportării malului și a construcțiilor, completând la scara parcelei monitorizarea barajului realizată de deținător în cadrul UCC.' },
+      { type:'table', headers:['Instrument monitorizare locală','Mărime urmărită','Prag alertă'], rows:[
+        ['Repere nivelment topografic','deplasare/tasare','mm/an: 5'],
+        ['Fisurometru','deschidere fisură','mm: 2'],
+        ['Foraj piezometric mic','nivel apă subterană','m sub teren: 1,2'],
+        ['Înclinometru versant','deplasare laterală','mm/an: 8'],
+        ['Frecvență citire','-','citiri/an: 4']
+      ]}
+    ]
+  },
+  {
+    title: 'Infiltrațiile prin corpul și fundația barajului — relevanță pentru aval',
+    blocks: [
+      { type:'p', text:'Infiltrațiile reprezintă curgerea apei prin corpul și fundația barajului, un fenomen normal în limite controlate, dar care, dacă crește anormal sau antrenează material fin (eroziune internă, fenomen de renard hidraulic), poate compromite siguranța lucrării. Debitul de infiltrație și turbiditatea apei drenate sunt printre cei mai sensibili indicatori urmăriți în programul de comportare în timp, conform Legii 466/2001. Pentru amplasamentul aval, relevanța infiltrațiilor este indirectă, dar importantă: o creștere bruscă a infiltrațiilor este unul dintre primele semnale ale unei probleme care, în scenariul cel mai grav, ar putea evolua spre cedare, declanșând planurile de avertizare aval.' },
+      { type:'p', text:'Sistemul de drenaj al barajului — drenuri, filtre, galerii de drenaj — colectează apa infiltrată și o evacuează controlat, prevenind acumularea de presiune care ar putea destabiliza construcția. Filtrele invers granulometric împiedică antrenarea particulelor fine, principalul mecanism al eroziunii interne. Studiul nu evaluează starea acestor sisteme — competență a expertului atestat și a deținătorului — ci preia concluzia relevantă pentru lot: dacă regimul de infiltrații este stabil și sub control, conform ultimei expertize. Un sistem de drenaj funcțional și un debit de infiltrații stabil sunt indicatori favorabili ai stării de siguranță, care reduc incertitudinea de risc a amplasamentului din aval.' },
+      { type:'p', text:'Pentru utilizatorul lotului, semnificația practică este că starea infiltrațiilor barajului, deși invizibilă de la amplasament, condiționează probabilitatea evenimentului extrem care ar afecta parcela. Apariția unor izvoare noi, tulburi, în piciorul aval al barajului ar fi un semnal de eroziune internă, raportabil imediat. Studiul recomandă ca administrația locală să mențină accesul la concluziile privind regimul de infiltrații, ca parte a evaluării riscului rezidual, și ca populația din aval să cunoască semnificația unei manevre de golire decisă din cauza unor infiltrații anormale. Astfel, un fenomen tehnic al barajului se traduce într-un element de înțelegere a riscului la scara amplasamentului perilacustru aval.' },
+      { type:'bullets', items:[
+        ['Infiltrații','Curgere prin corp/fundație — normală în limite controlate'],
+        ['Indicator de alarmă','Creștere bruscă a debitului sau turbiditate'],
+        ['Eroziune internă (renard)','Antrenarea materialului fin — periculoasă'],
+        ['Drenaj baraj','Filtre + galerii care evacuează controlat apa'],
+        ['Relevanță aval','Infiltrații stabile = risc rezidual mai mic pentru lot']
+      ]}
+    ]
+  },
+  {
+    title: 'Valul indus de alunecări de mal și fenomenul de seișă în lac',
+    blocks: [
+      { type:'p', text:'Pe lângă valul de impuls generat de o alunecare bruscă (tratat anterior ca hazard major), lacul poate fi sediul unor oscilații libere ale întregii mase de apă, numite seișe, declanșate de vânt puternic, variații bruște de presiune atmosferică sau de mișcări seismice. O seișă este o undă staționară cu perioadă proprie ce depinde de lungimea și adâncimea lacului (de tip T = 2L / √(g·h) pentru modul fundamental), care produce o ridicare și coborâre ritmică a nivelului la maluri opuse. Pentru amplasamentul perilacustru, seișa poate genera variații de nivel de ordinul decimetrilor până la metru, suprapuse peste cota normală, afectând amenajările de mal.' },
+      { type:'p', text:'Deși de amplitudine în general redusă comparativ cu valul de impuls al unei alunecări mari, seișa este un fenomen recurent care solicită ciclic structurile de mal — pontoane, debarcadere, ziduri — și poate inunda temporar fâșia joasă a malului la coincidența cu o cotă ridicată a lacului. Periodicitatea ei o face distinctă de valurile de vânt obișnuite. Studiul estimează perioada proprie de oscilație a lacului în funcție de dimensiunile sale și amplitudinea probabilă a seișei la dreptul lotului, corelând rezultatul cu garda de cotă recomandată pentru amenajări și cu solicitarea de proiectare a pontoanelor și a lucrărilor de mal ancorate.' },
+      { type:'p', text:'Pentru lot, relevanța practică a seișei constă în dimensionarea corectă a amenajărilor de mal la o solicitare ciclică pe care proiectarea naivă o ignoră, ducând la oboseala și defectarea prematură a ancorajelor și a pontoanelor. Studiul recomandă luarea în calcul a amplitudinii de seișă la stabilirea cotei utile a pontoanelor și la verificarea sistemelor de ancorare la solicitări repetate. Tratarea acestui fenomen specific lacurilor, alături de valul de impuls și de valurile de vânt, completează tabloul solicitărilor hidrodinamice asupra frontului la apă al parcelei, asigurând durabilitatea amenajărilor pe amplasamentul perilacustru.' },
+      { type:'table', headers:['Parametru seișă/oscilație lac','U.M.','Valoare'], rows:[
+        ['Lungime caracteristică lac','km','9'],
+        ['Adâncime medie lac','m','28'],
+        ['Perioadă proprie mod fundamental','min','18'],
+        ['Amplitudine seișă estimată la lot','cm','35'],
+        ['Gardă cotă suplimentară amenajări','cm','40']
+      ]}
+    ]
+  },
+  {
+    title: 'Colmatarea prizei de apă locale și mentenanța acesteia',
+    blocks: [
+      { type:'p', text:'O priză de apă locală — pentru alimentarea cu apă, pentru o microhidrocentrală sau pentru irigații — amplasată în zona de mal a amplasamentului este expusă colmatării prin depunerea sedimentelor și prin acumularea de plante acvatice și lemn plutitor, fenomen specific lacurilor de acumulare cu transport solid. Reducerea secțiunii utile a prizei scade debitul captabil și poate întrerupe alimentarea, mai ales la cote scăzute când priza se apropie de zona de depunere. Pentru lot, fiabilitatea unei eventuale prize locale depinde de amplasarea ei într-o zonă cu colmatare redusă și de un program de mentenanță adaptat ratei locale de depunere, corelate cu capitolul de sedimentare a cuvetei.' },
+      { type:'p', text:'Soluțiile de reducere a colmatării prizei includ amplasarea la o cotă superioară zonei de depunere, grătare și site autocurățătoare, prize cu mai multe niveluri de aspirație și sisteme de spălare în contracurent. Proiectarea trebuie să țină cont de variația de nivel a lacului, astfel încât priza să rămână submersă și funcțională între nivelul minim și cel normal de exploatare. Studiul evaluează susceptibilitatea la colmatare a unei prize în zona lotului pe baza ratei locale de depunere și a geomorfologiei malului, recomandând soluții constructive și o frecvență de mentenanță care asigură continuitatea alimentării pe durata de viață a investiției.' },
+      { type:'p', text:'Mentenanța prizei presupune inspecții periodice, curățarea grătarelor, decolmatarea zonei de aspirație prin dragare locală și verificarea sistemelor de spălare; costul și frecvența acestor operațiuni cresc cu rata de colmatare și trebuie incluse în planul de exploatare. Neglijarea mentenanței conduce la scăderea treptată a debitului și la avarii. Studiul recomandă pentru lot un program de mentenanță a prizei dimensionat la condițiile locale și includerea costurilor aferente în analiza economică a soluției de captare. Fiabilitatea prizei locale, deși un detaliu tehnic, condiționează direct viabilitatea oricărei valorificări care depinde de apa lacului pe amplasamentul perilacustru.' },
+      { type:'table', headers:['Parametru priză de apă locală','U.M.','Valoare'], rows:[
+        ['Rată colmatare zonă priză','cm/an','4'],
+        ['Cotă inferioară priză','mdMN','339,5'],
+        ['Frecvență decolmatare','luni','12'],
+        ['Reducere debit la colmatare','%','25'],
+        ['Cost mentenanță anuală','lei/an','7.500']
+      ]}
+    ]
+  },
+  {
+    title: 'Gestiunea lemnului plutitor și a deșeurilor pe luciul lacului',
+    blocks: [
+      { type:'p', text:'Lacurile de acumulare colectează din bazinul versant cantități importante de lemn plutitor, vegetație antrenată și deșeuri, care se acumulează în special în coada lacului, în golfuri și în fața barajului, împinse de vânt și de curenți. Acest material plutitor degradează peisajul, obstruează prizele de apă și grătarele evacuatorilor, periclitează navigația și se concentrează adesea tocmai în zonele de mal valorificate pentru agrement. Pentru amplasamentul perilacustru, acumularea de plutitori în dreptul malului este o problemă recurentă de calitate a mediului și de utilizare, care afectează direct atractivitatea turistică și funcționalitatea amenajărilor de mal.' },
+      { type:'p', text:'Gestiunea plutitorilor revine, la scara barajului, deținătorului, care folosește bariere flotante în fața evacuatorilor și a prizelor și efectuează colectări periodice; la scara malului local, însă, responsabilitatea de a menține curată fâșia de țărm revine adesea utilizatorului parcelei. Volumul de plutitori variază sezonier, cu vârfuri după viituri și furtuni care antrenează material din bazin. Studiul evaluează expunerea malului lotului la acumularea de plutitori în funcție de poziția față de vânturile dominante și de curenți, recomandând soluții de protecție — bariere flotante locale, colectare periodică — pentru zonele de agrement și pentru eventuala priză de apă.' },
+      { type:'p', text:'Pe lângă lemnul plutitor de origine naturală, deșeurile antropice (plastic, ambalaje) aduse de afluenți și de vizitatori reprezintă o problemă în creștere, cu impact asupra calității apei și a faunei. Colectarea lor necesită infrastructură și efort organizat, eventual în cadrul unor acțiuni comunitare coordonate de UAT. Studiul recomandă pentru lot integrarea gestiunii plutitorilor și a deșeurilor de mal în planul de mentenanță al obiectivului, întrucât o fâșie de țărm curată este o condiție a valorificării turistice. Această problemă, specifică luciului de apă al unei acumulări, completează gestiunea deșeurilor de pe uscat tratată anterior, vizând strict materialul plutitor și acumulările de mal.' },
+      { type:'bullets', items:[
+        ['Sursă plutitori','Lemn și vegetație antrenate din bazin la viituri'],
+        ['Zone de acumulare','Coada lacului, golfuri, în fața barajului'],
+        ['Probleme','Obstruare prize/evacuatori, peisaj, navigație'],
+        ['Soluții','Bariere flotante locale + colectare periodică'],
+        ['Deșeuri antropice','Plastic/ambalaje — acțiuni comunitare cu UAT']
+      ]}
+    ]
+  },
+  {
+    title: 'Restricțiile de navigație și balizajul pe sectorul de luciu adiacent',
+    blocks: [
+      { type:'p', text:'Navigația pe luciul lacului de acumulare este reglementată prin reguli care concilează agrementul nautic cu siguranța și cu protecția lucrării hidrotehnice, materializate printr-un sistem de balizaj — geamanduri și semnale care delimitează zonele interzise, sectoarele de viteză redusă și culoarele de navigație. Zona din imediata vecinătate a barajului, a descărcătorilor și a prizelor este, de regulă, marcată ca interdicție absolută de navigație și acces, din cauza curenților periculoși și a riscului pentru lucrare. Pentru amplasamentul perilacustru, cunoașterea balizajului și a restricțiilor de pe sectorul de luciu adiacent definește exact ce activități nautice sunt admise în dreptul lotului.' },
+      { type:'p', text:'Balizajul include geamanduri de delimitare a zonelor de scaldă (în care navigația cu motor este interzisă pentru protecția înotătorilor), marcaje ale obstacolelor submerse — frecvente la lacurile de acumulare unde au rămas construcții și vegetație inundate — și semnale ale culoarelor sigure la cote variabile. Variația de nivel complică balizajul, întrucât un obstacol vizibil la cotă scăzută devine periculos submers la cotă ridicată. Studiul corelează balizajul necesar în zona lotului cu batimetria și cu prezența obstacolelor submerse cunoscute, recomandând marcarea zonelor de scaldă și a pericolelor, ca măsură de siguranță pentru valorificarea nautică a frontului la apă al parcelei.' },
+      { type:'p', text:'Întreținerea balizajului și informarea utilizatorilor revin deținătorului lacului și autorităților, dar un obiectiv turistic de pe lot are responsabilitatea de a-și informa oaspeții asupra regulilor și pericolelor zonei. Studiul recomandă afișarea hărții de navigație cu zonele interzise și de viteză redusă la obiectivul de pe parcelă și marcarea propriei zone de scaldă cu geamanduri. Respectarea restricțiilor de navigație nu este doar o obligație legală, ci o condiție de siguranță, întrucât accidentele nautice — coliziuni cu obstacole submerse, apropierea de descărcători — sunt printre cele mai frecvente pe lacurile de acumulare valorificate turistic, iar prevenirea lor protejează atât vizitatorii, cât și operatorul.' },
+      { type:'table', headers:['Element navigație/balizaj','Stare','Valoare/Indicator'], rows:[
+        ['Zonă interzisă lângă baraj','marcată','rază m: 500'],
+        ['Geamanduri zonă scaldă','necesare lot','buc.: 4'],
+        ['Obstacole submerse cunoscute','marcate','buc.: 2'],
+        ['Limită viteză sector adiacent','reglementată','noduri: 5'],
+        ['Hartă navigație afișată','recomandat','-']
+      ]}
+    ]
+  },
+  {
+    title: 'Impactul lacului asupra microclimatului agricol din aval',
+    blocks: [
+      { type:'p', text:'Prezența unui mare luciu de apă și regimul reglat al debitelor influențează microclimatul și condițiile agricole din aval-ul barajului, cu efecte relevante pentru terenurile agricole ale localității din zona de influență. Inerția termică a lacului și aerul umed advectat aval pot reduce frecvența și intensitatea înghețurilor târzii de primăvară și timpurii de toamnă în imediata vecinătate a cursului, prelungind sezonul de vegetație și favorizând culturile sensibile la îngheț. Pentru un amplasament cu vocație agricolă din aval, acest efect microclimatic poate constitui un avantaj, valorificabil prin alegerea culturilor adaptate condițiilor mai blânde induse de proximitatea apei.' },
+      { type:'p', text:'Pe de altă parte, regimul reglat al debitelor și posibilitatea irigării din lac sau din cursul aval oferă o sursă de apă mai stabilă pentru agricultură decât regimul natural, dar coborârea nivelului acviferului prin captări sau modificarea regimului de inundare a luncii pot avea efecte contrare, reducând umiditatea naturală a solurilor de luncă. Studiul evaluează la nivel local efectul lacului asupra condițiilor agricole din aval-ul amplasamentului — risc de îngheț, disponibilitate de apă pentru irigații, regim de umiditate al solului — corelându-l cu debitul salubru și cu regimul de exploatare, fără a se extinde la o analiză agro-climatică de bazin.' },
+      { type:'p', text:'Ceața persistentă indusă de lac, deși benefică termic, poate reduce insolația și favoriza bolile criptogamice la unele culturi, ceea ce impune alegerea soiurilor rezistente. Variațiile bruște de nivel ale cursului aval, datorate turbinării de vârf, pot afecta terenurile de luncă prin eroziune sau prin schimbarea regimului de umiditate. Studiul recomandă pentru un lot cu vocație agricolă din aval valorificarea avantajelor microclimatice (sezon prelungit, apă pentru irigații) și gestionarea dezavantajelor (ceață, variații de nivel), ca element de fundamentare a celei mai bune utilizări agricole. Această analiză punctuală a microclimatului agricol local completează, fără a o dubla, evaluarea microclimatului perilacustru tratată anterior pentru zona malului.' },
+      { type:'chart', data:[ ['Reducere zile îngheț târziu', 8], ['Prelungire sezon vegetație (zile)', 12], ['Zile suplimentare cu ceață', 14], ['Disponibilitate apă irigații (%)', 85] ], title:'Efectul lacului asupra condițiilor agricole din aval', source:'Date meteo regionale / estimare locală' }
+    ]
   }
 ];

@@ -560,10 +560,25 @@
             if(bl.type==='p' && bl.text) D.P(bl.text);
             else if(bl.type==='bullets' && bl.items && bl.items.length && D.bullets) D.bullets(bl.items);
             else if(bl.type==='chart' && bl.data && bl.data.length && D.barChart){
-              // bloc grafic explicit din conținut: data=[[label,val],...]
+              // bloc grafic explicit — acceptă AMBELE formate:
+              //  (a) data=[[label,val],...]   (b) labels=[...] + data=[num,...] (+ chartType opțional)
               var pal2=[[59,130,246],[34,197,94],[249,115,22],[168,85,247],[234,179,8],[14,165,233]];
-              var cd=bl.data.map(function(r,i){ return [(''+(r[0]||('#'+(i+1)))).slice(0,16), _num(r[1]), (r[2]&&r[2].length===3)?r[2]:pal2[i%pal2.length]]; }).filter(function(r){return r[1]!=null;});
-              if(cd.length>=2){ D.barChart(cd, {title:bl.title||'Reprezentare grafică', max:bl.max||0, source:bl.source||'Date studiu'}); hadVisual=true; }
+              var cd;
+              if(bl.labels && bl.labels.length && typeof bl.data[0]!=='object'){
+                cd=bl.labels.map(function(l,i){ return [(''+l).slice(0,18), _num(bl.data[i]), pal2[i%pal2.length]]; }).filter(function(r){return r[1]!=null;});
+              } else {
+                cd=bl.data.map(function(r,i){ return [(''+((Array.isArray(r)?r[0]:r)||('#'+(i+1)))).slice(0,18), _num(Array.isArray(r)?r[1]:r), (Array.isArray(r)&&r[2]&&r[2].length===3)?r[2]:pal2[i%pal2.length]]; }).filter(function(r){return r[1]!=null;});
+              }
+              if(cd.length>=2){
+                var _ttl=bl.title||'Reprezentare grafică', _src=bl.source||'Date studiu', _ct=bl.chartType;
+                if(_ct==='donut' && D.donut) D.donut(cd,{title:_ttl,source:_src});
+                else if(_ct==='pie' && D.pie) D.pie(cd,{title:_ttl,source:_src});
+                else if(_ct==='hbar' && D.hbar) D.hbar(cd,{title:_ttl,source:_src});
+                else if(_ct==='radar' && D.radar && cd.length>=4) D.radar(cd,{title:_ttl,source:_src});
+                else if((_ct==='line'||_ct==='linie') && D.lineChart) D.lineChart([{name:(''+_ttl).slice(0,22),color:[37,99,235],points:cd.map(function(r){return r[1];})}], cd.map(function(r){return r[0];}), {title:_ttl,source:_src});
+                else D.barChart(cd, {title:_ttl, max:bl.max||0, source:_src});
+                hadVisual=true;
+              }
             }
             else if(bl.type==='table' && bl.headers && bl.rows && bl.rows.length && D.table){
               var nc=bl.headers.length||1; D.table(bl.headers, bl.rows, bl.headers.map(function(){return CW/nc;}));

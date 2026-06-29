@@ -169,7 +169,9 @@
 
       // ── Corp dezvoltat (conținut profund per profil×rang) ──
       var deep = (G._PROFILE_DEEP && G._PROFILE_DEEP[profileId + '_' + rank]) || [];
-      if (deep.length && G._deepRender) { D.__allowChapterIVU = true; G._deepRender(D, deep, CW); D.__allowChapterIVU = false; }
+      // Graficele per capitol vin din DATELE proprii ale studiului (tabele/charturi). NU activăm
+      // fallback-ul IVU în capitole (regula Florin: graficele IVU NU se repetă în corp — doar în Nota UrbanX).
+      if (deep.length && G._deepRender) { G._deepRender(D, deep, CW); }
       else { D.chapter('Conținut dezvoltat'); D.P('Corpul dezvoltat al acestui studiu de profil se află în integrare progresivă. Structura, copertă, sursele și Nota UrbanX sunt complete.'); }
 
       // ── Planșe cu HĂRȚI REALE ale UAT ──
