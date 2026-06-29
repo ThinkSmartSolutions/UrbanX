@@ -61,13 +61,20 @@
     var out = {}; Object.keys(acc).forEach(function (j) { out[j] = [acc[j].x / acc[j].n, acc[j].y / acc[j].n]; });
     _judCentroidCache = out; return out;
   }
-  // hull aproximativ (centroid regiune + cerc de raza adaptivă) — desen pe hartă
+  // hull peste TOATE UAT-urile regiunii (sute de puncte reale) → acoperă teritoriul real,
+  // nu lasă „restul" gol. Folosește _UAT_REGISTRY (3181 UAT cu coordonate).
+  var _uatByJud = null;
+  function _uatPoints(juds) {
+    if (!_uatByJud) { _uatByJud = {}; var R = G._UAT_REGISTRY || {}; Object.keys(R).forEach(function (k) { var u = R[k]; if (u.c && u.j) { (_uatByJud[u.j] = _uatByJud[u.j] || []).push(u.c); } }); }
+    var pts = []; juds.forEach(function (j) { (_uatByJud[j] || []).forEach(function (c) { pts.push(c); }); });
+    return pts;
+  }
   function _regionGeo(r) {
-    var C = _judCentroids(); var pts = r.jud.map(function (j) { return C[j]; }).filter(Boolean);
+    var pts = _uatPoints(r.jud);
+    if (pts.length < 3) { var C = _judCentroids(); pts = r.jud.map(function (j) { return C[j]; }).filter(Boolean); }
     if (!pts.length) return null;
     var cx = pts.reduce(function (a, p) { return a + p[0]; }, 0) / pts.length, cy = pts.reduce(function (a, p) { return a + p[1]; }, 0) / pts.length;
-    // convex hull simplu (gift wrapping) pe centroizii județelor, apoi buffer vizual
-    if (pts.length < 3) { pts = pts.concat([[cx + 0.25, cy], [cx, cy + 0.2], [cx - 0.25, cy]]); }
+    if (pts.length < 3) pts = pts.concat([[cx + 0.2, cy], [cx, cy + 0.15], [cx - 0.2, cy]]);
     var hull = _hull(pts); return { center: [cx, cy], ring: hull };
   }
   function _hull(P) {

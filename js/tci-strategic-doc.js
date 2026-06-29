@@ -56,6 +56,9 @@
     const FONT = _hasRO ? 'DejaVuRO' : 'helvetica';
     const W = 210, H = 297, ML = 18, MR = 18, MT = 22, MB = 15, CW = W - ML - MR;
     const ACCENT = opts.accent || [212, 175, 55];
+    // versiune LUMINOASĂ a accentului pt text pe BENZI ÎNCHISE (top band, etichetă capitol,
+    // antet tabel) — accentul închis (ex. roșu-bordo Regionalizare) era ilizibil pe navy.
+    const ACCENT_HDR = ACCENT.map(function (v) { return Math.round(v + (255 - v) * 0.55); });
     const INK = [28, 38, 58], SUB = [90, 102, 124], MUT = [130, 142, 162];
     const docTitle = opts.docTitle || 'DOCUMENT STRATEGIC';
     const cityName = opts.cityName || '';
@@ -70,7 +73,7 @@
     function band() {
       pdf.setFillColor(10, 18, 38); pdf.rect(0, 0, W, 13, 'F');
       pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(0, 12.6, W, 0.5, 'F');
-      pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7.5);
+      pdf.setTextColor.apply(pdf, ACCENT_HDR); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7.5);
       pdf.text(S2(docTitle), ML, 8.6);
       pdf.setTextColor(120, 140, 170); pdf.setFont(FONT, 'normal'); pdf.setFontSize(7);
       pdf.text(S2(cityName), W - MR, 8.6, { align: 'right' });
@@ -111,7 +114,7 @@
       else { ensure(bandH + 40); if (y > MT + 6) y += 7; }   // spațiu și ÎNAINTE de bandă
       // banda capitol (inaltime = bandH)
       pdf.setFillColor(12, 24, 56); pdf.rect(ML, y, CW, bandH, 'F'); pdf.setFillColor.apply(pdf, ACCENT); pdf.rect(ML, y, 2.4, bandH, 'F');
-      pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7); pdf.setCharSpace && pdf.setCharSpace(0.3);
+      pdf.setTextColor.apply(pdf, ACCENT_HDR); pdf.setFont(FONT, 'bold'); pdf.setFontSize(7); pdf.setCharSpace && pdf.setCharSpace(0.3);
       pdf.text(S2('CAPITOLUL ' + chapterNo), ML + 6.5, y + _topPad);
       try { pdf.setCharSpace && pdf.setCharSpace(0); } catch (e) {}
       pdf.setTextColor(255, 255, 255); pdf.setFont(FONT, 'bold'); pdf.setFontSize(_tfs);
@@ -207,7 +210,7 @@
         var hmaxL = hcells.reduce(function (m, ls) { return Math.max(m, ls.length); }, 1);
         var headH = Math.max(RH, hmaxL * 3.3 + 2.6);
         ensure(headH + 2); pdf.setFillColor(14, 26, 54); pdf.rect(ML, y, CW, headH, 'F');
-        var cx = ML; hcells.forEach(function (ls, i) { pdf.setTextColor.apply(pdf, ACCENT); pdf.setFont(FONT, 'bold'); pdf.setFontSize(hfs); ls.forEach(function (ln, li) { pdf.text(ln, cx + 1.6, y + 3.6 + li * 3.3); }); cx += cw[i]; });
+        var cx = ML; hcells.forEach(function (ls, i) { pdf.setTextColor.apply(pdf, ACCENT_HDR); pdf.setFont(FONT, 'bold'); pdf.setFontSize(hfs); ls.forEach(function (ln, li) { pdf.text(ln, cx + 1.6, y + 3.6 + li * 3.3); }); cx += cw[i]; });
         y += headH;
       }
       drawHead();
