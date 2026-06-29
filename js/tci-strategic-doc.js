@@ -609,6 +609,26 @@
         pdf.setPage(_last);
       }
     } catch (e) { console.warn('[StratDoc IVU cover]', e); }
+    // ── QR deep-link pe COPERTĂ (toate documentele teritoriale: SIDU/MP/PMUD/SDL/metropolitană/profil) ──
+    // Scanarea redeschide platforma pe UAT-ul corect. Sărit dacă a fost deja aplicat (ex. MP propriu).
+    try {
+      if (G._QRGenerator && !pdf.__qrStamped) {
+        pdf.__qrStamped = true;
+        var _qck = (D && D.__cityKey) || (G.TCI && G.TCI.cityKey);
+        var _url = (G._QRMasterplanPatch && G._QRMasterplanPatch._buildShareURL) ? G._QRMasterplanPatch._buildShareURL(_qck) : ((window.location.origin + window.location.pathname) + '?c=' + (_qck || ''));
+        var _qr = G._QRGenerator.generate(_url, 96);
+        if (_qr) {
+          var _lp = pdf.getNumberOfPages(); pdf.setPage(1);
+          var _qs = 20, _qx = W - MR - _qs, _qy = 13;
+          pdf.setFillColor(4, 10, 28); pdf.roundedRect(_qx - 2.5, _qy - 2.5, _qs + 5, _qs + 8.5, 1.5, 1.5, 'F');
+          pdf.setDrawColor(ACCENT[0], ACCENT[1], ACCENT[2]); pdf.setLineWidth(0.4); pdf.roundedRect(_qx - 2.5, _qy - 2.5, _qs + 5, _qs + 8.5, 1.5, 1.5, 'S');
+          pdf.addImage(_qr, 'PNG', _qx, _qy, _qs, _qs, '', 'FAST');
+          pdf.setTextColor(150, 165, 190); pdf.setFont(TF, 'normal'); pdf.setFontSize(5.2);
+          pdf.text('Scanează · UrbanX', _qx + _qs / 2, _qy + _qs + 3, { align: 'center' });
+          pdf.setPage(_lp);
+        }
+      }
+    } catch (e) { console.warn('[StratDoc QR]', e); }
     const entries = D.toc;
     const perPage = 46; const tocPages = Math.max(1, Math.ceil(entries.length / perPage));
     // numerele de pagina cresc cu tocPages (cuprinsul se insereaza inainte de continut)
