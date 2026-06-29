@@ -100,8 +100,17 @@
     const noteMed  = Math.round(Math.min(100, svMpLoc / normaSV * 100 * 0.7 + 30));
     const noteDem  = Math.round(Math.min(100, 50 + rata * 18));
     const noteRez  = Math.round(Math.min(100, 82 - ag * 120 + 4));
-    const noteComp = Math.round((noteEco * 0.20 + noteMob * 0.20 + noteMed * 0.15 + noteDem * 0.15 + noteRez * 0.15 + 70 * 0.15));
-    const calific  = noteComp >= 80 ? 'A' : noteComp >= 65 ? 'B' : noteComp >= 50 ? 'C+' : 'D';
+    // SURSĂ UNICĂ pentru Nota UrbanX: UrbanXIVU.scoreFor (identic cu panoul IVU + cinematic +
+    // toate studiile). NU mai calculăm o notă proprie aici (cauza divergenței 56 vs 64).
+    let noteComp, calific;
+    try {
+      var _ivuS = (window.UrbanXIVU && window.UrbanXIVU.scoreFor) ? window.UrbanXIVU.scoreFor(city.key || cityKey) : null;
+      if (_ivuS && _ivuS.R) { noteComp = _ivuS.R.score; calific = _ivuS.R.grade; }
+    } catch (e) {}
+    if (noteComp == null) {
+      noteComp = Math.round((noteEco * 0.20 + noteMob * 0.20 + noteMed * 0.15 + noteDem * 0.15 + noteRez * 0.15 + 70 * 0.15));
+      calific  = noteComp >= 80 ? 'A' : noteComp >= 65 ? 'B' : noteComp >= 50 ? 'C+' : 'D';
+    }
 
     // ── Portofoliu proiecte SIDU — calibrat pe mărimea UAT ──────────────────
     // Proiectele și bugetele sunt proporționale cu populația și nevoile specifice
@@ -311,6 +320,7 @@
       try {
         const city = m._resolveCity(cityKey);
         if (!city) { ss && ss('UAT negasit'); return; }
+        if (!city.key) city.key = cityKey;   // pt sursa unică Nota UrbanX (UrbanXIVU.scoreFor) — coerență PDF == panou == cinematic
 
         const mob  = (p && p._mobilityModel) ? p._mobilityModel(city) : null;
         const need = (typeof _calcUrbanNeedLocal === 'function') ? _calcUrbanNeedLocal(city, scenario || 'S2') : m._calcNeed ? m._calcNeed(city, scenario || 'S2') : {};

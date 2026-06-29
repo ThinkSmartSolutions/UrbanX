@@ -15,6 +15,7 @@
   // ── moduleId → mecanismul REAL (window.X) ──
   var MODULE_OPEN = {
     harta: function () { try { G._closeAllMenusAndOverlay && G._closeAllMenusAndOverlay(); } catch (e) {} },
+    profileTerit: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._ProfileStudies && window._ProfileStudies.openTerritorialPicker && window._ProfileStudies.openTerritorialPicker(); } catch (e) {} },
     fisa360: mod('Fisa360', 'open'), studyzone: mod('StudyZone', 'openBuilder'),
     cadastru: mod('Cadastru', 'openPanel'), dosar: mod('Dosar', 'open'), heritage: mod('Heritage', 'openPanel'),
     cau: mod('CAU', 'openPanel'), plati: mod('Plati', 'openPanel'), notificari: mod('Notificari', 'openPanel'),
@@ -96,6 +97,7 @@
       { label: 'PMUD — Plan Mobilitate Urbană Durabilă', moduleId: 'pmud' },
       { label: 'SDL — Strategia de Dezvoltare Locală', moduleId: 'sps:sdl' },
       { label: 'Strategia Metropolitană', moduleId: 'sps:metropolitan' },
+      { label: '◆ Studii de profil teritorial (auto-detectate)', moduleId: 'profileTerit' },
       { sep: '— SECTORIALE —' },
       { label: 'Smart City — ISO 37120 · Digital Twin', moduleId: 'sps:smart-city' },
       { label: '🌦 Climatică — SECAP · Adaptare', moduleId: 'clima', info: 'clima' },

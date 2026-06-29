@@ -1425,6 +1425,8 @@ document.addEventListener('click', function(){
 
 <!-- RAPOARTE DROPDOWN — direct pe body pentru a evita overflow clipping din topbar -->
 <div id="rapoarte-menu" style="display:none;position:fixed;background:#0f172a;border:1px solid rgba(212,175,55,.3);border-radius:12px;padding:10px;min-width:280px;max-height:85vh;overflow-y:auto;z-index:9000;box-shadow:0 12px 40px rgba(0,0,0,.7)">
+  <!-- Banner gating: studiile de amplasament cer parcelă + volum 3D (apare doar când lipsesc) -->
+  <div id="rapoarte-gate-banner" style="display:none;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#fcd34d;padding:8px 10px;margin-bottom:8px;font-size:11px;line-height:1.45">⚠️ <b>Studiile de amplasament</b> se generează după ce alegi o <b>parcelă</b> pe hartă și generezi <b>volumul 3D</b> (pre-proiectare) — de acolo provin POT/CUT, suprafețele și capturile.</div>
   <!-- TCI (Proiecție Urbanistică) mutat în meniul UrbanX Pro — nu mai apare în Rapoarte -->
   <!-- IVU mutat în topbar lângă UAT (standard transversal) — nu mai apare în Rapoarte -->
   <!-- Hartă conexiuni -->
@@ -1445,9 +1447,10 @@ document.addEventListener('click', function(){
   <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
-  <!-- STUDII DE PROFIL TERITORIAL — apar DOAR pentru UAT-urile cu profil detectat (litoral/deltă/baraj...) -->
+  <!-- STUDII DE PROFIL PE AMPLASAMENT — apar DOAR pentru UAT-urile cu profil detectat (litoral/deltă/baraj...) -->
+  <!-- Studiile TERITORIALE de profil sunt în meniul Teritoriu (nu aici — Rapoarte = doar amplasament). -->
   <div id="rapoarte-profile-wrap" style="display:none">
-    <div style="padding:5px 8px 3px;font-size:9px;color:#0e74a5;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(14,116,165,.18);margin-top:3px">◆ Studii de Profil Teritorial</div>
+    <div style="padding:5px 8px 3px;font-size:9px;color:#0e74a5;text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-top:1px solid rgba(14,116,165,.18);margin-top:3px">◆ Profil specific al UAT — studiu pe amplasament</div>
     <div id="rapoarte-profile-list"></div>
   </div>
 
@@ -1575,10 +1578,7 @@ document.addEventListener('click', function(){
     <button onclick="generateCPE();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#34d399;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">⚡ Certificat Performanță Energetică</button>
     <button onclick="infoDrawerOpen('cpe')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
   </div>
-  <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);" onmouseover="this.style.background='rgba(139,92,246,0.12)'" onmouseout="this.style.background='rgba(139,92,246,0.06)'">
-    <button onclick="openTCI ? openTCI() : generateProiectieUrbanistica();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#818cf8;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px;font-weight:600;">🏙 Proiecție Urbanistică 10/20/30 ani</button>
-    <button onclick="infoDrawerOpen('tci')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(148,163,184,.6);border-radius:4px;padding:3px 6px;font-size:10px;cursor:pointer">ⓘ</button>
-  </div>
+  <!-- „Proiecție Urbanistică 10/20/30 ani" ELIMINAT din Rapoarte (cerere Florin 29 iun) — e proiecție teritorială, nu raport de parcelă; rămâne accesibilă din meniul Teritoriu/UrbanX Pro -->
   <!-- Studiu Sănătate + Seismic (adăugate 13.05.2026) -->
   <div style="display:flex;align-items:center;gap:2px;padding:1px 2px;border-radius:6px" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='none'">
     <button onclick="generateHealthImpactStudy();toggleRapoarteMenu()" style="flex:1;text-align:left;background:none;border:none;color:#f472b6;padding:7px 10px;cursor:pointer;border-radius:6px;font-size:12px">🫁 Studiu Impact Sănătate Publică</button>

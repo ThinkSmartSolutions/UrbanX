@@ -158,7 +158,9 @@
       pdf.setTextColor.apply(pdf, o.color || INK); pdf.setFont(FONT, o.bold ? 'bold' : 'normal'); pdf.setFontSize(fs);
       const lines = pdf.splitTextToSize(S2(text), CW - ind);
       const jw = CW - ind;
-      for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); _jline(lines[i], ML + ind, y + lh - 1, jw, o.noJustify || i === lines.length - 1); y += lh; }
+      // FIX page-break: ensure() poate insera o pagină nouă la mijlocul paragrafului, iar band()/foot()
+      // resetează culoarea/fontul → liniile continuate ieșeau gri. Re-aplicăm stilul după fiecare ensure().
+      for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.setTextColor.apply(pdf, o.color || INK); pdf.setFont(FONT, o.bold ? 'bold' : 'normal'); pdf.setFontSize(fs); _jline(lines[i], ML + ind, y + lh - 1, jw, o.noJustify || i === lines.length - 1); y += lh; }
       y += o.gap == null ? 2 : o.gap;
     }
     function bullets(arr, o) {
@@ -177,14 +179,14 @@
           words.forEach(w => { const test = cur ? cur + ' ' + w : w; if (pdf.getTextWidth(test) > maxW && cur) { lines.push(cur); cur = w; maxW = CW - 6; } else cur = test; });
           if (cur) lines.push(cur);
           for (let i = 0; i < lines.length; i++) {
-            ensure(lh + 0.5);
+            ensure(lh + 0.5); pdf.setTextColor.apply(pdf, INK); pdf.setFontSize(fs);
             if (i === 0) { pdf.setFont(FONT, 'bold'); pdf.text(hstr, ML + 5, y + lh - 1); pdf.setFont(FONT, 'normal'); _jline(lines[0], ML + 5 + hw, y + lh - 1, CW - 6 - hw, lines.length === 1); }
             else { _jline(lines[i], ML + 5, y + lh - 1, CW - 6, i === lines.length - 1); }
             y += lh;
           }
         } else {
           const lines = pdf.splitTextToSize(body, CW - 6);
-          for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.setFont(FONT, 'normal'); _jline(lines[i], ML + 5, y + lh - 1, CW - 6, i === lines.length - 1); y += lh; }
+          for (let i = 0; i < lines.length; i++) { ensure(lh + 0.5); pdf.setTextColor.apply(pdf, INK); pdf.setFont(FONT, 'normal'); pdf.setFontSize(fs); _jline(lines[i], ML + 5, y + lh - 1, CW - 6, i === lines.length - 1); y += lh; }
         }
         y += 0.8;
       });

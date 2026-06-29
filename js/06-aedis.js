@@ -6294,8 +6294,13 @@ function toggleRapoarteMenu(){
   // Pozitionare corecta: display:block INTAI, apoi calculeaza offsetWidth real
   m.style.visibility = 'hidden';
   m.style.display = 'block';
-  // Studii de profil teritorial: reîmprospătează lista pt UAT-ul curent (apar doar profilurile detectate)
+  // Studii de profil pe amplasament: reîmprospătează lista pt UAT-ul curent (apar doar profilurile detectate)
   try { window._ProfileStudies && window._ProfileStudies.renderMenu && window._ProfileStudies.renderMenu(); } catch (e) {}
+  // Banner gating: arată avertismentul dacă NU avem parcelă + volum 3D
+  try {
+    var _gb = document.getElementById('rapoarte-gate-banner');
+    if (_gb) { var _ap = window.S && S.parcels && S.parcels[(S.activeParcel == null ? 0 : S.activeParcel)]; var _ok = _ap && _ap.geo && _ap.geo.geometry && window.S && S.vol && S.vol.genDone; _gb.style.display = _ok ? 'none' : 'block'; }
+  } catch (e) {}
   // 001 Faza 3b: filtrare pe rol (implicit FULL → nimic ascuns; doar rol restrictiv filtreaza)
   try { window.UXRoles && window.UXRoles.filterRapoarte && window.UXRoles.filterRapoarte(m); } catch (e) {}
 
