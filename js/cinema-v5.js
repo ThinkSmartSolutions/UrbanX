@@ -286,6 +286,22 @@ function preload(city,siruta,done){
     })
     .catch(function(){D.wiki={extract:'Date indisponibile.',title:city.name||'UAT'};}));
 
+  // SIGLĂ / stemă UAT de pe Wikipedia — preferăm imaginea „stemă/coat of arms", altfel imaginea lead.
+  try{
+    SE._cityCrest=null;
+    fetch('https://ro.wikipedia.org/w/api.php?action=query&prop=images&imlimit=60&redirects=1&titles='+encodeURIComponent(_wtitle)+'&format=json&origin=*',{signal:AbortSignal.timeout(6000)})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        var pg=d&&d.query&&d.query.pages, files=[]; if(pg){Object.keys(pg).forEach(function(k){(pg[k].images||[]).forEach(function(im){files.push(im.title);});});}
+        var crest=files.filter(function(f){return /stem|coa|coat|arms|blazon|wappen|герб/i.test(f);})[0];
+        var pick=crest||files.filter(function(f){return /\.(svg|png|jpg|jpeg)$/i.test(f)&&!/commons-logo|wiki|edit|icon|map|harta|location|locator/i.test(f);})[0];
+        if(!pick) return;
+        return fetch('https://ro.wikipedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url&iiurlwidth=200&titles='+encodeURIComponent(pick)+'&format=json&origin=*',{signal:AbortSignal.timeout(6000)})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(j){ var p2=j&&j.query&&j.query.pages, url=null; if(p2){Object.keys(p2).forEach(function(k){var ii=p2[k].imageinfo;if(ii&&ii[0])url=ii[0].thumburl||ii[0].url;});} if(url){var im=new Image();im.crossOrigin='anonymous';im.onload=function(){SE._cityCrest=im;};im.src=url;} });
+      }).catch(function(){});
+  }catch(e){}
+
   if(window._PredEngine&&window._PredEngine.fetchINSE){
     window._PredEngine.fetchINSE(siruta).then(function(d){if(d)D.inse=d;}).catch(function(){});
   }
@@ -2061,6 +2077,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
 
     switch(id){
       case 'b1s1':
+        // SIGLĂ / stemă UAT (Wikipedia) — badge deasupra numelui orașului
+        try{ if(SE._cityCrest && SE._cityCrest.complete && SE._cityCrest.naturalWidth){ var _cs=Math.min(W*0.085,H*0.16), _iw=SE._cityCrest.naturalWidth, _ih=SE._cityCrest.naturalHeight, _r=_iw/_ih, _cw=_r>=1?_cs:_cs*_r, _ch=_r>=1?_cs/_r:_cs; ctx.globalAlpha=sA*rE(0.10,0.34); ctx.drawImage(SE._cityCrest, W/2-_cw/2, H*0.27, _cw, _ch); ctx.globalAlpha=1; } }catch(e){}
         ctx.globalAlpha=sA*rE(0.16,0.30);
         ctx.fillStyle='rgba(255,255,255,0.96)';
         var fn=Math.min(W*0.070,90);
