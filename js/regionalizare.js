@@ -15,7 +15,7 @@
   function _jsPDF() { return (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || (window.jspdf && window.jspdf.default) || null; }
 
   // ordinea părților documentului
-  var PARTS = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06', 'p07', 'p08', 'p09', 'p10', 'p11', 'p12', 'p13'];
+  var PARTS = ['p01', 'p02', 'p03', 'p04', 'p05', 'p06', 'p07', 'p14', 'p15', 'p16', 'p17', 'p18', 'p08', 'p09', 'p20', 'p10', 'p11', 'p12', 'p19', 'p13'];
   var ACCENT = [180, 30, 40]; // roșu-bordo instituțional
 
   // cele 8 regiuni de dezvoltare (NUTS-2) — date reale de cadru (INS/Eurostat)

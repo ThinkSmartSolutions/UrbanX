@@ -104,27 +104,44 @@
     return { key: key, nume: s.nume, nota: s.nota, regiuni: s.regiuni.map(function (r, i) { var a = _agg(r); a.dep = deps[i]; a.sen = sens[i]; a.cor = cors[i]; return Object.assign({}, r, a, { col: COLORS[i % COLORS.length] }); }) };
   }
 
-  // ── desenează regiunile scenariului pe hartă ──────────────────────────────
-  function drawOnMap(key) {
+  // ordinea CORECTĂ de curățare: TOATE layerele întâi, apoi TOATE sursele
+  // (altfel „source X cannot be removed while layer Y is using it").
+  var _LYRS = ['sti-uat', 'sti-line', 'sti-lbl'], _SRCS = ['sti-uat', 'sti-hull', 'sti-lbl'];
+  function clearMap() {
+    var map = G.map; if (!map) return;
+    _LYRS.forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} });
+    _SRCS.forEach(function (id) { try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} });
+  }
+  // ── desenează regiunile: FIECARE UAT colorat după regiune (acoperire COMPLETĂ,
+  //    fără teritoriu nerepartizat) + contur hull + etichetă. ──────────────────
+  function _draw(key) {
     var map = G.map; if (!map || !map.getCanvas) return;
     var s = _scenarioData(key); if (!s) return;
-    ['sti-fill', 'sti-line', 'sti-lbl'].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} });
-    var feats = [], lblFeats = [];
-    s.regiuni.forEach(function (r) {
-      var g = _regionGeo(r); if (!g) return;
-      feats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [g.ring] }, properties: { c: r.col, n: r.n } });
-      lblFeats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: g.center }, properties: { t: r.n + ' · ' + r.dep + 'D/' + r.sen + 'S' } });
-    });
+    clearMap();
+    // județ → culoare regiune
+    var judCol = {}; s.regiuni.forEach(function (r) { r.jud.forEach(function (j) { judCol[j] = r.col; }); });
+    // toate UAT-urile colorate
+    var uatPts = [], R = G._UAT_REGISTRY || {};
+    Object.keys(R).forEach(function (k) { var u = R[k]; if (u.c && judCol[u.j]) uatPts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: u.c }, properties: { c: judCol[u.j] } }); });
+    // contururi hull + etichete
+    var hullFeats = [], lblFeats = [];
+    s.regiuni.forEach(function (r) { var g = _regionGeo(r); if (!g) return; hullFeats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [g.ring] }, properties: { c: r.col } }); lblFeats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: g.center }, properties: { t: r.n + ' · ' + r.dep + 'D/' + r.sen + 'S' } }); });
     try {
-      map.addSource('sti-fill', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-      map.addLayer({ id: 'sti-fill', type: 'fill', source: 'sti-fill', paint: { 'fill-color': ['get', 'c'], 'fill-opacity': 0.32 } });
-      map.addLayer({ id: 'sti-line', type: 'line', source: 'sti-fill', paint: { 'line-color': ['get', 'c'], 'line-width': 2 } });
+      map.addSource('sti-uat', { type: 'geojson', data: { type: 'FeatureCollection', features: uatPts } });
+      map.addLayer({ id: 'sti-uat', type: 'circle', source: 'sti-uat', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 9, 8], 'circle-color': ['get', 'c'], 'circle-opacity': 0.62, 'circle-blur': 0.3 } });
+      map.addSource('sti-hull', { type: 'geojson', data: { type: 'FeatureCollection', features: hullFeats } });
+      map.addLayer({ id: 'sti-line', type: 'line', source: 'sti-hull', paint: { 'line-color': ['get', 'c'], 'line-width': 2, 'line-opacity': 0.85 } });
       map.addSource('sti-lbl', { type: 'geojson', data: { type: 'FeatureCollection', features: lblFeats } });
-      map.addLayer({ id: 'sti-lbl', type: 'symbol', source: 'sti-lbl', layout: { 'text-field': ['get', 't'], 'text-size': 13, 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'] }, paint: { 'text-color': '#fff', 'text-halo-color': '#0b1020', 'text-halo-width': 1.6 } });
-      map.flyTo({ center: [25.0, 45.9], zoom: 6, duration: 1500, essential: true });
+      map.addLayer({ id: 'sti-lbl', type: 'symbol', source: 'sti-lbl', layout: { 'text-field': ['get', 't'], 'text-size': 13, 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#fff', 'text-halo-color': '#0b1020', 'text-halo-width': 1.8 } });
+      map.flyTo({ center: [25.0, 45.9], zoom: 6.1, pitch: 0, bearing: 0, duration: 1400, essential: true });
     } catch (e) { console.warn('[STIRegio] draw', e); }
   }
-  function clearMap() { var map = G.map; if (!map) return; ['sti-fill', 'sti-line', 'sti-lbl'].forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} }); }
+  // așteaptă harta gata (stil încărcat) înainte de desen — repară „scenariile nu se încarcă"
+  function drawOnMap(key) {
+    var map = G.map; if (!map) return;
+    if (map.isStyleLoaded && map.isStyleLoaded()) { _draw(key); }
+    else { try { map.once('idle', function () { _draw(key); }); } catch (e) { setTimeout(function () { _draw(key); }, 800); } }
+  }
 
   // ── PANOU INTERACTIV: scenariu + carduri regiuni + simulator majoritate ───
   function openPanel() {
