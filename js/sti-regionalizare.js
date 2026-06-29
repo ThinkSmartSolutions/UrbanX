@@ -13,8 +13,7 @@
   var TOT_DEP = 330, TOT_SEN = 136, TOT_COR = 15, POP_RO = 19053; // mii loc. (Recensământ 2021)
   var JUD = { AB:'Alba',AR:'Arad',AG:'Argeș',BC:'Bacău',BH:'Bihor',BN:'Bistrița-Năsăud',BT:'Botoșani',BR:'Brăila',BV:'Brașov',BZ:'Buzău',CL:'Călărași',CS:'Caraș-Severin',CJ:'Cluj',CT:'Constanța',CV:'Covasna',DB:'Dâmbovița',DJ:'Dolj',GL:'Galați',GR:'Giurgiu',GJ:'Gorj',HR:'Harghita',HD:'Hunedoara',IL:'Ialomița',IS:'Iași',IF:'Ilfov',MM:'Maramureș',MH:'Mehedinți',MS:'Mureș',NT:'Neamț',OT:'Olt',PH:'Prahova',SM:'Satu Mare',SJ:'Sălaj',SB:'Sibiu',SV:'Suceava',TR:'Teleorman',TM:'Timiș',TL:'Tulcea',VL:'Vâlcea',VS:'Vaslui',VN:'Vrancea',B:'București' };
   // populație județeană (mii, Recensământ 2021 — orientativ) pt agregare per regiune
-  var POPJ = { AB:323,AR:415,AG:574,BC:580,BH:551,BN:276,BT:380,BR:285,BV:535,BZ:393,CL:268,CS:253,CJ:691,CT:684,CV:200,DB:481,DJ:633,GL:506,GR:265,GJ:325,HR:291,HD:361,IL:243,IS:773,IF:542,MM:458,MH:248,MS:518,NT:karte(443),OT:croaz(402),PH:726,SM:328,SJ:215,SB:397,SV:688,TR:330,TM:707,TL:193,VL:355,VS:375,VN:317,B:1716 };
-  function karte(v){return v;} function croaz(v){return v;}
+  var POPJ = { AB:323,AR:415,AG:574,BC:580,BH:551,BN:276,BT:380,BR:285,BV:535,BZ:393,CL:268,CS:253,CJ:691,CT:684,CV:200,DB:481,DJ:633,GL:506,GR:265,GJ:325,HR:291,HD:361,IL:243,IS:773,IF:542,MM:458,MH:248,MS:518,NT:443,OT:402,PH:726,SM:328,SJ:215,SB:397,SV:688,TR:330,TM:707,TL:193,VL:355,VS:375,VN:317,B:1716 };
 
   // SCENARII — regiuni propuse cu județe; restul (pop/dep/sen/cor/pib) se CALCULEAZĂ din date reale.
   var SC = {
@@ -29,12 +28,12 @@
       { id:'BI', n:'București-Ilfov', cap:'București', jud:['B','IF'], pibcap:164, analog:'—' } ] },
     S3: { nume: 'S3 · Provincii istorice', regiuni: [
       { id:'MOLD', n:'Moldova', cap:'Iași', jud:['IS','BT','NT','SV','VS','BC','VN','GL'], pibcap:47, analog:'Mazowieckie (PL)', nuts:'>3M — redelimitare fără GL+VN', vuln:'fără autostradă până 2027; migrație −180k' },
-      { id:'TR', n:'Transilvania', cap:'Cluj-Napoca', jud:['CJ','BV','MS','HR','CV','SB','BN','AB'], pibcap:85, analog:'Bohemia (CZ)', nuts:'conformă', vuln:'sensibilitate etnică HR+CV' },
-      { id:'MUNT', n:'Muntenia', cap:'Ploiești', jud:['PH','DB','AG','GR','CL','IL','TR'], pibcap:68, analog:'—', nuts:'conformă', vuln:'gravitație spre București (coeziune 52)' },
+      { id:'TR', n:'Transilvania', cap:'Cluj-Napoca', jud:['CJ','BV','MS','HR','CV','SB','BN','AB','HD'], pibcap:85, analog:'Bohemia (CZ)', nuts:'conformă', vuln:'sensibilitate etnică HR+CV' },
+      { id:'MUNT', n:'Muntenia', cap:'Ploiești', jud:['PH','DB','AG','GR','CL','IL','TR','BR','BZ'], pibcap:68, analog:'—', nuts:'conformă', vuln:'gravitație spre București (coeziune 52)' },
       { id:'OLT', n:'Oltenia', cap:'Craiova', jud:['DJ','GJ','MH','OT','VL'], pibcap:49, analog:'—', nuts:'conformă', vuln:'decarbonare lignit — 15k locuri afectate' },
       { id:'BAN', n:'Banat', cap:'Timișoara', jud:['TM','AR','CS'], pibcap:78, analog:'—', nuts:'conformă (<800k? verifică)', vuln:'masă demografică mică' },
       { id:'DOB', n:'Dobrogea', cap:'Constanța', jud:['CT','TL'], pibcap:60, analog:'—', nuts:'<800k — sub plafon NUTS-2', vuln:'populație redusă; sezonalitate' },
-      { id:'CRMM', n:'Crișana-Maramureș', cap:'Oradea', jud:['BH','SM','SJ','MM','BN'], pibcap:62, analog:'—', nuts:'conformă', vuln:'periferalitate nord-vest' },
+      { id:'CRMM', n:'Crișana-Maramureș', cap:'Oradea', jud:['BH','SM','SJ','MM'], pibcap:62, analog:'—', nuts:'conformă', vuln:'periferalitate nord-vest' },
       { id:'BI', n:'București-Ilfov', cap:'București', jud:['B','IF'], pibcap:164, analog:'Mazowieckie/Praga', nuts:'conformă', vuln:'disparitate extremă față de rest' } ] },
     S4: { nume: 'S4 · Macro-regiuni (4)', regiuni: [
       { id:'M1', n:'Macroregiunea 1 (NV+Centru)', cap:'Cluj-Napoca', jud:['BH','BN','CJ','MM','SJ','SM','AB','BV','CV','HR','MS','SB'], pibcap:75, analog:'Länder mari' },
@@ -52,42 +51,45 @@
     var rating = r.pibcap >= 120 ? 'BB+' : r.pibcap >= 75 ? 'BB' : r.pibcap >= 55 ? 'BB-' : 'B+';
     return { pop: pop, dep: dep, sen: sen, cor: cor, pibMld: pibMld, rating: rating, fondsPct: +(pop / POP_RO * 100).toFixed(1) };
   }
-  // centroid județ (medie a UAT-urilor din _UAT_REGISTRY cu coordonate)
-  var _judCentroidCache = null;
-  function _judCentroids() {
-    if (_judCentroidCache) return _judCentroidCache;
-    var acc = {}; var R = G._UAT_REGISTRY || {};
-    Object.keys(R).forEach(function (k) { var u = R[k]; if (u.c && u.j) { acc[u.j] = acc[u.j] || { x: 0, y: 0, n: 0 }; acc[u.j].x += u.c[0]; acc[u.j].y += u.c[1]; acc[u.j].n++; } });
-    var out = {}; Object.keys(acc).forEach(function (j) { out[j] = [acc[j].x / acc[j].n, acc[j].y / acc[j].n]; });
-    _judCentroidCache = out; return out;
+  // ── GRANIȚE REALE DE JUDEȚ (poligoane administrative ADM1, sursă geoBoundaries,
+  //    normalizate local în data/ro-judete.geojson). Înlocuiesc hull-urile convexe care
+  //    se suprapuneau (București înghițit de Sud-Muntenia) și lăsau teritoriu gol.
+  //    Fiecare județ e colorat după regiunea lui → acoperire 1:1, fără suprapunere. ──
+  var _JUDGEO = null, _judRep = null, _loadingGeo = false, _geoWaiters = [];
+  function _loadJudete(cb) {
+    if (_JUDGEO) { if (cb) cb(); return; }
+    if (cb) _geoWaiters.push(cb);
+    if (_loadingGeo) return; _loadingGeo = true;
+    fetch('data/ro-judete.geojson').then(function (r) { return r.json(); }).then(function (g) {
+      _JUDGEO = g; _computeReps(); _loadingGeo = false;
+      var w = _geoWaiters.slice(); _geoWaiters = []; w.forEach(function (f) { try { f(); } catch (e) {} });
+    }).catch(function (e) { console.warn('[STIRegio] judete geojson', e); _loadingGeo = false; });
   }
-  // hull peste TOATE UAT-urile regiunii (sute de puncte reale) → acoperă teritoriul real,
-  // nu lasă „restul" gol. Folosește _UAT_REGISTRY (3181 UAT cu coordonate).
-  var _uatByJud = null;
-  function _uatPoints(juds) {
-    if (!_uatByJud) { _uatByJud = {}; var R = G._UAT_REGISTRY || {}; Object.keys(R).forEach(function (k) { var u = R[k]; if (u.c && u.j) { (_uatByJud[u.j] = _uatByJud[u.j] || []).push(u.c); } }); }
-    var pts = []; juds.forEach(function (j) { (_uatByJud[j] || []).forEach(function (c) { pts.push(c); }); });
-    return pts;
+  function _outerRings(geom) {
+    var rings = [];
+    if (geom.type === 'Polygon') rings.push(geom.coordinates[0]);
+    else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(function (p) { rings.push(p[0]); });
+    return rings;
   }
-  function _regionGeo(r) {
-    var pts = _uatPoints(r.jud);
-    if (pts.length < 3) { var C = _judCentroids(); pts = r.jud.map(function (j) { return C[j]; }).filter(Boolean); }
-    if (!pts.length) return null;
-    var cx = pts.reduce(function (a, p) { return a + p[0]; }, 0) / pts.length, cy = pts.reduce(function (a, p) { return a + p[1]; }, 0) / pts.length;
-    if (pts.length < 3) pts = pts.concat([[cx + 0.2, cy], [cx, cy + 0.15], [cx - 0.2, cy]]);
-    var hull = _hull(pts); return { center: [cx, cy], ring: hull };
+  // punct reprezentativ per județ = centroidul inelului cu cea mai mare arie (insula principală)
+  function _computeReps() {
+    _judRep = {};
+    _JUDGEO.features.forEach(function (f) {
+      var rings = _outerRings(f.geometry), best = null, bestA = -1;
+      rings.forEach(function (ring) {
+        var a = 0; for (var i = 0; i < ring.length - 1; i++) { a += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1]; }
+        a = Math.abs(a); if (a > bestA) { bestA = a; best = ring; }
+      });
+      if (best) { var cx = 0, cy = 0; best.forEach(function (p) { cx += p[0]; cy += p[1]; }); _judRep[f.properties.jud] = [cx / best.length, cy / best.length]; }
+    });
   }
-  function _hull(P) {
-    P = P.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
-    var cross = function (o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); };
-    var lo = [], up = [];
-    P.forEach(function (p) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); });
-    P.slice().reverse().forEach(function (p) { while (up.length >= 2 && cross(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop(); up.push(p); });
-    lo.pop(); up.pop(); var h = lo.concat(up); if (h.length) h.push(h[0]); return h;
+  function _regionCenter(juds) {
+    var xs = 0, ys = 0, n = 0; juds.forEach(function (j) { var p = _judRep && _judRep[j]; if (p) { xs += p[0]; ys += p[1]; n++; } });
+    return n ? [xs / n, ys / n] : [25, 45.9];
   }
   var COLORS = ['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#06b6d4','#ec4899','#84cc16','#14b8a6','#f97316'];
 
-  var _curScenario = 'S3', _selected = {};
+  var _curScenario = 'S1', _selected = {};
   // distribuie EXACT `total` locuri proporțional cu populația (metoda resturilor celor mai mari)
   function _apportion(pops, total) {
     var sum = pops.reduce(function (a, b) { return a + b; }, 0) || 1;
@@ -106,41 +108,45 @@
 
   // ordinea CORECTĂ de curățare: TOATE layerele întâi, apoi TOATE sursele
   // (altfel „source X cannot be removed while layer Y is using it").
-  var _LYRS = ['sti-uat', 'sti-line', 'sti-lbl'], _SRCS = ['sti-uat', 'sti-hull', 'sti-lbl'];
+  var _LYRS = ['sti-fill', 'sti-cty', 'sti-lbl'], _SRCS = ['sti-judete', 'sti-lbl'];
   function clearMap() {
     var map = G.map; if (!map) return;
     _LYRS.forEach(function (id) { try { if (map.getLayer(id)) map.removeLayer(id); } catch (e) {} });
     _SRCS.forEach(function (id) { try { if (map.getSource(id)) map.removeSource(id); } catch (e) {} });
   }
-  // ── desenează regiunile: FIECARE UAT colorat după regiune (acoperire COMPLETĂ,
-  //    fără teritoriu nerepartizat) + contur hull + etichetă. ──────────────────
+  // ── desenează regiunile pe GRANIȚE REALE: fiecare județ (poligon administrativ) e
+  //    colorat după regiunea din care face parte → teritoriul e acoperit 1:1, fără
+  //    suprapuneri și fără goluri; București-Ilfov apar ca poligoane proprii. ──────
   function _draw(key) {
     var map = G.map; if (!map || !map.getCanvas) return;
+    if (!_JUDGEO) { _loadJudete(function () { _draw(key); }); return; }
     var s = _scenarioData(key); if (!s) return;
     clearMap();
-    // județ → culoare regiune
+    // județ → culoarea regiunii (expresie data-driven Mapbox)
     var judCol = {}; s.regiuni.forEach(function (r) { r.jud.forEach(function (j) { judCol[j] = r.col; }); });
-    // toate UAT-urile colorate
-    var uatPts = [], R = G._UAT_REGISTRY || {};
-    Object.keys(R).forEach(function (k) { var u = R[k]; if (u.c && judCol[u.j]) uatPts.push({ type: 'Feature', geometry: { type: 'Point', coordinates: u.c }, properties: { c: judCol[u.j] } }); });
-    // contururi hull + etichete
-    var hullFeats = [], lblFeats = [];
-    s.regiuni.forEach(function (r) { var g = _regionGeo(r); if (!g) return; hullFeats.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [g.ring] }, properties: { c: r.col } }); lblFeats.push({ type: 'Feature', geometry: { type: 'Point', coordinates: g.center }, properties: { t: r.n + ' · ' + r.dep + 'D/' + r.sen + 'S' } }); });
+    var matchExpr = ['match', ['get', 'jud']];
+    Object.keys(judCol).forEach(function (j) { matchExpr.push(j, judCol[j]); });
+    matchExpr.push('#475569'); // fallback (n-ar trebui să apară — toate cele 42 sunt alocate)
+    var lblFeats = s.regiuni.map(function (r) { return { type: 'Feature', geometry: { type: 'Point', coordinates: _regionCenter(r.jud) }, properties: { t: r.n + ' · ' + r.dep + 'D/' + r.sen + 'S' } }; });
     try {
-      map.addSource('sti-uat', { type: 'geojson', data: { type: 'FeatureCollection', features: uatPts } });
-      map.addLayer({ id: 'sti-uat', type: 'circle', source: 'sti-uat', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 3, 9, 8], 'circle-color': ['get', 'c'], 'circle-opacity': 0.62, 'circle-blur': 0.3 } });
-      map.addSource('sti-hull', { type: 'geojson', data: { type: 'FeatureCollection', features: hullFeats } });
-      map.addLayer({ id: 'sti-line', type: 'line', source: 'sti-hull', paint: { 'line-color': ['get', 'c'], 'line-width': 2, 'line-opacity': 0.85 } });
+      map.addSource('sti-judete', { type: 'geojson', data: _JUDGEO });
+      // umplere județe colorate pe regiune + contur subțire alb (vezi limitele de județ)
+      map.addLayer({ id: 'sti-fill', type: 'fill', source: 'sti-judete', paint: { 'fill-color': matchExpr, 'fill-opacity': 0.45, 'fill-outline-color': 'rgba(255,255,255,0.28)' } });
+      // contur gros pe culoarea regiunii (grupează vizual județele aceleiași regiuni)
+      map.addLayer({ id: 'sti-cty', type: 'line', source: 'sti-judete', paint: { 'line-color': matchExpr, 'line-width': 1.6, 'line-opacity': 0.95 } });
       map.addSource('sti-lbl', { type: 'geojson', data: { type: 'FeatureCollection', features: lblFeats } });
-      map.addLayer({ id: 'sti-lbl', type: 'symbol', source: 'sti-lbl', layout: { 'text-field': ['get', 't'], 'text-size': 13, 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#fff', 'text-halo-color': '#0b1020', 'text-halo-width': 1.8 } });
+      map.addLayer({ id: 'sti-lbl', type: 'symbol', source: 'sti-lbl', layout: { 'text-field': ['get', 't'], 'text-size': 13, 'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#fff', 'text-halo-color': '#0b1020', 'text-halo-width': 2 } });
       map.flyTo({ center: [25.0, 45.9], zoom: 6.1, pitch: 0, bearing: 0, duration: 1400, essential: true });
     } catch (e) { console.warn('[STIRegio] draw', e); }
   }
-  // așteaptă harta gata (stil încărcat) înainte de desen — repară „scenariile nu se încarcă"
+  // așteaptă geojson-ul de județe ȘI stilul hărții înainte de desen
+  // — repară „scenariile nu se încarcă / dau refresh".
   function drawOnMap(key) {
     var map = G.map; if (!map) return;
-    if (map.isStyleLoaded && map.isStyleLoaded()) { _draw(key); }
-    else { try { map.once('idle', function () { _draw(key); }); } catch (e) { setTimeout(function () { _draw(key); }, 800); } }
+    _loadJudete(function () {
+      if (map.isStyleLoaded && map.isStyleLoaded()) { _draw(key); }
+      else { try { map.once('idle', function () { _draw(key); }); } catch (e) { setTimeout(function () { _draw(key); }, 800); } }
+    });
   }
 
   // ── PANOU INTERACTIV: scenariu + carduri regiuni + simulator majoritate ───
@@ -167,6 +173,7 @@
       return '<div onclick="_stiToggleSel(\'' + r.id + '\')" style="cursor:pointer;border:1px solid ' + (on ? r.col : 'rgba(255,255,255,.08)') + ';background:' + (on ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)') + ';border-radius:9px;padding:9px 11px;margin-bottom:7px">' +
         '<div style="display:flex;justify-content:space-between;align-items:center"><span style="color:' + r.col + ';font-weight:700;font-size:12.5px">' + (on ? '☑ ' : '☐ ') + r.n + '</span><span style="color:#cbd5e1;font-size:11px">' + N(r.pop) + ' mii · ' + r.rating + '</span></div>' +
         '<div style="font-size:10px;color:#94a3b8;margin-top:3px">Capitală: ' + (r.cap || '—') + ' · PIB/loc ' + r.pibcap + '% UE · ' + r.jud.length + ' județe</div>' +
+        '<div style="font-size:9.5px;color:#7c8aa0;margin-top:2px">' + r.jud.map(function (j) { return JUD[j] || j; }).join(', ') + '</div>' +
         '<div style="display:flex;gap:8px;margin-top:4px;font-size:10.5px"><span style="color:#fca5a5">🏛 ' + r.dep + ' deputați</span><span style="color:#fcd34d">🏛 ' + r.sen + ' senatori</span><span style="color:#93c5fd">🇪🇺 ' + r.cor + ' CoR</span><span style="color:#86efac">💶 ' + r.fondsPct + '% fonduri</span></div>' +
         (r.nuts ? '<div style="font-size:9.5px;color:#64748b;margin-top:2px">NUTS-2: ' + r.nuts + (r.analog && r.analog !== '—' ? ' · analog ' + r.analog : '') + '</div>' : '') +
         (r.vuln ? '<div style="font-size:9.5px;color:#f87171;margin-top:1px">⚠ ' + r.vuln + '</div>' : '') + '</div>';
@@ -184,7 +191,7 @@
       '<div style="font-size:11px;color:#cbd5e1;margin-top:2px">' + selSen + ' / ' + TOT_SEN + ' senatori · ' + selCor + ' locuri Comitetul Regiunilor · ' + N(selPop) + ' mii loc. (' + (selPop / POP_RO * 100).toFixed(0) + '% RO)</div>' +
       '<div style="margin-top:6px;font-size:11px;font-weight:700">' + (maj23 ? '<span style="color:#22c55e">✓ Majoritate constituțională 2/3 (' + Math.ceil(TOT_DEP * 2 / 3) + ')</span>' : maj ? '<span style="color:#86efac">✓ Majoritate simplă 50%+1 (' + (Math.floor(TOT_DEP / 2) + 1) + ')</span>' : '<span style="color:#f87171">✗ Fără majoritate (' + nSel + ' regiuni)</span>') + '</div></div>' +
       cards +
-      '<button onclick="window._Regionalizare&&window._Regionalizare.generate()" style="width:100%;margin-top:10px;background:linear-gradient(180deg,#b41e28,#8a1820);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer">📘 Generează studiul complet (651 pag, PDF)</button>' +
+      '<button onclick="window._Regionalizare&&window._Regionalizare.generate()" style="width:100%;margin-top:10px;background:linear-gradient(180deg,#b41e28,#8a1820);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer">📘 Generează studiul complet (PDF)</button>' +
       '<div style="font-size:9px;color:#475569;margin-top:8px;line-height:1.4">Mandate calculate proporțional cu populația (Recensământ 2021): 330 deputați + 136 senatori + 15 locuri Comitetul European al Regiunilor. PIB/loc %UE = Eurostat NUTS-2. Date reale-statice (AEP/INS/Eurostat); simulare orientativă, nu predicție electorală.</div>' +
       '</div>';
     if (!old) document.body.appendChild(div);

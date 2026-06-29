@@ -73,9 +73,9 @@
       { label: 'Import PUG digital (GeoJSON/KML)', moduleId: 'importPug' } ] },
     { id: 'analiza', label: 'Analiză teritorială', ico: '📊', color: '#534AB7', items: [
       { label: 'Capacitate & conformitate UAT', moduleId: 'intelligence' },
-      { label: 'SimLab — 10 simulatoare', moduleId: 'simlab' },
-      { label: 'Analytics — Walk/15-min/ROI/UHI/SDG/seismic', moduleId: 'analytics' },
-      { label: 'Raport indici urbani (PDF, 12 indici)', moduleId: 'indici' },
+      { label: 'SimLab — explorare pre-proiectare', moduleId: 'simlab' },
+      { label: 'Analytics — indici urbani live', moduleId: 'analytics' },
+      { label: 'Raport indici urbani (PDF)', moduleId: 'indici' },
       { label: 'Market — piața imobiliară (UAT)', moduleId: 'market' },
       { label: '💶 Hartă Valori Imobiliare (€/mp)', moduleId: 'valoriMap', info: 'valori' },
       { label: '📄 Studiu Valori Imobiliare (PDF)', moduleId: 'valoriPdf', info: 'valori_pdf' },
@@ -95,7 +95,7 @@
       { label: 'Rețele edilitare pe hartă', moduleId: 'retele' } ] },
     { id: 'strategie', label: 'Strategic Planning Suite', ico: '🏛', color: '#888780', items: [
       { sep: '★ FLAGSHIP NAȚIONAL ★' },
-      { label: '🇷🇴 REGIONALIZAREA ROMÂNIEI — simulator hartă + studiu 600p', moduleId: 'regionalizare' },
+      { label: '🇷🇴 REGIONALIZAREA ROMÂNIEI — simulator hartă + studiu', moduleId: 'regionalizare' },
       { sep: '— TERITORIU (UAT) —' },
       { label: 'SIDU — Strategia Integrată de Dezvoltare Urbană', moduleId: 'sidu-doc' },
       { label: 'Masterplan Urban', moduleId: 'masterplan' },

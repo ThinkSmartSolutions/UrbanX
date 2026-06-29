@@ -39,15 +39,38 @@
     { name: 'Autostrada A8 (Unirii) + A7 — conectivitate regională', domain: 'infrastructura', status: 'in_executie', cost_mil: 0, funding: 'buget de stat', priority: 1, drives: 'PUG', termen: 'lung', lista: 'metropolitan' }
   ];
   var KEY = 'urbanx_sidu_projects_v2';
-  function load() { try { var v = localStorage.getItem(KEY); if (v == null) { var a = SEED.map(function (p, i) { return Object.assign({ id: 'sp_seed_' + i, seed: true }, p); }); localStorage.setItem(KEY, JSON.stringify(a)); return a; } return JSON.parse(v); } catch (e) { return SEED.slice(); } }
-  function save(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} }
+  // cheia portofoliului e PER-UAT — altfel proiectele Iași apăreau pe orice oraș (bug raportat Galați).
+  function _curKey() { try { return _resolveCity().key; } catch (e) { return 'RO-IS-01'; } }
+  function _keyFor(cityKey) { return KEY + '__' + (cityKey || _curKey()); }
+  // mapează un proiect din registrul real _InvestMajore → structura de portofoliu SIDU
+  function _invToSidu(x) {
+    var sect = (x.sect || '').toLowerCase();
+    var domain = /sănăt|sanat/.test(sect) ? 'sanatate' : /mobilit|transport|aerian|portuar|feroviar|metrou|rutier/.test(sect) ? 'mobilitate' : /infrastructur/.test(sect) ? 'infrastructura' : /educat/.test(sect) ? 'educatie' : 'economie';
+    var st = (x.st || '').toLowerCase();
+    var status = /execu|contract/.test(st) ? 'in_executie' : /finalizat/.test(st) ? 'finalizat' : 'propus';
+    var an = +x.an || 0, termen = (an && an <= 2026) ? 'scurt' : (an && an <= 2030) ? 'mediu' : 'lung';
+    var natl = x.jud === 'NATIONAL';
+    return { name: x.n, domain: domain, status: status, cost_mil: +x.val || 0, funding: x.prog || '—', priority: natl ? 1 : 2, termen: termen, lista: natl ? 'metropolitan' : 'scurta', drives: /mobilit|transport|metrou|feroviar|rutier/.test(sect) ? 'PMUD' : '' };
+  }
+  // seed inițial per-UAT: Iași = seed istoric detaliat; restul = proiecte reale din _InvestMajore
+  function _seedFor(cityKey) {
+    if (cityKey === 'RO-IS-01') return SEED.slice();
+    var inv = (G._InvestMajore && G._InvestMajore.forCity) ? G._InvestMajore.forCity(cityKey) : [];
+    if (inv && inv.length) return inv.map(_invToSidu);
+    return []; // UAT fără proiecte majore anunțate → portofoliu gol (utilizatorul adaugă), nu Iași
+  }
+  function load(cityKey) {
+    cityKey = cityKey || _curKey(); var k = _keyFor(cityKey);
+    try { var v = localStorage.getItem(k); if (v == null) { var a = _seedFor(cityKey).map(function (p, i) { return Object.assign({ id: 'sp_seed_' + i, seed: true }, p); }); localStorage.setItem(k, JSON.stringify(a)); return a; } return JSON.parse(v); } catch (e) { return _seedFor(cityKey); }
+  }
+  function save(a, cityKey) { try { localStorage.setItem(_keyFor(cityKey), JSON.stringify(a)); } catch (e) {} }
   var projects = {
-    list: function () { return load(); },
-    add: function (p) { var a = load(); p.id = 'sp' + Date.now(); a.push(p); save(a); return p; },
-    remove: function (id) { save(load().filter(function (p) { return p.id !== id; })); }
+    list: function (cityKey) { return load(cityKey); },
+    add: function (p, cityKey) { var a = load(cityKey); p.id = 'sp' + Date.now(); a.push(p); save(a, cityKey); return p; },
+    remove: function (id, cityKey) { save(load(cityKey).filter(function (p) { return p.id !== id; }), cityKey); }
   };
-  function dashboard() {
-    var ps = load(); var byDom = {}, byStatus = {}, byFund = {}, byTermen = {}, byLista = {}, total = 0;
+  function dashboard(cityKey) {
+    var ps = load(cityKey); var byDom = {}, byStatus = {}, byFund = {}, byTermen = {}, byLista = {}, total = 0;
     ps.forEach(function (p) { byDom[p.domain] = (byDom[p.domain] || 0) + 1; byStatus[p.status] = (byStatus[p.status] || 0) + 1; byFund[p.funding] = (byFund[p.funding] || 0) + (+p.cost_mil || 0); if (p.termen) byTermen[p.termen] = (byTermen[p.termen] || 0) + 1; if (p.lista) byLista[p.lista] = (byLista[p.lista] || 0) + 1; total += (+p.cost_mil || 0); });
     return { count: ps.length, total_mil: Math.round(total), by_domain: byDom, by_status: byStatus, by_funding: byFund, by_termen: byTermen, by_lista: byLista, drives_pmud: ps.filter(function (p) { return /PMUD/.test(p.drives || ''); }).length, drives_mp: ps.filter(function (p) { return /Masterplan/.test(p.drives || ''); }).length };
   }
@@ -87,7 +110,7 @@
     try {
       var J = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!J) { alert('jsPDF indisponibil'); return; }
       if (typeof G._makeStratDoc !== 'function') { console.warn('[SIDU] motor strategic indisponibil → fallback simplu'); return _generateDocumentSimple(cityKey); }
-      var city = _resolveCity(cityKey), d = dashboard(), ps = projects.list();
+      var city = _resolveCity(cityKey), d = dashboard(city.key), ps = projects.list(city.key);
       var c = city.c || {};
       var pop21 = +city.pop || 0, pop11 = +(c.pop2011 || 0);
       var delta = (pop21 && pop11) ? ((pop21 - pop11) / pop11 * 100) : null;
@@ -337,7 +360,7 @@
   function _generateDocumentSimple(cityKey) {
     try {
       var jsPDFns = (G.jspdf && G.jspdf.jsPDF) || G.jsPDF; if (!jsPDFns) { alert('jsPDF indisponibil'); return; }
-      var city = _resolveCity(cityKey), d = dashboard();
+      var city = _resolveCity(cityKey), d = dashboard(city.key);
       var pdf = new jsPDFns({ unit: 'mm', format: 'a4' }); if (G._registerROFont) G._registerROFont(pdf);
       var W = 210, H = 297, F = G._registerROFont ? 'DejaVuRO' : 'helvetica';
       pdf.setFillColor(8, 15, 35); pdf.rect(0, 0, W, H, 'F');
@@ -355,7 +378,7 @@
   // Word deschide nativ .doc-ul cu stiluri, titluri (navigabile), tabel portofoliu.
   function generateDocx(cityKey) {
     try {
-      var city = _resolveCity(cityKey), d = dashboard(), ps = projects.list();
+      var city = _resolveCity(cityKey), d = dashboard(city.key), ps = projects.list(city.key);
       var N = function (n) { try { return Math.round(n).toLocaleString('ro-RO'); } catch (e) { return '' + n; } };
       var dateStr = new Date().toLocaleDateString('ro-RO', { day: '2-digit', month: 'long', year: 'numeric' });
       var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
@@ -469,7 +492,8 @@
   function openPanel() {
     var ov = el('div', { style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
     var m = el('div', { style: ST.modal });
-    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">🏛 SIDU — Strategia Integrată (umbrela)</div><div style="font-size:11px;color:#94a3b8">Cadrul de nivel superior care conduce Masterplan + PMUD → transpus în PUG</div>'));
+    var _cy = _resolveCity();
+    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">🏛 SIDU — Strategia Integrată (umbrela)</div><div style="font-size:11px;color:#94a3b8">Cadrul de nivel superior care conduce Masterplan + PMUD → transpus în PUG · UAT activ: <b style="color:#d4af37">' + (_cy.name || 'UAT') + '</b></div>'));
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
     body.appendChild(el('div', { style: 'background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px;font-size:12px;color:#cbd5e1;margin-bottom:10px' },
