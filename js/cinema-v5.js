@@ -1735,9 +1735,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b14s3': // Orasul ca sistem viu (City OS)
         lp('night');
         onIdle(function(){ try{SE._add3DGrowthFull&&SE._add3DGrowthFull(map);}catch(e){} });
-        rot(20,0.006);
-        fly(Z.CBD,14.5,66,20,5000,0,'night');
-        fly(Z.CBD,15,70,110,13000,5000,'night');
+        rot(20,0.004);
+        // mai SUS și mai larg: se vede ansamblul UAT, barele nu mai agresează vizual (cerere Florin)
+        fly([cx,cy],12.6,48,15,5000,0,'night');
+        fly([cx,cy],13.0,54,90,13000,5000,'night');
         break;
       case 'b24s1': // ENERGIE & CLIMAT
         lp('day');

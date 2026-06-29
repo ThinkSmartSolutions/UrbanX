@@ -1697,8 +1697,18 @@ G._CinemaEngine={
     var det=(window._UATProfile&&window._UATProfile.detect)?window._UATProfile.detect(city):[];
     this._profileInfo={ profiles:det.map(function(d){return {id:d.id,label:d.profile.label,icon:d.profile.icon,evidence:d.evidence,conf:d.confidence};}), drawn:0 };
     if(!det.length){
-      // fără profil aparte — marcaj discret central + etichetă onestă
-      this._cinLabels(map,[{lon:cx,lat:cy,color:'#94a3b8',icon:'◎',title:'PROFIL STANDARD',sub:'fără specific teritorial aparte'}]);
+      // fără profil teritorial APARTE — transmite totuși caracterul real al teritoriului:
+      // desenăm apa, verdele și pădurea reale (OSM) din jurul UAT, ca să nu fie hartă goală.
+      try{
+        var aq='[out:json][timeout:25];(way["natural"="water"](around:9000,'+cy+','+cx+');way["natural"~"wood"](around:9000,'+cy+','+cx+');way["landuse"="forest"](around:9000,'+cy+','+cx+');way["leisure"="park"](around:6000,'+cy+','+cx+'););out geom tags;';
+        var jj=await this._osmFetchJSON(aq); if(!this._playing) return;
+        var waterF=[], greenF=[];
+        (jj.elements||[]).forEach(function(el){ if(!el.geometry||el.geometry.length<3)return; var c=el.geometry.map(function(g){return [g.lon,g.lat];}); if(c[0][0]!==c[c.length-1][0]||c[0][1]!==c[c.length-1][1])c.push(c[0]); var tg=el.tags||{}; if(tg.natural==='water') waterF.push({type:'Feature',geometry:{type:'Polygon',coordinates:[c]},properties:{}}); else greenF.push({type:'Feature',geometry:{type:'Polygon',coordinates:[c]},properties:{}}); });
+        if(greenF.length) this._safeAdd(map,'v8-prof-green',{type:'geojson',data:{type:'FeatureCollection',features:greenF}},{id:'v8-prof-green-l',type:'fill',source:'v8-prof-green',paint:{'fill-color':'#22c55e','fill-opacity':0.30}});
+        if(waterF.length) this._safeAdd(map,'v8-prof-water',{type:'geojson',data:{type:'FeatureCollection',features:waterF}},{id:'v8-prof-water-l',type:'fill',source:'v8-prof-water',paint:{'fill-color':'#38bdf8','fill-opacity':0.45}});
+      }catch(e){}
+      var fp=null; try{ fp=(window._UrbanRank&&window._UrbanRank._forestPct)?window._UrbanRank._forestPct(city):null; }catch(e){}
+      this._cinLabels(map,[{lon:cx,lat:cy,color:'#94a3b8',icon:'🏙',title:(city.name||'UAT')+' — profil urban',sub:'fără specific aparte (litoral/deltă/baraj...)'+(fp!=null?' · pădure jud. '+fp+'%':'')}]);
       return;
     }
     var COLP={litoral:'#22d3ee',delta:'#34d399',baraj:'#60a5fa',minier:'#b08968',salin:'#cbd5e1',portuar:'#38bdf8',termal:'#fb923c',silvic:'#22c55e',seismic:'#f59e0b',transfront:'#a78bfa'};
