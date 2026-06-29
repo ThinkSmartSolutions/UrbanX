@@ -184,7 +184,7 @@
       '<div style="font-size:11px;color:#cbd5e1;margin-top:2px">' + selSen + ' / ' + TOT_SEN + ' senatori · ' + selCor + ' locuri Comitetul Regiunilor · ' + N(selPop) + ' mii loc. (' + (selPop / POP_RO * 100).toFixed(0) + '% RO)</div>' +
       '<div style="margin-top:6px;font-size:11px;font-weight:700">' + (maj23 ? '<span style="color:#22c55e">✓ Majoritate constituțională 2/3 (' + Math.ceil(TOT_DEP * 2 / 3) + ')</span>' : maj ? '<span style="color:#86efac">✓ Majoritate simplă 50%+1 (' + (Math.floor(TOT_DEP / 2) + 1) + ')</span>' : '<span style="color:#f87171">✗ Fără majoritate (' + nSel + ' regiuni)</span>') + '</div></div>' +
       cards +
-      '<button onclick="window._Regionalizare&&window._Regionalizare.generate()" style="width:100%;margin-top:10px;background:linear-gradient(180deg,#b41e28,#8a1820);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer">📘 Generează studiul complet (444 pag, PDF)</button>' +
+      '<button onclick="window._Regionalizare&&window._Regionalizare.generate()" style="width:100%;margin-top:10px;background:linear-gradient(180deg,#b41e28,#8a1820);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer">📘 Generează studiul complet (651 pag, PDF)</button>' +
       '<div style="font-size:9px;color:#475569;margin-top:8px;line-height:1.4">Mandate calculate proporțional cu populația (Recensământ 2021): 330 deputați + 136 senatori + 15 locuri Comitetul European al Regiunilor. PIB/loc %UE = Eurostat NUTS-2. Date reale-statice (AEP/INS/Eurostat); simulare orientativă, nu predicție electorală.</div>' +
       '</div>';
     if (!old) document.body.appendChild(div);
