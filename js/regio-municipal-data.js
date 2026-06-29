@@ -114,7 +114,7 @@
     });
 
     // sinteză națională: top 10 poli + grad de concentrare
-    D.subsec && D.subsec('Ierarhia urbană națională și implicații pentru regionalizare');
+    if (D.subsec) D.subsec('Ierarhia urbană națională și implicații pentru regionalizare'); else if (D.h2) D.h2('Ierarhia urbană națională și implicații pentru regionalizare');
     var top = allRows.slice().sort(function (a, b) { return (b.spop * 1) - (a.spop * 1); }).slice(0, 12);
     try { if (window._pickChart) window._pickChart(D, ['Oraș', 'Populație'], top.map(function (x) { return [x.seat, x.spop]; }), 'Cele mai populate reședințe de județ (INS 2021)'); } catch (e) {}
     D.P('Ierarhia urbană a României este dominată de București (peste 1,7 mil. loc.), urmat de un al doilea eșalon de poli regionali puternici — Cluj-Napoca, Timișoara, Iași, Constanța, Craiova, Brașov, Galați — și de orașe medii sub 100.000 de locuitori în majoritatea județelor. Această structură explică de ce o regionalizare eficientă trebuie să se sprijine pe polii existenți (modelul „orașelor-ancoră"): regiunile cu un pol metropolitan matur (NV-Cluj, Vest-Timișoara, NE-Iași) au capacitate administrativă și de absorbție net superioară regiunilor fără un astfel de pol (ex. Sud-Muntenia, unde gravitația se scurge spre București). Concentrarea urbană redusă și absența unui pol clar sunt argumente împotriva fragmentării excesive și în favoarea consolidării în jurul reședințelor metropolitane.');
