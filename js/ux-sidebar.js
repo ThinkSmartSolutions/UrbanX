@@ -17,6 +17,7 @@
     harta: function () { try { G._closeAllMenusAndOverlay && G._closeAllMenusAndOverlay(); } catch (e) {} },
     profileTerit: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._ProfileStudies && window._ProfileStudies.openTerritorialPicker && window._ProfileStudies.openTerritorialPicker(); } catch (e) {} },
     regionalizare: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._Regionalizare && window._Regionalizare.generate && window._Regionalizare.generate(); } catch (e) {} },
+    investMajore: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._InvestMajore && window._InvestMajore.openPanel && window._InvestMajore.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} },
     fisa360: mod('Fisa360', 'open'), studyzone: mod('StudyZone', 'openBuilder'),
     cadastru: mod('Cadastru', 'openPanel'), dosar: mod('Dosar', 'open'), heritage: mod('Heritage', 'openPanel'),
     cau: mod('CAU', 'openPanel'), plati: mod('Plati', 'openPanel'), notificari: mod('Notificari', 'openPanel'),
@@ -79,6 +80,7 @@
       { label: '💶 Hartă Valori Imobiliare (€/mp)', moduleId: 'valoriMap', info: 'valori' },
       { label: '📄 Studiu Valori Imobiliare (PDF)', moduleId: 'valoriPdf', info: 'valori_pdf' },
       { label: 'Carbon & emisii (UAT)', moduleId: 'carbon' },
+      { label: '🏗 Investiții majore anunțate (PNRR/Anghel Saligny/CNAIR)', moduleId: 'investMajore' },
       { label: 'Metodologie & surse de date', moduleId: 'metodologie' } ] },
     { id: 'mobilitate', label: 'Mobilitate', ico: '🚦', color: '#0EA5A5', items: [
       { label: 'Flux — studiu de trafic (calculator)', moduleId: 'mobility' } ] },

@@ -3833,6 +3833,8 @@ D.callout('Continuitatea participarii', 'Procesul participativ nu se incheie oda
 
 D.P('In concluzie, procesul de consultare publica si participare desfasurat pentru elaborarea acestei strategii integrate de dezvoltare urbana a respectat atat litera, cat si spiritul cadrului legal aplicabil. Prin combinarea instrumentelor cantitative si calitative, prin acoperirea tuturor categoriilor de actori si prin documentarea transparenta a fiecarei etape, strategia rezultata beneficiaza de o legitimitate solida si de o ancorare autentica in aspiratiile comunitatii din ' + uat + '. Aceasta fundamentare participativa reprezinta garantia ca obiectivele si masurile propuse vor intruni sustinerea necesara pe parcursul implementarii lor.')
       }
+      // --- Investiții majore anunțate (PNRR/Anghel Saligny/CNAIR) ---
+      try { if (window._InvestMajore) window._InvestMajore.renderSection(D, cityKey); } catch (e) { console.warn('[SIDU] invest:', e.message); }
       // --- IVU / Nota UrbanX (standard transversal in orice document) ---
       try { if (window.UrbanXIVU && window.UrbanXIVU.renderSection) window.UrbanXIVU.renderSection(D, cityKey); } catch (e) { console.warn('[SIDU] IVU:', e.message); }
       // --- sectiune ord 99 (chapter) ---

@@ -1087,6 +1087,8 @@
       try{ if(window._PublicParticipation&&window._PublicParticipation.renderChapter){ window._PublicParticipation.renderChapter(D, city); } }catch(e){ console.warn('[MP] participare:',e.message); }
       // FAUNA urbana & siguranta (caini fara stapan + ursi)
       try{ if(window._UrbanFauna){ window._UrbanFauna.renderChapter(D, city); } }catch(e){ console.warn('[MP] fauna:',e.message); }
+      // INVESTIȚII MAJORE anunțate (PNRR/Anghel Saligny/CNAIR) cu impact teritorial
+      try{ if(window._InvestMajore){ window._InvestMajore.renderSection(D, city.key || (window.TCI&&window.TCI.cityKey)); } }catch(e){ console.warn('[MP] invest:',e.message); }
       // NOTA UrbanX — clasament + benchmark european
       try{ if(window._UrbanRank){ var _prR=(window._PredEngine&&_PredEngine.calc)?_PredEngine.calc(city):{}; window._UrbanRank.renderChapter(D, _prR, city); } }catch(e){ console.warn('[MP] rank:',e.message); }
 

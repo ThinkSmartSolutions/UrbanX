@@ -269,7 +269,7 @@
   // Funcțiile clar dependente de volumul 3D (folosesc POT/CUT, suprafețe, capturi de ecran ale
   // proiectului) NU se pot genera fără parcelă + pre-proiectare. Wrap centralizat, non-invaziv.
   (function () {
-    var GATED = ['generateSolarStudy', 'generateShadowStudy', 'generateSSF', 'generateGeotehnicalStudy', 'generateStudiuPMR', 'generateStudiuIluminat', 'generateStabilitateTaluzuri', 'generateStudiuApePluviale', 'generatePrestudiuBransamente', 'generateCPE'];
+    var GATED = ['generateSolarStudy', 'generateShadowStudy', 'generateSSF', 'generateGeotehnicalStudy', 'generateStudiuPMR', 'generateStudiuIluminat', 'generateStabilitateTaluzuri', 'generateStudiuApePluviale', 'generatePrestudiuBransamente', 'generateCPE', 'generateEnvironmentalImpact'];
     function wrap() { GATED.forEach(function (fn) { var o = window[fn]; if (typeof o === 'function' && !o.__gated) { var w = function () { if (G._requireParcel3D && !G._requireParcel3D()) return; return o.apply(this, arguments); }; w.__gated = true; window[fn] = w; } }); }
     if (document.readyState !== 'loading') wrap(); else document.addEventListener('DOMContentLoaded', wrap);
   })();
