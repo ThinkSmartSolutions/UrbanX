@@ -18,6 +18,18 @@
       setTimeout(f, ms || 1600);
     });
   }
+  // Comută stilul hărții și așteaptă reîncărcarea (style.load re-adaugă automat layerele aplicației).
+  function _setStyle(map, styleUrl) {
+    return new Promise(function (res) {
+      var done = false; function f() { if (!done) { done = true; res(); } }
+      try { map.once('style.load', function () { setTimeout(f, 600); }); map.setStyle(styleUrl); } catch (e) { f(); }
+      setTimeout(f, 4500);
+    });
+  }
+  // Bază de hartă LIZIBILĂ LA TIPAR pentru capturi: satelit-streets (nu tema dark a UI,
+  // care iese aproape neagră în PDF). Restaurată la final. Cerere Florin: „capturile sunt negre".
+  var _PRINT_BASEMAP = (G.STYLES && G.STYLES.sat) || 'mapbox://styles/mapbox/satellite-streets-v12';
+  var _UI_BASEMAP = (G.STYLES && G.STYLES.custom) || 'mapbox://styles/mapbox/dark-v11';
   function _grab(map, title) {
     try {
       var url = map.getCanvas().toDataURL('image/jpeg', 0.92);
@@ -118,11 +130,14 @@
     // restaureaza starea camerei la final
     var savedCenter, savedZoom, savedPitch, savedBearing;
     try { savedCenter = map.getCenter(); savedZoom = map.getZoom(); savedPitch = map.getPitch(); savedBearing = map.getBearing(); } catch (e) {}
+    var _styleSwitched = false;
     try {
       // centreaza pe UAT
       var c = (G._RO_CITIES_DB && G._RO_CITIES_DB[cityKey]) || (G.TCI && G.TCI._EXTRA_UATS && G.TCI._EXTRA_UATS[cityKey]);
       if (c && c.lat && c.lon && map.jumpTo) { map.jumpTo({ center: [c.lon, c.lat], zoom: 13.2, pitch: 0, bearing: 0 }); }
-      await _idle(map, 1400);
+      // BAZĂ LIZIBILĂ: comută pe satelit pentru capturi (tema dark iese neagră la tipar).
+      try { await _setStyle(map, _PRINT_BASEMAP); _styleSwitched = true; if (c && c.lat && c.lon) map.jumpTo({ center: [c.lon, c.lat], zoom: 13.2, pitch: 0, bearing: 0 }); } catch (e) {}
+      await _idle(map, 1600);
 
       // 1. plan de situatie (harta UAT)
       var base = _grab(map, 'Plan de situatie — harta UAT'); if (base) shots.push(base);
@@ -193,6 +208,8 @@
         }
       }
     } catch (e) { console.warn('[DocMapCaptures] capture', e); }
+    // restaureaza stilul UI (dark) — style.load re-adaugă automat layerele aplicației
+    try { if (_styleSwitched) await _setStyle(map, _UI_BASEMAP); } catch (e) {}
     // restaureaza camera
     try { if (savedCenter && map.jumpTo) map.jumpTo({ center: savedCenter, zoom: savedZoom, pitch: savedPitch, bearing: savedBearing }); } catch (e) {}
     return shots;
