@@ -1488,16 +1488,41 @@ G._CinemaEngine={
   },
 
   // ── SANATATE & ORAS DIGITAL — spital + hub digital
-  _addServices(map, cityKey, city){
-    if(!window._UrbanServices) return;
-    var f=window._UrbanServices.buildFeatures(cityKey||this._cityKey||'RO-IS-01', city||this._city||{});
-    if(f.pts && f.pts.length){
-      this._safeAdd(map,'v8-srv',{type:'geojson',data:{type:'FeatureCollection',features:f.pts}},{
+  async _addServices(map, cityKey, city){
+    city=city||this._city||{}; var cx=city.lon||27, cy=city.lat||47;
+    // SPITALE/CLINICI REALE din OSM (NU un singur marker sintetic — orașul are mai multe!).
+    var q='[out:json][timeout:25];(nwr["amenity"~"^(hospital|clinic)$"](around:7000,'+cy+','+cx+');nwr["healthcare"~"hospital|clinic"](around:7000,'+cy+','+cx+'););out center tags;';
+    var hosp=[], names=[];
+    try{
+      var j=await this._osmFetchJSON(q);
+      (j.elements||[]).forEach(function(el){
+        var tg=el.tags||{}; if(tg.amenity==='pharmacy') return;
+        var lat=el.lat!=null?el.lat:(el.center&&el.center.lat), lon=el.lon!=null?el.lon:(el.center&&el.center.lon);
+        if(lat==null) return;
+        var isClinic=(tg.amenity==='clinic'||(tg.healthcare||'').indexOf('clinic')>=0);
+        hosp.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{c:isClinic?'#fb7185':'#ef4444',k:isClinic?'clinic':'hosp'}});
+        if(!isClinic && tg.name && names.length<6) names.push(tg.name);
+      });
+    }catch(e){}
+    if(!this._playing) return;
+    var hospCount=hosp.filter(function(p){return p.properties.k==='hosp';}).length;
+    this._healthOSM={ total:hosp.length, hospitals:hospCount, names:names };
+    if(hosp.length){
+      this._safeAdd(map,'v8-srv',{type:'geojson',data:{type:'FeatureCollection',features:hosp}},{
         id:'v8-srv-l',type:'circle',source:'v8-srv',
-        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,8,15,18],'circle-color':['get','c'],'circle-opacity':0.9,'circle-stroke-width':2,'circle-stroke-color':'#f0fdfa'}
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],11,5,15,12],'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':1.6,'circle-stroke-color':'#fff5f5'}
       });
     }
-    if(this._cinLabels) this._cinLabels(map, f.labels||[]);
+    // etichete: spitalul regional PNRR + hub digital + câteva spitale mari reale
+    var labels=[];
+    try{
+      var h=window._UrbanServices && window._UrbanServices.health(cityKey||this._cityKey||'RO-IS-01', city);
+      if(h && h.regional) labels.push({lon:cx-0.012,lat:cy+0.006,color:'#22c55e',icon:'🏥',title:h.regional.split('—')[0].trim()+' (nou)',sub:'PNRR · în plus față de spitalele existente'});
+      var d=window._UrbanServices && window._UrbanServices.digital(cityKey||this._cityKey||'RO-IS-01', city);
+      if(d) labels.push({lon:cx+0.014,lat:cy-0.009,color:'#06b6d4',icon:'📡',title:'ORAȘ DIGITAL',sub:'fibră '+d.fiberPct+'%'+(d.gigabit?' · gigabit':'')});
+    }catch(e){}
+    names.slice(0,3).forEach(function(nm,i){ var pt=hosp[i]; if(pt) labels.push({lon:pt.geometry.coordinates[0],lat:pt.geometry.coordinates[1],color:'#ef4444',icon:'🏥',title:nm.slice(0,26),sub:''}); });
+    if(this._cinLabels) this._cinLabels(map, labels);
   },
 
   // ── EDUCATIE & SPORT — campus universitar + stadioane/arene

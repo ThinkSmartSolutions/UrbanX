@@ -3493,7 +3493,9 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
               ctx.fillText('🏥 '+h.regional,W*0.04,H*0.42); ctx.globalAlpha=1; }
           }
         }
-        narativ('Sanatatea si digitalizarea sunt servicii esentiale cu impact direct pe 30 de ani. Accesul medical e corelat cu imbatranirea — cererea creste; spitalele regionale PNRR (Iasi/Cluj/Craiova) schimba radical accesul regional. Romania are una dintre cele mai bune retele de fibra din UE — atu pentru IT, remote work si investitii digitale; e-guvernarea reduce birocratia.');
+        var _hO=SE._healthOSM||{}; var _hN=_hO.hospitals||0;
+        if(_hN>0){ var ah=Math.min(1,(t-0.34)/0.16)*sA; if(ah>0){ ctx.globalAlpha=ah; ctx.fillStyle='#fca5a5'; ctx.font='700 '+Math.min(W*0.012,15)+'px "Space Grotesk",sans-serif'; ctx.textAlign='left'; ctx.fillText('🏥 '+_hN+' spitale + '+((_hO.total||0)-_hN)+' clinici (OSM, reale)',W*0.04,H*0.48); ctx.globalAlpha=1; } }
+        narativ('Sanatatea si digitalizarea sunt servicii esentiale pe 30 de ani. Punctele rosii de pe harta sunt spitalele si clinicile REALE ale orasului (OpenStreetMap)'+(_hN>0?(' — '+_hN+' spitale existente'):'')+'; peste acestea, Spitalul Regional de Urgenta (PNRR) ADAUGA capacitate de inalta performanta, nu inlocuieste reteaua actuala. Accesul medical e corelat cu imbatranirea — cererea creste. Romania are una dintre cele mai bune retele de fibra din UE — atu pentru IT, remote work si investitii digitale.');
         concluzie('Acces medical echitabil + oras digital = calitate a vietii, reziliență si competitivitate economica');
         break;
       }
