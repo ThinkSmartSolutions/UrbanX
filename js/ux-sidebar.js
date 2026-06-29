@@ -16,6 +16,7 @@
   var MODULE_OPEN = {
     harta: function () { try { G._closeAllMenusAndOverlay && G._closeAllMenusAndOverlay(); } catch (e) {} },
     profileTerit: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._ProfileStudies && window._ProfileStudies.openTerritorialPicker && window._ProfileStudies.openTerritorialPicker(); } catch (e) {} },
+    regionalizare: function () { try { G.UXSidebar && G.UXSidebar.close && G.UXSidebar.close(); window._Regionalizare && window._Regionalizare.generate && window._Regionalizare.generate(); } catch (e) {} },
     fisa360: mod('Fisa360', 'open'), studyzone: mod('StudyZone', 'openBuilder'),
     cadastru: mod('Cadastru', 'openPanel'), dosar: mod('Dosar', 'open'), heritage: mod('Heritage', 'openPanel'),
     cau: mod('CAU', 'openPanel'), plati: mod('Plati', 'openPanel'), notificari: mod('Notificari', 'openPanel'),
@@ -98,6 +99,7 @@
       { label: 'SDL — Strategia de Dezvoltare Locală', moduleId: 'sps:sdl' },
       { label: 'Strategia Metropolitană', moduleId: 'sps:metropolitan' },
       { label: '◆ Studii de profil teritorial (auto-detectate)', moduleId: 'profileTerit' },
+      { label: '🇷🇴 Regionalizarea României (STI — document național)', moduleId: 'regionalizare' },
       { sep: '— SECTORIALE —' },
       { label: 'Smart City — ISO 37120 · Digital Twin', moduleId: 'sps:smart-city' },
       { label: '🌦 Climatică — SECAP · Adaptare', moduleId: 'clima', info: 'clima' },
