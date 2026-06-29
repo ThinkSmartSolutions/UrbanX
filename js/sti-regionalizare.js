@@ -44,12 +44,27 @@
   SC.S2 = { nume: 'S2 · Granițe S1 + personalitate juridică (consilii alese)', regiuni: SC.S1.regiuni, nota: 'Granițe identice cu S1; diferența = statut juridic + buget + consiliu ales. Cost suplimentar ~280 mil €/an; necesită referendum + revizuire constituțională (art. 3(3), 120-123).' };
 
   // calcul agregat per regiune (din date reale)
+  // conformitate NUTS-2 CALCULATĂ din populație (prag Eurostat: 800.000–3.000.000 loc.)
+  // — afișată proeminent; sub plafon = blochează constituirea regiunii NUTS-2 și fondurile.
+  function _nutsCheck(popMii) {
+    if (popMii < 800) return { lvl: 'sub', col: '#ef4444', txt: 'SUB plafonul NUTS-2 (800.000 loc.) — nu poate fi regiune NUTS-2 autonomă; risc major de neeligibilitate la fondurile structurale UE' };
+    if (popMii > 3000) return { lvl: 'peste', col: '#f59e0b', txt: 'Peste pragul orientativ NUTS-2 (3 mil. loc.) — Eurostat poate solicita subdiviziune statistică' };
+    if (popMii < 1000) return { lvl: 'marg', col: '#eab308', txt: 'Conformă NUTS-2, dar MARGINAL — aproape de plafonul minim (800k); fragilitate demografică pe termen lung' };
+    return { lvl: 'ok', col: '#22c55e', txt: 'Conformă NUTS-2 (800.000–3.000.000 loc.)' };
+  }
+  // benchmark de convergență UE — context comparativ direct (sursă: Eurostat reg. accounts)
+  function _euBench(pibcap) {
+    if (pibcap >= 120) return 'Peste media UE — comparabil cu Praga/Bratislava (capitale est-europene).';
+    if (pibcap < 55) return 'Polonia Est (Lubelskie/Podkarpackie) era la ~42% în 2004; a ajuns la ~58–62% în 2021 prin fonduri de coeziune.';
+    if (pibcap < 75) return 'Convergență tipică est-europeană: ~+1,5 pp/an cu absorbție bună (ex. Slovacia Est 50%→64% în ~15 ani).';
+    return 'Nivel comparabil cu regiuni mature din PL/CZ; convergență spre 85–90% UE realistă în ~10 ani.';
+  }
   function _agg(r) {
     var pop = 0; r.jud.forEach(function (j) { pop += (POPJ[j] || 0); });
     var dep = Math.round(TOT_DEP * pop / POP_RO), sen = Math.round(TOT_SEN * pop / POP_RO), cor = Math.max(1, Math.round(TOT_COR * pop / POP_RO));
     var pibMld = Math.round(pop * (r.pibcap || 50) / 100 * 0.36); // proxy: PIB ≈ pop × (%UE × ~36k€ medie UE/cap) — orientativ
     var rating = r.pibcap >= 120 ? 'BB+' : r.pibcap >= 75 ? 'BB' : r.pibcap >= 55 ? 'BB-' : 'B+';
-    return { pop: pop, dep: dep, sen: sen, cor: cor, pibMld: pibMld, rating: rating, fondsPct: +(pop / POP_RO * 100).toFixed(1) };
+    return { pop: pop, dep: dep, sen: sen, cor: cor, pibMld: pibMld, rating: rating, fondsPct: +(pop / POP_RO * 100).toFixed(1), nutsChk: _nutsCheck(pop), euBench: _euBench(r.pibcap || 50) };
   }
   // ── GRANIȚE REALE DE JUDEȚ (poligoane administrative ADM1, sursă geoBoundaries,
   //    normalizate local în data/ro-judete.geojson). Înlocuiesc hull-urile convexe care
@@ -167,17 +182,29 @@
     var selDep = 0, selSen = 0, selPop = 0, selCor = 0, nSel = 0;
     s.regiuni.forEach(function (r) { if (_selected[r.id]) { selDep += r.dep; selSen += r.sen; selPop += r.pop; selCor += r.cor; nSel++; } });
     var pctDep = (selDep / TOT_DEP * 100), maj = selDep > TOT_DEP / 2, maj23 = selDep >= TOT_DEP * 2 / 3;
-    var tabs = ['S1', 'S2', 'S3', 'S4'].map(function (k) { var on = k === _curScenario; return '<button onclick="_stiPickScenario(\'' + k + '\')" style="flex:1;background:' + (on ? 'rgba(180,30,40,.3)' : 'transparent') + ';border:1px solid ' + (on ? 'rgba(180,30,40,.6)' : 'rgba(255,255,255,.12)') + ';color:' + (on ? '#fca5a5' : '#94a3b8') + ';border-radius:6px;padding:5px 4px;cursor:pointer;font-size:11px;font-weight:700">' + k + '</button>'; }).join('');
+    var tabs = ['S1', 'S2', 'S3', 'S4'].map(function (k) { var on = k === _curScenario, rec = k === 'S2'; return '<button onclick="_stiPickScenario(\'' + k + '\')" title="' + (rec ? 'Recomandat de UrbanX' : '') + '" style="flex:1;background:' + (on ? 'rgba(180,30,40,.3)' : rec ? 'rgba(16,120,60,.14)' : 'transparent') + ';border:1px solid ' + (on ? 'rgba(180,30,40,.6)' : rec ? 'rgba(34,197,94,.4)' : 'rgba(255,255,255,.12)') + ';color:' + (on ? '#fca5a5' : rec ? '#4ade80' : '#94a3b8') + ';border-radius:6px;padding:5px 4px;cursor:pointer;font-size:11px;font-weight:700">' + k + (rec ? ' ★' : '') + '</button>'; }).join('');
     var cards = s.regiuni.map(function (r) {
       var on = !!_selected[r.id];
+      var nc = r.nutsChk || {}, badgeTxt = nc.lvl === 'sub' ? '⚠ NUTS-2: SUB PLAFON' : nc.lvl === 'peste' ? 'NUTS-2: peste prag (3M)' : nc.lvl === 'marg' ? '◑ NUTS-2: marginal' : '✓ NUTS-2 conform';
+      var nutsBadge = '<span style="font-size:9px;font-weight:800;padding:1.5px 7px;border-radius:5px;background:' + (nc.col || '#64748b') + '22;color:' + (nc.col || '#94a3b8') + ';border:1px solid ' + (nc.col || '#64748b') + '66">' + badgeTxt + '</span>';
+      // avertizarea NUTS critică = bară solidă, imposibil de ignorat (cerut pt prezentare minister/CE)
+      var nutsAlert = (nc.lvl === 'sub' || nc.lvl === 'peste') ? '<div style="font-size:10px;color:#fff;background:' + nc.col + ';border-radius:6px;padding:5px 8px;margin-top:5px;font-weight:700;line-height:1.35">⚠ ' + nc.txt + '</div>' : (nc.lvl === 'marg' ? '<div style="font-size:9.5px;color:#fde68a;background:rgba(234,179,8,.14);border:1px solid rgba(234,179,8,.4);border-radius:6px;padding:4px 7px;margin-top:5px;line-height:1.35">◑ ' + nc.txt + '</div>' : '');
       return '<div onclick="_stiToggleSel(\'' + r.id + '\')" style="cursor:pointer;border:1px solid ' + (on ? r.col : 'rgba(255,255,255,.08)') + ';background:' + (on ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.02)') + ';border-radius:9px;padding:9px 11px;margin-bottom:7px">' +
         '<div style="display:flex;justify-content:space-between;align-items:center"><span style="color:' + r.col + ';font-weight:700;font-size:12.5px">' + (on ? '☑ ' : '☐ ') + r.n + '</span><span style="color:#cbd5e1;font-size:11px">' + N(r.pop) + ' mii · ' + r.rating + '</span></div>' +
         '<div style="font-size:10px;color:#94a3b8;margin-top:3px">Capitală: ' + (r.cap || '—') + ' · PIB/loc ' + r.pibcap + '% UE · ' + r.jud.length + ' județe</div>' +
         '<div style="font-size:9.5px;color:#7c8aa0;margin-top:2px">' + r.jud.map(function (j) { return JUD[j] || j; }).join(', ') + '</div>' +
         '<div style="display:flex;gap:8px;margin-top:4px;font-size:10.5px"><span style="color:#fca5a5">🏛 ' + r.dep + ' deputați</span><span style="color:#fcd34d">🏛 ' + r.sen + ' senatori</span><span style="color:#93c5fd">🇪🇺 ' + r.cor + ' CoR</span><span style="color:#86efac">💶 ' + r.fondsPct + '% fonduri</span></div>' +
-        (r.nuts ? '<div style="font-size:9.5px;color:#64748b;margin-top:2px">NUTS-2: ' + r.nuts + (r.analog && r.analog !== '—' ? ' · analog ' + r.analog : '') + '</div>' : '') +
-        (r.vuln ? '<div style="font-size:9.5px;color:#f87171;margin-top:1px">⚠ ' + r.vuln + '</div>' : '') + '</div>';
+        '<div style="margin-top:5px">' + nutsBadge + '</div>' + nutsAlert +
+        '<div style="font-size:9px;color:#93b3c8;margin-top:5px;line-height:1.4">📊 Convergență UE: ' + r.euBench + '</div>' +
+        (r.vuln ? '<div style="font-size:9.5px;color:#fca5a5;margin-top:3px;font-weight:600">⚠ ' + r.vuln + '</div>' : '') +
+        (r.analog && r.analog !== '—' ? '<div style="font-size:9px;color:#64748b;margin-top:1px">analog european: ' + r.analog + '</div>' : '') + '</div>';
     }).join('');
+    // RECOMANDARE fermă explicită (cerută) — afișată proeminent
+    var REC = '<div style="background:linear-gradient(180deg,rgba(16,120,60,.20),rgba(16,120,60,.07));border:1px solid rgba(34,197,94,.45);border-radius:10px;padding:11px 13px;margin-bottom:12px">' +
+      '<div style="color:#4ade80;font-weight:800;font-size:11.5px;letter-spacing:.04em">✅ RECOMANDAREA UrbanX — Scenariul S2</div>' +
+      '<div style="color:#e2e8f0;font-size:11px;margin-top:5px;line-height:1.5">Păstrarea celor <b>8 regiuni actuale</b> (granițe NUTS-2 recunoscute de Eurostat → fără perturbarea fondurilor structurale) + acordarea de <b>personalitate juridică</b>: consilii regionale alese, buget propriu, competențe descentralizate. Disrupție administrativă minimă, conformitate NUTS-2 integrală, în intervalul dimensional polonez-ceh validat european.</div>' +
+      '<div style="color:#94a3b8;font-size:9px;margin-top:6px;line-height:1.45">Criterii: conformitate NUTS-2 · continuitatea absorbției UE · disrupție minimă · precedent CE (PL/CZ). Necesită revizuire constituțională (art. 3(3), 73, 120-123) + referendum. Recomandare <b>analitică</b> UrbanX, orientativă — nu predicție politică.</div>' +
+      '</div>';
     div.innerHTML =
       '<div style="position:sticky;top:0;background:rgba(8,13,26,.98);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);z-index:2">' +
       '<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fca5a5;font-weight:800;font-size:14px">🇷🇴 Simulator Regionalizare (STI)</div>' +
@@ -189,7 +216,17 @@
       '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">SIMULATOR MAJORITATE — bifează regiuni să cumulezi mandatele</div>' +
       '<div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:30px;font-weight:900;color:' + (maj ? '#22c55e' : '#fca5a5') + '">' + selDep + '</span><span style="color:#94a3b8;font-size:12px">/ ' + TOT_DEP + ' deputați (' + pctDep.toFixed(1) + '%)</span></div>' +
       '<div style="font-size:11px;color:#cbd5e1;margin-top:2px">' + selSen + ' / ' + TOT_SEN + ' senatori · ' + selCor + ' locuri Comitetul Regiunilor · ' + N(selPop) + ' mii loc. (' + (selPop / POP_RO * 100).toFixed(0) + '% RO)</div>' +
-      '<div style="margin-top:6px;font-size:11px;font-weight:700">' + (maj23 ? '<span style="color:#22c55e">✓ Majoritate constituțională 2/3 (' + Math.ceil(TOT_DEP * 2 / 3) + ')</span>' : maj ? '<span style="color:#86efac">✓ Majoritate simplă 50%+1 (' + (Math.floor(TOT_DEP / 2) + 1) + ')</span>' : '<span style="color:#f87171">✗ Fără majoritate (' + nSel + ' regiuni)</span>') + '</div></div>' +
+      // bară de prag cu repere 50%+1 și 2/3 marcate vizual
+      '<div style="position:relative;height:30px;margin-top:9px">' +
+      '<div style="position:absolute;top:0;left:0;right:0;height:14px;background:rgba(255,255,255,.08);border-radius:7px"></div>' +
+      '<div style="position:absolute;top:0;left:0;height:14px;width:' + Math.min(100, pctDep).toFixed(1) + '%;background:linear-gradient(90deg,' + (maj ? '#15803d,#22c55e' : '#b41e28,#dc2626') + ');border-radius:7px;transition:width .35s"></div>' +
+      '<div style="position:absolute;top:-2px;left:50%;height:18px;width:2px;background:#86efac"></div>' +
+      '<div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:8px;color:#86efac;white-space:nowrap">50%+1 · ' + (Math.floor(TOT_DEP / 2) + 1) + '</div>' +
+      '<div style="position:absolute;top:-2px;left:66.6%;height:18px;width:2px;background:#fcd34d"></div>' +
+      '<div style="position:absolute;top:16px;left:66.6%;transform:translateX(-50%);font-size:8px;color:#fcd34d;white-space:nowrap">2/3 · ' + Math.ceil(TOT_DEP * 2 / 3) + '</div>' +
+      '</div>' +
+      '<div style="margin-top:4px;font-size:11px;font-weight:700">' + (maj23 ? '<span style="color:#22c55e">✓ Majoritate constituțională 2/3 (' + Math.ceil(TOT_DEP * 2 / 3) + ')</span>' : maj ? '<span style="color:#86efac">✓ Majoritate simplă 50%+1 (' + (Math.floor(TOT_DEP / 2) + 1) + ')</span>' : '<span style="color:#f87171">✗ Fără majoritate (' + nSel + ' regiuni selectate)</span>') + '</div></div>' +
+      REC +
       cards +
       '<button onclick="window._Regionalizare&&window._Regionalizare.generate()" style="width:100%;margin-top:10px;background:linear-gradient(180deg,#b41e28,#8a1820);color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:13px;cursor:pointer">📘 Generează studiul complet (PDF)</button>' +
       '<div style="font-size:9px;color:#475569;margin-top:8px;line-height:1.4">Mandate calculate proporțional cu populația (Recensământ 2021): 330 deputați + 136 senatori + 15 locuri Comitetul European al Regiunilor. PIB/loc %UE = Eurostat NUTS-2. Date reale-statice (AEP/INS/Eurostat); simulare orientativă, nu predicție electorală.</div>' +
