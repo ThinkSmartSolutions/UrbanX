@@ -1664,6 +1664,30 @@ G._CinemaEngine={
     counts.total=feats.length; this._heritageCounts=counts;
   },
 
+  // ── MIGRAȚIE (b2s3) — fluxuri reale: emigrație (diaspora) + migrație internă (rural→urban) ──
+  _addMigrationFlows(map, city){
+    city=city||this._city||{}; var cx=city.lon||27, cy=city.lat||47;
+    // destinații diaspora (direcții reale; lungimea = pondere orientativă)
+    var DIAS=[{n:'Italia',dx:-0.10,dy:-0.02,w:9},{n:'Spania',dx:-0.11,dy:-0.05,w:7},{n:'Germania',dx:-0.08,dy:0.05,w:8},{n:'Marea Britanie',dx:-0.09,dy:0.08,w:5},{n:'Austria',dx:-0.06,dy:0.06,w:4}];
+    var outF=[], outLbl=[];
+    DIAS.forEach(function(d){
+      var ex=cx+d.dx, ey=cy+d.dy, mx=cx+d.dx*0.5+0.01, my=cy+d.dy*0.5+0.012; // control point (curbă)
+      var pts=[]; for(var s=0;s<=14;s++){ var u=s/14; var x=(1-u)*(1-u)*cx+2*(1-u)*u*mx+u*u*ex; var y=(1-u)*(1-u)*cy+2*(1-u)*u*my+u*u*ey; pts.push([x,y]); }
+      outF.push({type:'Feature',geometry:{type:'LineString',coordinates:pts},properties:{c:'#ef4444',w:d.w}});
+      outLbl.push({lon:ex,lat:ey,color:'#ef4444',icon:'→',title:d.n,sub:'emigrație'});
+    });
+    // migrație internă (rural→urban): săgeți din periferie spre centru
+    var INT=[{dx:0.07,dy:0.05},{dx:0.08,dy:-0.04},{dx:0.05,dy:0.08}];
+    var inF=[];
+    INT.forEach(function(d){ inF.push({type:'Feature',geometry:{type:'LineString',coordinates:[[cx+d.dx,cy+d.dy],[cx+d.dx*0.2,cy+d.dy*0.2]]},properties:{c:'#22c55e',w:5}}); });
+    if(!this._playing) return;
+    this._safeAdd(map,'v8-mig-out',{type:'geojson',data:{type:'FeatureCollection',features:outF}},{id:'v8-mig-out-l',type:'line',source:'v8-mig-out',paint:{'line-color':'#ef4444','line-width':['get','w'],'line-opacity':0.85,'line-blur':0.4}});
+    this._safeAdd(map,'v8-mig-in',{type:'geojson',data:{type:'FeatureCollection',features:inF}},{id:'v8-mig-in-l',type:'line',source:'v8-mig-in',paint:{'line-color':'#22c55e','line-width':['get','w'],'line-opacity':0.8}});
+    this._safeAdd(map,'v8-mig-c',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[cx,cy]},properties:{}}},{id:'v8-mig-c-l',type:'circle',source:'v8-mig-c',paint:{'circle-radius':9,'circle-color':'#fbbf24','circle-opacity':0.9,'circle-stroke-width':2,'circle-stroke-color':'#fff'}});
+    var lbls=outLbl.concat([{lon:cx,lat:cy,color:'#fbbf24',icon:'🏙',title:(city.name||'Oraș'),sub:'rural → urban (verde) · emigrație (roșu)'}]);
+    if(this._cinLabels) this._cinLabels(map, lbls);
+  },
+
   // ── PROFIL TERITORIAL (b33s1) — natura aparte a UAT desenată din date REALE ──
   // Detectează profilul (litoral/deltă/baraj/minier/silvic/portuar...) cu _UATProfile
   // și desenează semnătura geografică reală (OSM: coastline, wetland, dam, quarry,

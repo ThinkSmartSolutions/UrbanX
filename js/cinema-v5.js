@@ -1042,13 +1042,10 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b2s3':
         lp('night');
         onIdle(function(){try{SE._addBuildings&&SE._addBuildings(map);}catch(e){}}); // backdrop oras (nu harta goala)
-        fly([cx,cy],12.4,48,0,4000,0,'night');
-        setTimeout(function(){
-          if(!SE._playing) return;
-          if(D.roads&&D.roads.length){ addLine('v9-hw',D.roads); _pulse(map,'v9-hw','line-opacity',0.3,0.9,10); }
-        },1500);
-        fly(Z.C,13,52,15,6000,9000,'night');
-        fly(Z.PER,12.5,48,50,6000,17000,'night');
+        onIdle(function(){try{SE._addMigrationFlows&&SE._addMigrationFlows(map,city);}catch(e){}}); // fluxuri migrație (emigrație + rural→urban)
+        fly([cx,cy],11.4,40,0,4000,0,'night');   // mai larg ca să se vadă săgețile de flux
+        fly([cx,cy],11.8,46,15,6000,9000,'night');
+        fly([cx,cy],11.2,42,-20,6000,17000,'night');
         break;
 
       case 'b2s4':
@@ -3615,7 +3612,8 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
     // deschide cinematic (ca marcajele de episod). Director-style chapter card.
     var _prevBloc=(SE._si>0&&SCENES[SE._si-1])?SCENES[SE._si-1].bloc:-1;
     var _isBlocStart=(SE._si===0)||(_prevBloc!==sc.bloc);
-    if(_isBlocStart && t<0.26){
+    // GUARD: nu afișa cartonul de capitol dacă blocul/eticheta lipsesc (evită „ACT undefined")
+    if(_isBlocStart && t<0.26 && sc.blabel && _ACT_ROMAN[sc.bloc]){
       var cardA=t<0.04?(t/0.04):t>0.20?(1-(t-0.20)/0.06):1; cardA=Math.max(0,Math.min(1,cardA));
       if(cardA>0){
         ctx.save();
