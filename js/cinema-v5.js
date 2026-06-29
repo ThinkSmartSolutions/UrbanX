@@ -1707,11 +1707,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         rot(14,0.004);
         fly(Z.C,14,56,40,14000,4500,'day');
         break;
-      case 'b13s2': // Economia de noapte
+      case 'b13s2': // Economia de noapte — POI reale (localuri/restaurante) cu zoom
         lp('night');
         onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
-        fly(Z.CBD,14.5,60,20,4000,0,'night');
-        fly(Z.CBD,15,64,80,13000,4500,'night');
+        onIdle(function(){ try{SE._addNightlife&&SE._addNightlife(map,city);}catch(e){} });
+        fly(Z.CBD,13.8,52,0,4000,0,'night');
+        fly(Z.CBD,15.2,64,30,6500,8500,'night');   // zoom pe zona de localuri
+        fly(Z.C,14.2,56,-25,5500,16000,'night');
         break;
       case 'b13s3': // Oras prietenos seniori
         lp('day');
@@ -1719,12 +1721,13 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         fly(Z.RES,14,54,0,4000,0,'day');
         fly(Z.C,13.6,52,40,13000,4500,'day');
         break;
-      case 'b13s4': // Oras pentru copii
+      case 'b13s4': // Oras pentru copii — POI reale (joacă/grădinițe/școli/parcuri) cu zoom
         lp('day');
-        onIdle(function(){ try{SE._addExpansionRings&&SE._addExpansionRings(map);}catch(e){} });
-        fly(Z.RES,14,54,0,4000,0,'day');
-        rot(12,0.004);
-        fly(Z.C,13.8,54,50,13000,4500,'day');
+        onIdle(function(){ try{SE._addBuildings&&SE._addBuildings(map);}catch(e){} });
+        onIdle(function(){ try{SE._addChildren&&SE._addChildren(map,city);}catch(e){} });
+        fly(Z.C,13.6,48,0,4000,0,'day');
+        fly(Z.RES,15.0,58,30,6500,8500,'day');   // zoom pe cartiere cu locuri de joacă
+        fly(Z.C,14.0,52,-25,5500,16000,'day');
         break;
 
       // PROLOG + scene-semnatura noi ────────────────────────────────────────

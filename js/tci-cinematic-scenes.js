@@ -1665,6 +1665,29 @@ G._CinemaEngine={
     counts.total=feats.length; this._heritageCounts=counts;
   },
 
+  // ── ECONOMIA DE NOAPTE (b13s2) — POI reale OSM: baruri/puburi/cluburi/cinema/teatre ──
+  async _addNightlife(map, city){
+    city=city||this._city||{}; var cx=city.lon||27, cy=city.lat||47;
+    var a='(around:3500,'+cy+','+cx+')';
+    var q='[out:json][timeout:25];(nwr["amenity"~"^(bar|pub|nightclub|cinema|theatre)$"]'+a+';nwr["amenity"="restaurant"]'+a+';);out center tags;';
+    var feats=[], cnt={noapte:0,resto:0}; var COL={bar:'#a855f7',pub:'#a855f7',nightclub:'#ec4899',cinema:'#f59e0b',theatre:'#f59e0b',restaurant:'#22d3ee'};
+    try{ var j=await this._osmFetchJSON(q); (j.elements||[]).forEach(function(el){ var tg=el.tags||{}, am=tg.amenity; if(!am)return; var lat=el.lat!=null?el.lat:(el.center&&el.center.lat), lon=el.lon!=null?el.lon:(el.center&&el.center.lon); if(lat==null)return; feats.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{c:COL[am]||'#a855f7'}}); if(am==='restaurant')cnt.resto++; else cnt.noapte++; }); }catch(e){}
+    if(!this._playing) return; this._nightCounts=cnt;
+    if(feats.length) this._safeAdd(map,'v8-night',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{id:'v8-night-l',type:'circle',source:'v8-night',paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,3.5,16,9],'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':1,'circle-stroke-color':'rgba(10,5,25,0.8)'}});
+    if(this._cinLabels) this._cinLabels(map,[{lon:cx,lat:cy,color:'#ec4899',icon:'🌙',title:(cnt.noapte)+' localuri de noapte',sub:cnt.resto+' restaurante (OSM, reale)'}]);
+  },
+  // ── ORAȘ PENTRU COPII (b13s4) — POI reale OSM: locuri de joacă/grădinițe/școli/parcuri ──
+  async _addChildren(map, city){
+    city=city||this._city||{}; var cx=city.lon||27, cy=city.lat||47;
+    var a='(around:3500,'+cy+','+cx+')';
+    var q='[out:json][timeout:25];(nwr["leisure"="playground"]'+a+';nwr["amenity"~"^(kindergarten|school)$"]'+a+';nwr["leisure"~"^(park|garden)$"]'+a+';);out center tags;';
+    var feats=[], cnt={joaca:0,scoli:0,parcuri:0}; var COL={playground:'#fbbf24',kindergarten:'#34d399',school:'#22c55e',park:'#16a34a',garden:'#16a34a'};
+    try{ var j=await this._osmFetchJSON(q); (j.elements||[]).forEach(function(el){ var tg=el.tags||{}, k=tg.leisure||tg.amenity; if(!k||!COL[k])return; var lat=el.lat!=null?el.lat:(el.center&&el.center.lat), lon=el.lon!=null?el.lon:(el.center&&el.center.lon); if(lat==null)return; feats.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{c:COL[k]}}); if(k==='playground')cnt.joaca++; else if(k==='park'||k==='garden')cnt.parcuri++; else cnt.scoli++; }); }catch(e){}
+    if(!this._playing) return; this._kidCounts=cnt;
+    if(feats.length) this._safeAdd(map,'v8-kids',{type:'geojson',data:{type:'FeatureCollection',features:feats}},{id:'v8-kids-l',type:'circle',source:'v8-kids',paint:{'circle-radius':['interpolate',['linear'],['zoom'],12,4,16,11],'circle-color':['get','c'],'circle-opacity':0.92,'circle-stroke-width':1.2,'circle-stroke-color':'#fff'}});
+    if(this._cinLabels) this._cinLabels(map,[{lon:cx,lat:cy,color:'#fbbf24',icon:'🛝',title:cnt.joaca+' locuri de joacă',sub:cnt.scoli+' școli/grădinițe · '+cnt.parcuri+' parcuri (OSM)'}]);
+  },
+
   // ── MIGRAȚIE (b2s3) — fluxuri reale: emigrație (diaspora) + migrație internă (rural→urban) ──
   _addMigrationFlows(map, city){
     city=city||this._city||{}; var cx=city.lon||27, cy=city.lat||47;
