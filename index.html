@@ -1447,6 +1447,14 @@ document.addEventListener('click', function(){
   <button onclick="infoDrawerOpen('registru')" title="Info" style="background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.25);color:#a78bfa;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;flex-shrink:0">ⓘ</button>
   </div>
 
+  <!-- iVU pe PARCELĂ — fișă de scor pe amplasament (necesită parcelă selectată) -->
+  <div style="margin-bottom:8px">
+  <button onclick="window._IVUParcela&&window._IVUParcela.open();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(37,99,235,.08));border:1px solid rgba(56,189,248,.3);border-radius:8px;color:#7dd3fc;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700">
+    <span style="font-size:16px">📍</span>
+    <div><div>iVU pe amplasament — fișă de scor</div><div style="font-size:9px;font-weight:400;color:#64748b;margin-top:1px">proximitate reală OSM · formulă ponderată · PDF · necesită parcelă</div></div>
+  </button>
+  </div>
+
   <!-- STUDII DE PROFIL PE AMPLASAMENT — apar DOAR pentru UAT-urile cu profil detectat (litoral/deltă/baraj...) -->
   <!-- Studiile TERITORIALE de profil sunt în meniul Teritoriu (nu aici — Rapoarte = doar amplasament). -->
   <div id="rapoarte-profile-wrap" style="display:none">
@@ -2808,6 +2816,8 @@ setInterval(()=>{
   <script src="js/urbanx-rank.js?v=20260628prof"></script><!-- nota/clasament UrbanX (+toate modulele) -->
   <script src="js/uat-profile.js?v=20260628prof"></script><!-- strat de profil teritorial (Delta/litoral/minier/baraj...) -->
   <script src="js/urbanx-ivu.js?v=20260629alluats"></script><!-- IVU City Intelligence & Comparator (pe _UrbanRank) -->
+  <script src="js/ivu-parcela.js?v=20260629ivup"></script><!-- iVU pe parcelă (nativ) — formulă + auto-scor OSM -->
+  <script src="js/ivu-parcela-ui.js?v=20260629ivup"></script><!-- iVU pe parcelă — panou + export PDF -->
   <script src="js/profile-deep-litoral-inf.js?v=20260628prof"></script><!-- litoral · rang inferior -->
   <script src="js/profile-deep-litoral-sup.js?v=20260628prof"></script><!-- litoral · rang superior -->
   <script src="js/profile-deep-delta-inf.js?v=20260628prof"></script><!-- deltă · rang inferior -->
