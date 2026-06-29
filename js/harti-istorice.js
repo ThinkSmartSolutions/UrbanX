@@ -10,10 +10,14 @@
 (function (G) {
   'use strict';
   var WMS = 'https://services.geo-spatial.org/geoserver/eharta/wms';
-  // construiește template-ul de tile WMS (Mapbox înlocuiește {bbox-epsg-3857})
+  var PROXY = 'https://urbanx-proxy.3dtravelsoftart.workers.dev/proxy?url=';
+  // template tile WMS rutat PRIN PROXY (regula #4 + CORS necesar pt toDataURL în capturile RCAI).
+  // Trucul: encodăm întregul URL WMS cu un token pt bbox, apoi restaurăm placeholder-ul LITERAL
+  // {bbox-epsg-3857} (neîncodat) ca Mapbox să-l recunoască și să-l înlocuiască cu bbox-ul real.
   function _tpl(layer) {
-    return WMS + '?service=WMS&version=1.1.1&request=GetMap&layers=' + encodeURIComponent(layer) +
-      '&bbox={bbox-epsg-3857}&width=256&height=256&srs=EPSG:3857&format=image/png&transparent=true';
+    var inner = WMS + '?service=WMS&version=1.1.1&request=GetMap&layers=' + layer +
+      '&bbox=__BBOX__&width=256&height=256&srs=EPSG:3857&format=image/png&transparent=true';
+    return PROXY + encodeURIComponent(inner).replace('__BBOX__', '{bbox-epsg-3857}');
   }
   // straturile istorice disponibile, în ordine cronologică
   var LAYERS = [
