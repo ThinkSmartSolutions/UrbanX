@@ -475,7 +475,9 @@ function _prfLang(rawText) {
 // ─────────────────────────────────────────────────────────────────────────────
 function _pdfTableOfContents(pdf, W, H, chapters, title) {
   // chapters = [{num, title, page, status}]
-  pdf.addPage();
+  // FIX pagina 1 GOALĂ: jsPDF începe deja cu o pagină. TOC e prima desenare în toate
+  // studiile → reutilizăm pagina inițială (addPage doar dacă există deja conținut).
+  try { if (pdf.internal.getNumberOfPages() > 1) pdf.addPage(); } catch(e) { pdf.addPage(); }
   pdf.setFillColor(8,20,42);
   pdf.rect(0,0,W,H,'F');
   pdf.setFillColor(212,175,55);

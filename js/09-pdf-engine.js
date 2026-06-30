@@ -8,6 +8,15 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const pdf=new jsPDF({orientation:_orient,unit:'mm',format:_format});
   // Standard de sistem: font RO (diacritice) pentru proza studiilor (fallback helvetica)
   const _roFont=(window._registerROFont&&window._registerROFont(pdf))?'DejaVuRO':null;
+  // TOTAL pagini REAL în „Pag. X / N": totalPages declarat (ex.14) nu corespunde cu nr. real
+  // de pagini generate (ex.23). Folosim un alias înlocuit cu numărul real înainte de output.
+  const _TPA='{urbanx_tp}';
+  (function(){
+    var fix=function(){ try{ pdf.putTotalPages(_TPA); }catch(e){} };
+    ['save','output','outputBlob'].forEach(function(m){
+      if(typeof pdf[m]==='function'){ var o=pdf[m].bind(pdf); pdf[m]=function(){ fix(); return o.apply(pdf,arguments); }; }
+    });
+  })();
   const W = _orient==='landscape'?(_format==='a3'?420:297):(_format==='a3'?297:210);
   const H = _orient==='landscape'?(_format==='a3'?297:210):(_format==='a3'?420:297);
 
@@ -44,6 +53,8 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
 
   // Header rafinat 28mm
   const hdr=(title,pg)=>{
+    // pg lipsă în multe apeluri (ex. SSF) → „Pag. undefined". Folosim nr. real de pagină din jsPDF.
+    if(pg==null){ try{ pg = pdf.internal.getCurrentPageInfo().pageNumber; }catch(e){ try{ pg = pdf.internal.getNumberOfPages(); }catch(e2){ pg='—'; } } }
     pdf.setFillColor(...DARK);pdf.rect(0,0,W,28,'F');
     pdf.setFillColor(...GOLD);pdf.rect(0,0,W,2.5,'F');
     pdf.setFillColor(...GOLD2);pdf.rect(0,27,W,1,'F');
@@ -59,7 +70,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(title),W/2,22,{align:'center'});
     pdf.setTextColor(...GOLD2);pdf.setFontSize(7);pdf.setFont(_roFont||'helvetica','bold');
-    pdf.text('Pag. '+pg+' / '+totalPages,W-8,22,{align:'right'});
+    pdf.text('Pag. '+pg+' / '+_TPA,W-8,22,{align:'right'});
   };
 
   // Footer elegant 10mm
