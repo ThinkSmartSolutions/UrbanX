@@ -219,24 +219,40 @@ function _patchRenderPlan(){
       }
     });
 
-    // ── STRAT 7: etichete camere ──────────────────────────────────────────
+    // ── STRAT 7: etichete camere (ADAPTIV — abreviere + fit pe înălțime, anti-suprapunere) ──
+    // Abrevieri pentru camere înguste (altfel „CAMERA DE ZI" se sparge în 3 linii și
+    // se revarsă peste camerele vecine — bug raportat pe planuri cu apartamente mici).
+    const ROOM_ABBR={living:'LIVING',bedroom:'DORM.',bedroom2:'DORM.',bedroom3:'DORM.',kitchen:'BUC.',
+      bath:'BAIE',wc:'WC',hall:'HOL',storage:'DEB.',core:'SCARĂ',balcon:'BALCON',
+      commercial:'COMERC.',office:'BIROU',meeting:'SALĂ',reception:'RECEPȚIE'};
     sorted.forEach(r=>{
       const rx_=ox+r.x*SC,ry_=oy+r.y*SC,rw_=r.w*SC,rh_=r.h*SC;
-      if(rw_<18||rh_<12) return;
+      if(rw_<16||rh_<11) return;
       const area=(r.w*r.h).toFixed(2).replace('.',',');
-      const lbl=ROOM_LBL[r.t]||((r.lbl||r.t).replace('\n',' ').toUpperCase());
-      const fs=Math.min(9,Math.max(6,rw_/10));
+      let lbl=ROOM_LBL[r.t]||((r.lbl||r.t).replace('\n',' ').toUpperCase());
+      let fs=Math.min(9,Math.max(5.5,rw_/9));
       ctx.font=`bold ${fs}px Arial`;
-      const tw=ctx.measureText(lbl).width;
-      const lines=tw>rw_*.88?lbl.split(' '):[lbl];
+      // 1) dacă nu încape pe o linie → încearcă abrevierea
+      if(ctx.measureText(lbl).width>rw_*0.92 && ROOM_ABBR[r.t]){ lbl=ROOM_ABBR[r.t]; ctx.font=`bold ${fs}px Arial`; }
+      // 2) dacă tot nu încape → micșorează fontul până la 5px
+      while(ctx.measureText(lbl).width>rw_*0.94 && fs>5){ fs-=0.5; ctx.font=`bold ${fs}px Arial`; }
+      // 3) wrap pe cuvinte doar dacă încă nu încape ȘI sunt mai multe cuvinte
+      let lines = (ctx.measureText(lbl).width>rw_*0.94 && lbl.indexOf(' ')>0) ? lbl.split(' ') : [lbl];
+      const lineH=fs+1.5;
+      // aria se afișează doar dacă rămâne loc pe verticală sub etichetă
+      let showArea = (!r.bal && r.w*r.h>0.8 && rh_ > lines.length*lineH + fs + 7);
+      // 4) FIT pe înălțime: dacă blocul depășește camera, taie la o linie; dacă tot nu, skip
+      if(lines.length*lineH + (showArea?fs+2:0) > rh_-3){ lines=[lines[0]]; showArea=false; }
+      if(lines.length*lineH > rh_-2) return;
       ctx.textAlign='center';
       ctx.fillStyle=r.t==='core'?'rgba(255,255,255,.9)':'#1E293B';
-      const startY=ry_+rh_/2-(lines.length*(fs+2)+fs)/2+fs;
-      lines.forEach((ln,i)=>{ ctx.font=`bold ${fs}px Arial`; ctx.fillText(ln,rx_+rw_/2,startY+i*(fs+2)); });
-      if(!r.bal&&r.w*r.h>0.5&&rh_>22){
-        ctx.font=`${Math.max(6,fs-1)}px Arial`;
+      const blockH=lines.length*lineH+(showArea?fs+2:0);
+      const startY=ry_+rh_/2-blockH/2+fs;
+      lines.forEach((ln,i)=>{ ctx.font=`bold ${fs}px Arial`; ctx.fillText(ln,rx_+rw_/2,startY+i*lineH); });
+      if(showArea){
+        ctx.font=`${Math.max(5,fs-1)}px Arial`;
         ctx.fillStyle=r.t==='core'?'rgba(255,255,255,.7)':'rgba(30,41,59,.6)';
-        ctx.fillText('s = '+area+' mp',rx_+rw_/2,startY+lines.length*(fs+2)+3);
+        ctx.fillText('s = '+area+' mp',rx_+rw_/2,startY+lines.length*lineH+2);
       }
       ctx.textAlign='left';
     });
