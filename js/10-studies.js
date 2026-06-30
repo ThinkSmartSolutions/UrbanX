@@ -8172,6 +8172,50 @@ async function generateStudiuAmplasament(){
 
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // iVU PE AMPLASAMENT — Indice de Valoare Urbană (proximitate REALĂ OSM)
+  // ═══════════════════════════════════════════════════════════════════════════
+  try {
+    if(window._IVUParcela && window._IVUParcela.analyze && lat!=null && lon!=null){
+      ss && ss('Calculez iVU pe amplasament (proximitate reală OSM)…');
+      var _ivuCity=null;
+      try{ if(window.S_UAT&&window.S_UAT.id&&window._PUG_REGISTRY) _ivuCity=Object.keys(window._PUG_REGISTRY).find(function(k){return window._PUG_REGISTRY[k].id===window.S_UAT.id;}); }catch(e){}
+      _ivuCity=_ivuCity||(window.TCI&&window.TCI.cityKey)||'RO-IS-01';
+      var _ivuSt=await window._IVUParcela.analyze(lat,lon,_ivuCity, ap.zone);
+      var _R=_ivuSt.result, _FA=(window._IVUParcela.FACTORI)||[];
+      var _gcol=_R.iVU>=75?[16,130,60]:_R.iVU>=55?[20,50,98]:_R.iVU>=35?[200,120,30]:[185,28,28];
+      pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('iVU PE AMPLASAMENT — INDICE DE VALOARE URBANĂ',2);ftr();
+      cy=28;
+      cy=sec('iVU — INDICE DE VALOARE URBANĂ PE AMPLASAMENT (proximitate reală OSM)',cy);cy+=2;
+      pdf.setFillColor(..._gcol);pdf.rect(14,cy,W-28,15,'F');
+      pdf.setTextColor(255,255,255);pdf.setFont('DejaVuRO','bold');pdf.setFontSize(13);
+      pdf.text('iVU = '+_R.iVU+' / 100   ·   Nota '+_R.grade,W/2,cy+9.5,{align:'center'});
+      cy+=20;
+      cy=body('iVU exprimă valoarea urbană a amplasamentului pe baza proximității REALE față de dotările și serviciile din jur (date OpenStreetMap, rază 1.500 m), corectată cu factorii de formă a parcelei (Kf), rețele edilitare (Kr), accesibilitate (Ka) și calitatea vieții la nivel de UAT (Kql). Formula: iVU = S⁺ × (1 − P⁻/100) × Kf × Kr × Ka × Kql.',14,cy);cy+=3;
+      cy=tblRow(['Componentă formulă','Valoare','Semnificație'],cy,true,[58,34,90]);
+      [['S⁺ — scor pozitiv agregat',_R.Splus+'/100','media ponderată a dotărilor din proximitate'],
+       ['P⁻ — penalizare restricții',_R.Pminus+'%','servituți/restricții detectate (LMI, seism, N2000…)'],
+       ['Kf — formă parcelă',(+_R.Kf).toFixed(2),'regularitatea geometriei'],
+       ['Kr — rețele edilitare',(+_R.Kr).toFixed(2),'completitudine utilități'],
+       ['Ka — accesibilitate UAT',(+_R.Ka).toFixed(2),'conectivitate oraș (din iVU UAT)'],
+       ['Kql — calitatea vieții UAT',(+_R.Kql).toFixed(2),'din iVU UAT'],
+      ].forEach(r=>cy=tblRow(r,cy,false,[58,34,90]));
+      cy+=4;
+      cy=sec('PROXIMITATEA AMPLASAMENTULUI FAȚĂ DE DOTĂRI ȘI SERVICII (OSM)',cy);cy+=2;
+      _FA.forEach(function(g){
+        cy=tblRow([g.label,'Scor/10','Cel mai apropiat','Nr. în 1,5km'],cy,true,[78,24,40,40]);
+        g.f.forEach(function(fc){
+          var ev=_ivuSt.evidence&&_ivuSt.evidence[fc.id]; var sc=_ivuSt.vals&&_ivuSt.vals[fc.id];
+          var nd=ev&&ev.nearest!=null?(ev.nearest>=1000?(ev.nearest/1000).toFixed(1)+' km':ev.nearest+' m'):'—';
+          var cnt=ev&&ev.count!=null?''+ev.count:'—';
+          cy=tblRow([fc.name,(sc!=null?(+sc).toFixed(1):'—'),nd,cnt],cy,false,[78,24,40,40]);
+        });
+        cy+=2;
+      });
+      cy=body('Interpretare: distanțele mici și numărul ridicat de dotări în proximitate cresc valoarea urbană a amplasamentului. Categoriile cu scor redus indică deficite de dotări în zonă. iVU este orientativ, auto-scorat din OpenStreetMap; nu înlocuiește o evaluare imobiliară autorizată ANEVAR.',14,cy);
+    }
+  } catch(e){ console.warn('[Amplasament iVU]',e); }
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // PAG 1b: CONFLICT DETECTION — Avertismente urbanistice automate (AUDIT)
   // ═══════════════════════════════════════════════════════════════════════════
   if(_conflicts.length > 0 || _warnings.length > 0){

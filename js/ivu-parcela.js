@@ -151,20 +151,11 @@
     return { ap: ap, lat: ctr ? ctr[1] : null, lon: ctr ? ctr[0] : null, area: area, nrcad: ap.nrcad || (ap.properties && ap.properties.nrcad), zone: ap.zone };
   }
 
-  // ── deschide fișa iVU pe parcela selectată (auto-scor OSM) ───────────────────
-  async function open() {
-    var P = _activeParcel();
-    if (!P) { G.ss && G.ss('⚠️ Selectează o parcelă pe hartă pentru fișa iVU pe amplasament.'); return; }
-    G.ss && G.ss('🔎 Calculez iVU pe amplasament (proximitate reală OSM)...');
-    // UAT-ul PARCELEI (din PUG-ul încărcat S_UAT), NU UAT-ul activ din panoul IVU (pot diferi —
-    // ex. panou pe Galați, dar parcela e din PUG Iași). Altfel ieșea „Galați" pe document Iași.
-    var cityKey = null;
-    try { if (window.S_UAT && window.S_UAT.id && window._PUG_REGISTRY) cityKey = Object.keys(window._PUG_REGISTRY).find(function (k) { return window._PUG_REGISTRY[k].id === window.S_UAT.id; }); } catch (e) {}
-    cityKey = cityKey || (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
+  // ── pipeline complet (fetch OSM → scoruri+distanțe → restricții → iVU) ───────
+  async function _computeFull(P, cityKey) {
     var coefs = _uatCoefs(cityKey);
     var els = await _fetchOSM(P.lat, P.lon, 1500);
     var osmScores = _scoreFactorsFromOSM(els, P.lat, P.lon);
-    // valori factori: din OSM unde există; derived/risk → din context
     var vals = {}, evidence = {};
     FACTORI.forEach(function (g) { g.f.forEach(function (fc) {
       if (osmScores[fc.id]) { vals[fc.id] = osmScores[fc.id].score; evidence[fc.id] = osmScores[fc.id]; }
@@ -172,11 +163,27 @@
       else if (fc.id === 'inf_util') { vals[fc.id] = (P.zone && P.zone.utrNr) ? 8.5 : 6.5; evidence[fc.id] = { note: 'estimat din regim urban' }; }
       else { vals[fc.id] = 6; evidence[fc.id] = { note: 'estimare' }; }
     }); });
-    // restricții auto-detectate
     var restr = await _autoRestrictii(P, cityKey);
-    // formă + rețele (default; editabile în panou)
     var state = { vals: vals, evidence: evidence, restr: restr, kf: 'regulata', kr: 'toate', P: P, cityKey: cityKey, coefs: coefs };
     state.result = compute(vals, restr, state.kf, state.kr, coefs.ka, coefs.kql);
+    return state;
+  }
+  // ── API public: analiză iVU din coordonate (pt integrare în Studiul de Amplasament) ──
+  // Întoarce {result:{iVU,grade,Splus,Pminus,Kf,Kr,Ka,Kql}, evidence:{factorId:{score,nearest,count}}, FACTORI}
+  async function analyze(lat, lon, cityKey, zone) {
+    cityKey = cityKey || (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
+    return await _computeFull({ lat: lat, lon: lon, zone: zone || null }, cityKey);
+  }
+  // ── deschide fișa iVU pe parcela selectată (auto-scor OSM) ───────────────────
+  async function open() {
+    var P = _activeParcel();
+    if (!P) { G.ss && G.ss('⚠️ Selectează o parcelă pe hartă pentru fișa iVU pe amplasament.'); return; }
+    G.ss && G.ss('🔎 Calculez iVU pe amplasament (proximitate reală OSM)...');
+    // UAT-ul PARCELEI (din PUG-ul încărcat S_UAT), NU UAT-ul activ din panoul IVU (pot diferi).
+    var cityKey = null;
+    try { if (window.S_UAT && window.S_UAT.id && window._PUG_REGISTRY) cityKey = Object.keys(window._PUG_REGISTRY).find(function (k) { return window._PUG_REGISTRY[k].id === window.S_UAT.id; }); } catch (e) {}
+    cityKey = cityKey || (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
+    var state = await _computeFull(P, cityKey);
     G._IVUParcela._state = state;
     if (G._IVUParcela._renderPanel) G._IVUParcela._renderPanel(state);
     else G.ss && G.ss('iVU calculat: ' + state.result.iVU + '/100 (' + state.result.grade + ')');
@@ -195,7 +202,7 @@
     return restr;
   }
 
-  G._IVUParcela = { open: open, compute: compute, FACTORI: FACTORI, RESTRICTII: RESTRICTII, KF: KF, KR: KR, exportPDF: null, _state: null };
+  G._IVUParcela = { open: open, analyze: analyze, compute: compute, FACTORI: FACTORI, RESTRICTII: RESTRICTII, KF: KF, KR: KR, exportPDF: null, _state: null };
   window._IVUParcela = G._IVUParcela;
   console.log('[IVUParcela] ✅ iVU pe parcelă încărcat (window._IVUParcela.open)');
 
