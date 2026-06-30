@@ -110,6 +110,9 @@
       // ── Planșe + Nota IVU națională ──
       try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, 'RO-B-01'); } catch (e) {}
 
+      // ── Poziționare față de literatură + RAI + CBA + DEMONSTRAȚIA recomandării (matrice decizie) ──
+      try { if (G._RegioDecision && G._RegioDecision.renderSection) G._RegioDecision.renderSection(D); } catch (e) { console.warn('[Regionalizare] decision', e); }
+
       D.chapter('Concluzii generale și scenariul recomandat');
       D.P('Studiul converge către concluzia că reducerea disparităților regionale ale României nu depinde mecanic de numărul sau granițele regiunilor, ci de transferul efectiv de competențe, resurse fiscale și capacitate administrativă către nivelul regional, dublat de o prioritizare a investițiilor în conectivitate (autostrăzi, cale ferată de mare viteză, digital) și în capitalul uman. Orice scenariu de regionalizare a fost evaluat după trei criterii: (1) reducerea decalajelor de dezvoltare, (2) eficiența și apropierea deciziei de cetățean, (3) creșterea capacității de absorbție a fondurilor europene.');
       D.P('RECOMANDAREA FERMĂ a studiului este SCENARIUL S2 — menținerea celor 8 regiuni de dezvoltare actuale și acordarea de personalitate juridică (consilii alese, buget, competențe). Acest scenariu maximizează simultan cele trei criterii cu cel mai mic cost și risc: granițele NUTS-2 fiind deja recunoscute de Eurostat, absorbția fondurilor europene nu suferă nicio întrerupere statistică; descentralizarea reală (nu redesenarea hărții) este pârghia care apropie decizia de cetățean și crește capacitatea administrativă; iar reforma este reversibilă și gradual implementabilă. Dimensional, cele 8 regiuni se încadrează în intervalul validat de modelele polonez (województwa) și ceh (kraje), confirmat în atlasul comparativ european al studiului.');
