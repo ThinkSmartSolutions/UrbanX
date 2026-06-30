@@ -2626,7 +2626,6 @@ async function generateNoiseStudy(){
   ]); }catch(_ce){console.warn('[concluzii]',_ce.message);}
   
   // ESG Rating (Audit G)
-  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
 
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Acustic Urban',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
@@ -4588,7 +4587,6 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   sign();
   
   // ESG Rating (Audit G)
-  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
 
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Pre-Studiu Geotehnic',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
@@ -5442,6 +5440,17 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
    ['Platforma intoarcere ISU',_needsPlatforma?'OBLIGATORIE (acces estimat >50m)':'Nu se impune'],
    ['Nr. persoane evacuare',_pers+' pers. — '+_nrScari+' scara(i) x '+_latEvacu.toFixed(1)+'m latime'],
   ].forEach(r=>cy=tblRow(r,cy,false,[100,82]));
+  cy+=4;
+  cy=sec('10.2. CONCLUZIA GENERALĂ ȘI PAȘII URMĂTORI',cy);cy+=2;
+  cy=body('Pe baza sintezei de mai sus, clădirea analizată (H='+aedisH.toFixed(1)+'m, '+niv+' niveluri, risc la foc '+_riscFoc+', grad de rezistență '+_grf+') '+(_avizISU_SSF?'NECESITĂ aviz ISU obligatoriu înainte de Autorizația de Construire':'va fi verificată la faza de Proiect Tehnic, avizul ISU putând fi condiționat de configurația finală')+'. Măsurile marcate „OBLIGATORII" trebuie prevăzute integral în proiectul tehnic și verificate de un verificator de proiect atestat la cerința Bc (securitate la incendiu), conform Legii 10/1995.',14,cy);cy+=3;
+  cy=tblRow(['Pas următor recomandat','Responsabil','Termen orientativ'],cy,true,[78,52,52]);
+  [['Scenariu de securitate la incendiu complet, semnat','Inginer atestat IGSU','faza DTAC'],
+   ['Proiect instalații PSI (detecție, hidranți, stingere)','Proiectant instalații','faza PT'],
+   ['Obținere aviz / autorizație ISU','Beneficiar + proiectant','înainte de AC / PIF'],
+   ['Verificare proiect la cerința Bc','Verificator atestat MLPDA','faza DTAC/PT'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[78,52,52]));
+  cy+=3;
+  cy=body('Cost orientativ al echipării PSI: 20-80 EUR/mp construit, în funcție de obligativitatea sistemelor (detecție automată, hidranți interiori, sprinklere). Avizul ISU adaugă de regulă 2-4 luni la calendarul de autorizare și poate impune soluții constructive suplimentare. Aceste costuri și termene trebuie incluse din faza de buget a investiției.',14,cy);
 
   // ── PAG 13: PLAN ORIENTATIV EVACUARE + TIMPI ────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN ORIENTATIV DE EVACUARE - TIMPI SI CAPACITATI DIMENSIONATE',13);ftr();
@@ -5653,7 +5662,6 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
 
   
   // ESG Rating (Audit G)
-  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
 
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('SSF / Siguranta la Foc',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
@@ -6081,7 +6089,6 @@ async function generateEnvironmentalImpact(){
   sign();
   
   // ESG Rating (Audit G)
-  try{const _esgX=_calcESGScore(ap,params,(S.vol?._lastFeats?.reduce((m,f)=>Math.max(m,f.properties?.top||0),0)||12),(AEDIS?.fn||'rezidential_colectiv'));pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();let _cy2=33;_cy2=_pdfESGBlock(pdf,W,_cy2,_esgX);}catch(_e){}
 
   // Health Check (Audit #16)
   try{const _hc=_pdfHealthCheck('Studiu Impact Mediu (EIM)',params,nrcad,utr,[]);if(_hc.issues.length>0)_pdfRenderHealthCheck(pdf,W,H,_hc);}catch(_e){}
@@ -8652,14 +8659,10 @@ async function generateStudiuAmplasament(){
   // Hartă conexiuni rapoarte (#26 audit) — înainte de semnături
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'amplasament',nrcad);
   
-  // ── ESG URBAN SUSTAINABILITY RATING (Audit G) ────────────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ESG URBAN SUSTAINABILITY RATING');ftr();
-  let cyESG=33;
-  cyESG=sec('ESG SCORING — ENVIRONMENTAL, SOCIAL, GOVERNANCE',cyESG);cyESG+=3;
-  cyESG=body('Analiza ESG evalueaza sustenabilitatea proiectului pe 3 dimensiuni. Scorurile sunt ESTIMATIVE pe baza parametrilor proiectului.',14,cyESG);cyESG+=4;
+  // ── ESG page ELIMINAT — scorecard de sustenabilitate off-topic într-un studiu de
+  //    amplasament (cerut de Florin: „apare si health"); calculul intern rămâne pt JSON. ──
   const fn=S?.vol?.fn||params?.fn_label?.slice(0,3)||'rez';
   const esgScore=_calcESGScore(ap,params,aedisH,fn);
-  cyESG=_pdfESGBlock(pdf,W,cyESG,esgScore);
   // Report JSON (Audit #20)
   _saveReportJSON('amplasament',{nrcad:nrcad,utr,area,lat,lon,uat,judet,params},[{type:'ESG',rating:esgScore.rating}],['ANCPI','OSM'],{esg:esgScore.total});
 
