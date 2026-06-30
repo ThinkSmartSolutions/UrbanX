@@ -5134,6 +5134,17 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
    ['Clasa performanta la foc materiale','Minim A2-s1,d0','SR EN 13501-1:2019'],
    ['Comportament seismic (relevant PSI)','Zona seismica '+getSeismConfig().zona,'P100-1/2022'],
   ].forEach(r=>cy=tblRow(r,cy,false,[70,62,50]));
+  cy+=4;
+  cy=sec('2.1. IMPLICAȚIILE ÎNCADRĂRII ASUPRA PROIECTĂRII',cy);cy+=2;
+  cy=body('Încadrarea de mai sus determină cerințele tehnice obligatorii ale proiectului de securitate la incendiu. Gradul de rezistență la foc '+_grf+' impune valori minime REI/EI pentru toate elementele structurale și de compartimentare. Clasa de risc „'+_riscFoc+'" și categoria de importanță stabilesc nivelul de echipare cu instalații de detecție, semnalizare și stingere, precum și frecvența verificărilor periodice (Legea 307/2006).',14,cy);cy+=3;
+  cy=tblRow(['Consecință a încadrării','Cerință rezultată','Bază normativă'],cy,true,[64,66,52]);
+  [['Grad rezistență '+_grfNum,'Elemente structurale REI ≥ '+_reiMin+' min','P118-1/1999 Tab.1'],
+   ['Risc la foc '+_riscFoc,niv>4?'Detecție + semnalizare automată obligatorie':'Detecție recomandată; stingătoare obligatorii','P118-2/2013'],
+   ['Categorie '+(niv>6?'B':'C')+' importanță','Verificare proiect la cerința Bc (verificator atestat)','Legea 10/1995'],
+   ['H='+aedisH.toFixed(1)+'m / P+'+(niv-1),aedisH>28?'Clădire ÎNALTĂ — desfumare mecanică + ascensor pompieri':'Clădire obișnuită — cerințe standard','P118-1/1999 Art.3'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[64,66,52]));
+  cy+=3;
+  cy=body('Aceste consecințe trebuie integrate din faza de concept arhitectural: poziționarea caselor de scări, compartimentarea antifoc (pereți EI), traseele de evacuare și amplasarea instalațiilor PSI influențează direct planul și nu pot fi adăugate ulterior fără modificări majore. Se recomandă implicarea unui verificator de proiect atestat la cerința Bc (securitate la incendiu) încă din faza DTAC.',14,cy);
 
   // ── PAG 3: REZISTENTA LA FOC ELEMENTE CONSTRUCTIVE ───────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('REZISTENTA LA FOC — ELEMENTE CONSTRUCTIVE — GRF '+_grfNum,3);ftr();
@@ -5470,7 +5481,17 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
    ['Ușă casă scară — rezistență la foc','EI2 60 min. ('+_grf+' GRF)','EI2 60 conf. P118-1/2015 Tab.4.3 · EI2 90 rec.','P118-1/2015 Tab.4.3'],
    ['Rampă evacuare PMR (dacă >P+3)','min. 1.20m lățime, panta max.8%','1.50m lățime, panta 6%','NP 051/2012'],
   ].forEach(r=>cy=tblRow(r,cy,false,[55,45,45,37]));
+  cy+=4;
+  cy=sec('13.2. DISTANȚE MAXIME DE EVACUARE ADMISE — P118-2/2013',cy);cy+=2;
+  cy=body('Lungimea maximă a traseelor de evacuare (de la ușa celei mai îndepărtate încăperi până la o ieșire sau casa de scări) este limitată normativ în funcție de riscul de incendiu și de numărul direcțiilor de evacuare. Pentru clădirea analizată (risc '+_riscFoc+', '+niv+' niveluri), valorile de referință sunt:',14,cy);cy+=3;
+  cy=tblRow(['Situație traseu de evacuare','Lungime maximă admisă','Observație'],cy,true,[64,48,58]);
+  [['Coridor înfundat (o singură direcție)','20-25 m','P118-2/2013 Tab. 2.5'],
+   ['Două direcții de evacuare','35-40 m','recomandat la > 50 pers./nivel'],
+   ['Acces la casa de scări de evacuare','conform nr. niveluri','min. '+_nrScari+' casă/case de scări'],
+   ['Timp total evacuare (RSET) estimat',(typeof tTotal!=='undefined'?tTotal:'—')+' s','< ASET '+(typeof tASET!=='undefined'?tASET:'—')+' s'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[64,48,58]));
   cy+=3;
+  cy=body('La depășirea lungimilor admise sau a unui flux de peste 50 de persoane pe nivel devine obligatorie a doua casă de scări de evacuare (P118-1/2015). Pentru clădirile înalte (H > 28 m) se adaugă cerințe de desfumare mecanică și presurizare a caselor de scări, precum și ascensor de pompieri (P118-1/2015 cap. 5).',14,cy);cy+=3;
   cy=body('NOTA: Dimensionarea finală a căilor de evacuare se realizează de proiectantul autorizat la faza Proiect Tehnic (PT), pe baza planurilor aprobate și a numărului definitiv de persoane stabilit prin tema de proiectare. Prezentul calcul are caracter ORIENTATIV.',14,cy);
 
   // ── PAG 14: DEVIZ ORIENTATIV INSTALATII PSI + CHECKLIST AVIZ ISU ────────────
@@ -5622,7 +5643,11 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
       }
 
       cy13=_oy2+_bD*_sc2+6;
-      cy13=body('Notă: Schema funcțională de mai sus a fost generată automat de UrbanX Relevee Instant pe baza parametrilor urbanistici. Nu înlocuiește planșele arhitecturale din Proiectul Tehnic. Distanțele de evacuare marcate cu roșu necesită verificare obligatorie la faza PAC cu arhitect OAR autorizat.',14,cy13);
+      cy13=body('Notă: Schema funcțională de mai sus a fost generată automat de UrbanX Relevee Instant pe baza parametrilor urbanistici. Nu înlocuiește planșele arhitecturale din Proiectul Tehnic. Distanțele de evacuare marcate cu roșu necesită verificare obligatorie la faza PAC cu arhitect OAR autorizat.',14,cy13);cy13+=4;
+      cy13=sec('PRINCIPII DE EVACUARE VERIFICATE ÎN SCHEMĂ',cy13);cy13+=2;
+      ['Fiecare nivel dispune de cel puțin o cale de evacuare protejată către exterior (P118-1/2015).','Ușile de pe traseul de evacuare se deschid în sensul evacuării; bară antipanică la flux > 50 persoane.','Coridoarele și casele de scări se mențin libere, fără depozitări sau obstrucții.','Iluminat de securitate (evacuare) + indicatoare luminoase pe tot traseul — NP 061/2002, SR EN 1838.','Ușile caselor de scări: rezistență la foc EI2 '+(typeof _reiMin!=='undefined'?(_reiMin>=90?'90':'60'):'60')+' min, cu sistem de autoînchidere.','Plan de evacuare afișat la fiecare nivel — obligatoriu la recepția construcției.'].forEach(function(l){cy13=body('• '+l,16,cy13);cy13+=1.5;});
+      cy13+=2;
+      cy13=body('Recomandare: schema funcțională devine plan de evacuare autorizat numai după întocmirea planșelor de Proiect Tehnic de către arhitect/proiectant și obținerea avizului ISU (Legea 307/2006).',14,cy13);
     }catch(e){console.warn('[SSF-Relevee] Eroare pagina relevee:',e.message);}
   }
 
