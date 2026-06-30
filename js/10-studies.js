@@ -4373,7 +4373,22 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
      ['Panta medie', _coteNiv.panta+' %', 'pe extinderea de '+_coteNiv.extent_m+' m'],
     ].forEach(r=>cyc=tblRow(r,cyc,false,[52,42,78]));
     cyc+=3;
-    cyc=body('Recomandare privind demisolul: '+_coteNiv.recomandare,14,cyc);cyc+=2;
+    cyc=body('Recomandare privind demisolul: '+_coteNiv.recomandare,14,cyc);cyc+=3;
+    // ── Conținut tehnic real care valorifică datele de declivitate (umple pagina) ──
+    var _pNum=parseFloat(_coteNiv.panta)||0;
+    var _pClass=_pNum<5?'teren cvasi-orizontal (pantă < 5%)':_pNum<10?'teren cu pantă ușoară (5-10%)':_pNum<20?'teren cu pantă medie (10-20%)':'teren cu pantă accentuată (> 20%)';
+    cyc=sec('IMPLICAȚII ALE DECLIVITĂȚII ASUPRA FUNDĂRII',cyc);cyc+=2;
+    cyc=body('Panta medie de '+_coteNiv.panta+'% încadrează amplasamentul în categoria „'+_pClass+'". Conform NP 124/2010 (lucrări geotehnice de fundare pe terenuri în pantă) și GP 006, pentru această clasă se recomandă: (a) fundații în TREPTE — fundare la cote diferite, cu praguri de minim 0,60 m și raport al treptelor de cel mult 2:3 — pentru a urmări panta fără supra-săpături inutile; (b) verificarea stabilității generale a versantului la starea-limită ultimă GEO conform SR EN 1997-1 (Eurocod 7), cu factor de siguranță Fs ≥ 1,5 în condiții statice și Fs ≥ 1,1 în combinația seismică (P100-1/2022, ag=0,20g).',14,cyc);cyc+=3;
+    cyc=body('Managementul apelor de suprafață: pe terenurile în pantă, scurgerea pluvială concentrată poate provoca eroziune și infiltrații la baza fundațiilor. Se impune un sistem perimetral de rigole și, după caz, drenuri de intercepție pe latura amonte, conform STAS 1846 și NP 124/2010, pentru a dirija apele departe de amprenta construită și a proteja portanța terenului de fundare.',14,cyc);cyc+=3;
+    var _demVal=_pNum>=5||(parseFloat(_coteNiv.dH)||0)>=3;
+    cyc=body('Balanța terasamentelor (cut & fill): diferența de nivel de '+_coteNiv.dH+' m pe '+_coteNiv.extent_m+' m '+(_demVal?'permite valorificarea unui demisol/subsol parțial îngropat, cu încastrare pe latura amonte și fațadă liberă pe latura aval — soluție care echilibrează volumul de săpătură cu cel de umplutură și reduce costul terasamentelor. Cota ±0,00 se recomandă a fi stabilită la nivelul mediu ponderat al terenului, pentru a minimiza atât săpătura, cât și umplutura compactată (grad de compactare Proctor ≥ 95%).':'permite o platformare simplă, cu terasamente reduse și echilibrate.'),14,cyc);cyc+=3;
+    cyc=tblRow(['Măsură recomandată pe pantă','Normativ','Prioritate'],cyc,true,[78,52,42]);
+    [['Fundații în trepte / cotă de încastrare amonte','NP 124/2010','Obligatoriu pe pantă'],
+     ['Verificare stabilitate versant (Fs ≥ 1,5)','SR EN 1997-1 (EC7)','Obligatoriu'],
+     ['Drenaj perimetral + rigole de gardă','STAS 1846 / NP 124','Recomandat'],
+     ['Ridicare topografică certificată (cote reale)','Legea 7/1996','Obligatoriu la PT/DTAC'],
+    ].forEach(r=>cyc=tblRow(r,cyc,false,[78,52,42]));
+    cyc+=3;
     cyc=body('NOTA: '+_coteNiv.nota,14,cyc);
   }
 
@@ -4400,6 +4415,21 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
    ['Umflare/tasare potential','Moderat (argile contractile)','Verificare in situ'],
    ['Agresivitate chimica','Neagresiv (pH normal)','Verificare apa freatică'],
   ].forEach(r=>cy=tblRow(r,cy,false,[65,65,48]));
+  cy+=4;
+  // ── Conținut tehnic real care valorifică pagina (capacitate portantă + loess PSU) ──
+  var _presMin=niv*13, _presMax=Math.round(niv*13*2.6);
+  cy=sec('2.1. VERIFICAREA PRELIMINARĂ A CAPACITĂȚII PORTANTE',cy);cy+=2;
+  cy=body('Pentru structura propusă (H='+aedisH.toFixed(1)+'m, '+niv+' niveluri), presiunea efectivă transmisă terenului de fundare se estimează la cca. '+_presMin+'-'+_presMax+' kPa (presiune medie pe amprenta fundațiilor, funcție de tipul și lățimea tălpilor). Raportată la presiunea convențională estimată a terenului (p_conv = 150-200 kPa pentru loess/argilă prăfoasă în stare naturală), rezultă o încadrare '+(_presMax<=200?'ACCEPTABILĂ pentru fundare directă':'care necesită fundații late/radier sau îmbunătățirea terenului')+', sub rezerva confirmării prin încercări in situ. Verificarea la starea-limită ultimă (GEO) și de exploatare (tasări) se realizează conform SR EN 1997-1 (Eurocod 7) și NP 112/2014.',14,cy);cy+=3;
+  cy=tblRow(['Verificare','Estimare preliminară','Criteriu'],cy,true,[60,55,63]);
+  [['Presiune efectivă pe teren',_presMin+'-'+_presMax+' kPa','< p_conv (150-200 kPa)'],
+   ['Tasare totală estimată','2-5 cm','< 8 cm admis (NP 112, cladiri curente)'],
+   ['Tasare diferențială','< 1/500 deschidere','SR EN 1997-1'],
+   ['Adâncime minimă fundare','1,20-2,00 m','sub cota de îngheț -0,90 m (STAS 6054)'],
+  ].forEach(r=>cy=tblRow(r,cy,false,[60,55,63]));
+  cy+=3;
+  cy=sec('2.2. RISC SPECIFIC — PĂMÂNTURI LOESSOIDE SENSIBILE LA UMEZIRE (PSU)',cy);cy+=2;
+  cy=body('Podișul Moldovei (inclusiv municipiul Iași) este caracterizat de depozite loessoide cuaternare care intră frecvent în categoria pământurilor sensibile la umezire (PSU), conform NP 125/2010. La inundarea accidentală a terenului de fundare (rupere conductă, drenaj defectuos, ape pluviale necontrolate), aceste pământuri pot suferi TASĂRI SUPLIMENTARE prin umezire ("colaps structural"), cu valori de 5-15 cm, independent de încărcarea structurii. Identificarea grupei (A — tasare < 5 cm sau B — tasare > 5 cm) se face obligatoriu prin încercare edometrică dublă pe probe netulburate, în cadrul studiului geotehnic detaliat.',14,cy);cy+=3;
+  cy=body('Măsuri de prevenire recomandate (NP 125/2010): (a) etanșarea perfectă a rețelelor purtătoare de apă în jurul construcției; (b) sistem de colectare și evacuare dirijată a apelor pluviale (pante de minim 2% pe o lățime de 3 m perimetral, rigole); (c) după caz, compactarea/îmbunătățirea terenului de fundare sau fundare sub stratul sensibil. Acest risc trebuie tratat explicit în studiul geotehnic la faza PT/DTAC.',14,cy);
 
   // PAG 3: Viewer + categorii geotehnice
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D + CATEGORII GEOTEHNICE SI FUNDARE',3);ftr();
