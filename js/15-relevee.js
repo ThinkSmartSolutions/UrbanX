@@ -683,9 +683,12 @@ function _rvFloor(b, floorIdx){
     // Casa scărilor (core) apare NUMAI în HOL NIVEL — nu taie ap-urile vertical.
     const floorFn     = _rvGetFloorFn(floorIdx);
     const isLastFloor = (floorIdx === b.niv - 1);
-    // Nr. apartamente pe o parte: minim 2, bazat pe lățimea clădirii
-    const nBaysN = Math.max(2, Math.round(bW / 6.5));
-    const nBaysS = Math.max(2, Math.round(bW / 6.5));
+    // Nr. apartamente pe o parte, în funcție de lățimea reală a clădirii.
+    // Un apartament decent are min. ~6m front; sub ~9.7m lățime => 1 ap/parte
+    // (altfel ieșeau 2 ap. de ~3,3m lățime = ~10mp, suprapuse — bug raportat Florin
+    //  pe parcela 177203, 6,7m: 4-6 apartamente înghesuite pe parter).
+    const nBaysN = Math.max(1, Math.round(bW / 6.5));
+    const nBaysS = Math.max(1, Math.round(bW / 6.5));
     const totalUnits  = nBaysN + nBaysS;
     const unitTypes   = _rvBuildUnitList(totalUnits, floorFn, _RV.unitMix, isLastFloor);
     const fallback = floorFn==='rez'?'2cam':floorFn==='birouri'?'openspace':floorFn==='hotel'?'standard':'retail';
