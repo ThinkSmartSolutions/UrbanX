@@ -172,12 +172,23 @@
   window._stiPickScenario = function (k) { _curScenario = k; _selected = {}; G._STIRegio.selected = _selected; _render(); drawOnMap(k); };
   window._stiToggleSel = function (id) { _selected[id] = !_selected[id]; _render(); };
   window._stiClose = function () { var p = document.getElementById('sti-panel'); if (p) p.remove(); clearMap(); };
+  // restrânge/extinde bottom-sheet-ul pe mobil ca să se vadă harta
+  window._stiToggleSheet = function () {
+    var p = document.getElementById('sti-panel'); if (!p) return;
+    var t = document.getElementById('sti-sheet-toggle');
+    var collapsed = p.getAttribute('data-collapsed') === '1';
+    if (collapsed) { p.style.maxHeight = '64vh'; p.setAttribute('data-collapsed', '0'); if (t) t.innerHTML = '⌄ Hartă'; }
+    else { p.style.maxHeight = '76px'; p.setAttribute('data-collapsed', '1'); if (t) t.innerHTML = '⌃ Panou'; }
+  };
 
   function _render() {
     var s = _scenarioData(_curScenario); if (!s) return;
     var old = document.getElementById('sti-panel'); var div = old || document.createElement('div'); div.id = 'sti-panel';
     var mob = window.innerWidth < 841;
-    if (!old) div.style.cssText = 'position:fixed;' + (mob ? 'inset:0;border-radius:0' : 'top:54px;right:14px;width:460px;max-height:90vh;border-radius:14px') + ';z-index:9300;background:rgba(8,13,26,.98);border:1px solid rgba(180,30,40,.35);overflow-y:auto;box-shadow:0 16px 50px rgba(0,0,0,.7);backdrop-filter:blur(14px);font-family:system-ui,sans-serif';
+    // MOBIL: bottom-sheet (NU fullscreen) — harta rămâne vizibilă în treimea superioară;
+    // panoul se poate restrânge cu butonul ⌄/⌃. (Florin: „pe mobil cum văd harta?")
+    if (!old) div.style.cssText = 'position:fixed;' + (mob ? 'left:0;right:0;bottom:0;max-height:64vh;border-radius:16px 16px 0 0;border-bottom:0' : 'top:54px;right:14px;width:460px;max-height:90vh;border-radius:14px') + ';z-index:9300;background:rgba(8,13,26,.98);border:1px solid rgba(180,30,40,.35);overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7);backdrop-filter:blur(14px);font-family:system-ui,sans-serif';
+    if (mob && !old) div.style.transition = 'max-height .28s ease';
     // sumă mandate selectate
     var selDep = 0, selSen = 0, selPop = 0, selCor = 0, nSel = 0;
     s.regiuni.forEach(function (r) { if (_selected[r.id]) { selDep += r.dep; selSen += r.sen; selPop += r.pop; selCor += r.cor; nSel++; } });
@@ -208,7 +219,8 @@
     div.innerHTML =
       '<div style="position:sticky;top:0;background:rgba(8,13,26,.98);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);z-index:2">' +
       '<div style="display:flex;justify-content:space-between;align-items:center"><div style="color:#fca5a5;font-weight:800;font-size:14px">🇷🇴 Simulator Regionalizare (STI)</div>' +
-      '<button onclick="_stiClose()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">✕</button></div>' +
+      '<div style="display:flex;gap:6px">' + (mob ? '<button onclick="_stiToggleSheet()" id="sti-sheet-toggle" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#cbd5e1;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">⌄ Hartă</button>' : '') +
+      '<button onclick="_stiClose()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700">✕</button></div></div>' +
       '<div style="display:flex;gap:4px;margin-top:8px">' + tabs + '</div>' +
       '<div style="color:#94a3b8;font-size:10px;margin-top:5px">' + s.nume + '</div>' + (s.nota ? '<div style="color:#64748b;font-size:9.5px;margin-top:2px">' + s.nota + '</div>' : '') + '</div>' +
       '<div style="padding:12px 16px">' +
