@@ -3087,10 +3087,12 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   const kbTotalRound=Math.round(kbTotal*100)/100;
   cy2+=2;
   const kbOk=kbTotalRound>=0.3;
-  pdf.setFillColor(...(kbOk?GREEN:ORANGE));pdf.rect(14,cy2,W-28,10,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(9);pdf.setFont('DejaVuRO','bold');
-  pdf.text('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB >= 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W/2,cy2+7,{align:'center'});
-  cy2+=14;
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('DejaVuRO','bold');
+  var _kbMsg=pdf.splitTextToSize('KB TOTAL CALCULAT: '+kbTotalRound.toFixed(2)+' | Valoare ecologică totală: '+Math.round(tipuri.reduce((s,t)=>s+t.suprafata*t.kb,0)).toLocaleString('en-US')+' mp | '+(kbOk?'OK — KB >= 0.30 (prag Berlin)':'INSUFICIENT — creșteți acoperișul verde sau plantațiile'),W-40);
+  var _kbBh=Math.max(10,_kbMsg.length*4.6+4);
+  pdf.setFillColor(...(kbOk?GREEN:ORANGE));pdf.rect(14,cy2,W-28,_kbBh,'F');
+  pdf.setTextColor(255,255,255);pdf.text(_kbMsg,W/2,cy2+5.5,{align:'center'});
+  cy2+=_kbBh+4;
   cy2=tblRow(['Standard KB','Prag minim KB','Aplicabilitate','Status amplasament'],cy2,true,[60,20,80,22]);
   [['Berlin Biotope Area Factor (BAF) — Senat Berlin 2015','0.30','Obligatoriu la noi construcții în Berlin (implementat)',''+( kbTotalRound>=0.30?'OK':'Sub prag')],
    ['Stockholm Green Space Factor (GSF)','0.50','Planificare urbana Stockholm',''+( kbTotalRound>=0.50?'OK':'Sub prag')],
@@ -5472,10 +5474,12 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
    ['10','Aviz ISU eliberat (valabil 2 ani — reînnoire dacă depășit)','Legea 307/2006','La eliberare'],
   ].forEach(r=>cy=tblRow(r,cy,false,[8,115,42,17]));
   cy+=3;
-  pdf.setFillColor(...RED);pdf.rect(14,cy,W-28,10,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('DejaVuRO','bold');
-  pdf.text('ATENȚIE: Avizul ISU este CONDIȚIE OBLIGATORIE pentru eliberarea Autorizației de Construire (AC). Lipsa avizului = respingere AC automată.',W/2,cy+6.5,{align:'center'});
-  cy+=14;
+  pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('DejaVuRO','bold');
+  var _isuMsg=pdf.splitTextToSize('ATENȚIE: Avizul ISU este CONDIȚIE OBLIGATORIE pentru eliberarea Autorizației de Construire (AC). Lipsa avizului = respingere AC automată.',W-40);
+  var _isuBh=Math.max(10,_isuMsg.length*4.6+4);
+  pdf.setFillColor(...RED);pdf.rect(14,cy,W-28,_isuBh,'F');
+  pdf.text(_isuMsg,W/2,cy+5.5,{align:'center'});
+  cy+=_isuBh+4;
   sign();
   // ════════════════════════════════════════════════════════════════════════
   // PAG RELEVEE — Schemă funcțională etaj curent + verificare evacuare ISU

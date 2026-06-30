@@ -8,15 +8,9 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const pdf=new jsPDF({orientation:_orient,unit:'mm',format:_format});
   // Standard de sistem: font RO (diacritice) pentru proza studiilor (fallback helvetica)
   const _roFont=(window._registerROFont&&window._registerROFont(pdf))?'DejaVuRO':null;
-  // TOTAL pagini REAL în „Pag. X / N": totalPages declarat (ex.14) nu corespunde cu nr. real
-  // de pagini generate (ex.23). Folosim un alias înlocuit cu numărul real înainte de output.
-  const _TPA='{urbanx_tp}';
-  (function(){
-    var fix=function(){ try{ pdf.putTotalPages(_TPA); }catch(e){} };
-    ['save','output','outputBlob'].forEach(function(m){
-      if(typeof pdf[m]==='function'){ var o=pdf[m].bind(pdf); pdf[m]=function(){ fix(); return o.apply(pdf,arguments); }; }
-    });
-  })();
+  // TOTAL pagini REAL: alias-ul {urbanx_tp}+putTotalPages NU se înlocuia pe studiile care
+  // salvează pe alt path (apărea literal „/ {urbanx_tp}"). Soluție robustă: afișăm doar
+  // „Pag. X" (nr. real din jsPDF) — fără total declarat greșit. totalPages rămas pt compat.
   const W = _orient==='landscape'?(_format==='a3'?420:297):(_format==='a3'?297:210);
   const H = _orient==='landscape'?(_format==='a3'?297:210):(_format==='a3'?420:297);
 
@@ -47,7 +41,12 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const utr=ap?.utr||'\u2014';
   const area=ap?.area?ap.area.toFixed(0):'\u2014';
   let lat=47.16, lon=27.59; try{ if(ap?.geo?.geometry){ const _c=turf.centerOfMass(ap.geo).geometry.coordinates; if(!isNaN(_c[0])&&!isNaN(_c[1])){ lon=_c[0]; lat=_c[1]; } } }catch(e){}
-  const params=ap?.params||getDefaultParams(utr);
+  const params=Object.assign({},getDefaultParams(utr)||{},ap?.params||{});
+  // completează câmpurile lipsă — altfel apar „undefined" în studii (parcaje, retrageri,
+  // spații verzi, regim) pentru UTR-uri fără valori complete. Default-uri RGU rezonabile.
+  const _PDEF={pot:40,cut:1.5,h:10,niv:3,rf:3,rs:3,rl:3,sv:20,pk:1,
+    retragere_fata:'3',retragere_lat:'3',retragere_spate:'3'};
+  Object.keys(_PDEF).forEach(function(k){ if(params[k]==null||params[k]==='') params[k]=_PDEF[k]; });
   const uat=getUATLabel();
   const judet=getUATJudet();
 
@@ -70,7 +69,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(title),W/2,22,{align:'center'});
     pdf.setTextColor(...GOLD2);pdf.setFontSize(7);pdf.setFont(_roFont||'helvetica','bold');
-    pdf.text('Pag. '+pg+' / '+_TPA,W-8,22,{align:'right'});
+    pdf.text('Pag. '+pg,W-8,22,{align:'right'});
   };
 
   // Footer elegant 10mm
