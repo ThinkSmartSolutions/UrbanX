@@ -49,16 +49,16 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setFillColor(...GOLD2);pdf.rect(0,27,W,1,'F');
     pdf.setFillColor(...GOLD);pdf.rect(0,2.5,3.5,25.5,'F');
     try{_pdfDrawLogo&&_pdfDrawLogo(pdf,8,7,13);}catch(e){}
-    pdf.setTextColor(...GOLD);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD);pdf.setFontSize(7.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('URBANX',9,9.5);
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.4);pdf.line(34,5,34,24);
-    pdf.setTextColor(...GOLD3);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD3);pdf.setFontSize(6.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(studyName.toUpperCase()),38,9.5);
-    pdf.setTextColor(170,185,210);pdf.setFontSize(6);pdf.setFont('helvetica','normal');
+    pdf.setTextColor(170,185,210);pdf.setFontSize(6);pdf.setFont(_roFont||'helvetica','normal');
     pdf.text(S2(uat)+' \u00b7 jud. '+S2(judet)+' \u00b7 Nr.cad '+S2(nrcad)+' \u00b7 UTR '+S2(utr),38,15);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(9.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(title),W/2,22,{align:'center'});
-    pdf.setTextColor(...GOLD2);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(7);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('Pag. '+pg+' / '+totalPages,W-8,22,{align:'right'});
   };
 
@@ -66,9 +66,9 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const ftr=()=>{
     pdf.setFillColor(...DARK);pdf.rect(0,H-10,W,10,'F');
     pdf.setFillColor(...GOLD);pdf.rect(0,H-10,W,0.8,'F');
-    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(6.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('URBANX',8,H-3.5);
-    pdf.setTextColor(160,175,200);pdf.setFontSize(5.8);pdf.setFont('helvetica','normal');
+    pdf.setTextColor(160,175,200);pdf.setFontSize(5.8);pdf.setFont(_roFont||'helvetica','normal');
     pdf.text(S2(studySubtitle)+' \u00b7 '+S2(uat)+' \u00b7 Parcela '+S2(nrcad)+' \u00b7 '+S2(dateStr),W/2,H-3.5,{align:'center'});
     pdf.setTextColor(100,118,140);pdf.setFontSize(5.5);
     pdf.text('Document orientativ \u00b7 UrbanX TSS\u00b7FG',W-8,H-3.5,{align:'right'});
@@ -96,7 +96,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setFillColor(...bg);pdf.rect(14,y,W-28,9,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,3,9,'F');
     pdf.setFillColor(...GOLD2);pdf.rect(14,y+9,W-28,0.5,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(title.toUpperCase()),20,y+6.2);
     return y+14;
   };
@@ -106,7 +106,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     y=_ensureSpace(y,24,title);  // break-after: avoid — subtitlu + un rand de continut
     pdf.setFillColor(...(col||LIGHT3));pdf.rect(14,y,W-28,7.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,y,2,7.5,'F');
-    pdf.setTextColor(...(col?WHITE:BLUE));pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...(col?WHITE:BLUE));pdf.setFontSize(8);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(title),19,y+5.2);
     return y+11;
   };
@@ -159,7 +159,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     }
     cols.forEach((c,ci)=>{
       const x=14+colW.slice(0,ci).reduce((a,b)=>a+b,0)+(isHeader&&ci===0?5:3);
-      pdf.setFontSize(fs);pdf.setFont('helvetica',isHeader?'bold':'normal');
+      pdf.setFontSize(fs);pdf.setFont(_roFont||'helvetica',isHeader?'bold':'normal');
       pdf.setTextColor(...(isHeader?GOLD3:[26,38,56]));
       const lines=pdf.splitTextToSize(S2(String(c??'\u2014')),colW[ci]-5);
       lines.forEach((l,li)=>pdf.text(l,x,y+li*lineH));
@@ -172,9 +172,9 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     const bw=w||42,bh=18;
     pdf.setFillColor(...DARK2);pdf.rect(x,y,bw,bh,'F');
     pdf.setFillColor(...(accentCol||GOLD));pdf.rect(x,y,bw,2,'F');
-    pdf.setTextColor(...(accentCol||GOLD3));pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...(accentCol||GOLD3));pdf.setFontSize(6.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(label).toUpperCase(),x+3,y+7);
-    pdf.setTextColor(255,255,255);pdf.setFontSize(10.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(10.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(String(val??'\u2014')).substring(0,18),x+3,y+14.5);
     return y+bh+4;
   };
@@ -183,7 +183,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
   const badge=(txt,x,y,col,w2)=>{
     const bw=w2||38;
     pdf.setFillColor(...col);pdf.rect(x,y-6.5,bw,7.5,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(7.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text(S2(txt),x+bw/2,y-0.5,{align:'center'});
     return y+4;
   };
@@ -200,7 +200,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     items.forEach(item=>{
       if(y>H-20) return;
       pdf.setFillColor(...(col||GOLD));pdf.circle((x||14)+2,y-1,1,'F');
-      pdf.setTextColor(24,38,58);pdf.setFontSize(8.5);pdf.setFont('helvetica','normal');
+      pdf.setTextColor(24,38,58);pdf.setFontSize(8.5);pdf.setFont(_roFont||'helvetica','normal');
       const lines=pdf.splitTextToSize(S2(item),maxW);
       lines.forEach((l,i)=>{
         const isLast=i===lines.length-1;
@@ -230,12 +230,12 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     items.forEach((item,i)=>{
       if(y>H-28){pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');ftr();y=20;}
       pdf.setFillColor(...GOLD);pdf.roundedRect(14,y-4,7,7,1,1,'F');
-      pdf.setTextColor(...DARK);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+      pdf.setTextColor(...DARK);pdf.setFontSize(7.5);pdf.setFont(_roFont||'helvetica','bold');
       pdf.text(String(i+1),17.5,y+0.8,{align:'center'});
       const lh=5.3,lines=pdf.splitTextToSize(S2(item),W-38);
       lines.forEach((l,li)=>{
         const isLast=li===lines.length-1;
-        pdf.setTextColor(24,38,56);pdf.setFontSize(8.5);pdf.setFont('helvetica','normal');
+        pdf.setTextColor(24,38,56);pdf.setFontSize(8.5);pdf.setFont(_roFont||'helvetica','normal');
         if(!isLast&&l.trim().length>0){
           const words=l.split(' ').filter(w=>w.length>0);
           if(words.length>1){
@@ -259,7 +259,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setFillColor(...DARK2);pdf.rect(14,sy,W-28,62,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,W-28,2.5,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,sy,2.5,62,'F');
-    pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('CASETA DE ELABORARE, VERIFICARE SI ASUMARE A RESPONSABILITATII',W/2,sy+10,{align:'center'});
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.3);pdf.line(17,sy+13,W-17,sy+13);
     const roles=['ELABORAT','VERIFICAT','BENEFICIAR / INVESTITOR'];
@@ -267,13 +267,13 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     roles.forEach((r,i)=>{
       const cw=(W-28)/3,cx=14+i*cw;
       pdf.setFillColor(...roleColors[i]);pdf.rect(cx,sy+14,cw,7,'F');
-      pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
+      pdf.setTextColor(255,255,255);pdf.setFontSize(7);pdf.setFont(_roFont||'helvetica','bold');
       pdf.text(r,cx+cw/2,sy+19,{align:'center'});
     });
     const infos=[['Specialist UrbanX TSS\u00b7FG','\u2014','\u2014'],['Nr. lic./atestat: \u2014','\u2014','Beneficiar: \u2014'],['Data: '+dateStr,'Data: \u2014','Data: \u2014']];
     infos.forEach((row,ri)=>row.forEach((v,ci)=>{
       const cw=(W-28)/3,cx=16+ci*cw;
-      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.setFont('helvetica','normal');
+      pdf.setTextColor(...GRAY2);pdf.setFontSize(7);pdf.setFont(_roFont||'helvetica','normal');
       pdf.text(S2(v),cx,sy+27+ri*6);
     }));
     for(let i=0;i<3;i++){
@@ -283,7 +283,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
       pdf.text('Semnatura si stampila',cx,sy+56.5);
     }
     pdf.setFillColor(...RED);pdf.rect(14,sy+59,W-28,5,'F');
-    pdf.setTextColor(255,255,255);pdf.setFontSize(5.8);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFontSize(5.8);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conf. Legii 50/1991 si Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
   };
 
@@ -295,18 +295,18 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setFillColor(...BLUE);pdf.rect(0,3,5,H-6,'F');
     pdf.setFillColor(...GOLD);pdf.rect(0,3,2.5,H-6,'F');
     try{_pdfDrawLogo&&_pdfDrawLogo(pdf,W/2-14,15,28);}catch(e){
-      pdf.setTextColor(...GOLD);pdf.setFontSize(32);pdf.setFont('helvetica','bold');pdf.text('UrbanX',W/2,44,{align:'center'});
+      pdf.setTextColor(...GOLD);pdf.setFontSize(32);pdf.setFont(_roFont||'helvetica','bold');pdf.text('UrbanX',W/2,44,{align:'center'});
     }
-    pdf.setTextColor(...GOLD2);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD2);pdf.setFontSize(8);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('URBANX - PLATFORMA NATIONALA DE ANALIZA URBANISTICA',W/2,50,{align:'center'});
     pdf.setFillColor(...GOLD);pdf.rect(W/2-40,54,80,1,'F');
-    pdf.setTextColor(255,255,255);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(255,255,255);pdf.setFont(_roFont||'helvetica','bold');
     // Auto-fit titlu: micsoram fontul pana incape pe un rand (titluri lungi nu mai depasesc pagina)
     {var _tt=S2(studyName.toUpperCase()),_fs=20,_maxTW=W-30;pdf.setFontSize(_fs);
      while(pdf.getTextWidth(_tt)>_maxTW&&_fs>10.5){_fs-=0.5;pdf.setFontSize(_fs);}
      pdf.text(_tt,W/2,67,{align:'center'});}
     if(subtitle2){
-      pdf.setTextColor(...GOLD2);pdf.setFontSize(10);pdf.setFont('helvetica','normal');
+      pdf.setTextColor(...GOLD2);pdf.setFontSize(10);pdf.setFont(_roFont||'helvetica','normal');
       pdf.text(S2(subtitle2),W/2,76,{align:'center'});
     }
     pdf.setFillColor(...GOLD2);pdf.rect(W/2-50,80,100,0.5,'F');
@@ -319,7 +319,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.75}));}catch(e2){}
         pdf.rect(19,85+74-8,W-40,8,'F');
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e2){}
-        pdf.setTextColor(...GOLD2);pdf.setFontSize(6);pdf.setFont('helvetica','italic');
+        pdf.setTextColor(...GOLD2);pdf.setFontSize(6);pdf.setFont(_roFont||'helvetica','italic');
         pdf.text('Vedere 3D amplasament \u00b7 '+S2(uat)+' \u00b7 Nr.cad. '+S2(nrcad),W/2,85+74-1.5,{align:'center'});
       }catch(e){}
     }
@@ -327,7 +327,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf.setFillColor(...DARK2);pdf.rect(14,by,W-28,70,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,by,W-28,2,'F');
     pdf.setFillColor(...GOLD);pdf.rect(14,by,2,70,'F');
-    pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+    pdf.setTextColor(...GOLD3);pdf.setFontSize(7.5);pdf.setFont(_roFont||'helvetica','bold');
     pdf.text('DATE DE IDENTIFICARE',W/2,by+8,{align:'center'});
     pdf.setDrawColor(...GOLD2);pdf.setLineWidth(0.25);pdf.line(16,by+11,W-16,by+11);
     const kpis=[['Nr. cadastral',nrcad],['UAT / Localitate',uat],['Jude\u0163',judet],['Suprafa\u021b\u0103 teren',area+' mp'],
@@ -338,18 +338,18 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
       const col=i%2,row=Math.floor(i/2),kx=15+col*kColW,ky=by+16+row*11;
       if(ky>by+66) return;
       if(col===0&&row>0){pdf.setDrawColor(20,36,68);pdf.setLineWidth(0.15);pdf.line(16,ky-3,W-16,ky-3);}
-      pdf.setTextColor(148,168,200);pdf.setFontSize(6.5);pdf.setFont('helvetica','bold');
+      pdf.setTextColor(148,168,200);pdf.setFontSize(6.5);pdf.setFont(_roFont||'helvetica','bold');
       pdf.text(S2(l)+':',kx+2,ky);
-      pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont('helvetica','bold');
+      pdf.setTextColor(255,255,255);pdf.setFontSize(8);pdf.setFont(_roFont||'helvetica','bold');
       pdf.text(S2(String(v??'\u2014')).substring(0,34),kx+2,ky+5);
     });
     if(statusText){
       const barY=by+68;
       pdf.setFillColor(...(statusOk!==false?GREEN:RED));pdf.rect(14,barY,W-28,8,'F');
-      pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont('helvetica','bold');
+      pdf.setTextColor(255,255,255);pdf.setFontSize(8.5);pdf.setFont(_roFont||'helvetica','bold');
       pdf.text(S2(statusText),W/2,barY+5.5,{align:'center'});
     }
-    pdf.setTextColor(90,110,140);pdf.setFontSize(6.5);pdf.setFont('helvetica','normal');
+    pdf.setTextColor(90,110,140);pdf.setFontSize(6.5);pdf.setFont(_roFont||'helvetica','normal');
     pdf.text('Generat: '+S2(dateStr)+' \u00b7 Document cu caracter ORIENTATIV \u00b7 UrbanX TSS-FG',W/2,H-8,{align:'center'});
     ftr();
   };
@@ -364,7 +364,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     if(!img||img.length<500){
       pdf.setFillColor(...LIGHT3);pdf.rect(x,y,w,h2,'F');
       pdf.setDrawColor(...GRAY3);pdf.setLineWidth(0.3);pdf.rect(x,y,w,h2,'S');
-      pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.setFont('helvetica','italic');
+      pdf.setTextColor(...GRAY2);pdf.setFontSize(8);pdf.setFont(_roFont||'helvetica','italic');
       pdf.text('Captur\u0103 indisponibil\u0103',x+w/2,y+h2/2,{align:'center'});
       if(caption){pdf.setFontSize(5.5);pdf.setTextColor(...GRAY);pdf.text('FIG.'+figNum+' \u2014 '+S2(caption),x+2,y+h2+3.5);return y+h2+8;}
       return y+h2+4;
@@ -382,7 +382,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         if(pdf.triangle)pdf.triangle(nx,ny-4.5,nx-2,ny+1,nx+2,ny+1,'F');
         pdf.setFillColor(240,240,240);
         if(pdf.triangle)pdf.triangle(nx,ny+4.5,nx-2,ny-1,nx+2,ny-1,'F');
-        pdf.setTextColor(255,255,255);pdf.setFontSize(4.5);pdf.setFont('helvetica','bold');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(4.5);pdf.setFont(_roFont||'helvetica','bold');
         pdf.text('N',nx,ny-5.5,{align:'center'});
       }
       if(opt.scaleM){
@@ -390,7 +390,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         pdf.setFillColor(255,255,255);pdf.rect(bx,by,bw,3,'F');
         pdf.setFillColor(0,0,0);pdf.rect(bx,by,bw/2,3,'F');
         pdf.setDrawColor(0);pdf.setLineWidth(0.3);pdf.rect(bx,by,bw,3,'S');
-        pdf.setTextColor(255,255,255);pdf.setFontSize(5);pdf.setFont('helvetica','bold');
+        pdf.setTextColor(255,255,255);pdf.setFontSize(5);pdf.setFont(_roFont||'helvetica','bold');
         pdf.text('0',bx,by+5.5);
         pdf.text(opt.scaleLabel||opt.scaleM+'m',bx+bw,by+5.5,{align:'right'});
       }
@@ -398,7 +398,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:0.75}));}catch(e){}
         pdf.setFillColor(4,12,28);pdf.rect(x+w-62,y+h2-8,60,7,'F');
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e){}
-        pdf.setTextColor(120,160,210);pdf.setFontSize(5);pdf.setFont('helvetica','normal');
+        pdf.setTextColor(120,160,210);pdf.setFontSize(5);pdf.setFont(_roFont||'helvetica','normal');
         pdf.text(opt.viewMeta,x+w-60,y+h2-3.5);
       }
       if(opt.legend&&opt.legend.length){
@@ -409,7 +409,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         opt.legend.forEach((leg,li)=>{
           pdf.setFillColor(...(leg.col||[212,175,55]));
           pdf.rect(x+5,y+5.5+li*5.5,4,3,'F');
-          pdf.setTextColor(220,230,245);pdf.setFontSize(5.5);pdf.setFont('helvetica','normal');
+          pdf.setTextColor(220,230,245);pdf.setFontSize(5.5);pdf.setFont(_roFont||'helvetica','normal');
           pdf.text(leg.label,x+11,y+7.5+li*5.5);
         });
       }
@@ -418,9 +418,9 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
         pdf.setFillColor(8,20,42);pdf.rect(x,y+h2-9,w,9,'F');
         try{pdf.setGState&&pdf.setGState(pdf.GState({opacity:1}));}catch(e2){}
         pdf.setFillColor(212,175,55);pdf.rect(x,y+h2-9,15,9,'F');
-        pdf.setTextColor(8,20,42);pdf.setFontSize(6);pdf.setFont('helvetica','bold');
+        pdf.setTextColor(8,20,42);pdf.setFontSize(6);pdf.setFont(_roFont||'helvetica','bold');
         pdf.text('FIG.'+figNum,x+7.5,y+h2-2.5,{align:'center'});
-        pdf.setTextColor(212,175,55);pdf.setFontSize(5.8);pdf.setFont('helvetica','italic');
+        pdf.setTextColor(212,175,55);pdf.setFontSize(5.8);pdf.setFont(_roFont||'helvetica','italic');
         pdf.text(S2(caption),x+17,y+h2-2.5,{maxWidth:w-20});
       }
     }catch(e){
@@ -514,6 +514,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,GOLD3,BLUE,BLUE2,TEAL,LIGHT,LIGHT2,LIGHT3,
     RED,GREEN,ORANGE,PURPLE,GRAY,GRAY2,GRAY3,GRAY4,WHITE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,n,nK,
+    FONT:_roFont||'helvetica',
     hdr,ftr,sec,subsec,body,tblRow,addImg,kv,badge,divider,bullet,concluzii,sign,cover,newPage,checkY,smartPage,miniChart
   };
 }
@@ -552,7 +553,7 @@ function _pdfIcon(pdf,x,y,type,size,col){
   const labels={ok:'+',warn:'!',err:'x',info:'i'};
   pdf.setFillColor(...(colors[type]||c));
   pdf.circle(x,y,s/2,'F');
-  pdf.setTextColor(255,255,255);pdf.setFontSize(s*1.2);pdf.setFont('helvetica','bold');
+  pdf.setTextColor(255,255,255);pdf.setFontSize(s*1.2);pdf.setFont(_roFont||'helvetica','bold');
   pdf.text(labels[type]||'?',x,y+s*0.4,{align:'center'});
 }
 
