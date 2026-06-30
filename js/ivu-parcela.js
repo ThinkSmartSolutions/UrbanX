@@ -202,7 +202,53 @@
     return restr;
   }
 
-  G._IVUParcela = { open: open, analyze: analyze, compute: compute, FACTORI: FACTORI, RESTRICTII: RESTRICTII, KF: KF, KR: KR, exportPDF: null, _state: null };
+  // ── RENDER reutilizabil: pagină iVU pe amplasament în orice studiu de parcelă ──
+  // ctx = { pdf, W, H, LIGHT, hdr, ftr, sec, body, tblRow } (din _initStudyPdf).
+  // Desenează o pagină nouă cu scorul iVU + formula + proximitatea reală OSM pe categorii.
+  // Folosit în Amplasament + toate studiile de parcelă unde valoarea/proximitatea contează.
+  async function renderStudyPage(ctx, lat, lon, cityKey, zone, opts) {
+    opts = opts || {};
+    try {
+      if (!ctx || !ctx.pdf || lat == null || lon == null) return false;
+      var pdf = ctx.pdf, W = ctx.W || 210, H = ctx.H || 297, LIGHT = ctx.LIGHT || [248, 249, 252];
+      var hdr = ctx.hdr, ftr = ctx.ftr, sec = ctx.sec, body = ctx.body, tblRow = ctx.tblRow;
+      if (!sec || !body || !tblRow) return false;
+      cityKey = cityKey || (G.TCI && G.TCI.cityKey) || 'RO-IS-01';
+      var st = await analyze(lat, lon, cityKey, zone);
+      var R = st.result, FA = FACTORI;
+      var gcol = R.iVU >= 75 ? [16, 130, 60] : R.iVU >= 55 ? [20, 50, 98] : R.iVU >= 35 ? [200, 120, 30] : [185, 28, 28];
+      pdf.addPage(); pdf.setFillColor(LIGHT[0], LIGHT[1], LIGHT[2]); pdf.rect(0, 0, W, H, 'F');
+      if (hdr) hdr('iVU PE AMPLASAMENT — INDICE DE VALOARE URBANĂ'); if (ftr) ftr();
+      var cy = 28;
+      cy = sec('iVU — INDICE DE VALOARE URBANĂ PE AMPLASAMENT (proximitate reală OSM)', cy); cy += 2;
+      pdf.setFillColor(gcol[0], gcol[1], gcol[2]); pdf.rect(14, cy, W - 28, 15, 'F');
+      pdf.setTextColor(255, 255, 255); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(13);
+      pdf.text('iVU = ' + R.iVU + ' / 100   ·   Nota ' + R.grade, W / 2, cy + 9.5, { align: 'center' }); cy += 20;
+      cy = body('iVU exprimă valoarea urbană a amplasamentului pe baza proximității REALE față de dotările și serviciile din jur (date OpenStreetMap, rază 1.500 m), corectată cu factorii de formă a parcelei (Kf), rețele edilitare (Kr), accesibilitate (Ka) și calitatea vieții la nivel de UAT (Kql). Formula: iVU = S⁺ × (1 − P⁻/100) × Kf × Kr × Ka × Kql.', 14, cy); cy += 3;
+      cy = tblRow(['Componentă formulă', 'Valoare', 'Semnificație'], cy, true, [58, 34, 90]);
+      [['S⁺ — scor pozitiv agregat', R.Splus + '/100', 'media ponderată a dotărilor din proximitate'],
+       ['P⁻ — penalizare restricții', R.Pminus + '%', 'servituți/restricții detectate (LMI, seism, N2000…)'],
+       ['Kf — formă parcelă', (+R.Kf).toFixed(2), 'regularitatea geometriei'],
+       ['Kr — rețele edilitare', (+R.Kr).toFixed(2), 'completitudine utilități'],
+       ['Ka — accesibilitate UAT', (+R.Ka).toFixed(2), 'conectivitate oraș (din iVU UAT)'],
+       ['Kql — calitatea vieții UAT', (+R.Kql).toFixed(2), 'din iVU UAT']
+      ].forEach(function (r) { cy = tblRow(r, cy, false, [58, 34, 90]); }); cy += 4;
+      cy = sec('PROXIMITATEA AMPLASAMENTULUI FAȚĂ DE DOTĂRI ȘI SERVICII (OSM)', cy); cy += 2;
+      FA.forEach(function (g) {
+        cy = tblRow([g.label, 'Scor/10', 'Cel mai apropiat', 'Nr. în 1,5km'], cy, true, [78, 24, 40, 40]);
+        g.f.forEach(function (fc) {
+          var ev = st.evidence && st.evidence[fc.id], sc = st.vals && st.vals[fc.id];
+          var nd = ev && ev.nearest != null ? (ev.nearest >= 1000 ? (ev.nearest / 1000).toFixed(1) + ' km' : ev.nearest + ' m') : '—';
+          var cnt = ev && ev.count != null ? '' + ev.count : '—';
+          cy = tblRow([fc.name, (sc != null ? (+sc).toFixed(1) : '—'), nd, cnt], cy, false, [78, 24, 40, 40]);
+        }); cy += 2;
+      });
+      cy = body('Interpretare: distanțele mici și numărul ridicat de dotări în proximitate cresc valoarea urbană a amplasamentului. Categoriile cu scor redus indică deficite de dotări în zonă. iVU este orientativ, auto-scorat din OpenStreetMap; nu înlocuiește o evaluare imobiliară autorizată ANEVAR.', 14, cy);
+      return R;
+    } catch (e) { console.warn('[IVUParcela renderStudyPage]', e); return false; }
+  }
+
+  G._IVUParcela = { open: open, analyze: analyze, renderStudyPage: renderStudyPage, compute: compute, FACTORI: FACTORI, RESTRICTII: RESTRICTII, KF: KF, KR: KR, exportPDF: null, _state: null };
   window._IVUParcela = G._IVUParcela;
   console.log('[IVUParcela] ✅ iVU pe parcelă încărcat (window._IVUParcela.open)');
 
