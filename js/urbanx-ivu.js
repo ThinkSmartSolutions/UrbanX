@@ -81,12 +81,30 @@
     return { key: cityKey, name: city.name || cityKey, city: city, R: R };
   }
 
-  // catalog NAȚIONAL (toate UAT-urile cu date: municipii + orașe + comune), ordonat după IVU
+  // catalog NAȚIONAL — TOATE UAT-urile (municipii+orașe+comune din datele bogate
+  // UNITE cu întregul registru SIRUTA de 3181 UAT). Memoizat (calcul o singură
+  // dată — scoreFor × 3181 e costisitor). UAT-urile fără date bogate sunt
+  // scorate ONEST din atributele proprii (marcate _estimat).
+  var _catCache = null;
   function catalog() {
-    var all = _allUats();
-    return Object.keys(all).map(scoreFor).filter(Boolean)
+    if (_catCache) return _catCache;
+    var keys = {};
+    Object.keys(_allUats()).forEach(function (k) { keys[k] = 1; });
+    if (G._UAT_REGISTRY) Object.keys(G._UAT_REGISTRY).forEach(function (k) { keys[k] = 1; });
+    var scored = Object.keys(keys).map(scoreFor).filter(Boolean);
+    // dedup pe nume+judet: acelasi UAT poate exista sub 2 chei (EXTRA vs registru)
+    // → pastram intrarea cu DATE BOGATE (non-estimat) fata de cea estimata.
+    var byName = {};
+    scored.forEach(function (s) {
+      var nm = (s.name || '') + '|' + (s.city && (s.city.judet_code || s.city.judet) || '');
+      var prev = byName[nm];
+      if (!prev || (prev.city && prev.city._estimat && !(s.city && s.city._estimat))) byName[nm] = s;
+    });
+    _catCache = Object.keys(byName).map(function (k) { return byName[k]; })
       .sort(function (a, b) { return b.R.score - a.R.score; });
+    return _catCache;
   }
+  function _catInvalidate() { _catCache = null; }
 
   // rang național + percentilă în catalog
   function rankOf(cityKey) {
@@ -206,19 +224,40 @@
   }
 
   // ── Catalog național (toate orașele ranked) ──────────────────────────────
+  var CAT_CAP = 150; // afisam top N; restul via cautare (evita 3181 randuri in DOM)
+  function _normNmCat(s) { return String(s || '').toLowerCase().replace(/[șş]/g, 's').replace(/[țţ]/g, 't').replace(/[ăâ]/g, 'a').replace(/î/g, 'i'); }
+  function _catRowsHTML(list, offset) {
+    offset = offset || 0;
+    return list.map(function (s, i) {
+      return '<tr style="border-top:1px solid rgba(255,255,255,.06);cursor:pointer" onclick="window.UrbanXIVU.show(\'' + s.key + '\')">' +
+        '<td style="padding:5px;color:#64748b">' + (s._rank != null ? s._rank : (offset + i + 1)) + '</td><td style="padding:5px;color:#e2e8f0">' + s.name + (s.city && s.city._estimat ? ' <span title="scor estimat — UAT fără date detaliate" style="color:#fbbf24;font-size:9px">~est</span>' : '') + '</td>' +
+        '<td style="padding:5px;text-align:center;font-weight:800;color:' + gradeColor(s.R.score) + '">' + s.R.score + '</td>' +
+        '<td style="padding:5px;text-align:center;color:' + gradeColor(s.R.score) + '">' + s.R.grade + '</td>' +
+        '<td style="padding:5px;text-align:center;color:#94a3b8;font-size:10px">' + (TIER_RO[s.R.tier] || s.R.tier || '') + '</td></tr>';
+    }).join('');
+  }
+  function catFilter(q) {
+    var box = document.getElementById('ivu-cat-rows'); if (!box) return;
+    var cat = catalog(); var qn = _normNmCat(q);
+    var list;
+    if (qn && qn.length >= 2) {
+      list = cat.filter(function (s) { return _normNmCat(s.name).indexOf(qn) >= 0; }).slice(0, 60)
+        .map(function (s) { s._rank = cat.indexOf(s) + 1; return s; });
+    } else {
+      list = cat.slice(0, CAT_CAP);
+    }
+    box.innerHTML = _catRowsHTML(list, 0);
+    var note = document.getElementById('ivu-cat-note');
+    if (note) note.textContent = qn && qn.length >= 2 ? (list.length + ' rezultate pentru „' + q + '" (rang național din ' + cat.length + ')') : ('Top ' + Math.min(CAT_CAP, cat.length) + ' din ' + cat.length + ' UAT-uri — caută pentru restul.');
+  }
   function catalogHTML() {
     var cat = catalog();
-    if (!cat.length) return '<div style="color:#64748b;padding:14px">Catalogul se populează din _RO_CITIES_DB.</div>';
-    return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
-      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">Oraș</th><th style="padding:5px;color:#94a3b8">iVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Categorie</th></tr>' +
-      cat.map(function (s, i) {
-        return '<tr style="border-top:1px solid rgba(255,255,255,.06);cursor:pointer" onclick="window.UrbanXIVU.show(\'' + s.key + '\')">' +
-          '<td style="padding:5px;color:#64748b">' + (i + 1) + '</td><td style="padding:5px;color:#e2e8f0">' + s.name + '</td>' +
-          '<td style="padding:5px;text-align:center;font-weight:800;color:' + gradeColor(s.R.score) + '">' + s.R.score + '</td>' +
-          '<td style="padding:5px;text-align:center;color:' + gradeColor(s.R.score) + '">' + s.R.grade + '</td>' +
-          '<td style="padding:5px;text-align:center;color:#94a3b8;font-size:10px">' + (TIER_RO[s.R.tier] || s.R.tier || '') + '</td></tr>';
-      }).join('') + '</table></div>' +
-      '<div style="font-size:10px;color:#64748b;margin-top:8px">Click pe un oraș → Score Card detaliat. Catalog ordonat după IVU.</div>';
+    if (!cat.length) return '<div style="color:#64748b;padding:14px">Catalogul se populează din registrul de UAT-uri.</div>';
+    return '<input id="ivu-cat-q" oninput="window.UrbanXIVU.catFilter(this.value)" placeholder="🔎 caută în toate cele ' + cat.length + ' UAT-uri…" style="width:100%;box-sizing:border-box;background:#0a1120;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#e6edf7;padding:8px 11px;font-size:12px;margin-bottom:8px;font-family:inherit">' +
+      '<div style="overflow-x:auto;max-height:52vh;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
+      '<tr><th style="text-align:left;padding:5px;color:#94a3b8">#</th><th style="text-align:left;padding:5px;color:#94a3b8">UAT</th><th style="padding:5px;color:#94a3b8">iVU</th><th style="padding:5px;color:#94a3b8">Notă</th><th style="padding:5px;color:#94a3b8">Categorie</th></tr>' +
+      '<tbody id="ivu-cat-rows">' + _catRowsHTML(cat.slice(0, CAT_CAP), 0) + '</tbody></table></div>' +
+      '<div id="ivu-cat-note" style="font-size:10px;color:#64748b;margin-top:8px">Top ' + Math.min(CAT_CAP, cat.length) + ' din ' + cat.length + ' UAT-uri — caută pentru restul. Click pe un UAT → fișă de scor.</div>';
   }
 
   // ── Panou principal (overlay cu 3 taburi) ────────────────────────────────
@@ -274,7 +313,8 @@
     add: function (k) { if (k && _sel.indexOf(k) < 0 && _sel.length < 4) _sel.push(k); _tab = 'compare'; _render(); },
     search: function (q) { try { _renderResults(q); } catch (e) {} },
     rm: function (k) { _sel = _sel.filter(function (x) { return x !== k; }); _render(); },
-    scoreFor: scoreFor, catalog: catalog, rankOf: rankOf
+    scoreFor: scoreFor, catalog: catalog, rankOf: rankOf, catFilter: catFilter,
+    resolveCity: _resolveCityData, cityFromRegistry: _cityFromRegistry
   };
   G.UrbanXIVU = IVU;
 

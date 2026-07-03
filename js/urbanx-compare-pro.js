@@ -127,7 +127,8 @@ G._CompareProEngine = {
   },
 
   addCity(cityKey) {
-    const city=window._RO_CITIES_DB?.[cityKey];
+    // date bogate daca exista, altfel rezolva ONEST din registrul SIRUTA (3181 UAT)
+    const city=window._RO_CITIES_DB?.[cityKey]||(window.UrbanXIVU&&window.UrbanXIVU.resolveCity&&window.UrbanXIVU.resolveCity(cityKey));
     if(!city||this._cities.find(c=>c.key===cityKey)) return false;
     if(this._cities.length>=5) {ss?.('Maximum 5 UAT-uri');return false;}
     this._cities.push({key:cityKey,city,indicators:this.extractIndicators(city)});
@@ -330,19 +331,26 @@ G._CompareProEngine = {
   _filterCities(q) {
     const el=document.getElementById('compare-search-results');
     if(!el) return;
-    const db=window._RO_CITIES_DB||{};
-    const matches=Object.entries(db)
-      .filter(([k,c])=>(c.name||'').toLowerCase().includes(q.toLowerCase())&&!this._cities.find(x=>x.key===k))
-      .slice(0,12);
-    el.innerHTML=matches.map(([k,c])=>`
-      <button onclick="_CompareProEngine.addCity('${k}');document.getElementById('compare-add-modal').style.display='none'"
+    // cauta in TOATE cele 3181 UAT-uri (registrul SIRUTA), nu doar ~31 municipii
+    let matches=[];
+    if(window._searchSIRUTA && q && q.length>=2){
+      matches=window._searchSIRUTA(q,14).filter(m=>!this._cities.find(x=>x.key===m.key));
+    } else {
+      const db=window._RO_CITIES_DB||{};
+      matches=Object.entries(db)
+        .filter(([k,c])=>(c.name||'').toLowerCase().includes(q.toLowerCase())&&!this._cities.find(x=>x.key===k))
+        .slice(0,14).map(([k,c])=>({key:k,name:c.name,judet:c.judet_code||c.judet||'',tip:c.tip||'',pop2021:c.pop2021||0}));
+    }
+    if(!matches.length){el.innerHTML='<div style="padding:8px 10px;color:rgba(148,163,184,.5);font-size:10px">Tastează cel puțin 2 litere…</div>';return;}
+    el.innerHTML=matches.map(m=>`
+      <button onclick="_CompareProEngine.addCity('${m.key}');document.getElementById('compare-add-modal').style.display='none'"
         style="display:block;width:100%;text-align:left;padding:6px 10px;background:none;border:none;
           color:#e2e8f0;font-size:10px;cursor:pointer;border-radius:5px;font-family:inherit;
           border-bottom:1px solid rgba(255,255,255,.04)"
         onmouseover="this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.background='none'">
-        <span style="font-weight:700">${c.name}</span>
+        <span style="font-weight:700">${m.name}</span>
         <span style="color:rgba(148,163,184,.4);font-size:9px;margin-left:8px">
-          ${c.judet_code||''} · ${N(c.pop2021)} loc · ${(c.rata_reala_2011_2021>=0?'+':'')+c.rata_reala_2011_2021?.toFixed(1)||'—'}%/an
+          ${(m.tip||'')} · ${m.judet||''} · ${N(m.pop2021)} loc
         </span>
       </button>`).join('');
   },
