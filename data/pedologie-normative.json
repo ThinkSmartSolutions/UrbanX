@@ -1,0 +1,50 @@
+{
+  "_meta": {
+    "version": "2025.07",
+    "ultima_verificare": "2025-07-02",
+    "urmatoarea_verificare": "2026-04-01",
+    "nota": "Tarifele Ord. MADR 83/2018 se actualizeaza anual prin HG (martie-aprilie). Verificare la monitoruloficial.ro + madr.ro inainte de utilizare oficiala.",
+    "responsabil": "OSPA / persoana atestata MADR"
+  },
+  "normative": [
+    { "cod": "ORD_MADR_83_2018", "titlu": "Aprobarea coeficientilor de echivalent valoric pentru scoaterea din circuitul agricol", "act": "Ordinul MADR nr. 83/2018", "status": "IN_VIGOARE", "url": "https://www.madr.ro", "domeniu": "taxa_scoatere" },
+    { "cod": "LEGEA_18_1991", "titlu": "Legea fondului funciar", "act": "Legea nr. 18/1991 republicata", "status": "IN_VIGOARE", "domeniu": "protectie_teren_agricol" },
+    { "cod": "SRTS_2012", "titlu": "Sistemul Roman de Taxonomie a Solurilor", "act": "SRTS 2012 (ICPA)", "status": "IN_VIGOARE", "domeniu": "clasificare_sol" },
+    { "cod": "OUG_195_2005", "titlu": "Protectia mediului", "act": "OUG nr. 195/2005", "status": "IN_VIGOARE", "domeniu": "mediu" },
+    { "cod": "LEGEA_107_1996", "titlu": "Legea apelor", "act": "Legea nr. 107/1996", "status": "IN_VIGOARE", "domeniu": "ape" },
+    { "cod": "ORD_MMPA_278_2011", "titlu": "Metodologia privind bonitarea terenurilor agricole", "act": "Metodologie ICPA bonitare", "status": "IN_VIGOARE", "domeniu": "bonitare" }
+  ],
+  "clase_calitate": {
+    "1": { "roman": "I", "nota_bonitare": "81-100", "descriere": "Sol cu fertilitate foarte ridicata, fara limitari", "restrictie_scoatere": "Restrictii severe la scoatere; aprobare la nivel superior (MADR)" },
+    "2": { "roman": "II", "nota_bonitare": "61-80", "descriere": "Sol cu fertilitate ridicata, limitari reduse", "restrictie_scoatere": "Restrictii; aprobare conditionata" },
+    "3": { "roman": "III", "nota_bonitare": "41-60", "descriere": "Sol cu fertilitate mijlocie, limitari moderate", "restrictie_scoatere": "Scoatere posibila cu taxa si documentatie" },
+    "4": { "roman": "IV", "nota_bonitare": "21-40", "descriere": "Sol cu fertilitate scazuta, limitari severe", "restrictie_scoatere": "Scoatere facila, taxa redusa" },
+    "5": { "roman": "V", "nota_bonitare": "1-20", "descriere": "Sol cu fertilitate foarte scazuta / teren neproductiv", "restrictie_scoatere": "Scoatere facila, taxa minima" }
+  },
+  "taxa_ord83_2018": {
+    "arabil": { "1": 1.65, "2": 1.32, "3": 0.99, "4": 0.66, "5": 0.33 },
+    "pasune": { "1": 0.83, "2": 0.66, "3": 0.50, "4": 0.33, "5": 0.17 },
+    "faneta": { "1": 0.83, "2": 0.66, "3": 0.50, "4": 0.33, "5": 0.17 },
+    "vie":    { "1": 2.48, "2": 1.98, "3": 1.49, "4": 0.99, "5": 0.50 },
+    "livada": { "1": 2.48, "2": 1.98, "3": 1.49, "4": 0.99, "5": 0.50 },
+    "padure": { "1": 1.24, "2": 0.99, "3": 0.74, "4": 0.50, "5": 0.25 }
+  },
+  "soluri_srts": [
+    { "cod": "CZ", "nume": "Cernoziom", "clasa_tip": "Cernisol", "fertilitate": "foarte ridicata", "nota": "Cel mai fertil sol; humus 3-6%, structura glomerulara" },
+    { "cod": "FZ", "nume": "Faeoziom", "clasa_tip": "Cernisol", "fertilitate": "ridicata", "nota": "Orizont Am inchis; zone de silvostepa" },
+    { "cod": "EL", "nume": "Preluvosol", "clasa_tip": "Luvisol", "fertilitate": "medie-ridicata", "nota": "Orizont Bt argic; zone de padure de foioase" },
+    { "cod": "LV", "nume": "Luvosol", "clasa_tip": "Luvisol", "fertilitate": "medie", "nota": "Eluvionare accentuata; aciditate moderata" },
+    { "cod": "AS", "nume": "Aluviosol", "clasa_tip": "Protisol", "fertilitate": "variabila", "nota": "Lunci; depuneri aluviale recente; risc inundatie" },
+    { "cod": "GS", "nume": "Gleiosol", "clasa_tip": "Hidrisol", "fertilitate": "scazuta", "nota": "Exces de umiditate freatica; gleizare" },
+    { "cod": "SN", "nume": "Solonceac", "clasa_tip": "Salsodisol", "fertilitate": "foarte scazuta", "nota": "Salinizare; restrictie majora" },
+    { "cod": "RS", "nume": "Regosol", "clasa_tip": "Protisol", "fertilitate": "scazuta", "nota": "Sol slab dezvoltat pe versanti; eroziune" }
+  ],
+  "agrochimie_intervale": {
+    "pH": { "optim": "6.0-7.5", "unitate": "-" },
+    "humus": { "optim": "2.5-5.0", "unitate": "%" },
+    "azotTotal": { "optim": "0.15-0.30", "unitate": "%" },
+    "fosforMobil": { "optim": "20-80", "unitate": "ppm" },
+    "potasiuMobil": { "optim": "100-250", "unitate": "ppm" },
+    "CaCO3": { "optim": "0.5-5.0", "unitate": "%" }
+  }
+}

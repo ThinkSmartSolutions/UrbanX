@@ -530,6 +530,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Numele/CNP proprietarilor cu valoare juridică = date ANCPI; aici doar pseudonimizat cu consimțământ', 'Registru partajat multi-utilizator + audit GDPR = Faza 2 (Supabase RLS)'],
   },
+  pedologie: {
+    ico: '🌱', label: 'Studiu Pedologic & Agrochimic', badge: 'recomandat', badgeLabel: 'Teren agricol · MADR', color: '167,139,250',
+    fn: 'window.generatePedologie&&window.generatePedologie()',
+    ce: 'Studiu de sol AGRICOL pentru scoaterea terenului din circuitul agricol: clasificare SRTS 2012, indicatori agrochimici (pH/humus/N-P-K), bonitare (notă 0–100), încadrare în clase de calitate I–V și calculul taxei de scoatere (Ord. MADR 83/2018). Analiză de relief pe date live (elevație/pantă) și folosința terenului din OSM. PDF ≥40 pagini.',
+    dece: 'Autorizarea construcțiilor pe teren extravilan agricol necesită scoaterea din circuitul agricol, condiționată de un studiu pedologic. Diferit de Studiul Geotehnic: pedologia evaluează solul AGRICOL (fertilitate, clase I–V, taxă), geotehnica evaluează solul de FUNDARE (portanță) — se completează, nu se dublează.',
+    legal: 'Ordinul MADR 83/2018 · Legea 18/1991 (fondul funciar) · SRTS 2012 (ICPA) · OUG 195/2005 · metodologie bonitare ICPA',
+    output: [
+      { ico: '🧪', txt: 'Clasificare sol + agrochimie + bonitare (notă 0–100)' },
+      { ico: '🏷', txt: 'Clasă de calitate I–V + favorabilitate scoatere' },
+      { ico: '💶', txt: 'Taxă scoatere Ord. 83/2018 + relief live + PDF ≥40 pag' },
+    ],
+    nu: ['Determinarea exactă a clasei și notei de bonitare se face de OSPA/atestat MADR în laborator', 'Tarifele Ord. 83/2018 se actualizează anual prin HG — se verifică la data depunerii'],
+  },
   'utilitati-nationale': {
     ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
     fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',

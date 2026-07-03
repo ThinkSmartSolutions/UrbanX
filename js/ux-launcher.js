@@ -41,6 +41,7 @@
     { g: G3, ico: '📐', l: 'Fișă cadastrală (lotizare/comasare/dezmembrare)', d: 'plan amplasament + Stereo70 · ANCPI', k: 'cadastru fisa stereo70 dezmembrare comasare', run: mod('Cadastru', 'openPanel'), info: 'cadastru' },
     { g: G3, ico: '📐', l: 'Planșe & Proiect preliminar PAC', d: 'relevee + planșe arhitecturale', k: 'planse relevee pac', run: call('generateRelevee'), info: 'relevee' },
     { g: G3, ico: '🏗', l: 'Memoriu tehnic avize', d: 'memoriu pentru avize', k: 'memoriu tehnic', run: call('generateMemoriu'), info: 'memoriu' },
+    { g: G3, ico: '🌱', l: 'Studiu Pedologic & Agrochimic', d: 'sol agricol · clase I-V · taxă scoatere Ord.83/2018 · relief live', k: 'pedologie sol agricol bonitare clase calitate taxa scoatere circuit agricol ospa', run: call('generatePedologie'), info: 'pedologie' },
     { g: G3, ico: '📋', l: 'Fișă urbanism per parcelă', d: 'PDF A4 · POT/CUT/RH · printabil', k: 'fisa urbanism parcela', run: call('generateParcelFisa') },
     // Mediu & Climă
     { g: G4, ico: '🌿', l: 'LOISIR — spații verzi & plămân urban', d: 'catalog L.24/2007 · parc 3D · concurs · climă', k: 'loisir spatii verzi parc uhi clima', run: mod('Loisir', 'openPanel'), info: 'loisir' },
