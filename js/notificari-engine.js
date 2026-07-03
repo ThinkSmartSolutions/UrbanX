@@ -32,8 +32,24 @@
         ev.push({ ref: 'ses:' + s.id, type: 'Sesizare', title: (c.icon || '') + ' ' + (s.title || c.label || s.category), sub: c.label || '', geom: s.geom, date: s.created_at, deadline: null, uat: s.uat });
       });
     } catch (e) {}
+    // ── PRELUARE OFICIALĂ (pull automat din baze publice, provenienta marcata) ──
+    // Pliem cache-ul UAT-ului curent SI cel national (sursele nationale sunt
+    // stocate sub '_national'), cu dedup pe ref.
+    try {
+      if (G.NotificariOficial && G.NotificariOficial.cached) {
+        var ck = (G.TCI && G.TCI.cityKey), seen = {};
+        [ck, '_national'].forEach(function (k) {
+          if (!k) return;
+          (G.NotificariOficial.cached(k) || []).forEach(function (o) {
+            if (o && o.ref && !seen[o.ref]) { seen[o.ref] = 1; ev.push(o); }
+          });
+        });
+      }
+    } catch (e) {}
     return ev.sort(function (a, b) { return (b.date || 0) - (a.date || 0); });
   }
+  // callback: cand preluarea oficiala se termina, semnaleaza UI-ul sa reimprospateze
+  function _onOficial() { try { if (G.Notificari && G.Notificari._refreshUI) G.Notificari._refreshUI(); } catch (e) {} }
 
   var subs = {
     list: function () { return load(SKEY); },
@@ -92,6 +108,6 @@
     forEvent: function (ref) { return load(OKEY).filter(function (o) { return o.event_ref === ref; }); }
   };
 
-  G.Notificari = { subs: subs, events: events, feed: feed, count: count, objections: objections, OBJ_DAYS: OBJ_DAYS, zonePolygon: zonePolygon, fetchAffected: fetchAffected };
+  G.Notificari = { subs: subs, events: events, feed: feed, count: count, objections: objections, OBJ_DAYS: OBJ_DAYS, zonePolygon: zonePolygon, fetchAffected: fetchAffected, _onOficial: _onOficial };
   console.log('[Notificari] motor încărcat (window.Notificari)');
 })(window);

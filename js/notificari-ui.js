@@ -85,7 +85,38 @@
     // evenimente in platforma (din CAU/Sesizari) — ce ar fi notificat
     p2.appendChild(el('div', { style: ST.label }, 'Evenimente înregistrate în platformă (ce s-ar notifica)'));
     var ev = G.Notificari.events();
-    p2.appendChild(el('div', { style: 'font-size:12px;color:#94a3b8' }, ev.length ? (ev.length + ' evenimente (CU/sesizări). Cu serverul, abonații din rază ar primi email + termen obiecție 10 zile.') : 'Niciun eveniment încă (apar pe măsură ce se înregistrează CU în CAU / sesizări).'));
+    p2.appendChild(el('div', { style: 'font-size:12px;color:#94a3b8' }, ev.length ? (ev.length + ' evenimente (CU/sesizări + preluare oficială). Cu serverul, abonații din rază ar primi email + termen obiecție 10 zile.') : 'Niciun eveniment încă (apar pe măsură ce se înregistrează CU în CAU / sesizări sau din preluarea oficială).'));
+
+    // ── SURSE OFICIALE — preluare periodică (pull automat, nu manual) ──
+    var ofBox = el('div', { style: 'margin-top:14px;background:#0a1120;border:1px solid rgba(59,130,246,.3);border-radius:10px;padding:12px' });
+    function fmtT(t) { if (!t) return 'niciodată'; try { var d = new Date(t); return d.toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return '—'; } }
+    function renderOficial() {
+      ofBox.innerHTML = '';
+      var NO = G.NotificariOficial;
+      ofBox.appendChild(el('div', { style: 'font-size:13px;font-weight:600;color:#93c5fd;margin-bottom:2px' }, '🏛 Surse oficiale — preluare automată'));
+      if (!NO) { ofBox.appendChild(el('div', { style: 'font-size:11.5px;color:#94a3b8' }, 'Motorul de preluare nu este încărcat.')); return; }
+      var st = NO.status();
+      ofBox.appendChild(el('div', { style: 'font-size:10.5px;color:#94a3b8;line-height:1.5;margin-bottom:7px' },
+        'Sistemul <b>preia periodic</b> (la ~6h) din baze publice, nu prin introducere manuală. Ultima verificare: <b style="color:#e6edf7">' + fmtT(st.last) + '</b>' +
+        (st.next ? ' · Următoarea: ' + fmtT(st.next) : '') + '.'));
+      (st.report || []).forEach(function (r) {
+        var ico = r.kind === 'feed' ? (r.ok === false ? '⚠️' : (r.ok ? '✅' : '⏳')) : '🔗';
+        var tail = r.kind === 'feed' ? (r.ok === false ? ' — indisponibil acum' : (r.count != null ? ' — ' + r.count + ' seturi' : '')) : ' — portal (verificare periodică)';
+        ofBox.appendChild(el('div', { style: 'font-size:11px;color:#cbd5e1;padding:2px 0;border-top:1px solid rgba(148,163,184,.08)' }, ico + ' ' + r.name + tail));
+      });
+      // portaluri fără feed → link out onest
+      (NO.portals ? NO.portals() : []).forEach(function (p) {
+        var a = el('a', { href: p.url, target: '_blank', rel: 'noopener', style: 'display:block;font-size:10.5px;color:#60a5fa;text-decoration:none;margin-top:3px' }, '↗ ' + p.name);
+        ofBox.appendChild(a);
+      });
+      var btn = el('button', { style: 'margin-top:9px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:system-ui' }, '⟳ Verifică acum');
+      btn.onclick = function () { btn.disabled = true; btn.textContent = '⏳ Preiau din surse oficiale...'; NO.poll().then(function () { renderOficial(); }).catch(function () { btn.disabled = false; btn.textContent = '⟳ Verifică acum'; }); };
+      ofBox.appendChild(btn);
+      ofBox.appendChild(el('div', { style: 'font-size:9.5px;color:#64748b;margin-top:7px;line-height:1.4' }, 'ONEST: nu există un API național unic pentru „ce s-a depus lângă tine". Preluăm ce e machine-readable (date.gov.ro) și verificăm periodic portalurile oficiale (MOL/ANCPI) cu link direct — fără date fabricate. Notificarea digitală suplimentează afișajul fizic (L.50/1991), nu-l înlocuiește.'));
+    }
+    renderOficial();
+    p2.appendChild(ofBox);
+    G.Notificari._refreshUI = renderOficial;
 
     ov.appendChild(m); document.body.appendChild(ov);
   }
