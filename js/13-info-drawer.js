@@ -530,6 +530,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Numele/CNP proprietarilor cu valoare juridică = date ANCPI; aici doar pseudonimizat cu consimțământ', 'Registru partajat multi-utilizator + audit GDPR = Faza 2 (Supabase RLS)'],
   },
+  'utilitati-nationale': {
+    ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
+    fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',
+    ce: 'Dashboard LIVE al Sistemului Energetic Național (producție/consum/sold + mix pe surse + interconexiuni transfrontaliere, în timp real de la Transelectrica) și desenarea rețelelor de transport (linii 400/220/110 kV + conducte gaz SNT) pe hartă din OpenStreetMap.',
+    dece: 'Traseele de utilități de transport nu erau vizibile în platformă, iar datele energetice reale (câtă energie produce/consumă România acum, din ce surse) nu erau expuse. Hărțile oficiale Transelectrica/Transgaz sunt schematice statice; aici traseele vin din OSM (machine-readable) iar datele live din feed-ul SEN. Alimentează SKID (proximitate gaz), SSI (apă/gaz/hidranți) și Hale (branșamente).',
+    legal: 'CN Transelectrica SA (operator transport energie) · SNTGN Transgaz SA (transport gaze) · date publice; distribuția locală aparține operatorilor de distribuție',
+    output: [
+      { ico: '⚡', txt: 'SEN LIVE: producție/consum/sold + mix surse + interconexiuni' },
+      { ico: '🗺', txt: 'Rețele 400/220/110 kV + gaz SNT pe hartă (OSM, colorate pe voltaj)' },
+      { ico: '📏', txt: 'Proximitate linie/conductă pentru studiile de obiect (SKID/SSI/Hale)' },
+    ],
+    nu: ['Hărțile Transgaz/Transelectrica sunt schematice statice — folosite ca referință/denumiri, nu ca feed', 'Distribuția de joasă tensiune / branșamentele gaz aparțin operatorilor de distribuție (nu în RET/SNT)'],
+  },
   sesizari: {
     ico: '📢', label: 'Sesizări urbane', badge: 'optional', badgeLabel: 'Cetățean · participare', color: '94,234,212',
     fn: 'window.Sesizari&&window.Sesizari.openForm&&window.Sesizari.openForm()',

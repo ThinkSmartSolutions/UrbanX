@@ -49,6 +49,7 @@
     { g: GR, ico: '🌐', l: 'Simulare cutremur (scenariu Vrancea)', d: 'mag. 5–8 · intensitate EMS-98 · PGA · avarieri · pe hartă', k: 'cutremur seismic vrancea magnitudine p100 risc', run: mod('RiskSeismic', 'openPanel') },
     { g: GR, ico: '🌊', l: 'Predicție inundație urbană (pluvială)', d: 'ploaie extremă · băltire pe relief real · Q=C·i·A · pe hartă', k: 'inundatie flood ploaie precipitatii anar pluvial relief', run: mod('RiskFlood', 'openPanel') },
     { g: GR, ico: '🔌', l: 'Rețele edilitare pe hartă (on/off)', d: 'electric · gaze · apă · CF · ape — subteran/suprateran (OSM)', k: 'retele edilitare subteran suprateran electric gaze apa cau utilitati', run: mod('CAU', 'showNetworksPanel') },
+    { g: GR, ico: '⚡', l: 'Utilități naționale (SEN live + transport)', d: 'energie LIVE Transelectrica · rețele 400/220/110kV + gaz SNT pe hartă (OSM)', k: 'utilitati nationale sen transelectrica transgaz ret snt energie electric gaz live transport', run: mod('UtilitatiRO', 'openPanel'), info: 'utilitati-nationale' },
     { g: GR, ico: '🛡', l: 'Inventar adăposturi ALA (on/off)', d: 'candidați NP-073 · capacitate · pe hartă (de verificat ISU)', k: 'ala adapost protectie civila bunker subsol isu inventar', run: mod('RiskShelters', 'toggle') },
     // Administrație
     { g: G5, ico: '🏗️', l: 'Capacitate & Conformitate UAT', d: 'apă·școli·verde vs ce s-a aprobat', k: 'capacitate intelligence uxi conformitate', run: mod('UXI', 'openDashboard'), info: 'ux_capacitate' },
