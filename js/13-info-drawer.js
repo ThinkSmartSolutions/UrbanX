@@ -517,6 +517,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Tranzacțiile ANCPI și riscul climatic per-parcelă necesită surse externe', 'Datele cu valoare juridică (CF, sarcini) se obțin de la ANCPI/OCPI'],
   },
+  'registru-imobil': {
+    ico: '🏢', label: 'Registrul Imobilelor', badge: 'recomandat', badgeLabel: 'Administrație · GDPR', color: '94,234,212',
+    fn: 'window.RegistruImobil&&window.RegistruImobil.openPanel&&window.RegistruImobil.openPanel()',
+    ce: 'Registrul master al imobilelor dintr-un UAT: fiecare imobil cu identitate cadastrală, status pe ciclul de viață (teren → CU → autorizație → șantier → recepție → intabulat) și lanțul de documente. Statusul e derivat automat din CAU. Complementar Dosarului Digital (acela = fișa unei parcele; acesta = registrul întregului fond).',
+    dece: 'Primăria nu are un registru unificat, permanent, al imobilelor cu istoricul lor — informația e împrăștiată pe dosare de autorizare. Registrul devine coloana vertebrală care leagă parcela de toate documentele ei fără a le duplica (le citește din CAU/Sesizări prin Dosar).',
+    legal: 'Legea 7/1996 (cadastru) · L.50/1991 (autorizare) · Regulamentul UE 2016/679 (GDPR) — date personale pseudonimizate, consimțământ / sarcină publică, retenție și drept la ștergere',
+    output: [
+      { ico: '🪪', txt: 'Imobil: nr. cadastral, adresă, UTR, suprafață, status' },
+      { ico: '🔗', txt: 'Lanț documente (CU/AC/sesizări) prin referințe, fără duplicare' },
+      { ico: '🔒', txt: 'Date proprietar pseudonimizate GDPR + fișă/registru PDF' },
+    ],
+    nu: ['Numele/CNP proprietarilor cu valoare juridică = date ANCPI; aici doar pseudonimizat cu consimțământ', 'Registru partajat multi-utilizator + audit GDPR = Faza 2 (Supabase RLS)'],
+  },
   sesizari: {
     ico: '📢', label: 'Sesizări urbane', badge: 'optional', badgeLabel: 'Cetățean · participare', color: '94,234,212',
     fn: 'window.Sesizari&&window.Sesizari.openForm&&window.Sesizari.openForm()',
