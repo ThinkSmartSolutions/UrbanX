@@ -118,8 +118,11 @@
     // POT / CUT
     if (d.POT_max != null) chk(ac.POT <= +d.POT_max, 'POT propus ' + ac.POT + '% ' + (ac.POT <= +d.POT_max ? '<' : '>') + ' POT max ' + d.POT_max + '%', 'RGU / PUG-PUZ');
     if (d.CUT_max != null) chk(ac.CUT <= +d.CUT_max, 'CUT propus ' + ac.CUT + ' ' + (ac.CUT <= +d.CUT_max ? '<' : '>') + ' CUT max ' + d.CUT_max, 'RGU / PUG-PUZ');
-    // retrageri
-    if (d.retragere_spate != null && d.retragere_spate_min != null) chk(+d.retragere_spate >= +d.retragere_spate_min, 'Retragere spate ' + d.retragere_spate + 'm ' + (+d.retragere_spate >= +d.retragere_spate_min ? '≥' : '<') + ' minim ' + d.retragere_spate_min + 'm impus prin CU', 'CU / Cod civil art. 612');
+    // retrageri — aliniament/față, laterale, spate
+    function chkRetr(prop, min, lbl, norma) { if (d[prop] != null && d[min] != null && d[min] !== '') chk(+d[prop] >= +d[min], lbl + ' ' + d[prop] + 'm ' + (+d[prop] >= +d[min] ? '≥' : '<') + ' minim ' + d[min] + 'm impus prin CU', norma); }
+    chkRetr('retragere_fata', 'retragere_fata_min', 'Retragere/aliniament stradal', 'CU / RLU · aliniament');
+    chkRetr('retragere_lateral', 'retragere_lateral_min', 'Retragere laterală', 'CU / Cod civil art. 612 (min. 0,60 m / H/2)');
+    chkRetr('retragere_spate', 'retragere_spate_min', 'Retragere spate', 'CU / Cod civil art. 612');
     // parcaje
     if (d.parcaje_propuse != null) chk(+d.parcaje_propuse >= ac.parcaje_necesare, 'Parcaje propuse ' + d.parcaje_propuse + ' ' + (+d.parcaje_propuse >= ac.parcaje_necesare ? '≥' : '<') + ' necesar ' + ac.parcaje_necesare, 'NP 067/2002 / HG 525/1996');
     // sprinklere (P118): SC>3000 sau H>28
@@ -145,7 +148,14 @@
     d.nrcad = ap.nrcad || ''; d.uat = ap.uat || ''; d.judet = ap.judet || (ap.uat || '');
     d.Steren = ap.area || 0; d.utr = ap.utr || '';
     // reguli UTR (POT/CUT max + retrageri)
-    try { var reg = (G.REGULI && G.REGULI[ap.utr]) || (ap.params) || {}; d.POT_max = reg.pot || (ap.params && ap.params.pot) || null; d.CUT_max = reg.cut || (ap.params && ap.params.cut) || null; d.retragere_spate_min = 5; } catch (e) {}
+    try {
+      var reg = (G.REGULI && G.REGULI[ap.utr]) || (ap.params) || {};
+      d.POT_max = reg.pot || (ap.params && ap.params.pot) || null; d.CUT_max = reg.cut || (ap.params && ap.params.cut) || null;
+      function _numR(x) { if (x == null) return null; var m = String(x).match(/[\d.]+/); return m ? +m[0] : null; }
+      d.retragere_fata_min = _numR(reg.retragere_fata) || null;
+      d.retragere_lateral_min = _numR(reg.retragere_lat || reg.retragere_lateral) || null;
+      d.retragere_spate_min = _numR(reg.retragere_spate) || 5;
+    } catch (e) {}
     // din volumul AEDIS
     try {
       var A = G.AEDIS;

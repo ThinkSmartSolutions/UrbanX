@@ -62,13 +62,15 @@
       form.innerHTML = '';
       var fnOpts = Object.keys(G.UXDoc.FUNCTIUNI).map(function (k) { return [k, G.UXDoc.FUNCTIUNI[k].label]; });
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual')]));
-      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
+      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), fld('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
       form.appendChild(section('4–5', 'Construcție propusă', [
         fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts }),
         fld('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
         fld('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),
         fld('Niveluri supraterane', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1' }),
         fld('Înălțime coamă H (m)', 'H', 'manual', { type: 'number' }),
+        fld('Aliniament/față propus (m)', 'retragere_fata', 'manual', { type: 'number' }),
+        fld('Retragere laterală propusă (m)', 'retragere_lateral', 'manual', { type: 'number' }),
         fld('Retragere spate propusă (m)', 'retragere_spate', 'manual', { type: 'number' }),
         fld('Parcaje propuse', 'parcaje_propuse', 'manual', { type: 'number' }),
         fld('POT propus', 'POT', 'auto'), fld('CUT propus', 'CUT', 'auto'),
