@@ -1,82 +1,213 @@
 /* ============================================================================
- * UrbanX — Plan FUNCȚIONAL schematic din modelul funcțional (D._spatii).
- * Fiecare spațiu = bloc dimensionat pe suprafață, împachetat pe niveluri (P/E),
- * colorat pe categorie. Export: SVG, PDF (print), DXF (AutoCAD/BricsCAD — DWG prin ODA).
- * NU e planșa DTAC finală cotată (aceea cere geometrie/proiectare) — e planul
- * funcțional/diagramă de zonare, punct de plecare real din model.
- * window.UXPlanSVG.open(spatii)
+ * UrbanX — GENERATOR PLANȘE (parte desenată) din modelul funcțional.
+ * Produce planșe PARAMETRICE COTATE de nivel profesional (draft de proiectare):
+ *  • Plan de nivel (parter/etaj) — pereți dublu-strat, uși, etichete+arii, cote, nord, cartuș
+ *  • Plan de situație — parcelă, amprentă, retrageri, accese, nord, cote, cartuș
+ *  • Secțiune — niveluri, cote de nivel, teren, atic, cartuș
+ *  • Fațadă — goluri (tâmplărie), atic/cornișă, cote înălțime, cartuș
+ * Export: SVG · PDF (print) · DXF (AutoCAD/BricsCAD; DWG prin ODA).
+ * NB: geometria finală (cotare exactă, grilă structurală) o definește proiectantul;
+ * planșele auto sunt baza parametrică reală, nu planșa DTAC finală.
+ * window.UXPlanSVG.open(spatii, meta)
  * ========================================================================== */
 (function (G) {
   'use strict';
   function el(t, a, h) { var e = document.createElement(t); if (a) for (var k in a) e.setAttribute(k, a[k]); if (h != null) e.innerHTML = h; return e; }
-  var CATCOL = { Primire: '#60a5fa', Administrativ: '#a78bfa', Medical: '#34d399', Recuperare: '#22d3ee', 'Masă': '#fbbf24', 'Bloc alimentar': '#f59e0b', Sanitare: '#38bdf8', Tehnic: '#94a3b8', 'Activități': '#f472b6', Personal: '#c084fc', Sport: '#4ade80', Producție: '#fb923c', Depozitare: '#a3a3a3', Cazare: '#818cf8', 'Educațional': '#2dd4bf', Energie: '#f87171', PSI: '#ef4444', 'Circulații': '#cbd5e1', Diverse: '#9ca3af' };
-  var SCALE = 9, GAP = 6, PAD = 16, W = 940; // px/m
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var CATCOL = { Primire: '#eaf2ff', Administrativ: '#f0ecff', Medical: '#e8fff4', Recuperare: '#e6fbff', 'Masă': '#fff7e6', 'Bloc alimentar': '#fff0db', Sanitare: '#e8f6ff', Tehnic: '#f0f2f5', 'Activități': '#ffeef7', Personal: '#f5edff', Sport: '#ecfce9', Producție: '#fff0e6', Depozitare: '#f2f2f2', Cazare: '#eef0ff', 'Educațional': '#e9fbf7', Energie: '#ffecec', PSI: '#ffe9e9', 'Circulații': '#f7f9fb', Diverse: '#f3f4f6' };
+  var MPP = 26; // px per metru (scară desen la ~1:50 vizual)
+  var WALL = 3; // grosime perete px
 
-  // Împachetare pe rafturi (shelf packing) per nivel. Întoarce {levels:[{niv,rects:[...],h}], w, h}
+  // ── layout pe niveluri: împachetare rânduri, mp→dimensiuni reale ─────────
   function layout(spatii) {
     var byNiv = {}; (spatii || []).forEach(function (r) { var k = r.niv || 'P'; (byNiv[k] = byNiv[k] || []).push(r); });
-    var order = Object.keys(byNiv).sort();
-    var levels = [], yTop = 0;
-    order.forEach(function (niv) {
-      var rooms = byNiv[niv].slice().sort(function (a, b) { return (b.buc * b.mp_unit) - (a.buc * a.mp_unit); });
+    var res = {};
+    Object.keys(byNiv).forEach(function (niv) {
+      var rooms = []; byNiv[niv].forEach(function (r) { var b = Math.max(1, +r.buc || 1); for (var i = 0; i < b; i++) rooms.push(r); });
+      rooms.sort(function (a, b) { return (b.mp_unit || 0) - (a.mp_unit || 0); });
+      var W = 24; // lățime bandă în metri (canvas logic)
       var x = 0, y = 0, rowH = 0, rects = [];
       rooms.forEach(function (r) {
-        var buc = +r.buc || 1;
-        for (var k = 0; k < buc; k++) {
-          var A = Math.max(4, +r.mp_unit || 4);
-          var w = Math.max(46, Math.min(260, Math.round(Math.sqrt(A) * SCALE * 1.25)));
-          var h = Math.max(36, Math.round(A * SCALE * SCALE / w));
-          h = Math.min(h, 150);
-          if (x + w > W) { x = 0; y += rowH + GAP; rowH = 0; }
-          rects.push({ x: x, y: y, w: w, h: h, room: r });
-          x += w + GAP; rowH = Math.max(rowH, h);
-        }
+        var A = Math.max(4, +r.mp_unit || 4);
+        var w = Math.min(8.5, Math.max(2.4, Math.sqrt(A) * 1.15)); // lățime m
+        var h = Math.max(2.2, A / w); // înălțime m
+        if (x + w > W) { x = 0; y += rowH + 0.0; rowH = 0; }
+        rects.push({ x: x, y: y, w: w, h: h, room: r }); x += w; rowH = Math.max(rowH, h);
       });
-      var lh = y + rowH;
-      levels.push({ niv: niv === 'E' ? 'ETAJ' : (niv === 'S' ? 'SUBSOL' : 'PARTER'), rects: rects, h: lh, yTop: yTop });
-      yTop += lh + 42;
+      var totalH = 0; rects.forEach(function (rc) { totalH = Math.max(totalH, rc.y + rc.h); });
+      res[niv] = { rects: rects, w: W, h: totalH };
     });
-    return { levels: levels, w: W, h: yTop };
+    return res;
   }
 
-  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-  function toSVG(lay, title) {
-    var H = lay.h + PAD * 2 + 30;
-    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + (lay.w + PAD * 2) + '" height="' + H + '" font-family="system-ui,Arial" font-size="10">';
-    s += '<rect width="100%" height="100%" fill="#ffffff"/>';
-    s += '<text x="' + PAD + '" y="20" font-size="15" font-weight="700" fill="#1F3864">' + esc(title || 'PLAN FUNCȚIONAL (schematic din model)') + '</text>';
-    lay.levels.forEach(function (lv) {
-      var oy = 40 + lv.yTop;
-      s += '<text x="' + PAD + '" y="' + (oy - 6) + '" font-size="12" font-weight="700" fill="#2F5496">' + esc(lv.niv) + '</text>';
-      lv.rects.forEach(function (rc) {
-        var col = CATCOL[rc.room.cat] || '#9ca3af';
-        var x = PAD + rc.x, y = oy + rc.y;
-        s += '<rect x="' + x + '" y="' + y + '" width="' + rc.w + '" height="' + rc.h + '" fill="' + col + '" fill-opacity="0.22" stroke="' + col + '" stroke-width="1.2"/>';
-        var nm = esc((rc.room.nume || '').length > 22 ? rc.room.nume.slice(0, 21) + '…' : rc.room.nume);
-        s += '<text x="' + (x + 4) + '" y="' + (y + 14) + '" fill="#111">' + nm + '</text>';
-        s += '<text x="' + (x + 4) + '" y="' + (y + 27) + '" fill="#555">' + (Math.round(rc.room.mp_unit || 0)) + ' mp</text>';
-      });
+  // ── cartuș (title block) conform Legea 50/1991 Anexa 1 ───────────────────
+  function cartus(meta, X, Y, W) {
+    meta = meta || {}; var H = 78, x = X, y = Y;
+    var s = '<g font-family="Arial" font-size="8" fill="#111">';
+    s += '<rect x="' + x + '" y="' + y + '" width="' + W + '" height="' + H + '" fill="#fff" stroke="#111" stroke-width="1"/>';
+    // rânduri
+    var rows = [
+      ['Proiectant', meta.proiectant || 'ThinkSmart Solutions SRL / UrbanX'],
+      ['Beneficiar', meta.beneficiar || '—'],
+      ['Proiect', meta.proiect || '—'],
+      ['Amplasament', meta.amplasament || '—'],
+      ['Planșa', (meta.cod || '') + '  ' + (meta.titlu || '')],
+      ['Faza / Scara / Data', (meta.faza || 'DTAC') + '  ·  ' + (meta.scara || '1:100') + '  ·  ' + (meta.data || '')]
+    ];
+    var ry = y + 12; s += '<text x="' + (x + 5) + '" y="' + ry + '" font-size="10" font-weight="bold" fill="#1F3864">' + esc(meta.proiectant || 'UrbanX — ThinkSmart Solutions') + '</text>'; ry += 12;
+    rows.slice(1).forEach(function (r) { s += '<text x="' + (x + 5) + '" y="' + ry + '"><tspan fill="#666">' + esc(r[0]) + ': </tspan>' + esc(r[1]) + '</text>'; ry += 10.5; });
+    s += '<text x="' + (x + W - 5) + '" y="' + (y + H - 6) + '" text-anchor="end" font-size="7" fill="#888">Generat UrbanX · verificat și semnat de proiectanți atestați</text>';
+    s += '</g>';
+    return s;
+  }
+  function nord(x, y) {
+    return '<g transform="translate(' + x + ',' + y + ')"><circle r="14" fill="none" stroke="#111" stroke-width="0.8"/><polygon points="0,-13 4,4 0,0 -4,4" fill="#111"/><text y="-16" text-anchor="middle" font-size="9" font-family="Arial" font-weight="bold">N</text></g>';
+  }
+  function dimH(x1, x2, y, txt) { // cotă orizontală
+    return '<g stroke="#c0392b" stroke-width="0.6" font-family="Arial" font-size="7" fill="#c0392b">' +
+      '<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '"/>' +
+      '<line x1="' + x1 + '" y1="' + (y - 3) + '" x2="' + x1 + '" y2="' + (y + 3) + '"/>' +
+      '<line x1="' + x2 + '" y1="' + (y - 3) + '" x2="' + x2 + '" y2="' + (y + 3) + '"/>' +
+      '<text x="' + ((x1 + x2) / 2) + '" y="' + (y - 3) + '" text-anchor="middle">' + txt + '</text></g>';
+  }
+  function dimV(y1, y2, x, txt) {
+    return '<g stroke="#c0392b" stroke-width="0.6" font-family="Arial" font-size="7" fill="#c0392b">' +
+      '<line x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + y2 + '"/>' +
+      '<line x1="' + (x - 3) + '" y1="' + y1 + '" x2="' + (x + 3) + '" y2="' + y1 + '"/>' +
+      '<line x1="' + (x - 3) + '" y1="' + y2 + '" x2="' + (x + 3) + '" y2="' + y2 + '"/>' +
+      '<text x="' + (x - 4) + '" y="' + ((y1 + y2) / 2) + '" text-anchor="middle" transform="rotate(-90 ' + (x - 4) + ',' + ((y1 + y2) / 2) + ')">' + txt + '</text></g>';
+  }
+
+  // ── PLAN DE NIVEL ────────────────────────────────────────────────────────
+  function planNivel(lay, niv, meta) {
+    var d = lay[niv]; if (!d) return '';
+    var PAD = 60, M = MPP;
+    var pw = d.w * M, ph = d.h * M;
+    var W = pw + PAD * 2, H = ph + PAD * 2 + 90;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial">';
+    s += '<rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">' + esc((meta && meta.titlu) || ('PLAN ' + (niv === 'E' ? 'ETAJ' : niv === 'S' ? 'SUBSOL' : 'PARTER'))) + '</text>';
+    var ox = PAD, oy = 40;
+    // conturul exterior gros
+    s += '<rect x="' + (ox - 2) + '" y="' + (oy - 2) + '" width="' + (pw + 4) + '" height="' + (ph + 4) + '" fill="none" stroke="#111" stroke-width="' + (WALL + 1) + '"/>';
+    d.rects.forEach(function (rc) {
+      var x = ox + rc.x * M, y = oy + rc.y * M, w = rc.w * M, h = rc.h * M;
+      var col = CATCOL[rc.room.cat] || '#f3f4f6';
+      s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + col + '" stroke="#111" stroke-width="' + WALL + '"/>';
+      // ușă: gol de 0,9m pe latura de jos (arc)
+      var dw = 0.9 * M, dx = x + Math.min(w * 0.3, 8);
+      s += '<line x1="' + dx + '" y1="' + (y + h) + '" x2="' + (dx + dw) + '" y2="' + (y + h) + '" stroke="#fff" stroke-width="' + (WALL + 1) + '"/>';
+      s += '<path d="M ' + dx + ' ' + (y + h) + ' A ' + dw + ' ' + dw + ' 0 0 1 ' + (dx + dw) + ' ' + (y + h) + '" fill="none" stroke="#999" stroke-width="0.5"/>';
+      // etichetă
+      var nm = esc((rc.room.nume || '').length > 20 ? rc.room.nume.slice(0, 19) + '…' : rc.room.nume);
+      s += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - 3) + '" text-anchor="middle" font-size="8" font-weight="bold" fill="#222">' + nm + '</text>';
+      s += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 8) + '" text-anchor="middle" font-size="7" fill="#555">' + (Math.round(rc.room.mp_unit || 0)) + ' mp · ' + rc.w.toFixed(1) + '×' + rc.h.toFixed(1) + '</text>';
     });
+    // cote generale
+    s += dimH(ox, ox + pw, oy - 14, d.w.toFixed(1) + ' m');
+    s += dimV(oy, oy + ph, ox - 14, d.h.toFixed(1) + ' m');
+    s += nord(W - 40, 40);
+    s += cartus(meta, W - 360, oy + ph + 6, 340);
     s += '</svg>';
     return s;
   }
 
-  // DXF minimal (R12) — dreptunghiuri (POLYLINE) + etichete (TEXT) pe layere per nivel. Deschide în AutoCAD/BricsCAD; DWG prin ODA.
-  function toDXF(lay) {
-    var e = [];
-    function p(code, val) { e.push(code); e.push(val); }
+  // ── PLAN DE SITUAȚIE ─────────────────────────────────────────────────────
+  function planSituatie(D, meta) {
+    var st = +D.Steren || 2000, sc = +D.Sc || Math.round(st * 0.25);
+    var side = Math.sqrt(st), bside = Math.sqrt(sc); // pătrat echivalent
+    var M = 3.2, PAD = 70;
+    var pw = side * M, ph = side * M, W = pw + PAD * 2, H = ph + PAD * 2 + 90;
+    var rf = +D.retragere_fata || 5, rl = +D.retragere_lateral || 3, rsp = +D.retragere_spate || 5;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">PLAN DE SITUAȚIE</text>';
+    var ox = PAD, oy = 40;
+    // parcela
+    s += '<rect x="' + ox + '" y="' + oy + '" width="' + pw + '" height="' + ph + '" fill="#f4faf0" stroke="#111" stroke-width="1.5" stroke-dasharray="6 3"/>';
+    // amprenta clădire (retrasă)
+    var bx = ox + rf * M, by = oy + rf * M, bw = bside * M, bh = (sc / bside) * M;
+    if (bw > pw - (rf + rl) * M) bw = pw - (rf + rl) * M; if (bh > ph - (rf + rsp) * M) bh = ph - (rf + rsp) * M;
+    s += '<rect x="' + bx + '" y="' + by + '" width="' + bw + '" height="' + bh + '" fill="#dbe7f5" stroke="#1F3864" stroke-width="2"/>';
+    s += '<text x="' + (bx + bw / 2) + '" y="' + (by + bh / 2) + '" text-anchor="middle" font-size="9" font-weight="bold" fill="#1F3864">CONSTRUCȚIE PROPUSĂ<tspan x="' + (bx + bw / 2) + '" dy="12" font-size="8" font-weight="normal">Sc ≈ ' + sc + ' mp</tspan></text>';
+    // retrageri (cote)
+    s += dimV(oy, by, ox - 16, 'front ' + rf + 'm');
+    s += dimH(ox, bx, oy + ph + 16, 'lat ' + rl + 'm');
+    // acces
+    s += '<text x="' + (ox + pw / 2) + '" y="' + (oy + ph - 4) + '" text-anchor="middle" font-size="8" fill="#c0392b">▲ acces din drum public</text>';
+    s += '<text x="' + ox + '" y="' + (oy - 4) + '" font-size="8" fill="#555">Teren: ' + st.toLocaleString('ro-RO') + ' mp · POT propus ' + (st ? Math.round(sc / st * 100) : 0) + '%</text>';
+    s += nord(W - 40, 40);
+    s += cartus(Object.assign({}, meta, { titlu: 'Plan de situație', cod: 'A.01', scara: '1:500' }), W - 360, oy + ph + 6, 340);
+    s += '</svg>';
+    return s;
+  }
+
+  // ── SECȚIUNE ─────────────────────────────────────────────────────────────
+  function sectiune(D, meta) {
+    var niv = Math.max(1, +D.niv_supraterane || 1), hNiv = 3.0, H0 = +D.H || (niv * hNiv + 1);
+    var M = 34, PAD = 70, wm = 14;
+    var pw = wm * M, ph = (niv * hNiv + 1.5) * M, W = pw + PAD * 2, Ht = ph + PAD * 2 + 90;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + Ht + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">SECȚIUNE TRANSVERSALĂ A-A</text>';
+    var ox = PAD, oy = 40, base = oy + ph - 1.5 * M;
+    // teren
+    s += '<line x1="' + (ox - 20) + '" y1="' + base + '" x2="' + (ox + pw + 20) + '" y2="' + base + '" stroke="#6b4423" stroke-width="2"/>';
+    s += '<text x="' + (ox + pw + 22) + '" y="' + (base + 3) + '" font-size="8" fill="#6b4423">±0,00 (CTS)</text>';
+    // niveluri
+    for (var k = 0; k < niv; k++) {
+      var yTop = base - (k + 1) * hNiv * M, yBot = base - k * hNiv * M;
+      s += '<rect x="' + ox + '" y="' + yTop + '" width="' + pw + '" height="' + (hNiv * M) + '" fill="#fafafa" stroke="#111" stroke-width="2"/>';
+      s += '<text x="' + (ox + 6) + '" y="' + (yBot - 6) + '" font-size="8" fill="#333">' + (k === 0 ? 'PARTER' : 'ETAJ ' + k) + ' (H liber 2,70 m)</text>';
+      s += '<text x="' + (ox - 6) + '" y="' + (yTop + 3) + '" text-anchor="end" font-size="7" fill="#c0392b">+' + ((k + 1) * hNiv).toFixed(2) + '</text>';
+    }
+    // planșeu/acoperiș
+    s += '<rect x="' + (ox - 4) + '" y="' + (base - niv * hNiv * M - 6) + '" width="' + (pw + 8) + '" height="6" fill="#1F3864"/>';
+    s += '<text x="' + (ox + pw + 8) + '" y="' + (base - niv * hNiv * M) + '" font-size="7" fill="#c0392b">+' + (niv * hNiv).toFixed(2) + ' atic</text>';
+    s += dimV(base - niv * hNiv * M, base, ox - 30, 'H ' + (niv * hNiv).toFixed(1) + ' m');
+    s += cartus(Object.assign({}, meta, { titlu: 'Secțiune A-A', cod: 'A.06', scara: '1:50' }), W - 360, oy + ph + 6, 340);
+    s += '</svg>';
+    return s;
+  }
+
+  // ── FAȚADĂ ───────────────────────────────────────────────────────────────
+  function fatada(D, meta) {
+    var niv = Math.max(1, +D.niv_supraterane || 1), hNiv = 3.0, wm = 18, M = 30, PAD = 70;
+    var pw = wm * M, ph = (niv * hNiv + 1) * M, W = pw + PAD * 2, Ht = ph + PAD * 2 + 90;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + Ht + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">FAȚADA PRINCIPALĂ</text>';
+    var ox = PAD, oy = 40, base = oy + ph - 0.6 * M;
+    // volum
+    s += '<rect x="' + ox + '" y="' + (base - niv * hNiv * M) + '" width="' + pw + '" height="' + (niv * hNiv * M) + '" fill="#eef2f7" stroke="#111" stroke-width="1.5"/>';
+    // ferestre pe niveluri
+    for (var k = 0; k < niv; k++) {
+      var yb = base - k * hNiv * M, wy = yb - hNiv * M + 0.5 * M;
+      var nW = Math.floor(wm / 3);
+      for (var j = 0; j < nW; j++) {
+        var wx = ox + 1.2 * M + j * 3 * M;
+        s += '<rect x="' + wx + '" y="' + wy + '" width="' + (1.6 * M) + '" height="' + (1.5 * M) + '" fill="#cfe0f0" stroke="#1F3864" stroke-width="1"/>';
+        s += '<line x1="' + (wx + 0.8 * M) + '" y1="' + wy + '" x2="' + (wx + 0.8 * M) + '" y2="' + (wy + 1.5 * M) + '" stroke="#1F3864" stroke-width="0.5"/>';
+      }
+    }
+    // ușă acces la parter
+    s += '<rect x="' + (ox + pw / 2 - 0.9 * M) + '" y="' + (base - 2.4 * M) + '" width="' + (1.8 * M) + '" height="' + (2.4 * M) + '" fill="#dbe7f5" stroke="#1F3864" stroke-width="1.2"/>';
+    s += '<line x1="' + (ox - 20) + '" y1="' + base + '" x2="' + (ox + pw + 20) + '" y2="' + base + '" stroke="#6b4423" stroke-width="2"/>';
+    s += dimV(base - niv * hNiv * M, base, ox - 20, 'H ' + (niv * hNiv).toFixed(1) + ' m');
+    s += cartus(Object.assign({}, meta, { titlu: 'Fațada principală', cod: 'A.09', scara: '1:50' }), W - 360, oy + ph + 6, 340);
+    s += '</svg>';
+    return s;
+  }
+
+  // ── DXF (plan de nivel) ──────────────────────────────────────────────────
+  function toDXF(lay, niv) {
+    var d = lay[niv]; if (!d) return ''; var e = [];
+    function p(c, v) { e.push(c); e.push(v); }
     e.push('0'); e.push('SECTION'); e.push('2'); e.push('ENTITIES');
-    lay.levels.forEach(function (lv) {
-      var layer = lv.niv;
-      lv.rects.forEach(function (rc) {
-        // în DXF y crește în sus; folosim scala 1 unitate = 1 metru → împărțim px la SCALE
-        var X = rc.x / SCALE, Y = -(lv.yTop + rc.y) / SCALE, Wm = rc.w / SCALE, Hm = rc.h / SCALE;
-        var pts = [[X, Y], [X + Wm, Y], [X + Wm, Y - Hm], [X, Y - Hm], [X, Y]];
-        p('0', 'POLYLINE'); p('8', layer); p('66', '1'); p('70', '1');
-        pts.forEach(function (pt) { p('0', 'VERTEX'); p('8', layer); p('10', pt[0].toFixed(3)); p('20', pt[1].toFixed(3)); });
-        p('0', 'SEQEND');
-        p('0', 'TEXT'); p('8', layer); p('10', (X + 0.2).toFixed(3)); p('20', (Y - 0.6).toFixed(3)); p('40', '0.35'); p('1', (rc.room.nume || '').replace(/[^\x20-\x7e]/g, '') + ' ' + Math.round(rc.room.mp_unit || 0) + 'mp');
-      });
+    d.rects.forEach(function (rc) {
+      var X = rc.x, Y = -(rc.y), W = rc.w, H = rc.h;
+      var pts = [[X, Y], [X + W, Y], [X + W, Y - H], [X, Y - H], [X, Y]];
+      p('0', 'POLYLINE'); p('8', 'PERETI'); p('66', '1'); p('70', '1');
+      pts.forEach(function (pt) { p('0', 'VERTEX'); p('8', 'PERETI'); p('10', pt[0].toFixed(3)); p('20', pt[1].toFixed(3)); });
+      p('0', 'SEQEND');
+      p('0', 'TEXT'); p('8', 'TEXT'); p('10', (X + 0.2).toFixed(3)); p('20', (Y - 0.5).toFixed(3)); p('40', '0.3'); p('1', (rc.room.nume || '').replace(/[^\x20-\x7e]/g, '') + ' ' + Math.round(rc.room.mp_unit || 0) + 'mp');
     });
     e.push('0'); e.push('ENDSEC'); e.push('0'); e.push('EOF');
     return e.join('\n');
@@ -85,23 +216,36 @@
   function _dl(name, content, mime) { try { var b = new Blob([content], { type: mime }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); } catch (e) {} }
 
   function open(spatii, meta) {
-    spatii = spatii || []; if (!spatii.length) { if (G.ss) G.ss('Nu există program de spații. Generează-l întâi în „🧩 Program funcțional".'); return; }
-    var lay = layout(spatii); var title = (meta && meta.title) || 'PLAN FUNCȚIONAL — schematic din model';
-    var svg = toSVG(lay, title);
+    spatii = spatii || []; meta = meta || {};
+    if (!spatii.length) { if (G.ss) G.ss('Nu există program de spații. Generează-l în „🧩 Program funcțional".'); return; }
+    var D = meta.D || {};
+    var lay = layout(spatii);
+    var planse = [];
+    Object.keys(lay).sort().forEach(function (niv) { planse.push({ id: 'plan-' + niv, nume: 'Plan ' + (niv === 'E' ? 'etaj' : niv === 'S' ? 'subsol' : 'parter'), svg: planNivel(lay, niv, Object.assign({}, meta, { titlu: 'PLAN ' + (niv === 'E' ? 'ETAJ' : niv === 'S' ? 'SUBSOL' : 'PARTER'), cod: niv === 'E' ? 'A.03' : 'A.02', scara: '1:100' })), niv: niv }); });
+    planse.push({ id: 'situatie', nume: 'Plan situație', svg: planSituatie(D, meta) });
+    planse.push({ id: 'sectiune', nume: 'Secțiune', svg: sectiune(D, meta) });
+    planse.push({ id: 'fatada', nume: 'Fațadă', svg: fatada(D, meta) });
+
     var ov = el('div', { id: 'uxplan-ov', style: 'position:fixed;inset:0;background:#070c18;z-index:4300;overflow:auto;font-family:system-ui;color:#e6edf7' });
-    var wrap = el('div', { style: 'max-width:1050px;margin:0 auto;padding:16px' });
+    var wrap = el('div', { style: 'max-width:1200px;margin:0 auto;padding:16px' });
     var head = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px' });
-    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#6ee7b7">📐 Plan funcțional (din modelul de spații)</div><div style="font-size:11px;color:#94a3b8">Schematic/zonare — export SVG · PDF · DXF (AutoCAD/BricsCAD). Nu înlocuiește planșa DTAC cotată.</div>'));
+    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#6ee7b7">📐 Planșe (parte desenată) din model</div><div style="font-size:11px;color:#94a3b8">Planuri niveluri · situație · secțiune · fațadă — cotate, cu cartuș. Export SVG/PDF/DXF. Draft parametric; geometria finală o rafinează proiectantul.</div>'));
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); }; head.appendChild(bX); wrap.appendChild(head);
-    var bar = el('div', { style: 'display:flex;gap:8px;margin-bottom:10px' });
-    function mkbtn(txt, fn) { var b = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.4);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer' }, txt); b.onclick = fn; return b; }
-    bar.appendChild(mkbtn('⬇ SVG', function () { _dl('Plan_functional.svg', svg, 'image/svg+xml'); }));
-    bar.appendChild(mkbtn('⬇ DXF (CAD)', function () { _dl('Plan_functional.dxf', toDXF(lay), 'application/dxf'); }));
-    bar.appendChild(mkbtn('🖨 PDF (print)', function () { var w = window.open('', '_blank'); if (w) { w.document.write('<html><head><title>Plan funcțional</title></head><body style="margin:0">' + svg + '</body></html>'); w.document.close(); setTimeout(function () { w.print(); }, 300); } }));
-    wrap.appendChild(bar);
-    var box = el('div', { style: 'background:#fff;border-radius:8px;padding:8px;overflow:auto' }); box.innerHTML = svg; wrap.appendChild(box);
-    ov.appendChild(wrap); document.body.appendChild(ov);
+    // tabs
+    var tabs = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px' });
+    var view = el('div', { style: 'background:#fff;border-radius:8px;padding:8px;overflow:auto' });
+    var cur = 0;
+    function show(i) { cur = i; view.innerHTML = planse[i].svg; Array.prototype.forEach.call(tabs.children, function (c, k) { c.style.background = k === i ? '#34d399' : 'rgba(148,163,184,.15)'; c.style.color = k === i ? '#04231a' : '#cbd5e1'; }); }
+    planse.forEach(function (pl, i) { var b = el('button', { style: 'border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer' }, pl.nume); b.onclick = function () { show(i); }; tabs.appendChild(b); });
+    var bar = el('div', { style: 'display:flex;gap:8px;margin-bottom:8px' });
+    function mk(t, fn) { var b = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.4);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer' }, t); b.onclick = fn; return b; }
+    bar.appendChild(mk('⬇ SVG', function () { _dl(planse[cur].id + '.svg', planse[cur].svg, 'image/svg+xml'); }));
+    bar.appendChild(mk('⬇ DXF (plan)', function () { var pl = planse[cur]; if (pl.niv) _dl(pl.id + '.dxf', toDXF(lay, pl.niv), 'application/dxf'); else if (G.ss) G.ss('DXF disponibil pentru planurile de nivel.'); }));
+    bar.appendChild(mk('🖨 PDF', function () { var w = window.open('', '_blank'); if (w) { w.document.write('<html><head><title>' + planse[cur].nume + '</title></head><body style="margin:0">' + planse[cur].svg + '</body></html>'); w.document.close(); setTimeout(function () { w.print(); }, 300); } }));
+    bar.appendChild(mk('⬇ Toate (SVG)', function () { planse.forEach(function (pl) { _dl(pl.id + '.svg', pl.svg, 'image/svg+xml'); }); }));
+    wrap.appendChild(tabs); wrap.appendChild(bar); wrap.appendChild(view);
+    ov.appendChild(wrap); document.body.appendChild(ov); show(0);
   }
 
-  G.UXPlanSVG = { layout: layout, toSVG: toSVG, toDXF: toDXF, open: open };
+  G.UXPlanSVG = { layout: layout, planNivel: planNivel, planSituatie: planSituatie, sectiune: sectiune, fatada: fatada, toDXF: toDXF, open: open };
 })(window);
