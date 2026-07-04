@@ -146,6 +146,13 @@
         });
       };
       sideBox.appendChild(bPlan);
+      var bBim = el('button', { style: 'width:100%;margin-top:8px;background:rgba(232,179,65,.14);color:#e8b341;border:1px solid rgba(232,179,65,.4);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer' }, '🏗 Model 3D + BIM (IFC / GLB)');
+      bBim.onclick = function () {
+        if (!G.UXDocBIM) { if (G.ss) G.ss('Modulul BIM nu e încărcat.'); return; }
+        var bb = bilant(); D._spatii = state.rows; D.Sc = D.Sc || bb.sc; D.Sd = D.Sd || bb.sd; if (bb.niv) D.niv_supraterane = D.niv_supraterane || bb.niv;
+        G.UXDocBIM.exportIFC(D);
+      };
+      sideBox.appendChild(bBim);
     }
 
     renderParams();
