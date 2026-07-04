@@ -71,13 +71,9 @@
         { h: null, html: deep },
         { h: 'Indicatori urbanistici ai proiectului', html: _indicatoriTbl(D, v) },
         { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ] : [
-        { h: '1. Date de identificare', html: '<p>Prezenta documentație tehnică fundamentează autorizarea construirii obiectivului „' + esc(fn) + '", situat în ' + esc(D.uat || '—') + (D.nrcad ? ', nr. cadastral ' + esc(D.nrcad) : '') + ', beneficiar ' + esc(D.beneficiar || '—') + '.</p>' + (D.nrCU ? '<p>Certificat de urbanism nr. ' + esc(D.nrCU) + '.</p>' : '') },
-        { h: '2. Descrierea funcțiunii și a soluției', html: '<p>Obiectivul are funcțiunea „' + esc(fn) + '". Soluția propusă respectă reglementările urbanistice și normativele tehnice specifice funcțiunii.</p>' },
-        { h: '3. Indicatori urbanistici', html: _indicatoriTbl(D, v) },
-        { h: '4. Sistem constructiv și date seismice', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '. Zonă seismică: a<sub>g</sub> = ' + v.calc.seismic.ag + 'g, T<sub>c</sub> = ' + v.calc.seismic.Tc + ' s (P100-1/2013). Zăpadă s<sub>k</sub> = ' + v.calc.clima.sk + ' kN/m² (CR 1-1-3), temperatura exterioară de calcul ' + v.calc.clima.Te + ' °C.</p>' },
-        { h: '5. Verificarea conformității', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ];
+      ] : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
+        { h: '1. Date de identificare', html: '<p>Autorizarea obiectivului „' + esc(fn) + '", ' + esc(D.uat || '—') + '.</p>' }, { h: '2. Indicatori', html: _indicatoriTbl(D, v) }
+      ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), secs) };
     },
     'Memoriu arhitectură': function (D, v) {
@@ -85,11 +81,9 @@
       var secs = deep ? [
         { h: null, html: deep },
         { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
-      ] : [
-        { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '. Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '.</p>' },
-        { h: '2. Soluția arhitecturală', html: '<p>Regim de înălțime P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + ', suprafață construită ' + esc(D.Sc || '—') + ' mp, desfășurată ' + esc(D.Sd || '—') + ' mp. Retragerea față de limita posterioară: ' + esc(D.retragere_spate || '—') + ' m.</p>' },
-        { h: '3. Finisaje și accesibilitate PMR', html: '<p>Finisaje conform destinației. Se asigură accesibilitatea persoanelor cu dizabilități conform NP 051/2012 (rampe, uși min. 0,90 m, grupuri sanitare adaptate).</p>' }
-      ];
+      ] : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
+        { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '.</p>' }
+      ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_arhitectura.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE ARHITECTURĂ'), secs) };
     },
     'Memoriu rezistență': function (D, v) {
@@ -97,12 +91,9 @@
       var secs = deep ? [
         { h: null, html: deep },
         { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C']], ['Parametru', 'Valoare']) }
-      ] : [
-        { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + ', fundare ' + esc(D.fundare || 'izolată/continuă după studiul geotehnic') + '.</p>' },
-        { h: '2. Încărcări', html: '<p>Încărcări permanente și utile conform SR EN 1991. Zăpadă: s<sub>k</sub> = ' + v.calc.clima.sk + ' kN/m² (CR 1-1-3/2012). Vânt conform CR 1-1-4. Temperatura exterioară de calcul: ' + v.calc.clima.Te + ' °C.</p>' },
-        { h: '3. Acțiunea seismică', html: '<p>Conform P100-1/2013: a<sub>g</sub> = ' + v.calc.seismic.ag + 'g, T<sub>c</sub> = ' + v.calc.seismic.Tc + ' s. Clasa de importanță se stabilește conform destinației.</p>' },
-        { h: '4. Fundații', html: '<p>Tipul și adâncimea de fundare se stabilesc pe baza studiului geotehnic (presiunea convențională a stratului portant). A se corela cu Pre-Studiul Geotehnic din platformă.</p>' }
-      ];
+      ] : (G.UXParagrafe ? G.UXParagrafe.rezistenta(D, v) : [
+        { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '.</p>' }
+      ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_rezistenta.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE REZISTENȚĂ'), secs) };
     },
     'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)': function (D, v) {
@@ -110,12 +101,9 @@
       var secs = deep ? [
         { h: null, html: deep },
         { h: 'Anexă — soluții alese pentru proiect', html: tbl([['Încălzire', esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit')], ['Alimentare cu apă', esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit')]], ['Instalație', 'Soluție']) }
-      ] : [
-        { h: 'Instalații termice (IT)', html: '<p>Încălzire: ' + esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit') + '. Necesarul de căldură se calculează conform C 107/2005.</p>' },
-        { h: 'Instalații sanitare (IS)', html: '<p>Alimentare cu apă: ' + esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit') + '. Canalizare menajeră și pluvială conform I9 și SR 1846.</p>' },
-        { h: 'Instalații electrice (IE)', html: '<p>Racord electric, tablouri, iluminat, prize, priză de pământ și paratrăsnet (SR EN 62305) conform I7/2011.</p>' },
-        { h: 'Ventilație / HVAC + curenți slabi (ICT)', html: '<p>Ventilație conform destinației; curenți slabi (CCTV, control acces, date-voce, BMS) după caz.</p>' }
-      ];
+      ] : (G.UXParagrafe ? G.UXParagrafe.instalatii(D, v) : [
+        { h: 'Instalații', html: '<p>Instalații termice, sanitare, electrice, ventilare și PSI conform destinației și normativelor I13/I9/I7/I5/P118.</p>' }
+      ]);
       return { cat: 'Memorii Tehnice', file: 'Memorii_instalatii.doc', html: docHtml(_meta(D, 'MEMORII TEHNICE — INSTALAȚII'), secs) };
     },
     'Caiet de sarcini arhitectură (PTh)': function (D, v) {
