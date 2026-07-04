@@ -31,9 +31,11 @@
     bImp.onclick = function () { if (G.UXIngest) G.UXIngest.open(D, function () { renderForm(); recalc(); }); else if (G.ss) G.ss('Modulul de import nu e încărcat.'); };
     var bProg = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.45);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '🧩 Program funcțional');
     bProg.onclick = function () { if (G.UXSpaceUI) G.UXSpaceUI.open(D, function () { recalc(); renderForm(); }); else if (G.ss) G.ss('Modulul program funcțional nu e încărcat.'); };
+    var bVer = el('button', { style: 'background:rgba(251,191,36,.16);color:#fbbf24;border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '💾 Versiuni');
+    bVer.onclick = function () { if (G.UXVersion) G.UXVersion.open(D, function (data) { for (var k in D) { if (D.hasOwnProperty(k)) delete D[k]; } for (var k2 in data) D[k2] = data[k2]; renderForm(); recalc(); }); else if (G.ss) G.ss('Modulul versiuni nu e încărcat.'); };
     var bAedis = el('button', { style: 'background:rgba(139,92,246,.2);color:#c4b5fd;border:1px solid rgba(139,92,246,.45);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer' }, '⚡ Pre-umple din AEDIS');
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); };
-    hbtns.appendChild(bImp); hbtns.appendChild(bProg); hbtns.appendChild(bAedis); hbtns.appendChild(bX); head.appendChild(hbtns); wrap.appendChild(head);
+    hbtns.appendChild(bImp); hbtns.appendChild(bProg); hbtns.appendChild(bVer); hbtns.appendChild(bAedis); hbtns.appendChild(bX); head.appendChild(hbtns); wrap.appendChild(head);
 
     // legendă
     wrap.appendChild(el('div', { style: 'display:flex;gap:14px;font-size:10.5px;color:#94a3b8;margin:10px 0' },
