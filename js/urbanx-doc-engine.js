@@ -65,10 +65,19 @@
   var AEDIS_FN_MAP = { industrie: 'hala-industriala', rezidential_colectiv: 'bloc-locuinte', locuinta_individuala: 'locuinta-individuala', birouri: 'birouri', comercial: 'spatiu-comercial', hotel: 'hotelier', mixt: 'cladire-mixta' };
 
   // ── Auto-calcul indicatori (câmpurile VERZI din mockup) ───────────────────
+  function _stripDia(s) { return String(s || '').toLowerCase().replace(/[ăâ]/g, 'a').replace(/î/g, 'i').replace(/[șş]/g, 's').replace(/[țţ]/g, 't'); }
   function _judByName(nume) {
-    // mapare nume județ → cod _SEISMIC_ZONES (parțial; fallback zonă medie)
-    var M = { 'iasi': 'IS', 'iași': 'IS', 'vrancea': 'VN', 'buzau': 'BZ', 'buzău': 'BZ', 'prahova': 'PH', 'galati': 'GL', 'galați': 'GL', 'vaslui': 'VS', 'botosani': 'BT', 'botoșani': 'BT', 'suceava': 'SV', 'neamt': 'NT', 'neamț': 'NT', 'bacau': 'BC', 'bacău': 'BC', 'cluj': 'CJ', 'timis': 'TM', 'timiș': 'TM', 'brasov': 'BV', 'brașov': 'BV', 'constanta': 'CT', 'constanța': 'CT', 'sibiu': 'SB', 'bucuresti': 'B', 'bucurești': 'B', 'ilfov': 'IF' };
-    var k = String(nume || '').toLowerCase().replace(/^(municipiul|orasul|oras|comuna|judetul|jud\.?)\s+/, '').trim();
+    // mapare COMPLETĂ nume județ → cod _SEISMIC_ZONES (toate 41 + București), diacritice-insensibilă
+    var M = {
+      'alba': 'AB', 'arad': 'AR', 'arges': 'AG', 'bacau': 'BC', 'bihor': 'BH', 'bistrita': 'BN', 'bistrita-nasaud': 'BN',
+      'botosani': 'BT', 'braila': 'BR', 'brasov': 'BV', 'buzau': 'BZ', 'caras-severin': 'CS', 'caras': 'CS', 'calarasi': 'CL',
+      'cluj': 'CJ', 'constanta': 'CT', 'covasna': 'CV', 'dambovita': 'DB', 'dolj': 'DJ', 'galati': 'GL', 'giurgiu': 'GR',
+      'gorj': 'GJ', 'harghita': 'HR', 'hunedoara': 'HD', 'ialomita': 'IL', 'iasi': 'IS', 'ilfov': 'IF', 'maramures': 'MM',
+      'mehedinti': 'MH', 'mures': 'MS', 'neamt': 'NT', 'olt': 'OT', 'prahova': 'PH', 'salaj': 'SJ', 'satu mare': 'SM', 'satu-mare': 'SM',
+      'sibiu': 'SB', 'suceava': 'SV', 'teleorman': 'TR', 'timis': 'TM', 'tulcea': 'TL', 'valcea': 'VL', 'vaslui': 'VS',
+      'vrancea': 'VN', 'bucuresti': 'B'
+    };
+    var k = _stripDia(nume).replace(/^(municipiul|orasul|oras|comuna|judetul|jud\.?)\s+/, '').trim();
     return M[k] || null;
   }
   function seismicFor(judet) {
@@ -80,9 +89,9 @@
   // Zone climatice — sk zăpadă (CR 1-1-3/2012) + Te iarnă (SR 1907) pe cod județ
   function climaFor(judet) {
     var cod = /^[A-Z]{1,2}$/.test(judet || '') ? judet : _judByName(judet);
-    // sk (kN/m²) zonă zăpadă + Te (°C) temperatură exterioară de calcul
-    var SK = { 'IS': 2.5, 'VN': 2.0, 'BZ': 2.0, 'PH': 2.5, 'GL': 2.5, 'VS': 2.5, 'BT': 2.5, 'SV': 2.5, 'NT': 2.5, 'BC': 2.5, 'CJ': 2.0, 'TM': 1.5, 'BV': 2.0, 'CT': 1.5, 'SB': 2.0, 'B': 2.0, 'IF': 2.0 };
-    var TE = { 'IS': -18, 'VN': -15, 'BZ': -15, 'PH': -18, 'GL': -15, 'VS': -18, 'BT': -21, 'SV': -21, 'NT': -18, 'BC': -18, 'CJ': -18, 'TM': -15, 'BV': -21, 'CT': -12, 'SB': -18, 'B': -15, 'IF': -15 };
+    // sk (kN/m²) zonă zăpadă CR 1-1-3/2012 + Te (°C) temperatură exterioară SR 1907 — TOATE județele
+    var SK = { 'AB': 1.5, 'AR': 1.0, 'AG': 2.0, 'BC': 2.5, 'BH': 1.5, 'BN': 2.0, 'BT': 2.5, 'BR': 2.5, 'BV': 2.0, 'BZ': 2.0, 'CS': 1.5, 'CL': 2.0, 'CJ': 2.0, 'CT': 1.5, 'CV': 2.0, 'DB': 2.0, 'DJ': 1.5, 'GL': 2.5, 'GR': 2.0, 'GJ': 1.5, 'HR': 2.5, 'HD': 1.5, 'IL': 2.0, 'IS': 2.5, 'IF': 2.0, 'MM': 2.5, 'MH': 1.5, 'MS': 1.5, 'NT': 2.5, 'OT': 1.5, 'PH': 2.5, 'SJ': 1.5, 'SM': 1.5, 'SB': 2.0, 'SV': 2.5, 'TR': 2.0, 'TM': 1.5, 'TL': 1.5, 'VL': 2.0, 'VS': 2.5, 'VN': 2.0, 'B': 2.0 };
+    var TE = { 'AB': -18, 'AR': -15, 'AG': -15, 'BC': -18, 'BH': -15, 'BN': -18, 'BT': -21, 'BR': -15, 'BV': -21, 'BZ': -15, 'CS': -15, 'CL': -15, 'CJ': -18, 'CT': -12, 'CV': -21, 'DB': -15, 'DJ': -15, 'GL': -15, 'GR': -15, 'GJ': -15, 'HR': -21, 'HD': -18, 'IL': -15, 'IS': -18, 'IF': -15, 'MM': -21, 'MH': -15, 'MS': -18, 'NT': -18, 'OT': -15, 'PH': -18, 'SJ': -18, 'SM': -15, 'SB': -18, 'SV': -21, 'TR': -15, 'TM': -15, 'TL': -12, 'VL': -15, 'VS': -18, 'VN': -15, 'B': -15 };
     return { sk: (cod && SK[cod]) || 2.0, Te: (cod && TE[cod]) || -18, cod: cod || '?', estimat: !(cod && SK[cod]) };
   }
   function autoCalc(d) {

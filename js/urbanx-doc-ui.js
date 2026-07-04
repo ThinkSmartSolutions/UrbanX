@@ -9,8 +9,8 @@
   'use strict';
   var D = {}; // starea formularului
   var AVIZATORI = ['ISU', 'DSP', 'APM', 'Apele Române', 'ANIF', 'Distribuitor gaze', 'Distribuitor electric', 'Transelectrica', 'Operator apă-canal', 'CFR', 'CNAIR', 'Consiliul Județean', 'Primăria (PUG/PUZ)', 'Patrimoniu/Cultură', 'ROMATSA', 'SRI', 'MApN', 'Orange', 'Vodafone', 'Digi/RCS-RDS', 'Telekom'];
-  var DOCUMENTE = ['Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Memorii avizatori', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
-  var FAZE = [['DTAC', 'D.T.A.C. — autorizare construire'], ['PTh', 'P.Th. + D.E. — proiect tehnic de execuție']];
+  var DOCUMENTE = ['Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Memorii avizatori', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
+  var FAZE = [['DTAC', 'D.T.A.C. — autorizare construire'], ['PTh', 'P.Th. + D.E. — proiect tehnic de execuție'], ['ambele', 'Ambele (D.T.A.C. + P.Th.) — din aceleași date']];
   var STRUCT = { metalica: 'Metalică (Eurocod 3)', beton: 'Beton armat monolit', prefabricat: 'Beton prefabricat', lemn: 'Lemn CLT/glulam', zidarie: 'Zidărie portantă', lsf: 'LSF (structură ușoară)', mixt: 'Mixt metal-beton' };
   var INCALZIRE = { ct_gaz: 'CT gaz', pompa: 'Pompă de căldură', vrf: 'VRF', termoficare: 'Termoficare', electric: 'Electric', radiant: 'Radiant infraroșu' };
   var APA = { retea: 'Rețea publică', put: 'Puț forat', rezervor: 'Rezervor propriu' };
@@ -51,7 +51,7 @@
       box.appendChild(el('div', { style: 'font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#94a3b8;margin-bottom:3px' }, label + (kind === 'auto' ? ' · auto' : '')));
       if (kind === 'auto') { var v = el('div', { id: 'auto-' + key, style: 'font-size:13px;font-weight:700;color:#86efac' }, opts && opts.val != null ? opts.val : '—'); box.appendChild(v); }
       else if (kind === 'select') { var sel = el('select', { style: INP }); (opts.options || []).forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (D[key] === o[0]) op.setAttribute('selected', 'selected'); sel.appendChild(op); }); sel.onchange = function () { D[key] = sel.value; if (key === 'faza') renderForm(); else recalc(); }; if (!D[key] && opts.options && opts.options[0]) D[key] = opts.options[0][0]; box.appendChild(sel); }
-      else { var inp = el('input', { type: opts && opts.type || 'text', placeholder: opts && opts.ph || '', style: INP }); if (D[key] != null) inp.value = D[key]; inp.oninput = function () { D[key] = opts && opts.type === 'number' ? (inp.value === '' ? '' : +inp.value) : inp.value; recalc(); }; box.appendChild(inp); }
+      else { var inp = el('input', { id: 'fld-' + key, type: opts && opts.type || 'text', placeholder: opts && opts.ph || '', style: INP }); if (D[key] != null) inp.value = D[key]; inp.oninput = function () { D[key] = opts && opts.type === 'number' ? (inp.value === '' ? '' : +inp.value) : inp.value; D['__auto_' + key] = false; recalc(); }; box.appendChild(inp); }
       return box;
     }
     function section(nr, title, fields) {
@@ -66,7 +66,7 @@
       var fnOpts = Object.keys(G.UXDoc.FUNCTIUNI).map(function (k) { return [k, G.UXDoc.FUNCTIUNI[k].label]; });
       if (!D.faza) D.faza = 'DTAC';
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual'), fld('Faza de proiectare', 'faza', 'select', { options: FAZE })]));
-      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), fld('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
+      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), fld('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), fld('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), fld('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
       form.appendChild(section('4–5', 'Construcție propusă', [
         fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts }),
         fld('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
@@ -98,13 +98,36 @@
       // documente
       var sd = el('div', { style: 'margin-bottom:16px' }); sd.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">15</span>Documente de generat'));
       var gd = el('div', { style: 'display:grid;grid-template-columns:repeat(2,1fr);gap:5px' }); D._docs = D._docs || {};
-      var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
+      var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT' || D.faza === 'ambele');
       var pthOnly = { 'Caiet de sarcini arhitectură (PTh)': 1, 'Caiet de sarcini rezistență (PTh)': 1, 'Caiet de sarcini instalații (PTh)': 1, 'Liste de cantități / antemăsurători (PTh)': 1 };
       DOCUMENTE.forEach(function (dc) { if (pthOnly[dc] && !isPth) { D._docs[dc] = false; return; } var lab = el('label', { style: 'font-size:11px;color:' + (pthOnly[dc] ? '#a78bfa' : '#cbd5e1') + ';display:flex;gap:5px;align-items:center;cursor:pointer' }); var cb = el('input', { type: 'checkbox' }); if (D._docs[dc] !== false) { cb.setAttribute('checked', 'checked'); D._docs[dc] = true; } cb.onchange = function () { D._docs[dc] = cb.checked; }; lab.appendChild(cb); lab.appendChild(el('span', null, dc)); gd.appendChild(lab); }); sd.appendChild(gd); form.appendChild(sd);
       recalc();
     }
 
+    function _prefillDinCU() {
+      // Din Certificatul de Urbanism: POT/CUT max × teren → SC/SD max construibil (editabil).
+      var st = +D.Steren || 0, potm = +D.POT_max || 0, cutm = +D.CUT_max || 0;
+      var scMax = st && potm ? Math.round(st * potm / 100) : 0;
+      var sdMax = st && cutm ? Math.round(st * cutm) : 0;
+      function fill(key, val) {
+        if (!(val > 0)) return;
+        if (D[key] == null || D[key] === '' || D['__auto_' + key]) {
+          D[key] = val; D['__auto_' + key] = true;
+          var e = document.getElementById('fld-' + key);
+          if (e && document.activeElement !== e) e.value = val;
+        }
+      }
+      var nivm = +D.niv_max || 0, hmax = +D.H_max || 0;
+      fill('Sc', scMax); fill('Sd', sdMax); fill('H', hmax);
+      if (D.niv_supraterane == null || D.niv_supraterane === '' || D.__auto_niv_supraterane) {
+        var derived = (+D.Sc > 0 && +D.Sd > 0) ? Math.max(1, Math.round((+D.Sd) / (+D.Sc))) : 0;
+        var nivVal = nivm ? (derived ? Math.min(nivm, derived) : nivm) : derived; // plafonat la maximul din CU
+        if (nivVal > 0) { D.niv_supraterane = nivVal; D.__auto_niv_supraterane = true; var en = document.getElementById('fld-niv_supraterane'); if (en && document.activeElement !== en) en.value = nivVal; }
+      }
+      return { scMax: scMax, sdMax: sdMax, nivm: nivm, hmax: hmax };
+    }
     function recalc() {
+      var _cu = _prefillDinCU();
       var v = G.UXDoc.valideaza(D); var ac = v.calc;
       function setA(id, val) { var e = document.getElementById('auto-' + id); if (e) e.textContent = val; }
       setA('POT', (ac.POT || 0) + '%'); setA('CUT', ac.CUT || 0);
@@ -126,6 +149,17 @@
       });
       if (!v.checks.length) box.appendChild(el('div', { style: 'font-size:11.5px;color:#94a3b8' }, 'Completați suprafețele și POT/CUT max pentru validare.'));
       side.appendChild(box);
+      // Plafon din Certificatul de Urbanism (maxim construibil) — precompletat, editabil
+      var st = +D.Steren || 0, potm = +D.POT_max || 0, cutm = +D.CUT_max || 0;
+      if (st && (potm || cutm)) {
+        var scMax = potm ? Math.round(st * potm / 100) : 0, sdMax = cutm ? Math.round(st * cutm) : 0;
+        var cuBox = el('div', { style: 'background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:10px;margin-top:10px;font-size:11px;color:#cbd5e1' });
+        cuBox.innerHTML = '<div style="font-weight:700;color:#c4b5fd;margin-bottom:4px">Plafon din CU (maxim construibil)</div>' +
+          (scMax ? '<div>SC ≤ <b>' + scMax.toLocaleString('ro-RO') + '</b> mp (POT ' + potm + '% × ' + st.toLocaleString('ro-RO') + ')</div>' : '') +
+          (sdMax ? '<div>SD ≤ <b>' + sdMax.toLocaleString('ro-RO') + '</b> mp (CUT ' + cutm + ' × ' + st.toLocaleString('ro-RO') + ')</div>' : '') +
+          '<div style="color:#94a3b8;margin-top:4px">Precompletat cu maximul; editează în jos la ce proiectezi efectiv.</div>';
+        side.appendChild(cuBox);
+      }
       var nDocs = Object.keys(D._docs || {}).filter(function (k) { return D._docs[k]; }).length;
       var gen = el('button', { style: 'width:100%;margin-top:12px;background:' + (v.ok ? '#8b5cf6' : 'rgba(139,92,246,.5)') + ';color:#fff;border:none;border-radius:9px;padding:12px;font-size:13px;font-weight:700;cursor:pointer' }, '📦 Generează ' + nDocs + ' documente (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconf.' : ''));
       gen.onclick = function () { genereaza(v); }; side.appendChild(gen);
