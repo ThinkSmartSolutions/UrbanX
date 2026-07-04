@@ -874,3 +874,1001 @@ Sistemul de wayfinding este proiectat pentru **maximă lizibilitate și orientar
 ### PTh-A.14.6 — Recepția sistemului de semnalizare
 
 Recepția verifică: montajul la cotele și pozițiile din planul de semnalizare, contrastul și lizibilitatea (verificare de la distanța de proiect), prezența și corectitudinea Braille/relief, coerența codului cromatic, funcționarea semnalizării fotoluminiscente de evacuare (test în întuneric), absența reflexiilor sub iluminatul real al clădirii. Neconformitățile se remediază înainte de recepția la terminarea lucrărilor.
+
+## PTh-A.15 — ROOM DATA SHEETS (fișe complete pe încăpere)
+
+### PTh-A.15.1 — Convenții și legendă pentru fișele de încăpere
+
+Prezentul supliment detaliază la nivel de execuție fiecare încăpere a Centrului Social de Zi pentru Vârstnici (regim P+1, arie construită desfășurată circa 900 mp). Fișele de mai jos completează detaliile D01-D22 și fișele de finisaje deja emise, fără a le repeta; unde o poziție de finisaj a fost deja definită (ex. tencuială decorativă, gresie R10), fișa trimite la codul respectiv și adaugă doar parametrii specifici încăperii.
+
+Abrevieri utilizate în coloana finisaje:
+- **PVC-om** — pardoseală PVC omogen antibacterian, clasa 34-43, cu ridicare la perete (plintă curbă) 100 mm.
+- **GRS-R10 / GRS-R11** — gresie porțelanată rectificată, coeficient antiderapant R10 (zone uscate) respectiv R11-B (zone umede).
+- **VOP-lav** — vopsea lavabilă superlavabilă antibacteriană, clasa de rezistență la frecare umedă 1 (EN 13300).
+- **VOP-igi** — vopsea epoxidică / lavabilă igienizabilă pentru zone medicale, rezistentă la dezinfectanți.
+- **FAI-A2** — tavan casetat demontabil, plăci fibră minerală A2-s1,d0, absorbție acustică αw indicat pe fișă.
+- **GK-hidro** — tavan gips-carton verde (hidrofug) sau plăci gips-fibră, vopsit VOP-igi.
+- **FAI-igi** — tavan casetat cu plăci lavabile (higienizabile), pentru zone alimentare/medicale.
+
+Legenda cerințe speciale: **V** = ventilare mecanică, **IL** = iluminat, **AC** = acustică, **PSI** = securitate la incendiu, **ACC** = accesibilitate persoane cu dizabilități / vârstnici.
+
+### PTh-A.15.2 — Fișe încăperi PARTER (cota ±0,00)
+
+#### Tabel R.01 — Windfang / sas acces principal
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.01 |
+| Funcțiune | Sas acces principal (tampon termic) |
+| Suprafață utilă | 8,40 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11 + grătar ștergere picioare încastrat (vezi D26) |
+| Pereți | VOP-lav pe glet, soclu GRS h=1,20 m |
+| Tavan | GK-hidro, VOP-igi |
+| Tâmplărie | Uși automate glisante exterior (T-01) + ușă interior batantă EI30 |
+| Dotări fixe | Preș încastrat, covor tactil de avertizare (D30), bară sprijin |
+| V | Perdea de aer caldă deasupra ușii interioare, 3 schimburi/h |
+| IL | 200 lx, senzor prezență, IRC ≥ 80 |
+| AC | Fără cerință specială |
+| PSI | Ușă interior EI30-C, iluminat siguranță |
+| ACC | Lățime liberă trecere ≥ 1,50 m, prag ≤ 20 mm teșit |
+
+#### Tabel R.02 — Hol recepție / zonă așteptare
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.02 |
+| Funcțiune | Hol principal, recepție, așteptare |
+| Suprafață utilă | 46,20 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om cu inserție ghidaj tactil, plintă curbă |
+| Pereți | VOP-lav, lambriu protecție lovire h=1,20 m (D19), mână curentă dublă h 0,70/0,90 m |
+| Tavan | FAI-A2, αw ≥ 0,60 |
+| Tâmplărie | Fereastră fixă recepție, ghișeu jos accesibil scaun rulant |
+| Dotări fixe | Blat recepție dublu nivel (0,75 / 1,10 m), panou informare, buclă inductivă |
+| V | Ventilare confort 4 schimburi/h |
+| IL | 300 lx uniform, evitare orbire, contrast reperabil |
+| AC | Timp reverberație T ≤ 0,8 s |
+| PSI | Traseu evacuare principal, marcaj pardoseală |
+| ACC | Ghișeu accesibil, buclă inductivă pentru proteze auditive |
+
+#### Tabel R.03 — Cabinet medical (consultații)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.03 |
+| Funcțiune | Cabinet medical / consultații generale |
+| Suprafață utilă | 16,80 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om conductiv-disipativ, racord curb, sudură la cald |
+| Pereți | VOP-igi lavabilă medicală, colțuri protejate |
+| Tavan | FAI-igi, plăci lavabile |
+| Tâmplărie | Ușă EI0 h=1,00 m clară, fereastră cu jaluzea integrată |
+| Dotări fixe | Chiuvetă spălare mâini fără atingere, dulap medicamente, negatoscop |
+| V | Ventilare 6 schimburi/h, uși închise |
+| IL | 500 lx general + 1000 lx local examinare, IRC ≥ 90 |
+| AC | Confidențialitate: R'w ≥ 45 dB perete despărțitor |
+| PSI | Recipient deșeuri medicale conform |
+| ACC | Spațiu manevră Ø 1,50 m liber lângă pat consultație |
+
+#### Tabel R.04 — Cabinet asistență socială / consiliere
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.04 |
+| Funcțiune | Consiliere psihologică / asistență socială |
+| Suprafață utilă | 14,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om, plintă curbă |
+| Pereți | VOP-lav |
+| Tavan | FAI-A2, αw ≥ 0,70 (confidențialitate) |
+| Tâmplărie | Ușă acustică Rw ≥ 32 dB, fereastră exterioară |
+| Dotări fixe | Birou, mobilier confortabil, dulap dosare cu cheie |
+| V | 4 schimburi/h |
+| IL | 300 lx, lumină caldă 3000 K |
+| AC | R'w ≥ 45 dB, T ≤ 0,7 s (protecția confidențialității) |
+| PSI | — |
+| ACC | Acces liber, mobilier deplasabil |
+
+#### Tabel R.05 — Sală kinetoterapie / recuperare
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.05 |
+| Funcțiune | Kinetoterapie, gimnastică medicală |
+| Suprafață utilă | 42,00 mp |
+| Înălțime liberă | 3,20 m |
+| Pardoseală | PVC-om sport, elasticitate, absorbție șoc, R10 |
+| Pereți | VOP-lav, oglindă h 0,90-2,10 m pe un perete, bară balet, mână curentă |
+| Tavan | FAI-A2 rezistent la lovire minge, αw ≥ 0,60 |
+| Tâmplărie | Ferestre mari cu protecție solară, ușă dublă 1,50 m |
+| Dotări fixe | Bare paralele reeducare mers, spalier, oglindă, scări exersare |
+| V | 6 schimburi/h, evacuare umiditate/efort |
+| IL | 400 lx uniform, fără orbire în oglindă |
+| AC | T ≤ 1,0 s, atenuare zgomot de impact |
+| PSI | Suprafață aglomerată, dublă cale evacuare |
+| ACC | Spații libere manevră, pardoseală fără denivelări |
+
+#### Tabel R.06 — Sală activități ocupaționale / ergoterapie
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.06 |
+| Funcțiune | Atelier ergoterapie, activități manuale |
+| Suprafață utilă | 38,50 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om, rezistent pete, plintă curbă |
+| Pereți | VOP-lav, panouri expunere lucrări |
+| Tavan | FAI-A2, αw ≥ 0,60 |
+| Tâmplărie | Ferestre cu parapet jos vizibilitate, ușă 1,00 m |
+| Dotări fixe | Mese ajustabile înălțime, chiuvetă, dulapuri materiale |
+| V | 5 schimburi/h (praf, vopsele) |
+| IL | 500 lx lucru fin, IRC ≥ 85 |
+| AC | T ≤ 0,9 s |
+| PSI | Depozitare materiale inflamabile limitată |
+| ACC | Mese accesibile scaun rulant (spațiu genunchi 0,70 m) |
+
+#### Tabel R.07 — Sală multifuncțională / socializare
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.07 |
+| Funcțiune | Activități comune, evenimente, sală mese secundară |
+| Suprafață utilă | 72,00 mp |
+| Înălțime liberă | 3,20 m |
+| Pardoseală | PVC-om trafic intens clasa 34/43, plintă curbă |
+| Pereți | VOP-lav, lambriu antișoc h=1,20 m, mână curentă perimetrală |
+| Tavan | FAI-A2, αw ≥ 0,70, corpuri suspendate reglabile |
+| Tâmplărie | Uși duble acces terasă, ferestre mari cu protecție solară |
+| Dotări fixe | Sistem audio + buclă inductivă, ecran proiecție, prize podea |
+| V | 6 schimburi/h, dimensionat la ocupare max 60 pers. |
+| IL | 300 lx general, scenariu reglabil dimmer |
+| AC | T ≤ 1,0 s, buclă inductivă obligatorie |
+| PSI | Sală aglomerată: două căi evacuare, iluminat siguranță, marcaj |
+| ACC | Acces terasă fără prag, spații scaun rulant integrate |
+
+#### Tabel R.08 — Oficiu / bucătărie regenerare
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.08 |
+| Funcțiune | Oficiu alimentar, regenerare / porționare hrană |
+| Suprafață utilă | 24,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B cu sifon pardoseală, hidroizolație sub |
+| Pereți | Faianță h=2,10 m, restul VOP-igi |
+| Tavan | FAI-igi lavabil |
+| Tâmplărie | Ușă batantă lavabilă, ferestruică predare tăvi |
+| Dotări fixe | Blaturi inox, spălător dublu, mașină spălat vase, hotă |
+| V | Ventilare 10 schimburi/h + hotă absorbție, presiune negativă |
+| IL | 500 lx, IRC ≥ 80, corpuri IP54 |
+| AC | — |
+| PSI | Separare EI, stingător, oprire gaz de urgență |
+| ACC | Circulație personal, blat lucru accesibil |
+
+#### Tabel R.09 — Grup sanitar public bărbați + cabină accesibilă
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.09 |
+| Funcțiune | GS bărbați + cabină persoane cu dizabilități |
+| Suprafață utilă | 14,50 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, pantă spre sifon, hidroizolație |
+| Pereți | Faianță h=2,10 m, VOP-igi peste |
+| Tavan | GK-hidro, VOP-igi |
+| Tâmplărie | Uși h=1,00 m, cabină ACC ușă exterior deschidere / glisantă |
+| Dotări fixe | Obiecte sanitare suspendate, bare rabatabile inox, buton alarmă |
+| V | Ventilare mecanică 15 mc/h per obiect, evacuare |
+| IL | 200 lx, senzor prezență |
+| AC | — |
+| PSI | Ventilare cu clapetă la nevoie |
+| ACC | Cabină Ø 1,50 m, WC cotă 0,46 m, bare, oglindă înclinată, buton alarmă la 0,20 m sol |
+
+#### Tabel R.10 — Grup sanitar public femei
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.10 |
+| Funcțiune | GS femei |
+| Suprafață utilă | 11,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, pantă spre sifon, hidroizolație |
+| Pereți | Faianță h=2,10 m, VOP-igi peste |
+| Tavan | GK-hidro, VOP-igi |
+| Tâmplărie | Uși cabine h=2,00 m cu indicator ocupat/liber |
+| Dotări fixe | Obiecte suspendate, bare sprijin, oglinzi |
+| V | Ventilare mecanică 15 mc/h per obiect |
+| IL | 200 lx, senzor prezență |
+| AC | — |
+| PSI | — |
+| ACC | O cabină lărgită cu bare |
+
+#### Tabel R.11 — Vestiar + GS personal
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.11 |
+| Funcțiune | Vestiar personal, dușuri, GS |
+| Suprafață utilă | 18,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B zonă umedă / PVC-om zonă uscată |
+| Pereți | Faianță h=2,10 m dușuri, VOP-igi restul |
+| Tavan | GK-hidro |
+| Tâmplărie | Uși lavabile, cabine duș |
+| Dotări fixe | Dulapuri vestiar, bănci, dușuri, chiuvete |
+| V | 10 schimburi/h, evacuare umiditate |
+| IL | 200 lx |
+| AC | — |
+| PSI | — |
+| ACC | Un dulap și o cabină accesibile |
+
+#### Tabel R.12 — Cameră odihnă / repaus asistați
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.12 |
+| Funcțiune | Repaus, odihnă supravegheată |
+| Suprafață utilă | 20,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om acustic, plintă curbă |
+| Pereți | VOP-lav culori calde odihnitoare |
+| Tavan | FAI-A2, αw ≥ 0,80 (liniște) |
+| Tâmplărie | Fereastră cu jaluzea integrată blackout, ușă acustică |
+| Dotări fixe | Paturi/canapele repaus, mână curentă, sistem apelare |
+| V | 4 schimburi/h silențioasă |
+| IL | 100 lx reglabil dimmer, lumină caldă 2700 K |
+| AC | T ≤ 0,6 s, R'w ≥ 45 dB |
+| PSI | Iluminat siguranță |
+| ACC | Sistem apelare asistență la fiecare pat |
+
+#### Tabel R.13 — Depozit materiale / consumabile
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.13 |
+| Funcțiune | Depozit materiale curente |
+| Suprafață utilă | 9,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R10, plintă |
+| Pereți | VOP-lav |
+| Tavan | GK, VOP |
+| Tâmplărie | Ușă plină EI30 |
+| Dotări fixe | Rafturi metalice |
+| V | 2 schimburi/h |
+| IL | 150 lx |
+| AC | — |
+| PSI | Sarcină termică limitată, EI30, stingător apropiat |
+| ACC | Acces personal |
+
+#### Tabel R.14 — Cameră curățenie (spații tehnice curățenie)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.14 |
+| Funcțiune | Depozit curățenie, spălător mopuri |
+| Suprafață utilă | 4,50 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, sifon |
+| Pereți | Faianță h=1,50 m |
+| Tavan | GK-hidro |
+| Tâmplărie | Ușă lavabilă |
+| Dotări fixe | Bazin mop, raft chimicale ventilat |
+| V | 8 schimburi/h |
+| IL | 150 lx |
+| AC | — |
+| PSI | Substanțe periculoase separate |
+| ACC | — |
+
+#### Tabel R.15 — Casa scării principală + palier
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.15 / E.15 |
+| Funcțiune | Circulație verticală principală |
+| Suprafață utilă | 22,00 mp (pe nivel) |
+| Înălțime liberă | var. |
+| Pardoseală | GRS-R11, muchie treaptă contrast + bandă antiderapantă |
+| Pereți | VOP-lav, mână curentă dublă continuă ambele părți |
+| Tavan | VOP-igi |
+| Tâmplărie | Ușă EI30-C ambele niveluri |
+| Dotări fixe | Mână curentă h 0,70 și 0,90 m, prelungiri orizontale 0,30 m |
+| V | Desfumare naturală / trapă (vezi PSI) |
+| IL | 200 lx, iluminat siguranță antipanică |
+| AC | — |
+| PSI | Casă scări de evacuare, EI, desfumare, iluminat siguranță |
+| ACC | Contrast muchii trepte, mână curentă continuă, marcaj podest |
+
+#### Tabel R.16 — Lift persoane (put + cabină)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.16 / E.16 |
+| Funcțiune | Ascensor accesibil vârstnici / brancardă |
+| Suprafață utilă | Cabină 1,10 × 2,10 m |
+| Înălțime liberă | 2,20 m cabină |
+| Pardoseală | PVC-om antiderapant, contrast |
+| Pereți | Panouri inox mat + mână curentă, oglindă perete opus ușă |
+| Tavan | Iluminat LED, ventilație |
+| Tâmplărie | Uși automate telescopice 0,90 m liber |
+| Dotări fixe | Panou comandă Braille + vocal la 0,90-1,10 m, bară, scaun rabatabil |
+| V | Ventilație cabină |
+| IL | 100 lx cabină, 200 lx palier |
+| AC | Anunț vocal etaj |
+| PSI | Manevră pompieri / oprire dedicată, sursă rezervă |
+| ACC | Cabină brancardă, comandă accesibilă, semnal vocal + tactil |
+
+### PTh-A.15.3 — Fișe încăperi ETAJ (cota +3,20)
+
+#### Tabel R.17 — Hol etaj / distribuție
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.01 |
+| Funcțiune | Circulație orizontală etaj |
+| Suprafață utilă | 40,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om cu ghidaj tactil |
+| Pereți | VOP-lav, mână curentă dublă continuă, lambriu antișoc |
+| Tavan | FAI-A2, αw ≥ 0,60 |
+| Tâmplărie | Ferestre capăt culoar lumină naturală |
+| Dotări fixe | Mână curentă, bănci odihnă intermediare, panouri orientare |
+| V | 4 schimburi/h |
+| IL | 200 lx, fără zone întunecate, contrast reperaj |
+| AC | T ≤ 0,8 s |
+| PSI | Coridor evacuare, iluminat siguranță, marcaj |
+| ACC | Lățime ≥ 1,80 m, bănci de odihnă la 25-30 m |
+
+#### Tabel R.18 — Sală terapie de grup / club
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.02 |
+| Funcțiune | Terapie de grup, activități club |
+| Suprafață utilă | 45,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om, plintă curbă |
+| Pereți | VOP-lav, panou expunere, mână curentă |
+| Tavan | FAI-A2, αw ≥ 0,70 |
+| Tâmplărie | Ferestre mari, protecție solară exterioară |
+| Dotări fixe | Mobilier modular, tablă, sistem audio + buclă |
+| V | 6 schimburi/h la ocupare max |
+| IL | 300 lx reglabil |
+| AC | T ≤ 0,9 s, buclă inductivă |
+| PSI | Cale evacuare, iluminat siguranță |
+| ACC | Spații scaun rulant, mobilier deplasabil |
+
+#### Tabel R.19 — Bibliotecă / cameră lectură
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.03 |
+| Funcțiune | Lectură, lucru liniștit |
+| Suprafață utilă | 26,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om acustic |
+| Pereți | VOP-lav, rafturi biblioteca ancorate |
+| Tavan | FAI-A2, αw ≥ 0,80 |
+| Tâmplărie | Ferestre orientare favorabilă, protecție solară |
+| Dotări fixe | Rafturi, mese lectură, lampă locală |
+| V | 4 schimburi/h |
+| IL | 500 lx la planul de citire, lumină neutră 4000 K |
+| AC | T ≤ 0,6 s (liniște) |
+| PSI | Sarcină termică hârtie limitată |
+| ACC | Culoare între rafturi ≥ 0,90 m, masă accesibilă |
+
+#### Tabel R.20 — Cabinet psiholog / logopedie
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.04 |
+| Funcțiune | Cabinet individual terapie cognitivă |
+| Suprafață utilă | 12,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om |
+| Pereți | VOP-lav |
+| Tavan | FAI-A2, αw ≥ 0,75 |
+| Tâmplărie | Ușă acustică Rw ≥ 34 dB, fereastră |
+| Dotări fixe | Birou, dulap dosare cu cheie |
+| V | 4 schimburi/h |
+| IL | 300 lx, lumină caldă |
+| AC | R'w ≥ 47 dB, T ≤ 0,6 s (confidențialitate maximă) |
+| PSI | — |
+| ACC | Spațiu manevră Ø 1,50 m |
+
+#### Tabel R.21 — Sală relaxare / snoezelen (stimulare senzorială)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.05 |
+| Funcțiune | Terapie senzorială, relaxare |
+| Suprafață utilă | 20,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om moale, culoare neutră |
+| Pereți | VOP-lav mat culori pastel, panouri capitonate |
+| Tavan | FAI-A2, αw ≥ 0,85 |
+| Tâmplărie | Fereastră cu blackout total |
+| Dotări fixe | Elemente senzoriale, iluminat dinamic, difuzoare |
+| V | 4 schimburi/h silențioasă |
+| IL | 50-300 lx complet reglabil, RGB, dimmer |
+| AC | T ≤ 0,5 s, izolare fonică R'w ≥ 50 dB |
+| PSI | Materiale ignifugate, iluminat siguranță |
+| ACC | Acces scaun rulant, pardoseală continuă |
+
+#### Tabel R.22 — Birou administrație / director
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.06 |
+| Funcțiune | Administrație, conducere |
+| Suprafață utilă | 16,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om |
+| Pereți | VOP-lav |
+| Tavan | FAI-A2, αw ≥ 0,60 |
+| Tâmplărie | Fereastră, ușă acustică |
+| Dotări fixe | Mobilier birou, dulapuri arhivă |
+| V | 4 schimburi/h |
+| IL | 500 lx la birou |
+| AC | R'w ≥ 42 dB |
+| PSI | — |
+| ACC | Circulație liberă |
+
+#### Tabel R.23 — Sală ședințe / conferință
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.07 |
+| Funcțiune | Ședințe echipă, întâlniri familie |
+| Suprafață utilă | 22,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | PVC-om acustic |
+| Pereți | VOP-lav, panou proiecție |
+| Tavan | FAI-A2, αw ≥ 0,70 |
+| Tâmplărie | Fereastră, protecție solară |
+| Dotări fixe | Masă ședințe, ecran, priză podea |
+| V | 6 schimburi/h |
+| IL | 400 lx reglabil |
+| AC | T ≤ 0,7 s |
+| PSI | — |
+| ACC | Masă accesibilă scaun rulant |
+
+#### Tabel R.24 — Arhivă / depozit documente
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.08 |
+| Funcțiune | Arhivă documente sociale/medicale |
+| Suprafață utilă | 10,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R10 |
+| Pereți | VOP-lav |
+| Tavan | GK, VOP |
+| Tâmplărie | Ușă plină EI60 |
+| Dotări fixe | Rafturi arhivă / rafturi mobile |
+| V | 2 schimburi/h, control umiditate |
+| IL | 200 lx |
+| AC | — |
+| PSI | Sarcină termică ridicată hârtie: EI60, detecție, stingere adecvată |
+| ACC | Acces personal |
+
+#### Tabel R.25 — GS etaj bărbați + cabină accesibilă
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.09 |
+| Funcțiune | GS bărbați + cabină persoane cu dizabilități |
+| Suprafață utilă | 13,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, sifon, hidroizolație |
+| Pereți | Faianță h=2,10 m |
+| Tavan | GK-hidro |
+| Tâmplărie | Uși, cabină ACC |
+| Dotări fixe | Obiecte suspendate, bare rabatabile, buton alarmă |
+| V | 15 mc/h per obiect |
+| IL | 200 lx senzor |
+| AC | — |
+| PSI | — |
+| ACC | Cabină Ø 1,50 m, bare, buton alarmă |
+
+#### Tabel R.26 — GS etaj femei
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.10 |
+| Funcțiune | GS femei |
+| Suprafață utilă | 10,50 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, sifon, hidroizolație |
+| Pereți | Faianță h=2,10 m |
+| Tavan | GK-hidro |
+| Tâmplărie | Uși cabine cu indicator |
+| Dotări fixe | Obiecte suspendate, bare, oglinzi |
+| V | 15 mc/h per obiect |
+| IL | 200 lx senzor |
+| AC | — |
+| PSI | — |
+| ACC | Cabină lărgită cu bare |
+
+#### Tabel R.27 — Oficiu cafea / punct servire etaj
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | E.11 |
+| Funcțiune | Punct servire băuturi calde |
+| Suprafață utilă | 8,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, sifon |
+| Pereți | Faianță h=1,60 m, VOP-igi |
+| Tavan | FAI-igi |
+| Tâmplărie | Ușă lavabilă |
+| Dotări fixe | Blat, spălător, dulapuri |
+| V | 8 schimburi/h |
+| IL | 400 lx |
+| AC | — |
+| PSI | — |
+| ACC | Blat accesibil |
+
+#### Tabel R.28 — Cameră tehnică ventilație / CT (parter tehnic)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.17 |
+| Funcțiune | Centrală ventilație / termică |
+| Suprafață utilă | 15,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | Șapă elicopterizată, vopsea epoxidică, cuvă retenție |
+| Pereți | VOP-lav, tratament fonoabsorbant local |
+| Tavan | Aparent, VOP |
+| Tâmplărie | Ușă EI60 exterior, grilă ventilare |
+| Dotări fixe | Agregate, tablou, ancoraje antivibrație |
+| V | Ventilare tehnică conform utilaj |
+| IL | 200 lx, corpuri IP54 |
+| AC | Izolare vibrații/zgomot spre încăperi adiacente R'w ≥ 55 dB |
+| PSI | EI60, detecție, gaze conform |
+| ACC | Acces exclusiv personal tehnic |
+
+#### Tabel R.29 — Cameră deșeuri / colectare selectivă
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.18 |
+| Funcțiune | Colectare selectivă deșeuri, inclusiv medicale |
+| Suprafață utilă | 8,00 mp |
+| Înălțime liberă | 3,00 m |
+| Pardoseală | GRS-R11-B, sifon, hidroizolație, pantă |
+| Pereți | Faianță h=2,10 m lavabilă |
+| Tavan | GK-hidro |
+| Tâmplărie | Ușă lavabilă exterior, ventilare |
+| Dotări fixe | Pubele, robinet spălare, container deșeuri medicale |
+| V | 10 schimburi/h, presiune negativă, evacuare mirosuri |
+| IL | 200 lx |
+| AC | — |
+| PSI | Separare EI, sarcină controlată |
+| ACC | Acces personal, cărucior |
+
+#### Tabel R.30 — Terasă exterioară activități (parter)
+
+| Parametru | Valoare / cerință |
+|---|---|
+| Cod încăpere | P.19 (exterior) |
+| Funcțiune | Terasă activități în aer liber, grădină terapeutică |
+| Suprafață utilă | 60,00 mp |
+| Înălțime liberă | — (exterior acoperit parțial) |
+| Pardoseală | Dală antiderapantă exterioară R11, pantă scurgere |
+| Pereți | — / parapet |
+| Tavan | Copertină parțială (D23) |
+| Tâmplărie | — |
+| Dotări fixe | Mobilier exterior fix, jardiniere înălțate accesibile, umbrar |
+| V | Aer liber |
+| IL | Iluminat exterior 50 lx, fără orbire |
+| AC | — |
+| PSI | Cale evacuare secundară posibilă |
+| ACC | Acces fără prag, mână curentă, jardiniere la 0,60-0,75 m |
+
+### PTh-A.15.4 — Breviar sintetic încăperi
+
+| Categorie | Nr. încăperi | Arie utilă aprox. (mp) |
+|---|---|---|
+| Circulații (holuri, scări, lift) | 5 | 130 |
+| Cabinete medicale / terapie | 7 | 143 |
+| Săli activități / socializare | 5 | 217 |
+| Administrație / birouri | 4 | 60 |
+| Grupuri sanitare / vestiare | 6 | 77 |
+| Oficii / servire | 3 | 40 |
+| Tehnice / depozite / deșeuri | 6 | 54 |
+| Odihnă / relaxare | 3 | 60 |
+| Exterior (terasă) | 1 | 60 |
+| **Total (fără terasă)** | **≈ 39** | **≈ 781 util** |
+
+---
+
+## PTh-A.16 — STUDIU DE ÎNSORIRE ȘI ILUMINAT NATURAL
+
+### PTh-A.16.1 — Cadru normativ și metodologie
+
+Studiul verifică respectarea Ordinului Ministerului Sănătății nr. 119/2014 (norme de igienă), completat de NP 015 (proiectarea unităților de asistență socială), C 107 (termotehnică pentru raportul vitrat) și SR EN 17037 (lumina naturală în clădiri). Cerințele urmărite:
+
+- **Durata minimă de însorire:** minim 1½ ore la solstițiul de iarnă (21 decembrie), respectiv conform Ord. MS 119/2014 durata neîntreruptă de însorire de cel puțin 1½ h/zi pentru încăperile de zi ocupate durabil.
+- **Raportul suprafață vitrată / suprafață pardoseală (RSV):** minim 1/8 (0,125) pentru încăperi de ședere prelungită; recomandat 1/6 (0,167) pentru încăperi terapeutice și de lectură.
+- **Factorul mediu de lumină naturală (FLN):** minim 2 % pentru încăperi ocupate, minim 3-5 % pentru zone de lucru fin (lectură, ergoterapie, examinare).
+
+Metoda: calcul geometric pe fațadele reale, orientare stabilită conform planului de trasare (fațada principală orientată sud-est). Se exclud din verificarea de însorire încăperile fără cerință (depozite, tehnice, GS, circulații interioare).
+
+### PTh-A.16.2 — Verificarea duratei de însorire (21 decembrie)
+
+| Încăpere | Orientare fereastră | Unghi obstrucție | Durată însorire estimată | Cerință | Verdict |
+|---|---|---|---|---|---|
+| P.02 Recepție/așteptare | SE | 12° | 3 h 10 min | ≥ 1,5 h | Conform |
+| P.03 Cabinet medical | S | 10° | 4 h 05 min | ≥ 1,5 h | Conform |
+| P.05 Kinetoterapie | SV | 15° | 3 h 40 min | ≥ 1,5 h | Conform |
+| P.06 Ergoterapie | SE | 14° | 2 h 55 min | ≥ 1,5 h | Conform |
+| P.07 Multifuncțională | S | 8° | 4 h 20 min | ≥ 1,5 h | Conform |
+| P.12 Cameră odihnă | E | 18° | 2 h 10 min | ≥ 1,5 h | Conform |
+| E.02 Terapie grup | SE | 10° | 3 h 15 min | ≥ 1,5 h | Conform |
+| E.03 Bibliotecă | S | 6° | 4 h 30 min | ≥ 1,5 h | Conform |
+| E.05 Snoezelen | N | — | 0 h (intenționat blackout) | fără cerință* | Conform* |
+| E.06 Birou director | SV | 12° | 3 h 25 min | ≥ 1,5 h | Conform |
+
+*Sala snoezelen are cerință funcțională de blackout; iluminatul natural este intenționat controlat/exclus, iar durata de însorire nu constituie criteriu igienic pentru destinația senzorială.
+
+### PTh-A.16.3 — Raportul suprafață vitrată / pardoseală (RSV)
+
+| Încăpere | S pardoseală (mp) | S vitrată efectivă (mp) | RSV | Cerință | Verdict |
+|---|---|---|---|---|---|
+| P.02 Recepție | 46,20 | 8,60 | 0,186 | ≥ 0,125 | Conform |
+| P.03 Cabinet medical | 16,80 | 2,90 | 0,173 | ≥ 0,167 | Conform |
+| P.04 Consiliere | 14,00 | 2,20 | 0,157 | ≥ 0,125 | Conform |
+| P.05 Kinetoterapie | 42,00 | 9,80 | 0,233 | ≥ 0,125 | Conform |
+| P.06 Ergoterapie | 38,50 | 6,80 | 0,177 | ≥ 0,167 | Conform |
+| P.07 Multifuncțională | 72,00 | 14,60 | 0,203 | ≥ 0,125 | Conform |
+| P.12 Cameră odihnă | 20,00 | 2,70 | 0,135 | ≥ 0,125 | Conform |
+| E.02 Terapie grup | 45,00 | 8,40 | 0,187 | ≥ 0,125 | Conform |
+| E.03 Bibliotecă | 26,00 | 5,00 | 0,192 | ≥ 0,167 | Conform |
+| E.04 Cabinet psiholog | 12,00 | 1,70 | 0,142 | ≥ 0,125 | Conform |
+| E.06 Birou director | 16,00 | 2,60 | 0,163 | ≥ 0,125 | Conform |
+| E.07 Ședințe | 22,00 | 3,60 | 0,164 | ≥ 0,125 | Conform |
+
+Suprafața vitrată efectivă este suprafața liberă a golului minus cca 20 % ocupat de rame/montanți (factor de transparență al tâmplăriei aplicat conform tabloului de tâmplărie).
+
+### PTh-A.16.4 — Factorul mediu de lumină naturală (FLN)
+
+Calcul simplificat prin metoda componentei directe (SR EN 17037), coeficient de reflexie mediu interior 0,55 (pereți deschiși, tavan alb αw irelevant optic), transmisia geamului triplu low-E τ = 0,68.
+
+| Încăpere | FLN estimat (%) | Cerință FLN (%) | Verdict |
+|---|---|---|---|
+| P.02 Recepție | 2,8 | ≥ 2,0 | Conform |
+| P.03 Cabinet medical | 3,4 | ≥ 3,0 | Conform |
+| P.05 Kinetoterapie | 4,1 | ≥ 2,0 | Conform |
+| P.06 Ergoterapie | 3,6 | ≥ 3,0 | Conform |
+| P.07 Multifuncțională | 3,9 | ≥ 2,0 | Conform |
+| P.12 Cameră odihnă | 2,3 | ≥ 2,0 | Conform |
+| E.02 Terapie grup | 3,2 | ≥ 2,0 | Conform |
+| E.03 Bibliotecă | 4,4 | ≥ 3,0 | Conform |
+| E.04 Cabinet psiholog | 2,4 | ≥ 2,0 | Conform |
+| E.06 Birou director | 3,1 | ≥ 2,0 | Conform |
+
+### PTh-A.16.5 — Măsuri de control al luminii și protecție solară
+
+| Măsură | Încăperi vizate | Rol |
+|---|---|---|
+| Jaluzele exterioare orientabile | P.05, P.07, E.02, E.03 | Reducere aport termic estival, control orbire |
+| Jaluzele integrate în geam | P.03, P.12 | Igienă (cabinet), blackout parțial (odihnă) |
+| Blackout total | E.05 snoezelen | Cerință funcțională senzorială |
+| Peliculă low-E selectivă | Toate golurile mari S/SV | Factor solar g ≤ 0,35 |
+| Reflectoare de lumină (lightshelf) | E.03 bibliotecă | Distribuție uniformă în adâncime |
+
+Concluzie: toate încăperile cu cerință de ședere prelungită satisfac simultan durata de însorire, raportul vitrat și factorul de lumină naturală conform Ord. MS 119/2014, NP 015 și SR EN 17037.
+
+---
+
+## PTh-A.17 — PROGRAM DETALIAT DE MENTENANȚĂ ARHITECTURĂ
+
+### PTh-A.17.1 — Principii și responsabilități
+
+Programul de mentenanță stabilește operațiile, periodicitatea și responsabilul pentru fiecare element de arhitectură, în scopul menținerii duratei de viață proiectate și a garanțiilor. Responsabili: **AD** = administrator clădire, **FT** = firmă tehnică specializată contract, **PSI** = responsabil securitate la incendiu, **PROD** = producător/instalator autorizat (perioada de garanție).
+
+### PTh-A.17.2 — Terasă necirculabilă / circulabilă
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Curățare guri scurgere și site | Trimestrial + după furtuni | AD |
+| Verificare vizuală membrană hidroizolație (fisuri, băltiri) | Semestrial | FT |
+| Verificare racorduri, colțare, străpungeri | Anual | FT |
+| Verificare strat protecție / pietriș / dale | Anual | FT |
+| Test etanșeitate zone suspecte | La 5 ani sau la semnalare | FT |
+| Reîntinerire mastic rosturi | La 5-7 ani | FT |
+| Verificare parapet terasă tehnică și fixări | Anual | FT |
+
+### PTh-A.17.3 — Sistem termoizolant fațadă (ETICS)
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Inspecție vizuală fisuri, umflături, desprinderi | Anual | FT |
+| Verificare rosturi de dilatație și profile | Anual | FT |
+| Spălare fațadă (praf, poluare, alge) | La 3-5 ani | FT |
+| Verificare glafuri, solbancuri, picurători | Anual | FT |
+| Retușare tencuială decorativă lovită | La nevoie | FT |
+| Verificare ancoraje mascare instalații fațadă (D28) | Anual | FT |
+
+### PTh-A.17.4 — Tâmplărie exterioară și interioară
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Curățare profile și garnituri | Semestrial | AD |
+| Reglaj feronerie, balamale, cremoane | Anual | FT |
+| Verificare/înlocuire garnituri EPDM | La 5 ani | FT |
+| Gresare puncte mobile | Anual | FT |
+| Verificare uși automate acces (senzori, viteză) | Trimestrial | PROD |
+| Verificare uși EI (autoînchidere, garnituri intumescente) | Semestrial | PSI |
+| Verificare tâmplărie acustică (etanșeitate perimetrală) | Anual | FT |
+
+### PTh-A.17.5 — Finisaje interioare
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Curățare/dezinfecție pardoseli PVC | Zilnic/săptămânal | AD |
+| Metalizare/ceruire PVC omogen | Anual | FT |
+| Verificare suduri PVC și racorduri curbe la perete | Anual | FT |
+| Verificare rosturi gresie/faianță zone umede | Anual | FT |
+| Rezugrăvire pereți zone trafic | La 2-3 ani | FT |
+| Verificare tavane casetate (fixări, plăci deteriorate) | Anual | FT |
+| Verificare lambriuri antișoc și mâini curente | Semestrial | AD |
+
+### PTh-A.17.6 — Accesibilizări și elemente pentru vârstnici
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Verificare fixare mâini curente (moment strângere) | Semestrial | AD |
+| Verificare bare rabatabile GS (sarcină, blocare) | Trimestrial | FT |
+| Verificare butoane alarmă GS (funcționare, cablare) | Lunar | FT |
+| Verificare benzi tactile exterioare/interioare (uzură, contrast) | Semestrial | AD |
+| Verificare rampe exterioare (aderență, denivelări) | Trimestrial | AD |
+| Verificare lift persoane (revizie autorizată ISCIR) | Conform ISCIR | PROD |
+| Verificare buclă inductivă (semnal) | Anual | FT |
+
+### PTh-A.17.7 — Elemente exterioare
+
+| Operație | Periodicitate | Responsabil |
+|---|---|---|
+| Curățare grătar ștergere picioare (D26) | Săptămânal | AD |
+| Verificare copertină acces (fixări, scurgere) | Anual | FT |
+| Verificare parapete și balustrade exterioare | Semestrial | FT |
+| Curățare/verificare terasă exterioară activități | Sezonier | AD |
+| Verificare mână curentă exterioară rampă (D25) | Trimestrial | AD |
+
+---
+
+## PTh-A.18 — PLAN DE MANAGEMENT AL CALITĂȚII (execuție arhitectură)
+
+### PTh-A.18.1 — Domeniu și structură
+
+Planul de management al calității (PMC) pentru lucrările de arhitectură se aplică pe faze, cu proceduri tehnice de execuție (PTE), puncte de control (PC) — inclusiv faze determinante (FD) supuse verificatorului/dirigintelui — și înregistrări specifice. Se corelează cu Legea 10/1995 și HG 273/1994 (recepția lucrărilor).
+
+### PTh-A.18.2 — Proceduri tehnice de execuție (PTE)
+
+| Cod | Procedură | Fază |
+|---|---|---|
+| PTE-A01 | Trasare și verificare cote arhitectură | Înainte de compartimentări |
+| PTE-A02 | Execuție pereți despărțitori (zidărie/GK) | Structură brută |
+| PTE-A03 | Execuție hidroizolații zone umede și terasă | Finisaje |
+| PTE-A04 | Montaj termosistem ETICS | Fațade |
+| PTE-A05 | Montaj tâmplărie exterioară | Închideri |
+| PTE-A06 | Execuție pardoseli (șape, PVC, gresie) | Finisaje |
+| PTE-A07 | Montaj tavane suspendate | Finisaje |
+| PTE-A08 | Execuție finisaje pereți (zugrăveli, placaje) | Finisaje |
+| PTE-A09 | Montaj elemente accesibilitate (mâini curente, bare) | Finisaje |
+| PTE-A10 | Montaj tâmplărie interioară și uși EI | Finisaje |
+
+### PTh-A.18.3 — Puncte de control și faze determinante
+
+| Punct control | Element verificat | Criteriu acceptare | Tip | Înregistrare |
+|---|---|---|---|---|
+| PC-01 | Trasare axe și cote nivel | Toleranță ± 5 mm | FD | Proces-verbal trasare |
+| PC-02 | Suport hidroizolație (planeitate, pantă) | Pantă ≥ 1,5 %, fără denivelări | FD | PV fază determinantă |
+| PC-03 | Etanșeitate hidroizolație zone umede | Test inundare 24 h fără infiltrații | FD | PV probă etanșeitate |
+| PC-04 | Aderență ETICS (lipire + dibluri) | Smulgere ≥ 0,08 N/mmp | PC | Buletin încercare |
+| PC-05 | Verticalitate/planeitate tencuială | Abatere ≤ 2 mm/m | PC | Fișă control |
+| PC-06 | Montaj tâmplărie (aplomb, etanșare) | Abatere ≤ 2 mm/m, spumă continuă | PC | Fișă recepție |
+| PC-07 | Planeitate pardoseli | Abatere ≤ 2 mm/2 m | PC | Fișă control |
+| PC-08 | Suduri PVC și ridicare la perete | Continuitate, h ≥ 100 mm | PC | Fișă control |
+| PC-09 | Fixare mâini curente/bare (sarcină) | Rezistă la ≥ 1,0 kN | FD | PV probă sarcină |
+| PC-10 | Uși EI (autoînchidere, garnituri) | Închidere completă, certificat | PC | Fișă + certificat produs |
+| PC-11 | Contrast/dimensiuni elemente accesibilitate | Conform NP 051 | PC | Fișă conformitate |
+
+### PTh-A.18.4 — Înregistrări de calitate obligatorii
+
+| Înregistrare | Emitent | Arhivare |
+|---|---|---|
+| Procese-verbale faze determinante | Executant + verificator + diriginte | Cartea tehnică |
+| Procese-verbale lucrări ascunse | Executant + diriginte | Cartea tehnică |
+| Certificate/declarații performanță materiale | Furnizor | Cartea tehnică |
+| Buletine încercări (aderență, etanșeitate) | Laborator autorizat | Cartea tehnică |
+| Fișe de control intern | Responsabil tehnic execuție | Dosar executant |
+| Registru neconformități + acțiuni corective | RTE | Dosar calitate |
+
+### PTh-A.18.5 — Tratarea neconformităților
+
+| Etapă | Acțiune | Responsabil |
+|---|---|---|
+| Identificare | Consemnare în registru NC | Orice participant |
+| Analiză | Stabilire cauză și soluție | RTE + proiectant |
+| Decizie | Acceptare/remediere/refacere | Proiectant + diriginte |
+| Execuție remediere | Conform dispoziției de șantier | Executant |
+| Verificare | Confirmare remediere | Diriginte |
+| Închidere | Semnare închidere NC | RTE + diriginte |
+
+---
+
+## PTh-A.19 — MĂSURI EFICIENȚĂ ENERGETICĂ ȘI DURABILITATE (arhitectură)
+
+### PTh-A.19.1 — Cadru nZEB și obiective
+
+Clădirea se proiectează în standard nZEB conform Legii 372/2005 (republicată) și Mc 001, cu consum de energie primară aproape zero acoperit predominant din surse regenerabile. Componenta de arhitectură contribuie prin anvelopă performantă, tratarea punților termice, etanșeitate la aer și alegerea materialelor sustenabile.
+
+### PTh-A.19.2 — Performanța anvelopei (rezistențe termice)
+
+| Element anvelopă | R proiectat (mp·K/W) | R minim normat | Verdict |
+|---|---|---|---|
+| Perete exterior ETICS 18 cm | 4,60 | ≥ 1,80 | Conform (depășit) |
+| Terasă termoizolată | 5,80 | ≥ 5,00 | Conform |
+| Placă pe sol termoizolată | 4,10 | ≥ 4,50* | Ajustare grosime izolație |
+| Tâmplărie triplu geam low-E | U = 0,90 W/mpK | ≤ 1,30 | Conform |
+| Ușă exterioară izolată | U = 1,20 W/mpK | ≤ 1,50 | Conform |
+
+*Se majorează grosimea polistirenului extrudat sub placă pentru atingerea R ≥ 4,50.
+
+### PTh-A.19.3 — Tratarea punților termice
+
+| Punte termică | Soluție de tratare | Efect |
+|---|---|---|
+| Soclu / racord perete-fundație | Termoizolație soclu coborâtă min. 60 cm sub CTS | Elimină puntea liniară soclu |
+| Buiandrugi și glafuri goluri | Retur termoizolație pe glaf min. 3 cm + solbanc izolat | Reduce ψ la goluri |
+| Atic terasă | Termoizolație continuă peste atic, capac izolat | Continuitate anvelopă |
+| Balcoane/copertine | Element cu întrerupere termică (izolator structural) | Elimină puntea de consolă |
+| Planșeu peste sol la conturul exterior | Termoizolație perimetrală verticală | Reduce pierderi la contur |
+| Străpungeri instalații | Manșoane izolate, etanșare | Elimină punți punctuale |
+
+### PTh-A.19.4 — Etanșeitate la aer
+
+| Măsură | Detaliu |
+|---|---|
+| Barieră de etanșare continuă | Strat continuu (tencuială interioară / membrană) pe toată anvelopa |
+| Etanșare goluri tâmplărie | Bandă precomprimată exterior + folie difuzie/barieră interior (principiul „mai etanș în interior decât în exterior") |
+| Etanșare străpungeri | Manșoane și benzi la toate trecerile prin anvelopă |
+| Țintă test Blower Door | n50 ≤ 1,5 h⁻¹ (obiectiv nZEB) |
+| Verificare | Test presurizare/depresurizare la recepție |
+
+### PTh-A.19.5 — Materiale sustenabile și economie circulară
+
+| Categorie | Alegere sustenabilă | Beneficiu |
+|---|---|---|
+| Termoizolație | Vată minerală (reciclabilă, A1) parțial în locul EPS | Ignifug, reciclabil |
+| Finisaje interioare | Vopsele cu emisii reduse COV (A+) | Calitate aer interior |
+| Pardoseli | PVC cu conținut reciclat, reciclabil la sfârșit de viață | Circularitate |
+| Tâmplărie | Profile cu conținut reciclat, geam reciclabil | Amprentă redusă |
+| Lemn | Certificat proveniență responsabilă (FSC/PEFC) | Sursă responsabilă |
+| Ape | Colectare ape pluviale terasă pentru irigare grădină | Economie apă |
+
+### PTh-A.19.6 — Măsuri pasive și confort
+
+| Măsură | Rol |
+|---|---|
+| Orientare sud-est fațadă principală | Maximizare aport solar iarna |
+| Protecție solară exterioară (jaluzele) | Prevenire supraîncălzire vara |
+| Masă termică interioară (planșee, pereți grei) | Amortizare oscilații temperatură |
+| Ventilare naturală transversală suplimentară | Răcire nocturnă vara |
+| Iluminat natural optimizat (vezi A.16) | Reducere consum iluminat artificial |
+| Zonare termică (încăperi tampon la nord) | Reducere pierderi |
+
+---
+
+## PTh-A.20 — DETALII SUPLIMENTARE D23-D30
+
+### PTh-A.20.1 — D23 Copertină acces principal
+
+| Parametru | Specificație |
+|---|---|
+| Tip | Copertină în consolă peste intrarea principală |
+| Structură | Cadru metalic zincat termic, tije tirant sau consolă încastrată |
+| Acoperire | Panou compozit / policarbonat / tablă cu izolație fonică ploaie |
+| Lățime acoperire | Min. 1,50 m peste zona ușilor + depășire laterală 0,30 m |
+| Pantă | 2 % spre jgheab ascuns cu burlan mascat |
+| Iluminat integrat | Spoturi LED încastrate 200 lx la sol |
+| Racord fațadă | Șorț de etanșare sub tencuială, picurător |
+| Rol accesibilitate | Protecție utilizatori la ploaie/zăpadă în zona de așteptare acces |
+
+### PTh-A.20.2 — D24 Rampă exterioară acces
+
+| Parametru | Specificație |
+|---|---|
+| Pantă | Max. 8 % (recomandat 5 %) conform NP 051 |
+| Lățime liberă | Min. 1,20 m (recomandat 1,50 m) |
+| Podeste | La fiecare 10 m rampă și la schimbări direcție, min. 1,50 × 1,50 m |
+| Finisaj | Dală/beton amprentat antiderapant R11, culoare contrastantă |
+| Rebord lateral | Bordură de siguranță h ≥ 10 cm (prevenire ieșire roată) |
+| Mână curentă | Dublă (0,70 / 0,90 m) ambele părți, continuă (vezi D25) |
+| Scurgere | Pantă transversală 1 %, rigolă la bază |
+| Semnalizare | Bandă tactilă la capete (vezi D30) |
+
+### PTh-A.20.3 — D25 Mână curentă exterioară
+
+| Parametru | Specificație |
+|---|---|
+| Material | Țeavă inox Ø 40 mm sau aluminiu vopsit, prindere pe montanți |
+| Înălțimi | Dublu nivel: 0,90 m și 0,70 m |
+| Prelungiri | Orizontale min. 0,30 m la capetele rampei/scării |
+| Distanță perete | Min. 40 mm liber pentru priză mână |
+| Capete | Rotunjite / întoarse spre perete (fără agățare) |
+| Continuitate | Neîntreruptă pe toată lungimea rampei și podestelor |
+| Contrast | Culoare contrastantă față de fundal (reperabilitate) |
+| Prindere | Suporți la max. 1,00 m interax, rezistență ≥ 1,0 kN |
+
+### PTh-A.20.4 — D26 Grătar ștergere picioare încastrat
+
+| Parametru | Specificație |
+|---|---|
+| Poziție | În pardoseala sasului de acces (P.01), la nivel |
+| Cadru | Ramă inox / aluminiu încastrată în șapă, cuvă cu scurgere |
+| Grătar | Lamele aluminiu cu inserție cauciuc + perii, pas ≤ 8 mm (fără prindere baston/roată) |
+| Dimensiune | Min. lățimea ușii × 0,90 m adâncime |
+| Suprafață superioară | La același nivel cu pardoseala finită (fără prag) |
+| Scurgere | Sifon în cuva de dedesubt, racord canalizare |
+| Accesibilitate | Interspațiu ≤ 8 mm pentru a nu bloca roți scaun rulant / vârf baston |
+| Întreținere | Grătar demontabil pentru curățare cuvă |
+
+### PTh-A.20.5 — D27 Parapet terasă tehnică
+
+| Parametru | Specificație |
+|---|---|
+| Înălțime | Min. 1,00 m (min. 1,10 m dacă acces frecvent) |
+| Structură | Atic zidit termoizolat + parapet metalic sau atic înalt |
+| Umplere | Fără spații care permit cățărare (fără trepte orizontale) |
+| Interspații verticale | ≤ 10 cm (nedepășibile) |
+| Capac atic | Copertină metalică cu picurător ambele fețe, pantă spre interior |
+| Racord hidroizolație | Ridicare hidroizolație pe atic min. 20 cm peste terasa finită |
+| Fixare | Ancoraje inox, dilatații prevăzute |
+| Protecție anticădere | Puncte de ancorare linie de viață pentru mentenanță |
+
+### PTh-A.20.6 — D28 Mascare instalații pe fațadă
+
+| Parametru | Specificație |
+|---|---|
+| Scop | Mascare traseu evacuare condens / burlane / unități exterioare |
+| Sistem | Casetă/jaluzea din tablă aluminiu vopsită în culoarea fațadei |
+| Ventilare | Fante de ventilare pentru unitățile exterioare (debit necesar) |
+| Fixare | Structură secundară ancorată în perete, independentă de ETICS |
+| Etanșare | Străpungeri ETICS etanșate, fără punte termică |
+| Demontabilitate | Panouri demontabile pentru acces mentenanță |
+| Integrare estetică | Aliniere la rosturile de fațadă, aspect unitar |
+
+### PTh-A.20.7 — D29 Profil rost fațadă
+
+| Parametru | Specificație |
+|---|---|
+| Tip | Rost de dilatație / rost estetic în tencuiala decorativă ETICS |
+| Profil dilatație | Profil PVC/aluminiu cu bandă elastică pentru mișcări |
+| Poziție | La rosturile structurale și la max. 12-15 m câmp continuu fațadă |
+| Adâncime rost estetic | 8-12 mm, muchii cu profil de colț/glet |
+| Etanșare | Mastic elastic la rosturile funcționale, compatibil ETICS |
+| Rol | Preluare dilatații termice, evitare fisuri necontrolate |
+| Aspect | Trasee ordonate, corelate cu compoziția fațadei |
+
+### PTh-A.20.8 — D30 Bandă tactilă exterioară de avertizare/ghidaj
+
+| Parametru | Specificație |
+|---|---|
+| Tip | Plăci/benzi tactile podotactile (avertizare = butoni, ghidaj = nervuri) |
+| Poziție avertizare | La capetele rampei, scării exterioare, trecere carosabil, acces principal |
+| Poziție ghidaj | Traseu continuu de la limita proprietății la intrare |
+| Material | Plăci inox/beton/polimer antiderapante, rezistente îngheț-dezgheț |
+| Contrast | Culoare și luminanță contrastante față de pardoseala adiacentă |
+| Lățime bandă | Ghidaj min. 0,30 m; avertizare adâncime 0,60 m |
+| Racord | La nivel cu pardoseala, fără prag de împiedicare |
+| Corelare interior | Continuitate cu ghidajul tactil din holuri (P.02, E.01) |
+
+---
+
+## PTh-A.21 — NOTĂ DE CORELARE ȘI ÎNCHEIERE SUPLIMENT
+
+Prezentul supliment PTh (capitolele A.15-A.20) completează, fără a repeta, piesele emise anterior (DTAC, PTh partea 1 — detalii D01-D10 și fișe finisaje, PTh partea 2 — fișe materiale FT01-08, detalii D11-D22, breviar suprafețe). Room data sheets (A.15) se corelează cu tabloul de tâmplărie și fișele de finisaje prin codurile de finisaj; detaliile D23-D30 (A.20) continuă seria de detalii fără suprapunere. Studiul de însorire (A.16), programul de mentenanță (A.17), planul de management al calității (A.18) și măsurile de eficiență energetică (A.19) sunt teme netratate în piesele anterioare. Toate valorile numerice sunt orientative de proiect și se confirmă la fazele determinante prin măsurători și încercări de laborator, conform planului de management al calității.

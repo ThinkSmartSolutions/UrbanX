@@ -1210,3 +1210,589 @@ Notă: cantitățile din prezentul extras servesc corelării cu listele de canti
 ---
 
 *Prezentul supliment PTh completează memoriile de instalații pe temele: calcul iluminat interior și de siguranță, breviar PSI (hidranți, IDSAI, desfumare, stingătoare), bilanț energetic (Legea 372/2005), calcul ventilare mecanică (I5), calcul canalizare menajeră și pluvială, fișe tehnice echipamente complementare și protecția antiseismică a instalațiilor (P100 — componente nestructurale). Toate calculele sunt de nivel de proiect tehnic (PTh) și se corelează cu planurile de execuție, schemele și detaliile de montaj din piesele desenate.*
+
+Voi livra conținutul PTh suplimentar cerut. Este o sarcină de redactare tehnică directă, deci scriu markdown-ul integral.
+
+## PTh-I.17 — INSTALAȚIA DE UTILIZARE GAZE NATURALE (NTPEE-2018/2022)
+
+### PTh-I.17.1 Date generale și încadrare
+
+Centrul social de zi pentru vârstnici (P+1, Sd ≈ 900 mp) se alimentează cu gaze naturale exclusiv pentru **centrala termică proprie**, amplasată într-o încăpere tehnică dedicată la parter, cu acces direct din exterior. Nu există aparate consumatoare de gaze în restul clădirii (bucătăria de regenerare este electrică — vezi PTh-I partea 1). Presiunea de alimentare la ieșirea din postul de reglare-măsurare este **presiune joasă** (sub 0,05 bar = 50 mbar), conform racordului avizat de operatorul de distribuție (OD).
+
+Proiectul se conformează Normelor Tehnice pentru Proiectarea, Executarea și Exploatarea sistemelor de alimentare cu gaze naturale (NTPEE — Ordin ANRE 89/2018 cu modificările ulterioare), SR EN 1775, I13, P118 și normativelor conexe.
+
+| Parametru | Valoare de proiect |
+|---|---|
+| Combustibil | Gaz natural (metan), Hi ≈ 9,32 kWh/mc (33,54 MJ/mc) |
+| Densitate relativă față de aer | 0,554 (gaz mai ușor decât aerul) |
+| Presiune la contor / ieșire PRM | 20 mbar (presiune joasă) |
+| Presiune minimă la aparat | ≥ 17 mbar |
+| Categoria consumator | Non-casnic, C1 |
+| Amplasare aparat | Centrală termică proprie, parter, perete exterior |
+
+### PTh-I.17.2 Debitul de calcul
+
+Aparatul consumator este cazanul în condensație cu putere nominală **Pn = 70 kW** (2 module de 35 kW în caskadă — vezi bilanț termic PTh partea 2), randament pe PCS ηs = 0,98.
+
+Debitul nominal de gaz al fiecărui aparat:
+
+Qi = Pn / (Hi × η)
+
+Qi = 70 / (9,32 × 0,98) = **7,66 mc/h**
+
+Se adoptă debit de calcul de dimensionare cu coeficient de simultaneitate **Cs = 1,0** (un singur circuit de aparate, funcționare simultană a modulelor în cascadă):
+
+Qc = Cs × ΣQi = 1,0 × 7,66 = **7,66 mc/h** → rotunjit de proiect **8 mc/h**
+
+| Aparat | Pn [kW] | η | Qi [mc/h] | Cs | Qc [mc/h] |
+|---|---|---|---|---|---|
+| Cazan condensație cascadă 2×35 kW | 70 | 0,98 | 7,66 | 1,0 | 7,66 |
+| **Total instalație** | **70** | — | **7,66** | — | **≈ 8,0** |
+
+### PTh-I.17.3 Dimensionarea conductelor pe tronsoane
+
+Instalația de utilizare se dimensionează astfel încât căderea totală de presiune de la PRM până la aparat să nu depășească **10 mbar** (limită NTPEE pentru presiune joasă, pentru a garanta minimum 17 mbar la aparat pornind de la 20 mbar nominal). Se folosește țeavă de oțel pentru traseul îngropat/exterior și țeavă de oțel/cupru pentru interior (se adoptă **oțel Dn** pe tot traseul de utilizare interioară din centrala termică).
+
+Formula de calcul a căderii de presiune (regim laminar-turbulent, presiune joasă, relația NTPEE / Renouard joasă presiune):
+
+ΔP = 23,2 × Lc × Qc^1,82 / D^4,82   [mbar]
+
+unde:
+- Lc = lungimea de calcul = L geometric × 1,1 (majorare 10% pentru rezistențe locale)
+- Qc în mc/h, D diametrul interior în mm
+- ΔP în mbar
+
+Traseul: PRM (limita proprietate) → conductă îngropată exterioară → intrare în centrală → robinet de incendiu (RTI manual) → contor → electrovalvă → rampă gaz cazan.
+
+| Tronson | Descriere | Qc [mc/h] | L geom [m] | Lc [m] | Dn ales | D int [mm] | v [m/s] | ΔP tronson [mbar] |
+|---|---|---|---|---|---|---|---|---|
+| T1 | PRM → intrare clădire (îngropat) | 8,0 | 12,0 | 13,2 | Dn 32 (1¼") | 35,9 | 2,2 | 0,42 |
+| T2 | Intrare → RTI → contor | 8,0 | 3,0 | 3,3 | Dn 32 (1¼") | 35,9 | 2,2 | 0,11 |
+| T3 | Contor → electrovalvă → rampă cazan | 8,0 | 6,0 | 6,6 | Dn 32 (1¼") | 35,9 | 2,2 | 0,21 |
+| **Total** | PRM → aparat | 8,0 | 21,0 | 23,1 | — | — | — | **0,74** |
+
+Verificarea vitezei gazului:
+
+v = Qc / (3600 × A) ; A = π × D²/4 = 3,14 × 0,0359²/4 = 1,012×10⁻³ mp
+
+v = 8,0 / (3600 × 1,012×10⁻³) = 2,20 m/s
+
+Viteza 2,20 m/s < 20 m/s (limita admisă presiune joasă) → **CONFORM**.
+
+Căderea totală ΔP = 0,74 mbar << 10 mbar admis → **CONFORM cu rezervă amplă**. Presiune la aparat = 20 − 0,74 = 19,26 mbar > 17 mbar minim → **CONFORM**.
+
+Se adoptă unitar **Dn 32 (oțel, 1¼")** pe tot traseul de utilizare, pentru uniformitate de montaj și marjă de siguranță.
+
+### PTh-I.17.4 Postul de reglare-măsurare (PRM)
+
+Postul de reglare-măsurare se amplasează la limita de proprietate, în firidă metalică ventilată, montată pe soclu de beton, la min. 0,50 m de orice deschidere și min. 1,0 m de tabloul electric exterior.
+
+| Componentă PRM | Caracteristică |
+|---|---|
+| Robinet de branșament (la intrare) | Dn 32, sferic, cu manetă, cu blocare |
+| Filtru de gaz | Grad filtrare 50 μm, Dn 32 |
+| Regulator de presiune | Intrare presiune redusă → ieșire 20 mbar, Qmax ≥ 10 mc/h |
+| Supapă de blocare (SSV) | Închidere la suprapresiune/subpresiune |
+| Supapă de descărcare (SBV) | Evacuare controlată la depășire prag |
+| Contor de gaz | Turbină/burduf G4-G6, Qmax 10 mc/h, cu index |
+| Robinet post-contor | Dn 32, izolare instalație utilizare |
+| Priză de manometru | Verificare presiune reglată |
+
+Firida PRM se leagă la priza de pământ (echipotențializare), se marchează avertizor „PERICOL GAZE — NU FUMAȚI, NU FOLOSIȚI FOC DESCHIS".
+
+### PTh-I.17.5 Detector de gaz, electrovalvă și sistemul de siguranță
+
+Centrala termică se echipează cu **sistem automat de detecție și blocare gaz**, obligatoriu la debit > 3 mc/h în spații interioare:
+
+| Element | Caracteristică / prag |
+|---|---|
+| Detector gaz metan | Senzor catalitic/semiconductor, montat la 0,30 m sub tavan (gaz mai ușor ca aerul) |
+| Prag alarmă preventivă | 10% LIE (LIE metan = 5% vol.) → 0,5% vol. metan în aer |
+| Prag alarmă de blocare | 20% LIE → 1,0% vol. metan |
+| Electrovalvă (EV) | Normal închisă (NF), rearmare manuală, Dn 32, 230 V |
+| Logica de siguranță | La depășire prag → EV se închide + alarmă acustică/optică + oprire arzător |
+| Reanclanșare | Manuală, numai după ventilare și dispariția cauzei |
+| Alimentare de siguranță | EV se închide și la cădere tensiune (fail-safe) |
+
+Detectorul se interconectează cu centrala de detecție incendiu (IDSAI — vezi PTh partea 2) pentru semnalizare la panoul de asistent și oprirea ventilării în caz de incendiu, dar închiderea EV pe gaz are prioritate absolută.
+
+### PTh-I.17.6 Ventilarea centralei termice
+
+Ventilarea naturală a încăperii centralei se dimensionează conform NTPEE și I13, cu **priză de aer inferioară** (aer proaspăt combustie + ventilare) și **priză superioară** (evacuare eventuale scăpări gaz + aer viciat).
+
+Debit aer de combustie necesar (regula: 2 mc aer/mc gaz teoretic + exces):
+
+Vaer ≈ Qc × 11 (aer stoechiometric + exces λ≈1,15) = 8 × 11 ≈ 88 mc/h
+
+Suprafața grilei de ventilare (regulă NTPEE): min. **0,0025 mp per kW**, dar nu mai puțin decât aria echivalentă rezultată din debit.
+
+Sinf = 0,0025 × Pn = 0,0025 × 70 = 0,175 mp = **1750 cmp** (priza inferioară)
+
+Ssup = min. 50% din inferioară = **875 cmp** (priza superioară, evacuare)
+
+| Grilă | Poziție | Suprafață liberă necesară | Adoptat |
+|---|---|---|---|
+| Priză inferioară (aer combustie) | La 0,30 m de pardoseală, perete exterior | 1750 cmp | Grilă 500×400, secțiune liberă ~1800 cmp |
+| Priză superioară (evacuare) | La 0,30 m sub tavan, perete exterior | 875 cmp | Grilă 350×300, secțiune liberă ~900 cmp |
+
+Ambele grile sunt fixe (fără posibilitate de obturare), protejate cu plasă anti-insecte cu ochiuri ce nu reduc secțiunea liberă sub valorile de mai sus. Se interzice orice sistem care poate închide aceste prize.
+
+### PTh-I.17.7 Evacuarea gazelor arse (coș / tiraj)
+
+Cazanul în condensație funcționează cu **cameră etanșă (tip C)**, evacuare forțată prin coș concentric/dublu-flux din inox, cu aspirație aer din exterior și evacuare gaze arse peste acoperiș.
+
+| Parametru evacuare | Valoare |
+|---|---|
+| Tip cazan | C (etanș), tiraj forțat |
+| Sistem coș | Dublu perete inox, izolat, rezistent la condens |
+| Diametru evacuare gaze | Dn 100 mm (conform fișă cazan cascadă) |
+| Temperatură gaze arse | ~55–60 °C (condensație) |
+| Înălțime coș peste coamă acoperiș | min. 0,50 m (respectă distanțele față de goluri) |
+| Colector condens | Sifon cu neutralizator condens acid, racord canalizare |
+| Terminal | Cu căciulă anti-vânt și plasă |
+
+Calcul tiraj simplificat — pierderea de sarcină pe traseu (L ≈ 8 m vertical + 2 coturi) se acoperă de ventilatorul integrat al cazanului (presiune disponibilă ~120 Pa > pierdere estimată ~70 Pa) → **CONFORM**. Condensul acid se neutralizează (pH > 6,5) înainte de deversare în canalizarea menajeră.
+
+### PTh-I.17.8 Probe de rezistență și etanșeitate
+
+Înainte de PIF, instalația de utilizare se supune probelor conform NTPEE, în prezența OD:
+
+| Probă | Mediu | Presiune | Durată | Criteriu de admitere |
+|---|---|---|---|---|
+| Rezistență mecanică | Aer/gaz inert | 1 bar (presiune joasă instalație) | 60 min | Fără scădere de presiune la manometru |
+| Etanșeitate | Aer/gaz inert | 150 mbar | 60 min (după stabilizare temp.) | Scădere ≤ 0 (fără scădere sesizabilă) |
+| Verificare îmbinări | Spumă/spray detector | — | — | Fără bule pe îmbinări sudate/filetate |
+
+Rezultatele se consemnează în **proces-verbal de recepție tehnică**, semnat de executant autorizat ANRE (EDD/EDT) și OD. Punerea în funcțiune se face numai de operatorul de distribuție, după verificarea documentației.
+
+---
+
+## PTh-I.18 — INSTALAȚII CURENȚI SLABI (I18)
+
+### PTh-I.18.1 Structură generală și canalizația
+
+Sistemele de curenți slabi se dezvoltă pe o **canalizație dedicată**, separată fizic de instalația electrică de forță/iluminat (paturi de cablu distincte sau tubulatură cu ecran, distanță min. 30 cm la paralelism, intersecții la 90°). Toate sistemele converg în camera tehnică IT/curenți slabi de la parter (rack central).
+
+| Sistem | Rol | Nod central |
+|---|---|---|
+| Voce-date (structurat) | Rețea LAN, telefonie IP, WiFi | Rack 19" parter |
+| CCTV | Supraveghere video | NVR în rack |
+| Control acces | Uși controlate | Controller în rack |
+| Nurse-call | Apel asistență vârstnici | Panou asistent + concentrator |
+| Sonorizare / apel | Anunțuri, muzică ambientală, evacuare | Amplificator în rack |
+
+### PTh-I.18.2 Rețeaua structurată voce-date
+
+**Topologie:** stea ierarhică, cu un singur rack central (parter) — distanța maximă orizontală cablu ≤ 90 m (canal permanent) + 10 m cordoane, conform ISO/IEC 11801 / EIA-568.
+
+| Element | Specificație |
+|---|---|
+| Cablare orizontală | Cablu U/UTP Cat.6, 4 perechi, LSZH |
+| Prize de lucru (RJ45) | 2 × RJ45 Cat.6 per post de lucru |
+| Rack | Cabinet 19", 42U, cu PDU, organizatoare, ventilație |
+| Patch panel | Cat.6, 24 porturi, câte necesare |
+| Switch | Gestionat, PoE+ (pentru AP WiFi, camere, telefoane IP) |
+| Puncte acces WiFi | AP-uri pe coridoare/săli comune, alimentate PoE |
+| Backbone | Fibră optică OM4 dacă apare rack secundar la etaj (nu e cazul: P+1 sub 90 m) |
+
+**Distribuția prizelor de date (estimativ):**
+
+| Zonă | Nr. posturi date (prize duble RJ45) |
+|---|---|
+| Recepție / secretariat | 3 |
+| Birouri administrație | 6 |
+| Cabinet medical / asistent | 4 |
+| Săli de activități | 4 |
+| Puncte AP WiFi | 6 |
+| CCTV / control acces (rezervă) | 4 |
+| **Total prize date** | **~27 posturi** |
+
+Toate cablurile se certifică (test de certificare Cat.6 — NEXT, return loss, lungime), rezultatele se predau ca anexă la cartea tehnică.
+
+### PTh-I.18.3 Sistemul CCTV (supraveghere video)
+
+**Concept:** supraveghere perimetrală și a spațiilor comune, cu respectarea **GDPR / Regulament (UE) 2016/679** — NU se montează camere în saloane individuale, băi, vestiare sau cabinet medical (zone cu așteptare de intimitate).
+
+| Poziție cameră | Tip | Justificare |
+|---|---|---|
+| Intrare principală | Bullet/dome IP, IR | Control acces vizitatori |
+| Intrare secundară / acces personal | Bullet IP, IR | Securitate perimetrală |
+| Coridor parter | Dome IP | Circulație comună |
+| Coridor etaj | Dome IP | Circulație comună |
+| Sală de zi / activități comune | Dome IP | Supraveghere spațiu comun |
+| Parcare / curte | Bullet IP, IR, IP66 | Perimetru exterior |
+
+| Element sistem | Specificație |
+|---|---|
+| Camere | IP, min. 4 MP, IR, alimentare PoE |
+| Înregistrare | NVR cu HDD dedicat supraveghere, RAID recomandat |
+| Durată stocare | Max. justificat de scop; recomandat 20–30 zile apoi suprascriere |
+| Acces vizualizare | Restricționat, jurnalizat, doar personal autorizat |
+| Semnalizare GDPR | Pictograme „Zonă supravegheată video" la fiecare intrare |
+| Alimentare | Switch PoE din rack + UPS |
+
+Documentația include **registrul de evidență a prelucrărilor** și analiza de impact (DPIA) — obligatoriu la supravegherea sistematică a unui spațiu accesibil publicului.
+
+### PTh-I.18.4 Sistemul de control acces
+
+Control acces pe ușile de delimitare între zone (acces personal, farmacie/depozit medicamente, arhivă), NU pe căile de evacuare în sens restrictiv.
+
+| Ușă controlată | Tip cititor | Mod |
+|---|---|---|
+| Acces personal / vestiar | Card proximitate | Intrare autorizată |
+| Depozit medicamente / farmacie | Card + PIN | Acces restricționat, jurnalizat |
+| Arhivă / server room | Card | Acces limitat |
+| Intrare principală (după program) | Card + interfon | Închidere automată seara |
+
+**Principiu de siguranță la incendiu (fail-safe):** toate încuietorile electromagnetice de pe **căile de evacuare** sunt de tip **fail-safe** (se deblochează automat la întreruperea alimentării și la semnal de la centrala de incendiu IDSAI). Ușile de depozit fără rol de evacuare pot fi fail-secure. Fiecare ușă de evacuare are buton verde de deblocare de urgență („break-glass").
+
+| Componentă | Specificație |
+|---|---|
+| Controller acces | Montat în rack, cu backup baterie |
+| Electromagnet / bolț | Fail-safe pe evacuare (deblocare la lipsă tensiune) |
+| Buton ieșire urgență | Verde, cu geam sacrificabil, pe fiecare ușă evacuare |
+| Integrare IDSAI | Contact NC — la alarmă incendiu toate ușile de evacuare se deblochează |
+| Jurnalizare | Evenimente acces datate, exportabile |
+
+### PTh-I.18.5 Sistemul NURSE-CALL (apel asistență)
+
+Sistem esențial într-un centru pentru vârstnici — apel de la beneficiar către personalul de îngrijire, cu redundanță și confirmare.
+
+**Topologie:** buclă/magistrală pe fiecare nivel, terminale în camere și băi, concentrator de nivel → panou central asistent. Sistem adresabil (fiecare terminal are identitate unică → afișare cameră/pat pe panou).
+
+| Terminal | Amplasare | Funcție |
+|---|---|---|
+| Buton de apel la pat | Cap de pat, cablu prelungitor „pară" | Apel normal beneficiar |
+| Buton apel baie / tras cordon | Baie, la 10 cm de pardoseală (accesibil la cădere) | Apel de urgență din baie |
+| Buton anulare / prezență | La intrarea în cameră | Asistentul confirmă prezența (anulează apelul) |
+| Lampă de semnalizare pe hol | Deasupra ușii camerei | Indică vizual camera care apelează |
+| Panou asistent | Post de îngrijire fiecare nivel | Afișaj cameră + tip apel + acustic |
+
+| Parametru | Valoare |
+|---|---|
+| Tip sistem | Adresabil, cu bus dedicat |
+| Diferențiere apeluri | Apel normal / apel urgență (baie) / apel medical |
+| Alimentare | 24 Vcc, cu acumulator backup (autonomie ≥ 1 h la cădere rețea) |
+| Confirmare | Apelul rămâne activ până la anularea fizică din cameră (prezență) |
+| Integrare | Redirecționare la panoul de asistent + opțional pager/telefon personal |
+| Terminale pat estimat | 1 per pat/loc de odihnă |
+| Terminale baie | 1 per grup sanitar accesibil beneficiarilor |
+
+Distribuția indicativă: fiecare cameră de odihnă = 1 buton pat + 1 lampă hol; fiecare baie beneficiari = 1 buton cordon; fiecare nivel = 1 panou asistent. Cablarea nurse-call este independentă de restul curenților slabi și rezistentă la foc pe traseele critice.
+
+### PTh-I.18.6 Sistemul de sonorizare / apel
+
+Sonorizare pentru anunțuri, muzică ambientală în spațiile comune și **mesaje de evacuare** (interfațat cu IDSAI).
+
+| Element | Specificație |
+|---|---|
+| Amplificator | Linie 100 V, cu prioritate mesaj evacuare |
+| Difuzoare | Tavan/perete, 6 W, distribuite pe zone (coridoare, săli comune) |
+| Zonare | Parter / etaj / exterior, comandabile independent |
+| Microfon apel | La recepție, cu prioritate |
+| Prioritate evacuare | Mesaj preînregistrat declanșat de IDSAI, suprascrie orice sursă |
+| Alimentare | UPS / sursă neîntreruptibilă pt. funcția de evacuare |
+
+Numărul de difuzoare se stabilește pentru acoperire uniformă (nivel semnal min. 6 dB peste zgomotul ambiant, min. 65 dB(A) în zonele de anunț).
+
+---
+
+## PTh-I.19 — AUTOMATIZARE BMS (Building Management System)
+
+### PTh-I.19.1 Arhitectură și rol
+
+Sistemul BMS integrează monitorizarea și comanda instalațiilor termice, de ventilare, electrice și sanitare, cu obiectivul: confort adaptat vârstnicilor, eficiență energetică, siguranță și mentenanță predictivă. Arhitectură pe 3 niveluri: **teren** (senzori/actuatori) → **automate/controllere** (DDC) → **management** (stație de operare/SCADA + acces web).
+
+Protocoale: BACnet/IP și Modbus RTU/TCP pentru integrarea cazanelor, CTA, tablouri electrice și contoare.
+
+### PTh-I.19.2 Lista punctelor — sistem termic (centrală + distribuție)
+
+Legendă: AI = intrare analogică, AO = ieșire analogică, DI = intrare digitală, DO = ieșire digitală.
+
+| Punct | Tip | Prag alarmă / setpoint |
+|---|---|---|
+| Temperatură tur cazan | AI | Alarmă > 85 °C |
+| Temperatură retur cazan | AI | Monitorizare ΔT |
+| Temperatură exterioară | AI | Compensare climatică |
+| Presiune circuit primar | AI | Alarmă < 1,0 bar / > 2,5 bar |
+| Stare arzător / cascadă | DI | Alarmă defect |
+| Comandă pornire/oprire cazan | DO | Program orar |
+| Comandă vană amestec 3 căi | AO | Curbă de încălzire |
+| Comandă pompe circulație | DO | — |
+| Stare pompe (flux) | DI | Alarmă lipsă debit |
+| Temperatură ACM (boiler) | AI | Setpoint 55–60 °C; ciclu antilegionella periodic > 60 °C |
+| Detector gaz (prag/alarmă) | DI | Preluare stare de la sistemul de gaz |
+| Electrovalvă gaz (stare) | DI | Alarmă închidere |
+
+### PTh-I.19.3 Lista punctelor — ventilare (CTA / VMC)
+
+| Punct | Tip | Prag / setpoint |
+|---|---|---|
+| Comandă pornire/oprire CTA | DO | Program zi/noapte |
+| Temperatură aer refulat | AI | Setpoint 20–22 °C |
+| Temperatură aer introdus/recuperator | AI | Monitorizare randament |
+| CO₂ în săli comune | AI | Prag ventilare la > 800 ppm; alarmă > 1200 ppm |
+| Comandă turație ventilatoare (VSD) | AO | Modulare pe CO₂ |
+| Stare filtru (presiune diferențială) | DI/AI | Alarmă filtru colmatat |
+| Baterie încălzire (vană) | AO | Reglare temperatură |
+| Antiîngheț baterie | DI | Alarmă / oprire de protecție |
+| Clapete antifoc (stare) | DI | Închise la incendiu (semnal IDSAI) |
+
+### PTh-I.19.4 Lista punctelor — electric și sanitar
+
+| Punct (electric) | Tip | Prag / observație |
+|---|---|---|
+| Energie activă generală (contor) | AI (impuls/Modbus) | Monitorizare consum |
+| Stare cădere rețea / prezență tensiune | DI | Alarmă |
+| Stare UPS / grup electrogen (dacă există) | DI | Alarmă comutare |
+| Iluminat zone comune (comandă) | DO | Scenarii zi/noapte |
+| Nivel iluminare (senzor) | AI | Reglare la lumina naturală |
+
+| Punct (sanitar) | Tip | Prag / observație |
+|---|---|---|
+| Nivel rezervor apă (dacă există) | AI | Alarmă nivel minim |
+| Pompă recirculare ACM | DO | Program + antilegionella |
+| Temperatură ACM pe recirculare | AI | Alarmă < 50 °C (risc legionella) |
+| Detector inundație camera tehnică | DI | Alarmă + comandă oprire pompă |
+| Debit apă rece (contor) | AI | Monitorizare consum / detecție scurgeri |
+
+### PTh-I.19.5 Scenarii de funcționare
+
+| Scenariu | Comportament sistemelor |
+|---|---|
+| **ZI (program activ)** | Încălzire/răcire la setpoint confort (22 °C); ventilare pe cerere (CO₂); iluminat comun on cu reglare pe lumină naturală; sonorizare ambientală activă |
+| **NOAPTE / redus** | Setpoint redus (19–20 °C) în spații comune, confort menținut în camere de odihnă; ventilare minim igienic; iluminat redus pe coridoare (orientare, evitare căderi); CCTV activ |
+| **INCENDIU (semnal IDSAI)** | Oprire ventilare de confort + închidere clapete antifoc; pornire desfumare (dacă e cazul); deblocare uși evacuare (fail-safe); mesaj evacuare pe sonorizare; oprire arzător + închidere electrovalvă gaz; iluminat de siguranță; BMS trece în mod semnalizare pasivă (nu comandă în conflict cu IDSAI) |
+| **CĂDERE TENSIUNE** | Comutare pe sursă de siguranță pentru circuite vitale; iluminat de siguranță; nurse-call pe baterie; alarmă BMS |
+| **MENTENANȚĂ** | Punere manuală pe „service" a subsistemelor, cu jurnalizare |
+
+Toate alarmele se jurnalizează cu dată/oră și se pot transmite prin notificare (e-mail/SMS) către personalul tehnic.
+
+---
+
+## PTh-I.20 — INSTALAȚIA DE PROTECȚIE ÎMPOTRIVA TRĂSNETULUI (IPT — SR EN 62305)
+
+### PTh-I.20.1 Evaluarea riscului
+
+Se aplică metoda din **SR EN 62305-2** (evaluarea riscului R1 — pierderi de vieți omenești). Clădirea adăpostește **persoane vulnerabile (vârstnici)** cu mobilitate redusă și dificultate de evacuare, ceea ce crește ponderea riscului și impune protecție.
+
+**Densitatea trăsnetelor la sol (România, zonă de câmpie/deal):** Ng ≈ 2,5 trăsnete/kmp/an (valoare de proiect; se ajustează cu harta izokeraunică locală).
+
+Aria de expunere echivalentă a structurii izolate (L × l × H):
+Considerăm L = 40 m, l = 20 m, H = 8 m (P+1).
+
+Ad = L×l + 2×(3H)×(L+l) + π×(3H)²
+Ad = 40×20 + 2×24×(60) + 3,14×24²
+Ad = 800 + 2880 + 1809 = 5489 mp ≈ 5,49×10⁻³ kmp
+
+Numărul anual de evenimente periculoase directe:
+Nd = Ng × Ad × Cd
+cu Cd = 1,0 (structură izolată, teren plan)
+Nd = 2,5 × 5,49×10⁻³ × 1,0 = **0,0137 evenimente/an**
+
+Comparație cu riscul tolerabil Rt = 10⁻⁵ /an (pierderi de vieți): frecvența evenimentelor și consecințele (persoane vulnerabile, panică, dificultate evacuare, potențial incendiu) conduc la **R1 > Rt fără protecție** → **se impune instalarea IPT**.
+
+### PTh-I.20.2 Nivelul de protecție adoptat
+
+Pentru destinație socială cu persoane vulnerabile se adoptă **Nivel de Protecție împotriva Trăsnetului NPT III**, cu posibilitatea majorării la NPT II în funcție de rezultatul detaliat al analizei de risc. Se dimensionează conform NPT III.
+
+| Nivel NPT | Rază sferă rulantă R [m] | Ochi rețea [m] | Eficiență |
+|---|---|---|---|
+| I | 20 | 5×5 | 0,99 |
+| II | 30 | 10×10 | 0,97 |
+| **III (adoptat)** | **45** | **15×15** | **0,91** |
+| IV | 60 | 20×20 | 0,84 |
+
+### PTh-I.20.3 Dispozitivul de captare (SPT extern)
+
+Se adoptă **instalație cu dispozitiv de captare tip rețea (metoda sferei rulante + rețea de conductori)** pe acoperiș, întrucât clădirea are acoperiș tip terasă/șarpantă joasă.
+
+| Element captare | Specificație |
+|---|---|
+| Conductor de captare | Rotund OL-Zn Ø8 mm (sau bandă 25×4 mm), pe suporți la 0,10 m de suprafață |
+| Rețea de captare | Ochiuri max. 15×15 m (NPT III) |
+| Tije de captare (paratrăsnet) | Pe elemente înalte (coș, ventilații, chillere pe terasă) |
+| Metoda de verificare | Sfera rulantă R = 45 m — toate elementele expuse sunt „atinse" doar de rețea/tije |
+
+Toate corpurile metalice de pe acoperiș (coș inox, grile, echipamente) se leagă la rețeaua de captare.
+
+### PTh-I.20.4 Coborârile
+
+Numărul de coborâri se determină din perimetrul clădirii și distanța tipică între coborâri pentru NPT III (**15 m**).
+
+Perimetru P = 2×(L+l) = 2×(40+20) = 120 m
+Nr. coborâri = P / distanța tipică = 120 / 15 = **8 coborâri**
+
+Se adoptă **8 coborâri**, distribuite uniform pe perimetru, pe traseu cât mai drept și scurt.
+
+| Element coborâre | Specificație |
+|---|---|
+| Conductor coborâre | OL-Zn Ø8 mm sau bandă 25×4 mm |
+| Piesă de separație (de măsură) | La fiecare coborâre, la 1,5–1,8 m de sol, pentru măsurarea rezistenței |
+| Protecție mecanică | Tub de protecție pe primii 2 m de la sol |
+| Distanță de separare s | Verificată față de instalațiile metalice interioare (evitare descărcare laterală) |
+
+Verificarea distanței de separare (SR EN 62305-3):
+s = ki × (kc/km) × L
+cu ki = 0,04 (NPT III), kc ≈ 0,5 (8 coborâri), km = 1 (aer), L = lungime coborâre ≈ 8 m
+s = 0,04 × 0,5 × 8 = **0,16 m**
+
+Distanța reală între coborâri și instalațiile metalice interioare > 0,16 m → **CONFORM**; unde nu se poate respecta, se realizează legătură echipotențială.
+
+### PTh-I.20.5 Priza de pământ a IPT
+
+Fiecare coborâre se leagă la priza de pământ perimetrală (vezi PTh-I.21). Se realizează **priză de pământ tip B (inelară/perimetrală)**, comună cu priza de protecție electrică (priză de pământ unică, echipotențializată), cu rezistență de dispersie **Rp ≤ 1 Ω** (valoare comună impusă de coexistența IPT + protecție electrică + echipamente sensibile).
+
+---
+
+## PTh-I.21 — PRIZA DE PĂMÂNT ȘI ECHIPOTENȚIALIZAREA
+
+### PTh-I.21.1 Concept — priză de pământ unică
+
+Se realizează o **priză de pământ unică (comună)** pentru: protecția împotriva electrocutării (schema TN-S), instalația de protecție împotriva trăsnetului (IPT), echipamentele de curenți slabi/IT și legăturile echipotențiale. Valoarea impusă: **Rp ≤ 1 Ω** (dictată de IPT + echipamente electronice sensibile).
+
+### PTh-I.21.2 Calculul rezistenței prizei de pământ
+
+**Rezistivitatea solului de calcul:** ρ = 100 Ωm (sol argilos-nisipos umed, valoare de proiect; se confirmă prin măsurare geoelectrică).
+
+**a) Electrod vertical (țăruș) — rezistență de dispersie:**
+Rv = ρ / (2 × π × L) × ln(4L/d)
+cu L = 3 m (țăruș), d = 0,018 m (Ø18)
+Rv = 100 / (2×3,14×3) × ln(4×3/0,018)
+Rv = 100 / 18,84 × ln(666,7)
+Rv = 5,308 × 6,502 = **34,5 Ω** (un singur țăruș)
+
+**b) Priză de suprafață inelară (centură) — bandă OL-Zn îngropată:**
+Ro = ρ / (π × L) × ln(2L/(√(d×t)))  (aproximativ, bandă îngropată)
+Pentru centură perimetrală L = 120 m, bandă 40×4 mm (lățime b=0,04 m, adâncime t=0,8 m):
+Ri ≈ ρ / (π × L) × ln(2L²/(b×t)) — folosim relația simplificată pentru inel îngropat:
+Ri ≈ (2 × ρ) / (π² × D)   cu D = diametrul echivalent al inelului
+D_echiv = perimetru/π = 120/3,14 = 38,2 m
+Ri ≈ (2×100)/(9,87×38,2) = 200/377 = **0,53 Ω**
+
+**c) Combinație centură + țăruși (electrozi verticali în paralel pe inel):**
+
+Se adaugă **n = 12 țăruși** verticali de 3 m, legați la centură. Cu coeficient de utilizare η ≈ 0,6 (interacțiune între electrozi):
+Rn(țăruși) = Rv / (n × η) = 34,5 / (12 × 0,6) = 34,5 / 7,2 = 4,79 Ω
+
+Rezistența rezultantă (centură ∥ ansamblu țăruși):
+Rp = (Ri × Rn) / (Ri + Rn) = (0,53 × 4,79)/(0,53+4,79) = 2,539/5,32 = **0,48 Ω**
+
+**Rp = 0,48 Ω ≤ 1 Ω → CONFORM.** Se prevede marjă pentru variații sezoniere de rezistivitate (sol uscat).
+
+| Element priză | Specificație | Cantitate |
+|---|---|---|
+| Centură (electrod orizontal) | Bandă OL-Zn 40×4 mm, îngropată la 0,8 m, perimetral | ~120 m |
+| Electrozi verticali (țăruși) | OL-Zn Ø18 mm sau cruciform 50×50×5, L=3 m | 12 buc |
+| Piese de legătură | Cleme/sudură aluminotermică | per nod |
+| Piese de separație | La fiecare coborâre IPT + la borna principală de împământare | 8 + 1 |
+| Rezultat rezistență | Rp = 0,48 Ω (calcul); măsurat la recepție ≤ 1 Ω | — |
+
+### PTh-I.21.3 Echipotențializarea generală
+
+**Bara principală de egalizare a potențialului (BEP)** se montează în camera tehnică electrică și colectează:
+
+| Racord la BEP | Element |
+|---|---|
+| PE general tablou | Conductor de protecție instalație electrică |
+| Priză de pământ | Coborâre de la centura de împământare |
+| Conducte metalice apă rece/caldă | Racord la intrarea în clădire |
+| Conducte gaz | Racord (după robinet, cu piesă izolantă spre rețea) |
+| Structură metalică / armături | Elemente conducătoare importante |
+| Coborâri IPT | Prin piese de separație |
+| Ecrane cabluri curenți slabi | Punct unic de masă |
+
+### PTh-I.21.4 Legăturile echipotențiale suplimentare în băi
+
+În fiecare grup sanitar / baie se realizează **legătură echipotențială suplimentară locală (LES)**, obligatorie (I7), care leagă între ele toate elementele conductoare simultan accesibile:
+
+| Element legat la LES baie | Observație |
+|---|---|
+| Conductă apă rece | Racord cu brățară |
+| Conductă apă caldă | Racord cu brățară |
+| Conductă canalizare metalică (dacă e cazul) | — |
+| Corpuri de încălzire metalice | Radiator/țeavă |
+| Cadă / suporți metalici, bare de sprijin | Barele de sprijin pentru vârstnici — obligatoriu legate |
+| Conductor PE al prizelor din baie | Legătură la nodul LES |
+
+Conductor LES: cupru min. 4 mmp (protejat) / 2,5 mmp (neprotejat separat). Nodul LES se leagă la PE-ul tabloului de zonă. Se verifică continuitatea (rezistență < 0,2 Ω între mase). Barele de sprijin pentru vârstnici, fiind elemente metalice de care beneficiarii se sprijină permanent, sunt **obligatoriu** integrate în LES.
+
+---
+
+## PTh-I.22 — PROGRAM DE MENTENANȚĂ INSTALAȚII
+
+### PTh-I.22.1 Instalația de gaze naturale
+
+| Operație | Periodicitate | Executant / verificare |
+|---|---|---|
+| Verificare etanșeitate îmbinări (spray/detector) | Anual | Operator autorizat ANRE |
+| Revizie tehnică instalație utilizare (RT) | La 2 ani | Operator autorizat ANRE (obligatoriu NTPEE) |
+| Verificare tehnică periodică (VTP) | Conform contract OD | Operator distribuție |
+| Testare detector gaz + electrovalvă (probă închidere) | Semestrial | Firmă autorizată |
+| Verificare/curățare grile ventilare centrală | Trimestrial | Personal tehnic |
+| Curățare/verificare coș evacuare + neutralizator condens | Anual (sezon rece) | Firmă autorizată coșar/ISCIR |
+| Verificare regulator/contor PRM | Conform OD | Operator distribuție |
+
+### PTh-I.22.2 Centrala termică și instalația de încălzire
+
+| Operație | Periodicitate | Verificare |
+|---|---|---|
+| Service cazan (arzător, schimbător, aprindere) | Anual (înainte de sezon) | Service autorizat producător |
+| Verificare vas expansiune + presiune circuit | Anual | Personal tehnic |
+| Curățare/spălare schimbător condens + sifon | Anual | Service |
+| Verificare supape siguranță | Anual | ISCIR (unde aplicabil) |
+| Verificare pompe, vane amestec | Semestrial | Personal tehnic |
+| Dezaerisire instalație, verificare corpuri | Sezonier | Personal tehnic |
+| Autorizare ISCIR cazan (dacă > prag) | Conform prescripții ISCIR | RSVTI / ISCIR |
+
+### PTh-I.22.3 Ventilare / climatizare
+
+| Operație | Periodicitate | Verificare |
+|---|---|---|
+| Înlocuire/curățare filtre CTA | Trimestrial | Personal tehnic |
+| Curățare recuperator de căldură | Anual | Service |
+| Verificare ventilatoare, curele, rulmenți | Semestrial | Service |
+| Igienizare/dezinfecție tubulatură | Anual | Firmă specializată |
+| Verificare clapete antifoc (probă acționare) | Anual | Firmă autorizată PSI |
+| Verificare senzori CO₂ / calibrare | Anual | Firmă BMS |
+
+### PTh-I.22.4 Instalații electrice, IPT și priză de pământ
+
+| Operație | Periodicitate | Verificare |
+|---|---|---|
+| Verificare PRAM (rezistență priză, continuitate PE, RCD) | Anual | Laborator autorizat (buletin PRAM) |
+| Măsurare rezistență priză de pământ (≤ 1 Ω) | Anual | Buletin de măsurare |
+| Verificare IPT (captare, coborâri, piese separație) | Anual + după descărcare majoră | Firmă autorizată |
+| Test declanșare diferențiale (RCD) | Semestrial | Personal tehnic |
+| Verificare strângeri conexiuni tablouri (termografiere) | Anual | Firmă specializată |
+| Verificare iluminat de siguranță (autonomie) | Lunar (test scurt) + anual (autonomie completă) | Personal tehnic / PSI |
+| Verificare UPS / acumulatori | Semestrial | Service |
+
+### PTh-I.22.5 Curenți slabi și PSI
+
+| Operație | Periodicitate | Verificare |
+|---|---|---|
+| Test integral nurse-call (fiecare terminal) | Lunar | Personal tehnic |
+| Verificare acumulatori backup nurse-call | Semestrial | Personal tehnic |
+| Verificare CCTV (imagine, înregistrare, HDD) | Trimestrial | Firmă IT |
+| Verificare control acces + fail-safe pe evacuare | Semestrial | Firmă specializată |
+| Test sonorizare + mesaj evacuare | Trimestrial | Firmă PSI |
+| Verificare/mentenanță IDSAI (centrală, detectoare) | Semestrial + anual complet | Firmă autorizată IGSU |
+| Verificare hidranți / instalație stingere | Semestrial (probă presiune) | Firmă autorizată PSI |
+| Verificare/reîncărcare stingătoare | Anual | Firmă autorizată |
+
+### PTh-I.22.6 Instalații sanitare și BMS
+
+| Operație | Periodicitate | Verificare |
+|---|---|---|
+| Ciclu antilegionella ACM (șoc termic > 60 °C) | Săptămânal (automat BMS) | BMS / personal |
+| Verificare temperatură recirculare ACM | Lunar | Personal tehnic |
+| Curățare/detartrare boiler + rezervoare | Anual | Service |
+| Verificare pompe, senzori inundație | Semestrial | Personal tehnic |
+| Verificare vane, armături, etanșeitate | Anual | Personal tehnic |
+| Backup configurație BMS + verificare alarme | Semestrial | Firmă BMS |
+| Verificare senzori/actuatori BMS (calibrare) | Anual | Firmă BMS |
+
+### PTh-I.22.7 Evidența mentenanței
+
+Toate operațiile se consemnează în **registrul de mentenanță** al clădirii (fizic + digital, integrat în BMS), cu: data, operația, executantul, rezultatul, măsurile luate. Buletinele PRAM, procesele-verbale ISCIR/PSI și rapoartele de service se arhivează în **cartea tehnică a construcției** (obligatoriu conform Legii 10/1995). Responsabilul tehnic al beneficiarului urmărește respectarea periodicităților și programează din timp verificările cu termen legal (ISCIR, PRAM, gaze, PSI).
