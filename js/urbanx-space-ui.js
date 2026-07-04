@@ -135,6 +135,9 @@
         ov.remove(); if (typeof onApply === 'function') onApply(D);
       };
       sideBox.appendChild(bApply);
+      var bPlan = el('button', { style: 'width:100%;margin-top:8px;background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.4);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer' }, '📐 Plan funcțional (SVG / PDF / DXF)');
+      bPlan.onclick = function () { if (G.UXPlanSVG) G.UXPlanSVG.open(state.rows, { title: 'PLAN FUNCȚIONAL — ' + (state.tip || '') }); else if (G.ss) G.ss('Modulul plan nu e încărcat.'); };
+      sideBox.appendChild(bPlan);
     }
 
     renderParams();
