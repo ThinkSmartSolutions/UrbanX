@@ -196,6 +196,68 @@
     return s;
   }
 
+  // ── TABLOU DE TÂMPLĂRIE (T.01) — derivat parametric din spații ────────────
+  // Uși: 1 interioară/spațiu; ext. acces (1.60 dublă) + secundar (1.20). Ferestre:
+  // arie vitrată ≈ 1/8 din aria pardoselii (iluminat natural OMS 119/NP), în ferestre standard.
+  function tamplarie(spatii, D) {
+    spatii = spatii || [];
+    var usi = {}, fer = {};
+    function addU(cod, l, h, mat, obs) { var k = cod; usi[k] = usi[k] || { cod: cod, l: l, h: h, mat: mat, obs: obs, n: 0 }; usi[k].n++; }
+    function addF(cod, l, h, n) { fer[cod] = fer[cod] || { cod: cod, l: l, h: h, n: 0 }; fer[cod].n += n; }
+    var noSan = 0, noNorm = 0, aTot = 0;
+    spatii.forEach(function (r) {
+      var b = Math.max(1, +r.buc || 1), A = (+r.mp_unit || 0) * b; aTot += A;
+      var cat = (r.cat || '') + '', nm = (r.nume || '').toLowerCase();
+      // uși interioare pe spațiu
+      if (/sanit|wc|grup san|baie/.test(nm) || cat === 'Sanitare') { for (var i = 0; i < b; i++) addU('Ui1', 0.80, 2.10, 'PVC/MDF', 'ușă interioară GS'); noSan += b; }
+      else { for (var j = 0; j < b; j++) addU('Ui2', 0.90, 2.10, 'MDF/lemn', 'ușă interioară (acces PMR 0,90 m)'); noNorm += b; }
+      // ferestre din iluminat natural (spații de folosință prelungită)
+      if (!/sanit|wc|tehnic|depozit|magazie|circulat|hol|coridor/.test(nm) && cat !== 'Sanitare' && cat !== 'Tehnic' && cat !== 'Depozitare' && A > 0) {
+        var aFer = A / 8; // OMS 119: min 1/8 din pardoseală
+        var aUnit = 1.20 * 1.50; // fereastră tip 1,20×1,50
+        var nf = Math.max(b, Math.round(aFer / aUnit));
+        addF('F1', 1.20, 1.50, nf);
+      }
+    });
+    // uși exterioare
+    addU('Ue1', 1.60, 2.40, 'Al/geam securizat', 'acces principal, dublă, spre exterior'); usi['Ue1'].n = 1;
+    addU('Ue2', 1.20, 2.20, 'Al/geam securizat', 'acces secundar / evacuare'); usi['Ue2'].n = 1;
+    // fereastră mare pentru săli aglomerate
+    addF('F2', 1.80, 1.50, Math.max(1, Math.round(aTot / 300)));
+    return { usi: Object.keys(usi).map(function (k) { return usi[k]; }), fer: Object.keys(fer).map(function (k) { return fer[k]; }) };
+  }
+  function planTamplarie(spatii, D, meta) {
+    var t = tamplarie(spatii, D);
+    var items = t.usi.map(function (u) { return { tip: 'ușă', cod: u.cod, l: u.l, h: u.h, n: u.n, mat: u.mat, obs: u.obs }; })
+      .concat(t.fer.map(function (f) { return { tip: 'fereastră', cod: f.cod, l: f.l, h: f.h, n: f.n, mat: 'PVC/Al triplu geam low-E', obs: 'Uw ≤ 1,1 W/mp·K' }; }));
+    var rowH = 74, top = 56, W = 820, H = top + items.length * rowH + 130;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="30" y="26" font-size="14" font-weight="bold" fill="#1F3864">TABLOU DE TÂMPLĂRIE</text>';
+    s += '<text x="30" y="42" font-size="9" fill="#666">Derivat parametric din programul de spații (uși/spațiu + iluminat natural OMS 119). Dimensiunile finale se confirmă în proiectul de arhitectură.</text>';
+    // header
+    var cx = [30, 150, 470, 560, 660]; // thumbnail, cod, dims/obs, buc
+    s += '<g font-size="9" font-weight="bold" fill="#333"><text x="34" y="' + (top - 4) + '">Elevație</text><text x="150" y="' + (top - 4) + '">Cod / tip</text><text x="270" y="' + (top - 4) + '">Dimensiuni (l×h)</text><text x="470" y="' + (top - 4) + '">Material / obs.</text><text x="740" y="' + (top - 4) + '">Buc.</text></g>';
+    s += '<line x1="30" y1="' + top + '" x2="' + (W - 20) + '" y2="' + top + '" stroke="#111" stroke-width="0.8"/>';
+    items.forEach(function (it, i) {
+      var y = top + i * rowH; var pxScale = 24, tw = it.l * pxScale, th = it.h * pxScale;
+      var tx = 40, ty = y + (rowH - th) / 2 + 4;
+      // thumbnail elevație
+      s += '<rect x="' + tx + '" y="' + ty + '" width="' + tw + '" height="' + th + '" fill="' + (it.tip === 'ușă' ? '#dbe7f5' : '#cfe0f0') + '" stroke="#1F3864" stroke-width="1.2"/>';
+      if (it.tip === 'fereastră') { s += '<line x1="' + (tx + tw / 2) + '" y1="' + ty + '" x2="' + (tx + tw / 2) + '" y2="' + (ty + th) + '" stroke="#1F3864" stroke-width="0.6"/><line x1="' + tx + '" y1="' + (ty + th / 2) + '" x2="' + (tx + tw) + '" y2="' + (ty + th / 2) + '" stroke="#1F3864" stroke-width="0.6"/>'; }
+      else { s += '<line x1="' + (tx + tw * 0.8) + '" y1="' + (ty + th / 2) + '" x2="' + (tx + tw * 0.8) + '" y2="' + (ty + th / 2 + 3) + '" stroke="#1F3864" stroke-width="1"/>'; }
+      s += '<text x="150" y="' + (y + rowH / 2) + '" font-size="11" font-weight="bold" fill="#1F3864">' + it.cod + '</text><text x="150" y="' + (y + rowH / 2 + 13) + '" font-size="8" fill="#666">' + it.tip + '</text>';
+      s += '<text x="270" y="' + (y + rowH / 2 + 4) + '" font-size="10" fill="#222">' + it.l.toFixed(2) + ' × ' + it.h.toFixed(2) + ' m</text>';
+      s += '<text x="470" y="' + (y + rowH / 2 - 2) + '" font-size="8.5" fill="#333">' + it.mat + '</text><text x="470" y="' + (y + rowH / 2 + 10) + '" font-size="8" fill="#666">' + (it.obs || '') + '</text>';
+      s += '<text x="748" y="' + (y + rowH / 2 + 4) + '" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="middle">' + it.n + '</text>';
+      s += '<line x1="30" y1="' + (y + rowH) + '" x2="' + (W - 20) + '" y2="' + (y + rowH) + '" stroke="#ccc" stroke-width="0.5"/>';
+    });
+    var totU = t.usi.reduce(function (a, u) { return a + u.n; }, 0), totF = t.fer.reduce(function (a, f) { return a + f.n; }, 0);
+    s += '<text x="30" y="' + (top + items.length * rowH + 20) + '" font-size="9.5" fill="#333">Total: ' + totU + ' uși, ' + totF + ' ferestre. Toate tâmplăriile exterioare: geam triplu low-E, Uw ≤ 1,1 W/mp·K (C107/nZEB). Uși pe căi de evacuare: deschidere în sensul evacuării, bară antipanică unde e cazul (P118).</text>';
+    s += cartus(Object.assign({}, meta, { titlu: 'Tablou de tâmplărie', cod: 'T.01', scara: '1:20' }), W - 360, top + items.length * rowH + 34, 340);
+    s += '</svg>';
+    return s;
+  }
+
   // ── DXF (plan de nivel) ──────────────────────────────────────────────────
   function toDXF(lay, niv) {
     var d = lay[niv]; if (!d) return ''; var e = [];
@@ -225,11 +287,12 @@
     planse.push({ id: 'situatie', nume: 'Plan situație', svg: planSituatie(D, meta) });
     planse.push({ id: 'sectiune', nume: 'Secțiune', svg: sectiune(D, meta) });
     planse.push({ id: 'fatada', nume: 'Fațadă', svg: fatada(D, meta) });
+    planse.push({ id: 'tamplarie', nume: 'Tablou tâmplărie', svg: planTamplarie(spatii, D, meta) });
 
     var ov = el('div', { id: 'uxplan-ov', style: 'position:fixed;inset:0;background:#070c18;z-index:4300;overflow:auto;font-family:system-ui;color:#e6edf7' });
     var wrap = el('div', { style: 'max-width:1200px;margin:0 auto;padding:16px' });
     var head = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px' });
-    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#6ee7b7">📐 Planșe (parte desenată) din model</div><div style="font-size:11px;color:#94a3b8">Planuri niveluri · situație · secțiune · fațadă — cotate, cu cartuș. Export SVG/PDF/DXF. Draft parametric; geometria finală o rafinează proiectantul.</div>'));
+    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#6ee7b7">📐 Planșe (parte desenată) din model</div><div style="font-size:11px;color:#94a3b8">Planuri niveluri · situație · secțiune · fațadă · tablou tâmplărie — cotate, cu cartuș. Export SVG/PDF/DXF. Draft parametric; geometria finală o rafinează proiectantul.</div>'));
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); }; head.appendChild(bX); wrap.appendChild(head);
     // tabs
     var tabs = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px' });
@@ -247,5 +310,5 @@
     ov.appendChild(wrap); document.body.appendChild(ov); show(0);
   }
 
-  G.UXPlanSVG = { layout: layout, planNivel: planNivel, planSituatie: planSituatie, sectiune: sectiune, fatada: fatada, toDXF: toDXF, open: open };
+  G.UXPlanSVG = { layout: layout, planNivel: planNivel, planSituatie: planSituatie, sectiune: sectiune, fatada: fatada, tamplarie: tamplarie, planTamplarie: planTamplarie, toDXF: toDXF, open: open };
 })(window);
