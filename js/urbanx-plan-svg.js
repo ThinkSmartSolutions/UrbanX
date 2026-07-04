@@ -22,31 +22,46 @@
   // Nucleu scară/lift la un capăt (leagă nivelurile), coridor-spină, camere pe
   // ambele benzi ale coridorului, fiecare cu UȘĂ spre coridor și FEREASTRĂ pe
   // fațadă. Distribuire echilibrată pe cele două benzi. Anvelopă rectangulară.
-  function layout(spatii) {
+  function layout(spatii, env) {
     var byNiv = {}; (spatii || []).forEach(function (r) { var k = r.niv || 'P'; (byNiv[k] = byNiv[k] || []).push(r); });
     var res = {};
+    // anvelopa impusă (ex. din AEDIS): env.bW × env.bD — planul se încadrează în ea
+    var envW = env && +env.bW > 6 ? +env.bW : 0;
+    var envD = env && +env.bD > 6 ? +env.bD : 0;
     Object.keys(byNiv).forEach(function (niv) {
       var rooms = []; byNiv[niv].forEach(function (r) { var b = Math.max(1, +r.buc || 1); for (var i = 0; i < b; i++) rooms.push(Object.assign({}, r)); });
-      // sortare: camerele mari primele (arată coerent, ancorate lângă nucleu)
       rooms.sort(function (a, b) { return (b.mp_unit || 0) - (a.mp_unit || 0); });
-      var Db = 5.6;   // adâncime bandă (adâncime cameră tipică) m
       var Cw = 1.8;   // lățime coridor m
       var coreW = 4.6; // nucleu scară+lift, pe toată adâncimea
-      var D = 2 * Db + Cw; // adâncime clădire
-      var topX = coreW, botX = coreW; // pornim după nucleu
+      // adâncimea benzii: din anvelopa AEDIS (bD) dacă e dată, altfel tipică 5,6 m
+      var Db = envD ? Math.max(3.0, Math.min(9.0, (envD - Cw) / 2)) : 5.6;
+      var D = envD || (2 * Db + Cw);
+      var topX = coreW, botX = coreW;
       var rects = [];
       rooms.forEach(function (r) {
         var A = Math.max(3, +r.mp_unit || 6);
-        var w = Math.max(2.0, A / Db); // lățime cameră din arie / adâncime bandă
-        var top = topX <= botX;        // banda cu lățime cumulată mai mică
+        var w = Math.max(2.0, A / Db);
+        var top = topX <= botX;
         var x = top ? topX : botX;
         var y = top ? 0 : (Db + Cw);
         rects.push({ x: x, y: y, w: w, h: Db, room: r, band: top ? 'N' : 'S' });
         if (top) topX += w; else botX += w;
       });
       var W = Math.max(topX, botX, coreW + 4);
+      // dacă avem anvelopă AEDIS: scalăm lățimile camerelor ca să umple exact bW
+      if (envW && envW > coreW + 2) {
+        var sN = (envW - coreW), sB = (envW - coreW);
+        var wN = topX - coreW, wB = botX - coreW;
+        var fN = wN > 0 ? sN / wN : 1, fB = wB > 0 ? sB / wB : 1;
+        var cxN = coreW, cxB = coreW;
+        rects.forEach(function (rc) {
+          if (rc.band === 'N') { rc.w *= fN; rc.x = cxN; cxN += rc.w; }
+          else { rc.w *= fB; rc.x = cxB; cxB += rc.w; }
+        });
+        W = envW;
+      }
       res[niv] = {
-        rects: rects, w: W, h: D, Db: Db, Cw: Cw, coreW: coreW,
+        rects: rects, w: W, h: D, Db: Db, Cw: Cw, coreW: coreW, envelope: (envW ? true : false),
         core: { x: 0, y: 0, w: coreW, h: D },
         corridor: { x: coreW, y: Db, w: W - coreW, h: Cw }
       };
@@ -309,19 +324,40 @@
   }
 
   // ── DXF (plan de nivel) ──────────────────────────────────────────────────
+  // DXF R12 COMPLET (HEADER + TABLES/LAYER + ENTITIES + EOF) — acceptat de orice
+  // vizualizator/CAD. Include anvelopă, coridor, nucleu, camere, uși, text.
   function toDXF(lay, niv) {
     var d = lay[niv]; if (!d) return ''; var e = [];
-    function p(c, v) { e.push(c); e.push(v); }
-    e.push('0'); e.push('SECTION'); e.push('2'); e.push('ENTITIES');
+    function p(c, v) { e.push(c); e.push(String(v)); }
+    function layer(name, color) { p(0, 'LAYER'); p(2, name); p(70, 0); p(62, color); p(6, 'CONTINUOUS'); }
+    function poly(pts, lay, closed) { p(0, 'POLYLINE'); p(8, lay); p(66, 1); p(70, closed ? 1 : 0); pts.forEach(function (pt) { p(0, 'VERTEX'); p(8, lay); p(10, pt[0].toFixed(3)); p(20, pt[1].toFixed(3)); p(30, '0.0'); }); p(0, 'SEQEND'); }
+    function line(x1, y1, x2, y2, lay) { p(0, 'LINE'); p(8, lay); p(10, x1.toFixed(3)); p(20, y1.toFixed(3)); p(30, '0.0'); p(11, x2.toFixed(3)); p(21, y2.toFixed(3)); p(31, '0.0'); }
+    function rectPoly(x, y, w, h, lay) { poly([[x, -y], [x + w, -y], [x + w, -(y + h)], [x, -(y + h)], [x, -y]], lay, true); }
+    function txt(x, y, s, lay, h) { p(0, 'TEXT'); p(8, lay); p(10, x.toFixed(3)); p(20, (-y).toFixed(3)); p(30, '0.0'); p(40, (h || 0.3).toFixed(2)); p(1, String(s).replace(/[^\x20-\x7e]/g, function (c) { return ({ 'ă':'a','â':'a','î':'i','ș':'s','ț':'t','Ă':'A','Â':'A','Î':'I','Ș':'S','Ț':'T' })[c] || ' '; })); }
+    var W = d.w, D = d.h;
+    // HEADER
+    p(0, 'SECTION'); p(2, 'HEADER'); p(9, '$ACADVER'); p(1, 'AC1009'); p(9, '$INSUNITS'); p(70, 6); /*metri*/ p(9, '$EXTMIN'); p(10, '0.0'); p(20, (-D - 1).toFixed(1)); p(9, '$EXTMAX'); p(10, (W + 1).toFixed(1)); p(20, '1.0'); p(0, 'ENDSEC');
+    // TABLES (LAYER)
+    p(0, 'SECTION'); p(2, 'TABLES'); p(0, 'TABLE'); p(2, 'LAYER'); p(70, 5);
+    layer('ANVELOPA', 7); layer('PERETI', 3); layer('CORIDOR', 4); layer('NUCLEU', 6); layer('USI', 1); layer('TEXT', 2);
+    p(0, 'ENDTAB'); p(0, 'ENDSEC');
+    // ENTITIES
+    p(0, 'SECTION'); p(2, 'ENTITIES');
+    // anvelopă exterioară
+    rectPoly(0, 0, W, D, 'ANVELOPA');
+    // nucleu scară/lift
+    if (d.core) rectPoly(d.core.x, d.core.y, d.core.w, d.core.h, 'NUCLEU');
+    // coridor
+    if (d.corridor) rectPoly(d.corridor.x, d.corridor.y, d.corridor.w, d.corridor.h, 'CORIDOR');
+    // camere + uși + etichete
     d.rects.forEach(function (rc) {
-      var X = rc.x, Y = -(rc.y), W = rc.w, H = rc.h;
-      var pts = [[X, Y], [X + W, Y], [X + W, Y - H], [X, Y - H], [X, Y]];
-      p('0', 'POLYLINE'); p('8', 'PERETI'); p('66', '1'); p('70', '1');
-      pts.forEach(function (pt) { p('0', 'VERTEX'); p('8', 'PERETI'); p('10', pt[0].toFixed(3)); p('20', pt[1].toFixed(3)); });
-      p('0', 'SEQEND');
-      p('0', 'TEXT'); p('8', 'TEXT'); p('10', (X + 0.2).toFixed(3)); p('20', (Y - 0.5).toFixed(3)); p('40', '0.3'); p('1', (rc.room.nume || '').replace(/[^\x20-\x7e]/g, '') + ' ' + Math.round(rc.room.mp_unit || 0) + 'mp');
+      rectPoly(rc.x, rc.y, rc.w, rc.h, 'PERETI');
+      // ușă: gol pe latura dinspre coridor
+      var doorY = (rc.band === 'N') ? (rc.y + rc.h) : rc.y, dx = rc.x + rc.w / 2 - 0.45;
+      line(dx, -doorY, dx + 0.9, -doorY, 'USI');
+      txt(rc.x + 0.2, rc.y + rc.h / 2, (rc.room.nume || '') + ' ' + Math.round(rc.room.mp_unit || 0) + 'mp', 'TEXT', 0.28);
     });
-    e.push('0'); e.push('ENDSEC'); e.push('0'); e.push('EOF');
+    p(0, 'ENDSEC'); p(0, 'EOF');
     return e.join('\n');
   }
 
@@ -331,7 +367,7 @@
     spatii = spatii || []; meta = meta || {};
     if (!spatii.length) { if (G.ss) G.ss('Nu există program de spații. Generează-l în „🧩 Program funcțional".'); return; }
     var D = meta.D || {};
-    var lay = layout(spatii);
+    var lay = layout(spatii, { bW: D.bW || D.aedis_bW, bD: D.bD || D.aedis_bD });
     function nivName(n) { if (n === 'S') return ['subsol', 'SUBSOL']; if (n === 'P') return ['parter', 'PARTER']; if (n === 'E') return ['etaj', 'ETAJ']; var k = parseInt(n, 10); return isNaN(k) ? ['nivel ' + n, 'NIVEL ' + n] : ['etaj ' + k, 'ETAJ ' + k]; }
     function nivOrd(n) { if (n === 'S') return -1; if (n === 'P') return 0; if (n === 'E') return 1; var k = parseInt(n, 10); return isNaN(k) ? 99 : k; }
     var planse = [];

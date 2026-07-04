@@ -179,6 +179,25 @@
       else if (G._SKID_PROIECTE && (G._SKID_PROIECTE[d.nrcad] || G._SKID_PROIECTE['x'])) { d.functiune = 'skid'; }
       else if (A && A.corpuri && A.corpuri[0]) { var c = A.corpuri[0]; d.niv_supraterane = c.niv || 1; var hNiv = c.hNiv || 3; d.H = +(c.niv * hNiv).toFixed(1); if (d.Steren && d.POT_max) d.Sc = Math.round(d.Steren * (d.POT_max / 100) * 0.85); if (d.Sc) d.Sd = Math.round(d.Sc * (c.niv || 1)); }
     } catch (e) {}
+    // gabaritul clădirii (bW × bD) pentru planul de arhitectură — din AMPRENTA AEDIS
+    // (parterul volumului generat), ca planul să respecte forma din AEDIS
+    try {
+      var TF = G.turf || window.turf;
+      var fp0 = null;
+      if (S.vol && S.vol._lastFeats && S.vol._lastFeats.length) {
+        fp0 = S.vol._lastFeats.find(function (f) { return f.properties && f.properties.floor === 0 && !f.properties.isExistent; }) ||
+              S.vol._lastFeats.find(function (f) { return f.properties && f.properties.bldIdx != null; });
+      }
+      var geom = fp0 ? fp0.geometry : (ap.geo && ap.geo.geometry);
+      if (geom && TF && TF.bbox) {
+        var bb = TF.bbox({ type: 'Feature', geometry: geom, properties: {} });
+        var midLat = (bb[1] + bb[3]) / 2;
+        var wM = Math.abs((bb[2] - bb[0]) * 111320 * Math.cos(midLat * Math.PI / 180));
+        var dM = Math.abs((bb[3] - bb[1]) * 110540);
+        if (fp0 && wM > 4 && dM > 4) { d.bW = Math.round(wM * 10) / 10; d.bD = Math.round(dM * 10) / 10; d._aedis_footprint = true; }
+        else if (d.Sc) { var asp = (wM > 0 && dM > 0) ? wM / dM : 1.3; var bd = Math.sqrt(d.Sc / asp); d.bD = Math.round(bd * 10) / 10; d.bW = Math.round((d.Sc / bd) * 10) / 10; }
+      }
+    } catch (e) {}
     d.functiune = d.functiune || 'hala-industriala';
     d._source = 'AEDIS'; return d;
   }
