@@ -270,10 +270,34 @@
       ]) };
     },
     'Referate verificatori': function (D, v) {
-      return { cat: 'Piese Administrative', file: 'Referate_verificatori.doc', html: docHtml(_meta(D, 'REFERATE ALE VERIFICATORILOR DE PROIECTE'), [{ h: 'Referate pe cerințe (Legea 10/1995)', html: '<p>Referate de verificare pe cerințele esențiale: A (rezistență-stabilitate), B (siguranță în exploatare), C (securitate la incendiu), D (igienă/sănătate/mediu), E (izolație termică/economie energie), F (protecție împotriva zgomotului), Ie/It/Is (instalații). Verificatori atestați MDLPA — de completat.</p>' }]) };
+      var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
+      var CER = [
+        { c: 'A1/A2', n: 'Rezistență mecanică și stabilitate', ob: 'proiectul de rezistență (structură, fundații, note de calcul, planuri de armare)', norme: 'P100-1/2013, SR EN 1990-1999, NP 112/2014, Legea 10/1995' },
+        { c: 'B1', n: 'Siguranță și accesibilitate în exploatare', ob: 'proiectul de arhitectură (circulații, PMR, balustrade, pardoseli, scări, lift)', norme: 'NP 068, NP 051/2012, Legea 448/2006' },
+        { c: 'Cc', n: 'Securitate la incendiu', ob: 'scenariul de securitate la incendiu, memoriile, planurile de evacuare', norme: 'P118-1/2/3, Legea 307/2006, HG 571/2016' },
+        { c: 'D', n: 'Igienă, sănătate și mediu înconjurător', ob: 'proiectul de arhitectură și instalații sanitare/ventilare', norme: 'Ord. MS 119/2014, C 107, Legea 10/1995' },
+        { c: 'E', n: 'Economie de energie și izolare termică', ob: 'proiectul de arhitectură (anvelopă) + certificatul de performanță energetică', norme: 'C 107/2005, Legea 372/2005, Mc 001/2006' },
+        { c: 'F', n: 'Protecție împotriva zgomotului', ob: 'soluțiile de izolare acustică (pereți, planșee, finisaje)', norme: 'C 125/2013' },
+        { c: 'Is', n: 'Instalații sanitare', ob: 'proiectul de instalații sanitare (alimentare apă, canalizare)', norme: 'I9/2015, SR EN 806/12056' },
+        { c: 'It', n: 'Instalații termice', ob: 'proiectul de instalații termice/HVAC (sursă, distribuție, necesar de căldură)', norme: 'I13/2015, I5/2010, SR EN 12831' },
+        { c: 'Ie', n: 'Instalații electrice', ob: 'proiectul de instalații electrice (tablouri, priză de pământ, paratrăsnet)', norme: 'I7/2011, SR EN 62305' }
+      ];
+      var secs = [{ h: 'Notă', html: '<p>Pentru obiectivul „' + esc(fn) + '", ' + esc(D.uat || '—') + ', se prezintă referatele de verificare pe cerințele fundamentale aplicabile (Legea 10/1995). Verificarea se face de verificatori de proiecte atestați MDLPA pe fiecare cerință. Fiecare referat se semnează și ștampilează de verificatorul atestat.</p>' }];
+      CER.forEach(function (r) {
+        secs.push({ h: 'REFERAT DE VERIFICARE — cerința ' + r.c + ' (' + r.n + ')', html:
+          tbl([['Obiectivul verificat', esc(fn) + ', ' + esc(D.uat || '—')], ['Faza', D.faza === 'PTh' ? 'P.Th.' : 'D.T.A.C.'], ['Cerința fundamentală', r.c + ' — ' + r.n], ['Documente verificate', r.ob], ['Reglementări de referință', r.norme], ['Verificator atestat MDLPA', '(nume, nr. atestat) — de completat'], ['Concluzia verificării', 'Proiectul SE ADMITE / se restituie pentru refacere (după verificare)']], ['Element', 'Conținut']) +
+          '<p>Verificatorul confirmă că documentația verificată respectă cerința ' + r.c + ' și reglementările tehnice aplicabile, cu observațiile consemnate (dacă există). Referatul face parte din documentația de autorizare/execuție și din Cartea tehnică.</p>' });
+      });
+      return { cat: 'Piese Administrative', file: 'Referate_verificatori.doc', html: docHtml(_meta(D, 'REFERATE ALE VERIFICATORILOR DE PROIECTE', 'cerințe fundamentale Legea 10/1995'), secs) };
     },
     'PCCVI + faze determinante': function (D, v) {
-      return { cat: 'Recepție & Urmărire', file: 'PCCVI_faze_determinante.doc', html: docHtml(_meta(D, 'PROGRAM PENTRU CONTROLUL CALITĂȚII (PCCVI)'), [{ h: 'Faze determinante și controale', html: '<p>Program de control al calității pe faze determinante (infrastructură, structură, închideri, finisaje, instalații, recepție), cu prezența ISC conform Legii 10/1995 și HG 273/1994. Fazele determinante se stabilesc de proiectant și se anunță la ISC.</p>' }]) };
+      return { cat: 'Recepție & Urmărire', file: 'PCCVI_faze_determinante.doc', html: docHtml(_meta(D, 'PROGRAM DE CONTROL AL CALITĂȚII, VERIFICĂRI ȘI ÎNCERCĂRI (PCCVI)', 'Legea 10/1995 · HG 273/1994 · control pe faze determinante'), [
+        { h: '1. Obiect și cadru', html: '<p>Prezentul program stabilește controalele de calitate, verificările și încercările pe parcursul execuției obiectivului „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", precum și fazele determinante la care participă Inspecția de Stat în Construcții (ISC), proiectantul, dirigintele de șantier și executantul (Legea 10/1995, HG 742/2018).</p>' },
+        { h: '2. Faze determinante', html: tbl([['FD1', 'Recepția naturii terenului de fundare', 'Proiectant, Executant, Diriginte, Geotehnician, ISC'], ['FD2', 'Recepția armăturii fundațiilor înainte de betonare', 'Proiectant, Executant, Diriginte, ISC'], ['FD3', 'Recepția armăturii stâlpi/pereți parter', 'Proiectant, Executant, Diriginte'], ['FD4', 'Recepția armăturii planșeu peste parter (grinzi/placă/noduri)', 'Proiectant, Executant, Diriginte'], ['FD5', 'Recepția structurii la roșu (înainte de închideri)', 'Proiectant, Executant, Diriginte, ISC'], ['FD6', 'Recepția anvelopei termice (ETICS) / hidroizolații', 'Proiectant, Executant, Diriginte'], ['FD7', 'Probe instalații înainte de mascare (presiune, etanșeitate, PRAM)', 'Proiectant, Executant, Diriginte']], ['Nr.', 'Faza determinantă', 'Participanți']) },
+        { h: '3. Controale pe categorii de lucrări', html: tbl([['Terasamente/fundare', 'cotă, natură teren, compactare', 'PV recepție teren, buletine compactare'], ['Beton', 'consistență, rezistență 28 zile', 'buletine SR EN 12390, bonuri livrare'], ['Armătură', 'diametre, poziție, acoperiri', 'PV recepție armătură'], ['Instalații', 'probe presiune/etanșeitate/PRAM/debite', 'buletine probe, PRAM'], ['Finisaje/închideri', 'planeitate, aderență, etanșeitate', 'PVLA, PV recepție']], ['Categorie', 'Ce se verifică', 'Document']) },
+        { h: '4. Urmărirea comportării în timp (P130)', html: '<p>După recepție se instituie urmărirea curentă a comportării construcției (examinare vizuală periodică — fisuri, tasări, hidroizolații), consemnată în Cartea Tehnică. Pentru clasa de importanță II se prevede monitorizarea tasărilor (mărci topografice, măsurători la execuție + primii ani).</p>' },
+        { h: '5. Recepția lucrărilor', html: '<p>Recepția la terminarea lucrărilor și recepția finală se organizează conform HG 273/1994 (modificat prin HG 343/2017), cu comisie de recepție și consemnarea eventualelor obiecțiuni. Cartea tehnică se completează și se predă beneficiarului.</p>' }
+      ]) };
     },
     'Recepție (HG 273/1994)': function (D, v) {
       return { cat: 'Recepție & Urmărire', file: 'Proces_verbal_receptie.doc', html: docHtml(_meta(D, 'PROCES-VERBAL DE RECEPȚIE', 'la terminarea lucrărilor / finală — HG 273/1994'), [{ h: 'Proces-verbal de recepție', html: '<p>Se întocmește procesul-verbal de recepție la terminarea lucrărilor și, ulterior, recepția finală, conform HG 273/1994, cu comisia de recepție și eventualele obiecțiuni.</p>' }]) };
@@ -282,9 +306,25 @@
       return { cat: 'Recepție & Urmărire', file: 'Grafic_executie_finantare.doc', html: docHtml(_meta(D, 'GRAFIC DE EXECUȚIE ȘI FINANȚARE'), [{ h: 'Eșalonarea execuției', html: '<p>Durata estimată de execuție: ' + esc(D.durata || '—') + ' luni. Graficul Gantt și graficul de finanțare eșalonată se corelează cu devizul general și cu fazele determinante.</p>' }]) };
     },
     'Memorii avizatori': function (D, v) {
+      var ac = v.calc || {};
       var avize = Object.keys(D._avize || {}).filter(function (k) { return D._avize[k]; });
-      var secs = avize.length ? avize.map(function (a) { return { h: 'Memoriu pentru ' + a, html: '<p>Memoriu tehnic pentru obținerea avizului ' + esc(a) + ', cu descrierea soluției relevante pentru acest avizator și documentele necesare.</p>' }; }) : [{ h: 'Memorii avizatori', html: '<p>Bifați avizatorii din secțiunea 13 pentru a genera memoriile aferente.</p>' }];
-      return { cat: 'Avize', file: 'Memorii_avizatori.doc', html: docHtml(_meta(D, 'MEMORII PENTRU AVIZATORI'), secs) };
+      if (!avize.length) avize = ['ISU', 'DSP', 'APM', 'Operator energie electrică', 'Operator apă-canal', 'Salubritate'];
+      function match(a) { return String(a).toLowerCase(); }
+      function memAviz(a) {
+        var k = match(a); var body;
+        if (/isu|pompier|incendiu/.test(k)) body = '<p>Se solicită avizul/autorizația de securitate la incendiu (ISU) conform Legii 307/2006 și HG 571/2016. Categoria de pericol de incendiu: ' + esc(ac.psi_default || 'C') + '; grad de rezistență la foc: ' + esc(ac.grad_default || 'II') + '. Obiectivul dispune de: căi de evacuare dimensionate (P118-1), ' + (ac.idsi_oblig ? 'instalație de detectare-semnalizare (IDSAI, P118-3), ' : '') + (ac.sprinklere_oblig ? 'sprinklere (SR EN 12845), ' : '') + 'hidranți' + (D.Sc > 600 ? ' interiori' : '') + ', stingătoare, iluminat de securitate. Documentul de fundamentare este Scenariul de securitate la incendiu (piesă distinctă). Documente: cerere, scenariu SSI, planuri, opis.</p>';
+        else if (/dsp|sanit|sanatate/.test(k)) body = '<p>Se solicită avizul sanitar (DSP) conform Legii 95/2006 și Ord. MS 119/2014. Se demonstrează: asigurarea grupurilor sanitare (inclusiv adaptat PMR), a ventilării și iluminării naturale, a alimentării cu apă potabilă și evacuării apelor uzate, a finisajelor lavabile/igienizabile în spațiile cu cerințe (cabinet medical, bloc alimentar), gestiunea deșeurilor. Documente: cerere, memoriu tehnic, plan de situație, planuri, dovada folosinței.</p>';
+        else if (/mediu|apm/.test(k)) body = '<p>Se solicită actul de reglementare de mediu (APM) conform OUG 195/2005 și Legii 292/2018. Funcțiunea este „curată" (fără procese tehnologice poluante); se verifică încadrarea Natura 2000 și, după caz, pragurile SEVESO. Memoriul de mediu (14 capitole, Ord. 863/2002) este piesă distinctă. Documente: notificare, memoriu de prezentare, plan de situație, certificat de urbanism.</p>';
+        else if (/gaz/.test(k)) body = '<p>Se solicită avizul operatorului de distribuție gaze naturale (Legea 123/2012, NTPEE). Se prezintă necesarul de gaz (debit), poziția postului de reglare-măsurare, traseul de racord, măsurile de siguranță (detector gaz + electrovalvă). Documente: cerere de racordare, memoriu, plan de situație.</p>';
+        else if (/electric|energie|electrica/.test(k)) body = '<p>Se solicită avizul tehnic de racordare (ATR) la operatorul de distribuție energie electrică (Legea 123/2012, Ord. ANRE). Putere instalată/absorbită: conform bilanțului electric (memoriu IE). Se prezintă poziția branșamentului, tabloul general, puterea solicitată. Documente: cerere ATR, fișă de date energetice, plan de situație.</p>';
+        else if (/apa|canal|apavital|raja|aquatim/.test(k)) body = '<p>Se solicită avizul operatorului de apă-canal (Legea 241/2006). Se prezintă debitele de apă (I9) și de ape uzate menajere/pluviale, poziția branșamentului și racordului la colectoare. Documente: cerere, memoriu instalații sanitare, plan de situație cu rețele.</p>';
+        else if (/salubr/.test(k)) body = '<p>Se solicită avizul de salubritate (Legea 101/2006). Se prezintă platforma gospodărească de colectare selectivă a deșeurilor menajere și modul de evacuare cu operatorul autorizat. Documente: cerere, plan de situație cu platforma de deșeuri.</p>';
+        else if (/protectie civil|ala|adapost/.test(k)) body = '<p>Se solicită avizul de protecție civilă (Legea 481/2004, HG 862/2016) privind necesitatea/scutirea de adăpost ALA, în funcție de suprafața desfășurată' + (D.Sd ? ' (' + (+D.Sd).toLocaleString('ro-RO') + ' mp)' : '') + '. Documente: cerere, memoriu, planuri.</p>';
+        else body = '<p>Memoriu tehnic pentru obținerea avizului „' + esc(a) + '", cu descrierea soluției relevante pentru acest avizator, temeiul legal aplicabil și lista documentelor necesare (cerere, memoriu, plan de situație, planuri).</p>';
+        return { h: 'DOSAR AVIZ — ' + esc(a), html: body };
+      }
+      var secs = [{ h: 'Notă', html: '<p>Dosarele de avize se întocmesc conform mențiunilor din Certificatul de Urbanism. Fiecare dosar cuprinde: cerere-tip, memoriu tehnic specific avizatorului, piese desenate relevante și opis. Mai jos, memoriile pe avizatori.</p>' }].concat(avize.map(memAviz));
+      return { cat: 'Avize', file: 'Dosare_avize.doc', html: docHtml(_meta(D, 'DOSARE / MEMORII PENTRU AVIZATORI'), secs) };
     }
   };
 
