@@ -148,6 +148,39 @@
     vestiar_arbitri: { label: 'Vestiar arbitri', cat: 'Sport', mp_min: 8, mp_rec: 10, normativ: 'Ord. MTS' },
     gs_public: { label: 'Grup sanitar public', cat: 'Sanitare', mp_min: 12, mp_rec: 20, share: true, normativ: 'NP 051/2012' },
     camera_materiale_sport: { label: 'Cameră materiale sportive', cat: 'Sport', mp_min: 10, mp_rec: 16, normativ: '—' },
+    // --- medical extins (sală operație, laborator analize) — Ord. MS 914/2006 ---
+    sala_operatie: { label: 'Sală de operație', cat: 'Medical', mp_min: 30, mp_rec: 42, normativ: 'Ord. MS 914/2006 + NP 015-1997', genereaza: ['sala_pregatire_preop', 'sala_trezire_postop', 'sterilizare_centrala', 'depozit_materiale_sterile', 'camera_deseuri_med', 'vestiar_medical_curat', 'vestiar_medical_murdar'], inst: ['climatizare_curata_ISO5', 'gaze_medicale', 'UPS', 'HEPA_H14'], avize: ['DSP', 'MS'], psi: { cat: 'C', detector: 'VESDA', sting: 'gazos clean-agent' } },
+    sala_pregatire_preop: { label: 'Sală pregătire preoperatorie', cat: 'Medical', mp_min: 15, mp_rec: 18, normativ: 'Ord. MS 914/2006' },
+    sala_trezire_postop: { label: 'Sală trezire postoperatorie', cat: 'Medical', mp_min: 20, mp_rec: 24, normativ: 'Ord. MS 914/2006' },
+    sterilizare_centrala: { label: 'Sterilizare centrală', cat: 'Medical', mp_min: 30, mp_rec: 35, normativ: 'Ord. MS 914/2006', inst: ['abur', 'apa_dedurizata'] },
+    depozit_materiale_sterile: { label: 'Depozit materiale sterile', cat: 'Medical', mp_min: 10, mp_rec: 14, normativ: 'Ord. MS 914/2006' },
+    camera_deseuri_med: { label: 'Cameră deșeuri medicale periculoase (18 01)', cat: 'Medical', mp_min: 8, mp_rec: 10, share: true, normativ: 'Ord. MS 1226/2012', avize: ['DSP', 'APM'] },
+    vestiar_medical_curat: { label: 'Vestiar personal medical (curat)', cat: 'Personal', mp_min: 12, mp_rec: 14, normativ: 'Ord. MS 914/2006' },
+    vestiar_medical_murdar: { label: 'Vestiar personal medical (murdar)', cat: 'Personal', mp_min: 10, mp_rec: 12, normativ: 'Ord. MS 914/2006' },
+    laborator_analize: { label: 'Laborator analize medicale', cat: 'Medical', mp_min: 25, mp_rec: 40, normativ: 'Ord. MS 914/2006 + Ord. MS 1301/2007', genereaza: ['sala_recoltare', 'camera_reactivi', 'camera_deseuri_periculoase_lab'], inst: ['hota_chimica', 'apa_distilata', 'depresiune_aer'], avize: ['DSP', 'APM'] },
+    sala_recoltare: { label: 'Sală recoltare', cat: 'Medical', mp_min: 15, mp_rec: 18, normativ: 'Ord. MS 914/2006' },
+    camera_reactivi: { label: 'Depozit reactivi (ventilat, securizat)', cat: 'Medical', mp_min: 8, mp_rec: 10, normativ: 'Ord. MS 1301/2007', inst: ['hota_chimica'] },
+    camera_deseuri_periculoase_lab: { label: 'Cameră deșeuri periculoase laborator', cat: 'Medical', mp_min: 6, mp_rec: 8, share: true, normativ: 'Ord. MS 1226/2012' },
+    // --- industrial: vopsitorie ATEX (SR EN 60079 + Dir. 2014/34/UE) ---
+    zona_vopsitorie: { label: 'Zonă vopsitorie / lăcuire (ATEX)', cat: 'Producție', mp_min: 20, mp_rec: 40, normativ: 'SR EN 60079 + Dir. ATEX 2014/34/UE', genereaza: ['cabina_vopsire', 'camera_mixare_vopsele', 'depozit_solventi'], inst: ['ventilatie_antiex', 'instalatie_electrica_Ex'], deviz: ['cabina_vopsire_antiex'], avize: ['ISU', 'ITM', 'APM'], psi: { cat: 'A-B', detector: 'gaz solvenți', sting: 'sprinklere/CO2' }, doc: ['evaluare_ATEX_DIPE', 'clasificare_zone_Ex'] },
+    cabina_vopsire: { label: 'Cabină de vopsire (antiex, ATEX 1)', cat: 'Producție', mp_min: 20, mp_rec: 30, normativ: 'SR EN 60079', inst: ['ventilatie_antiex'] },
+    camera_mixare_vopsele: { label: 'Cameră mixare vopsele (ATEX 1)', cat: 'Producție', mp_min: 10, mp_rec: 14, normativ: 'SR EN 60079', inst: ['ventilatie_antiex'] },
+    depozit_solventi: { label: 'Depozit solvenți (REI 120, ATEX 2)', cat: 'Depozitare', mp_min: 8, mp_rec: 12, normativ: 'P118 + SR EN 60079' },
+    // --- energie: SKID GPL (NTPEE + ATEX + ISCIR) ---
+    skid_gpl: { label: 'SKID GPL / stație', cat: 'Energie', mp_min: 20, mp_rec: 60, dim: 'param', normativ: 'NTPEE + ISCIR PT C7 + NFPA 58 + ATEX', genereaza: ['zona_protectie_gpl', 'camin_vane_gpl', 'imprejmuire_skid'], inst: ['detectie_gaz_Ex', 'paratrasnete_dedicate'], avize: ['ISU', 'ANRE', 'ISCIR', 'APM'], psi: { cat: 'A', detector: 'gaz Ex', sting: 'apă pulverizată/CO2' }, doc: ['DIPE_ATEX', 'autorizare_ANRE', 'autorizare_IGSU', 'autorizare_ISCIR', 'scoatere_circuit_agricol'] },
+    zona_protectie_gpl: { label: 'Zonă protecție GPL (3 m perimetru, ATEX 2)', cat: 'Energie', mp_min: 0, mp_rec: 0, normativ: 'NFPA 58 + NTPEE' },
+    camin_vane_gpl: { label: 'Cămin vane GPL', cat: 'Energie', mp_min: 2, mp_rec: 4, normativ: 'ISCIR PT C7' },
+    imprejmuire_skid: { label: 'Împrejmuire skid (gard H=1,8m, avertizare)', cat: 'Energie', mp_min: 0, mp_rec: 0, normativ: 'Ord. IGSU 87/2010' },
+    // --- sport: bazin înot ---
+    bazin_inot: { label: 'Bazin de înot', cat: 'Sport', mp_min: 200, mp_rec: 500, dim: 'param', normativ: 'NP 010 + Ord. MTS + Ord. MS 119/2014', genereaza: ['sala_tratare_apa', 'camera_pompe_bazin', 'depozit_chimicale', 'vestiar_sportivi', 'gs_public'], inst: ['tratare_apa_clor', 'ventilatie_dezumidificare'], avize: ['DSP', 'ISU'] },
+    sala_tratare_apa: { label: 'Sală tratare apă (clor, pH — ATEX)', cat: 'Sport', mp_min: 40, mp_rec: 50, normativ: 'Ord. MS 119/2014', inst: ['ventilatie_antiex'] },
+    camera_pompe_bazin: { label: 'Cameră pompe bazin', cat: 'Tehnic', mp_min: 20, mp_rec: 25, normativ: 'I9' },
+    depozit_chimicale: { label: 'Depozit chimicale (ventilat, impermeabil)', cat: 'Tehnic', mp_min: 8, mp_rec: 10, normativ: 'Ord. MS 119/2014' },
+    // --- educațional: laborator chimie școală (NP 010 + DSP) ---
+    laborator_chimie: { label: 'Laborator chimie școlar', cat: 'Educațional', mp_min: 70, mp_rec: 80, normativ: 'NP 010-1997', genereaza: ['depozit_reactivi_chimici', 'camera_pregatire_chimie'], inst: ['hota_chimica', 'statie_neutralizare'], avize: ['DSP', 'APM', 'ISU'] },
+    depozit_reactivi_chimici: { label: 'Depozit reactivi chimici (securizat, ventilat)', cat: 'Educațional', mp_min: 8, mp_rec: 10, normativ: 'NP 010 + Ord. MS' },
+    camera_pregatire_chimie: { label: 'Cameră pregătire experimente chimie', cat: 'Educațional', mp_min: 10, mp_rec: 12, normativ: 'NP 010' },
+    sala_clasa: { label: 'Sală de clasă', cat: 'Educațional', mp_min: 50, mp_rec: 56, normativ: 'NP 010-1997 (1,8 mp/elev)' },
     // --- comune (hotel, birouri, locuințe) ---
     receptie: { label: 'Recepție', cat: 'Primire', mp_min: 10, mp_rec: 20, normativ: '—' },
     lobby: { label: 'Lobby / spațiu așteptare', cat: 'Primire', mp_min: 20, mp_rec: 60, dim: 'param', normativ: '—' },
@@ -181,6 +214,31 @@
         if ((p.restaurant_locuri || 0) > 0) s.push({ id: 'restaurant', mp: Math.max(40, (p.restaurant_locuri) * 1.3) }, { id: 'bucatarie_profesionala', mp: Math.max(40, (p.restaurant_locuri) * 0.6) });
         return s;
       }
+    },
+    'spital': {
+      label: 'Spital / unitate medicală', norma: 'Ord. MS 914/2006 + NP 015-1997',
+      params: [{ key: 'paturi', label: 'Nr. paturi', type: 'number', def: 50 }, { key: 'sali_operatie', label: 'Săli de operație', type: 'number', def: 2 }, { key: 'laborator', label: 'Laborator analize', type: 'bool', def: true }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 3 }],
+      baza: function (p) {
+        var s = [{ id: 'receptie' }, { id: 'lobby', mp: Math.max(30, (p.paturi || 50) * 0.8) }, { id: 'camera_deseuri_med' }, { id: 'centrala_termica' }, { id: 'camera_server' }];
+        for (var i = 0; i < (p.sali_operatie || 0); i++) s.push({ id: 'sala_operatie' });
+        if (p.laborator) s.push({ id: 'laborator_analize' });
+        return s;
+      }
+    },
+    'scoala': {
+      label: 'Școală / gimnaziu', norma: 'NP 010-1997 + HG 1534/2008',
+      params: [{ key: 'elevi', label: 'Nr. elevi', type: 'number', def: 300 }, { key: 'clase', label: 'Nr. săli de clasă', type: 'number', def: 12 }, { key: 'lab_chimie', label: 'Laborator chimie', type: 'bool', def: true }, { key: 'sala_sport', label: 'Sală de sport', type: 'bool', def: true }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 2 }],
+      baza: function (p) {
+        var s = [{ id: 'receptie' }, { id: 'sala_clasa', qty: p.clase || 12 }, { id: 'centrala_termica' }, { id: 'gs_public' }];
+        if (p.lab_chimie) s.push({ id: 'laborator_chimie' });
+        if (p.sala_sport) s.push({ id: 'sala_sport', mp: 540 });
+        return s;
+      }
+    },
+    'skid-gpl': {
+      label: 'SKID GPL / stație carburanți', norma: 'NTPEE + ISCIR PT C7 + ATEX',
+      params: [{ key: 'mp_skid', label: 'Suprafață skid (mp)', type: 'number', def: 60 }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 1 }],
+      baza: function (p) { return [{ id: 'skid_gpl', mp: p.mp_skid || 60 }]; }
     },
     'hala-logistica': {
       label: 'Hală logistică / producție', norma: 'NP 011 + P118 + Legea 319/2006',
