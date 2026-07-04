@@ -52,16 +52,55 @@
     return { P: P, bW: bW, bD: bD, niv: niv, scArea: scArea, sdaTotal: sdaTotal, sdaPerFloor: scArea, cores: cores, parcelArea: P.area };
   }
 
+  // niv label pt indexul de nivel fi (0=parter, 1..=etaje, subsol separat)
+  function _nivLabel(fi) { return fi === 0 ? 'P' : String(fi); }
+
+  // Construiește floors (rects/doors/wins) din planul cu coridor (UXPlanSVG.layout),
+  // astfel încât exportatorul IFC să genereze pereți + spații + uși + ferestre REALE
+  // (nu doar lespedea de massă). Aliniază anvelopa clădirii la geometria planului.
+  function _floorsFromLayout(D, b) {
+    if (!G.UXPlanSVG || !G.UXPlanSVG.layout || !D._spatii || !D._spatii.length) return { floors: [], W: b.bW, Db: b.bD };
+    var lay = G.UXPlanSVG.layout(D._spatii);
+    var maxW = 0, maxD = 0;
+    Object.keys(lay).forEach(function (k) { if (lay[k].w > maxW) maxW = lay[k].w; if (lay[k].h > maxD) maxD = lay[k].h; });
+    var niv = Math.max(1, +D.niv_supraterane || 1);
+    var floors = [];
+    for (var fi = 0; fi < niv; fi++) {
+      var d = lay[_nivLabel(fi)] || lay['P'];
+      if (!d) { floors.push({ rects: [], doors: [], wins: [] }); continue; }
+      var rects = [], doors = [], wins = [];
+      // nucleu (pereți portanți)
+      rects.push({ x: d.core.x, y: d.core.y, w: d.core.w, h: d.core.h, t: 'core', lbl: 'Scara / lift', apt: -1, solarOk: true });
+      d.rects.forEach(function (rc) {
+        rects.push({ x: rc.x, y: rc.y, w: rc.w, h: rc.h, t: 'room', lbl: (rc.room.nume || '').slice(0, 60), apt: -1, solarOk: rc.band === 'N' });
+        // ușă spre coridor
+        var doorY = (rc.band === 'N') ? (rc.y + rc.h) : rc.y;
+        doors.push({ x: rc.x + rc.w / 2 - 0.45, y: doorY, w: 0.9, type: 'int' });
+        // fereastră pe fațadă (camerele cu iluminat)
+        var cat = rc.room.cat || '';
+        if (!/Sanitare|Tehnic|Depozit|Circula/.test(cat) && rc.w > 2.0) {
+          wins.push({ x: rc.x + rc.w / 2 - 0.9, y: 0, w: 1.8, wall: (rc.band === 'N') ? 'N' : 'S' });
+        }
+      });
+      // ușă de acces principal (parter) — pe fațada de capăt, în dreptul coridorului
+      if (fi === 0) doors.push({ x: d.coreW + 0.1, y: d.Db, w: 1.6, type: 'main' });
+      floors.push({ rects: rects, doors: doors, wins: wins, W: d.w, D: d.h });
+    }
+    return { floors: floors, W: maxW || b.bW, D: maxD || b.bD };
+  }
+
   // Populează window._RV din modelul de documentație
   function buildRV(D) {
     var P = _paramsFromDoc(D);
     var b = _compBuilding(P);
+    var fl = _floorsFromLayout(D, b);
+    if (fl.floors.length) { b.bW = fl.W; b.bD = fl.D; b.niv = fl.floors.length; b.scArea = fl.W * fl.D; b.sdaTotal = b.scArea * b.niv; b.sdaPerFloor = b.scArea; }
     if (!G._RV) G._RV = {};
     G._RV.parcelParams = P;
     G._RV.building = b;
-    G._RV.floors = [];           // exportatorul IFC regenerează/înlocuiește la nevoie
+    G._RV.floors = fl.floors;    // pereți/spații/uși/ferestre REALE per nivel
     G._RV.curFloor = 0;
-    return { P: P, building: b };
+    return { P: P, building: b, floors: fl.floors.length };
   }
 
   function _ss(m) { if (typeof G.ss === 'function') G.ss(m); }
