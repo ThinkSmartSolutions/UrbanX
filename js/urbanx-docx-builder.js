@@ -314,10 +314,51 @@
       ]) };
     },
     'Recepție (HG 273/1994)': function (D, v) {
+      var deep = _lib(D, 'receptie');
+      if (deep) return { cat: 'Recepție & Urmărire', file: 'Receptie_lucrari_HG273.doc', html: docHtml(_meta(D, 'RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII', 'la terminarea lucrărilor + finală + carte tehnică + urmărire în timp — HG 273/1994'), [{ h: null, html: deep }]) };
       return { cat: 'Recepție & Urmărire', file: 'Proces_verbal_receptie.doc', html: docHtml(_meta(D, 'PROCES-VERBAL DE RECEPȚIE', 'la terminarea lucrărilor / finală — HG 273/1994'), [{ h: 'Proces-verbal de recepție', html: '<p>Se întocmește procesul-verbal de recepție la terminarea lucrărilor și, ulterior, recepția finală, conform HG 273/1994, cu comisia de recepție și eventualele obiecțiuni.</p>' }]) };
     },
     'Gantt + grafic finanțare': function (D, v) {
-      return { cat: 'Recepție & Urmărire', file: 'Grafic_executie_finantare.doc', html: docHtml(_meta(D, 'GRAFIC DE EXECUȚIE ȘI FINANȚARE'), [{ h: 'Eșalonarea execuției', html: '<p>Durata estimată de execuție: ' + esc(D.durata || '—') + ' luni. Graficul Gantt și graficul de finanțare eșalonată se corelează cu devizul general și cu fazele determinante.</p>' }]) };
+      var N = Math.max(6, Math.min(24, Math.round(+D.durata || 12))); // luni
+      // activitati cu start/durata proportionale cu N si pondere % din C+M
+      var ACT = [
+        { n: 'Organizare de șantier', s: 0.00, d: 0.06, p: 2 },
+        { n: 'Terasamente și săpături', s: 0.04, d: 0.06, p: 3 },
+        { n: 'Infrastructură (fundații, hidroizolații)', s: 0.08, d: 0.14, p: 12 },
+        { n: 'Suprastructură (cadre b.a., planșee)', s: 0.18, d: 0.28, p: 26 },
+        { n: 'Închideri și compartimentări', s: 0.42, d: 0.18, p: 10 },
+        { n: 'Învelitoare / terasă, tâmplărie exterioară', s: 0.50, d: 0.14, p: 8 },
+        { n: 'Instalații (IS/IT/IE/HVAC/PSI)', s: 0.50, d: 0.28, p: 18 },
+        { n: 'Finisaje interioare și exterioare', s: 0.66, d: 0.28, p: 15 },
+        { n: 'Amenajări exterioare, împrejmuire', s: 0.82, d: 0.16, p: 4 },
+        { n: 'Probe, verificări, recepție', s: 0.94, d: 0.06, p: 2 }
+      ];
+      var head = ['Activitate']; for (var m = 1; m <= N; m++) head.push('L' + m);
+      var rows = ACT.map(function (a) {
+        var s0 = Math.round(a.s * N), e0 = Math.min(N, Math.max(s0 + 1, Math.round((a.s + a.d) * N)));
+        var r = [a.n]; for (var m = 1; m <= N; m++) r.push((m - 1 >= s0 && m - 1 < e0) ? '■' : ''); return r;
+      });
+      var gantt = tbl(rows, head);
+      // finantare esalonata: valoare C+M repartizata pe luni dupa ponderea activitatilor active
+      var cm = 0; try { cm = (v.calc && v.calc.deviz && v.calc.deviz.cm) ? +v.calc.deviz.cm : 0; } catch (e) {}
+      if (!cm) cm = Math.round((+D.Sd || 900) * 1100); // estimare 1100 EUR/mp C+M
+      var perMonth = new Array(N + 1).fill(0);
+      ACT.forEach(function (a) {
+        var s0 = Math.round(a.s * N), e0 = Math.min(N, Math.max(s0 + 1, Math.round((a.s + a.d) * N)));
+        var span = Math.max(1, e0 - s0), val = cm * a.p / 100, per = val / span;
+        for (var m = s0; m < e0; m++) perMonth[m + 1] += per;
+      });
+      var cum = 0; var finRows = [];
+      for (var m = 1; m <= N; m++) { cum += perMonth[m]; finRows.push(['Luna ' + m, Math.round(perMonth[m]).toLocaleString('ro-RO'), Math.round(cum).toLocaleString('ro-RO'), (Math.round(cum / cm * 1000) / 10) + '%']); }
+      finRows.push(['TOTAL C+M', Math.round(cm).toLocaleString('ro-RO'), Math.round(cm).toLocaleString('ro-RO'), '100%']);
+      var fin = tbl(finRows, ['Perioada', 'Tranșă (EUR)', 'Cumulat (EUR)', '% din C+M']);
+      var secs = [
+        { h: '1. Durata și eșalonarea execuției', html: '<p>Durata estimată de execuție: <b>' + N + ' luni</b>. Graficul de eșalonare (Gantt) de mai jos corelează activitățile principale cu fazele determinante (PCCVI) și cu graficul de finanțare. Activitățile se suprapun controlat (fluxuri paralele) pentru încadrarea în durată.</p>' },
+        { h: '2. Grafic Gantt de execuție', html: gantt + '<p style="font-size:11px;color:#666">■ = perioadă de desfășurare a activității. Drumul critic: terasamente → infrastructură → suprastructură → închideri → instalații mascate → finisaje → recepție.</p>' },
+        { h: '3. Grafic de finanțare eșalonată (C+M)', html: '<p>Repartizarea valorii lucrărilor de construcții-montaj (C+M ≈ ' + Math.round(cm).toLocaleString('ro-RO') + ' EUR fără TVA) pe luni, proporțional cu volumul de lucrări executat. Tranșele se decontează pe baza situațiilor de lucrări confirmate de dirigintele de șantier.</p>' + fin },
+        { h: '4. Corelări', html: '<p>Graficul se corelează cu: Devizul general (HG 907/2016) — valoarea C+M; PCCVI — momentele fazelor determinante (recepția fundațiilor, structurii la roșu, probelor de instalații); DTOE — organizarea de șantier și resursele. Orice modificare a duratei se reflectă în reeșalonarea tranșelor.</p>' }
+      ];
+      return { cat: 'Recepție & Urmărire', file: 'Grafic_executie_finantare.doc', html: docHtml(_meta(D, 'GRAFIC DE EXECUȚIE ȘI FINANȚARE', 'eșalonare Gantt + grafic de finanțare C+M'), secs) };
     },
     'Memorii avizatori': function (D, v) {
       var ac = v.calc || {};
