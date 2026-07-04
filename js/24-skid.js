@@ -41,19 +41,57 @@
   function _dimRec(cap) { return cap <= 1000 ? { L: 1.5, W: 0.8 } : cap <= 3000 ? { L: 2.5, W: 1.0 } : cap <= 5000 ? { L: 3.2, W: 1.1 } : cap <= 7000 ? { L: 3.8, W: 1.2 } : { L: 4.5, W: 1.3 }; }
   function _distCladiri(capTot) { for (var i = 0; i < DIST_CLADIRI.length; i++) if (capTot <= DIST_CLADIRI[i][0]) return { tip_I: DIST_CLADIRI[i][1], tip_II: DIST_CLADIRI[i][2], tip_III: DIST_CLADIRI[i][3] }; return { tip_I: 15, tip_II: 20, tip_III: 30 }; }
 
+  // vaporizare naturală (kg/h/recipient) — PT C8-2010 / I 31/1999, temp-dependent
+  function _vaporizare(capL, umplere, T) {
+    var u = (umplere || 85) / 100;
+    var k = T >= 10 ? 0.0028 : T >= 0 ? 0.0020 : T >= -10 ? 0.0014 : T >= -15 ? 0.0010 : 0.0007;
+    return +(capL * u * k).toFixed(1);
+  }
   function skid_calc(params) {
     params = params || {};
     var dest = params.destinatie || 'incalzire_cladiri'; var D = DEST[dest] || DEST.incalzire_cladiri;
-    var nrRec = params.nrRec || 1; var capRec = params.capRec || D.cap_rec; var capTot = nrRec * capRec;
+    var nrRec = Math.max(1, Math.min(params.nrRec || 1, 3)); var capRec = params.capRec || D.cap_rec; var capTot = nrRec * capRec;
+    var montaj = params.montaj || 'suprateran'; // suprateran | subteran_orizontal | subteran_vertical
+    var subteran = montaj.indexOf('subteran') === 0;
     var totalKW = params.totalKW != null ? params.totalKW : D.target_kW;
     var debit = +(totalKW * 0.08).toFixed(1); // kg/h
-    var capKg = capTot * RHO; var util = capKg * 0.85;
+    var debitM3h = +(debit / 1.97).toFixed(2);
+    var capKg = capTot * RHO; var util = capKg * (0.85 - 0.20); // 85% umplere − 20% rezervă
     var oreZi = params.oreZi || 10;
     var autonomieZile = debit > 0 ? +(util / (debit * oreZi)).toFixed(1) : null;
     var tone = +(capTot * RHO / 1000).toFixed(2); var seveso = tone >= 50;
     var dim = _dimRec(capRec); var distCl = _distCladiri(capTot);
-    var pW = +(nrRec * (dim.W + 1.2) + 2).toFixed(1), pL = +(dim.L + 4).toFixed(1);
-    return { dest: dest, label: D.label, nrRec: nrRec, capRec: capRec, capTot: capTot, totalKW: totalKW, debit: debit, capKg: Math.round(capKg), util: Math.round(util), oreZi: oreZi, autonomieZile: autonomieZile, tone: tone, seveso: seveso, atex: D.atex, dim: dim, distCladiri: distCl, dist: DIST, pW: pW, pL: pL, norme: D.norme };
+    // subteran: distanțe reduse ~50% (I 31/1999) — recipientul îngropat prezintă risc redus
+    var subF = subteran ? 0.5 : 1.0;
+    var distCladiri = { tip_I: Math.ceil(distCl.tip_I * subF), tip_II: Math.ceil(distCl.tip_II * subF), tip_III: Math.ceil(distCl.tip_III * subF) };
+    // distanța minimă între recipiente (baterie): max(1.0m ; 1/4 din suma diametrelor) suprateran; 0.5m subteran
+    var distIntre = subteran ? 0.5 : Math.max(1.0, +(0.25 * (dim.W * 2)).toFixed(2));
+    // vaporizare la −15°C vs debit → vaporizator necesar?
+    var vap15 = _vaporizare(capRec, 85, -15) * nrRec;
+    var vaporizatorNecesar = debit > vap15;
+    // cuvă de retenție (V ≥ 110% cel mai mare recipient) — obligatorie industrial (PT C6) / recomandată suprateran mare
+    var cuvaNecesara = (dest === 'industrial') || (!subteran && capRec >= 5000);
+    var cuvaVolMc = cuvaNecesara ? +(capRec / 1000 * 1.1).toFixed(1) : 0;
+    // perete de protecție antifoc — dacă distanța disponibilă < distanța normată (tip_II implicit)
+    var distDisp = params.distDisponibil != null ? params.distDisponibil : null;
+    var distNorm = distCladiri.tip_II;
+    var peretNecesar = distDisp != null && distDisp < distNorm;
+    var perete = peretNecesar ? {
+      rezistenta: 'REI 120', material: 'beton armat / zidărie plină incombustibilă',
+      H: +((subteran ? 0.5 : dim.W) + 0.5).toFixed(1), // depășește partea superioară a recipientului cu 0,5 m
+      L: +(dim.L + 1.0).toFixed(1),                    // depășește capetele cu 0,5 m/parte
+      nota: 'Distanța de siguranță se măsoară OCOLIND peretele; permite amplasarea recipientului mai aproape de obiectul protejat (PT C8-2010 / I 31/1999).'
+    } : null;
+    // platformă
+    var pW = +(nrRec * (dim.W + distIntre) + 2).toFixed(1), pL = +(dim.L + 4).toFixed(1);
+    return {
+      dest: dest, label: D.label, nrRec: nrRec, capRec: capRec, capTot: capTot, montaj: montaj, subteran: subteran,
+      totalKW: totalKW, debit: debit, debitM3h: debitM3h, capKg: Math.round(capKg), util: Math.round(util), oreZi: oreZi, autonomieZile: autonomieZile,
+      tone: tone, seveso: seveso, atex: D.atex, dim: dim, distCladiri: distCladiri, distCladiriSupra: distCl, dist: DIST, distIntre: distIntre,
+      vap15: vap15, vaporizatorNecesar: vaporizatorNecesar, cuvaNecesara: cuvaNecesara, cuvaVolMc: cuvaVolMc,
+      distDisponibil: distDisp, peretNecesar: peretNecesar, perete: perete, subF: subF,
+      pW: pW, pL: pL, norme: D.norme
+    };
   }
   G.skid_calc = skid_calc;
   G.skid_genPromptAEDIS = function (c) { return 'GPL skid installation: ' + c.nrRec + ' horizontal cylindrical LPG tank(s) ' + c.dim.L + 'x' + c.dim.W + 'm on concrete platform, pressure regulation cabinet, safety fence, warning signage, photorealistic, industrial'; };
@@ -75,7 +113,7 @@
     S.vol._lastFeats = [{ type: 'Feature', properties: { base: 0, top: 0.1, color: '#b8bcc2', floor: 0 }, geometry: { type: 'Polygon', coordinates: [[[lon - dd, lat - dd], [lon + dd, lat - dd], [lon + dd, lat + dd], [lon - dd, lat + dd], [lon - dd, lat - dd]]] } }];
     S.vol.fn = 'industrie'; S.vol.genDone = true;
     // parametri pentru _v3dAddSkid
-    window._SKID_VIEW = { nTanks: c.nrRec, tankLen: c.dim.L, tankDia: c.dim.W, pW: c.pW, pL: c.pL };
+    window._SKID_VIEW = { nTanks: c.nrRec, tankLen: c.dim.L, tankDia: c.dim.W, pW: c.pW, pL: c.pL, distIntre: c.distIntre, subteran: c.subteran, montaj: c.montaj, cuva: c.cuvaNecesara, perete: c.perete };
     // deschide Viewer 3D → _v3dAddSkid desenează SKID-ul
     try {
       if (typeof G.aedisOpen3DViewer === 'function') G.aedisOpen3DViewer();
@@ -150,17 +188,60 @@
     page('DATE TEHNICE'); SEC('1. DATE TEHNICE ȘI CALCUL');
     P('Instalația SKID GPL propusă pentru „' + c.label + '" cuprinde ' + c.nrRec + ' recipient(e) de ' + c.capRec.toLocaleString('ro-RO') + ' L, cu grup de reglare a presiunii, pe platformă betonată împrejmuită. Calculul urmează PT C8-2010 și I 31/1999.');
     cy = tblRow(['Parametru', 'Valoare', 'Bază'], cy, true, [58, 44, 80]);
-    [['Capacitate totală', c.capTot.toLocaleString('ro-RO') + ' L', 'nr × cap. recipient'],
-     ['Masă GPL utilă (85%)', c.util.toLocaleString('ro-RO') + ' kg', 'cap × 0,51 × 0,85'],
-     ['Debit maxim consumatori', c.debit + ' kg/h', 'putere ' + c.totalKW + ' kW × 0,08'],
-     ['Autonomie', (c.autonomieZile != null ? c.autonomieZile + ' zile' : '—'), 'la ' + c.oreZi + ' h/zi funcționare'],
+    [['Nr. recipiente / montaj', c.nrRec + ' × ' + (c.subteran ? 'subteran' : 'suprateran'), c.montaj],
+     ['Capacitate totală', c.capTot.toLocaleString('ro-RO') + ' L', 'nr × cap. recipient'],
+     ['Masă GPL utilă (85%−20%)', c.util.toLocaleString('ro-RO') + ' kg', 'cap × 0,51 × (0,85−0,20)'],
+     ['Debit maxim consumatori', c.debit + ' kg/h (' + c.debitM3h + ' m³/h)', 'putere ' + c.totalKW + ' kW × 0,08'],
+     ['Autonomie', (c.autonomieZile != null ? c.autonomieZile + ' zile' : '—'), 'la ' + c.oreZi + ' h/zi'],
+     ['Vaporizare naturală −15°C', c.vap15 + ' kg/h', c.nrRec + ' recipient(e)'],
+     ['Vaporizator electric', c.vaporizatorNecesar ? 'NECESAR (debit > vaporizare)' : 'nu e necesar', 'PT C8-2010'],
      ['Echivalent tone GPL', c.tone + ' t', 'cap × 0,51 / 1000'],
-     ['Prag SEVESO III (50 t)', c.seveso ? 'DEPĂȘIT' : 'sub prag', 'HG 804/2007'],
+     ['Prag SEVESO III (50 t)', c.seveso ? 'DEPĂȘIT — PPAM' : 'sub prag', 'HG 804/2007'],
      ['Dimensiuni recipient', c.dim.L + ' × ' + c.dim.W + ' m', 'standard pe capacitate'],
-     ['Platformă betonată', c.pW + ' × ' + c.pL + ' m', 'calcul amplasare']
+     ['Distanță între recipiente', c.distIntre + ' m', c.subteran ? 'min. subteran' : 'max(1m; ¼ Σdiametre)'],
+     ['Platformă betonată', c.pW + ' × ' + c.pL + ' m · C25/30', 'grosime ≥ 15–20 cm']
     ].forEach(function (r) { cy = tblRow(r, cy, false, [58, 44, 80]); });
     cy += 3;
-    P('Vaporizarea naturală scade la temperaturi joase; dacă debitul necesar (' + c.debit + ' kg/h) depășește capacitatea de vaporizare naturală a recipientului la −15 °C, se prevede vaporizator electric (PT C8-2010, I 31/1999).');
+    P('Vaporizarea naturală scade la temperaturi joase. La −15 °C, capacitatea de vaporizare a bateriei este ~' + c.vap15 + ' kg/h, față de debitul necesar de ' + c.debit + ' kg/h → ' + (c.vaporizatorNecesar ? 'ESTE NECESAR vaporizator electric (15–30 kW).' : 'vaporizarea naturală acoperă necesarul.') + ' (PT C8-2010, I 31/1999).');
+
+    // ── MONTAJ: suprateran vs subteran ──
+    page('TIP MONTAJ'); SEC('1b. TIPUL DE MONTAJ AL RECIPIENTELOR');
+    P('Recipientele GPL se pot monta suprateran (orizontale, pe șei, cel mai frecvent) sau subteran (îngropate, orizontale/verticale). Montajul subteran reduce substanțial distanțele de siguranță (recipientul îngropat prezintă risc redus de propagare), dar impune cerințe specifice de protecție.');
+    cy = tblRow(['Aspect', 'Suprateran', 'Subteran'], cy, true, [50, 66, 66]);
+    [['Distanță clădiri grad III–IV', c.distCladiriSupra.tip_II + ' m', Math.ceil(c.distCladiriSupra.tip_II * 0.5) + ' m (~50%)'],
+     ['Protecție anticorozivă', 'vopsire/termoizolare', 'strat epoxidic + protecție CATODICĂ'],
+     ['Fundație/pat', 'șei pe platformă', 'pat de nisip 20 cm + acoperire ≥ 0,5 m'],
+     ['Acces/inspecție', 'direct', 'cămin de vizitare + capace'],
+     ['Sarcini rutiere deasupra', 'n/a', 'interzise fără dală de protecție'],
+     ['Vizual pe teren', 'vizibil', 'discret (doar capace de vizitare)']
+    ].forEach(function (r) { cy = checkY(cy, 14, TITLE, pg); cy = tblRow(r, cy, false, [50, 66, 66]); });
+    cy += 3;
+    P('Soluția aleasă: montaj ' + (c.subteran ? 'SUBTERAN' : 'SUPRATERAN') + '. ' + (c.subteran ? 'Recipientele îngropate necesită pat de nisip, protecție anticorozivă cu protecție catodică (anozi de sacrificiu sau curenți impriмați), cămin de vizitare și interzicerea traficului greu direct deasupra. Distanțele de siguranță se reduc la ~50% față de montajul suprateran.' : 'Recipientele supraterane se așază pe șei metalice pe platforma betonată, cu acces direct pentru inspecție și verificări ISCIR periodice (SR EN 12817).'));
+
+    // ── PERETE DE PROTECȚIE ANTIFOC ──
+    page('PERETE PROTECȚIE'); SEC('1c. PERETELE DE PROTECȚIE ANTIFOC');
+    P('Când distanța de siguranță până la un obiect protejat (clădire, limită de proprietate, drum) NU poate fi respectată pe amplasament, normativul permite interpunerea unui PERETE DE PROTECȚIE rezistent la foc. Distanța de siguranță se măsoară atunci pe traseul care ocolește peretele, permițând amplasarea recipientului mai aproape de obiectul protejat (PT C8-2010 / I 31/1999).');
+    if (c.peretNecesar && c.perete) {
+      P('Pe amplasamentul analizat, distanța disponibilă (' + c.distDisponibil + ' m) este mai mică decât distanța normată (' + c.distCladiri.tip_II + ' m) → ESTE NECESAR un perete de protecție:');
+      cy = tblRow(['Caracteristică perete', 'Valoare'], cy, true, [90, 92]);
+      [['Rezistență la foc', c.perete.rezistenta], ['Material', c.perete.material], ['Înălțime (peste rezervor + 0,5 m)', c.perete.H + ' m'], ['Lungime (depășește capetele + 0,5 m/parte)', c.perete.L + ' m'], ['Goluri', 'FĂRĂ (perete plin, continuu)']
+      ].forEach(function (r) { cy = tblRow(r, cy, false, [90, 92]); });
+      cy += 3;
+      P(c.perete.nota + ' Peretele este reprezentat și în volumul 3D al instalației.');
+    } else {
+      P('Pe baza parametrilor introduși, distanțele de siguranță pot fi respectate pe amplasament fără perete de protecție. Dacă la faza de proiect distanța disponibilă scade sub valoarea normată, se prevede un perete de protecție REI 120, plin, care depășește partea superioară a recipientului cu min. 0,5 m și capetele cu min. 0,5 m/parte; distanța se măsoară ocolind peretele.');
+    }
+
+    // ── CUVĂ DE RETENȚIE ──
+    page('CUVĂ RETENȚIE'); SEC('1d. CUVA DE RETENȚIE ȘI STRUCTURA PLATFORMEI');
+    P('Platforma se execută din beton armat C25/30 (grosime min. 15 cm, respectiv 20 cm dacă circulă autocisterna), cu armătură și impermeabilizare (aditiv hidrofug + tratament de suprafață).');
+    if (c.cuvaNecesara) {
+      P('Pentru configurația aleasă (' + c.label + (c.capRec >= 5000 ? ', recipient ≥ 5000 L' : '') + ') este prevăzută o cuvă de retenție cu volum ≥ 110% din cel mai mare recipient = ~' + c.cuvaVolMc + ' m³ (PT C6-2010). Cuva: beton armat C25/30 + impermeabilizare elastomerică, pereți min. 15 cm, radier 20 cm, vană de drenaj DN80 manuală, ÎNCHISĂ în exploatare normală.');
+    } else {
+      P('Pentru GPL suprateran de capacitate redusă, cuva de retenție nu este, de regulă, obligatorie (GPL-ul vaporizează și se dispersează, spre deosebire de lichidele combustibile). La configurații industriale sau recipiente mari (PT C6-2010) devine obligatorie o cuvă cu V ≥ 110% din cel mai mare recipient.');
+    }
+
+    page('DISTANȚE'); SEC('2. DISTANȚE DE SIGURANȚĂ (PT C8-2010 / I 31/1999)');
 
     page('DISTANȚE'); SEC('2. DISTANȚE DE SIGURANȚĂ (PT C8-2010 / I 31/1999)');
     P('Amplasarea recipientelor respectă distanțe minime față de clădiri (diferențiate pe gradul de rezistență la foc), drumuri, surse de foc și rețele. Pentru capacitatea totală de ' + c.capTot.toLocaleString('ro-RO') + ' L:');
@@ -187,7 +268,23 @@
       P('Pentru destinația „' + c.label + '" cu capacitatea propusă, clasificarea ATEX completă nu este, de regulă, obligatorie, însă zonele de siguranță în jurul supapelor și racordurilor se tratează cu echipamente adecvate. La depășirea pragurilor sau pentru distribuție auto/industrial, Documentul de Protecție la Explozie devine obligatoriu (HG 1058/2006).');
     }
 
-    page('AVIZE ȘI INTERCONECTARE'); SEC('5. AVIZE, SEVESO ȘI LEGĂTURI');
+    page('MĂSURI DE SECURITATE'); SEC('5. MĂSURI DE SECURITATE ȘI EXPLOATARE');
+    P('Dincolo de distanțe și zonarea ATEX, instalația necesită un set complet de măsuri de securitate:');
+    cy = tblRow(['Măsură', 'Cerință / normativ'], cy, true, [70, 112]);
+    [['Împământare + egalizare potențial', 'Toate componentele metalice legate la priză de pământ (R ≤ 4 Ω)'],
+     ['Protecție împotriva trăsnetului', 'Paratrăsnet / dispozitiv de captare (SR EN 62305) — instalație clasa I'],
+     ['Detecție gaz', 'Detectoare GPL Ex-d (pellistor/IR) la recipient + racorduri, cu alarmă sonoră/vizuală'],
+     ['Electrovană de siguranță', 'Închidere automată a alimentării la detecție gaz / avarie'],
+     ['Ventilație (subteran)', 'Cămin de vizitare ventilat natural — GPL fiind mai greu decât aerul se acumulează jos'],
+     ['Semnalizare', 'Plăci „Pericol de explozie", „Fumatul interzis", „GPL" (HG 971/2006)'],
+     ['Stingătoare', '2× CO₂ 6 kg (ATEX) + 1× praf ABC 50 kg carosabil (Ord. MAI 163/2007)'],
+     ['Plan de urgență', 'Afișat la intrare + transmis la ISU; instructaj personal semestrial (L.319/2006)'],
+     ['Verificări ISCIR periodice', 'Inspecție recipiente sub presiune (SR EN 12817) + revizie instalație (PT C8-2010)']
+    ].forEach(function (r) { cy = checkY(cy, 14, TITLE, pg); cy = tblRow(r, cy, false, [70, 112]); });
+    cy += 3;
+    P('Aprovizionarea cu autocisternă se face conform ADR 2023, la un punct de descărcare situat la min. ' + c.dist.descarcare_autocisterna + ' m față de împrejmuire, cu legare la pământ a autocisternei pe durata transvazării. Umplerea recipientelor nu depășește 85% (spațiu de expansiune a fazei gazoase).');
+
+    page('AVIZE ȘI INTERCONECTARE'); SEC('6. AVIZE, SEVESO ȘI LEGĂTURI');
     P('Avize obligatorii: ISCIR (instalare + funcționare, PT C8-2010), ISU (aviz/autorizație securitate la incendiu — risc foarte mare), APM (mediu)' + (c.dest === 'distributie_auto' ? ', ANRE (autorizare stație)' : '') + '. ' + (c.seveso ? 'Capacitatea depășește 50 t GPL → obligatorie Politica de Prevenire a Accidentelor Majore (PPAM), HG 804/2007.' : 'Capacitatea este sub pragul SEVESO de 50 t.'));
     P('Legături în ecosistem: riscul de incendiu „foarte mare" și zonarea ATEX se preiau prin referință în Scenariul de Securitate la Incendiu (SSI); distanțele față de pădure (20 m) în Studiul Silvic; proximitatea conductelor de gaz în Utilități Naționale. Volumul 3D al instalației este generat în Viewer 3D (rezervor + platformă + cabinet + gard).');
     cy = tblRow(['Normativ', 'Obiect'], cy, true, [58, 124]);

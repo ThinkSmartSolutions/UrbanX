@@ -2442,32 +2442,51 @@ function _v3dAddSkid(THREE, scene, ring0, toLoc, isNight){
   var pts=ring0.map(toLoc); var xs=pts.map(function(p){return p[0];}), zs=pts.map(function(p){return p[1];});
   var cx=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2, cz=(Math.min.apply(null,zs)+Math.max.apply(null,zs))/2;
   var nT=Math.max(1,Math.min(P.nTanks||1,3)), tLen=P.tankLen||6, tDia=P.tankDia||1.6, r=tDia/2;
-  var pW=Math.max(P.pW|| (nT*(tDia+1.2)+2), 5), pL=Math.max(P.pL|| (tLen+4), 6);
+  var dIntre=P.distIntre||1.0, subteran=!!P.subteran;
+  var pitch=tDia+dIntre;
+  var pW=Math.max(P.pW|| (nT*pitch+2), 5), pL=Math.max(P.pL|| (tLen+4), 6);
   var g=new THREE.Group();
-  // platformă beton
   var conc=new THREE.MeshStandardMaterial({color:isNight?0x555a60:0xb8bcc2,roughness:0.95,metalness:0.02});
-  var slab=new THREE.Mesh(new THREE.BoxGeometry(pW,0.35,pL),conc); slab.position.set(0,0.175,0); slab.castShadow=slab.receiveShadow=true; g.add(slab);
-  var slabTop=0.35;
-  // materiale rezervor (alb GPL, ușor metalic)
   var tankMat=new THREE.MeshStandardMaterial({color:isNight?0xdfe3e8:0xf2f4f7,roughness:0.35,metalness:0.55,emissive:isNight?0x0a0d12:0x000000});
   var capMat=new THREE.MeshStandardMaterial({color:0xe6e9ee,roughness:0.4,metalness:0.5});
   var saddleMat=new THREE.MeshStandardMaterial({color:0x8a4a2a,roughness:0.9,metalness:0.05});
   var redMat=new THREE.MeshStandardMaterial({color:0xcc2222,roughness:0.5,metalness:0.3});
-  for(var i=0;i<nT;i++){
-    var offx=(i-(nT-1)/2)*(tDia+1.2);
-    var yC=slabTop + 0.35 + r; // pe șa
-    // corp cilindric orizontal (axă pe X)
-    var cyl=new THREE.Mesh(new THREE.CylinderGeometry(r,r,tLen,28),tankMat); cyl.rotation.z=Math.PI/2; cyl.position.set(offx,yC,0); cyl.castShadow=true; g.add(cyl);
-    // capace bombate (semisfere) la capete
-    [-1,1].forEach(function(s){ var cap=new THREE.Mesh(new THREE.SphereGeometry(r,20,12,0,Math.PI*2,0,Math.PI/2),capMat); cap.rotation.z=s*Math.PI/2; cap.position.set(offx+s*tLen/2,yC,0); g.add(cap); });
-    // 2 șei de sprijin
-    [-1,1].forEach(function(s){ var sad=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.35,tDia*0.9),saddleMat); sad.position.set(offx+s*tLen*0.28,slabTop+0.175,0); sad.castShadow=true; g.add(sad); });
-    // supapă/gât pe partea superioară
-    var neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.35,10),redMat); neck.position.set(offx,yC+r+0.15,0); g.add(neck);
+  var buriedMat=new THREE.MeshStandardMaterial({color:0xc9cdd3,roughness:0.5,metalness:0.4,transparent:true,opacity:0.5});
+  var slabTop;
+  if(subteran){
+    // SUBTERAN: recipiente îngropate sub o dală de acoperire; se văd semitransparent + capace de vizitare
+    var pit=new THREE.Mesh(new THREE.BoxGeometry(pW,0.25,pL),conc); pit.position.set(0,-0.125,0); pit.receiveShadow=true; g.add(pit); // dală acoperire la nivel sol
+    slabTop=0;
+    for(var i=0;i<nT;i++){
+      var offx=(i-(nT-1)/2)*pitch;
+      var yC=-r-0.6; // îngropat: pat de nisip + acoperire ≥0,5 m
+      var cyl=new THREE.Mesh(new THREE.CylinderGeometry(r,r,tLen,28),buriedMat); cyl.rotation.z=Math.PI/2; cyl.position.set(offx,yC,0); g.add(cyl);
+      [-1,1].forEach(function(s){ var cap=new THREE.Mesh(new THREE.SphereGeometry(r,18,10,0,Math.PI*2,0,Math.PI/2),buriedMat); cap.rotation.z=s*Math.PI/2; cap.position.set(offx+s*tLen/2,yC,0); g.add(cap); });
+      // cămin/capac de vizitare la suprafață
+      var man=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,0.12,16),new THREE.MeshStandardMaterial({color:0x707880,roughness:0.6,metalness:0.4})); man.position.set(offx,0.06,0); g.add(man);
+    }
+  } else {
+    // SUPRATERAN
+    var slab=new THREE.Mesh(new THREE.BoxGeometry(pW,0.35,pL),conc); slab.position.set(0,0.175,0); slab.castShadow=slab.receiveShadow=true; g.add(slab);
+    slabTop=0.35;
+    // cuvă de retenție (bordură) dacă cerută
+    if(P.cuva){ var wallH=0.5; ['n','s','e','w'].forEach(function(sd){ var mw=new THREE.Mesh(sd==='n'||sd==='s'?new THREE.BoxGeometry(pW,wallH,0.12):new THREE.BoxGeometry(0.12,wallH,pL),conc); mw.position.set(sd==='e'?pW/2:sd==='w'?-pW/2:0, slabTop+wallH/2, sd==='n'?-pL/2:sd==='s'?pL/2:0); g.add(mw); }); }
+    for(var j=0;j<nT;j++){
+      var ox2=(j-(nT-1)/2)*pitch;
+      var yC2=slabTop + 0.35 + r;
+      var cyl2=new THREE.Mesh(new THREE.CylinderGeometry(r,r,tLen,28),tankMat); cyl2.rotation.z=Math.PI/2; cyl2.position.set(ox2,yC2,0); cyl2.castShadow=true; g.add(cyl2);
+      [-1,1].forEach(function(s){ var cap2=new THREE.Mesh(new THREE.SphereGeometry(r,20,12,0,Math.PI*2,0,Math.PI/2),capMat); cap2.rotation.z=s*Math.PI/2; cap2.position.set(ox2+s*tLen/2,yC2,0); g.add(cap2); });
+      [-1,1].forEach(function(s){ var sad=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.35,tDia*0.9),saddleMat); sad.position.set(ox2+s*tLen*0.28,slabTop+0.175,0); sad.castShadow=true; g.add(sad); });
+      var neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.35,10),redMat); neck.position.set(ox2,yC2+r+0.15,0); g.add(neck);
+    }
   }
   // grup reglare presiune (dulap metalic)
   var cab=new THREE.Mesh(new THREE.BoxGeometry(0.9,1.3,0.5),new THREE.MeshStandardMaterial({color:0x9aa2ac,roughness:0.6,metalness:0.4}));
-  cab.position.set(pW/2-0.8,slabTop+0.65,pL/2-0.6); cab.castShadow=true; g.add(cab);
+  cab.position.set(pW/2-0.8,(subteran?0:slabTop)+0.65,pL/2-0.6); cab.castShadow=true; g.add(cab);
+  // PERETE DE PROTECȚIE ANTIFOC (dacă distanța nu poate fi respectată) — REI 120
+  if(P.perete){ var ph=Math.max(2.2,(P.perete.H||2.2)), pl=Math.max(pL, (P.perete.L||tLen)+1); var fw=new THREE.Mesh(new THREE.BoxGeometry(0.25,ph,pl),new THREE.MeshStandardMaterial({color:0x8d9298,roughness:0.95,metalness:0.02})); fw.position.set(-pW/2-0.6,ph/2,0); fw.castShadow=true; g.add(fw);
+    // marcaj roșu sus (rezistență foc)
+    var band=new THREE.Mesh(new THREE.BoxGeometry(0.27,0.15,pl),redMat); band.position.set(-pW/2-0.6,ph-0.1,0); g.add(band); }
   // împrejmuire — bolarzi galbeni + balustradă
   var boll=new THREE.MeshStandardMaterial({color:0xf2c200,roughness:0.7,metalness:0.1});
   var fw=pW/2+0.8, fl=pL/2+0.8, step=1.6;
