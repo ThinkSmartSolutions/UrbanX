@@ -582,6 +582,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Pre-proiectare — nu înlocuiește proiectul ISCIR autorizat și Documentul de Protecție la Explozie', 'Scenariul de incendiu (risc foarte mare) se detaliază în modulul SSI'],
   },
+  documentatii: {
+    ico: '📑', label: 'Generator Documentații Tehnice', badge: 'recomandat', badgeLabel: 'DTAC/PTh · autorizare', color: '196,181,253',
+    fn: 'window.UXDoc&&window.UXDoc.openPanel&&window.UXDoc.openPanel()',
+    ce: 'Modul de generare a documentațiilor tehnice complete (DTAC/PTh/DALI/SF): formular pe secțiuni cu câmpuri manuale, selectabile și calculate automat (POT/CUT/parcaje/spații verzi/seismic ag-Tc din județ/sk-Te/verificări PSI), validare de conformitate în timp real (POT/CUT/retrageri/parcaje/sprinklere/IDSI/desfumare/lift/compartiment cu temei legal), pre-umplere automată din volumul AEDIS, selectare avizatori și documente → generare ~80 documente DOCX+PDF autorizabile.',
+    dece: 'Elaborarea unui dosar de autorizare (memorii pe specialități, deviz HG 907, scenariu PSI, referate, avize) este laborioasă și repetitivă. Engine-ul detectează funcțiunea, aplică normativele proprii fiecăreia și asamblează dosarul — reutilizând studiile deja generate în platformă (PSI din SSI, obiectul 3D din Hala/SKID, geotehnic, amplasament), fără duplicare.',
+    legal: 'Legea 50/1991 · HG 907/2016 (deviz) · HG 273/1994 (recepție) · P118 · P100-1/2013 · normative pe funcțiune',
+    output: [
+      { ico: '📝', txt: 'Formular 15 secțiuni + validare conformitate în timp real' },
+      { ico: '⚡', txt: 'Pre-umplere din volumul AEDIS + calcul automat indicatori' },
+      { ico: '📦', txt: '~80 documente DOCX+PDF (memorii/deviz/PSI/avize) în ZIP' },
+    ],
+    nu: ['Pre-proiectare/asamblare documentație — se verifică și se semnează de proiectanții atestați', 'Biblioteca completă de funcțiuni se extinde continuu (45+)'],
+  },
   'utilitati-nationale': {
     ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
     fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',
