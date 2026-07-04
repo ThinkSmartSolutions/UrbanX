@@ -36,7 +36,7 @@
       '<div class="m">Amplasament: ' + esc(meta.amplasament || '—') + '</div>' +
       '<div class="m">Faza: ' + esc(meta.faza || 'DTAC') + '</div></div>' +
       '<br style="page-break-after:always">';
-    var body = sections.map(function (s) { return '<h2>' + esc(s.h) + '</h2>' + (s.html || ''); }).join('');
+    var body = sections.map(function (s) { return (s.h ? '<h2>' + esc(s.h) + '</h2>' : '') + (s.html || ''); }).join('');
     var foot = '<div class="foot">Document generat de UrbanX (ThinkSmart Solutions) — orientativ, se verifică și se semnează de proiectanții atestați.</div>';
     return '<html><head><meta charset="utf-8">' + STYLE + '</head><body>' + cover + body + foot + '</body></html>';
   }
@@ -58,40 +58,103 @@
   function _verificariTbl(v) {
     return tbl(v.checks.map(function (c) { return [c.status === 'conform' ? 'CONFORM' : c.status === 'neconform' ? 'NECONFORM' : 'ATENȚIE', c.text, c.norma]; }), ['Stare', 'Verificare', 'Temei legal']);
   }
+  // Conținut profund din bibliotecă (per funcțiune + specialitate). Întoarce HTML sau '' .
+  function _lib(D, key) {
+    try { var L = G.UXLibrary && G.UXLibrary[D.functiune]; return (L && L[key] && L[key].html) ? L[key].html : ''; } catch (e) { return ''; }
+  }
 
   var DOC_BUILDERS = {
     'Memoriu general DTAC': function (D, v) {
       var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
-      return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), [
+      var deep = _lib(D, 'general');
+      var secs = deep ? [
+        { h: null, html: deep },
+        { h: 'Indicatori urbanistici ai proiectului', html: _indicatoriTbl(D, v) },
+        { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
+      ] : [
         { h: '1. Date de identificare', html: '<p>Prezenta documentație tehnică fundamentează autorizarea construirii obiectivului „' + esc(fn) + '", situat în ' + esc(D.uat || '—') + (D.nrcad ? ', nr. cadastral ' + esc(D.nrcad) : '') + ', beneficiar ' + esc(D.beneficiar || '—') + '.</p>' + (D.nrCU ? '<p>Certificat de urbanism nr. ' + esc(D.nrCU) + '.</p>' : '') },
         { h: '2. Descrierea funcțiunii și a soluției', html: '<p>Obiectivul are funcțiunea „' + esc(fn) + '". Soluția propusă respectă reglementările urbanistice și normativele tehnice specifice funcțiunii.</p>' },
         { h: '3. Indicatori urbanistici', html: _indicatoriTbl(D, v) },
         { h: '4. Sistem constructiv și date seismice', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '. Zonă seismică: a<sub>g</sub> = ' + v.calc.seismic.ag + 'g, T<sub>c</sub> = ' + v.calc.seismic.Tc + ' s (P100-1/2013). Zăpadă s<sub>k</sub> = ' + v.calc.clima.sk + ' kN/m² (CR 1-1-3), temperatura exterioară de calcul ' + v.calc.clima.Te + ' °C.</p>' },
         { h: '5. Verificarea conformității', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ]) };
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), secs) };
     },
     'Memoriu arhitectură': function (D, v) {
-      return { cat: 'Memorii Tehnice', file: 'Memoriu_arhitectura.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE ARHITECTURĂ'), [
+      var deep = _lib(D, 'arhitectura');
+      var secs = deep ? [
+        { h: null, html: deep },
+        { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
+      ] : [
         { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '. Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '.</p>' },
         { h: '2. Soluția arhitecturală', html: '<p>Regim de înălțime P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + ', suprafață construită ' + esc(D.Sc || '—') + ' mp, desfășurată ' + esc(D.Sd || '—') + ' mp. Retragerea față de limita posterioară: ' + esc(D.retragere_spate || '—') + ' m.</p>' },
         { h: '3. Finisaje și accesibilitate PMR', html: '<p>Finisaje conform destinației. Se asigură accesibilitatea persoanelor cu dizabilități conform NP 051/2012 (rampe, uși min. 0,90 m, grupuri sanitare adaptate).</p>' }
-      ]) };
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Memoriu_arhitectura.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE ARHITECTURĂ'), secs) };
     },
     'Memoriu rezistență': function (D, v) {
-      return { cat: 'Memorii Tehnice', file: 'Memoriu_rezistenta.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE REZISTENȚĂ'), [
+      var deep = _lib(D, 'structura');
+      var secs = deep ? [
+        { h: null, html: deep },
+        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C']], ['Parametru', 'Valoare']) }
+      ] : [
         { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + ', fundare ' + esc(D.fundare || 'izolată/continuă după studiul geotehnic') + '.</p>' },
         { h: '2. Încărcări', html: '<p>Încărcări permanente și utile conform SR EN 1991. Zăpadă: s<sub>k</sub> = ' + v.calc.clima.sk + ' kN/m² (CR 1-1-3/2012). Vânt conform CR 1-1-4. Temperatura exterioară de calcul: ' + v.calc.clima.Te + ' °C.</p>' },
         { h: '3. Acțiunea seismică', html: '<p>Conform P100-1/2013: a<sub>g</sub> = ' + v.calc.seismic.ag + 'g, T<sub>c</sub> = ' + v.calc.seismic.Tc + ' s. Clasa de importanță se stabilește conform destinației.</p>' },
         { h: '4. Fundații', html: '<p>Tipul și adâncimea de fundare se stabilesc pe baza studiului geotehnic (presiunea convențională a stratului portant). A se corela cu Pre-Studiul Geotehnic din platformă.</p>' }
-      ]) };
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Memoriu_rezistenta.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE REZISTENȚĂ'), secs) };
     },
     'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)': function (D, v) {
-      return { cat: 'Memorii Tehnice', file: 'Memorii_instalatii.doc', html: docHtml(_meta(D, 'MEMORII TEHNICE — INSTALAȚII'), [
+      var deep = _lib(D, 'instalatii');
+      var secs = deep ? [
+        { h: null, html: deep },
+        { h: 'Anexă — soluții alese pentru proiect', html: tbl([['Încălzire', esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit')], ['Alimentare cu apă', esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit')]], ['Instalație', 'Soluție']) }
+      ] : [
         { h: 'Instalații termice (IT)', html: '<p>Încălzire: ' + esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit') + '. Necesarul de căldură se calculează conform C 107/2005.</p>' },
         { h: 'Instalații sanitare (IS)', html: '<p>Alimentare cu apă: ' + esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit') + '. Canalizare menajeră și pluvială conform I9 și SR 1846.</p>' },
         { h: 'Instalații electrice (IE)', html: '<p>Racord electric, tablouri, iluminat, prize, priză de pământ și paratrăsnet (SR EN 62305) conform I7/2011.</p>' },
         { h: 'Ventilație / HVAC + curenți slabi (ICT)', html: '<p>Ventilație conform destinației; curenți slabi (CCTV, control acces, date-voce, BMS) după caz.</p>' }
-      ]) };
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Memorii_instalatii.doc', html: docHtml(_meta(D, 'MEMORII TEHNICE — INSTALAȚII'), secs) };
+    },
+    'Caiet de sarcini arhitectură (PTh)': function (D, v) {
+      var deep = _lib(D, 'caiet_arh');
+      var body = deep || '<p>Caietul de sarcini pe specialitatea arhitectură (faza PTh) descrie, pe categorii de lucrări (zidării, tencuieli, pardoseli, placaje, tâmplărie, zugrăveli, tavane, termosistem, hidroizolații, accesibilizări), obiectul, standardele de referință, materialele și condițiile de recepție, tehnologia de execuție, verificările și controlul calității, recepția și modul de măsurare/decontare. Conținutul detaliat se generează pentru funcțiunile cu bibliotecă tehnică dedicată.</p>';
+      return { cat: 'Caiete de sarcini', file: 'Caiet_sarcini_arhitectura.doc', html: docHtml(_meta(D, 'CAIET DE SARCINI — ARHITECTURĂ', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: deep ? null : 'Caiet de sarcini — lucrări de arhitectură', html: body }]) };
+    },
+    'Caiet de sarcini rezistență (PTh)': function (D, v) {
+      var deep = _lib(D, 'caiet_str');
+      var body = deep || '<p>Caietul de sarcini pe specialitatea rezistență (faza PTh) descrie, pe categorii de lucrări (terasamente, cofraje, armături, betoane, hidroizolarea fundațiilor, elemente structurale), obiectul, standardele (SR EN 1992, SR EN 206, SR EN 13670, NP 112, P100-1), materialele și recepția lor, tehnologia și toleranțele de execuție, probele și controlul calității, fazele determinante, măsurarea și decontarea.</p>';
+      return { cat: 'Caiete de sarcini', file: 'Caiet_sarcini_rezistenta.doc', html: docHtml(_meta(D, 'CAIET DE SARCINI — REZISTENȚĂ', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: deep ? null : 'Caiet de sarcini — lucrări de rezistență', html: body }]) };
+    },
+    'Caiet de sarcini instalații (PTh)': function (D, v) {
+      var deep = _lib(D, 'caiet_inst');
+      var body = deep || '<p>Caietul de sarcini pe specialitatea instalații (faza PTh) descrie, pe fiecare instalație (sanitare, termice, ventilare-climatizare, electrice, IDSAI P118-3, stingere P118-2, gaze, curenți slabi), obiectul, standardele de referință, materialele și echipamentele cu condiții de recepție, montajul, probele și verificările (presiune, etanșeitate, funcționale, PRAM, debite), recepția și decontarea.</p>';
+      return { cat: 'Caiete de sarcini', file: 'Caiet_sarcini_instalatii.doc', html: docHtml(_meta(D, 'CAIET DE SARCINI — INSTALAȚII', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: deep ? null : 'Caiet de sarcini — lucrări de instalații', html: body }]) };
+    },
+    'Liste de cantități / antemăsurători (PTh)': function (D, v) {
+      var ac = v.calc || {};
+      var sc = +D.Sc || 0, sd = +D.Sd || 0, st = +D.Steren || 0;
+      var amp = st && sc ? (st - sc) : 0;
+      var rows = [
+        ['Terasamente — săpătură generală + fundații', 'mc', st ? Math.round(sc * 1.2) : '—', 'estimare: amprentă × adâncime medie fundare'],
+        ['Beton în fundații și infrastructură', 'mc', sc ? Math.round(sc * 0.35) : '—', 'fundații + placă pe sol'],
+        ['Beton în suprastructură (stâlpi/grinzi/plăci)', 'mc', sd ? Math.round(sd * 0.28) : '—', 'niveluri supraterane'],
+        ['Armătură (oțel B500B)', 'kg', sd ? Math.round(sd * 0.28 * 105) : '—', '≈105 kg/mc beton (medie)'],
+        ['Cofraje', 'mp', sd ? Math.round(sd * 2.2) : '—', 'raport cofraj/suprafață'],
+        ['Zidărie de compartimentare', 'mp', sd ? Math.round(sd * 0.9) : '—', 'pereți neportanți'],
+        ['Termosistem fațadă (ETICS)', 'mp', sc ? Math.round((sc * 4) * 0.75) : '—', 'anvelopă opacă'],
+        ['Tâmplărie exterioară', 'mp', sd ? Math.round(sd * 0.18) : '—', 'ferestre + uși ext.'],
+        ['Finisaje pardoseli', 'mp', sd ? Math.round(sd * 0.85) : '—', 'gresie/PVC/mochetă'],
+        ['Finisaje pereți (tencuieli + zugrăveli)', 'mp', sd ? Math.round(sd * 2.6) : '—', 'ambele fețe'],
+        ['Tavane suspendate', 'mp', sd ? Math.round(sd * 0.6) : '—', 'zone cu tavan casetat'],
+        ['Hidroizolație terasă', 'mp', sc ? Math.round(sc * 0.55) : '—', 'suprafață terasă'],
+        ['Instalații (global, procent din C+M)', '%', 25, 'sanitare+termice+HVAC+electrice+PSI'],
+        ['Amenajări exterioare + spații verzi', 'mp', amp || '—', 'teren − amprentă']
+      ];
+      var note = '<p><b>Antemăsurători orientative</b>, generate parametric din datele proiectului (Sc=' + (sc || '—') + ' mp, Sd=' + (sd || '—') + ' mp). Cantitățile exacte se extrag din planșele PTh și din breviarul de calcul; listele de mai jos fundamentează devizul pe obiect și oferta de execuție. Prețurile unitare se preiau din baza de prețuri a platformei (deviz HG 907).</p>';
+      return { cat: 'Caiete de sarcini', file: 'Liste_cantitati_antemasuratori.doc', html: docHtml(_meta(D, 'LISTE DE CANTITĂȚI (ANTEMĂSURĂTORI)', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: 'Antemăsurători pe categorii de lucrări', html: note + tbl(rows, ['Categorie de lucrări', 'U.M.', 'Cantitate', 'Bază de estimare']) }]) };
     },
     'Scenariu securitate incendiu (P118)': function (D, v) {
       var ac = v.calc;
@@ -132,10 +195,13 @@
     }
   };
 
-  function genereazaDosar(D, v) {
-    v = v || (G.UXDoc && G.UXDoc.valideaza(D)) || { calc: {}, checks: [], neconformitati: 0 };
+  var PTH_ONLY = ['Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
+  function _build(D, v) {
+    var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
     var selected = Object.keys(D._docs || {}).filter(function (k) { return D._docs[k] !== false && DOC_BUILDERS[k]; });
     if (!selected.length) selected = Object.keys(DOC_BUILDERS);
+    // Caietele de sarcini + antemăsurătorile aparțin fazei PTh (Legea 50 Anexa 1: DTAC nu le conține)
+    if (!isPth) selected = selected.filter(function (k) { return PTH_ONLY.indexOf(k) < 0; });
     var docs = selected.map(function (k) { try { return DOC_BUILDERS[k](D, v); } catch (e) { return null; } }).filter(Boolean);
     var base = 'Documentatie_' + (D.nrcad || (D.uat || 'proiect').replace(/\s+/g, '_'));
     if (G.JSZip) {
@@ -149,6 +215,13 @@
       docs.forEach(function (dc) { _save(docBlob(dc.html), dc.file); });
       if (G.ss) G.ss('✅ ' + docs.length + ' documente Word generate (JSZip indisponibil — salvate individual).');
     }
+  }
+  function genereazaDosar(D, v) {
+    v = v || (G.UXDoc && G.UXDoc.valideaza(D)) || { calc: {}, checks: [], neconformitati: 0 };
+    // Așteaptă conținutul profund din bibliotecă (dacă funcțiunea are), apoi construiește.
+    var ready = (G.UXLibraryReady && D.functiune) ? G.UXLibraryReady(D.functiune) : Promise.resolve(null);
+    if (G.ss && G.UXLibrary && !G.UXLibrary[D.functiune] && ready !== Promise.resolve(null)) G.ss('⏳ Se încarcă conținutul detaliat…');
+    return Promise.resolve(ready).then(function () { _build(D, v); }).catch(function () { _build(D, v); });
   }
   function _save(blob, name) { try { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); } catch (e) {} }
 
