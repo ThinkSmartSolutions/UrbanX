@@ -96,8 +96,13 @@
   }
   function autoCalc(d) {
     d = d || {}; var Steren = +d.Steren || 0, Sc = +d.Sc || 0, Sd = +d.Sd || 0;
+    // Multi-corp: dacă există corpuri (C1/C2/C3...), indicatorii se calculează pe SUMA amprentelor/desfășuratelor.
+    if (d.corpuri && d.corpuri.length) {
+      var sSc = 0, sSd = 0; d.corpuri.forEach(function (c) { sSc += +c.Sc || 0; sSd += +c.Sd || 0; });
+      if (sSc > 0) Sc = sSc; if (sSd > 0) Sd = sSd;
+    }
     var fn = FUNCTIUNI[d.functiune] || FUNCTIUNI['hala-industriala'];
-    var out = {};
+    var out = {}; out.Sc_total = Sc; out.Sd_total = Sd; out.nr_corpuri = (d.corpuri && d.corpuri.length) || 0;
     out.POT = Steren ? +(Sc / Steren * 100).toFixed(1) : 0;
     out.CUT = Steren ? +(Sd / Steren).toFixed(2) : 0;
     out.sv_min_pct = fn.sv_min; out.sv_min_mp = Math.round(Steren * fn.sv_min / 100);

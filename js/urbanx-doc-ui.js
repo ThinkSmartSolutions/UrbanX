@@ -82,6 +82,27 @@
         fld('POT propus', 'POT', 'auto'), fld('CUT propus', 'CUT', 'auto'),
         fld('Parcaje necesare', 'parcaje_necesare', 'auto'), fld('Spații verzi min.', 'sv', 'auto')
       ]));
+      // Multi-corp (opțional): C1/C2/C3 cu regim și indicatori pe corp (ca la proiectele multi-corp)
+      (function () {
+        var sc = el('div', { style: 'margin-bottom:16px' });
+        sc.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">5b</span>Corpuri (multi-corp) — opțional'));
+        var list = el('div', { id: 'uxdoc-corpuri' });
+        D.corpuri = D.corpuri || [];
+        function renderC() {
+          list.innerHTML = '';
+          D.corpuri.forEach(function (c, idx) {
+            var row = el('div', { style: 'display:grid;grid-template-columns:1.2fr 1.5fr 1fr 0.9fr 0.9fr 28px;gap:6px;margin-bottom:5px;align-items:center' });
+            function inp(key, ph, num) { var i2 = el('input', { placeholder: ph, style: INP + ';padding:5px 7px;font-size:11.5px' }); if (c[key] != null) i2.value = c[key]; i2.oninput = function () { c[key] = num ? (i2.value === '' ? '' : +i2.value) : i2.value; recalc(); }; return i2; }
+            row.appendChild(inp('nume', 'C' + (idx + 1))); row.appendChild(inp('functiune', 'funcțiune')); row.appendChild(inp('regim', 'regim ex P+1')); row.appendChild(inp('Sc', 'Sc', 1)); row.appendChild(inp('Sd', 'Sd', 1));
+            var del = el('button', { style: 'background:none;border:none;color:#f87171;cursor:pointer;font-size:15px' }, '✕'); del.onclick = function () { D.corpuri.splice(idx, 1); renderC(); recalc(); }; row.appendChild(del);
+            list.appendChild(row);
+          });
+          var add = el('button', { style: 'margin-top:6px;background:rgba(148,163,184,.15);color:#cbd5e1;border:1px dashed rgba(148,163,184,.4);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer' }, '+ Adaugă corp');
+          add.onclick = function () { D.corpuri.push({ nume: 'C' + (D.corpuri.length + 1), functiune: '', regim: '', Sc: '', Sd: '' }); renderC(); recalc(); };
+          list.appendChild(add);
+        }
+        renderC(); sc.appendChild(list); form.appendChild(sc);
+      })();
       form.appendChild(section('6–8', 'Structură + seism + climă', [
         fld('Tip structură', 'struct', 'select', { options: Object.keys(STRUCT).map(function (k) { return [k, STRUCT[k]]; }) }),
         fld('Ag seismic', 'ag', 'auto'), fld('Tc (colț spectru)', 'Tc', 'auto'),
