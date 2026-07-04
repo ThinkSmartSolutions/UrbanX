@@ -144,6 +144,27 @@
       var note = '<p><b>Antemăsurători orientative</b>, generate parametric din datele proiectului (Sc=' + (sc || '—') + ' mp, Sd=' + (sd || '—') + ' mp). Cantitățile exacte se extrag din planșele PTh și din breviarul de calcul; listele de mai jos fundamentează devizul pe obiect și oferta de execuție. Prețurile unitare se preiau din baza de prețuri a platformei (deviz HG 907).</p>';
       return { cat: 'Caiete de sarcini', file: 'Liste_cantitati_antemasuratori.doc', html: docHtml(_meta(D, 'LISTE DE CANTITĂȚI (ANTEMĂSURĂTORI)', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: 'Antemăsurători pe categorii de lucrări', html: note + tbl(rows, ['Categorie de lucrări', 'U.M.', 'Cantitate', 'Bază de estimare']) }]) };
     },
+    'Scoatere teren din circuitul agricol (Ord. 83/2018)': function (D, v) {
+      var st = +D.Steren || 0;
+      var secs = [
+        { h: '1. Descrierea obiectivului', html: '<p>Documentație pentru scoaterea definitivă/temporară din circuitul agricol a terenului în suprafață de <b>' + (st ? st.toLocaleString('ro-RO') + ' mp' : '—') + '</b>, ' + esc(D.uat || '—') + (D.nrcad ? ', nr. cad. ' + esc(D.nrcad) : '') + ', necesar realizării obiectivului „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '". Se întocmește conform Ord. MADR 83/2018 și Legii 18/1991.</p>' },
+        { h: '2. Necesitatea și oportunitatea', html: '<p>Terenul este necesar edificării investiției conform Certificatului de Urbanism' + (D.nrCU ? ' nr. ' + esc(D.nrCU) : '') + '; scoaterea din circuitul agricol este condiție prealabilă autorizării, întrucât terenul are folosință agricolă în evidențele cadastrale.</p>' },
+        { h: '3. Amplasament, suprafață afectată, situație juridică', html: tbl([['Suprafață totală teren', (st ? st.toLocaleString('ro-RO') : '—') + ' mp'], ['Suprafață scoasă din circuit', (D.Sc ? (+D.Sc + Math.round((st - D.Sc) * 0.3)).toLocaleString('ro-RO') : '—') + ' mp (amprentă + amenajări)'], ['Categorie de folosință actuală', esc(D.folosinta || 'arabil / de precizat')], ['Situare', 'intravilan / extravilan — conform CF']], ['Element', 'Valoare']) },
+        { h: '4. Încadrarea în categorii de bonitate și taxele', html: '<p>Taxa de scoatere din circuitul agricol se calculează în funcție de <b>clasa de calitate/bonitate</b> a solului (I-V) și de categoria de folosință, conform Legii 18/1991 (Anexă) și HG 890/2005 actualizat. Terenurile de clasă superioară (I-II) au taxe mai mari. Valoarea exactă se stabilește pe baza studiului pedologic (OSPA) și a încadrării de bonitate.</p>' + tbl([['Clasa I (foarte bună)', 'taxă maximă'], ['Clasa II-III (bună/mijlocie)', 'taxă medie'], ['Clasa IV-V (slabă/foarte slabă)', 'taxă redusă']], ['Clasa bonitate', 'Nivel taxă']) },
+        { h: '5. Documente necesare + avize', html: '<p>Documentație cadastrală, extras CF, CU, studiu pedologic (OSPA), aviz APM (după caz), plan de amplasament. Pentru extravilan: aviz DADR/APIA. Actul de scoatere se emite de autoritatea competentă (APIA/MADR/consiliul județean, funcție de suprafață).</p>' }
+      ];
+      return { cat: 'Avize', file: 'Scoatere_circuit_agricol.doc', html: docHtml(_meta(D, 'SCOATERE DIN CIRCUITUL AGRICOL', 'Ord. MADR 83/2018 · Legea 18/1991'), secs) };
+    },
+    'Memoriu tehnic aviz de mediu (Ord. 863/2002)': function (D, v) {
+      var caps = ['Date de identificare (titular, proiectant, amplasament)', 'Descrierea proiectului (componente, etape, tehnologii)', 'Amplasamentul (fizic, geologic, hidrologic, vecinătăți, arii Natura 2000)', 'Cadrul legal aplicabil și încadrarea procedurală', 'Alternativele analizate (min. Alternativa 0 + soluția propusă)', 'Utilizarea resurselor (teren, apă, energie, materii prime)', 'Gestionarea deșeurilor (coduri EWC, operator autorizat)', 'Poluarea generată (aer, apă, sol, zgomot, vibrații) cu valori-limită', 'Riscul de accidente (scenarii + măsuri)', 'Impactul asupra factorilor de mediu (concluzie pe factor)', 'Măsuri de reducere a impactului', 'Programul de monitorizare (factor/metodă/frecvență/responsabil)', 'Rezumat non-tehnic (pentru public)', 'Concluzii + solicitare formală acord/aviz'];
+      var secs = [
+        { h: 'Structura memoriului (14 capitole — Ord. 863/2002 + Legea 292/2018)', html: tbl(caps.map(function (c, i) { return ['' + (i + 1), c]; }), ['Cap.', 'Conținut']) },
+        { h: 'Verificare arii protejate Natura 2000', html: '<p>Se verifică dacă amplasamentul (' + esc(D.uat || '—') + ') se află în/în vecinătatea (≤ 5 km) unei arii Natura 2000 (SPA/SCI). În caz afirmativ → necesară Evaluare Adecvată (EA). Se corelează cu baza de date ANPM.</p>' },
+        { h: 'Praguri SEVESO (HG 804/2007)', html: '<p>Dacă proiectul implică substanțe periculoase (ex. GPL, hidrogen), se verifică cantitatea față de pragurile din Anexa I a Directivei 2012/18/UE (HG 804/2007). Sub prag → confirmare explicită; peste prag → necesară autorizare SEVESO (nivel inferior/superior).</p>' },
+        { h: 'Procedura', html: '<p>Se depune la APM notificarea + memoriul; APM stabilește etapa de încadrare (aviz/acord de mediu, cu sau fără evaluare de impact — Legea 292/2018).</p>' }
+      ];
+      return { cat: 'Avize', file: 'Memoriu_aviz_mediu.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — AVIZ DE MEDIU', 'Ord. 863/2002 · Legea 292/2018 · HG 445/2009'), secs) };
+    },
     'DALI — construcție existentă / intervenție': function (D, v) {
       var tip = D.tip_interventie || 'reabilitare_termica';
       var TIPURI = {
