@@ -42,6 +42,7 @@
     { g: G3, ico: '📐', l: 'Planșe & Proiect preliminar PAC', d: 'relevee + planșe arhitecturale', k: 'planse relevee pac', run: call('generateRelevee'), info: 'relevee' },
     { g: G3, ico: '🏗', l: 'Memoriu tehnic avize', d: 'memoriu pentru avize', k: 'memoriu tehnic', run: call('generateMemoriu'), info: 'memoriu' },
     { g: G3, ico: '🌱', l: 'Studiu Pedologic & Agrochimic', d: 'sol agricol · clase I-V · taxă scoatere Ord.83/2018 · relief live', k: 'pedologie sol agricol bonitare clase calitate taxa scoatere circuit agricol ospa', run: call('generatePedologie'), info: 'pedologie' },
+    { g: G3, ico: '🌲', l: 'Studiu Regim Silvic', d: 'fond forestier · categorii I-V · taxă HG861/2009 · păduri OSM+Natura2000 live', k: 'silvic padure fond forestier codul silvic scoatere reimpadurire natura 2000 romsilva garda forestiera', run: call('generateSilvic'), info: 'silvic' },
     { g: G3, ico: '📋', l: 'Fișă urbanism per parcelă', d: 'PDF A4 · POT/CUT/RH · printabil', k: 'fisa urbanism parcela', run: call('generateParcelFisa') },
     // Mediu & Climă
     { g: G4, ico: '🌿', l: 'LOISIR — spații verzi & plămân urban', d: 'catalog L.24/2007 · parc 3D · concurs · climă', k: 'loisir spatii verzi parc uhi clima', run: mod('Loisir', 'openPanel'), info: 'loisir' },
@@ -51,6 +52,7 @@
     { g: GR, ico: '🌊', l: 'Predicție inundație urbană (pluvială)', d: 'ploaie extremă · băltire pe relief real · Q=C·i·A · pe hartă', k: 'inundatie flood ploaie precipitatii anar pluvial relief', run: mod('RiskFlood', 'openPanel') },
     { g: GR, ico: '🔌', l: 'Rețele edilitare pe hartă (on/off)', d: 'electric · gaze · apă · CF · ape — subteran/suprateran (OSM)', k: 'retele edilitare subteran suprateran electric gaze apa cau utilitati', run: mod('CAU', 'showNetworksPanel') },
     { g: GR, ico: '⚡', l: 'Utilități naționale (SEN live + transport)', d: 'energie LIVE Transelectrica · rețele 400/220/110kV + gaz SNT pe hartă (OSM)', k: 'utilitati nationale sen transelectrica transgaz ret snt energie electric gaz live transport', run: mod('UtilitatiRO', 'openPanel'), info: 'utilitati-nationale' },
+    { g: GR, ico: '🌲', l: 'Fond forestier pe hartă (on/off)', d: 'păduri OSM + bandă protecție 20m — parcela/centru hartă', k: 'padure fond forestier silvic harta banda protectie osm', run: function () { try { window.silvic_drawForest && window.silvic_drawForest(window.map); } catch (e) {} } },
     { g: GR, ico: '🛡', l: 'Inventar adăposturi ALA (on/off)', d: 'candidați NP-073 · capacitate · pe hartă (de verificat ISU)', k: 'ala adapost protectie civila bunker subsol isu inventar', run: mod('RiskShelters', 'toggle') },
     // Administrație
     { g: G5, ico: '🏗️', l: 'Capacitate & Conformitate UAT', d: 'apă·școli·verde vs ce s-a aprobat', k: 'capacitate intelligence uxi conformitate', run: mod('UXI', 'openDashboard'), info: 'ux_capacitate' },

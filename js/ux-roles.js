@@ -76,7 +76,7 @@
     'generateStudiuFezabilitate': 'rap:fezabilitate', '_HBU': 'rap:hbu', 'generateREPA': 'rap:repa',
     'generateCPE': 'rap:cpe', 'openTCI': 'proiectie', 'generateProiectieUrbanistica': 'proiectie',
     'generateHealthImpactStudy': 'rap:sanatate', 'generateSeismicStudy': 'rap:seismic',
-    'generateStudiuRestrictii': 'rap:restrictii', 'generatePedologie': 'rap:pedologie'
+    'generateStudiuRestrictii': 'rap:restrictii', 'generatePedologie': 'rap:pedologie', 'generateSilvic': 'rap:silvic'
   };
   function _ocToMod(oc) { var best = null, bi = Infinity; for (var k in RAP_MOD) { var idx = oc.indexOf(k); if (idx >= 0 && idx < bi) { bi = idx; best = RAP_MOD[k]; } } return best; }
   function _isHeader(el) { return el.tagName === 'DIV' && /text-transform:\s*uppercase/.test(el.getAttribute('style') || '') && !el.querySelector('button'); }

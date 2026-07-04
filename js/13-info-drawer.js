@@ -543,6 +543,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Determinarea exactă a clasei și notei de bonitare se face de OSPA/atestat MADR în laborator', 'Tarifele Ord. 83/2018 se actualizează anual prin HG — se verifică la data depunerii'],
   },
+  silvic: {
+    ico: '🌲', label: 'Studiu Regim Silvic', badge: 'recomandat', badgeLabel: 'Fond forestier · Cod Silvic', color: '77,160,0',
+    fn: 'window.generateSilvic&&window.generateSilvic()',
+    ce: 'Studiu privind regimul silvic și scoaterea terenului din fondul forestier național: categorii funcționale (I–V), taxă de scoatere (HG 861/2009), obligația de reîmpădurire, benzi de protecție și avize. Date LIVE: păduri din OpenStreetMap, tip pădure din Copernicus HRL, arii protejate Natura 2000 (EEA WDPA). Desenare păduri + bandă 20 m pe hartă.',
+    dece: 'Construirea pe / lângă fondul forestier este strict reglementată; scoaterea din fond necesită taxă, reîmpădurire compensatorie și avize. Studiul punctual pe parcelă completează profilul silvic teritorial (rang superior) și alimentează IVU (dimensiunea mediu), Loisir (păduri de recreere) și studiile GPL (banda 20 m).',
+    legal: 'Codul Silvic (Legea 46/2008) · HG 861/2009 · Ord. 1540/2011 · Legea 5/2000 · OUG 195/2005 · Ord. 19/2010 (evaluare adecvată Natura 2000)',
+    output: [
+      { ico: '🌲', txt: 'Categorie funcțională I–V + regim de construire' },
+      { ico: '💶', txt: 'Taxă scoatere HG 861/2009 + reîmpădurire (3:1 / 1:1)' },
+      { ico: '🗺', txt: 'Păduri OSM + Natura 2000 live + bandă protecție pe hartă' },
+    ],
+    nu: ['Apartenența la fondul forestier și categoria funcțională se stabilesc oficial pe amenajamentul silvic', 'Tarifele HG 861/2009 se indexează anual — se verifică la depunere'],
+  },
   'utilitati-nationale': {
     ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
     fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',
