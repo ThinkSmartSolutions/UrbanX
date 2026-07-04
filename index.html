@@ -1393,6 +1393,9 @@ document.addEventListener('click', function(){
     <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
     <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
     <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
+    <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaHala?proiecteazaHala():ss?.('Se inițializează'));_closeAllMenus()">🏭 Proiectează hală industrială (3D)</button>
+    <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaSkid?proiecteazaSkid():ss?.('Se inițializează'));_closeAllMenus()">🛢 Proiectează SKID GPL (3D)</button>
+    <button class="fa-i" style="color:#c4b5fd" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));_closeAllMenus()">📑 Generator Documentații Tehnice</button>
     <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
   </div>
   <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">💰 Investiție pe parcelă <span class="fa-cv">▼</span></button>
@@ -1429,6 +1432,8 @@ document.addEventListener('click', function(){
   <div id="rapoarte-gate-banner" style="display:none;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:8px;color:#fcd34d;padding:8px 10px;margin-bottom:8px;font-size:11px;line-height:1.45">⚠️ <b>Studiile de amplasament</b> se generează după ce alegi o <b>parcelă</b> pe hartă și generezi <b>volumul 3D</b> (pre-proiectare) — de acolo provin POT/CUT, suprafețele și capturile.</div>
   <!-- TCI (Proiecție Urbanistică) mutat în meniul UrbanX Pro — nu mai apare în Rapoarte -->
   <!-- IVU mutat în topbar lângă UAT (standard transversal) — nu mai apare în Rapoarte -->
+  <!-- Generator Documentații Tehnice (acțiune principală, vizibil) -->
+  <button onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.1));border:1px solid rgba(139,92,246,.5);border-radius:8px;color:#c4b5fd;padding:10px;cursor:pointer;font-size:12px;font-weight:800;margin-bottom:8px">📑 Generator Documentații Tehnice (DTAC/PTh) <span style="font-size:9px;font-weight:600;opacity:.8;margin-left:auto">formular + validare + ~80 doc</span></button>
   <!-- Hartă conexiuni -->
   <button onclick="openStudyMap();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(99,102,241,.08));border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">
     <span style="font-size:16px">🗺</span>
@@ -5837,7 +5842,9 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/inse-connector.js?v=20260523"></script>
 <script src="js/inse-real-data.js?v=20260615"></script>
 <script src="js/cinema-data.js?v=20260525"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="js/urbanx-doc-engine.js?v=20260704"></script>
+<script src="js/urbanx-docx-builder.js?v=20260704"></script>
 <script src="js/urbanx-doc-ui.js?v=20260704"></script>
 <script src="js/cinema-live-sources.js?v=20260525"></script>
 <script src="js/cinema-v5.js?v=20260629poi"></script>
