@@ -18,24 +18,38 @@
   var MPP = 26; // px per metru (scară desen la ~1:50 vizual)
   var WALL = 3; // grosime perete px
 
-  // ── layout pe niveluri: împachetare rânduri, mp→dimensiuni reale ─────────
+  // ── layout: PLAN CU CORIDOR (dublu încărcat) — regulă reală de proiectare ──
+  // Nucleu scară/lift la un capăt (leagă nivelurile), coridor-spină, camere pe
+  // ambele benzi ale coridorului, fiecare cu UȘĂ spre coridor și FEREASTRĂ pe
+  // fațadă. Distribuire echilibrată pe cele două benzi. Anvelopă rectangulară.
   function layout(spatii) {
     var byNiv = {}; (spatii || []).forEach(function (r) { var k = r.niv || 'P'; (byNiv[k] = byNiv[k] || []).push(r); });
     var res = {};
     Object.keys(byNiv).forEach(function (niv) {
-      var rooms = []; byNiv[niv].forEach(function (r) { var b = Math.max(1, +r.buc || 1); for (var i = 0; i < b; i++) rooms.push(r); });
+      var rooms = []; byNiv[niv].forEach(function (r) { var b = Math.max(1, +r.buc || 1); for (var i = 0; i < b; i++) rooms.push(Object.assign({}, r)); });
+      // sortare: camerele mari primele (arată coerent, ancorate lângă nucleu)
       rooms.sort(function (a, b) { return (b.mp_unit || 0) - (a.mp_unit || 0); });
-      var W = 24; // lățime bandă în metri (canvas logic)
-      var x = 0, y = 0, rowH = 0, rects = [];
+      var Db = 5.6;   // adâncime bandă (adâncime cameră tipică) m
+      var Cw = 1.8;   // lățime coridor m
+      var coreW = 4.6; // nucleu scară+lift, pe toată adâncimea
+      var D = 2 * Db + Cw; // adâncime clădire
+      var topX = coreW, botX = coreW; // pornim după nucleu
+      var rects = [];
       rooms.forEach(function (r) {
-        var A = Math.max(4, +r.mp_unit || 4);
-        var w = Math.min(8.5, Math.max(2.4, Math.sqrt(A) * 1.15)); // lățime m
-        var h = Math.max(2.2, A / w); // înălțime m
-        if (x + w > W) { x = 0; y += rowH + 0.0; rowH = 0; }
-        rects.push({ x: x, y: y, w: w, h: h, room: r }); x += w; rowH = Math.max(rowH, h);
+        var A = Math.max(3, +r.mp_unit || 6);
+        var w = Math.max(2.0, A / Db); // lățime cameră din arie / adâncime bandă
+        var top = topX <= botX;        // banda cu lățime cumulată mai mică
+        var x = top ? topX : botX;
+        var y = top ? 0 : (Db + Cw);
+        rects.push({ x: x, y: y, w: w, h: Db, room: r, band: top ? 'N' : 'S' });
+        if (top) topX += w; else botX += w;
       });
-      var totalH = 0; rects.forEach(function (rc) { totalH = Math.max(totalH, rc.y + rc.h); });
-      res[niv] = { rects: rects, w: W, h: totalH };
+      var W = Math.max(topX, botX, coreW + 4);
+      res[niv] = {
+        rects: rects, w: W, h: D, Db: Db, Cw: Cw, coreW: coreW,
+        core: { x: 0, y: 0, w: coreW, h: D },
+        corridor: { x: coreW, y: Db, w: W - coreW, h: Cw }
+      };
     });
     return res;
   }
@@ -81,33 +95,69 @@
   // ── PLAN DE NIVEL ────────────────────────────────────────────────────────
   function planNivel(lay, niv, meta) {
     var d = lay[niv]; if (!d) return '';
-    var PAD = 60, M = MPP;
+    var PAD = 66, M = MPP;
     var pw = d.w * M, ph = d.h * M;
-    var W = pw + PAD * 2, H = ph + PAD * 2 + 90;
+    var W = pw + PAD * 2, H = ph + PAD * 2 + 96;
+    var isP = (niv === 'P' || niv == null);
     var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial">';
     s += '<rect width="100%" height="100%" fill="#fff"/>';
-    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">' + esc((meta && meta.titlu) || ('PLAN ' + (niv === 'E' ? 'ETAJ' : niv === 'S' ? 'SUBSOL' : 'PARTER'))) + '</text>';
-    var ox = PAD, oy = 40;
-    // conturul exterior gros
-    s += '<rect x="' + (ox - 2) + '" y="' + (oy - 2) + '" width="' + (pw + 4) + '" height="' + (ph + 4) + '" fill="none" stroke="#111" stroke-width="' + (WALL + 1) + '"/>';
+    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">' + esc((meta && meta.titlu) || 'PLAN NIVEL') + '</text>';
+    var ox = PAD, oy = 44;
+    function X(mx) { return ox + mx * M; } function Y(my) { return oy + my * M; }
+    // 1. anvelopa exterioară (perete gros)
+    s += '<rect x="' + (ox - 3) + '" y="' + (oy - 3) + '" width="' + (pw + 6) + '" height="' + (ph + 6) + '" fill="#fff" stroke="#111" stroke-width="' + (WALL + 2) + '"/>';
+    // 2. coridorul (spină de circulație) — fundal + etichetă
+    var co = d.corridor;
+    s += '<rect x="' + X(co.x) + '" y="' + Y(co.y) + '" width="' + (co.w * M) + '" height="' + (co.h * M) + '" fill="#f4f7fb" stroke="#bbb" stroke-width="0.6"/>';
+    s += '<text x="' + X(co.x + co.w / 2) + '" y="' + Y(co.y + co.h / 2) + '" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="#8aa" letter-spacing="2">C O R I D O R</text>';
+    // 3. nucleul scară + lift
+    var cr = d.core;
+    s += '<rect x="' + X(cr.x) + '" y="' + Y(cr.y) + '" width="' + (cr.w * M) + '" height="' + (cr.h * M) + '" fill="#eef0f3" stroke="#111" stroke-width="' + WALL + '"/>';
+    // simbol scară (trepte) în jumătatea de sus a nucleului
+    var stX = X(cr.x + 0.5), stW = (cr.w - 1.0) * M, stY0 = Y(0.6), stY1 = Y(cr.h / 2 - 0.4), nT = 8;
+    for (var t = 0; t <= nT; t++) { var ty = stY0 + (stY1 - stY0) * t / nT; s += '<line x1="' + stX + '" y1="' + ty + '" x2="' + (stX + stW) + '" y2="' + ty + '" stroke="#888" stroke-width="0.7"/>'; }
+    s += '<line x1="' + (stX + stW / 2) + '" y1="' + stY0 + '" x2="' + (stX + stW / 2) + '" y2="' + stY1 + '" stroke="#888" stroke-width="0.7"/>';
+    // lift (pătrat cu X) în jumătatea de jos
+    var lfY = Y(cr.h / 2 + 0.4), lfS = Math.min(stW, (cr.h / 2 - 1.2) * M);
+    s += '<rect x="' + stX + '" y="' + lfY + '" width="' + lfS + '" height="' + lfS + '" fill="none" stroke="#888" stroke-width="0.7"/>';
+    s += '<line x1="' + stX + '" y1="' + lfY + '" x2="' + (stX + lfS) + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.6"/><line x1="' + (stX + lfS) + '" y1="' + lfY + '" x2="' + stX + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.6"/>';
+    s += '<text x="' + X(cr.x + cr.w / 2) + '" y="' + Y(cr.h - 0.3) + '" text-anchor="middle" font-size="7" fill="#555">SCARĂ / LIFT</text>';
+    // 4. camerele + uși spre coridor + ferestre pe fațadă
     d.rects.forEach(function (rc) {
-      var x = ox + rc.x * M, y = oy + rc.y * M, w = rc.w * M, h = rc.h * M;
+      var x = X(rc.x), y = Y(rc.y), w = rc.w * M, h = rc.h * M;
       var col = CATCOL[rc.room.cat] || '#f3f4f6';
       s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + col + '" stroke="#111" stroke-width="' + WALL + '"/>';
-      // ușă: gol de 0,9m pe latura de jos (arc)
-      var dw = 0.9 * M, dx = x + Math.min(w * 0.3, 8);
-      s += '<line x1="' + dx + '" y1="' + (y + h) + '" x2="' + (dx + dw) + '" y2="' + (y + h) + '" stroke="#fff" stroke-width="' + (WALL + 1) + '"/>';
-      s += '<path d="M ' + dx + ' ' + (y + h) + ' A ' + dw + ' ' + dw + ' 0 0 1 ' + (dx + dw) + ' ' + (y + h) + '" fill="none" stroke="#999" stroke-width="0.5"/>';
-      // etichetă
-      var nm = esc((rc.room.nume || '').length > 20 ? rc.room.nume.slice(0, 19) + '…' : rc.room.nume);
-      s += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - 3) + '" text-anchor="middle" font-size="8" font-weight="bold" fill="#222">' + nm + '</text>';
-      s += '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 8) + '" text-anchor="middle" font-size="7" fill="#555">' + (Math.round(rc.room.mp_unit || 0)) + ' mp · ' + rc.w.toFixed(1) + '×' + rc.h.toFixed(1) + '</text>';
+      // UȘA — pe latura dinspre coridor (N: jos y+h ; S: sus y)
+      var dw = 0.9 * M, dcx = x + w / 2 - dw / 2;
+      var doorY = (rc.band === 'N') ? (y + h) : y;
+      var sweep = (rc.band === 'N') ? 1 : 0;
+      s += '<line x1="' + dcx + '" y1="' + doorY + '" x2="' + (dcx + dw) + '" y2="' + doorY + '" stroke="#fff" stroke-width="' + (WALL + 1) + '"/>';
+      s += '<path d="M ' + dcx + ' ' + doorY + ' A ' + dw + ' ' + dw + ' 0 0 ' + sweep + ' ' + (dcx + dw) + ' ' + doorY + '" fill="none" stroke="#9aa" stroke-width="0.6"/>';
+      // FEREASTRA — pe latura de fațadă (N: sus y ; S: jos y+h), dacă e cameră cu iluminat
+      var cat = rc.room.cat || '';
+      if (!/Sanitare|Tehnic|Depozit|Circula/.test(cat) && w > 2.0 * M) {
+        var winY = (rc.band === 'N') ? y : (y + h), fw = Math.min(w * 0.6, 2.2 * M), fx = x + w / 2 - fw / 2;
+        s += '<line x1="' + fx + '" y1="' + winY + '" x2="' + (fx + fw) + '" y2="' + winY + '" stroke="#3b7" stroke-width="2.2"/>';
+      }
+      // etichetă cameră
+      var nm = esc((rc.room.nume || '').length > 22 ? rc.room.nume.slice(0, 21) + '…' : rc.room.nume);
+      var cy = y + h / 2;
+      s += '<text x="' + (x + w / 2) + '" y="' + (cy - 3) + '" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#222">' + nm + '</text>';
+      s += '<text x="' + (x + w / 2) + '" y="' + (cy + 8) + '" text-anchor="middle" font-size="6.8" fill="#555">' + Math.round(rc.room.mp_unit || 0) + ' mp · ' + rc.w.toFixed(1) + '×' + d.Db.toFixed(1) + '</text>';
     });
-    // cote generale
-    s += dimH(ox, ox + pw, oy - 14, d.w.toFixed(1) + ' m');
-    s += dimV(oy, oy + ph, ox - 14, d.h.toFixed(1) + ' m');
-    s += nord(W - 40, 40);
-    s += cartus(meta, W - 360, oy + ph + 6, 340);
+    // 5. acces principal (doar parter) — săgeată în coridor din dreptul nucleului
+    if (isP) {
+      var ay = Y(d.Db + d.Cw / 2);
+      s += '<text x="' + (ox - 6) + '" y="' + (ay - 6) + '" text-anchor="end" font-size="8" font-weight="bold" fill="#c0392b">ACCES ▶</text>';
+      s += '<line x1="' + (ox - 30) + '" y1="' + ay + '" x2="' + X(d.coreW) + '" y2="' + ay + '" stroke="#c0392b" stroke-width="1.4" stroke-dasharray="4 2"/>';
+      s += '<polygon points="' + X(d.coreW) + ',' + ay + ' ' + (X(d.coreW) - 7) + ',' + (ay - 4) + ' ' + (X(d.coreW) - 7) + ',' + (ay + 4) + '" fill="#c0392b"/>';
+    }
+    // 6. cote generale
+    s += dimH(ox, ox + pw, oy - 16, d.w.toFixed(1) + ' m');
+    s += dimV(oy, oy + ph, ox - 16, d.h.toFixed(1) + ' m');
+    s += nord(W - 42, 46);
+    s += '<text x="' + PAD + '" y="' + (oy + ph + 22) + '" font-size="8" fill="#888">Plan schematic parametric cu circulație (coridor + nucleu vertical). Geometria de detaliu (grilă structurală, cotare parțială) se definește de proiectant la faza P.Th.</text>';
+    s += cartus(meta, W - 360, oy + ph + 30, 340);
     s += '</svg>';
     return s;
   }
