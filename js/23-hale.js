@@ -97,7 +97,27 @@
     var grp = params.functiune && params.functiune.indexOf('pod_rulant') >= 0 ? 'pod_rulant' : params.functiune && params.functiune.indexOf('logistica') >= 0 ? 'logistica_tir' : params.functiune && params.functiune.indexOf('productie') >= 0 ? 'productie' : 'depozitare';
     var pas = HALE_NORMATIVE.pasStalpi[grp] || HALE_NORMATIVE.pasStalpi.default;
     var traveeL = Math.max(1, Math.round(W / pas[0])), traveeT = Math.max(1, Math.round(L / pas[1]));
-    return { L: L, W: W, Sc: Sc, H_lib: H_lib, H_grinda: H_grinda, H_streasina: H_streasina, H_coama: H_coama, H_med: H_med, panta: panta, acoperis: acoperis, risc: risc, sprinklere: sprinklere, V: V, comp_ok: comp_ok, comp_lim: lim, sprinklere_necesare: sprinklere_necesare, mez: mez, Sd: Sd, area: area, POT: POT, CUT: CUT, pasL: pas[0], pasT: pas[1], traveeL: traveeL, traveeT: traveeT, fn: fn, functiune: params.functiune || 'depozitare_stivuitor_4m' };
+    // ── DESFUMARE (P118/1-2015 art. 8): trape ≥ 2% din Sc, la Sc>1000 sau V>12000 ──
+    var desfumareNec = Sc > 1000 || V > 12000;
+    var trapeArea = +(Sc * 0.02).toFixed(1);          // mp suprafață liberă trape
+    var nrTrape = Math.max(2, Math.ceil(trapeArea / 1.0)); // ~1 mp/trapă, dist ≤ 20m
+    // ── EVACUARE (P118/1-2015 cap.6) ──
+    var densOcup = params.functiune && params.functiune.indexOf('productie') >= 0 ? 10 : 30; // mp/pers (producție/depozit)
+    var nrPers = Math.max(1, Math.round(Sc / densOcup));
+    var lungMaxTraseu = { mic: 60, mediu: 50, mare: 40, foarte_mare: 30 }[risc] || 50;
+    var nrIesiriMin = nrPers < 50 && Sc <= 300 ? 1 : nrPers < 200 ? 2 : nrPers < 500 ? 3 : 4;
+    if (Sc > 500 && nrIesiriMin < 2) nrIesiriMin = 2;
+    var latimeUsaMin = 1.20; // m — hale industriale
+    // ── ACCES ISU (P118/1-2015 cap.7) ──
+    var isu = { latime: 4.0, H_libera: 4.5, portanta: 17, raza_viraj: 12.5, dist_max_fatada: 18, fatade_min: (Sc > 2000 || H_coama > 30) ? 2 : 1 };
+    // ── POD RULANT ──
+    var podRulant = null;
+    if (fn.pod) { var cap = params.functiune === 'pod_rulant_5t' ? 5 : params.functiune === 'pod_rulant_10t' ? 10 : params.functiune === 'pod_rulant_20t' ? 20 : params.functiune === 'productie_grea' ? 5 : 10; podRulant = { capacitate: cap, H_cap_pod: +(H_lib + 0.5).toFixed(1), norma: 'SR EN 1991-3' }; }
+    // ── RAMPĂ/UȘĂ TIR (logistică) ──
+    var tir = params.functiune === 'logistica_tir' ? { usa_L: 4.0, usa_H: 4.5, rampa_H: 1.2, rampa_ad: 3.0, norma: 'GT 035-02' } : null;
+    // ── SISTEM STRUCTURAL recomandat ──
+    var recStruct = W > 30 ? 'ferme_metalice' : 'cadre_metalice';
+    return { L: L, W: W, Sc: Sc, H_lib: H_lib, H_grinda: H_grinda, H_streasina: H_streasina, H_coama: H_coama, H_med: H_med, panta: panta, acoperis: acoperis, risc: risc, sprinklere: sprinklere, V: V, comp_ok: comp_ok, comp_lim: lim, sprinklere_necesare: sprinklere_necesare, mez: mez, Sd: Sd, area: area, POT: POT, CUT: CUT, pasL: pas[0], pasT: pas[1], traveeL: traveeL, traveeT: traveeT, fn: fn, functiune: params.functiune || 'depozitare_stivuitor_4m', desfumareNec: desfumareNec, trapeArea: trapeArea, nrTrape: nrTrape, nrPers: nrPers, lungMaxTraseu: lungMaxTraseu, nrIesiriMin: nrIesiriMin, latimeUsaMin: latimeUsaMin, isu: isu, podRulant: podRulant, tir: tir, recStruct: recStruct };
   }
   G.hale_calc = hale_calc;
   G.hale_genViewer3DParams = function (c) { return { type: 'industrial_hall', footprint: { L: c.L, W: c.W }, H_streasina: c.H_streasina, H_coama: c.H_coama, roof: c.acoperis, structure: 'metal', mezanin: c.mez }; };
@@ -292,6 +312,36 @@
     ].forEach(function (r) { cy = tblRow(r, cy, false, [90, 92]); });
     cy += 3;
     P((c.comp_ok ? 'Volumul se încadrează în limitele admise pentru configurația considerată.' : 'Volumul depășește limita admisă: se impun ' + (c.sprinklere ? 'compartimentare cu pereți antifoc EI 120/180' : 'sprinklere automate (care măresc limita de ~3×) sau compartimentare') + '.') + ' Analiza completă a securității la incendiu (evacuare, detectare, hidranți, acces ISU) face obiectul Scenariului de Securitate la Incendiu (SSI), care preia acești parametri prin referință, fără a-i recalcula.');
+
+    // 9b. EVACUARE & DESFUMARE
+    page('EVACUARE ȘI DESFUMARE'); SEC('9b. EVACUAREA ȘI DESFUMAREA (P118/1-2015)');
+    P('Evacuarea persoanelor și evacuarea fumului sunt esențiale în hale. Numărul de persoane se estimează din densitatea de ocupare specifică funcțiunii, iar căile de evacuare se dimensionează conform P118/1-2015 cap. 6; desfumarea (evacuarea fumului) prin trape în acoperiș conform cap. 8.');
+    cy = tblRow(['Parametru', 'Valoare', 'Normă'], cy, true, [58, 40, 84]);
+    [['Persoane estimate', c.nrPers + ' pers.', 'Sc / densitate ocupare'],
+     ['Nr. minim ieșiri', '' + c.nrIesiriMin, 'P118 art. 6.4 (după persoane/Sc)'],
+     ['Lungime max. traseu evacuare', c.lungMaxTraseu + ' m', 'risc ' + c.risc + ' (P118 tab. 6.1)'],
+     ['Lățime minimă ușă evacuare', c.latimeUsaMin + ' m', 'hale industriale'],
+     ['Desfumare necesară', c.desfumareNec ? 'DA (Sc > 1000 mp / V mare)' : 'nu (sub prag)', 'P118 art. 8.2'],
+     ['Suprafață trape desfumare', c.trapeArea + ' mp (≥ 2% Sc)', c.nrTrape + ' trape, dist. ≤ 20 m'],
+     ['Sprinklere', c.sprinklere ? 'prevăzute' : (c.sprinklere_necesare ? 'NECESARE' : 'neprevăzute'), 'P118/2-2013']
+    ].forEach(function (r) { cy = tblRow(r, cy, false, [58, 40, 84]); });
+    cy += 3;
+    P('Desfumarea naturală se realizează prin trape acționate automat (detector fum / fuzibil) + manual din două puncte, cu suprafață liberă de min. 2% din suprafața compartimentului (' + c.trapeArea + ' mp pentru această hală), distribuite la distanțe de max. 20 m. Traseele de evacuare nu depășesc ' + c.lungMaxTraseu + ' m până la o ieșire; sunt necesare min. ' + c.nrIesiriMin + ' ieșiri, cu iluminat de siguranță pentru evacuare.');
+
+    // 9c. ACCES ISU + POD RULANT / TIR
+    page('ACCES ISU · ECHIPAMENTE'); SEC('9c. ACCESUL ISU ȘI ECHIPAMENTELE SPECIALE');
+    P('Accesul autospecialelor de intervenție (ISU) trebuie asigurat pe toată durata exploatării (P118/1-2015 cap. 7):');
+    cy = tblRow(['Cerință acces ISU', 'Valoare'], cy, true, [120, 62]);
+    [['Lățime cale de acces', c.isu.latime + ' m'], ['Înălțime liberă', c.isu.H_libera + ' m'], ['Capacitate portantă', c.isu.portanta + ' t/osie'], ['Rază de viraj', c.isu.raza_viraj + ' m'], ['Distanță max. față de fațadă', c.isu.dist_max_fatada + ' m'], ['Fațade accesibile', c.isu.fatade_min + (c.isu.fatade_min >= 2 ? ' (Sc>2000 / H>30m)' : '')]
+    ].forEach(function (r) { cy = tblRow(r, cy, false, [120, 62]); });
+    cy += 3;
+    if (c.podRulant) {
+      P('Hala este echipată cu POD RULANT ' + c.podRulant.capacitate + ' tone. Înălțimea la capul podului rulant este de min. ' + c.podRulant.H_cap_pod + ' m; structura (grinzi de rulare, stâlpi) se dimensionează pentru încărcările dinamice ale podului conform ' + c.podRulant.norma + '. Înălțimea liberă sub cârlig determină cota streașinei.');
+    }
+    if (c.tir) {
+      P('Pentru logistică TIR: uși secționale de min. ' + c.tir.usa_L + '×' + c.tir.usa_H + ' m (L×H), rampe de încărcare/descărcare cu H = ' + c.tir.rampa_H + ' m față de teren și adâncime ~' + c.tir.rampa_ad + ' m (' + c.tir.norma + '); pasul longitudinal de min. 12 m permite manevra TIR în incintă.');
+    }
+    if (!c.podRulant && !c.tir) { P('Funcțiunea curentă nu impune pod rulant sau rampe TIR specifice. La schimbarea funcțiunii (producție grea / logistică), aceste echipamente și cotele aferente se recalculează automat.'); }
 
     // 10. MEZANIN
     page('MEZANIN'); SEC('10. MEZANINUL');
