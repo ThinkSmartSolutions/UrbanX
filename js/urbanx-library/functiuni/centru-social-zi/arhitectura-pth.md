@@ -435,3 +435,442 @@ Cartea tehnică a construcției se întocmește conform HG 273/1994 și se pred�
 ### PTh-A.8.3 Predarea cărții tehnice
 
 Cartea tehnică a construcției (partea de arhitectură) se completează pe parcursul execuției și se finalizează la recepția la terminarea lucrărilor. Un exemplar se predă beneficiarului (administrator centru social), cu obligația păstrării pe toată durata de existență a construcției și a actualizării la orice intervenție ulterioară (reparație capitală, modificare, consolidare). Jurnalul evenimentelor se ține de către beneficiar pentru consemnarea lucrărilor de întreținere și a incidentelor.
+
+## PTh-A.9 — Fișe tehnice de materiale (caiet extins de produse arhitectură)
+
+### PTh-A.9.1 — Preambul și mod de utilizare a fișelor
+
+Prezentul capitol dezvoltă caietul de produse pentru fazele de aprovizionare, recepție calitativă la intrare și punere în operă. Fiecare fișă tehnică stabilește **caracteristica impusă** (valoarea minimă/maximă cerută prin proiect), **standardul de referință**, **clasa de performanță**, precum și **modul de recepție** (documentul care atestă conformitatea și verificarea la șantier). Nicio livrare nu se acceptă fără Declarație de Performanță (DoP) conform Regulamentului (UE) 305/2011 și marcaj CE, respectiv agrement tehnic în construcții valabil pentru produsele care nu au standard armonizat.
+
+Regula de bază de aprovizionare: **niciun material major nu se comandă înainte de aprobarea probei-martor (mostrei) de către proiectant și beneficiar.** Mostrele aprobate se sigilează, se etichetează cu data și se păstrează în organizarea de șantier până la recepția la terminarea lucrărilor, ca element de referință pentru controlul lotului livrat.
+
+| Etapă | Document obligatoriu | Cine verifică | Consecință neconformitate |
+|---|---|---|---|
+| Comandă | Fișă tehnică aprobată + mostră sigilată | Proiectant + Beneficiar | Blocare comandă |
+| Livrare la șantier | DoP + marcaj CE + certificat lot | Responsabil tehnic execuție (RTE) | Refuz recepție lot |
+| Depozitare | Fișă depozitare producător | Șef șantier | Rebutare produs degradat |
+| Punere în operă | Fișă tehnologică + PV fază determinantă | RTE + diriginte | Refacere lucrare |
+
+### PTh-A.9.2 — Fișă tehnică FT-01: Termosistem ETICS (fațadă ventilată nu se aplică — sistem lipit-ancorat)
+
+Sistemul termoizolant compact pe bază de polistiren expandat ignifugat, aplicat pe pereții exteriori ai clădirii, cu rol de anvelopă termică și suport pentru finisajul decorativ. Se impune **sistem certificat ca ansamblu unic (kit)**, de la un singur furnizor — este interzisă combinarea componentelor de la producători diferiți.
+
+| Caracteristică impusă | Valoare cerută | Standard referință | Clasă / mod recepție |
+|---|---|---|---|
+| Sistem ETICS complet (kit) | Ansamblu unic certificat | ETAG 004 / EAD 040083 | ETA valabil + DoP |
+| Placă EPS-F | conductivitate ≤ 0,032 W/mK | SR EN 13163 | λD declarat, CE |
+| Grosime termoizolație perete | 15 cm | proiect termotehnic C107 | verificare cu șubler la fața locului |
+| Reacție la foc ansamblu | min. B-s1,d0 | SR EN 13501-1 | clasificare din DoP |
+| Bariere antifoc (vată bazaltică) | benzi 20 cm la fiecare nivel + goluri | NP 118 / C58 | verificare vizuală + PV fază |
+| Rezistență la smulgere dibluri | ≥ 0,20 kN/diblu | ETAG 014 | test in-situ 1 la 200 mp |
+| Masă șpaclu + plasă fibră sticlă | plasă ≥ 145 g/mp, rezistență ≥ 40 daN/5cm | SR EN 13496 | certificat lot plasă |
+| Tencuială decorativă | siloxanică, structură 1,5–2,0 mm | SR EN 15824 | mostră culoare aprobată |
+| Absorbție apă capilară strat final | w ≤ 0,5 kg/mp·h^0,5 | SR EN 1062-3 | fișă tehnică producător |
+| Permeabilitate vapori strat final | Sd ≤ 0,14 m | SR EN 7783 | fișă tehnică producător |
+| Dibluri fixare | cu miez metalic, cap termic, avizate EPS | ETAG 014 | ETA diblu + calcul nr./mp |
+
+Numărul minim de dibluri: **6 buc/mp în câmp curent** și **8–10 buc/mp în zonele de colț și muchii** (zone de presiune/aspirație vânt), conform planului de dibluire din proiect. Soclul se realizează cu polistiren extrudat XPS (absorbție redusă a apei) pe o înălțime de min. 30 cm peste cota terenului amenajat, cu profil de soclu din aluminiu cu picurător.
+
+### PTh-A.9.3 — Fișă tehnică FT-02: Membrane hidroizolante
+
+Se disting trei categorii de aplicație: hidroizolație terasă necirculabilă (peste planșeul P+1), hidroizolație zone umede interioare (grupuri sanitare, băi asistate, oficiu) și hidroizolație/drenaj la soclu-fundație.
+
+| Aplicație | Produs impus | Caracteristică cheie | Standard | Mod recepție |
+|---|---|---|---|---|
+| Terasă necirculabilă | Membrană bituminoasă 2 straturi (4+4,5 mm) SBS | flexibilitate la rece ≤ −20 °C | SR EN 13707 | DoP + PV probă inundare 48h |
+| Alternativă terasă | Membrană monostrat PVC-P sau TPO 1,5 mm | rezistență UV, sudabilă cu aer cald | SR EN 13956 | test sudură cu cârlig |
+| Barieră vapori terasă | Folie bituminoasă cu insert Al | Sd ≥ 1500 m | SR EN 1931 | verificare petreceri ≥ 8 cm |
+| Zone umede interioare | Hidroizolație lichidă bicomponentă sub gresie | punte fisurare ≥ 0,4 mm | SR EN 14891 | 2 straturi, grosime uscat ≥ 2 mm |
+| Bandă etanșare colțuri/rosturi | Bandă cauciuc cu manșoane | elasticitate, aderență | SR EN 14891 anexa | montaj obligatoriu la toate colțurile |
+| Soclu/fundație | Membrană bituminoasă + membrană cu crampoane (drenaj) | rezistență perforare statică | SR EN 13967 | verificare petreceri + protecție |
+
+**Recepția hidroizolației terasei este fază determinantă** și se atestă prin proba de inundare (min. 5 cm coloană de apă, menținută 48 ore, cu control al plafonului inferior). Pentru zonele umede interioare, hidroizolația lichidă se ridică pe pereți: min. 15 cm în general, min. 200 cm în zona dușului la baie asistată, pe toată suprafața pardoselii cu racord etanș la sifonul de pardoseală.
+
+### PTh-A.9.4 — Fișă tehnică FT-03: Tâmplărie exterioară și interioară
+
+Tâmplăria exterioară se impune cu **performanță energetică ridicată**, adecvată unei clădiri cu ocupanți vârstnici (control termic, manevrare ușoară, siguranță).
+
+| Caracteristică | Tâmplărie exterioară | Tâmplărie interioară | Standard | Recepție |
+|---|---|---|---|---|
+| Material profil | PVC min. 6 camere sau Al cu barieră termică | MDF furniruit / HPL în zone umede | SR EN 14351-1 / SR EN 14024 | agrement + DoP |
+| Transmitanță termică Uw | ≤ 1,1 W/mK (ferestre) | — | SR EN 14351-1 | valoare din DoP |
+| Geam | tripan Low-E, gaz argon, Ug ≤ 0,7 | — | SR EN 1279 | eticheta distanțier |
+| Permeabilitate aer | clasa 4 | — | SR EN 12207 | din DoP |
+| Etanșeitate apă | clasa min. 8A | — | SR EN 12208 | din DoP |
+| Rezistență vânt | clasa min. C3 | — | SR EN 12210 | din DoP |
+| Lățime liberă ușă acces persoane | ≥ 90 cm liber | ≥ 90 cm circulații principale, ≥ 80 cm încăperi | NP 051 accesibilitate | măsurare in-situ |
+| Prag | fără prag / prag ≤ 2 cm teșit | fără prag la circulații | NP 051 | verificare cotă |
+| Feronerie | mâner tip levier (nu buton rotund) | levier | NP 051 | verificare tip |
+| Geam siguranță zone joase | geam securizat/laminat sub 90 cm | idem la uși vitrate | SR EN 12600 | marcaj pe geam |
+| Manevrare | forță deschidere ≤ 25 N (uși principale automatizate unde e cazul) | — | NP 051 | test dinamometru |
+
+Ușa principală de acces se prevede cu **sistem automat cu senzor** și cu buton de deschidere la înălțime accesibilă (85–105 cm), dublat de temporizare mărită a închiderii pentru a permite trecerea persoanelor cu mobilitate redusă și a celor în scaun rulant.
+
+### PTh-A.9.5 — Fișă tehnică FT-04: Placaje ceramice (gresie și faianță)
+
+| Caracteristică impusă | Gresie pardoseală | Faianță perete | Standard | Recepție |
+|---|---|---|---|---|
+| Tip / absorbție apă | gresie porțelanată, E ≤ 0,5 % (grupa BIa) | faianță E > 10 % (grupa BIII) | SR EN 14411 | certificat lot |
+| Rezistență alunecare circulații/băi | R10 (uscat) / clasa B (desculț) | — | DIN 51130 / DIN 51097 | fișă tehnică + mostră |
+| Rezistență alunecare rampe/dușuri | R11 / clasa C | — | DIN 51130 | verificare zonă |
+| Rezistență uzură (PEI) | min. PEI IV circulații intense | — | SR EN ISO 10545-7 | fișă tehnică |
+| Rezistență la pete | clasa 5 | clasa 3 min. | SR EN ISO 10545-14 | fișă tehnică |
+| Adeziv | clasa C2TE S1 (deformabil) | C2TE | SR EN 12004 | DoP adeziv |
+| Chit rosturi zone umede | epoxidic sau ciment CG2 hidrofob | CG2 | SR EN 13888 | tip declarat |
+| Lățime rost | 3 mm pardoseală, 2 mm perete | — | proiect | verificare cu cruciulițe calibrate |
+| Planeitate strat pozat | abatere ≤ 2 mm/2 m | idem | C56 / NE 001 | dreptar 2 m |
+
+Se impune **schema de pozare (calepinaj)** aprobată de proiectant, cu poziționarea rosturilor și centrarea plăcilor față de axele încăperii și față de obiectele sanitare. Pentru siguranța vârstnicilor, se aleg finisaje **mate, fără reflexii de tip oglindă** și cu **contrast cromatic** între pardoseală și plintă (min. 30 puncte LRV de diferență) pentru perceperea limitelor.
+
+### PTh-A.9.6 — Fișă tehnică FT-05: Pardoseli PVC (heterogen elastic)
+
+| Caracteristică impusă | Valoare cerută | Standard | Recepție |
+|---|---|---|---|
+| Tip | PVC heterogen în rolă, strat uzură ≥ 0,7 mm | SR EN ISO 10582 | fișă + mostră |
+| Clasă utilizare | 34 (comercial intens) / 43 pt zone tehnice | SR EN ISO 10874 | din fișă |
+| Rezistență alunecare | R10 / DS (zone umede R11) | DIN 51130 | fișă |
+| Grup uzură | grupa T (cea mai bună) | SR EN 660-2 | fișă |
+| Tratament suprafață | PUR reticulat, fără ceruire | producător | fișă |
+| Reacție la foc | Bfl-s1 | SR EN 13501-1 | DoP |
+| Comportament electrostatic | antistatic zone medicale | SR EN 1815 | fișă |
+| Racord perete (scafă) | ridicare 10 cm cu profil scafă | detaliu D19 | verificare in-situ |
+| Sudură rosturi | cordon la cald cu culoare asortată | producător | verificare continuitate |
+| Emisii COV | clasa A+ | reglementare emisii | fișă |
+
+Suportul (șapă autonivelantă) trebuie să aibă umiditatea reziduală **sub 2 % CM** (măsurare cu aparat CM) înainte de lipire. Se interzice montajul pe suport umed. Toate racordurile perete-pardoseală se realizează cu **scafă rotunjită** (fără colț la 90°) pentru igienizare facilă și pentru evitarea acumulării de praf.
+
+### PTh-A.9.7 — Fișă tehnică FT-06: Vopsele și tratamente de suprafață
+
+| Aplicație | Produs impus | Caracteristică cheie | Standard | Recepție |
+|---|---|---|---|---|
+| Pereți interiori uscați | Vopsea lavabilă lavabilitate clasa 1 | rezistență ≥ 10.000 cicluri | SR EN 13300 | clasa din fișă |
+| Pereți zone circulație/băi | Vopsea lavabilă antibacteriană spălabilă | rezistență la dezinfectanți | SR EN 13300 + fișă | fișă tehnică |
+| Tavane | Vopsea mată clasa 3, alb | opacitate clasa 1 | SR EN 13300 | mostră |
+| Grilaj emisii | COV redus, clasa A+ | conținut COV scăzut | Directiva COV | fișă |
+| Tâmplărie lemn/MDF | Sistem grund + email apos | aderență, rezistență spălare | fișă | mostră |
+| Elemente metalice | Grund anticoroziv + email | grosime film uscat ≥ 80 µm | SR EN ISO 12944 | măsurare grosime |
+| Zone exterioare tencuială | Vopsea siloxanică | permeabilitate vapori | SR EN 1062 | fișă |
+
+Se impun culori din paleta aprobată prin proiectul de design interior, cu **strategie cromatică specifică pentru vârstnici**: contraste clare pentru identificarea ușilor și a elementelor de sprijin, evitarea culorilor foarte apropiate în valoare (risc de confuzie perceptivă), evitarea modelelor cu contrast puternic pe pardoseală (pot fi percepute ca denivelări sau găuri de către persoane cu deficiențe de vedere).
+
+### PTh-A.9.8 — Fișă tehnică FT-07: Sisteme gips-carton (pereți și placări)
+
+| Caracteristică impusă | Valoare cerută | Standard | Recepție |
+|---|---|---|---|
+| Plăci standard (spații uscate) | tip A, 12,5 mm | SR EN 520 | marcaj muchie |
+| Plăci zone umede (băi, oficiu) | tip H2 (hidrofuge, verzi) | SR EN 520 | marcaj culoare |
+| Plăci pereți REI (protecție foc) | tip DF/F (roz), 2×12,5 mm | SR EN 520 | grosime + strat dublu |
+| Structură metalică | profile zincate CW/UW ≥ 0,6 mm tablă | SR EN 14195 | grosime tablă |
+| Interax montanți | 60 cm standard / 40 cm zone cu bare sprijin | producător | măsurare |
+| Vată izolantă interior perete | vată minerală ≥ 50 mm, densitate ≥ 40 kg/mc | SR EN 13162 | fișă |
+| Bandă etanșare la profile UW | bandă acustică sub profil | detaliu | verificare montaj |
+| Șpăcluire rosturi | bandă + pastă, nivel calitate Q2/Q3 | producător | verificare finisaj |
+| Întăriri pt sarcini | dublă placare / traversă lemn la puncte fixe | detaliu D17 | PV fază ascunsă |
+
+**Regula pentru bare de sprijin și console:** în toate pozițiile în care se prevăd bare de sprijin, mâini curente, lavoare suspendate, WC-uri suspendate sau dulapuri grele pe pereți de gips-carton, se prevăd **traverse de rigidizare (profil sau lemn tratat) montate în structura peretelui înainte de placare**, poziția lor fiind marcată pe planul de trasare și consemnată în PV de lucrări ascunse (vezi și D16).
+
+### PTh-A.9.9 — Fișă tehnică FT-08: Tavane suspendate
+
+| Tip tavan | Aplicație | Caracteristică cheie | Standard | Recepție |
+|---|---|---|---|---|
+| Casetat mineral 600×600 | birouri, circulații | absorbție acustică αw ≥ 0,60 | SR EN 13964 / SR EN ISO 354 | αw din fișă |
+| Casetat igienic (băi, oficiu) | zone umede | rezistență umiditate 100 % RH, spălabil | SR EN 13964 | fișă |
+| Gips-carton continuu | săli comune, holuri principale | clasa reacție foc A2-s1,d0 | SR EN 520 | DoP |
+| Tavan fonoabsorbant sală mese/activități | săli mari | αw ≥ 0,70, perforat/lamelar | SR EN ISO 354 | fișă + calcul reverberație |
+| Structură suspendare | toate | portanță ≥ sarcina proprie + corpuri iluminat | SR EN 13964 | calcul tije |
+
+Corpurile de iluminat, difuzoarele, senzorii și grilele de ventilație integrate în tavan se poziționează conform **planului de tavan reflectat coordonat** (arhitectură + instalații), evitându-se conflictele. Trapele de vizitare se prevăd la fiecare vană tehnică ascunsă.
+
+---
+
+## PTh-A.10 — Detalii de execuție suplimentare (D11–D22)
+
+### D11 — Streașină / cornișă la terasă necirculabilă
+
+Terasa se termină perimetral cu **atic** din zidărie/beton, hidroizolația ridicându-se pe fața interioară a aticului pe min. **20 cm peste cota finită** a terasei, protejată la partea superioară de **glaf/copertină metalică** din tablă vopsită sau aluminiu, cu **picurător** care depășește fața tencuielii cu min. 4 cm. Îmbinarea copertinei se face cu suprapunere și eclisă, nu cap la cap. Sub copertină se prevede strat de separare. Panta copertinei spre interiorul terasei este de min. 5°.
+
+| Element | Cerință | Verificare |
+|---|---|---|
+| Ridicare hidroizolație pe atic | ≥ 20 cm peste finit | măsurare |
+| Fixare mecanică margine superioară | profil de strângere / dibluri | vizual |
+| Copertină atic | tablă min. 0,6 mm, picurător ≥ 4 cm | șubler |
+| Pantă copertină | ≥ 5° spre terasă | nivelă |
+| Rost dilatare copertină | la max. 3 m | verificare |
+
+### D12 — Luminator / tabacheră pe terasă
+
+Luminatorul (dacă e prevăzut peste casa scării sau atrium) se montează pe un **postament (acroteră) supraînălțat** min. 15 cm peste cota terasei finite, pentru a proteja racordul hidroizolației. Hidroizolația se ridică pe postament și se prinde mecanic sub rama luminatorului. Racordul ramă-hidroizolație se etanșează cu bandă și mastic poliuretanic. Luminatorul are geam securizat-laminat și, dacă e prevăzut ca trapă de desfumare, mecanism de deschidere avizat.
+
+### D13 — Compartimentare gips-carton pe structură metalică
+
+Perete despărțitor tip pe structură metalică simplă/dublă:
+- Profile UW fixate la pardoseală și planșeu cu **bandă de etanșare acustică** dedesubt și dibluri la max. 60 cm.
+- Montanți CW la interax 60 cm (40 cm în zone cu încărcări), introduși în UW cu joc de dilatare la partea superioară (min. 10 mm sub planșeu pentru preluarea deformațiilor).
+- Vată minerală în toată cavitatea.
+- Placare pe fiecare față (simplă/dublă în funcție de cerința acustică/foc), rosturi decalate între straturi.
+- La pereții care nu ajung la planșeul structural, se prevede prelungire până la planșeu în zonele cu cerință acustică/foc.
+
+### D14 — Protecție colț și lambriu antișoc pe circulații
+
+Pentru protejarea pereților la trafic cu cărucioare, scaune rulante și paturi mobile:
+
+| Element | Poziție | Specificație |
+|---|---|---|
+| Protecție colț (colțar) | toate colțurile ieșinde circulații | profil PVC/inox, înălțime ≥ 150 cm, colț rotunjit |
+| Lambriu antișoc | pereți circulații, săli mese | placă PVC/HPL rezistentă la impact, h = 20–140 cm |
+| Mână de protecție paturi | circulații pat-brancard | bară de protecție la h ≈ 90 cm, distanță 5 cm de perete |
+| Protecție uși | cant + placă antișoc | inox/PVC pe zona de lovire cărucior |
+
+Toate profilele au **muchii rotunjite** (rază ≥ 3 mm), fără margini tăioase, montate cu adeziv + fixare mecanică ascunsă.
+
+### D15 — Glaf interior și exterior la ferestre
+
+- **Glaf exterior:** din aluminiu extrudat sau tablă vopsită, pantă ≥ 8° spre exterior, picurător cu întoarcere ≥ 2,5 cm, capete laterale cu bavete ridicate sub tencuială pentru dirijarea apei, chit elastic la racordul cu rama.
+- **Glaf interior:** PVC/piatră compozit/MDF hidrofug, tăiat drept, cu racord etanșat la rama tâmplăriei, ieșind în consolă max. 3–4 cm față de tencuială, cu muchie teșită/rotunjită.
+
+### D16 — Prag duș fără denivelare (walk-in) la baie asistată
+
+Zona de duș se realizează **la nivel cu pardoseala** (fără cădiță, fără prag), cu:
+- Pantă de scurgere 1,5–2 % spre sifonul/rigola de pardoseală.
+- Hidroizolație lichidă continuă pe toată suprafața băii, ridicată pe pereți min. 200 cm în dreptul dușului.
+- Rigolă liniară sau sifon de pardoseală cu grătar antiderapant la același nivel cu gresia.
+- Delimitarea zonei umede cu perdea/paravan mobil (nu prag).
+- Scaun de duș rabatabil ancorat în traversă de rigidizare.
+
+### D17 — Montaj bare de sprijin (detaliu ancoraj)
+
+Barele de sprijin (fixe și rabatabile) la WC-uri și dușuri se montează exclusiv în **suport rigidizat**:
+
+| Situație suport | Soluție ancoraj | Sarcină minimă verificare |
+|---|---|---|
+| Perete zidărie/beton | dibluri chimice / mecanice metalice | ≥ 100 kg sarcină verticală statică |
+| Perete gips-carton | traversă lemn tratat/profil montat în structură ÎNAINTE de placare | ≥ 100 kg |
+| Bară rabatabilă WC | placă de bază fixată în min. 4 puncte în traversă | test încărcare 100 kg |
+
+Poziționare: bară orizontală la h = 70–80 cm; bară verticală/oblică la duș; distanța axului WC față de perete cu bară = 40 cm; înălțime montaj conform NP 051. **Fiecare punct de ancoraj se probează la 100 kg** și se consemnează în PV.
+
+### D18 — Scafă tavan (rost umbră / cornișă interioară)
+
+La racordul tavan gips-carton cu peretele se prevede, în încăperile reprezentative, **rost de umbră** de 10–15 mm (profil de separare) sau **scafă cu iluminat indirect** (LED în cornișă). Rostul de umbră preia mișcările diferențiale și maschează micro-fisurile de racord. Profilul de separare se montează înainte de șpăcluire.
+
+### D19 — Rost pardoseală între materiale diferite
+
+La trecerea între două finisaje de pardoseală (gresie ↔ PVC, gresie ↔ covor):
+- Profil de trecere din aluminiu/inox, **fără denivelare** (nivel egal ambele fețe) — cerință de accesibilitate.
+- Dacă apare diferență de grosime, se egalizează suportul cu șapă, nu prin prag.
+- Rostul de dilatare al șapei se preia prin profil elastic, aliniat cu rostul finisajului.
+
+### D20 — Trecere instalații prin pereți REI (etanșare foc)
+
+Toate străpungerile de conducte, cabluri și tubulaturi prin pereți/planșee cu rol de rezistență la foc se **resigilează la clasa REI a elementului** cu sisteme certificate:
+
+| Tip străpungere | Soluție etanșare foc | Standard |
+|---|---|---|
+| Cabluri electrice | mortar/pernă/mastic intumescent | SR EN 1366-3 |
+| Conducte metalice | manșon + mastic | SR EN 1366-3 |
+| Conducte plastic (PP/PVC) | colier intumescent (se strangulează la foc) | SR EN 1366-3 |
+| Tubulatură ventilație | clapetă antifoc | SR EN 1366-2 |
+
+Fiecare penetrație se etichetează cu plăcuță (sistem, clasă REI, dată, executant) și se consemnează în registrul de penetrații.
+
+### D21 — Parapet / balustradă terasă și scări
+
+| Element | Cerință | Standard |
+|---|---|---|
+| Înălțime parapet terasă/balcon | ≥ 100 cm (≥ 110 cm dacă h cădere > 12 m) | SR EN ISO 14122 / normativ |
+| Deschidere între elemente verticale | ≤ 10 cm (non-cățărabil) | siguranță |
+| Element intermediar orizontal | evitat (risc cățărare copii/dezorientați) | proiect |
+| Mână curentă scară | continuă, ambele părți | NP 051 |
+| Rezistență împingere orizontală | ≥ 0,8 kN/m (spații publice) | CR 0 / normativ acțiuni |
+
+### D22 — Mână curentă dublă pe circulații (detaliu prindere)
+
+Circulațiile principale și rampele se echipează cu **mână curentă dublă**, la două înălțimi:
+
+| Parametru | Valoare |
+|---|---|
+| Înălțime mână curentă superioară | 90 cm |
+| Înălțime mână curentă inferioară | 70–75 cm |
+| Distanță față de perete (spațiu prindere) | 4–5 cm |
+| Diametru mână curentă (prindere ușoară) | 4,0–4,5 cm |
+| Prelungire capete (orizontală) | ≥ 30 cm dincolo de capătul rampei |
+| Terminații | întoarse spre perete/jos (fără capăt liber) |
+| Prindere console | interax ≤ 90 cm, ancorate în suport rigidizat |
+| Contrast cromatic față de perete | ≥ 30 puncte LRV |
+| Material | lemn/PVC cald la atingere (nu metal rece), fără muchii |
+
+---
+
+## PTh-A.11 — Confort acustic complet (C125)
+
+### PTh-A.11.1 — Cadru și indicatori
+
+Proiectarea acustică respectă normativul C125 privind proiectarea și execuția măsurilor de izolare fonică. Se urmăresc trei categorii de performanță:
+- **Izolarea la zgomot aerian** între încăperi și față de exterior — indicator Rw (indice de reducere a zgomotului aerian, dB), respectiv DnT,w pe teren.
+- **Zgomotul de impact** transmis prin planșee — indicator L'nT,w (nivel de zgomot de impact normalizat, dB) — valoare cât mai mică.
+- **Timpul de reverberație** în încăperile comune — indicator T (s) — controlul ecoului și al inteligibilității vorbirii.
+
+Specificul clădirii (vârstnici, mulți cu deficiențe de auz) impune **exigențe superioare de inteligibilitate a vorbirii** și de reducere a zgomotului de fond.
+
+### PTh-A.11.2 — Tabel cerințe Rw între spații + soluție + verificare
+
+| Spații adiacente | Rw impus (dB) | Soluție constructivă | Verificare |
+|---|---|---|---|
+| Cameră odihnă ↔ cameră odihnă | ≥ 52 | perete GK dublu placat + vată 2×50 mm | măsurare in-situ prin sondaj |
+| Cameră odihnă ↔ circulație | ≥ 45 (ușă ≥ 30) | perete GK + ușă cu garnituri | test ușă |
+| Cameră odihnă ↔ grup sanitar | ≥ 50 | perete GK hidrofug dublu + vată | sondaj |
+| Sală activități ↔ cameră odihnă | ≥ 55 | perete GK dublu + montanți dubli decuplați | sondaj |
+| Cabinet medical/consiliere ↔ oricare | ≥ 52 (confidențialitate) | perete GK dublu + ușă acustică | test |
+| Oficiu/bucătărie ↔ sală mese | ≥ 48 | perete GK + tratare tubulaturi | sondaj |
+| Spații interioare ↔ exterior (fațadă) | ≥ 30 (ansamblu) | tâmplărie clasa acustică + perete | din DoP tâmplărie |
+| Centrală tehnică ↔ spații ocupate | ≥ 55 + antivibratil | perete greu + suporturi elastice utilaje | sondaj + vizual |
+
+Toate ușile pe circuit acustic sensibil (cabinete, camere) se prevăd cu **garnituri perimetrale și prag automat cobelitor** (pragul cade la închidere, se ridică la deschidere — fără prag fizic permanent, compatibil cu accesibilitatea).
+
+### PTh-A.11.3 — Zgomot de impact la planșee
+
+| Element | L'nT,w impus (dB) | Soluție | Verificare |
+|---|---|---|---|
+| Planșeu peste parter (sub camere/săli) | ≤ 58 | șapă flotantă pe strat elastic (dală plutitoare) | măsurare sondaj |
+| Strat antiimpact sub șapă | grosime ≥ 20 mm, dinamică redusă | membrană/vată dedicată impact | verificare montaj |
+| Ridicare strat elastic pe perete | fâșie perimetrală ≥ 8 cm (decuplare) | bandă marginală | vizual înainte de șapă |
+| Pardoseli PVC | strat uzură + suport elastic contribuie | din fișă produs | fișă |
+
+Regula cheie a **dalei plutitoare**: șapa nu are contact rigid cu pereții și cu placa (este „plutită" pe stratul elastic și separată perimetral cu bandă marginală, tăiată la nivelul finisajului). Orice punte rigidă anulează performanța.
+
+### PTh-A.11.4 — Timp de reverberație săli comune
+
+| Încăpere | Volum orientativ | T impus (s, 500–1000 Hz) | Tratament acustic |
+|---|---|---|---|
+| Sală de mese / activități comune | mare | ≤ 0,8 | tavan fonoabsorbant αw ≥ 0,70 + panouri perete |
+| Sală multifuncțională / evenimente | mare | ≤ 1,0 | tavan + panouri + draperii |
+| Circulații / holuri | mediu | ≤ 1,2 | tavan casetat mineral αw ≥ 0,60 |
+| Cabinet medical / consiliere | mic | ≤ 0,6 | tavan absorbant + covor PVC |
+| Sală de kinetoterapie | mediu | ≤ 1,0 | tratament perete + tavan |
+
+Timpul de reverberație scăzut în sălile comune este **esențial pentru inteligibilitatea vorbirii** la persoanele cu deficiențe de auz și pentru reducerea oboselii acustice. Se preferă tratamente combinate tavan + perete, cu materiale spălabile/igienice în zonele cu cerințe sanitare.
+
+---
+
+## PTh-A.12 — Plan de trasare (cote, axe, repere)
+
+### PTh-A.12.1 — Principii de trasare
+
+Trasarea lucrării pleacă de la **sistemul de axe** al proiectului de structură (axe transversale numerotate 1, 2, 3… și axe longitudinale literate A, B, C…), materializat pe teren prin **bornele de trasare** și **reperul de cotă (RC)** legat de sistemul național de referință altimetric (Marea Neagră 1975) și planimetric (Stereo 70).
+
+| Element de trasare | Definire | Toleranță |
+|---|---|---|
+| Reper de nivel ±0,00 | cota pardoseală finită parter, legată de RN local | referință absolută |
+| Axe structurale | intersecții stâlpi/pereți portanți | ± 5 mm poziție ax |
+| Trasaj pereți neportanți | față finită perete | ± 5 mm |
+| Trasaj goluri tâmplărie | ax + lățime lumină | ± 5 mm |
+| Cote de nivel intermediare | pardoseli finite pe niveluri | ± 3 mm față de teoretic |
+| Verticalitate | fir cu plumb / laser | ≤ H/500 |
+
+### PTh-A.12.2 — Materializarea și predarea trasării
+
+- Trasarea se materializează cu **capre de trasare** (banc de trasare) în afara amprizei săpăturii, pe care se însemnează axele cu cuie și sârmă.
+- Cota ±0,00 se marchează pe un reper stabil (element de construcție existent / borna fixă) și se **transferă la fiecare nivel** cu nivela laser rotativ, marcându-se linia de referință „metru de control" (linie orizontală la 1,00 m peste pardoseala finită) pe pereții fiecărei încăperi — folosită de toate meseriile pentru montaje la cotă.
+- Trasarea se predă executantului prin **proces-verbal de predare-primire amplasament și reper de trasare**, semnat de proiectant, executant și beneficiar.
+- Se verifică diagonalele fiecărui compartiment (egalitatea diagonalelor confirmă unghiurile drepte) înainte de execuția pereților.
+
+---
+
+## PTh-A.13 — Breviar suprafețe as-built + bilanț final
+
+### PTh-A.13.1 — Metodologie de măsurare
+
+Suprafețele as-built se măsoară **la fața finită** a pereților, după aplicarea finisajelor, cu telemetru laser, și se compară cu suprafețele din proiect. Se calculează suprafața utilă (SU), suprafața construită (SC) și suprafața construită desfășurată (SCD). Abaterile față de proiect se documentează în cartea tehnică.
+
+### PTh-A.13.2 — Breviar suprafețe utile (orientativ, se completează la măsurare)
+
+| Nivel | Grupă funcțională | SU proiect (mp) | SU as-built (mp) | Abatere (%) |
+|---|---|---|---|---|
+| Parter | Acces/recepție/așteptare | 55 | _completare_ | _completare_ |
+| Parter | Sală de mese + oficiu | 95 | _completare_ | _completare_ |
+| Parter | Săli activități comune | 110 | _completare_ | _completare_ |
+| Parter | Cabinet medical + consiliere | 35 | _completare_ | _completare_ |
+| Parter | Grupuri sanitare + baie asistată | 40 | _completare_ | _completare_ |
+| Parter | Circulații + casa scării/lift | 60 | _completare_ | _completare_ |
+| Etaj 1 | Camere odihnă de zi | 130 | _completare_ | _completare_ |
+| Etaj 1 | Sală kinetoterapie | 55 | _completare_ | _completare_ |
+| Etaj 1 | Grupuri sanitare + băi asistate | 40 | _completare_ | _completare_ |
+| Etaj 1 | Administrativ / birouri personal | 45 | _completare_ | _completare_ |
+| Etaj 1 | Circulații + casa scării/lift | 60 | _completare_ | _completare_ |
+
+### PTh-A.13.3 — Bilanț final de suprafețe
+
+| Indicator | Valoare proiect (orientativ) | Observație |
+|---|---|---|
+| Suprafață construită (SC) | ~470 mp | amprentă la sol |
+| Suprafață construită desfășurată (SCD) | ~900 mp | P+1 |
+| Suprafață utilă totală (SU) | ~725 mp | fața finită |
+| Raport SU/SCD | ~0,80 | eficiență plan |
+| Suprafață circulații/tehnic | ~180 mp | ~20 % din SCD |
+| Nr. locuri beneficiari (capacitate de zi) | conform temă | verificare arii min./persoană |
+
+Bilanțul final confirmă respectarea **ariilor minime pe funcțiuni** cerute de normativele pentru servicii sociale destinate persoanelor vârstnice și a coeficienților urbanistici aprobați (POT/CUT) prin autorizația de construire.
+
+---
+
+## PTh-A.14 — Sistem de semnalizare și orientare (wayfinding)
+
+### PTh-A.14.1 — Principii de orientare pentru vârstnici
+
+Sistemul de wayfinding este proiectat pentru **maximă lizibilitate și orientare intuitivă**, adaptat unor utilizatori cu acuitate vizuală redusă, posibile deficiențe cognitive ușoare și mobilitate limitată. Principii:
+- **Pictograme mari, standardizate, universale** dublate de text.
+- **Contrast puternic** figură-fond (text închis pe fond deschis sau invers), evitând combinațiile roșu-verde (daltonism).
+- **Cod cromatic pe niveluri/zone** (fiecare grupă funcțională / nivel are o culoare de identificare consecventă).
+- **Ierarhie clară**: orientare (unde sunt / unde merg) → direcționare (săgeți) → identificare (numele ușii) → reglementare (info/interdicții).
+- **Redundanță senzorială**: vizual + tactil (Braille + relief) +, unde e cazul, sonor.
+
+### PTh-A.14.2 — Specificații dimensionale plăci
+
+Înălțimea caracterelor se dimensionează în funcție de distanța de citire (regula orientativă: **min. ~2,5 cm înălțime literă la fiecare 10 m distanță de citire**).
+
+| Tip semnalizare | Distanță citire | Înălțime literă (mm) | Poziție montaj |
+|---|---|---|---|
+| Panou orientare general (la intrare) | 4–6 m | ≥ 40 | perete hol acces, ax privire |
+| Direcționare pe circulații (săgeți) | 4–8 m | ≥ 40–60 | suspendat / perete, h 200–220 cm |
+| Identificare ușă încăpere | 1–1,5 m (citire de aproape) | 15–25 | lângă ușă, latura clanței, h centru 140–160 cm |
+| Numerotare cameră (tactilă) | contact | relief ≥ 1 mm + Braille | lângă ușă, h 140–160 cm |
+| Semnalizare grupuri sanitare | 2–4 m | ≥ 25 + pictogramă | lângă ușă + pe ușă |
+| Semnalizare de urgență/evacuare | conform normă | pictogramă fotoluminiscentă | conform plan evacuare |
+
+### PTh-A.14.3 — Cerințe de contrast, culoare și material
+
+| Parametru | Cerință |
+|---|---|
+| Contrast text/fond | ≥ 70 % diferență de luminanță (LRV) |
+| Contrast placă/perete de montaj | ≥ 30 puncte LRV (placa să se distingă de perete) |
+| Font | fără serife (sans-serif), fără litere doar-majuscule pe texte lungi |
+| Finisaj suprafață | mat, antireflex (fără luciu care produce voal) |
+| Culori interzise pe informație critică | combinații roșu/verde izolate |
+| Material placă | rigid, spălabil, rezistent la dezinfectanți; muchii rotunjite |
+| Braille + relief | la identificarea încăperilor și la mâna curentă (capete niveluri) |
+| Iluminare panou | fără umbre proprii, fără reflex; iluminat local unde e slab |
+
+### PTh-A.14.4 — Tipuri de semne și conținut
+
+| Cod | Tip semn | Conținut | Amplasare |
+|---|---|---|---|
+| W-01 | Panou orientare (directory) | plan simplificat nivel + legendă culori | hol acces, lângă recepție |
+| W-02 | Săgeți direcționale | pictogramă + text + săgeată | intersecții circulații |
+| W-03 | Identificare încăpere | nr. + denumire + pictogramă + Braille | lângă fiecare ușă |
+| W-04 | Semn grup sanitar | pictogramă gen + accesibil + Braille | la fiecare grup sanitar |
+| W-05 | Identificare nivel | „Parter" / „Etaj 1" + culoare nivel | pe palierul scării și la lift |
+| W-06 | Info/reglementare | reguli, program, interdicții | recepție, intrare |
+| W-07 | Evacuare/urgență | trasee + ieșiri (fotoluminiscent) | conform plan de evacuare |
+| W-08 | Reper tactil circulație | marcaj tactil-vizual la schimbări de direcție | pardoseală circulații principale |
+
+### PTh-A.14.5 — Montaj și integrare
+
+- Semnele suspendate se ancorează în structura tavanului/planșeului (nu doar în tavanul casetat), la înălțime liberă de trecere ≥ 220 cm sub semn.
+- Semnele de ușă se montează **pe latura clanței**, nu pe canatul mobil (rămân vizibile cu ușa deschisă).
+- La lift: indicator de nivel sonor + vizual, butoane cu relief și Braille, la înălțime accesibilă (90–120 cm).
+- Codul cromatic pe niveluri se corelează cu finisajele (ex. o bandă de culoare pe circulație, plinta colorată) pentru orientare chiar și fără citirea textului.
+- Toate componentele wayfinding se centralizează într-un **plan de semnalizare** (planșă dedicată) cu poziția, codul și conținutul fiecărui semn, predat în cartea tehnică.
+
+### PTh-A.14.6 — Recepția sistemului de semnalizare
+
+Recepția verifică: montajul la cotele și pozițiile din planul de semnalizare, contrastul și lizibilitatea (verificare de la distanța de proiect), prezența și corectitudinea Braille/relief, coerența codului cromatic, funcționarea semnalizării fotoluminiscente de evacuare (test în întuneric), absența reflexiilor sub iluminatul real al clădirii. Neconformitățile se remediază înainte de recepția la terminarea lucrărilor.

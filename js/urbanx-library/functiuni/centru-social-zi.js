@@ -69,7 +69,7 @@
   var content = {}; var loaded = 0, total = Object.keys(FILES).length;
   var readyResolve; var readyP = new Promise(function (r) { readyResolve = r; });
   Object.keys(FILES).forEach(function (key) {
-    fetch(BASE + FILES[key] + '?v=20260704q').then(function (r) { return r.ok ? r.text() : ''; }).then(function (md) {
+    fetch(BASE + FILES[key] + '?v=20260704r').then(function (r) { return r.ok ? r.text() : ''; }).then(function (md) {
       content[key] = { md: md, html: mdToHtml(md), pages_est: Math.round(md.length / 3000) };
     }).catch(function () { content[key] = { md: '', html: '', pages_est: 0 }; }).then(function () {
       loaded++; if (loaded >= total) { G.UXLibrary['centru-social'] = content; readyResolve(content); console.log('[UXLibrary] centru-social încărcat: ' + Object.keys(content).map(function (k) { return k + '~' + content[k].pages_est + 'p'; }).join(', ')); }
