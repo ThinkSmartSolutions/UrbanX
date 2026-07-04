@@ -107,72 +107,102 @@
       '<text x="' + (x - 4) + '" y="' + ((y1 + y2) / 2) + '" text-anchor="middle" transform="rotate(-90 ' + (x - 4) + ',' + ((y1 + y2) / 2) + ')">' + txt + '</text></g>';
   }
 
-  // ── PLAN DE NIVEL ────────────────────────────────────────────────────────
+  // fit text la lățimea camerei (px) — trunchiere cu … pe font dat
+  function _fit(str, wpx, fs) { str = String(str || ''); var max = Math.max(1, Math.floor(wpx / (fs * 0.55))); return str.length > max ? str.slice(0, Math.max(1, max - 1)) + '…' : str; }
+  // lanț de cote cu segmente etichetate (mm→m) — orizontal
+  function dimChainH(xs, y, M, ox) {
+    var g = '<g stroke="#c0392b" stroke-width="0.5" font-family="Arial" font-size="6.5" fill="#c0392b">';
+    for (var i = 0; i < xs.length; i++) { var px = ox + xs[i] * M; g += '<line x1="' + px + '" y1="' + (y - 3) + '" x2="' + px + '" y2="' + (y + 3) + '"/>'; }
+    g += '<line x1="' + (ox + xs[0] * M) + '" y1="' + y + '" x2="' + (ox + xs[xs.length - 1] * M) + '" y2="' + y + '"/>';
+    for (var j = 0; j + 1 < xs.length; j++) { var mid = ox + (xs[j] + xs[j + 1]) / 2 * M, seg = (xs[j + 1] - xs[j]); if (seg > 0.05) g += '<text x="' + mid + '" y="' + (y - 4) + '" text-anchor="middle">' + seg.toFixed(2) + '</text>'; }
+    return g + '</g>';
+  }
+  function dimChainV(ys, x, M, oy) {
+    var g = '<g stroke="#c0392b" stroke-width="0.5" font-family="Arial" font-size="6.5" fill="#c0392b">';
+    for (var i = 0; i < ys.length; i++) { var py = oy + ys[i] * M; g += '<line x1="' + (x - 3) + '" y1="' + py + '" x2="' + (x + 3) + '" y2="' + py + '"/>'; }
+    g += '<line x1="' + x + '" y1="' + (oy + ys[0] * M) + '" x2="' + x + '" y2="' + (oy + ys[ys.length - 1] * M) + '"/>';
+    for (var j = 0; j + 1 < ys.length; j++) { var mid = oy + (ys[j] + ys[j + 1]) / 2 * M, seg = (ys[j + 1] - ys[j]); if (seg > 0.05) g += '<text x="' + (x - 4) + '" y="' + mid + '" text-anchor="middle" transform="rotate(-90 ' + (x - 4) + ',' + mid + ')">' + seg.toFixed(2) + '</text>'; }
+    return g + '</g>';
+  }
+  function _axisBub(cx, cy, label, r) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r || 8) + '" fill="#fff" stroke="#c0392b" stroke-width="0.8"/><text x="' + cx + '" y="' + (cy + 3) + '" text-anchor="middle" font-size="8" font-weight="bold" fill="#c0392b">' + label + '</text>'; }
+
+  // ── PLAN DE NIVEL (cotat, cu axe + poché) ────────────────────────────────
   function planNivel(lay, niv, meta) {
     var d = lay[niv]; if (!d) return '';
-    var PAD = 66, M = MPP;
+    var M = MPP, PADL = 108, PADT = 104, PADR = 60, PADB = 130;
     var pw = d.w * M, ph = d.h * M;
-    var W = pw + PAD * 2, H = ph + PAD * 2 + 96;
+    var W = pw + PADL + PADR, H = ph + PADT + PADB;
     var isP = (niv === 'P' || niv == null);
+    var ox = PADL, oy = PADT, ew = 0.30; // grosime perete exterior (m)
+    function X(mx) { return ox + mx * M; } function Y(my) { return oy + my * M; }
     var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial">';
     s += '<rect width="100%" height="100%" fill="#fff"/>';
-    s += '<text x="' + PAD + '" y="24" font-size="14" font-weight="bold" fill="#1F3864">' + esc((meta && meta.titlu) || 'PLAN NIVEL') + '</text>';
-    var ox = PAD, oy = 44;
-    function X(mx) { return ox + mx * M; } function Y(my) { return oy + my * M; }
-    // 1. anvelopa exterioară (perete gros)
-    s += '<rect x="' + (ox - 3) + '" y="' + (oy - 3) + '" width="' + (pw + 6) + '" height="' + (ph + 6) + '" fill="#fff" stroke="#111" stroke-width="' + (WALL + 2) + '"/>';
-    // 2. coridorul (spină de circulație) — fundal + etichetă
+    s += '<text x="' + ox + '" y="28" font-size="15" font-weight="bold" fill="#1F3864">' + esc((meta && meta.titlu) || 'PLAN NIVEL') + '</text>';
+    // ── PERETI EXTERIORI (POCHÉ) — bandă neagră perimetrală
+    s += '<rect x="' + X(-ew) + '" y="' + Y(-ew) + '" width="' + ((d.w + 2 * ew) * M) + '" height="' + ((d.h + 2 * ew) * M) + '" fill="#111"/>';
+    s += '<rect x="' + X(0) + '" y="' + Y(0) + '" width="' + pw + '" height="' + ph + '" fill="#fff"/>';
+    // ── coridor
     var co = d.corridor;
-    s += '<rect x="' + X(co.x) + '" y="' + Y(co.y) + '" width="' + (co.w * M) + '" height="' + (co.h * M) + '" fill="#f4f7fb" stroke="#bbb" stroke-width="0.6"/>';
-    s += '<text x="' + X(co.x + co.w / 2) + '" y="' + Y(co.y + co.h / 2) + '" text-anchor="middle" dominant-baseline="middle" font-size="8" fill="#8aa" letter-spacing="2">C O R I D O R</text>';
-    // 3. nucleul scară + lift
+    s += '<rect x="' + X(co.x) + '" y="' + Y(co.y) + '" width="' + (co.w * M) + '" height="' + (co.h * M) + '" fill="#f4f7fb"/>';
+    s += '<text x="' + X(co.x + co.w / 2) + '" y="' + Y(co.y + co.h / 2 + 0.15) + '" text-anchor="middle" font-size="8" fill="#8aa" letter-spacing="3">CORIDOR</text>';
+    // ── nucleu scară + lift (poché pereți)
     var cr = d.core;
-    s += '<rect x="' + X(cr.x) + '" y="' + Y(cr.y) + '" width="' + (cr.w * M) + '" height="' + (cr.h * M) + '" fill="#eef0f3" stroke="#111" stroke-width="' + WALL + '"/>';
-    // simbol scară (trepte) în jumătatea de sus a nucleului
-    var stX = X(cr.x + 0.5), stW = (cr.w - 1.0) * M, stY0 = Y(0.6), stY1 = Y(cr.h / 2 - 0.4), nT = 8;
-    for (var t = 0; t <= nT; t++) { var ty = stY0 + (stY1 - stY0) * t / nT; s += '<line x1="' + stX + '" y1="' + ty + '" x2="' + (stX + stW) + '" y2="' + ty + '" stroke="#888" stroke-width="0.7"/>'; }
-    s += '<line x1="' + (stX + stW / 2) + '" y1="' + stY0 + '" x2="' + (stX + stW / 2) + '" y2="' + stY1 + '" stroke="#888" stroke-width="0.7"/>';
-    // lift (pătrat cu X) în jumătatea de jos
+    s += '<rect x="' + X(cr.x) + '" y="' + Y(cr.y) + '" width="' + (cr.w * M) + '" height="' + (cr.h * M) + '" fill="#eef0f3" stroke="#111" stroke-width="2.4"/>';
+    var stX = X(cr.x + 0.5), stW = (cr.w - 1.0) * M, stY0 = Y(0.6), stY1 = Y(cr.h / 2 - 0.4), nT = 9;
+    for (var t = 0; t <= nT; t++) { var ty = stY0 + (stY1 - stY0) * t / nT; s += '<line x1="' + stX + '" y1="' + ty + '" x2="' + (stX + stW) + '" y2="' + ty + '" stroke="#888" stroke-width="0.6"/>'; }
+    s += '<line x1="' + (stX + stW / 2) + '" y1="' + stY0 + '" x2="' + (stX + stW / 2) + '" y2="' + stY1 + '" stroke="#888" stroke-width="0.6"/>';
     var lfY = Y(cr.h / 2 + 0.4), lfS = Math.min(stW, (cr.h / 2 - 1.2) * M);
-    s += '<rect x="' + stX + '" y="' + lfY + '" width="' + lfS + '" height="' + lfS + '" fill="none" stroke="#888" stroke-width="0.7"/>';
-    s += '<line x1="' + stX + '" y1="' + lfY + '" x2="' + (stX + lfS) + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.6"/><line x1="' + (stX + lfS) + '" y1="' + lfY + '" x2="' + stX + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.6"/>';
-    s += '<text x="' + X(cr.x + cr.w / 2) + '" y="' + Y(cr.h - 0.3) + '" text-anchor="middle" font-size="7" fill="#555">SCARĂ / LIFT</text>';
-    // 4. camerele + uși spre coridor + ferestre pe fațadă
-    d.rects.forEach(function (rc) {
+    s += '<rect x="' + stX + '" y="' + lfY + '" width="' + lfS + '" height="' + lfS + '" fill="none" stroke="#888" stroke-width="0.6"/>';
+    s += '<line x1="' + stX + '" y1="' + lfY + '" x2="' + (stX + lfS) + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.5"/><line x1="' + (stX + lfS) + '" y1="' + lfY + '" x2="' + stX + '" y2="' + (lfY + lfS) + '" stroke="#888" stroke-width="0.5"/>';
+    s += '<text x="' + X(cr.x + cr.w / 2) + '" y="' + Y(cr.h - 0.3) + '" text-anchor="middle" font-size="6.5" fill="#555">SCARĂ / LIFT</text>';
+    // ── camerele (pereți interiori dublu-strat) + uși + ferestre + numerotare
+    var iw = 0.12; // 1/2 grosime perete interior aparent
+    d.rects.forEach(function (rc, idx) {
       var x = X(rc.x), y = Y(rc.y), w = rc.w * M, h = rc.h * M;
       var col = CATCOL[rc.room.cat] || '#f3f4f6';
-      s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + col + '" stroke="#111" stroke-width="' + WALL + '"/>';
-      // UȘA — pe latura dinspre coridor (N: jos y+h ; S: sus y)
+      s += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + col + '" stroke="#111" stroke-width="' + (iw * 2 * M) + '"/>';
       var dw = 0.9 * M, dcx = x + w / 2 - dw / 2;
-      var doorY = (rc.band === 'N') ? (y + h) : y;
-      var sweep = (rc.band === 'N') ? 1 : 0;
-      s += '<line x1="' + dcx + '" y1="' + doorY + '" x2="' + (dcx + dw) + '" y2="' + doorY + '" stroke="#fff" stroke-width="' + (WALL + 1) + '"/>';
+      var doorY = (rc.band === 'N') ? (y + h) : y, sweep = (rc.band === 'N') ? 1 : 0;
+      s += '<line x1="' + dcx + '" y1="' + doorY + '" x2="' + (dcx + dw) + '" y2="' + doorY + '" stroke="#f4f7fb" stroke-width="' + (iw * 2 * M) + '"/>';
       s += '<path d="M ' + dcx + ' ' + doorY + ' A ' + dw + ' ' + dw + ' 0 0 ' + sweep + ' ' + (dcx + dw) + ' ' + doorY + '" fill="none" stroke="#9aa" stroke-width="0.6"/>';
-      // FEREASTRA — pe latura de fațadă (N: sus y ; S: jos y+h), dacă e cameră cu iluminat
       var cat = rc.room.cat || '';
       if (!/Sanitare|Tehnic|Depozit|Circula/.test(cat) && w > 2.0 * M) {
-        var winY = (rc.band === 'N') ? y : (y + h), fw = Math.min(w * 0.6, 2.2 * M), fx = x + w / 2 - fw / 2;
-        s += '<line x1="' + fx + '" y1="' + winY + '" x2="' + (fx + fw) + '" y2="' + winY + '" stroke="#3b7" stroke-width="2.2"/>';
+        var winY = (rc.band === 'N') ? y : (y + h), fw = Math.min(w * 0.55, 2.2 * M), fx = x + w / 2 - fw / 2;
+        s += '<line x1="' + fx + '" y1="' + winY + '" x2="' + (fx + fw) + '" y2="' + winY + '" stroke="#2a6" stroke-width="2.4"/>';
       }
-      // etichetă cameră
-      var nm = esc((rc.room.nume || '').length > 22 ? rc.room.nume.slice(0, 21) + '…' : rc.room.nume);
-      var cy = y + h / 2;
-      s += '<text x="' + (x + w / 2) + '" y="' + (cy - 3) + '" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#222">' + nm + '</text>';
-      s += '<text x="' + (x + w / 2) + '" y="' + (cy + 8) + '" text-anchor="middle" font-size="6.8" fill="#555">' + Math.round(rc.room.mp_unit || 0) + ' mp · ' + rc.w.toFixed(1) + '×' + d.Db.toFixed(1) + '</text>';
+      // numerotare + etichetă fit
+      var cod = (isP ? 'P' : (niv === 'S' ? 'S' : 'E')) + '.' + ('0' + (idx + 1)).slice(-2);
+      var cy = y + h / 2, fs = w < 60 ? 6 : 7;
+      s += '<text x="' + (x + w / 2) + '" y="' + (cy - 8) + '" text-anchor="middle" font-size="7" font-weight="bold" fill="#c0392b">' + cod + '</text>';
+      s += '<text x="' + (x + w / 2) + '" y="' + (cy + 2) + '" text-anchor="middle" font-size="' + fs + '" fill="#222">' + esc(_fit(rc.room.nume, w, fs)) + '</text>';
+      s += '<text x="' + (x + w / 2) + '" y="' + (cy + 12) + '" text-anchor="middle" font-size="6.5" fill="#555">' + Math.round(rc.room.mp_unit || 0) + ' mp</text>';
     });
-    // 5. acces principal (doar parter) — săgeată în coridor din dreptul nucleului
+    // ── acces principal (parter)
     if (isP) {
       var ay = Y(d.Db + d.Cw / 2);
-      s += '<text x="' + (ox - 6) + '" y="' + (ay - 6) + '" text-anchor="end" font-size="8" font-weight="bold" fill="#c0392b">ACCES ▶</text>';
-      s += '<line x1="' + (ox - 30) + '" y1="' + ay + '" x2="' + X(d.coreW) + '" y2="' + ay + '" stroke="#c0392b" stroke-width="1.4" stroke-dasharray="4 2"/>';
+      s += '<text x="' + (ox - 30) + '" y="' + (ay - 6) + '" text-anchor="start" font-size="8" font-weight="bold" fill="#c0392b">ACCES</text>';
+      s += '<line x1="' + (ox - 34) + '" y1="' + ay + '" x2="' + X(d.coreW) + '" y2="' + ay + '" stroke="#c0392b" stroke-width="1.4" stroke-dasharray="4 2"/>';
       s += '<polygon points="' + X(d.coreW) + ',' + ay + ' ' + (X(d.coreW) - 7) + ',' + (ay - 4) + ' ' + (X(d.coreW) - 7) + ',' + (ay + 4) + '" fill="#c0392b"/>';
     }
-    // 6. cote generale
-    s += dimH(ox, ox + pw, oy - 16, d.w.toFixed(1) + ' m');
-    s += dimV(oy, oy + ph, ox - 16, d.h.toFixed(1) + ' m');
-    s += nord(W - 42, 46);
-    s += '<text x="' + PAD + '" y="' + (oy + ph + 22) + '" font-size="8" fill="#888">Plan schematic parametric cu circulație (coridor + nucleu vertical). Geometria de detaliu (grilă structurală, cotare parțială) se definește de proiectant la faza P.Th.</text>';
-    s += cartus(meta, W - 360, oy + ph + 30, 340);
+    // ── AXE STRUCTURALE (verticale A,B,C… la limitele traveilor + orizontale 1,2,3…)
+    var xb = [0, d.coreW]; d.rects.forEach(function (rc) { if (rc.band === 'N') xb.push(rc.x + rc.w); }); xb.push(d.w);
+    xb = xb.filter(function (v, i, a) { return a.indexOf(a.find(function (u) { return Math.abs(u - v) < 0.05; })) === i; }).sort(function (a, b) { return a - b; });
+    var letters = 'ABCDEFGHIJKLMN';
+    var axTopY = oy - 30;
+    xb.forEach(function (vx, i) { var px = X(vx); s += '<line x1="' + px + '" y1="' + (axTopY + 8) + '" x2="' + px + '" y2="' + Y(d.h) + '" stroke="#e39' + '0a0" stroke-width="0.4" stroke-dasharray="6 3"/>'; s += _axisBub(px, axTopY, letters[i] || ('' + (i + 1)), 8); });
+    var yb = [0, d.Db, d.Db + d.Cw, d.h]; var axLeftX = ox - 34;
+    yb.forEach(function (vy, i) { var py = Y(vy); s += '<line x1="' + (axLeftX + 8) + '" y1="' + py + '" x2="' + X(d.w) + '" y2="' + py + '" stroke="#e390a0" stroke-width="0.4" stroke-dasharray="6 3"/>'; s += _axisBub(axLeftX, py, '' + (i + 1), 8); });
+    // ── LANȚURI DE COTE (travei sus + adâncimi stânga + total)
+    s += dimChainH(xb, oy - 52, M, ox);
+    s += dimChainH([0, d.w], oy - 66, M, ox);
+    s += dimChainV(yb, ox - 56, M, oy);
+    s += dimChainV([0, d.h], ox - 70, M, oy);
+    // nord + legendă + notă + cartuș
+    s += nord(W - 40, 40);
+    var ly = oy + ph + 20;
+    s += '<text x="' + ox + '" y="' + ly + '" font-size="7.5" fill="#666">Legendă: ▬ perete · ▭ gol ușă (arc deschidere) · <tspan fill="#2a6">▬</tspan> fereastră · axe structurale A/B/C · 1/2/3 · cote în metri.</text>';
+    s += '<text x="' + ox + '" y="' + (ly + 13) + '" font-size="7.5" fill="#888">Plan preliminar parametric (dispunere pe coridor + nucleu). Geometria finală, grila structurală exactă, cotarea de detaliu, tâmplăria și dotările se definesc de arhitect la faza P.Th.</text>';
+    s += cartus(meta, W - 360, ly + 24, 340);
     s += '</svg>';
     return s;
   }
