@@ -144,6 +144,34 @@
       var note = '<p><b>Antemăsurători orientative</b>, generate parametric din datele proiectului (Sc=' + (sc || '—') + ' mp, Sd=' + (sd || '—') + ' mp). Cantitățile exacte se extrag din planșele PTh și din breviarul de calcul; listele de mai jos fundamentează devizul pe obiect și oferta de execuție. Prețurile unitare se preiau din baza de prețuri a platformei (deviz HG 907).</p>';
       return { cat: 'Caiete de sarcini', file: 'Liste_cantitati_antemasuratori.doc', html: docHtml(_meta(D, 'LISTE DE CANTITĂȚI (ANTEMĂSURĂTORI)', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: 'Antemăsurători pe categorii de lucrări', html: note + tbl(rows, ['Categorie de lucrări', 'U.M.', 'Cantitate', 'Bază de estimare']) }]) };
     },
+    'Borderou piese scrise și desenate': function (D, v) {
+      var niv = Math.max(1, +D.niv_supraterane || 1);
+      var hasSub = (+D.niv_subterane || 0) > 0 || /subsol|demisol|s\s*\+\s*p|d\s*\+\s*p/i.test(D.regim || '');
+      var isPth = (D.faza === 'PTh' || D.faza === 'ambele' || D.faza === 'PTh+DE');
+      var i = 0, PD = []; function ad(t, sc) { PD.push(['A.' + ('0' + (i++)).slice(-2), t, sc]); }
+      ad('Plan de încadrare în zonă', '1:2000 / 1:5000');
+      ad('Plan de situație', '1:500');
+      if (hasSub) ad('Plan subsol / demisol', '1:50');
+      ad('Plan parter (cota ±0,00)', '1:50');
+      for (var k = 1; k < niv; k++) ad('Plan etaj ' + k, '1:50');
+      ad('Plan învelitoare / terasă', '1:100');
+      ad('Secțiune transversală', '1:50');
+      ad('Secțiune longitudinală', '1:50');
+      ad('Fațada principală', '1:50');
+      ad('Fațada posterioară', '1:50');
+      ad('Fațada laterală stânga', '1:50');
+      ad('Fațada laterală dreapta', '1:50');
+      var PR = []; var j = 0;
+      if (isPth) { PR.push(['R.01', 'Plan de fundații', '1:50']); PR.push(['R.02', 'Detalii fundații', '1:20']); PR.push(['R.03', 'Plan cofraj + armare planșee', '1:50']); PR.push(['IS.01', 'Scheme instalații sanitare', '1:100']); PR.push(['IT.01', 'Scheme instalații termice / HVAC', '1:100']); PR.push(['IE.01', 'Scheme instalații electrice + monofilară', '1:100']); }
+      var scrise = Object.keys(D._docs || {}).filter(function (dc) { return D._docs[dc]; });
+      var secs = [
+        { h: 'A. Piese scrise', html: tbl(scrise.map(function (t, n) { return ['' + (n + 1), t]; }), ['Nr.', 'Piesă scrisă']) || '<p>Selectați documentele în secțiunea Documente.</p>' },
+        { h: 'B. Piese desenate — arhitectură', html: tbl(PD.map(function (r) { return r; }), ['Cod', 'Denumire planșă', 'Scara']) },
+      ];
+      if (PR.length) secs.push({ h: 'C. Piese desenate — rezistență și instalații (PTh)', html: tbl(PR, ['Cod', 'Denumire planșă', 'Scara']) });
+      secs.push({ h: 'D. Notă', html: '<p>Lista pieselor desenate este generată automat din regimul de înălțime (' + esc(D.regim || ('P+' + (niv - 1))) + ') și faza de proiectare. Fiecare planșă poartă cartuș conform Legii 50/1991, Anexa 1 (firmă/proiectant, nr. autorizație, titlu, scară, dată, semnături). Planurile se elaborează/finalizează de proiectant; planul funcțional schematic se poate genera din modelul de spații (SVG/PDF/DXF).</p>' });
+      return { cat: 'Piese Administrative', file: 'Borderou_piese.doc', html: docHtml(_meta(D, 'BORDEROU / OPIS PIESE', 'piese scrise și desenate — Legea 50/1991 Anexa 1'), secs) };
+    },
     'Program funcțional (breviar spații)': function (D, v) {
       var sp = D._spatii || [];
       if (!sp.length) return { cat: 'Memorii Tehnice', file: 'Program_functional.doc', html: docHtml(_meta(D, 'PROGRAM FUNCȚIONAL', 'breviar de spații'), [{ h: 'Program funcțional', html: '<p>Programul funcțional nu a fost generat. Deschideți „🧩 Program funcțional", introduceți parametrii de program (capacitate), generați și aplicați la proiect — spațiile vor fi listate aici automat, cu proveniența și temeiul normativ.</p>' }]) };
