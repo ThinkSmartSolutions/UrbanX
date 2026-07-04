@@ -43,7 +43,7 @@
   function docBlob(html) { return new Blob(['﻿', html], { type: 'application/msword' }); }
 
   // ── Conținut per document (real, din datele engine) ───────────────────────
-  var FAZA_LBL = { DTAC: 'D.T.A.C.', PTh: 'P.Th. + D.E.', 'PTh+DE': 'P.Th. + D.E.', ambele: 'D.T.A.C. + P.Th. (D.E.)' };
+  var FAZA_LBL = { DTAC: 'D.T.A.C. (extras pentru autorizare)', PTh: 'P.Th. + D.E. (proiect complet de execuție)', 'PTh+DE': 'P.Th. + D.E. (proiect complet de execuție)' };
   function _meta(D, titlu, subtitlu) {
     return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: FAZA_LBL[D.faza] || D.faza || 'D.T.A.C.' };
   }
@@ -290,7 +290,7 @@
 
   var PTH_ONLY = ['Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
   function _build(D, v) {
-    var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT' || D.faza === 'ambele');
+    var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
     var selected = Object.keys(D._docs || {}).filter(function (k) { return D._docs[k] !== false && DOC_BUILDERS[k]; });
     if (!selected.length) selected = Object.keys(DOC_BUILDERS);
     // Caietele de sarcini + antemăsurătorile aparțin fazei PTh (Legea 50 Anexa 1: DTAC nu le conține)

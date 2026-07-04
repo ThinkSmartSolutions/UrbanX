@@ -10,7 +10,7 @@
   var D = {}; // starea formularului
   var AVIZATORI = ['ISU', 'DSP', 'APM', 'Apele Române', 'ANIF', 'Distribuitor gaze', 'Distribuitor electric', 'Transelectrica', 'Operator apă-canal', 'CFR', 'CNAIR', 'Consiliul Județean', 'Primăria (PUG/PUZ)', 'Patrimoniu/Cultură', 'ROMATSA', 'SRI', 'MApN', 'Orange', 'Vodafone', 'Digi/RCS-RDS', 'Telekom'];
   var DOCUMENTE = ['Borderou piese scrise și desenate', 'Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Memorii avizatori', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Memoriu DTOE (organizare execuție)', 'Clădire mixtă — separări funcțiuni (P118)', 'DALI — construcție existentă / intervenție', 'Scoatere teren din circuitul agricol (Ord. 83/2018)', 'Memoriu tehnic aviz de mediu (Ord. 863/2002)', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
-  var FAZE = [['DTAC', 'D.T.A.C. — autorizare construire'], ['PTh', 'P.Th. + D.E. — proiect tehnic de execuție'], ['ambele', 'Ambele (D.T.A.C. + P.Th.) — din aceleași date']];
+  var FAZE = [['DTAC', 'D.T.A.C. — extras pentru autorizare'], ['PTh', 'P.Th. + D.E. — proiect complet de execuție (include extrasul DTAC)']];
   var STRUCT = { metalica: 'Metalică (Eurocod 3)', beton: 'Beton armat monolit', prefabricat: 'Beton prefabricat', lemn: 'Lemn CLT/glulam', zidarie: 'Zidărie portantă', lsf: 'LSF (structură ușoară)', mixt: 'Mixt metal-beton' };
   var INCALZIRE = { ct_gaz: 'CT gaz', pompa: 'Pompă de căldură', vrf: 'VRF', termoficare: 'Termoficare', electric: 'Electric', radiant: 'Radiant infraroșu' };
   var APA = { retea: 'Rețea publică', put: 'Puț forat', rezervor: 'Rezervor propriu' };
@@ -123,7 +123,7 @@
       // documente
       var sd = el('div', { style: 'margin-bottom:16px' }); sd.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">15</span>Documente de generat'));
       var gd = el('div', { style: 'display:grid;grid-template-columns:repeat(2,1fr);gap:5px' }); D._docs = D._docs || {};
-      var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT' || D.faza === 'ambele');
+      var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
       var pthOnly = { 'Caiet de sarcini arhitectură (PTh)': 1, 'Caiet de sarcini rezistență (PTh)': 1, 'Caiet de sarcini instalații (PTh)': 1, 'Liste de cantități / antemăsurători (PTh)': 1 };
       DOCUMENTE.forEach(function (dc) { if (pthOnly[dc] && !isPth) { D._docs[dc] = false; return; } var lab = el('label', { style: 'font-size:11px;color:' + (pthOnly[dc] ? '#a78bfa' : '#cbd5e1') + ';display:flex;gap:5px;align-items:center;cursor:pointer' }); var cb = el('input', { type: 'checkbox' }); if (D._docs[dc] !== false) { cb.setAttribute('checked', 'checked'); D._docs[dc] = true; } cb.onchange = function () { D._docs[dc] = cb.checked; }; lab.appendChild(cb); lab.appendChild(el('span', null, dc)); gd.appendChild(lab); }); sd.appendChild(gd); form.appendChild(sd);
       recalc();
