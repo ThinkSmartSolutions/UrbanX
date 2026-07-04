@@ -1,0 +1,26 @@
+{
+  "_meta": { "sursa": "UrbanX — prețuri orientative editabile", "moneda": "RON", "curs_eur": 5.05, "cota_tva": 0.21, "actualizat": "2026-07", "nota": "Prețuri fără TVA. Editabile din UI. Cost/mp = construcții+instalații (cap. 4.1)." },
+  "cost_mp_functiune": {
+    "hala-industriala": 1800, "locuinta-individuala": 3200, "bloc-locuinte": 3400, "birouri": 3800,
+    "spatiu-comercial": 3000, "mall": 3600, "scoala": 3600, "gradinita": 3800, "medical": 4800,
+    "hotelier": 4200, "centru-social": 3600, "parc-fotovoltaic": 400, "bess": 2500, "skid": 2200,
+    "statie-transformare": 3000, "infrastructura-drum": 900, "pod": 5000, "parcare": 2200, "sport": 3200,
+    "agricol": 1400, "cladire-mixta": 3600, "_default": 3000
+  },
+  "coeficienti": {
+    "amenajare_teren_pct": 0.015,
+    "utilitati_pct": 0.03,
+    "proiectare_pct": 0.03,
+    "studii_pct": 0.006,
+    "avize_pct": 0.004,
+    "asistenta_dirigentie_pct": 0.01,
+    "org_santier_pct": 0.015,
+    "isc_calitate_pct": 0.005,
+    "isc_urbanism_pct": 0.001,
+    "csc_pct": 0.005,
+    "diverse_neprevazute_pct": 0.07,
+    "publicitate_pct": 0.001,
+    "probe_pct": 0.003,
+    "marja_buget_pct": 0.25
+  }
+}
