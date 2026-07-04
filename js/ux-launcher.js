@@ -89,7 +89,7 @@
     { g: G9, ico: '🗺', l: 'Studiu de amplasament & context teritorial', k: 'amplasament context teritorial', run: call('generateStudiuAmplasament'), info: 'amplasament' },
     { g: G9, ico: '☀', l: 'Studiu de însorire', k: 'insorire solar', run: call('generateSolarStudy'), info: 'insorire' },
     { g: G9, ico: '🌑', l: 'Studiu umbre & obstrucție', k: 'umbre shadow obstructie', run: call('generateShadowStudy'), info: 'umbre' },
-    { g: G9, ico: '🔥', l: 'Studiu siguranță foc (ISU)', k: 'isu foc incendiu ssf', run: call('generateSSF'), info: 'isu' },
+    { g: G9, ico: '🔥', l: 'Scenariu securitate la incendiu (SSI · aviz ISU)', k: 'isu foc incendiu ssi ssf scenariu securitate ord 129 aviz', run: call('generateSSI'), info: 'isu' },
     { g: G9, ico: '🪨', l: 'Pre-studiu geotehnic', k: 'geotehnic foraje', run: call('generateGeotehnicalStudy'), info: 'geotehnic' },
     { g: G9, ico: '✈', l: 'Studiu AACR (aviz aeroport)', k: 'aacr aeroport romatsa', run: call('generateAACR'), info: 'aacr' },
     { g: G9, ico: '🌿', l: 'Studiu impact mediu (EIM)', k: 'mediu eim environmental', run: call('generateEnvironmentalImpact'), info: 'eim' },

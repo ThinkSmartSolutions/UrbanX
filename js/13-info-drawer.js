@@ -1184,11 +1184,11 @@ const RAPORT_INFO = {
     nu: ['Nu există excepții — recomandat pentru orice investiție imobiliară indiferent de dimensiune', 'Nu înlocuiește studiile tehnice de specialitate individuale obligatorii prin lege', 'Valorile sunt orientative — verificarea obligatorie la ANCPI, Primărie și operatori utilități'],
   },
   isu: {
-    ico: '🔥', label: 'Studiu de Siguranță la Foc (ISU)',
-    badge: 'obligatoriu', badgeLabel: 'H>8m sau SD>600mp · 12 pagini',
+    ico: '🔥', label: 'Scenariu de Securitate la Incendiu (SSI · aviz ISU)',
+    badge: 'obligatoriu', badgeLabel: 'Ord. MAI 129/2016 · 7 capitole',
     color: '248,113,113',
-    fn: 'generateSSF()',
-    ce: 'Verifică dacă clădirea propusă respectă normele de securitate la incendiu conform P118-1/2015 și P118-2/2013. Calculează categoria de pericol de incendiu, gradul de rezistență la foc necesar, dimensionează căile de evacuare și determină dacă este obligatoriu avizul ISU Moldova înainte de Autorizația de Construire.',
+    fn: 'generateSSI()',
+    ce: 'Scenariul de securitate la incendiu conform Ordinului MAI nr. 129/2016 — documentul autoritar cu 7 capitole obligatorii (caracteristici+risc, risc de incendiu, nivel de performanță/rezistență la foc, echipare+dotare, căi de evacuare, alimentare cu apă, forțe de intervenție) + motor de verificare automată a conformității. Fundamentează avizul ISU. Importă prin referință proiectele Hală/SKID de pe parcelă (risc, volum compartiment, sprinklere, ATEX). Înlocuiește vechiul SSF.',
     dece: 'Orice clădire cu înălțime mai mare de 8m sau suprafață desfășurată mai mare de 600mp necesită Avizul de Securitate la Incendiu de la ISU Moldova înainte de emiterea Autorizației de Construire. Construirea fără acest aviz atrage oprirea lucrărilor și amenzi contravenționale.',
     legal: 'P118-1/2015 (securitate incendiu construcții) · P118-2/2013 (instalații stingere) · Legea 307/2006 (apărare incendii) · Ordinul MAI 163/2007 · Legea 50/1991 art. 7',
     output: [

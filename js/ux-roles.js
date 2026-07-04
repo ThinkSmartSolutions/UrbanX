@@ -65,7 +65,7 @@
   var RAP_MOD = {
     'openStudyMap': 'studymap', 'IndicatorsRegistry': 'indici',
     'generateStudiuAmplasament': 'rap:amplasament', 'runExport': 'rap:raport_complet',
-    'generateSolarStudy': 'rap:insorire', 'generateShadowStudy': 'rap:umbre', 'generateSSF': 'rap:isu',
+    'generateSolarStudy': 'rap:insorire', 'generateShadowStudy': 'rap:umbre', 'generateSSF': 'rap:isu', 'generateSSI': 'rap:isu',
     'generateGeotehnicalStudy': 'rap:geotehnic', 'generateAACR': 'rap:aacr', 'generateStudiuPMR': 'rap:pmr',
     'generateStudiuIluminat': 'rap:iluminat', 'generateStabilitateTaluzuri': 'rap:taluzuri',
     'generateEnvironmentalImpact': 'rap:eim', 'generateWaterStudy': 'rap:apa', 'generateGreenStudy': 'rap:verde',
