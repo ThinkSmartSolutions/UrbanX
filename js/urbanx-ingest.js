@@ -86,10 +86,16 @@
     var bGeo = el('button', { style: 'margin-top:8px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:7px;padding:7px 13px;font-size:12px;cursor:pointer' }, 'Extrage din geotehnic');
     bGeo.onclick = function () { var o = extractGeo(taGeo.value); if (o.p_conv) found.p_conv = o.p_conv; if (o.adancime_fundare) found.adancime_fundare = o.adancime_fundare; if (o.cat_geo) found.cat_geo = o.cat_geo; res.textContent = '✓ Geo: ' + (Object.keys(o).length ? Object.keys(o).map(function (k) { return k + '=' + o[k]; }).join(', ') : 'nimic recunoscut'); };
     cGeo.appendChild(taGeo); cGeo.appendChild(bGeo); wrap.appendChild(cGeo);
+    // JSON din pipeline DWG (scripts/dwg-to-urbanx.py — ODA+ezdxf desktop)
+    var cJson = card('4 · Import JSON dintr-un DWG (pipeline dwg-to-urbanx.py)', 'Pentru DWG complet: rulează scripts/dwg-to-urbanx.py <fisier.dwg>, apoi încarcă aici urbanx_import.json. Prefill SC/SD/regim/grad din desen.');
+    var fJson = el('input', { type: 'file', accept: '.json', style: 'font-size:12px;color:#cbd5e1' });
+    function _regimNiv(r) { r = String(r || '').toLowerCase(); var m = r.match(/p\s*\+\s*(\d)/); if (m) return 1 + (+m[1]); if (/d\s*\+\s*p/.test(r)) return 2; if (/parter|^p\b/.test(r)) return 1; return null; }
+    fJson.onchange = function () { var f = fJson.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { try { var j = JSON.parse(rd.result); var ind = j.indicatori || {}; var got = []; if (ind.Sc) { found.Sc = +String(ind.Sc).replace(/\./g, '').replace(',', '.'); got.push('Sc=' + found.Sc); } if (ind.Sd) { found.Sd = +String(ind.Sd).replace(/\./g, '').replace(',', '.'); got.push('Sd=' + found.Sd); } var nv = _regimNiv(ind.regim); if (nv) { found.niv_supraterane = nv; got.push('niv=' + nv); } if (ind.grad_foc) { found.grad = ind.grad_foc; got.push('grad=' + ind.grad_foc); } if (j.dotari_inventar) found._dotari = j.dotari_inventar; res.textContent = '✓ JSON DWG (' + (j.sursa || '') + '): ' + (got.join(', ') || 'fără indicatori') + (j.are_model_3D ? ' · model 3D prezent (BIM)' : ''); } catch (e) { res.textContent = '⚠ JSON invalid: ' + e.message; } }; rd.readAsText(f); };
+    cJson.appendChild(fJson); wrap.appendChild(cJson);
     wrap.appendChild(res);
     var bApply = el('button', { style: 'width:100%;margin-top:16px;background:#8b5cf6;color:#fff;border:none;border-radius:9px;padding:12px;font-size:13px;font-weight:700;cursor:pointer' }, '✓ Aplică datele extrase la proiect');
     bApply.onclick = function () {
-      ['Steren', 'POT_max', 'CUT_max', 'H_max', 'niv_max', 'nrCU', 'judet', 'p_conv', 'adancime_fundare'].forEach(function (k) { if (found[k] != null) D[k] = found[k]; });
+      ['Steren', 'POT_max', 'CUT_max', 'H_max', 'niv_max', 'nrCU', 'judet', 'p_conv', 'adancime_fundare', 'Sc', 'Sd', 'niv_supraterane', 'grad'].forEach(function (k) { if (found[k] != null) { D[k] = found[k]; if (k === 'Sc' || k === 'Sd' || k === 'niv_supraterane') D['__auto_' + k] = false; } });
       if (found.adancime_fundare) D.fundare = 'directă la ' + found.adancime_fundare + ' m (studiu geotehnic' + (found.p_conv ? ', p_conv ' + found.p_conv + ' kPa' : '') + ')';
       if (found._boundary) D._parcelBoundary = found._boundary;
       if (G.ss) G.ss('✓ Date importate aplicate: ' + Object.keys(found).filter(function (k) { return k[0] !== '_'; }).length + ' câmpuri (le poți edita).');
