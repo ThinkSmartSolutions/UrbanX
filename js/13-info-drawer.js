@@ -556,6 +556,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Apartenența la fondul forestier și categoria funcțională se stabilesc oficial pe amenajamentul silvic', 'Tarifele HG 861/2009 se indexează anual — se verifică la depunere'],
   },
+  hale: {
+    ico: '🏭', label: 'Fișă tehnică Hală industrială', badge: 'recomandat', badgeLabel: 'Pre-proiectare · obiect', color: '167,139,250',
+    fn: 'window.generateHala&&window.generateHala()',
+    ce: 'Pre-proiectare hală industrială / depozit: dimensionare automată în înălțime (liberă/streașină/coamă), planșe schematice desenate (plan parter cu tramă de stâlpi, secțiune transversală cu cote, fațadă), verificarea compartimentului de incendiu (P118), sistem structural, acoperiș, mezanin și indicatori urbanistici (POT/CUT). Estimează branșamentele din rețelele de transport.',
+    dece: 'Investitorii și proiectanții au nevoie de o pre-dimensionare rapidă a halei în faza de temă/anteproiect: ce înălțime impune funcțiunea, ce volum de compartiment rezultă, dacă sunt necesare sprinklere, ce POT/CUT. Parametrii se propagă către Scenariul de Securitate la Incendiu și către vizualizarea 3D.',
+    legal: 'NP 008-97 · P118/1-2015 · Legea 319/2006 · GP 114-2006 · Eurocod 1/2/3 · HG 525/1996 (RGU) · GT 035-02',
+    output: [
+      { ico: '📐', txt: 'Cote înălțime + planșe desenate (plan/secțiune/fațadă)' },
+      { ico: '🔥', txt: 'Compartiment incendiu P118 + necesar sprinklere (→ SSI)' },
+      { ico: '📊', txt: 'POT/CUT + structură + acoperiș + branșamente + PDF' },
+    ],
+    nu: ['Pre-proiectare (temă/anteproiect) — nu înlocuiește proiectul tehnic și calculul structural Eurocod', 'Scenariul complet de incendiu se face în modulul SSI, avizat ISU'],
+  },
   'utilitati-nationale': {
     ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
     fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',

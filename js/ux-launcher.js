@@ -43,6 +43,7 @@
     { g: G3, ico: '🏗', l: 'Memoriu tehnic avize', d: 'memoriu pentru avize', k: 'memoriu tehnic', run: call('generateMemoriu'), info: 'memoriu' },
     { g: G3, ico: '🌱', l: 'Studiu Pedologic & Agrochimic', d: 'sol agricol · clase I-V · taxă scoatere Ord.83/2018 · relief live', k: 'pedologie sol agricol bonitare clase calitate taxa scoatere circuit agricol ospa', run: call('generatePedologie'), info: 'pedologie' },
     { g: G3, ico: '🌲', l: 'Studiu Regim Silvic', d: 'fond forestier · categorii I-V · taxă HG861/2009 · păduri OSM+Natura2000 live', k: 'silvic padure fond forestier codul silvic scoatere reimpadurire natura 2000 romsilva garda forestiera', run: call('generateSilvic'), info: 'silvic' },
+    { g: G3, ico: '🏭', l: 'Fișă tehnică Hală industrială', d: 'dimensionare + planșe (plan/secțiune/fațadă) + P118 + POT/CUT', k: 'hala industriala depozit dimensionare planse structura acoperis compartiment incendiu pod rulant', run: call('generateHala'), info: 'hale' },
     { g: G3, ico: '📋', l: 'Fișă urbanism per parcelă', d: 'PDF A4 · POT/CUT/RH · printabil', k: 'fisa urbanism parcela', run: call('generateParcelFisa') },
     // Mediu & Climă
     { g: G4, ico: '🌿', l: 'LOISIR — spații verzi & plămân urban', d: 'catalog L.24/2007 · parc 3D · concurs · climă', k: 'loisir spatii verzi parc uhi clima', run: mod('Loisir', 'openPanel'), info: 'loisir' },
