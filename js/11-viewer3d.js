@@ -1098,6 +1098,8 @@ function _v3dBuild(ap){
   // Adăugăm viață urbană (oameni, mașini, câini, biciclete etc.)
   const _isNightMode = window._v3dNight || document.getElementById('v3d-light')?.value === 'night';
   _v3dAddUrbanLife(THREE, scene, ring0, toWorld, _isNightMode); // toWorld: pozitii directe
+  // ── SKID GPL: geometrie 3D dedicată (rezervor + platformă + cabinet + gard) ──
+  try{ if(window._SKID_VIEW && typeof _v3dAddSkid==='function') _v3dAddSkid(THREE, scene, ring0, toWorld, _isNightMode); }catch(e){ console.warn('[v3dSkid]',e); }
   // Distanțele sunt afișate în harta Mapbox, NU în viewer 3D (simplitate vizuală)
 
   // Camera poziție
@@ -2432,6 +2434,54 @@ function _v3dAddStreets(THREE, scene, ring0, toLoc){
 
 
 // ── Viata urbana: oameni, masini, caini, biciclete, bancute, felinare ────────
+// ── SKID GPL — volum 3D complet în Viewer 3D (rezervor cilindric orizontal cu
+//    capace bombate + șa de sprijin + platformă beton + grup reglare presiune +
+//    împrejmuire cu bolarzi + placă de avertizare). window._SKID_VIEW = params.
+function _v3dAddSkid(THREE, scene, ring0, toLoc, isNight){
+  var P = window._SKID_VIEW || {}; if(!ring0) return;
+  var pts=ring0.map(toLoc); var xs=pts.map(function(p){return p[0];}), zs=pts.map(function(p){return p[1];});
+  var cx=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2, cz=(Math.min.apply(null,zs)+Math.max.apply(null,zs))/2;
+  var nT=Math.max(1,Math.min(P.nTanks||1,3)), tLen=P.tankLen||6, tDia=P.tankDia||1.6, r=tDia/2;
+  var pW=Math.max(P.pW|| (nT*(tDia+1.2)+2), 5), pL=Math.max(P.pL|| (tLen+4), 6);
+  var g=new THREE.Group();
+  // platformă beton
+  var conc=new THREE.MeshStandardMaterial({color:isNight?0x555a60:0xb8bcc2,roughness:0.95,metalness:0.02});
+  var slab=new THREE.Mesh(new THREE.BoxGeometry(pW,0.35,pL),conc); slab.position.set(0,0.175,0); slab.castShadow=slab.receiveShadow=true; g.add(slab);
+  var slabTop=0.35;
+  // materiale rezervor (alb GPL, ușor metalic)
+  var tankMat=new THREE.MeshStandardMaterial({color:isNight?0xdfe3e8:0xf2f4f7,roughness:0.35,metalness:0.55,emissive:isNight?0x0a0d12:0x000000});
+  var capMat=new THREE.MeshStandardMaterial({color:0xe6e9ee,roughness:0.4,metalness:0.5});
+  var saddleMat=new THREE.MeshStandardMaterial({color:0x8a4a2a,roughness:0.9,metalness:0.05});
+  var redMat=new THREE.MeshStandardMaterial({color:0xcc2222,roughness:0.5,metalness:0.3});
+  for(var i=0;i<nT;i++){
+    var offx=(i-(nT-1)/2)*(tDia+1.2);
+    var yC=slabTop + 0.35 + r; // pe șa
+    // corp cilindric orizontal (axă pe X)
+    var cyl=new THREE.Mesh(new THREE.CylinderGeometry(r,r,tLen,28),tankMat); cyl.rotation.z=Math.PI/2; cyl.position.set(offx,yC,0); cyl.castShadow=true; g.add(cyl);
+    // capace bombate (semisfere) la capete
+    [-1,1].forEach(function(s){ var cap=new THREE.Mesh(new THREE.SphereGeometry(r,20,12,0,Math.PI*2,0,Math.PI/2),capMat); cap.rotation.z=s*Math.PI/2; cap.position.set(offx+s*tLen/2,yC,0); g.add(cap); });
+    // 2 șei de sprijin
+    [-1,1].forEach(function(s){ var sad=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.35,tDia*0.9),saddleMat); sad.position.set(offx+s*tLen*0.28,slabTop+0.175,0); sad.castShadow=true; g.add(sad); });
+    // supapă/gât pe partea superioară
+    var neck=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.35,10),redMat); neck.position.set(offx,yC+r+0.15,0); g.add(neck);
+  }
+  // grup reglare presiune (dulap metalic)
+  var cab=new THREE.Mesh(new THREE.BoxGeometry(0.9,1.3,0.5),new THREE.MeshStandardMaterial({color:0x9aa2ac,roughness:0.6,metalness:0.4}));
+  cab.position.set(pW/2-0.8,slabTop+0.65,pL/2-0.6); cab.castShadow=true; g.add(cab);
+  // împrejmuire — bolarzi galbeni + balustradă
+  var boll=new THREE.MeshStandardMaterial({color:0xf2c200,roughness:0.7,metalness:0.1});
+  var fw=pW/2+0.8, fl=pL/2+0.8, step=1.6;
+  function post(x,z){ var p=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,1.0,8),boll); p.position.set(x,0.5,z); g.add(p); }
+  for(var x=-fw;x<=fw+0.01;x+=step){ post(x,-fl); post(x,fl); }
+  for(var z=-fl+step;z<fl-0.01;z+=step){ post(-fw,z); post(fw,z); }
+  // placă avertizare GPL (roșu)
+  var sign=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.6,0.05),redMat); sign.position.set(0,1.1,-fl); g.add(sign);
+  // poziționare la centrul parcelei
+  g.position.set(cx,0,cz);
+  scene.add(g);
+  if(typeof V3D!=='undefined' && V3D.aedis) V3D.aedis.push(g);
+}
+
 function _v3dAddUrbanLife(THREE, scene, ring0, toLoc, isNight){
   try{
     const pts=ring0.map(toLoc);

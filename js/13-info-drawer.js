@@ -569,6 +569,19 @@ const RAPORT_INFO = {
     ],
     nu: ['Pre-proiectare (temă/anteproiect) — nu înlocuiește proiectul tehnic și calculul structural Eurocod', 'Scenariul complet de incendiu se face în modulul SSI, avizat ISU'],
   },
+  skid: {
+    ico: '🛢', label: 'Proiectare SKID GPL', badge: 'recomandat', badgeLabel: 'Obiect 3D · ISCIR/ATEX', color: '167,139,250',
+    fn: 'window.proiecteazaSkid&&window.proiecteazaSkid()',
+    ce: 'Proiectează instalația SKID GPL ca OBIECT 3D REAL în Viewer 3D (rezervor cilindric orizontal cu capace bombate, șei de sprijin, platformă betonată, grup de reglare a presiunii, împrejmuire cu bolarzi și placă de avertizare), cu calcul (debit, autonomie, vaporizare, echivalent tone/SEVESO), verificarea distanțelor de siguranță și planșe (amplasare, zonare ATEX). Documentația PDF e disponibilă în Rapoarte.',
+    dece: 'Instalațiile GPL sunt obiecte tehnice de proiectat (nu doar de descris): platforma le generează volumul 3D și planșele, verifică distanțele PT C8-2010/I 31 și pragul SEVESO, și le leagă la securitatea la incendiu (SSI), la banda de protecție silvică (20 m) și la proximitatea conductelor de gaz.',
+    legal: 'PT C8-2010 (ISCIR) · I 31/1999 · NTPGN-2008 · Ord. ANRE 32/2021 · HG 804/2007 (SEVESO III) · HG 1058/2006 (ATEX) · P118/1-2015',
+    output: [
+      { ico: '🛢', txt: 'Volum 3D SKID în Viewer 3D (rezervor+platformă+cabinet+gard)' },
+      { ico: '📏', txt: 'Calcul debit/autonomie/vaporizare + distanțe + SEVESO/ATEX' },
+      { ico: '📐', txt: 'Planșe amplasare + zonare ATEX (documentație PDF în Rapoarte)' },
+    ],
+    nu: ['Pre-proiectare — nu înlocuiește proiectul ISCIR autorizat și Documentul de Protecție la Explozie', 'Scenariul de incendiu (risc foarte mare) se detaliază în modulul SSI'],
+  },
   'utilitati-nationale': {
     ico: '⚡', label: 'Utilități naționale (SEN + transport)', badge: 'recomandat', badgeLabel: 'Infrastructură · date LIVE', color: '147,197,253',
     fn: 'window.UtilitatiRO&&window.UtilitatiRO.openPanel&&window.UtilitatiRO.openPanel()',
