@@ -356,5 +356,44 @@
   }
 
   G.generateHala = generateHala;
-  console.log('[Hale] modul încărcat (window.generateHala)');
+
+  // ══════════════════════════════════════════════════════════════════════
+  // PROIECTARE — construiește hala ca OBIECT 3D REAL în AEDIS + deschide
+  // panoul de proiectare + planșe (modulul relevee) + AI render.
+  // Acesta e scopul principal (nu fișa PDF): hala devine un obiect proiectat.
+  // ══════════════════════════════════════════════════════════════════════
+  function proiecteazaHala(opts) {
+    opts = opts || {};
+    var S = G.S;
+    if (!S || !S.parcels || !S.parcels[S.activeParcel == null ? 0 : S.activeParcel]) { if (G.ss) G.ss('Selectați o parcelă pentru proiectarea halei.'); return; }
+    var ap = S.parcels[S.activeParcel == null ? 0 : S.activeParcel];
+    if (!ap.geo || !ap.geo.geometry) { if (G.ss) G.ss('Parcela nu are geometrie.'); return; }
+    if (typeof G.AEDIS === 'undefined' || typeof G.aedisBuild !== 'function') { if (G.ss) G.ss('Motorul 3D (AEDIS) nu e încărcat.'); return; }
+    var area = ap.area || 5000;
+    var c = hale_calc({ functiune: opts.functiune || 'depozitare_stivuitor_4m', area: area, L: opts.L, W: opts.W, are_mezanin: area > 2000 });
+    G._HALE_PROIECTE[ap.nrcad || 'x'] = c;
+    // ── SURSA de adevăr citită de aedisOpen(): S.vol + params ──
+    // (aedisOpen re-sincronizează corpuri din S.vol.fn / S.vol.hNiv / params.niv —
+    //  deci hala = 1 nivel înalt se forțează AICI, nu doar pe AEDIS.corpuri)
+    S.vol = S.vol || {};
+    S.vol.fn = 'industrie'; S.vol.niv = 1; S.vol.hNiv = c.H_streasina;
+    ap.params = Object.assign({}, ap.params, { niv: 1, h: c.H_coama });
+    // ── configurează AEDIS pentru HALĂ INDUSTRIALĂ (obiect 3D) ──
+    var A = G.AEDIS;
+    A.fn = 'industrie'; A._fnOverride = true; A.parterDiferit = false;
+    A.tipAcoperis = (c.acoperis === 'plat' ? 'terasa_plata' : 'sarpanta');
+    A.hSarpanta = Math.max(1, +(c.H_coama - c.H_streasina).toFixed(1)) + 0.4;
+    A.corpuri = [{ id: 0, label: 'Hală ' + c.L + '×' + c.W + 'm', h: c.H_streasina, niv: 1, hNiv: c.H_streasina, retragere: (opts.retragere || 6), fn: 'industrie', color: '#94a3b8' }];
+    // deschide panoul AEDIS (proiectant) + construiește volumul 3D
+    try { if (typeof G.aedisOpen === 'function') G.aedisOpen(); } catch (e) {}
+    // reasigură nivelul 1 după sincronizarea din aedisOpen (belt & suspenders)
+    try { if (A.corpuri[0]) { A.corpuri[0].niv = 1; A.corpuri[0].hNiv = c.H_streasina; } } catch (e) {}
+    try { if (typeof G.aedisGenerateAll === 'function') G.aedisGenerateAll(); else G.aedisBuild(); } catch (e) { try { G.aedisBuild(); } catch (e2) {} }
+    if (G.ss) G.ss('🏭 Hală proiectată în 3D: ' + c.L + '×' + c.W + 'm, H coamă ' + c.H_coama + 'm. Deschideți „Planșe" și „AI Render" din panoul 3D; fișa tehnică PDF din Rapoarte.');
+    return c;
+  }
+  G.proiecteazaHala = proiecteazaHala;
+  // planșe pentru hala construită (modulul relevee citește volumul AEDIS din S.vol._lastFeats)
+  G.haleGenPlanse = function () { try { if (typeof G.generateRelevee === 'function') { G.generateRelevee(); } else if (G.ss) G.ss('Modulul de planșe nu e încărcat.'); } catch (e) { if (G.ss) G.ss('Eroare planșe: ' + e.message); } };
+  console.log('[Hale] modul încărcat (window.proiecteazaHala + generateHala PDF)');
 })(window);
