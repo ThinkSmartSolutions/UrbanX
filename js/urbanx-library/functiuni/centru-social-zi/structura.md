@@ -1,5 +1,3 @@
-Voi redacta conținutul complet al memoriului tehnic de rezistență. Aceasta este o sarcină de redactare tehnică pură — nu necesită explorarea codebase-ului, ci expertiza de inginer structurist.
-
 ## 1. DATE GENERALE, OBIECTUL MEMORIULUI, CADRUL NORMATIV
 
 ### 1.1. Date generale privind investiția

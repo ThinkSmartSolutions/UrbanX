@@ -1,5 +1,3 @@
-Voi redacta conținutul solicitat. Aceasta este o sarcină de redactare tehnică pură - nu necesită explorarea codebase-ului sau invocarea vreunui tool. Livrez direct conținutul.
-
 ---
 
 # MEMORIU GENERAL ȘI MEMORIU DE AMENAJĂRI EXTERIOARE
@@ -365,7 +363,6 @@ Conținutul depășește echivalentul a 20 de pagini combinat și este livrat in
 
 ---
 
-Livrez direct capitolele. Continui numerotarea logic (memoriul existent acoperă cap. 1-5, deci încep de la 6).
 
 ## 6. CADRUL LEGAL ȘI JUSTIFICAREA OPORTUNITĂȚII INVESTIȚIEI
 
@@ -784,7 +781,6 @@ Organizarea de șantier se amplasează, de regulă, în incinta proprie a invest
 
 ---
 
-Am produs 11 capitole noi (6-16) pentru memoriul tehnic general DTAC, cca 42.000 de caractere de conținut dens, fără suprapunere cu partea existentă (date generale, soluția de principiu, indicatori de bază, sistem constructiv sintetic, conformitate urbanistică deja acoperite).
 
 Ancorare legală acoperită integral: Legea 50/1991 (r2) + Anexa 1, Legea 350/2001, HG 907/2016 (deviz + faze), Legea 292/2011 și Legea 17/2000 (serviciul social), Ord. MMJS 29/2019 (standarde minime pe module), Legea 197/2012 (licențiere/calitate), Legea 10/1995 (cele 6 cerințe A-F), Legea 448/2006 + NP 051 (accesibilitate), OUG 195/2005 + Legea 292/2018 (mediu), standarde de cost MDLPA, plus normative conexe (P100, C107, P118, NP 074, HG 766/1997, HG 343/2017, HG 300/2006).
 

@@ -43,8 +43,9 @@
   function docBlob(html) { return new Blob(['﻿', html], { type: 'application/msword' }); }
 
   // ── Conținut per document (real, din datele engine) ───────────────────────
+  var FAZA_LBL = { DTAC: 'D.T.A.C.', PTh: 'P.Th. + D.E.', 'PTh+DE': 'P.Th. + D.E.', ambele: 'D.T.A.C. + P.Th. (D.E.)' };
   function _meta(D, titlu, subtitlu) {
-    return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: D.faza || 'DTAC' };
+    return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: FAZA_LBL[D.faza] || D.faza || 'D.T.A.C.' };
   }
   function _indicatoriTbl(D, v) {
     var ac = v.calc;

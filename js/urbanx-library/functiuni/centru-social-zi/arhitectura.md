@@ -1,5 +1,3 @@
-This is a pure writing task in my domain expertise. I'll produce the complete content directly.
-
 ## 1. Date generale și amplasament
 
 ### 1.1. Date de identificare a investiției
@@ -1063,7 +1061,6 @@ Documentatia astfel intocmita asigura conformarea integrala a componentei de arh
 
 ---
 
-Livrez direct markdown-ul integral.
 
 ## 26. TABLOU COMPLET DE TÂMPLĂRIE (NOMENCLATOR UȘI ȘI FERESTRE)
 
@@ -1469,7 +1466,6 @@ Bilanțul teritorial sintetizează utilizarea terenului, în corelație cu brevi
 
 ---
 
-Am livrat 9 anexe/capitole noi (cap. 26-34), toate cu teme netratate în capitolele 1-25 existente:
 
 - **Cap. 26** — Tablou complet de tâmplărie: 26 poziții codificate (13 ferestre/vitraje F1-F12+VG, 6 uși exterioare UE1-6, 12 tipuri uși interioare U1-12 = 48 buc.), cu gol L×H, Uw, clasă, sens deschidere, foc, PMR.
 - **Cap. 27** — Breviar acustic C125: 10 relații Rw între spații adiacente + zgomot de impact planșeu + reverberație (inteligibilitate pentru prezbiacuzie) + măsuri de detaliu.

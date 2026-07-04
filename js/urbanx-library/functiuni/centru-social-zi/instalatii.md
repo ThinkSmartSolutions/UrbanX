@@ -1,5 +1,3 @@
-Voi redacta conținutul complet al memoriilor tehnice de instalații pentru un centru social de zi. Acesta este un task de redactare tehnică — livrez direct conținutul.
-
 ## MEMORII TEHNICE DE INSTALAȚII — CENTRU SOCIAL DE ZI
 
 ### Date generale de temă
@@ -563,7 +561,6 @@ Conținutul este returnat direct ca secțiuni Markdown structurate (## specialit
 
 ---
 
-Livrez direct conținutul markdown.
 
 ## A. INSTALAȚII TERMICE — BREVIAR DE CALCUL
 

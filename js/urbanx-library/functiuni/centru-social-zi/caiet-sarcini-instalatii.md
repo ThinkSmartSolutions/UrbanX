@@ -1,5 +1,3 @@
-Voi redacta caietul de sarcini complet. Livrez direct markdown-ul integral.
-
 # CAIET DE SARCINI — SPECIALITATEA INSTALAȚII
 
 ## Centru Social de Zi pentru Vârstnici, Regim P+1, Aria construită desfășurată cca. 900 mp

@@ -1,5 +1,3 @@
-Livrez documentul direct.
-
 ---
 
 # CAIET DE SARCINI — SPECIALITATEA ARHITECTURĂ
