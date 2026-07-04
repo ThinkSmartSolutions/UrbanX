@@ -144,6 +144,15 @@
       var note = '<p><b>Antemăsurători orientative</b>, generate parametric din datele proiectului (Sc=' + (sc || '—') + ' mp, Sd=' + (sd || '—') + ' mp). Cantitățile exacte se extrag din planșele PTh și din breviarul de calcul; listele de mai jos fundamentează devizul pe obiect și oferta de execuție. Prețurile unitare se preiau din baza de prețuri a platformei (deviz HG 907).</p>';
       return { cat: 'Caiete de sarcini', file: 'Liste_cantitati_antemasuratori.doc', html: docHtml(_meta(D, 'LISTE DE CANTITĂȚI (ANTEMĂSURĂTORI)', 'Proiect tehnic de execuție (PTh) · HG 907/2016'), [{ h: 'Antemăsurători pe categorii de lucrări', html: note + tbl(rows, ['Categorie de lucrări', 'U.M.', 'Cantitate', 'Bază de estimare']) }]) };
     },
+    'Clădire mixtă — separări funcțiuni (P118)': function (D, v) {
+      var secs = [
+        { h: '1. Funcțiuni combinate', html: '<p>Obiectivul cuprinde funcțiuni mixte' + (D.corpuri && D.corpuri.length ? ' (' + D.corpuri.map(function (c) { return esc(c.functiune || c.nume); }).join(', ') + ')' : '') + '. Conform P118-1/2013, între funcțiuni cu risc/destinație diferită se prevăd separări la foc și accese independente.</p>' },
+        { h: '2. Separări la foc obligatorii (P118-1)', html: tbl([['Comercial / rezidențial', 'planșeu + pereți', 'REI 120', 'P118-1 art. 3.3.2'], ['Parcare / rezidențial', 'planșeu', 'REI 180', 'P118-1 art. 3.5.1'], ['Producție / rezidențial', 'perete antifoc', 'REI 180', 'P118-1'], ['Spații tehnice / public', 'pereți + uși EI', 'REI 60-120 + uși EI', 'P118-1'], ['Casă de scări / niveluri', 'pereți + uși EI-C', 'REI 150 + EI 30-C', 'P118-2']], ['Între funcțiuni', 'Element', 'Rezistență la foc', 'Temei']) },
+        { h: '3. Accese separate', html: tbl([['Rezidențial', 'intrare separată de funcțiunile comerciale/publice'], ['Comercial', 'acces direct din stradă/spațiu public'], ['Parcare', 'acces auto separat de accesul pietonal'], ['Servicii / aprovizionare', 'acces de serviciu dedicat']], ['Funcțiune', 'Acces']) },
+        { h: '4. Indicatori și evacuare', html: '<p>POT/CUT se pot calcula separat pe funcțiune, dacă RLU/PUG impune (unele UTR-uri o cer). Căile de evacuare se dimensionează independent pe fiecare funcțiune, iar timpii de evacuare se verifică separat conform P118-1. Se corelează cu scenariul de securitate la incendiu.</p>' }
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Cladire_mixta_separari.doc', html: docHtml(_meta(D, 'CLĂDIRE MIXTĂ — SEPARĂRI ÎNTRE FUNCȚIUNI', 'P118-1/2013 · separări la foc + accese'), secs) };
+    },
     'Memoriu DTOE (organizare execuție)': function (D, v) {
       var sc = +D.Sc || 0;
       var secs = [
