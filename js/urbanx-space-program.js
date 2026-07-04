@@ -293,11 +293,42 @@
     });
     var sd = su ? Math.round(su / 0.82) : 0; // Su/Sd cu circulații+pereți
     var niv = Math.max(1, params.niveluri || 1);
+    spatii = _distributeNiv(spatii, niv); // distribuie funcțiunea pe niveluri (parter public+tehnic, etaje = spații repetitive)
     return {
       tipologie: tip, label: t.label, norma: t.norma, params: params,
       spatii: spatii, instalatii: Object.keys(instSet), avize: Object.keys(avizSet), deviz: Object.keys(devizSet), psi: psiList,
       bilant: { su: Math.round(su), sd: sd, sc: Math.round(sd / niv), niveluri: niv, nr_spatii: spatii.length, nr_obligatorii: spatii.filter(function (s) { return s.ob; }).length }
     };
+  }
+
+  // Distribuie spațiile pe niveluri: parterul = primire/tehnic/alimentar/public;
+  // etajele = spațiile repetitive (cazare, clase, cabinete, birouri, activități) —
+  // împărțite pe niveluri (buc/nivel), ca proiectantul să vadă funcționalul PE FIECARE NIVEL și să editeze.
+  function _distributeNiv(spatii, niv) {
+    if (niv <= 1) { spatii.forEach(function (s) { s.niv = 'P'; }); return spatii; }
+    // categorii/spații care se repetă pe etaje
+    function isRepeat(s) {
+      if (s.cat === 'Cazare' || s.cat === 'Educațional' || s.cat === 'Activități') return true;
+      if (/camera_hotel|sala_clasa|camera_pacient|salon|birou|cabinet|apartament|garsoniera|housekeeping/.test(s.id || '')) return true;
+      return false;
+    }
+    var lbl = function (f) { return f === 0 ? 'P' : String(f); };
+    var out = [];
+    spatii.forEach(function (s) {
+      if (!isRepeat(s) || (s.qty || 1) < 1) { s.niv = 'P'; out.push(s); return; }
+      // împarte buc pe toate nivelurile (parterul primește și el o parte)
+      var total = Math.max(1, s.qty || 1);
+      if (total < niv) { // mai puține bucăți decât niveluri: 1/etaj de sus în jos, restul pe parter
+        for (var f = 0; f < total; f++) { var c1 = Object.assign({}, s, { qty: 1, niv: lbl(Math.min(f, niv - 1)) }); out.push(c1); }
+        return;
+      }
+      var per = Math.floor(total / niv), rem = total - per * niv;
+      for (var fl = 0; fl < niv; fl++) {
+        var q = per + (fl < rem ? 1 : 0); if (q <= 0) continue;
+        out.push(Object.assign({}, s, { qty: q, niv: lbl(fl) }));
+      }
+    });
+    return out;
   }
 
   // Validare bidirecțională (compliance): la editare, semnalează spații obligatorii lipsă / sub minim.

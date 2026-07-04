@@ -282,8 +282,10 @@
     if (!spatii.length) { if (G.ss) G.ss('Nu există program de spații. Generează-l în „🧩 Program funcțional".'); return; }
     var D = meta.D || {};
     var lay = layout(spatii);
+    function nivName(n) { if (n === 'S') return ['subsol', 'SUBSOL']; if (n === 'P') return ['parter', 'PARTER']; if (n === 'E') return ['etaj', 'ETAJ']; var k = parseInt(n, 10); return isNaN(k) ? ['nivel ' + n, 'NIVEL ' + n] : ['etaj ' + k, 'ETAJ ' + k]; }
+    function nivOrd(n) { if (n === 'S') return -1; if (n === 'P') return 0; if (n === 'E') return 1; var k = parseInt(n, 10); return isNaN(k) ? 99 : k; }
     var planse = [];
-    Object.keys(lay).sort().forEach(function (niv) { planse.push({ id: 'plan-' + niv, nume: 'Plan ' + (niv === 'E' ? 'etaj' : niv === 'S' ? 'subsol' : 'parter'), svg: planNivel(lay, niv, Object.assign({}, meta, { titlu: 'PLAN ' + (niv === 'E' ? 'ETAJ' : niv === 'S' ? 'SUBSOL' : 'PARTER'), cod: niv === 'E' ? 'A.03' : 'A.02', scara: '1:100' })), niv: niv }); });
+    Object.keys(lay).sort(function (a, b) { return nivOrd(a) - nivOrd(b); }).forEach(function (niv, i) { var nn = nivName(niv); planse.push({ id: 'plan-' + niv, nume: 'Plan ' + nn[0], svg: planNivel(lay, niv, Object.assign({}, meta, { titlu: 'PLAN ' + nn[1], cod: 'A.' + ('0' + (2 + i)).slice(-2), scara: '1:100' })), niv: niv }); });
     planse.push({ id: 'situatie', nume: 'Plan situație', svg: planSituatie(D, meta) });
     planse.push({ id: 'sectiune', nume: 'Secțiune', svg: sectiune(D, meta) });
     planse.push({ id: 'fatada', nume: 'Fațadă', svg: fatada(D, meta) });

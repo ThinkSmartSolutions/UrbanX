@@ -71,11 +71,21 @@
       paramBox.appendChild(selRow);
     }
 
+    function _nivKey(v) { v = (v == null ? 'P' : String(v)); if (v === 'E') return '1'; return v; } // 'E' legacy → etaj 1
     function bilant() {
-      var suP = 0, suE = 0, ocup = 0;
-      (state.rows || []).forEach(function (r) { var st = (+r.buc || 0) * (+r.mp_unit || 0); if (r.niv === 'E') suE += st; else suP += st; ocup += (+r.ocup || 0) * (+r.buc || 0); });
-      var su = suP + suE, sd = su ? Math.round(su / 0.82) : 0, niv = suE > 0 ? 2 : (state.params.niveluri || 1);
-      return { su: Math.round(su), sd: sd, sc: niv ? Math.round(sd / niv) : sd, niv: niv, ocup: ocup };
+      var floors = {}, ocup = 0;
+      (state.rows || []).forEach(function (r) { var st = (+r.buc || 0) * (+r.mp_unit || 0); var k = _nivKey(r.niv); floors[k] = (floors[k] || 0) + st; ocup += (+r.ocup || 0) * (+r.buc || 0); });
+      var su = 0, maxFloor = 0; Object.keys(floors).forEach(function (k) { su += floors[k]; if (k !== 'S' && floors[k] > maxFloor) maxFloor = floors[k]; });
+      var supra = Object.keys(floors).filter(function (k) { return k !== 'S'; });
+      var niv = Math.max(supra.length || 1, +state.params.niveluri || 1);
+      var sd = su ? Math.round(su / 0.82) : 0;
+      var sc = maxFloor ? Math.round(maxFloor / 0.82) : (niv ? Math.round(sd / niv) : sd); // amprentă = cel mai mare nivel
+      return { su: Math.round(su), sd: sd, sc: sc, niv: niv, ocup: ocup };
+    }
+    function _nivOptions() {
+      var NN = +state.params.niveluri || 1;
+      (state.rows || []).forEach(function (r) { var n = parseInt(_nivKey(r.niv), 10); if (!isNaN(n) && n + 1 > NN) NN = n + 1; });
+      var o = [['P', 'Parter']]; for (var i = 1; i < NN; i++) o.push([String(i), 'Etaj ' + i]); o.push(['S', 'Subsol']); return o;
     }
 
     function renderTable() {
@@ -89,7 +99,7 @@
         var provColor = r.prov && r.prov.indexOf('regulă') === 0 ? '#fbbf24' : (r.prov && r.prov.indexOf('generat') === 0 ? '#93c5fd' : '#6ee7b7');
         tr.appendChild(el('td', { style: 'padding:4px' }, '<span style="color:#e6edf7">' + r.nume + '</span>' + (r.ob ? ' <span title="obligatoriu" style="color:#f87171">*</span>' : '')));
         tr.appendChild(el('td', { style: 'color:#94a3b8' }, r.cat || '—'));
-        var tdN = el('td'); var selN = el('select', { style: INP + ';padding:2px' }); [['P', 'P'], ['E', 'E']].forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (r.niv === o[0]) op.setAttribute('selected', 'selected'); selN.appendChild(op); }); selN.onchange = function () { r.niv = selN.value; renderSide(); }; tdN.appendChild(selN); tr.appendChild(tdN);
+        var tdN = el('td'); var selN = el('select', { style: INP + ';padding:2px' }); _nivOptions().forEach(function (o) { var op = el('option', { value: o[0], title: o[1] }, o[0]); if (_nivKey(r.niv) === o[0]) op.setAttribute('selected', 'selected'); selN.appendChild(op); }); selN.onchange = function () { r.niv = selN.value; renderSide(); }; tdN.appendChild(selN); tr.appendChild(tdN);
         var tdB = el('td'); var iB = el('input', { type: 'number', style: INP + ';width:46px;padding:3px' }); iB.value = r.buc; iB.oninput = function () { r.buc = +iB.value || 0; upd(); }; tdB.appendChild(iB); tr.appendChild(tdB);
         var tdM = el('td'); var iM = el('input', { type: 'number', style: INP + ';width:70px;padding:3px' }); iM.value = r.mp_unit; iM.oninput = function () { r.mp_unit = +iM.value || 0; upd(); }; tdM.appendChild(iM); tr.appendChild(tdM);
         var tdT = el('td', { style: 'color:#e6edf7' }, Math.round((r.buc || 0) * (r.mp_unit || 0)) + '');
