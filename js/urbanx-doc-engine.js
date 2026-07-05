@@ -117,10 +117,53 @@
     out.seismic = seismicFor(d.judet); out.clima = climaFor(d.judet);
     // grad/psi/struct default
     out.psi_default = fn.psi; out.grad_default = fn.grad; out.struct_default = fn.struct;
+    out.risc_incendiu = fn.risc || 'mediu';
     // verificări PSI automate (praguri)
-    out.sprinklere_oblig = Sc > 3000 || (+d.H || 0) > 28;
+    var H = +d.H || 0, niv = +d.niv_supraterane || 0;
+    out.sprinklere_oblig = Sc > 3000 || H > 28;
     out.idsi_oblig = Sc > 2500;
-    out.lift_oblig = (+d.niv_supraterane || 0) >= 5;
+    out.lift_oblig = niv >= 5;
+
+    // ── PARAMETRI TEHNICI DERIVAȚI COMPLEȚI (toți, nu doar categoria PSI) ──
+    // Clasa de importanță seismică (P100-1/2013 tab.4.2) + factor γI
+    var aglomerari = ['mall', 'spatiu-comercial', 'sport', 'scoala', 'gradinita', 'hotelier'];
+    var critice = ['medical', 'bess', 'skid', 'statie-transformare', 'pod'];
+    if (critice.indexOf(d.functiune) >= 0) { out.clasa_importanta = 'II'; out.gamma_I = 1.2; }
+    else if (aglomerari.indexOf(d.functiune) >= 0) { out.clasa_importanta = (d.functiune === 'mall' || d.functiune === 'medical') ? 'II' : 'III'; out.gamma_I = out.clasa_importanta === 'II' ? 1.2 : 1.0; }
+    else if (d.functiune === 'infrastructura-drum') { out.clasa_importanta = 'IV'; out.gamma_I = 0.8; }
+    else { out.clasa_importanta = 'III'; out.gamma_I = 1.0; }
+    if (d.functiune === 'pod') { out.clasa_importanta = 'III (SR EN 1998-2)'; out.gamma_I = 1.3; }
+    if (d.functiune === 'medical' || d.functiune === 'skid') { out.gamma_I = 1.4; out.clasa_importanta = (d.functiune === 'skid' ? 'II-III' : 'I-II'); }
+    // Categoria de importanță (HG 766/1997)
+    out.categorie_importanta = (critice.indexOf(d.functiune) >= 0 || d.functiune === 'mall' || d.functiune === 'parcare') ? 'B — deosebită'
+      : (d.functiune === 'infrastructura-drum') ? 'C — normală (D anexe)' : 'C — normală';
+    // Factor de comportare q (funcție de sistemul structural)
+    var qmap = { metalica: 4.0, beton: 3.0, prefabricat: 3.0, mixt: 3.0, zidarie: 2.5, lemn: 2.5, lsf: 2.0, usoara: 1.5 };
+    out.factor_q = qmap[(d.struct || fn.struct)] || 3.0;
+    // Categoria de pericol / risc incendiu → grad RF (deja) + arie compartiment max
+    var compBase = { 'A': 2000, 'B': 3000, 'C': 4000, 'D': 6000, 'E': 8000 };
+    var compMax = d.functiune === 'hala-industriala' ? ({ mic: 12000, mediu: 6000, mare: 3000, foarte_mare: 2000 }[out.risc_incendiu] || 6000)
+      : (compBase[fn.psi] || 5000);
+    out.arie_compartiment_max = compMax;
+    out.nr_compartimente = Sc > 0 ? Math.max(1, Math.ceil(Sc / compMax)) : 1;
+    // Evacuare (P118): flux 0,60 m; distanțe max
+    out.flux_evacuare_m = 0.60;
+    out.dist_evacuare_2sensuri = (fn.cat === 'invatamant' || fn.cat === 'medical') ? 30 : 35;
+    out.dist_evacuare_fundsac = 15;
+    // Desfumare (P118-2): H>8 (industrial) / SC mare / subteran
+    out.desfumare_oblig = (d.functiune === 'hala-industriala' && (H > 8 || Sc > 1000)) || d.functiune === 'parcare' || Sc > 2500 || H > 28;
+    // Hidranți interiori (P118-2): volum > 5000 mc sau Sd > 2000; exteriori: Sc mare
+    var vol = Sd * 3; // estimare volum (H nivel ~3 m)
+    out.hidranti_int_oblig = vol > 5000 || Sd > 2000 || ['mall', 'sport', 'medical', 'parcare', 'hala-industriala'].indexOf(d.functiune) >= 0;
+    out.hidranti_ext_oblig = Sc > 600 || niv >= 3;
+    // Rezervă apă incendiu (mc) — estimare P118-2 (hidranți int 4,2 l/s×10min + ext 10 l/s×3h dacă)
+    var vri = 0; if (out.hidranti_int_oblig) vri += 4.2 * 10 * 60 / 1000; if (out.hidranti_ext_oblig) vri += 10 * 180 * 60 / 1000; if (out.sprinklere_oblig) vri += 12 * 60 * 60 / 1000;
+    out.rezerva_incendiu_mc = Math.round(vri);
+    // Densitate sarcină termică (notă orientativă pe risc)
+    out.sarcina_termica_note = { mic: '< 420 MJ/mp', mediu: '420–840 MJ/mp', mare: '840–1680 MJ/mp', foarte_mare: '> 1680 MJ/mp' }[out.risc_incendiu] || '420–840 MJ/mp';
+    // Adâncime îngheț (STAS 6054, din temperatura de iarnă)
+    var Te = (out.clima && out.clima.Te) || -18;
+    out.adancime_inghet_m = Te <= -20 ? 1.1 : Te <= -15 ? 1.0 : 0.9;
     return out;
   }
 

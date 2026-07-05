@@ -139,13 +139,29 @@
       })();
       form.appendChild(section('6–8', 'Structură + seism + climă', [
         fld('Tip structură', 'struct', 'select', { options: Object.keys(STRUCT).map(function (k) { return [k, STRUCT[k]]; }) }),
+        fld('Categorie importanță (HG 766/1997)', 'categorie_importanta', 'auto'),
+        fld('Clasă importanță seismică (P100-1)', 'clasa_importanta', 'auto'),
+        fld('Factor importanță γI', 'gamma_I', 'auto'),
         fld('Ag seismic', 'ag', 'auto'), fld('Tc (colț spectru)', 'Tc', 'auto'),
-        fld('Sk zăpadă (kN/m²)', 'sk', 'auto'), fld('Te iarnă (°C)', 'Te', 'auto')
+        fld('Factor comportare q', 'factor_q', 'auto'),
+        fld('Sk zăpadă (kN/m²)', 'sk', 'auto'), fld('Te iarnă (°C)', 'Te', 'auto'),
+        fld('Adâncime îngheț (STAS 6054)', 'adancime_inghet', 'auto')
       ]));
-      form.appendChild(section('9–10', 'Instalații + PSI', [
+      form.appendChild(section('9–10', 'Instalații + PSI (parametri derivați compleți)', [
         fld('Tip încălzire', 'incalzire', 'select', { options: Object.keys(INCALZIRE).map(function (k) { return [k, INCALZIRE[k]]; }) }),
         fld('Sursă apă / canalizare', 'apa', 'select', { options: Object.keys(APA).map(function (k) { return [k, APA[k]]; }) }),
         fld('Categorie pericol PSI', 'psi', 'auto'),
+        fld('Risc de incendiu', 'risc_incendiu', 'auto'),
+        fld('Grad rezistență la foc (P118)', 'grad_rf', 'auto'),
+        fld('Densitate sarcină termică', 'sarcina_termica', 'auto'),
+        fld('Arie max compartiment (mp)', 'arie_compartiment', 'auto'),
+        fld('Nr. compartimente incendiu', 'nr_compartimente', 'auto'),
+        fld('Distanță evacuare 2 sensuri (m)', 'dist_evac2', 'auto'),
+        fld('Distanță evacuare fund sac (m)', 'dist_evacfs', 'auto'),
+        fld('Hidranți interiori', 'hidranti_int', 'auto'),
+        fld('Hidranți exteriori', 'hidranti_ext', 'auto'),
+        fld('Rezervă apă incendiu (mc)', 'rezerva_incendiu', 'auto'),
+        fld('Desfumare oblig.', 'desfumare_oblig', 'auto'),
         fld('Sprinklere oblig.', 'sprinklere_oblig', 'auto'), fld('IDSI oblig.', 'idsi_oblig', 'auto'), fld('Lift oblig.', 'lift_oblig', 'auto')
       ]));
       // avizatori
@@ -205,7 +221,25 @@
       setA('parcaje_necesare', ac.parcaje_necesare); setA('sv', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0).toLocaleString('ro-RO') + ' mp)');
       setA('ag', (ac.seismic.ag) + 'g' + (ac.seismic.estimat ? ' ~est' : '')); setA('Tc', ac.seismic.Tc + ' s');
       setA('sk', ac.clima.sk + ' kN/m²'); setA('Te', ac.clima.Te + ' °C');
+      // structură — clasă/categorie/factori (P100-1, HG 766/1997)
+      setA('categorie_importanta', ac.categorie_importanta || '—');
+      setA('clasa_importanta', ac.clasa_importanta || '—');
+      setA('gamma_I', 'γI = ' + (ac.gamma_I != null ? ac.gamma_I.toFixed(2) : '1.00'));
+      setA('factor_q', 'q = ' + (ac.factor_q != null ? ac.factor_q.toFixed(1) : '3.0'));
+      setA('adancime_inghet', (ac.adancime_inghet_m || 0.9).toFixed(2) + ' m (STAS 6054)');
+      // PSI — set complet de parametri derivați (P118-1/2/3)
       setA('psi', 'Categoria ' + (ac.psi_default || 'C') + ' (din funcțiune)'); D.psi = ac.psi_default;
+      setA('risc_incendiu', (ac.risc_incendiu || 'mediu').replace('foarte_mare', 'foarte mare'));
+      setA('grad_rf', 'Gradul ' + (ac.grad_default || 'II') + ' rezistență la foc');
+      setA('sarcina_termica', ac.sarcina_termica_note || '—');
+      setA('arie_compartiment', (ac.arie_compartiment_max || 0).toLocaleString('ro-RO') + ' mp');
+      setA('nr_compartimente', (ac.nr_compartimente || 1) + (ac.nr_compartimente > 1 ? ' compartimente' : ' compartiment'));
+      setA('dist_evac2', (ac.dist_evacuare_2sensuri || 35) + ' m (flux ' + (ac.flux_evacuare_m || 0.6) + ' m)');
+      setA('dist_evacfs', (ac.dist_evacuare_fundsac || 15) + ' m');
+      setA('hidranti_int', ac.hidranti_int_oblig ? 'DA' : 'nu');
+      setA('hidranti_ext', ac.hidranti_ext_oblig ? 'DA' : 'nu');
+      setA('rezerva_incendiu', (ac.rezerva_incendiu_mc || 0) + ' mc');
+      setA('desfumare_oblig', ac.desfumare_oblig ? 'DA' : 'nu');
       setA('sprinklere_oblig', ac.sprinklere_oblig ? 'DA' : 'nu'); setA('idsi_oblig', ac.idsi_oblig ? 'DA' : 'nu'); setA('lift_oblig', ac.lift_oblig ? 'DA' : 'nu');
       renderSide(v);
     }

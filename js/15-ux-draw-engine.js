@@ -429,6 +429,40 @@
     return doc;
   };
 
+  // ─── Notă tehnică pe planșă: tabel cu parametrii tehnici derivați ──────────
+  // params = obiect autoCalc (v.calc). Desenează un tabel titrat (mm) lângă cartuș.
+  UX.techNotes = function (doc, x, y, params) {
+    params = params || {}; var da = function (b) { return b ? 'DA' : 'nu'; };
+    var s = params.seismic || {}, c = params.clima || {};
+    var rows = [
+      ['Categ. importanță (HG 766/1997)', (params.categorie_importanta || '-')],
+      ['Clasă imp. seismică (P100-1)', (params.clasa_importanta || '-') + '  gI=' + (params.gamma_I != null ? params.gamma_I.toFixed(2) : '1.00')],
+      ['Factor comportare q', (params.factor_q != null ? params.factor_q.toFixed(1) : '3.0')],
+      ['ag / Tc (P100-1/2013)', ((s.ag != null ? s.ag : '-') + 'g / ' + (s.Tc != null ? s.Tc : '-') + 's')],
+      ['Zapada sk / Te (CR 1-1-3)', ((c.sk != null ? c.sk : '-') + ' kN/mp / ' + (c.Te != null ? c.Te : '-') + ' C')],
+      ['Adancime inghet (STAS 6054)', ((params.adancime_inghet_m || 0.9).toFixed(2) + ' m')],
+      ['Risc / categ. pericol incendiu', ((params.risc_incendiu || 'mediu').replace('foarte_mare', 'f.mare') + ' / Cat. ' + (params.psi_default || 'C'))],
+      ['Grad rezistenta la foc (P118)', ('Gradul ' + (params.grad_default || 'II'))],
+      ['Arie max / nr. compartimente', ((params.arie_compartiment_max || 0).toLocaleString('ro-RO') + ' mp / ' + (params.nr_compartimente || 1))],
+      ['Evacuare 2 sensuri / fund sac', ((params.dist_evacuare_2sensuri || 35) + 'm / ' + (params.dist_evacuare_fundsac || 15) + 'm')],
+      ['Desfumare / hidr. int / ext', (da(params.desfumare_oblig) + ' / ' + da(params.hidranti_int_oblig) + ' / ' + da(params.hidranti_ext_oblig))],
+      ['Rezerva apa incendiu (est.)', ((params.rezerva_incendiu_mc || 0) + ' mc')],
+      ['Sprinklere / IDSAI / lift pomp.', (da(params.sprinklere_oblig) + ' / ' + da(params.idsi_oblig) + ' / ' + da(params.lift_oblig))]
+    ];
+    var W = 120, rh = 6.5, H = rh * (rows.length + 1); // mm
+    doc.rect(x, y, W, H, 'T-TITL-LINE');
+    doc.line(x, y + H - rh, x + W, y + H - rh, 'T-TITL-LINE');
+    doc.line(x + W * 0.52, y, x + W * 0.52, y + H - rh, 'T-TITL-LINE');
+    doc.text(x + 2, y + H - rh + 2, 3.0, 'PARAMETRI TEHNICI DERIVATI (P100-1 · CR 1-1-3 · P118 · HG 766)', 'T-TITL-TEXT');
+    rows.forEach(function (r, i) {
+      var yy = y + H - rh - (i + 1) * rh + 2;
+      doc.line(x, y + H - rh - (i + 1) * rh, x + W, y + H - rh - (i + 1) * rh, 'T-TITL-LINE');
+      doc.text(x + 2, yy, 2.4, r[0], 'T-TITL-TEXT');
+      doc.text(x + W * 0.52 + 2, yy, 2.4, r[1], 'T-TITL-TEXT');
+    });
+    return doc;
+  };
+
   // ─── UTIL: mesele modelului relevee (metri) → plan DXF simplu (mm) ─────────
   // Demonstrativ Sprint 1: contur + camere + etichete + cotare + grid + casetă.
   UX.planFromRooms = function (rooms, opts) {
@@ -453,6 +487,8 @@
     UX.northArrow(doc, maxX * K + 600, maxY * K - 400, 300, opts.bearing || 0);
     UX.scaleBar(doc, 0, -900, 100, 10);
     UX.titleBlock(doc, { x: maxX * K + 1000, y: 0, proiect: opts.proiect || 'Plan nivel', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    // notă cu toți parametrii tehnici derivați (deasupra cartușului)
+    if (opts.params) { try { UX.techNotes(doc, maxX * K + 1000, 65, opts.params); } catch (e) {} }
     return doc.emit();
   };
 

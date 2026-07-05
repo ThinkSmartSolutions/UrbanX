@@ -83,6 +83,33 @@
   function _verificariTbl(v) {
     return tbl(v.checks.map(function (c) { return [c.status === 'conform' ? 'CONFORM' : c.status === 'neconform' ? 'NECONFORM' : 'ATENȚIE', c.text, c.norma]; }), ['Stare', 'Verificare', 'Temei legal']);
   }
+  // Sinteza COMPLETĂ a parametrilor tehnici derivați (nu doar categoria PSI) — structură, seism, climă, incendiu.
+  function _parametriDerivatiTbl(D, v) {
+    var ac = v.calc || {};
+    var da = function (b) { return b ? 'DA' : 'nu'; };
+    var risc = (ac.risc_incendiu || 'mediu').replace('foarte_mare', 'foarte mare');
+    return tbl([
+      ['Categorie de importanță (HG 766/1997)', (ac.categorie_importanta || '—')],
+      ['Clasă de importanță seismică (P100-1/2013)', (ac.clasa_importanta || '—')],
+      ['Factor de importanță γI', (ac.gamma_I != null ? ac.gamma_I.toFixed(2) : '1.00')],
+      ['Factor de comportare q', (ac.factor_q != null ? ac.factor_q.toFixed(1) : '3.0')],
+      ['Accelerație seismică ag / Tc', ((ac.seismic && ac.seismic.ag) || '—') + 'g / ' + ((ac.seismic && ac.seismic.Tc) || '—') + ' s'],
+      ['Încărcare din zăpadă sk (CR 1-1-3/2012)', ((ac.clima && ac.clima.sk) || '—') + ' kN/m²'],
+      ['Temperatura exterioară de calcul Te', ((ac.clima && ac.clima.Te) || '—') + ' °C'],
+      ['Adâncime de îngheț (STAS 6054)', (ac.adancime_inghet_m || 0.9).toFixed(2) + ' m'],
+      ['Risc / categorie de pericol de incendiu', risc + ' · Categoria ' + (D.psi || ac.psi_default || 'C')],
+      ['Grad de rezistență la foc (P118-1)', 'Gradul ' + (ac.grad_default || 'II')],
+      ['Densitate sarcină termică (SR EN 1991-1-2)', (ac.sarcina_termica_note || '—')],
+      ['Arie maximă compartiment de incendiu', (ac.arie_compartiment_max || 0).toLocaleString('ro-RO') + ' mp'],
+      ['Număr compartimente de incendiu', '' + (ac.nr_compartimente || 1)],
+      ['Distanță evacuare (2 sensuri / fund de sac)', (ac.dist_evacuare_2sensuri || 35) + ' m / ' + (ac.dist_evacuare_fundsac || 15) + ' m'],
+      ['Unitate de trecere evacuare (flux)', (ac.flux_evacuare_m || 0.6) + ' m'],
+      ['Desfumare obligatorie', da(ac.desfumare_oblig)],
+      ['Hidranți interiori / exteriori obligatorii', da(ac.hidranti_int_oblig) + ' / ' + da(ac.hidranti_ext_oblig)],
+      ['Rezervă de apă pentru incendiu (estimată)', (ac.rezerva_incendiu_mc || 0) + ' mc'],
+      ['Instalație sprinklere / IDSAI / lift pompieri', da(ac.sprinklere_oblig) + ' / ' + da(ac.idsi_oblig) + ' / ' + da(ac.lift_oblig)]
+    ], ['Parametru tehnic derivat', 'Valoare / temei']);
+  }
   // Conținut profund din bibliotecă (per funcțiune + specialitate). Întoarce HTML sau '' .
   function _lib(D, key) {
     try { var L = G.UXLibrary && G.UXLibrary[D.functiune]; return (L && L[key] && L[key].html) ? L[key].html : ''; } catch (e) { return ''; }
@@ -95,8 +122,9 @@
       var secs = deep ? [
         { h: null, html: deep },
         { h: 'Indicatori urbanistici ai proiectului', html: _indicatoriTbl(D, v) },
+        { h: 'Parametri tehnici derivați (sinteză structură · seism · climă · incendiu)', html: '<p>Valorile de mai jos sunt derivate automat din funcțiune, amplasament (județ), sistemul structural și indicatorii geometrici, conform normativelor în vigoare. Ele fundamentează proiectarea pe toate specialitățile și se preiau în piesele scrise și desenate.</p>' + _parametriDerivatiTbl(D, v) },
         { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ] : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
+      ] : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
         { h: '1. Date de identificare', html: '<p>Autorizarea obiectivului „' + esc(fn) + '", ' + esc(D.uat || '—') + '.</p>' }, { h: '2. Indicatori', html: _indicatoriTbl(D, v) }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), secs) };
@@ -115,7 +143,7 @@
       var deep = _lib(D, 'structura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'str_pth');
       var secs = deep ? [
         { h: null, html: deep },
-        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C']], ['Parametru', 'Valoare']) }
+        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997)', esc(v.calc.categorie_importanta || '—')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) }
       ] : (G.UXParagrafe ? G.UXParagrafe.rezistenta(D, v) : [
         { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '.</p>' }
       ]);
