@@ -43,7 +43,7 @@
         btns.appendChild(bR); btns.appendChild(bD); c.appendChild(btns); listBox.appendChild(c);
       });
     }
-    bSave.onclick = function () { var d = new Date().toISOString ? '' : ''; snapshot(D, note.value, ''); note.value = ''; render(); if (G.ss) G.ss('✓ Versiune salvată.'); };
+    bSave.onclick = function () { var ts = ''; try { ts = new Date().toLocaleString('ro-RO'); } catch (e) { try { ts = new Date().toISOString().slice(0, 16).replace('T', ' '); } catch (e2) {} } snapshot(D, note.value, ts); note.value = ''; render(); if (G.ss) G.ss('✓ Versiune salvată (' + ts + ').'); };
     saveRow.appendChild(note); saveRow.appendChild(bSave); wrap.appendChild(saveRow); wrap.appendChild(listBox);
     ov.appendChild(wrap); document.body.appendChild(ov); render();
   }
