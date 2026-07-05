@@ -11,7 +11,7 @@
   'use strict';
   G.UXLibrary = G.UXLibrary || {};
   G.UXLibrary._ready = G.UXLibrary._ready || {};
-  var VER = '20260705a';
+  var VER = '20260705b';
   var BASE = 'js/urbanx-library/functiuni/';
   // set standard de fișiere per funcțiune (aceleași chei ca la centru-social)
   var STD = {
@@ -34,7 +34,8 @@
     'mall': 'mall',
     'locuinta-individuala': 'locuinta-individuala',
     'cladire-mixta': 'cladire-mixta',
-    'sport': 'sport'
+    'sport': 'sport',
+    'parcare': 'parcare'
   };
 
   function mdToHtml(md) { return (typeof G.UXLibMdToHtml === 'function') ? G.UXLibMdToHtml(md) : (md || ''); }
