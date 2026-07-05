@@ -28,6 +28,7 @@
     D = D || {};
     if (!G.UX_DRAW || !G.UX_DRAW.facadeFromBuilding) { if (G.ss) G.ss('Motorul de planșe (UX_DRAW) nu e încărcat.'); return; }
     var v = (G.UXDoc && G.UXDoc.valideaza) ? G.UXDoc.valideaza(D) : { calc: {} };
+    try { if (G.UX_DRAW && G.UX_DRAW.ariiRows && v.calc) v.calc._ariiRows = G.UX_DRAW.ariiRows(D.functiune, D.Sc, D.Sd, D.niv_supraterane); } catch (e) {}
     var P = inferParams(D);
 
     var ov = el('div', { style: 'position:fixed;inset:0;background:#070c18;z-index:5200;overflow:auto;font-family:system-ui;color:#e6edf7' });

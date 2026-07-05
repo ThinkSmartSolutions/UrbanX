@@ -80,6 +80,44 @@
       ['Spații verzi minime', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0) + ' mp)']
     ], ['Indicator urbanistic', 'Valoare']);
   }
+  // Bilanț de suprafețe (Su/Sc/Sd) + STANDARDUL specific funcțiunii (BOMA/GLA/SU-pat etc.)
+  // Regulă: apare în memorii ȘI planșe ȘI peste tot, pentru ORICE funcțiune.
+  function _ariiStandardTbl(D, v) {
+    var ac = v.calc || {}; var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };
+    var Sd = +D.Sd || 0, Sc = +D.Sc || 0, niv = +D.niv_supraterane || 1;
+    var Su = +D.Su || (Sd ? Math.round(Sd * 0.82) : 0);
+    var rows = [
+      ['Suprafață utilă (Su)', Su ? nf(Su) + ' mp' : '—'],
+      ['Suprafață construită (Sc)', Sc ? nf(Sc) + ' mp' : '—'],
+      ['Suprafață desfășurată (Sd)', Sd ? nf(Sd) + ' mp' : '—'],
+      ['Raport Su/Sd (eficiență)', (Sd && Su) ? Math.round(Su / Sd * 100) + '%' : '—'],
+      ['Regim de înălțime', 'P+' + Math.max(0, niv - 1) + (D.H ? ' (H ' + D.H + ' m)' : '')],
+      ['POT / CUT', (ac.POT || 0) + '% / ' + (ac.CUT || 0)]
+    ];
+    var fn = D.functiune, extra = [];
+    if (fn === 'birouri') {
+      var rent = Sd ? Math.round(Sd * 0.90) : 0, lf = Su ? ((rent / Su - 1) * 100).toFixed(1) : '—';
+      extra = [['— Standard BOMA (ANSI/BOMA Z65.1, birouri) —', ''], ['Gross Floor Area (GFA)', nf(Sd) + ' mp'], ['Rentable Area — arie închiriabilă', nf(rent) + ' mp'], ['Usable Area — arie utilizabilă', nf(Su) + ' mp'], ['Load Factor (R/U − 1)', lf + '%'], ['Eficiență (Usable/Rentable)', rent ? Math.round(Su / rent * 100) + '%' : '—']];
+    } else if (fn === 'mall' || fn === 'spatiu-comercial') {
+      var gla = Sd ? Math.round(Sd * 0.80) : 0;
+      extra = [['— Standard comercial (GLA) —', ''], ['GBA — Gross Built Area', nf(Sd) + ' mp'], ['GLA — Gross Leasable Area (închiriabilă)', nf(gla) + ' mp'], ['Raport GLA/GBA', Sd ? Math.round(gla / Sd * 100) + '%' : '—']];
+    } else if (fn === 'hotelier') {
+      extra = [['— Standard hotelier —', ''], ['Nr. camere (estimat)', '' + (D.nr_camere || Math.max(1, Math.round(Su / 30)))], ['SU medie / cameră', '≈ 26–32 mp'], ['Pondere SU camere din SU total', '≈ 60–65%']];
+    } else if (fn === 'medical') {
+      extra = [['— Standard medical (OMS 914/2006) —', ''], ['Nr. paturi (estimat)', '' + (D.nr_paturi || Math.max(1, Math.round(Su / 35)))], ['SU / pat spitalizare', '≈ 30–40 mp (cu servicii)']];
+    } else if (fn === 'bloc-locuinte' || fn === 'locuinta-individuala') {
+      extra = [['— Standard locuire (NP 057/2002) —', ''], ['SU locuibilă (estimat)', Su ? nf(Math.round(Su * 0.70)) + ' mp' : '—'], ['Nr. apartamente (estimat)', '' + (fn === 'bloc-locuinte' ? Math.max(1, Math.round(Su / 65)) : 1)], ['SU medie / apartament', '≈ 55–75 mp']];
+    } else if (fn === 'hala-industriala') {
+      extra = [['— Standard hală / depozitare —', ''], ['SU depozitare/producție', nf(Su) + ' mp'], ['Sarcină utilă pardoseală', 'conform temă (t/mp)'], ['Înălțime liberă utilă', 'conform gabarit stivuire/rafturi']];
+    } else if (fn === 'parcare') {
+      extra = [['— Standard parcare —', ''], ['Nr. locuri (estimat, 25 mp/loc brut)', '' + (Su ? Math.round(Su / 25) : 0)], ['SU / loc de parcare (cu circulații)', '≈ 25 mp']];
+    } else if (fn === 'sport') {
+      extra = [['— Standard sport —', ''], ['SU teren/sală de joc', 'conform disciplină (FRF/FIBA/FIVB)'], ['Capacitate spectatori (estimat)', '' + (D.capacitate || '—')]];
+    } else if (fn === 'scoala' || fn === 'gradinita') {
+      extra = [['— Standard învățământ (NP 010/2022) —', ''], ['Nr. locuri/copii (estimat)', '' + (D.capacitate || Math.max(1, Math.round(Su / 6)))], ['SU / elev-preșcolar', '≈ 4–6 mp (sală de grupă/clasă)']];
+    }
+    return tbl(rows.concat(extra), ['Indicator de suprafață / standard specific', 'Valoare']);
+  }
   function _verificariTbl(v) {
     return tbl(v.checks.map(function (c) { return [c.status === 'conform' ? 'CONFORM' : c.status === 'neconform' ? 'NECONFORM' : 'ATENȚIE', c.text, c.norma]; }), ['Stare', 'Verificare', 'Temei legal']);
   }
@@ -122,6 +160,7 @@
       var secs = deep ? [
         { h: null, html: deep },
         { h: 'Indicatori urbanistici ai proiectului', html: _indicatoriTbl(D, v) },
+        { h: 'Bilanț de suprafețe și standard specific funcțiunii', html: '<p>Suprafețele utilă/construită/desfășurată și standardul de măsurare specific funcțiunii (ex. BOMA la birouri, GLA la comercial):</p>' + _ariiStandardTbl(D, v) },
         { h: 'Parametri tehnici derivați (sinteză structură · seism · climă · incendiu)', html: '<p>Valorile de mai jos sunt derivate automat din funcțiune, amplasament (județ), sistemul structural și indicatorii geometrici, conform normativelor în vigoare. Ele fundamentează proiectarea pe toate specialitățile și se preiau în piesele scrise și desenate.</p>' + _parametriDerivatiTbl(D, v) },
         { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
       ] : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
@@ -133,7 +172,7 @@
       var deep = _lib(D, 'arhitectura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'arh_pth');
       var secs = deep ? [
         { h: null, html: deep },
-        { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
+        { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + _ariiStandardTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
       ] : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
         { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '.</p>' }
       ]);

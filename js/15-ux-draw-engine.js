@@ -499,10 +499,23 @@
 
   // ─── Notă tehnică pe planșă: tabel cu parametrii tehnici derivați ──────────
   // params = obiect autoCalc (v.calc). Desenează un tabel titrat (mm) lângă cartuș.
+  // Rânduri de suprafețe + standard specific funcțiunii (pt. cartuș planșe) — Su/Sc/Sd + BOMA/GLA etc.
+  UX.ariiRows = function (fn, Sc, Sd, niv) {
+    Sc = +Sc || 0; Sd = +Sd || 0; niv = +niv || 1; var Su = Sd ? Math.round(Sd * 0.82) : 0;
+    var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };
+    var r = [['Su / Sc / Sd (mp)', nf(Su) + ' / ' + nf(Sc) + ' / ' + nf(Sd)]];
+    if (fn === 'birouri') { var rent = Sd ? Math.round(Sd * 0.90) : 0; r.push(['BOMA Rentable/Usable', nf(rent) + ' / ' + nf(Su) + ' mp']); r.push(['BOMA Load factor', Su ? ((rent / Su - 1) * 100).toFixed(1) + '%' : '-']); }
+    else if (fn === 'mall' || fn === 'spatiu-comercial') r.push(['GLA (arie inchiriabila)', nf(Sd ? Math.round(Sd * 0.80) : 0) + ' mp']);
+    else if (fn === 'hotelier') r.push(['Nr. camere (est.)', '' + (Su ? Math.round(Su / 30) : 0)]);
+    else if (fn === 'medical') r.push(['Nr. paturi (est.)', '' + (Su ? Math.round(Su / 35) : 0)]);
+    else if (fn === 'bloc-locuinte') r.push(['Nr. apartamente (est.)', '' + (Su ? Math.round(Su / 65) : 0)]);
+    else if (fn === 'parcare') r.push(['Nr. locuri (est.)', '' + (Su ? Math.round(Su / 25) : 0)]);
+    return r;
+  };
   UX.techNotes = function (doc, x, y, params) {
     params = params || {}; var da = function (b) { return b ? 'DA' : 'nu'; };
     var s = params.seismic || {}, c = params.clima || {};
-    var rows = [
+    var rows = (params._ariiRows && params._ariiRows.length ? params._ariiRows.slice() : []).concat([
       ['Categ. importanță (HG 766/1997)', (params.categorie_importanta || '-')],
       ['Clasă imp. seismică (P100-1)', (params.clasa_importanta || '-') + '  gI=' + (params.gamma_I != null ? params.gamma_I.toFixed(2) : '1.00')],
       ['Factor comportare q', (params.factor_q != null ? params.factor_q.toFixed(1) : '3.0')],
@@ -516,7 +529,7 @@
       ['Desfumare / hidr. int / ext', (da(params.desfumare_oblig) + ' / ' + da(params.hidranti_int_oblig) + ' / ' + da(params.hidranti_ext_oblig))],
       ['Rezerva apa incendiu (est.)', ((params.rezerva_incendiu_mc || 0) + ' mc')],
       ['Sprinklere / IDSAI / lift pomp.', (da(params.sprinklere_oblig) + ' / ' + da(params.idsi_oblig) + ' / ' + da(params.lift_oblig))]
-    ];
+    ]);
     var W = 120, rh = 6.5, H = rh * (rows.length + 1); // mm
     doc.rect(x, y, W, H, 'T-TITL-LINE');
     doc.line(x, y + H - rh, x + W, y + H - rh, 'T-TITL-LINE');

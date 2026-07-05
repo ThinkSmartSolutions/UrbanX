@@ -440,6 +440,7 @@
     // Opțiuni pentru motorul comun UX_DRAW (fundații/cofraj/instalații + DXF pt situație/secțiune/fațadă)
     var nivCount = Object.keys(lay).filter(function (n) { return nivOrd(n) >= 0; }).length || 1;
     var _ac = {}; try { _ac = (window.UXDoc && window.UXDoc.autoCalc) ? window.UXDoc.autoCalc(D) : {}; } catch (e) {}
+    try { if (window.UX_DRAW && window.UX_DRAW.ariiRows) { var _scE = (D.bW || D.aedis_bW || 20) * (D.bD || D.aedis_bD || 14); _ac._ariiRows = window.UX_DRAW.ariiRows(D.functiune, _scE, _scE * nivCount, nivCount); } } catch (e) {}
     var uxOpts = { width: D.bW || D.aedis_bW || 20, adancime: D.bD || D.aedis_bD || 14, niv: nivCount, hParter: D.hNiv || 3, hEtaj: D.hNiv || 3, roof: (nivCount > 2 ? 'terasa' : 'sarpanta'), winPerFloor: Math.max(2, Math.round((D.bW || D.aedis_bW || 20) / 3)), params: _ac, adancimeFundatie: (_ac && _ac.adancime_inghet_m) || 1.0, rl: D.rl || 3, rf: D.rf || 5, rs: D.rs || 6, parcelArea: D.area, nrCad: meta.nrcad || D.nrcad, proiect: meta.proiect || meta.titlu || D.nume, beneficiar: meta.beneficiar || D.beneficiar, data: meta.data, faza: meta.faza || D.faza || 'DTAC' };
     function uxDoc(kind, plansa) { if (!window.UX_DRAW) return null; try {
       var o = Object.assign({}, uxOpts, { plansa: plansa }); var UX = window.UX_DRAW;
