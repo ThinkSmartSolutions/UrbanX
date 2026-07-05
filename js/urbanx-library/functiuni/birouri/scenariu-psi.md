@@ -30,6 +30,10 @@ Conform P118-1, clădirile civile se clasifică după înălțime astfel: obișn
 
 Clădirea nu adăpostește procese tehnologice cu pericol de incendiu/explozie. Sursele potențiale de inițiere: instalații electrice, echipamente de birou, spații tehnice (post trafo, tablouri, grup electrogen, CTA), parcaj (autovehicule). Nu există depozite de materiale periculoase în cantități relevante.
 
+Scenariul de securitate la incendiu are ca scop demonstrarea îndeplinirii cerinței fundamentale „securitate la incendiu" (cerința B din Legea 10/1995) prin analiza sistematică a: riscului de incendiu și a densității sarcinii termice; nivelurilor de performanță ale construcției (stabilitate la foc, limitarea propagării, protecția utilizatorilor și a forțelor de intervenție); condițiilor de evacuare; instalațiilor de detectare, semnalizare, stingere și desfumare; și condițiilor de intervenție a forțelor de salvare. Documentul se elaborează conform structurii impuse de Ordinul MAI 129/2016 și fundamentează atât proiectarea măsurilor de securitate la incendiu, cât și avizul și autorizația de securitate la incendiu emise de ISU/IGSU. Fiind o clădire de birouri cu funcțiuni complementare, cu regim de înălțime P+6E (posibil clădire înaltă în varianta supraînălțată) și cu parcaj subteran, clădirea intră sub incidența HG 571/2016 privind obligativitatea avizării/autorizării de securitate la incendiu.
+
+Analiza pornește de la identificarea funcțiunilor și a modului de utilizare: birouri (utilizatori permanenți, cunoscători ai clădirii, valizi în majoritate), funcțiuni complementare la parter (posibil public ocazional), parcaj (utilizare tranzitorie). Numărul de utilizatori, mobilitatea și gradul de cunoaștere a clădirii influențează cerințele de evacuare și de alarmare. Sursele de inițiere a incendiului sunt cele tipice clădirilor de birouri (defecte electrice, echipamente, fumat neconform, lucrări cu foc deschis la mentenanță), fără riscuri tehnologice deosebite.
+
 ---
 
 ## 2. RISCUL DE INCENDIU. DENSITATEA SARCINII TERMICE
@@ -65,6 +69,10 @@ unde: Mi = masa materialului combustibil „i" [kg]; Hi = puterea calorifică in
 
 Pentru arhive dedicate (compartiment separat), qf depășește 840 MJ/mp → risc mare → tratare distinctă (compartimentare EI, stingere adecvată, limitarea suprafeței).
 
+Densitatea sarcinii termice este parametrul care caracterizează cantitativ potențialul caloric al unui incendiu într-un spațiu dat și stă la baza clasificării riscului de incendiu (mic, mijlociu, mare) conform P118-1. Pentru spațiile de birouri, valoarea calculată (~327 MJ/mp în exemplul de mai sus) se încadrează în domeniul riscului mijlociu, tipic acestei funcțiuni. Riscul mijlociu determină cerințe corespunzătoare privind: aria maximă a compartimentului de incendiu, distanțele maxime de evacuare, dotarea cu instalații de detectare și stingere și intensitatea de stingere (la sprinklere). Zonele cu risc diferit (arhive — risc mare; circulații, GS — risc mic) se tratează diferențiat: arhivele se separă în compartimente cu rezistență la foc ridicată, cu suprafață limitată și cu stingere adecvată, pentru a nu ridica riscul global al clădirii. Spațiile tehnice cu echipamente electrice (post trafo, tablouri, servere) se protejează conform NP 086/2005, cu detecție dedicată și, unde e cazul, stingere cu gaz. Riscul global al clădirii de birouri este astfel menținut la nivel mijlociu, cu tratarea punctuală a zonelor cu risc mai mare.
+
+Metodologia de calcul a densității sarcinii termice (P118-1, anexa aferentă) presupune inventarierea materialelor combustibile din spațiu (fixe — finisaje, tâmplării — și mobile — mobilier, echipamente, documente), determinarea masei și a puterii calorifice inferioare a fiecăruia, și raportarea sarcinii termice totale la aria pardoselii. Pentru clădirile de birouri, contribuția majoră o au mobilierul (lemn/PAL), documentele (hârtie) și materialele plastice ale echipamentelor și finisajelor. Valorile de referință utilizate (puteri calorifice: lemn ~17 MJ/kg, hârtie ~16 MJ/kg, materiale plastice ~30 MJ/kg) sunt cele uzuale în literatura de specialitate și în normativ. Rezultatul confirmă încadrarea în riscul mijlociu, cu excepția arhivelor tratate separat.
+
 ---
 
 ## 3. NIVELURILE DE PERFORMANȚĂ
@@ -72,6 +80,8 @@ Pentru arhive dedicate (compartiment separat), qf depășește 840 MJ/mp → ris
 ### 3.1. Gradul de rezistență la foc
 
 Clădirea se realizează în **gradul II de rezistență la foc**, corespunzător funcțiunii de birouri cu nivel mediu de înălțime (obligatoriu grad I–II la clădiri înalte). Elementele de construcție trebuie să asigure clasele de reacție la foc și rezistență la foc conform tabelelor P118-1 pentru gradul II.
+
+Gradul de rezistență la foc caracterizează capacitatea globală a construcției de a-și menține stabilitatea și integritatea într-un incendiu, pentru un timp suficient evacuării utilizatorilor și intervenției forțelor de salvare. El se stabilește în funcție de rezistența la foc a elementelor principale (structura de rezistență, pereții și planșeele de compartimentare) și determină, la rândul său, aria maximă a compartimentului de incendiu și numărul de niveluri admis. Gradul II asigură, prin structura de beton armat (material incombustibil, cu rezistență la foc ridicată în funcție de dimensiuni și acoperiri), o comportare foarte bună la foc: betonul nu contribuie la sarcina termică, își menține capacitatea portantă un timp îndelungat, și limitează propagarea. Alegerea gradului II (nu I) este justificată tehnic și economic pentru o clădire de birouri de acest regim de înălțime, cu condiția respectării cerințelor de rezistență la foc ale elementelor și a dotării cu instalații de securitate la incendiu.
 
 ### 3.2. Rezistența la foc a elementelor (grad II)
 
@@ -94,6 +104,8 @@ Pe căile de evacuare și în spațiile comune: finisaje clasa de reacție la fo
 ### 3.4. Aria maximă a compartimentului de incendiu
 
 Conform P118-1, aria maximă admisă a unui compartiment de incendiu pentru clădiri civile de gradul II de rezistență la foc este de regulă **2.500 mp** pe nivel (cu majorări în funcție de dotarea cu sprinklere — până la dublare). Suprafața construită la sol ~900 mp și aria pe nivel ~720–780 mp se încadrează cu marjă în limita compartimentului de incendiu, chiar și fără majorare. **Fiecare nivel constituie astfel un compartiment**, separat prin planșee REI, cu comunicare verticală protejată (case de scări închise/presurizate, ghene sigilate).
+
+Compartimentul de incendiu este volumul delimitat de elemente de construcție rezistente la foc (pereți, planșee) astfel încât un incendiu declanșat în interiorul său să fie împiedicat să se propage la compartimentele vecine pe durata reglementată. Limitarea ariei compartimentului este esențială pentru controlul dezvoltării incendiului și pentru eficacitatea intervenției. În cazul de față, dimensiunile reduse ale amprentei (aria pe nivel mult sub limita de 2.500 mp) fac ca fiecare nivel să constituie un compartiment de incendiu de sine stătător, separat de nivelurile adiacente prin planșeele rezistente la foc. Comunicarea pe verticală (case de scări, lifturi, ghene) se realizează exclusiv prin elemente protejate (pereți și uși rezistente la foc, ghene etanșate la traversarea planșeelor), astfel încât separarea între compartimente să fie efectivă. Parcajul subteran constituie un compartiment distinct, separat de restul clădirii prin elemente cu rezistență la foc ridicată și prin sas ventilat, dat fiind riscul specific (autovehicule, combustibili).
 
 ### 3.5. Propagarea incendiului
 
@@ -118,6 +130,8 @@ Măsuri împotriva propagării:
 
 **Persoane pe nivelul curent de calcul: 72.** Capacitatea de evacuare se dimensionează pentru nivelul cel mai aglomerat și pentru fluxul cumulat pe scări.
 
+Numărul de persoane care trebuie evacuate se determină pe baza densității de ocupare specifice fiecărei funcțiuni (pentru birouri, o persoană la 10 mp de arie utilă în ipoteza de proiectare, cu verificarea scenariului de densificare). La parter, unde coexistă lobby, spații de servicii/retail și eventual sală de conferință, numărul de persoane se calculează cumulat pe funcțiuni, cu densitățile specifice (mai mari la sălile de întrunire). Nivelul cel mai defavorabil (cel mai aglomerat) dimensionează capacitatea căilor de evacuare de pe nivelul respectiv, iar scările se dimensionează pentru fluxul cumulat provenit de la nivelurile deservite, ținând cont de scenariul de evacuare (simultană sau etajată). Pentru o clădire de birouri, se adoptă de regulă evacuarea simultană a nivelului incendiat și a celor imediat adiacente, cu alarmare fazată prin sistemul EVAC. Capacitatea de evacuare rezultată din calcul se compară cu cea asigurată de cele două case de scări, verificându-se acoperirea cu marjă.
+
 ### 4.2. Unități de trecere (fluxuri de evacuare)
 
 Conform P118-1, lățimea căilor de evacuare se exprimă în **unități de trecere (fluxuri)**, o unitate = **0,60 m**. Capacitatea de evacuare a unei unități de trecere pentru clădiri civile este de regulă **70 de persoane** pentru evacuare pe orizontală și palier, respectiv valori corectate pentru scări.
@@ -127,6 +141,8 @@ Conform P118-1, lățimea căilor de evacuare se exprimă în **unități de tre
 - Lățime necesară = 2 × 0,60 = **1,20 m** per direcție de evacuare.
 
 Se prevăd **două direcții de evacuare** (două case de scări în capete opuse ale nucleului), fiecare cu lățime liberă a rampei ≥ **1,20 m** (2 fluxuri), ceea ce acoperă cu marjă necesarul.
+
+Unitatea de trecere (fluxul de evacuare) este lățimea convențională de 0,60 m prin care se poate deplasa un șir de persoane; capacitatea de evacuare exprimă numărul de persoane care se pot evacua printr-o unitate de trecere într-un timp normat. Numărul necesar de unități de trecere se obține împărțind numărul de persoane de evacuat la capacitatea unei unități, rotunjind în plus. Lățimea liberă a căilor de evacuare (uși, coridoare, rampe de scară) trebuie să fie multiplu de unitate de trecere și să nu fie sub minimele impuse de normativ (o cale de evacuare are minim o unitate de trecere; căile principale minim două). Se ține cont că lățimile nu se pot reduce pe traseul de evacuare în sensul deplasării (evitarea „gâtuirilor"). Pentru cele 72 de persoane pe nivel, necesarul de ~2 unități per direcție (2 × 0,60 = 1,20 m) este asigurat de fiecare dintre cele două case de scări, cu marjă. La parter, unde fluxurile converg spre exterior, ieșirile finale se dimensionează pentru fluxul cumulat.
 
 ### 4.3. Numărul căilor de evacuare și distanțele
 
@@ -140,6 +156,10 @@ Conform P118-1, pentru clădiri de birouri se prevăd **minimum două căi de ev
 
 Timpul de evacuare rezultă acoperitor (viteza de deplasare ~ 1,0–1,3 m/s pe orizontală, debit scări conform normativ).
 
+Distanțele de evacuare (lungimea traseului de la punctul cel mai îndepărtat până la o ieșire spre o cale protejată) sunt limitate de normativ pentru a garanta că utilizatorii ajung la loc sigur înainte ca fumul și căldura să compromită traseul. Distanța admisă este mai mare când există două direcții de evacuare divergente (traseu în „două sensuri") și mai mică pentru traseul în „fund de sac" (o singură direcție), deoarece în acest din urmă caz un incendiu poate bloca singura ieșire. Amplasarea celor două case de scări în capete opuse ale nucleului asigură divergența traseelor și încadrarea în distanța admisă pentru evacuarea în două sensuri (≤ 40 m), cu porțiuni de fund de sac limitate (≤ 20 m). Timpul teoretic de evacuare, estimat pe baza vitezelor de deplasare și a debitelor prin unitățile de trecere și case de scări, rezultă acoperitor față de timpul disponibil (până la atingerea condițiilor critice de fum/căldură), mai ales în condițiile desfumării și ale detecției timpurii.
+
+Ușile de pe căile de evacuare se deschid în sensul evacuării (spre exterior/spre casa de scări), sunt echipate cu dispozitiv de autoînchidere și, la ieșirile principale și la casele de scări, cu bară antipanică pentru deschidere facilă sub presiunea mulțimii. Ușile rezistente la foc (EI2) mențin separarea compartimentelor și protecția casei de scări. Sistemele de control acces se deblochează automat la alarma de incendiu, pentru a nu împiedica evacuarea.
+
 ### 4.4. Casele de scări de evacuare
 
 - **Două case de scări** închise, cu pereți REI 150–180 și uși EI2 pe paliere.
@@ -150,6 +170,8 @@ Timpul de evacuare rezultă acoperitor (viteza de deplasare ~ 1,0–1,3 m/s pe o
 ### 4.5. Presurizarea și evacuarea fumului pe casele de scări
 
 La varianta clădire înaltă, casele de scări de evacuare și antecamerele lifturilor se **presurizează mecanic** pentru a împiedica pătrunderea fumului. Sistemul asigură suprapresiune 50 Pa (uși închise) și viteză a aerului ≥ 0,75–2,0 m/s prin ușa deschisă a nivelului incendiat, conform SR EN 12101-6 (clasa de presurizare corespunzătoare evacuării simultane/etajate). Alimentarea ventilatoarelor de presurizare se face din sursa de rezervă (grup electrogen).
+
+Presurizarea casei de scări este o soluție superioară desfumării prin evacuare atunci când scara trebuie să rămână complet liberă de fum (clădiri înalte): prin menținerea unei suprapresiuni în casa de scări față de spațiile adiacente, fumul este împiedicat să pătrundă chiar și la deschiderea ușilor. Sistemul trebuie să concilieze două cerințe aparent contradictorii: suprapresiune suficientă cu ușile închise (~50 Pa) pentru a bloca fumul, dar fără a face imposibilă deschiderea ușilor (forța la clanță limitată), și o viteză suficientă a aerului prin ușa deschisă a nivelului incendiat (≥ 0,75–2,0 m/s după caz) pentru a împinge fumul înapoi. Aceasta se realizează prin ventilatoare de introducere cu debit variabil și clapete de suprapresiune (relief) care evacuează excesul. Antecamerele (sasurile) dintre casa de scări/liftul de pompieri și nivel, de asemenea presurizate, creează o zonă-tampon suplimentară. Clasa de presurizare (SR EN 12101-6) se alege în funcție de scenariul de utilizare (evacuare simultană, evacuare fazată, utilizare de către pompieri).
 
 ---
 
@@ -174,6 +196,12 @@ Instalația de detectare, semnalizare și avertizare la incendiu este **obligato
 
 Detecția comandă automat: pornirea desfumării, închiderea clapetelor antifoc, oprirea recirculării aerului, aducerea lifturilor la parter și blocarea lor (recall), deblocarea ușilor pe căile de evacuare, activarea alarmării vocale.
 
+Instalația de detectare, semnalizare și avertizare la incendiu constituie „sistemul nervos" al securității la incendiu: detectează incendiul în faza incipientă, alarmează utilizatorii și comandă automat celelalte sisteme (desfumare, oprire ventilare, recall lifturi, deblocare uși). Detecția timpurie este decisivă, deoarece scurtează intervalul dintre inițierea incendiului și începerea evacuării, mărind marja de siguranță. Sistemul adresabil permite localizarea exactă a detectorului declanșat (identificarea zonei/încăperii), facilitând intervenția și reducând alarmele false prin verificare. Acoperirea totală (nu doar pe căile de evacuare, ci în toate spațiile, inclusiv tehnice, ghene și parcaj) asigură că niciun focar nu rămâne nedetectat.
+
+Sistemul de alarmare vocală (EVAC), obligatoriu la clădirile înalte și recomandat la cele cu populație numeroasă, transmite mesaje de evacuare clare și inteligibile (nu doar semnal sonor), permițând alarmarea fazată (întâi nivelul incendiat și cele adiacente, apoi extinderea), ceea ce evită panica și congestionarea căilor de evacuare. Inteligibilitatea vorbirii se verifică conform SR EN 54-16/24. Centrala de detecție și echipamentele de alarmare sunt alimentate din sursa de bază și dintr-o sursă de rezervă (acumulatori) care asigură funcționarea și în caz de pană de curent, pe durata normată (autonomie în stare de veghe + în stare de alarmare). Transmisia semnalului de alarmă către un dispecerat/serviciu de urgență asigură anunțarea rapidă a forțelor de intervenție.
+
+Componentele sistemului (detectoare optice de fum, termice, lineare, butoane manuale, sirene, difuzoare, centrală, module de comandă) se amplasează astfel încât să acopere integral spațiile, respectând razele de acoperire și distanțele maxime din normativ. Detectoarele de fum se aleg pentru spațiile cu risc de incendiu mocnit (birouri, arhive), cele termice pentru spațiile cu praf/vapori care ar da alarme false la detectoarele de fum, iar în parcaj detectoare adaptate mediului. Butoanele manuale se amplasează pe căile de evacuare și lângă ieșiri, pentru declanșarea manuală a alarmei.
+
 ---
 
 ## 6. INSTALAȚII DE STINGERE A INCENDIILOR — P118-2
@@ -187,12 +215,16 @@ Conform P118-2, clădirea se echipează cu **hidranți interiori** care asigură
 - Timp teoretic de funcționare hidranți interiori: **10 minute**.
 - Rezerva pentru hidranți interiori: Vhi = 4,2 l/s × 600 s = **2.520 litri ≈ 2,5 mc**.
 
+Hidranții interiori sunt prima linie de intervenție cu apă, utilizabili de personalul instruit și de forțele de intervenție în faza incipientă a incendiului. Amplasarea lor (în nișe marcate, pe căile de circulație, lângă intrări și case de scări) asigură ca fiecare punct al fiecărui nivel să poată fi atins de jeturile a cel puțin doi hidranți simultan — condiție pentru clădirile cu mai multe niveluri. Furtunul (uzual 20 m) plus bătaia jetului acoperă raza de acțiune necesară. Rețeaua de hidranți interiori este alimentată din instalația de incendiu (rezervor + pompe), separată sau interconectată corespunzător cu celelalte instalații de stingere, astfel încât presiunea și debitul la ajutaj să fie asigurate simultan pentru numărul de jeturi de calcul.
+
 ### 6.2. Hidranți exteriori
 
 - Debit hidranți exteriori pentru clădiri civile de acest volum: **q ≈ 20 l/s** (conform P118-2, în funcție de volumul construit și gradul RF; volum ~28.000 mc → debit 20 l/s).
 - Timp de funcționare: **3 ore** (180 minute).
 - Rezerva pentru hidranți exteriori: Vhe = 20 l/s × 10.800 s = 216.000 litri = **216 mc**.
 - Se asigură din rețeaua stradală (dacă are debit/presiune) sau din rezervorul propriu (gospodărie de apă cu pompe).
+
+Hidranții exteriori asigură alimentarea cu apă a autospecialelor de intervenție și stingerea de la exterior. Debitul necesar depinde de volumul construit și de gradul de rezistență la foc, conform tabelelor P118-2; pentru un volum de ~28.000 mc și grad II, debitul de calcul este de ordinul 20 l/s, iar timpul teoretic de funcționare de 3 ore, ceea ce conduce la o rezervă intangibilă importantă. Dacă rețeaua publică nu asigură debitul și presiunea necesare (verificat prin avizul operatorului), rezerva se asigură din rezervorul propriu, iar hidranții exteriori se alimentează prin pompare. Hidranții exteriori se amplasează pe traseul de intervenție al autospecialelor, la distanțele reglementare față de clădire și între ei, astfel încât să acopere perimetrul.
 
 ### 6.3. Instalație de sprinklere (drencere pentru ADS)
 
@@ -202,6 +234,8 @@ Conform P118-2, clădirea se echipează cu **hidranți interiori** care asigură
 - Debit sprinklere: q = 5 l/min·mp × 216 mp / 60 = **18 l/s** (orientativ, se detaliază în proiect).
 - Timp de funcționare sprinklere risc mijlociu: **60 minute**.
 - Rezerva sprinklere: Vsp = 18 l/s × 3.600 s = 64.800 litri ≈ **65 mc**.
+
+Instalația de sprinklere (stingere automată cu apă) este cea mai eficientă măsură de control a incendiului în faza incipientă, acționând automat la atingerea temperaturii de declanșare a capului sprinkler din zona afectată, fără intervenție umană. La clădirile înalte, sprinklerizarea integrală este obligatorie și constituie una dintre măsurile compensatorii care permit gradul II de rezistență la foc și ariile de compartiment adoptate. Instalația de tip umed (conducte permanent sub presiune cu apă) este adecvată spațiilor ferite de îngheț. Dimensionarea (intensitatea de stropire, aria de calcul/de declanșare simultană) se face conform clasei de risc: pentru birouri (risc mijlociu — clasa de pericol „ordinary hazard"), intensitatea de stropire și aria de calcul conduc la debitul și rezerva estimate mai sus. Instalația se prevede cu stație de control (aparat de control și semnalizare), care semnalează declanșarea la centrala de detecție. Extinderea sprinklerelor și în parcaj și în spațiile comune (la varianta înaltă) uniformizează protecția.
 
 ### 6.4. Rezerva de apă pentru incendiu — sinteză
 
@@ -213,6 +247,8 @@ Conform P118-2, clădirea se echipează cu **hidranți interiori** care asigură
 | **Total rezervă dimensionantă (însumat acoperitor)** | — | — | **~280 mc** (rezervor dedicat) |
 
 Notă: volumele se pot cumula sau nu în funcție de scenariul de funcționare simultană admis de P118-2; se adoptă valoarea acoperitoare pentru dimensionarea rezervorului. Rezervorul de incendiu este dedicat, cu compartimentare care garantează rezerva intangibilă, alimentat cu pompe (activă + rezervă + pompă-pilot), grup de pompare conform I9/P118-2, cu alimentare electrică din sursa de rezervă.
+
+Rezerva de apă pentru incendiu se asigură într-un rezervor dedicat, dimensionat pentru scenariul cel mai defavorabil de funcționare simultană a instalațiilor de stingere (conform P118-2). Volumul se stabilește însumând (acoperitor) necesarul pentru instalațiile care pot funcționa concomitent, pe durata lor de calcul. Rezerva intangibilă se protejează prin soluții constructive (racord de aspirație amplasat astfel încât consumul curent să nu poată epuiza rezerva de incendiu, sau rezervor exclusiv de incendiu). Grupul de pompare cuprinde pompa/pompele active, o pompă de rezervă (100% din capacitate) și o pompă-pilot pentru menținerea presiunii, cu automatizare de pornire la scăderea presiunii sau la comandă. Alimentarea electrică a grupului de pompare se face din sursa de bază și din sursa de rezervă (grup electrogen), garantând funcționarea și în caz de întrerupere a alimentării normale. Rezervorul se completează automat din rețeaua de apă.
 
 ### 6.5. Stingerea în spații speciale
 
@@ -227,6 +263,8 @@ Notă: volumele se pot cumula sau nu în funcție de scenariul de funcționare s
 
 Desfumarea asigură menținerea căilor de evacuare libere de fum și facilitează intervenția. Se realizează prin **tiraj natural-organizat** (guri de introducere + evacuare cu suprafață liberă) sau **mecanic** (ventilatoare) în funcție de configurație și înălțime.
 
+Fumul este, statistic, principala cauză de deces în incendii — mai mult decât căldura sau flacăra. Desfumarea (evacuarea fumului și a gazelor fierbinți) urmărește două obiective: menținerea liberă de fum a căilor de evacuare pe durata evacuării, și crearea condițiilor de intervenție pentru pompieri (vizibilitate, evacuarea căldurii). Principiul de bază este stratificarea și evacuarea fumului la partea superioară, cu introducerea aerului proaspăt la partea inferioară, creând un tiraj care menține o zonă liberă de fum la nivelul de circulație. Desfumarea poate fi naturală (prin deschideri/trape cu suprafață liberă calculată, valorificând tirajul termic) sau mecanică (cu ventilatoare de extracție și de introducere, capabile să funcționeze la temperatura fumului). Alegerea între cele două se face în funcție de configurația spațiului, de înălțimea clădirii și de posibilitatea realizării deschiderilor spre exterior.
+
 ### 7.2. Desfumarea caselor de scări
 
 - La varianta sub 28 m: casele de scări închise se desfumează natural (fereastră/trapă în partea superioară, suprafață liberă ≥ 1 mp sau 5% din aria proiecției scării, cu introducere de aer la partea inferioară).
@@ -239,11 +277,15 @@ Desfumarea asigură menținerea căilor de evacuare libere de fum și faciliteaz
   - Pentru un coridor de ~ 120 mp: debit evacuare ~ 1,2 mc/s, cu introducere de aer proaspăt de compensare (~ 60% din debitul evacuat).
 - Sistemul se activează automat de la detecția de incendiu, pe zona incendiată.
 
+Coridoarele și holurile de etaj care servesc drept căi de evacuare și care depășesc lungimile sau nu dispun de ventilare naturală se desfumează pentru a rămâne practicabile. Desfumarea coridoarelor se dimensionează pentru a evacua debitul de fum degajat și pentru a menține o zonă liberă la nivelul de circulație, cu introducere de aer de compensare (de regulă ~60% din debitul evacuat, restul fiind asigurat prin infiltrații și prin deschiderea ușilor). Comanda se dă automat, pe zona incendiată identificată de detecție, pentru a nu antrena fumul în zonele neafectate. Clapetele antifoc de pe tubulatura de ventilare curentă se închid la incendiu, izolând circuitele, iar ventilarea de confort se oprește pentru a nu propaga fumul.
+
 ### 7.4. Desfumarea parcajului subteran
 
 - Parcajul subteran (~1.400 mp) se desfumează **mecanic** (P118-2, NP 086, I5), cu ventilatoare rezistente la temperatură (400°C/2h sau conform normativ), separate pe zone de fum.
 - Debit desfumare parcaj: minim **600 mc/h per autovehicul** protejat sau ≥ **12 schimburi/oră** raportate la volumul zonei de fum, cu introducere de aer de compensare naturală/mecanică.
 - Sistemul de ventilare în regim curent (control CO) comută în regim de desfumare la detecție/comandă manuală.
+
+Parcajul subteran prezintă un risc specific (autovehicule cu combustibil, dezvoltare rapidă a fumului, spațiu fără lumină naturală) și necesită desfumare mecanică eficientă. Sistemul se organizează pe zone de fum, cu ventilatoare de extracție rezistente la temperatura fumului (certificate pentru funcționare la 400°C timp de 2 ore sau conform cerinței normativului) și cu introducere de aer de compensare (natural, prin rampă și grile, sau mecanic). Același sistem de ventilare care în regim curent controlează concentrația de CO (comandat de senzori) comută în regim de desfumare la detecția incendiului sau la comandă manuală. Ventilatoarele, clapetele și tablourile de comandă sunt alimentate din sursa de rezervă. Desfumarea parcajului facilitează atât evacuarea persoanelor, cât și intervenția pompierilor într-un spațiu altfel rapid invadat de fum.
 
 ### 7.5. Alimentarea sistemelor de desfumare
 
@@ -259,12 +301,16 @@ Conform P118-1, la clădirile cu cota ultimului nivel folosibil **peste 28 m (cl
 - Lift de pompieri conform **SR EN 81-72**, cu antecameră presurizată la fiecare nivel, uși EI, comandă prioritară pentru pompieri, cabină și puț protejate REI.
 - Alimentare electrică din sursa de rezervă, cu comutare automată.
 
+Liftul de pompieri permite forțelor de intervenție să ajungă rapid la nivelurile superioare cu echipamentul, fără a urca pe scări (esențial la clădirile înalte, unde urcarea pe scări ar epuiza pompierii). Spre deosebire de lifturile obișnuite (care se aduc la parter și se blochează la alarma de incendiu — recall), liftul de pompieri rămâne funcțional sub comanda exclusivă a pompierilor, cu cabină și puț protejate la foc, antecameră presurizată la fiecare nivel (protecție împotriva fumului) și alimentare electrică asigurată din sursa de rezervă. Conformarea la SR EN 81-72 (reguli de securitate pentru lifturile de pompieri) garantează funcționarea sigură în condiții de incendiu. La varianta P+6E sub 28 m, liftul de pompieri nu este impus, dar prevederea unui lift utilizabil de pompieri cu antecameră este o măsură de siguranță recomandată.
+
 ### 8.2. Accesul autospecialelor ISU
 
 - Cale de intervenție perimetrală cu lățime liberă ≥ **3,80 m**, gabarit vertical ≥ **4,20 m**, rază de racord ≥ 12 m, capabilă să susțină autospeciale grele.
 - Platformă de amplasare autoscară/autospecială pentru intervenție la fațadă (la clădire înaltă).
 - Racord de alimentare pompieri (racord tip B pentru coloana uscată/umedă) accesibil de la calea de intervenție.
 - Hidranți exteriori amplasați la ≤ 100 m de clădire și pe traseul de intervenție.
+
+Accesul și posibilitățile de intervenție ale forțelor de salvare sunt condiții esențiale ale securității la incendiu. Calea de intervenție trebuie să permită apropierea autospecialelor (autopompe, autoscări) de clădire, staționarea și manevra lor, și accesul la sursele de apă (hidranți exteriori, racord de alimentare al instalației interioare). Dimensiunile (lățime ≥ 3,80 m, gabarit vertical ≥ 4,20 m, raze de racord) și portanța platformei se stabilesc pentru autospecialele grele. La clădirile înalte, unde intervenția se poate face și de la înălțime (autoscară/autoplatformă), se prevede o platformă de amplasare a acesteia, cu acces la o fațadă. Calea de intervenție și platformele se mențin permanent libere (marcaj, interdicție de parcare). Racordul de alimentare al pompierilor (pentru coloanele uscate/umede care alimentează hidranții interiori de la autospecială) se amplasează accesibil de pe calea de intervenție.
 
 ---
 

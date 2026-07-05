@@ -547,7 +547,9 @@
         { h: '3. Jurnalul evenimentelor', html: '<p>Se completează cronologic, pe toată durata de existență a construcției, de către proprietar/administrator:</p>' + jurnal },
         { h: '4. Responsabilități și predare-primire', html: resp + '<p style="margin-top:6pt">Cartea tehnică se predă proprietarului la recepția la terminarea lucrărilor și se păstrează pe toată durata de existență a construcției; la înstrăinare se predă noului proprietar (Legea 10/1995). Nepredarea/necompletarea constituie contravenție.</p><p style="margin-top:6pt">Întocmit: ' + esc(D.proiectant || '____________________') + ' &nbsp; Data: ______________ &nbsp; Semnătura: ______________</p>' }
       ];
-      return { cat: 'Recepție & Urmărire', file: 'Cartea_tehnica_a_constructiei.doc', html: docHtml(_meta(D, 'CARTEA TEHNICĂ A CONSTRUCȚIEI', 'Legea 10/1995 · HG 273/1994 · HG 766/1997 Anexa 6 — secțiuni A–D + jurnal'), secs) };
+      var deepCT = _lib(D, 'carte_tehnica');
+      if (deepCT) secs = [{ h: null, html: deepCT }, { h: 'ANEXĂ — Centralizatorul pieselor pe secțiuni (opis) și jurnalul evenimentelor pentru acest proiect', html: '<p>Următorul centralizator particularizează Cartea Tehnică pentru obiectivul de față, conform structurii metodologice de mai sus.</p>' }].concat(secs.slice(1));
+      return { cat: 'Recepție & Urmărire', file: 'Cartea_tehnica_a_constructiei.doc', html: docHtml(_meta(D, 'CARTEA TEHNICĂ A CONSTRUCȚIEI', 'Legea 10/1995 · HG 273/1994 · HG 766/1997 Anexa 6 — regulament + secțiuni A–D + jurnal'), secs) };
     },
     'Memorii avizatori': function (D, v) {
       var ac = v.calc || {};

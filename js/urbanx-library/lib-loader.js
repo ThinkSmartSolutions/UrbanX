@@ -18,7 +18,7 @@
     arhitectura: 'arhitectura.md', structura: 'structura.md', instalatii: 'instalatii.md', general: 'general.md',
     caiet_arh: 'caiet-sarcini-arhitectura.md', caiet_str: 'caiet-sarcini-rezistenta.md', caiet_inst: 'caiet-sarcini-instalatii.md',
     arh_pth: 'arhitectura-pth.md', str_pth: 'structura-pth.md', inst_pth: 'instalatii-pth.md',
-    scenariu_psi: 'scenariu-psi.md', dtoe: 'dtoe.md', aviz_mediu: 'aviz-mediu.md', dali: 'dali.md', receptie: 'receptie.md'
+    scenariu_psi: 'scenariu-psi.md', dtoe: 'dtoe.md', aviz_mediu: 'aviz-mediu.md', dali: 'dali.md', receptie: 'receptie.md', carte_tehnica: 'carte-tehnica.md'
   };
   // REGISTRU funcțiuni (folder). centru-social e încărcat de loader-ul propriu.
   var REG = {
