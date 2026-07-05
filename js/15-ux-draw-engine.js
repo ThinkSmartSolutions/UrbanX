@@ -99,22 +99,25 @@
   UX.newDoc = function () {
     var ents = [];       // linii de text ENTITIES
     var used = {};       // layere folosite
+    var prims = [];      // primitive structurate (pt. preview SVG in browser)
     var hseed = 0x100;   // handle seed (hex)
     function h() { return (hseed++).toString(16).toUpperCase(); }
     function use(layer) { if (UX.LAYERS[layer]) used[layer] = 1; else used[layer] = 1; return layer; }
     function pair(code, val) { ents.push(code + '\n' + val); }
 
     var api = {
-      _ents: ents, _used: used,
+      _ents: ents, _used: used, _prims: prims,
       line: function (x1, y1, x2, y2, layer) {
         use(layer); pair(0, 'LINE'); pair(5, h()); pair(100, 'AcDbEntity'); pair(8, layer); pair(100, 'AcDbLine');
         pair(10, num(x1)); pair(20, num(y1)); pair(30, '0'); pair(11, num(x2)); pair(21, num(y2)); pair(31, '0');
+        prims.push({ t: 'line', x1: +x1, y1: +y1, x2: +x2, y2: +y2, l: layer });
         return api;
       },
       pline: function (pts, closed, layer) {
         use(layer); pair(0, 'LWPOLYLINE'); pair(5, h()); pair(100, 'AcDbEntity'); pair(8, layer); pair(100, 'AcDbPolyline');
         pair(90, pts.length); pair(70, closed ? 1 : 0);
         pts.forEach(function (p) { pair(10, num(p[0])); pair(20, num(p[1])); });
+        prims.push({ t: 'poly', pts: pts.map(function (p) { return [+p[0], +p[1]]; }), closed: !!closed, l: layer });
         return api;
       },
       rect: function (x, y, w, hgt, layer) {
@@ -122,12 +125,14 @@
       },
       circle: function (cx, cy, r, layer) {
         use(layer); pair(0, 'CIRCLE'); pair(5, h()); pair(100, 'AcDbEntity'); pair(8, layer); pair(100, 'AcDbCircle');
-        pair(10, num(cx)); pair(20, num(cy)); pair(30, '0'); pair(40, num(r)); return api;
+        pair(10, num(cx)); pair(20, num(cy)); pair(30, '0'); pair(40, num(r));
+        prims.push({ t: 'circle', cx: +cx, cy: +cy, r: +r, l: layer }); return api;
       },
       arc: function (cx, cy, r, a0, a1, layer) {
         use(layer); pair(0, 'ARC'); pair(5, h()); pair(100, 'AcDbEntity'); pair(8, layer); pair(100, 'AcDbCircle');
         pair(10, num(cx)); pair(20, num(cy)); pair(30, '0'); pair(40, num(r)); pair(100, 'AcDbArc');
-        pair(50, num(a0)); pair(51, num(a1)); return api;
+        pair(50, num(a0)); pair(51, num(a1));
+        prims.push({ t: 'arc', cx: +cx, cy: +cy, r: +r, a0: +a0, a1: +a1, l: layer }); return api;
       },
       text: function (x, y, hgt, str, layer, opts) {
         opts = opts || {}; use(layer);
@@ -137,7 +142,9 @@
         // alignment: 72 horiz (1=center), 73 vert (2=middle)
         if (opts.align === 'center') { pair(72, 1); pair(11, num(x)); pair(21, num(y)); pair(31, '0'); pair(73, opts.mid ? 2 : 0); }
         else if (opts.mid) { pair(72, 0); pair(11, num(x)); pair(21, num(y)); pair(31, '0'); pair(73, 2); }
-        pair(100, 'AcDbText'); return api;
+        pair(100, 'AcDbText');
+        prims.push({ t: 'text', x: +x, y: +y, h: +hgt, s: String(str == null ? '' : str), rot: +(opts.rot || 0), align: opts.align || (opts.mid ? 'left' : 'left'), l: layer });
+        return api;
       },
       // hașură reprezentată SOLID (fundal) sau ca pattern-linii simplificat pt. compatibilitate
       hatchLines: function (poly, mat, layer) {
@@ -176,9 +183,49 @@
         api.text(mx + nx * 15, my + ny * 15, 25, '' + cm, txtLayer || 'A-DIMS-PLAN', { align: 'center', rot: rot });
         return api;
       },
-      emit: function () { return UX._emitDxf(ents, used); }
+      emit: function () { return UX._emitDxf(ents, used); },
+      emitSVG: function (o) { return UX._emitSvg(prims, o); }
     };
     return api;
+  };
+
+  // ─── EMITERE SVG (preview in browser — aceleasi primitive ca DXF) ─────────
+  UX._emitSvg = function (prims, o) {
+    o = o || {}; prims = prims || [];
+    var minX = 1e15, minY = 1e15, maxX = -1e15, maxY = -1e15;
+    function ext(x, y) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    prims.forEach(function (p) {
+      if (p.t === 'line') { ext(p.x1, p.y1); ext(p.x2, p.y2); }
+      else if (p.t === 'poly') { p.pts.forEach(function (q) { ext(q[0], q[1]); }); }
+      else if (p.t === 'circle' || p.t === 'arc') { ext(p.cx - p.r, p.cy - p.r); ext(p.cx + p.r, p.cy + p.r); }
+      else if (p.t === 'text') { ext(p.x, p.y); }
+    });
+    if (minX > maxX) { minX = 0; minY = 0; maxX = 100; maxY = 100; }
+    var pad = (maxX - minX) * 0.03 + 50; minX -= pad; maxX += pad; minY -= pad; maxY += pad;
+    var W = maxX - minX, H = maxY - minY;
+    // Y flip: DXF are Y in sus → SVG Y in jos. Folosim viewBox cu transform.
+    function col(layer) { var L = UX.LAYERS[layer]; if (!L) return '#1a1a1a'; var c = L.color;
+      if (c === 1) return '#c0392b'; if (c === 2) return '#b7950b'; if (c === 3) return '#1e8449'; if (c === 4) return '#138d90';
+      if (c === 5) return '#8e44ad'; if (c === 6) return '#2e5cb8'; if (c === 8 || c === 9) return '#7f8c8d'; if (c >= 250) return '#95a5a6'; return '#1a1a1a'; }
+    function lw(layer) { var L = UX.LAYERS[layer]; var w = (L && L.lw) || 0.25; return Math.max(0.4, w / 0.35 * (W / 1400)); }
+    var s = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + minX.toFixed(1) + ' ' + minY.toFixed(1) + ' ' + W.toFixed(1) + ' ' + H.toFixed(1) + '" style="width:100%;height:auto;background:#fff" preserveAspectRatio="xMidYMid meet">'];
+    // grup cu flip pe Y in jurul centrului viewBox
+    s.push('<g transform="matrix(1 0 0 -1 0 ' + (2 * minY + H).toFixed(1) + ')">');
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    prims.forEach(function (p) {
+      var c = col(p.l), w = lw(p.l).toFixed(2);
+      if (p.t === 'line') s.push('<line x1="' + p.x1.toFixed(1) + '" y1="' + p.y1.toFixed(1) + '" x2="' + p.x2.toFixed(1) + '" y2="' + p.y2.toFixed(1) + '" stroke="' + c + '" stroke-width="' + w + '"/>');
+      else if (p.t === 'poly') { var d = p.pts.map(function (q, i) { return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ') + (p.closed ? ' Z' : ''); s.push('<path d="' + d + '" fill="none" stroke="' + c + '" stroke-width="' + w + '"/>'); }
+      else if (p.t === 'circle') s.push('<circle cx="' + p.cx.toFixed(1) + '" cy="' + p.cy.toFixed(1) + '" r="' + p.r.toFixed(1) + '" fill="none" stroke="' + c + '" stroke-width="' + w + '"/>');
+      else if (p.t === 'arc') { var a0 = p.a0 * Math.PI / 180, a1 = p.a1 * Math.PI / 180; if (a1 < a0) a1 += 2 * Math.PI; var x0 = p.cx + p.r * Math.cos(a0), y0 = p.cy + p.r * Math.sin(a0), x1 = p.cx + p.r * Math.cos(a1), y1 = p.cy + p.r * Math.sin(a1); var large = (a1 - a0) > Math.PI ? 1 : 0; s.push('<path d="M' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + p.r.toFixed(1) + ' ' + p.r.toFixed(1) + ' 0 ' + large + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + '" fill="none" stroke="' + c + '" stroke-width="' + w + '"/>'); }
+      else if (p.t === 'text') {
+        var anchor = p.align === 'center' ? 'middle' : 'start';
+        // textul e in grup flip-Y → contra-flip local ca sa nu fie oglindit
+        s.push('<g transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(1 -1)' + (p.rot ? ' rotate(' + (-p.rot).toFixed(1) + ')' : '') + '"><text x="0" y="0" font-family="Arial,sans-serif" font-size="' + Math.max(60, p.h).toFixed(0) + '" fill="#0b6" text-anchor="' + anchor + '" dominant-baseline="middle">' + esc(p.s) + '</text></g>');
+      }
+    });
+    s.push('</g></svg>');
+    return s.join('');
   };
 
   // ─── EMITERE DXF COMPLET (HEADER / TABLES / ENTITIES / EOF) ───────────────
@@ -495,7 +542,7 @@
   // ─── GENERATOR: FAȚADĂ / ELEVAȚIE (Sprint 3) ──────────────────────────────
   // opts: {width(m), niv, hParter(m), hEtaj(m), roof:'terasa'|'sarpanta', winPerFloor,
   //        cotaTeren(m), plansa, faza, proiect, beneficiar, data, params, orient}
-  UX.facadeFromBuilding = function (opts) {
+  UX.facadeDoc = function (opts) {
     opts = opts || {}; var doc = UX.newDoc(); var K = 1000;
     var Wm = opts.width || 12, niv = Math.max(1, opts.niv || 1);
     var hP = opts.hParter || 3.0, hE = opts.hEtaj || 3.0;
@@ -528,12 +575,13 @@
     UX.scaleBar(doc, 0, cotaT * K - 900, 100, 10);
     UX.titleBlock(doc, { x: W + 1600, y: 0, proiect: opts.proiect || 'Fațadă ' + (opts.orient || ''), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-05', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
     if (opts.params) { try { UX.techNotes(doc, W + 1600, 65, opts.params); } catch (e) {} }
-    return doc.emit();
+    return doc;
   };
+  UX.facadeFromBuilding = function (opts) { return UX.facadeDoc(opts).emit(); };
 
   // ─── GENERATOR: SECȚIUNE TRANSVERSALĂ (Sprint 3) ──────────────────────────
   // opts ca la fațadă + adâncimeFundatie(m), strataPlanseu[], strataAcoperis[]
-  UX.sectionFromBuilding = function (opts) {
+  UX.sectionDoc = function (opts) {
     opts = opts || {}; var doc = UX.newDoc(); var K = 1000;
     var Wm = opts.width || 12, niv = Math.max(1, opts.niv || 1);
     var hP = opts.hParter || 3.0, hE = opts.hEtaj || 3.0, thSlab = 250; // mm
@@ -567,8 +615,9 @@
     UX.scaleBar(doc, 0, -adf * K - 900, 100, 10);
     UX.titleBlock(doc, { x: W + th + 4000, y: 0, proiect: opts.proiect || 'Secțiune transversală', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-07', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
     if (opts.params) { try { UX.techNotes(doc, W + th + 4000, 65, opts.params); } catch (e) {} }
-    return doc.emit();
+    return doc;
   };
+  UX.sectionFromBuilding = function (opts) { return UX.sectionDoc(opts).emit(); };
 
   // ─── PARTAJAT: parametrii tehnici derivați pt orice motor de planșe ────────
   // Mapează o funcțiune relevee (fn liber) → cheia UXDoc + rulează autoCalc, ca să
