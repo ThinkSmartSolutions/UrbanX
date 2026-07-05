@@ -492,6 +492,135 @@
     return doc.emit();
   };
 
+  // ─── GENERATOR: FAȚADĂ / ELEVAȚIE (Sprint 3) ──────────────────────────────
+  // opts: {width(m), niv, hParter(m), hEtaj(m), roof:'terasa'|'sarpanta', winPerFloor,
+  //        cotaTeren(m), plansa, faza, proiect, beneficiar, data, params, orient}
+  UX.facadeFromBuilding = function (opts) {
+    opts = opts || {}; var doc = UX.newDoc(); var K = 1000;
+    var Wm = opts.width || 12, niv = Math.max(1, opts.niv || 1);
+    var hP = opts.hParter || 3.0, hE = opts.hEtaj || 3.0;
+    var levels = [0]; for (var i = 1; i <= niv; i++) levels.push(levels[i - 1] + (i === 1 ? hP : hE));
+    var totalH = levels[niv]; var roof = opts.roof || (niv > 2 ? 'terasa' : 'sarpanta');
+    var W = Wm * K, cotaT = (opts.cotaTeren != null ? opts.cotaTeren : 0);
+    // linia terenului (hașură pământ sub 0)
+    doc.line(-1500, cotaT * K, W + 1500, cotaT * K, 'C-ROAD-EDGE');
+    for (var g = -1400; g < W + 1400; g += 300) doc.line(g, cotaT * K, g - 250, cotaT * K - 250, 'A-HATCH-PMNT');
+    // conturul fațadei
+    doc.rect(0, 0, W, totalH * K, 'A-WALL-EXTR-N');
+    // linii de nivel (planșee vizibile pe fațadă) + cote de nivel
+    levels.forEach(function (lv, idx) {
+      if (idx > 0 && idx <= niv) doc.line(0, lv * K, W, lv * K, 'S-SLAB-N');
+      UX.levelMark(doc, W + 700, lv * K, lv, false);
+    });
+    // ferestre pe fiecare etaj
+    var nw = opts.winPerFloor || Math.max(2, Math.round(Wm / 3));
+    for (var f = 0; f < niv; f++) {
+      var y0 = levels[f] * K + 900, wh = ((f === 0 ? hP : hE) * K) - 1800; // parapet 0.9, allège
+      var gap = W / (nw + 1), ww = Math.min(1400, gap * 0.6);
+      for (var w = 1; w <= nw; w++) { var wx = gap * w - ww / 2; doc.rect(wx, y0, ww, Math.max(1200, wh), 'A-GLAZ-N'); doc.line(wx + ww / 2, y0, wx + ww / 2, y0 + Math.max(1200, wh), 'A-GLAZ-N'); }
+    }
+    // acoperiș
+    if (roof === 'sarpanta') { var over = 500, ridge = totalH * K + Math.min(W, 6000) * 0.25; doc.pline([[-over, totalH * K], [W / 2, ridge], [W + over, totalH * K]], false, 'A-WALL-EXTR-N'); UX.levelMark(doc, W + 700, ridge, (ridge / K), false); }
+    else { doc.line(-200, totalH * K + 400, W + 200, totalH * K + 400, 'A-WALL-EXTR-N'); doc.rect(-200, totalH * K, W + 400, 500, 'A-WALL-EXTR-N'); }
+    // lanț de cote pe verticală (înălțimi de nivel) — stânga
+    for (var c = 0; c < niv; c++) doc.dim(-600, levels[c] * K, -600, levels[c + 1] * K, -300, 'A-DIMS-ELEV');
+    doc.dim(-1400, 0, -1400, totalH * K, -300, 'A-DIMS-ELEV'); // total
+    UX.scaleBar(doc, 0, cotaT * K - 900, 100, 10);
+    UX.titleBlock(doc, { x: W + 1600, y: 0, proiect: opts.proiect || 'Fațadă ' + (opts.orient || ''), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-05', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    if (opts.params) { try { UX.techNotes(doc, W + 1600, 65, opts.params); } catch (e) {} }
+    return doc.emit();
+  };
+
+  // ─── GENERATOR: SECȚIUNE TRANSVERSALĂ (Sprint 3) ──────────────────────────
+  // opts ca la fațadă + adâncimeFundatie(m), strataPlanseu[], strataAcoperis[]
+  UX.sectionFromBuilding = function (opts) {
+    opts = opts || {}; var doc = UX.newDoc(); var K = 1000;
+    var Wm = opts.width || 12, niv = Math.max(1, opts.niv || 1);
+    var hP = opts.hParter || 3.0, hE = opts.hEtaj || 3.0, thSlab = 250; // mm
+    var levels = [0]; for (var i = 1; i <= niv; i++) levels.push(levels[i - 1] + (i === 1 ? hP : hE));
+    var totalH = levels[niv]; var W = Wm * K;
+    var adf = (opts.adancimeFundatie != null ? opts.adancimeFundatie : (opts.params && opts.params.adancime_inghet_m) || 1.0);
+    // pereți exteriori secționați (2 laturi) — hașurați (zidărie)
+    var th = 375;
+    [[-th, 0, th, totalH * K], [W, 0, th, totalH * K]].forEach(function (r) { doc.rect(r[0], r[1], r[2], r[3], 'A-WALL-EXTR-N'); try { UX.materialHatch(doc, [[r[0], r[1]], [r[0] + r[2], r[1]], [r[0] + r[2], r[1] + r[3]], [r[0], r[1] + r[3]]], 'ZIDARIE_BCA'); } catch (e) {} });
+    // planșee secționate la fiecare nivel (hașură beton) + cotă de nivel
+    levels.forEach(function (lv, idx) {
+      if (idx > 0) { doc.rect(-th, lv * K - thSlab, W + 2 * th, thSlab, 'S-SLAB-N'); try { UX.materialHatch(doc, [[-th, lv * K - thSlab], [W + th, lv * K - thSlab], [W + th, lv * K], [-th, lv * K]], 'BETON_ARMAT'); } catch (e) {} }
+      UX.levelMark(doc, W + th + 700, lv * K, lv, false);
+      // înălțime liberă interioară (cotă)
+      if (idx < niv) doc.dim(300, lv * K, 300, levels[idx + 1] * K - thSlab, 400, 'A-DIMS-ELEV');
+    });
+    // placa parter + fundație (sub cota 0)
+    doc.rect(-th, -thSlab, W + 2 * th, thSlab, 'S-SLAB-N');
+    doc.rect(-th - 200, -adf * K, th + 400, adf * K, 'S-FNDT-N'); doc.rect(W - 200, -adf * K, th + 400, adf * K, 'S-FNDT-N');
+    try { UX.materialHatch(doc, [[-th - 200, -adf * K], [-th - 200 + th + 400, -adf * K], [-th - 200 + th + 400, 0], [-th - 200, 0]], 'BETON_ARMAT'); } catch (e) {}
+    doc.text(W / 2, -adf * K / 2, 30, 'Fundație continuă — talpa sub adâncimea de îngheț ' + adf.toFixed(2) + 'm (STAS 6054)', 'A-TEXT-NOTE', { align: 'center' });
+    // acoperiș (terasă cu atic sau șarpantă)
+    var roof = opts.roof || (niv > 2 ? 'terasa' : 'sarpanta');
+    if (roof === 'terasa') { doc.rect(-th, totalH * K, W + 2 * th, thSlab, 'S-SLAB-N'); doc.rect(-th, totalH * K + thSlab, th, 500, 'A-WALL-EXTR-N'); doc.rect(W, totalH * K + thSlab, th, 500, 'A-WALL-EXTR-N'); }
+    else { var ridge = totalH * K + Math.min(W, 6000) * 0.25; doc.pline([[-th - 400, totalH * K], [W / 2, ridge], [W + th + 400, totalH * K]], false, 'A-WALL-EXTR-N'); doc.line(-th - 400, totalH * K, W + th + 400, totalH * K, 'S-SLAB-N'); }
+    // total înălțime + detaliu stratificație planșeu (callout la dreapta)
+    doc.dim(-th - 900, 0, -th - 900, totalH * K, -400, 'A-DIMS-ELEV');
+    var straturi = opts.strataPlanseu || [{ grosime: 50, nume: 'șapă + finisaj', material: 'MORTAR' }, { grosime: 250, nume: 'placă b.a.', material: 'BETON_ARMAT' }, { grosime: 20, nume: 'tencuială', material: 'MORTAR' }];
+    doc.text(W + th + 2400, totalH * K * 0.5 + 400, 30, 'DETALIU PLANȘEU 1:20', 'A-TEXT-NOTE');
+    try { UX.strataDetail(doc, W + th + 2400, totalH * K * 0.5 - 200, 700, straturi); } catch (e) {}
+    UX.scaleBar(doc, 0, -adf * K - 900, 100, 10);
+    UX.titleBlock(doc, { x: W + th + 4000, y: 0, proiect: opts.proiect || 'Secțiune transversală', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-07', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    if (opts.params) { try { UX.techNotes(doc, W + th + 4000, 65, opts.params); } catch (e) {} }
+    return doc.emit();
+  };
+
+  // ─── PARTAJAT: parametrii tehnici derivați pt orice motor de planșe ────────
+  // Mapează o funcțiune relevee (fn liber) → cheia UXDoc + rulează autoCalc, ca să
+  // avem ACEEAȘI calitate de parametri (seism/climă/incendiu) în modulul Planșe.
+  UX.mapFnToUXDoc = function (fn, niv) {
+    var f = String(fn || '').toLowerCase();
+    if (f.indexOf('birou') >= 0) return 'birouri';
+    if (f.indexOf('hotel') >= 0) return 'hotelier';
+    if (f.indexOf('mall') >= 0) return 'mall';
+    if (f.indexOf('com') >= 0 || f.indexOf('retail') >= 0) return 'spatiu-comercial';
+    if (f.indexOf('hala') >= 0 || f.indexOf('industr') >= 0 || f.indexOf('logist') >= 0) return 'hala-industriala';
+    if (f.indexOf('medical') >= 0 || f.indexOf('spital') >= 0 || f.indexOf('clinic') >= 0) return 'medical';
+    if (f.indexOf('scoala') >= 0 || f.indexOf('scol') >= 0 || f.indexOf('invat') >= 0) return 'scoala';
+    if (f.indexOf('gradinit') >= 0 || f.indexOf('cresa') >= 0) return 'gradinita';
+    if (f.indexOf('sport') >= 0) return 'sport';
+    if (f.indexOf('parcare') >= 0) return 'parcare';
+    if ((f.indexOf('individ') >= 0 || f.indexOf('unifam') >= 0) || (f.indexOf('rez') >= 0 && (niv || 1) <= 2)) return 'locuinta-individuala';
+    return 'bloc-locuinte';
+  };
+  // P = parcelParams relevee {fn, niv, hn, W, D, area, pot, cut, hMax, judet?, struct?}
+  UX.derivedParamsFor = function (P) {
+    P = P || {}; if (!G.UXDoc || !G.UXDoc.autoCalc) return {};
+    var niv = Math.max(1, +P.niv || 1);
+    var Sc = +P.scArea || (P.W && P.D && P.pot ? P.W * P.D * P.pot : (P.area ? P.area * (P.pot || 0.4) : 0));
+    var H = +P.hMax || (P.hn ? P.hn * niv : niv * 3);
+    var d = { functiune: UX.mapFnToUXDoc(P.fn, niv), judet: P.judet || (G._currentJudet) || '',
+      Sc: Math.round(Sc), Sd: Math.round(Sc * niv), H: H, niv_supraterane: niv, struct: P.struct || '' };
+    try { return G.UXDoc.autoCalc(d); } catch (e) { return {}; }
+  };
+  // rânduri pentru tabele (label, valoare)
+  UX.paramsRows = function (ac) {
+    ac = ac || {}; var da = function (b) { return b ? 'DA' : 'nu'; };
+    return [
+      ['Categorie importanta:', ac.categorie_importanta || '—'],
+      ['Clasa imp. seismica:', (ac.clasa_importanta || '—') + ' (gI=' + (ac.gamma_I != null ? ac.gamma_I.toFixed(2) : '1.00') + ')'],
+      ['ag / Tc (P100-1):', ((ac.seismic && ac.seismic.ag) || '—') + 'g / ' + ((ac.seismic && ac.seismic.Tc) || '—') + 's'],
+      ['Zapada / Te:', ((ac.clima && ac.clima.sk) || '—') + ' kN/mp / ' + ((ac.clima && ac.clima.Te) || '—') + '°C'],
+      ['Adancime inghet:', (ac.adancime_inghet_m || 0.9).toFixed(2) + ' m'],
+      ['Grad rezist. la foc:', 'Gradul ' + (ac.grad_default || 'II')],
+      ['Categoria PSI:', 'Cat. ' + (ac.psi_default || 'C') + ' (risc ' + (String(ac.risc_incendiu || 'mediu').replace('foarte_mare', 'f.mare')) + ')'],
+      ['Sprinklere/IDSAI/lift:', da(ac.sprinklere_oblig) + '/' + da(ac.idsi_oblig) + '/' + da(ac.lift_oblig)]
+    ];
+  };
+  // strip compact pt cartuș (o linie)
+  UX.paramsStrip = function (ac) {
+    ac = ac || {};
+    return 'Categ.imp. ' + (ac.categorie_importanta ? String(ac.categorie_importanta).split(' ')[0] : '-') +
+      ' · Clasa seism. ' + (ac.clasa_importanta || '-') + ' (gI=' + (ac.gamma_I != null ? ac.gamma_I.toFixed(2) : '1.00') + ')' +
+      ' · ag ' + ((ac.seismic && ac.seismic.ag) || '-') + 'g · Grad RF ' + (ac.grad_default || 'II') +
+      ' · PSI Cat.' + (ac.psi_default || 'C') + ' · inghet ' + (ac.adancime_inghet_m || 0.9).toFixed(2) + 'm';
+  };
+
   G.UX_DRAW = UX;
   try { console.log('[UX_DRAW] motor planșe DXF AC1024 încărcat · ' + Object.keys(UX.LAYERS).length + ' layere · ' + Object.keys(UX.MATERIALS).length + ' materiale'); } catch (e) {}
 })(window);

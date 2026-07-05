@@ -81,6 +81,9 @@
 async function _rvExportPlanseA3(){
   const P=_RV.parcelParams,b=_RV.building;
   if(!P||!b){alert('Generați releveele mai întâi.');return;}
+  // parametri tehnici derivati (seism/clima/incendiu) — ACEEASI calitate ca motorul de documentatii
+  let _pA3acCache=null;
+  const _pA3ac=()=>{ if(_pA3acCache)return _pA3acCache; try{ _pA3acCache=(window.UX_DRAW&&window.UX_DRAW.derivedParamsFor)?window.UX_DRAW.derivedParamsFor(Object.assign({scArea:b.scArea},P)):{}; }catch(e){_pA3acCache={};} return _pA3acCache; };
   const _jsPDF=(typeof jsPDF!=='undefined')?jsPDF:window.jspdf?.jsPDF;
   if(!_jsPDF){alert('jsPDF indisponibil.');return;}
   const btn=document.getElementById('rv-planseA3-btn');
@@ -154,8 +157,11 @@ async function _rvExportPlanseA3(){
     pdf.text(S2(String(nr).padStart(2,'0')+'  '+titlu),13,6);
     pdf.setTextColor(200,210,230);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
     pdf.text(S2((scTxt||scLabel)+'  ·  Nr.cad. '+P.nrCad+'  ·  UTR '+P.utr),W-4,6,{align:'right'});
-    pdf.setFillColor(243,245,250);pdf.rect(0,H-5.5,W,5.5,'F');
-    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.15);pdf.line(0,H-5.5,W,H-5.5);
+    pdf.setFillColor(243,245,250);pdf.rect(0,H-7.5,W,7.5,'F');
+    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.15);pdf.line(0,H-7.5,W,H-7.5);
+    // strip parametri tehnici derivati (aceeasi calitate ca motorul de documentatii)
+    try{ if(window.UX_DRAW && window.UX_DRAW.paramsStrip){ pdf.setTextColor(70,90,120);pdf.setFont('helvetica','normal');pdf.setFontSize(4.6);
+      pdf.text(S2(window.UX_DRAW.paramsStrip(_pA3ac())),W/2,H-4.2,{align:'center'}); } }catch(e){}
     pdf.setTextColor(110,125,145);pdf.setFont('helvetica','italic');pdf.setFontSize(4.5);
     pdf.text(S2('Nr.cad. '+P.nrCad+' · UTR: '+P.utr+' · '+P.W+'m×'+P.D+'m · '+P.area+'m² · UrbanX TSS·FG · Document orientativ — nu inlocuieste proiectul tehnic Legea 50/1991'),W/2,H-1.5,{align:'center'});
   };
@@ -603,7 +609,8 @@ async function _rvExportPlanseA3(){
   pdf.setTextColor(25,40,75);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);
   pdf.text('DATE GENERALE',dgX+dgW/2,ty+7,{align:'center'});
   const sdaT=Math.round(b.bW*b.bD*b.niv),scA=b.scArea?Math.round(b.scArea):Math.round(b.bW*b.bD*P.pot);
-  [['Suprafata construita:',scA+'m²'],
+  const _ac=_pA3ac();
+  const _dgRows=[['Suprafata construita:',scA+'m²'],
    ['Suprafata desfasurata:',sdaT+'m²'],
    ['Regim inaltime:','P+'+(b.niv-1)+'E'],
    ['Inaltime maxima:',(b.niv*P.hn).toFixed(1)+'m'],
@@ -613,11 +620,16 @@ async function _rvExportPlanseA3(){
    ['UTR:',S2(P.utr)],
    ['Suprafata parcela:',P.area+'m²'],
    ['Dim. parcela:',P.W+'m × '+P.D+'m'],
-  ].forEach(([k,v],i)=>{
-    const ry=ty+14+i*7.5;
-    pdf.setTextColor(60,75,95);pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.text(S2(k),dgX+3,ry);
-    pdf.setTextColor(25,40,75);pdf.setFont('helvetica','normal');pdf.text(S2(v),dgX+43,ry);
-    pdf.setDrawColor(225,230,238);pdf.setLineWidth(0.12);pdf.line(dgX+3,ry+2,dgX+dgW-3,ry+2);
+  ];
+  // PARAMETRI TEHNICI derivati (aceeasi calitate ca formularul + documentele + planse noi)
+  let _dgRowsAll=_dgRows;
+  try{ if(_ac&&_ac.categorie_importanta&&window.UX_DRAW&&window.UX_DRAW.paramsRows){ _dgRowsAll=_dgRows.concat([['—— PARAMETRI TEHNICI ——','']]).concat(window.UX_DRAW.paramsRows(_ac)); } }catch(e){}
+  const _dgN=_dgRowsAll.length, _dgAvail=(H-8)-(ty+14), _dgStep=Math.max(4.6,Math.min(7.5,_dgAvail/_dgN)), _dgFs=_dgStep<6?4.2:5;
+  _dgRowsAll.forEach(([k,v],i)=>{
+    const ry=ty+14+i*_dgStep;
+    pdf.setTextColor(60,75,95);pdf.setFont('helvetica','bold');pdf.setFontSize(_dgFs);pdf.text(S2(k),dgX+3,ry);
+    pdf.setTextColor(25,40,75);pdf.setFont('helvetica','normal');pdf.text(S2(v),dgX+40,ry);
+    pdf.setDrawColor(225,230,238);pdf.setLineWidth(0.12);pdf.line(dgX+3,ry+1.6,dgX+dgW-3,ry+1.6);
   });
 
   // Salvare

@@ -68,8 +68,10 @@
     bNorm.onclick = function () { if (G._NormativeRegistry) G._NormativeRegistry.openPanel(); else if (G.ss) G.ss('Registrul de normative nu e încărcat.'); };
     var bChk = el('button', { style: 'background:rgba(52,211,153,.16);color:#6ee7b7;border:1px solid rgba(52,211,153,.4);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '✅ Verifică conformitatea');
     bChk.onclick = function () { if (G.UX_COMPLIANCE) G.UX_COMPLIANCE.openReport(D); else if (G.ss) G.ss('Motorul de conformitate nu e încărcat.'); };
+    var bPl = el('button', { style: 'background:rgba(125,211,252,.16);color:#7dd3fc;border:1px solid rgba(125,211,252,.4);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '📐 Generează planșe');
+    bPl.onclick = function () { if (G.UXPlanseUI) G.UXPlanseUI.open(D); else if (G.ss) G.ss('Motorul de planșe nu e încărcat.'); };
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); };
-    hbtns.appendChild(bImp); hbtns.appendChild(bProg); hbtns.appendChild(bVer); hbtns.appendChild(bAedis); hbtns.appendChild(bNorm); hbtns.appendChild(bChk); hbtns.appendChild(bX); head.appendChild(hbtns); wrap.appendChild(head);
+    hbtns.appendChild(bImp); hbtns.appendChild(bProg); hbtns.appendChild(bVer); hbtns.appendChild(bAedis); hbtns.appendChild(bNorm); hbtns.appendChild(bChk); hbtns.appendChild(bPl); hbtns.appendChild(bX); head.appendChild(hbtns); wrap.appendChild(head);
 
     // legendă
     wrap.appendChild(el('div', { style: 'display:flex;gap:14px;font-size:10.5px;color:#94a3b8;margin:10px 0' },

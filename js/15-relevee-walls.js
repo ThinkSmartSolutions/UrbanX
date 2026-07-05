@@ -523,6 +523,7 @@ function _drawSitePlanReal(pdf, ap, P, b, ox, oy, scT, C){
 async function _rvExportPlanseWalls(){
   const P=_RV.parcelParams, b=_RV.building;
   if(!P||!b){alert('Generați releveele mai întâi.');return;}
+  let _wAc=null; const _wParams=()=>{ if(_wAc)return _wAc; try{ _wAc=(window.UX_DRAW&&window.UX_DRAW.derivedParamsFor)?window.UX_DRAW.derivedParamsFor(Object.assign({scArea:b.scArea},P)):{}; }catch(e){_wAc={};} return _wAc; };
   const _jsPDF=(typeof jsPDF!=='undefined')?jsPDF:window.jspdf?.jsPDF;
   if(!_jsPDF){alert('jsPDF indisponibil.');return;}
   const btn=document.getElementById('rv-walls-btn');
@@ -552,8 +553,10 @@ async function _rvExportPlanseWalls(){
     pdf.text(S2(String(nr).padStart(2,'0')+'  '+titlu),13,6);
     pdf.setTextColor(200,210,230);pdf.setFont('helvetica','normal');pdf.setFontSize(6);
     pdf.text(S2((scTxt||scLabel)+'  ·  Nr.cad. '+P.nrCad+'  ·  UTR '+P.utr),W-4,6,{align:'right'});
-    pdf.setFillColor(243,245,250);pdf.rect(0,H-5.5,W,5.5,'F');
-    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.15);pdf.line(0,H-5.5,W,H-5.5);
+    pdf.setFillColor(243,245,250);pdf.rect(0,H-7.5,W,7.5,'F');
+    pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.15);pdf.line(0,H-7.5,W,H-7.5);
+    try{ if(window.UX_DRAW&&window.UX_DRAW.paramsStrip){ pdf.setTextColor(70,90,120);pdf.setFont('helvetica','normal');pdf.setFontSize(4.6);
+      pdf.text(S2(window.UX_DRAW.paramsStrip(_wParams())),W/2,H-4.2,{align:'center'}); } }catch(e){}
     pdf.setTextColor(110,125,145);pdf.setFont('helvetica','italic');pdf.setFontSize(4.5);
     pdf.text(S2('Nr.cad. '+P.nrCad+' · UTR: '+P.utr+' · UrbanX TSS·FG · Document orientativ'),W/2,H-1.5,{align:'center'});
   };
