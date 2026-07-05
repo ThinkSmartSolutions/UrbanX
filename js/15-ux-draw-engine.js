@@ -241,10 +241,78 @@
     return out.join('\n') + '\n';
   };
 
-  // ─── GENERATOR: HAȘURĂ MATERIAL ───────────────────────────────────────────
+  // ─── GENERATOR: HAȘURĂ MATERIAL (pattern real pe tip, clipat în bandă) ─────
+  // Emite linii de hașură conform pattern-ului materialului (100% DXF valid,
+  // echivalent vizual cu hașura de secțiune a proiectantului). Bbox dreptunghiular.
   UX.materialHatch = function (doc, poly, materialKey) {
     var mat = UX.MATERIALS[materialKey] || UX.MATERIALS.BETON_ARMAT;
-    doc.hatchLines(poly, mat, mat.layer);
+    var xs = poly.map(function (p) { return p[0]; }), ys = poly.map(function (p) { return p[1]; });
+    var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+    var L = mat.layer, s = mat.scale || 25, i;
+    var pat = mat.pat || 'ANSI31';
+    if (pat === 'ANSI31' || pat === 'ANSI32') { // beton/lemn: linii la 45°
+      for (i = x0 - (y1 - y0); i <= x1; i += s) {
+        var xa = Math.max(x0, i), ya = y0 + Math.max(0, x0 - i);
+        var xb = Math.min(x1, i + (y1 - y0)), yb = y0 + Math.min(y1 - y0, x1 - i);
+        if (xb > xa) doc.line(xa, y0 + (xa - i), xb, y0 + (xb - i), L);
+      }
+      if (pat === 'ANSI32') for (i = x0 - (y1 - y0) + s / 2; i <= x1; i += s) { // dublă (lemn)
+        var xa2 = Math.max(x0, i), xb2 = Math.min(x1, i + (y1 - y0));
+        if (xb2 > xa2) doc.line(xa2, y0 + (xa2 - i), xb2, y0 + (xb2 - i), L);
+      }
+    } else if (pat === 'BRICK') { // zidărie cărămidă: orizontale + verticale decalate
+      var row = 0; for (i = y0; i <= y1; i += s) { doc.line(x0, i, x1, i, L); row++; }
+      row = 0; for (var yy = y0; yy < y1; yy += s) { var offx = (row % 2) ? s : 0; for (var xx = x0 + offx; xx <= x1; xx += 2 * s) doc.line(xx, yy, xx, Math.min(y1, yy + s), L); row++; }
+    } else if (pat === 'DOTS') { // termoizolație: puncte (cerculețe mici)
+      for (var yd = y0 + s / 2; yd < y1; yd += s) for (var xd = x0 + s / 2; xd < x1; xd += s) doc.circle(xd, yd, s * 0.08, L);
+    } else if (pat === 'EARTH') { // pământ: linii orizontale + hașuri scurte oblice sub
+      for (i = y0; i <= y1; i += s * 1.5) { doc.line(x0, i, x1, i, L); for (var xe = x0; xe < x1; xe += s) doc.line(xe, i, xe + s * 0.4, i - s * 0.4, L); }
+    } else { doc.hatchLines(poly, mat, L); }
+    return doc;
+  };
+
+  // ─── GENERATOR: SĂGEATĂ NORD ──────────────────────────────────────────────
+  UX.northArrow = function (doc, cx, cy, size, bearingDeg) {
+    size = size || 200; var b = (bearingDeg || 0) * Math.PI / 180;
+    var tip = [cx + size * Math.sin(b), cy + size * Math.cos(b)];
+    var bl = [cx + size * 0.3 * Math.sin(b + 2.5), cy + size * 0.3 * Math.cos(b + 2.5)];
+    var br = [cx + size * 0.3 * Math.sin(b - 2.5), cy + size * 0.3 * Math.cos(b - 2.5)];
+    doc.pline([tip, bl, [cx, cy], br], true, 'A-TEXT-NOTE');
+    doc.text(tip[0], tip[1] + size * 0.15, size * 0.25, 'N', 'A-TEXT-NOTE', { align: 'center' });
+    return doc;
+  };
+
+  // ─── GENERATOR: SCARĂ GRAFICĂ (bară gradată) ──────────────────────────────
+  UX.scaleBar = function (doc, x, y, scale, mMax) {
+    scale = scale || 100; mMax = mMax || 10; // metri
+    var mm = mMax * 1000 / scale * 10; // lungime desenată în mm-desen (la scara 1:scale, 1 m real = 1000/scale mm plan)... reprezentăm 0..mMax m
+    var seg = mm / mMax, i;
+    doc.line(x, y, x + mm, y, 'A-TEXT-NOTE');
+    for (i = 0; i <= mMax; i++) { doc.line(x + i * seg, y, x + i * seg, y + (i % 5 === 0 ? 40 : 20), 'A-TEXT-NOTE'); if (i % 5 === 0) doc.text(x + i * seg, y - 60, 25, '' + i, 'A-TEXT-NOTE', { align: 'center' }); }
+    doc.text(x + mm / 2, y - 130, 25, 'Sc. 1:' + scale + ' (m)', 'A-TEXT-NOTE', { align: 'center' });
+    return doc;
+  };
+
+  // ─── GENERATOR: COTĂ DE NIVEL (triunghi ▼ plin / △ gol + valoare ±X.XX) ────
+  UX.levelMark = function (doc, x, y, value, below) {
+    var s = 60; // mărime triunghi (mm)
+    doc.pline([[x, y], [x - s / 2, y + s], [x + s / 2, y + s]], true, 'A-DIMS-ELEV');
+    var v = (value >= 0 ? '+' : '') + (Math.round(value * 100) / 100).toFixed(2);
+    doc.text(x + s, y + s, 30, v, 'A-DIMS-ELEV', { mid: true });
+    return doc;
+  };
+
+  // ─── GENERATOR: DETALIU STRATIFICAȚIE (sandwich, insert 1:20) ──────────────
+  // straturi = [{grosime(mm), nume, material}] de jos în sus
+  UX.strataDetail = function (doc, x, y, w, straturi) {
+    var cy = y;
+    (straturi || []).forEach(function (st) {
+      doc.rect(x, cy, w, st.grosime, 'A-WALL-INTR-N');
+      if (st.material) { try { UX.materialHatch(doc, [[x, cy], [x + w, cy], [x + w, cy + st.grosime], [x, cy + st.grosime]], st.material); } catch (e) {} }
+      doc.text(x + w + 60, cy + st.grosime / 2, 25, st.nume + ' ' + st.grosime + 'mm', 'A-TEXT-FINI', { mid: true });
+      cy += st.grosime;
+    });
     return doc;
   };
 
@@ -381,6 +449,9 @@
     // cotare totală pe 2 laturi
     doc.dim(0, 0, maxX * K, 0, -240, 'A-DIMS-PLAN');
     doc.dim(0, 0, 0, maxY * K, -240, 'A-DIMS-PLAN');
+    UX.levelMark(doc, maxX * K / 2, maxY * K / 2, opts.cota != null ? opts.cota : 0.0);
+    UX.northArrow(doc, maxX * K + 600, maxY * K - 400, 300, opts.bearing || 0);
+    UX.scaleBar(doc, 0, -900, 100, 10);
     UX.titleBlock(doc, { x: maxX * K + 1000, y: 0, proiect: opts.proiect || 'Plan nivel', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
     return doc.emit();
   };
