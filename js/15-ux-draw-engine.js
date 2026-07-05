@@ -183,7 +183,7 @@
         api.text(mx + nx * 15, my + ny * 15, 25, '' + cm, txtLayer || 'A-DIMS-PLAN', { align: 'center', rot: rot });
         return api;
       },
-      emit: function () { return UX._emitDxf(ents, used); },
+      emit: function () { return UX._emitDxf(prims, used); },
       emitSVG: function (o) { return UX._emitSvg(prims, o); }
     };
     return api;
@@ -228,64 +228,81 @@
     return s.join('');
   };
 
-  // ─── EMITERE DXF COMPLET (HEADER / TABLES / ENTITIES / EOF) ───────────────
-  UX._emitDxf = function (ents, used) {
+  // ─── EMITERE DXF R12 (AC1009) din primitive — MAXIM compatibil ────────────
+  // R12 nu cere handle-uri/dictionare/BLOCK_RECORD/subclass → se deschide in orice
+  // CAD (AutoCAD, LibreCAD, QCAD, BricsCAD, ODA/CADReader). POLYLINE clasic (nu LWPOLYLINE).
+  UX._emitDxf = function (prims, used) {
+    prims = prims || []; used = used || {};
     var o = [];
-    function p(c, v) { o.push(c); o.push(v); }
+    function p(c, v) { o.push(c + '\n' + v); }
+    function f(n) { if (n == null || isNaN(n)) return '0'; var r = Math.round(n * 1e4) / 1e4; return String(r); }
+    // bbox pentru EXTMIN/EXTMAX (ca sa se zoom-eze corect, nu ecran gol)
+    var mnX = 1e15, mnY = 1e15, mxX = -1e15, mxY = -1e15;
+    function ex(x, y) { if (x < mnX) mnX = x; if (x > mxX) mxX = x; if (y < mnY) mnY = y; if (y > mxY) mxY = y; }
+    prims.forEach(function (e) {
+      if (e.t === 'line') { ex(e.x1, e.y1); ex(e.x2, e.y2); }
+      else if (e.t === 'poly') { e.pts.forEach(function (q) { ex(q[0], q[1]); }); }
+      else if (e.t === 'circle' || e.t === 'arc') { ex(e.cx - e.r, e.cy - e.r); ex(e.cx + e.r, e.cy + e.r); }
+      else if (e.t === 'text') { ex(e.x, e.y); }
+    });
+    if (mnX > mxX) { mnX = 0; mnY = 0; mxX = 1000; mxY = 1000; }
     // HEADER
     p(0, 'SECTION'); p(2, 'HEADER');
-    p(9, '$ACADVER'); p(1, 'AC1024');
+    p(9, '$ACADVER'); p(1, 'AC1009');
     p(9, '$INSUNITS'); p(70, 4);
     p(9, '$MEASUREMENT'); p(70, 1);
-    p(9, '$LTSCALE'); p(40, 1.0);
+    p(9, '$LTSCALE'); p(40, '1.0');
+    p(9, '$EXTMIN'); p(10, f(mnX)); p(20, f(mnY)); p(30, '0.0');
+    p(9, '$EXTMAX'); p(10, f(mxX)); p(20, f(mxY)); p(30, '0.0');
     p(0, 'ENDSEC');
     // TABLES
     p(0, 'SECTION'); p(2, 'TABLES');
-    // LTYPE
-    p(0, 'TABLE'); p(2, 'LTYPE'); p(70, Object.keys(UX.LTYPES).length + 1);
-    p(0, 'LTYPE'); p(2, 'BYLAYER'); p(70, 0); p(3, ''); p(72, 65); p(73, 0); p(40, 0);
-    Object.keys(UX.LTYPES).forEach(function (name) {
-      var lt = UX.LTYPES[name]; var pat = lt.pat || [];
-      var total = 0; pat.forEach(function (s) { total += Math.abs(s); });
-      p(0, 'LTYPE'); p(2, name); p(70, 0); p(3, lt.desc || name); p(72, 65);
-      p(73, pat.length); p(40, total);
-      pat.forEach(function (s) { p(49, s); p(74, 0); });
+    // LTYPE (CONTINUOUS obligatoriu + cele definite)
+    var ltNames = Object.keys(UX.LTYPES || {});
+    p(0, 'TABLE'); p(2, 'LTYPE'); p(70, ltNames.length + 1);
+    p(0, 'LTYPE'); p(2, 'CONTINUOUS'); p(70, 0); p(3, 'Solid line'); p(72, 65); p(73, 0); p(40, '0.0');
+    ltNames.forEach(function (name) {
+      var lt = UX.LTYPES[name]; var pat = lt.pat || []; var total = 0; pat.forEach(function (s) { total += Math.abs(s); });
+      p(0, 'LTYPE'); p(2, name); p(70, 0); p(3, lt.desc || name); p(72, 65); p(73, pat.length); p(40, f(total));
+      pat.forEach(function (s) { p(49, f(s)); });
     });
     p(0, 'ENDTAB');
     // LAYER
     var layers = Object.keys(used);
     p(0, 'TABLE'); p(2, 'LAYER'); p(70, layers.length + 1);
-    p(0, 'LAYER'); p(2, '0'); p(70, 0); p(62, 7); p(6, 'CONTINUOUS'); p(370, 25);
+    p(0, 'LAYER'); p(2, '0'); p(70, 0); p(62, 7); p(6, 'CONTINUOUS');
     layers.forEach(function (name) {
-      var L = UX.LAYERS[name] || { color: 7, lt: 'CONTINUOUS', lw: 0.25 };
-      p(0, 'LAYER'); p(2, name); p(70, 0); p(62, L.color); p(6, L.lt || 'CONTINUOUS');
-      p(370, Math.round((L.lw || 0.25) * 100)); // lineweight în 1/100 mm
+      var L = UX.LAYERS[name] || { color: 7, lt: 'CONTINUOUS' };
+      var ltn = L.lt || 'CONTINUOUS'; if (ltn !== 'CONTINUOUS' && ltNames.indexOf(ltn) < 0) ltn = 'CONTINUOUS';
+      p(0, 'LAYER'); p(2, name); p(70, 0); p(62, L.color || 7); p(6, ltn);
     });
     p(0, 'ENDTAB');
     // STYLE
-    p(0, 'TABLE'); p(2, 'STYLE'); p(70, 2);
-    p(0, 'STYLE'); p(2, 'STANDARD'); p(70, 0); p(40, 0); p(41, 1.0); p(50, 0); p(71, 0); p(42, 2.5); p(3, 'txt'); p(4, '');
-    p(0, 'STYLE'); p(2, 'ROMANS'); p(70, 0); p(40, 0); p(41, 0.8); p(50, 0); p(71, 0); p(42, 2.5); p(3, 'romans.shx'); p(4, '');
-    p(0, 'ENDTAB');
-    // DIMSTYLE (UX-STANDARD) — pentru DIMENSION reale viitoare
-    p(0, 'TABLE'); p(2, 'DIMSTYLE'); p(70, 1);
-    p(0, 'DIMSTYLE'); p(105, 'D1'); p(2, 'UX-STANDARD'); p(70, 0);
-    p(140, 2.5); p(141, 2.5); p(147, 0.5); p(41, 2.0); p(42, 0.5); p(44, 1.5); p(271, 0); p(279, 0);
+    p(0, 'TABLE'); p(2, 'STYLE'); p(70, 1);
+    p(0, 'STYLE'); p(2, 'STANDARD'); p(70, 0); p(40, '0.0'); p(41, '1.0'); p(50, '0.0'); p(71, 0); p(42, '2.5'); p(3, 'txt'); p(4, '');
     p(0, 'ENDTAB');
     p(0, 'ENDSEC');
-    // ENTITIES
+    // ENTITIES (R12: fara handle, fara subclass)
     p(0, 'SECTION'); p(2, 'ENTITIES');
-    // ents e listă de "code\nval" — le adăugăm direct
-    ents.forEach(function (e) { o.push(e); });
+    prims.forEach(function (e) {
+      var lay = e.l || '0';
+      if (e.t === 'line') { p(0, 'LINE'); p(8, lay); p(10, f(e.x1)); p(20, f(e.y1)); p(30, '0.0'); p(11, f(e.x2)); p(21, f(e.y2)); p(31, '0.0'); }
+      else if (e.t === 'poly') {
+        p(0, 'POLYLINE'); p(8, lay); p(66, 1); p(70, e.closed ? 1 : 0); p(10, '0.0'); p(20, '0.0'); p(30, '0.0');
+        e.pts.forEach(function (q) { p(0, 'VERTEX'); p(8, lay); p(10, f(q[0])); p(20, f(q[1])); p(30, '0.0'); });
+        p(0, 'SEQEND'); p(8, lay);
+      }
+      else if (e.t === 'circle') { p(0, 'CIRCLE'); p(8, lay); p(10, f(e.cx)); p(20, f(e.cy)); p(30, '0.0'); p(40, f(e.r)); }
+      else if (e.t === 'arc') { p(0, 'ARC'); p(8, lay); p(10, f(e.cx)); p(20, f(e.cy)); p(30, '0.0'); p(40, f(e.r)); p(50, f(e.a0)); p(51, f(e.a1)); }
+      else if (e.t === 'text') {
+        p(0, 'TEXT'); p(8, lay); p(10, f(e.x)); p(20, f(e.y)); p(30, '0.0'); p(40, f(Math.max(1, e.h))); p(1, String(e.s == null ? '' : e.s)); p(7, 'STANDARD');
+        if (e.rot) p(50, f(e.rot));
+        if (e.align === 'center') { p(72, 1); p(11, f(e.x)); p(21, f(e.y)); p(31, '0.0'); }
+      }
+    });
     p(0, 'ENDSEC');
     p(0, 'EOF');
-    // asamblare: perechile din p() sunt (code, val) alternante; ents sunt deja stringuri "code\nval"
-    var out = [];
-    for (var i = 0; i < o.length; i++) {
-      if (typeof o[i] === 'string' && o[i].indexOf('\n') >= 0) { out.push(o[i]); }
-      else { out.push(o[i] + '\n' + o[i + 1]); i++; }
-    }
-    return out.join('\n') + '\n';
+    return o.join('\n') + '\n';
   };
 
   // ─── GENERATOR: HAȘURĂ MATERIAL (pattern real pe tip, clipat în bandă) ─────
