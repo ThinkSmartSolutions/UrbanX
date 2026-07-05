@@ -102,6 +102,33 @@ Niciun material/produs cu incidență asupra rezistenței nu se pune în operă 
 
 Pentru fiecare categorie de lucrare, PCCVI precizează, pe rânduri: operația/faza; criteriul/valoarea de acceptare; metoda de verificare; frecvența; responsabilul (constructor/diriginte/proiectant/laborator); documentul rezultat (PVLA/PVFD/buletin/fișă); tipul punctului de control — **H (Hold — oprire obligatorie)**, **W (Witness — martor)** sau **R (Review documente)**. Punctele **H** (ex. verificarea armăturii înainte de betonare, geometria de montaj înainte de închideri, fazele determinante) blochează avansul lucrării până la semnătura de acceptare.
 
+### 1.8. Echipamente de măsurare și control — etalonare
+
+Rezultatele de măsurare sunt valabile numai dacă instrumentele sunt verificate/etalonate, cu certificate valabile:
+
+| Echipament | Utilizare | Cerință |
+|---|---|---|
+| Chei dinamometrice / aparate pretensionare | strângere șuruburi IR | etalonare periodică (certificat), precizie conform SR EN 1090-2 |
+| Grosimetru magnetic (DFT) | protecție anticorozivă/foc | calibrare pe etaloane înainte de fiecare set de măsurări |
+| Aparate NDT (UT, MT, PT), grade block | control suduri | verificate; personal nivel 2 (ISO 9712) |
+| Instrument topografic (nivelă/stație totală) | trasare, verticalități, cote | verificat metrologic |
+| Termohigrometru, termometru contact, creioane termice | condiții aplicare/preîncălzire | în termen de verificare |
+| Con Abrams, tipare epruvete, presă | control beton | laborator autorizat (grad II/III), aparatură verificată |
+| Aparat încercare cu placa / densimetru | compactare umpluturi | laborator autorizat |
+
+- Laboratoarele care efectuează încercări (beton, geotehnic, NDT, aderență) sunt **autorizate/acreditate** pentru domeniul respectiv; buletinele poartă semnătura personalului autorizat.
+
+### 1.9. Personal cu responsabilități de calitate
+
+| Rol | Cerință de calificare |
+|---|---|
+| Coordonator sudură (uzină) | IWE (EXC3) / IWT (EXC2), SR EN ISO 14731 |
+| Sudori | autorizați SR EN ISO 9606-1 pt. procedeu/poziție/material/grosime |
+| Operatori pretensionare | instruiți pe metoda și sistemul folosit |
+| Personal NDT | nivel 2, SR EN ISO 9712, pe metoda aplicată |
+| Aplicator protecții | autorizat de producătorul sistemului (anticoroziv/intumescent) |
+| Responsabil AQ constructor | responsabil tehnic cu execuția (RTE) atestat |
+
 ---
 
 ## 2. TERASAMENTE ȘI SISTEMATIZARE (PLATFORMĂ, SĂPĂTURI, UMPLUTURI)
@@ -188,7 +215,9 @@ Valori orientative de conformitate (SR EN 206, funcție de clasa de expunere —
 
 - **Transport:** cu autobetonieră; durata de la preparare la turnare, la temperaturi normale, **max. 90 min** (se reduce pe timp călduros); se interzice adaosul de apă la fața locului pentru refluidizare (numai superplastifiant conform rețetei, cu consemnare).
 - **Turnare:** înălțime de cădere liberă **≤ 1,5 m** (peste — jgheab/furtun/pâlnie); betonarea continuă pe elemente, cu evitarea segregării; grosimea stratului turnat corelată cu lungimea vibratorului.
-- **Compactare** prin vibrare internă (pervibrator): imersare verticală, pas ≤ 1,5× raza de acțiune, pătrundere ~10 cm în stratul anterior, retragere lentă, evitarea atingerii armăturii/cofrajului prelungite; nu se vibrează pentru „împingerea" betonului pe orizontală.
+- **Compactare** prin vibrare internă (pervibrator): imersare verticală, pas ≤ 1,5× raza de acțiune, pătrundere ~10 cm în stratul anterior, retragere lentă, evitarea atingerii armăturii/cofrajului prelungite; nu se vibrează pentru „împingerea" betonului pe orizontală. La placă se folosește și vibrare de suprafață (grindă vibrantă) urmată de nivelare.
+- **Pompare:** compoziția betonului pompabil (curbă granulometrică, finețe, consistență S4/S5) trebuie să evite dopurile și segregarea; se amorsează conducta cu lapte de ciment/mortar (care nu se pune în operă în element structural); se menține continuitatea alimentării pentru a evita rosturile reci neplanificate.
+- **Continuitatea betonării:** turnarea unui element/câmp se face fără întreruperi peste timpul de priză; dacă survine o întrerupere neplanificată, se tratează suprafața ca rost de lucru (cap. 3.5) și se anunță proiectantul. La placă, benzile/câmpurile se planifică astfel încât rosturile reci să coincidă cu rosturile de construcție prevăzute.
 
 ### 3.5. Rosturi de turnare (de lucru)
 
@@ -773,6 +802,25 @@ Valori orientative (esențiale — cele definitive din SR EN 1090-2, funcție de
 - Certificate materiale (3.1), DoP; buletine încercări beton; rapoarte NDT suduri; fișe pretensionare șuruburi; fișe grosimi protecție anticorozivă și la foc; PVLA/PVFD; jurnal de sudură; rapoarte topografice (trasare/verticalități); jurnal betonare timp friguros/călduros; dispoziții de șantier și note de constatare; **referatul proiectantului** și al **verificatorului** la terminarea lucrărilor; certificatul de marcaj CE al confecției metalice (SR EN 1090-1).
 - Neconformitățile se tratează prin **fișe de neconformitate** (identificare, cauză, dispoziție de remediere, reverificare) și se închid înainte de recepție.
 
+### 14.4. Recepția la terminarea lucrărilor de rezistență
+
+- Comisia de recepție (HG 343/2017) verifică realizarea structurii conform proiectului verificat și prezentul caiet, pe baza Cărții tehnice — capitolul rezistență. Se verifică: existența și valabilitatea tuturor certificatelor/DoP; buletinele de încercare beton (conformitate statistică); rapoartele NDT (suduri acceptate la nivelul B/C impus); fișele de pretensionare (procent verificat, valori în toleranță); fișele de grosimi protecție anticorozivă și la foc; PVLA/PVFD semnate; rapoartele topografice (geometrie de montaj în toleranțe 1090-2); referatele proiectantului și verificatorului la terminarea lucrărilor; certificatul de marcaj CE al confecției (SR EN 1090-1).
+- La recepție se consemnează eventualele **rezerve** (lucrări/documente restante) cu termene; recepția finală se face după perioada de garanție, cu verificarea comportării în exploatare (fisuri, tasări, coroziune, integritatea protecțiilor).
+- **Urmărirea în exploatare** a structurii (urmărire curentă / specială, după caz) se instituie conform proiectului și normelor, cu jurnal de evenimente și verificări periodice ale protecției anticorozive/foc și ale îmbinărilor solicitate (reverificare cupluri la îmbinări de rulare, dacă e prevăzut).
+
+### 14.5. Documente-tip aferente fazelor (checklist)
+
+| Fază | Document(e) obligatorii |
+|---|---|
+| Teren de fundare | PVFD/PVLA teren + referat geotehnic |
+| Compactări | PVLA + buletine grad compactare + Ev2 |
+| Armare | PVLA armătură (+ PVFD la faze determinante) |
+| Betonare | bon livrare + buletin epruvete 28 zile + jurnal betonare |
+| Confecție uzină | PV recepție uzină + rapoarte NDT + CE 1090-1 |
+| Montaj | PVFD geometrie + fișe pretensionare + NDT suduri șantier |
+| Protecții | PVLA + fișe DFT anticoroziv + fișe grosimi foc |
+| Placă | PVLA armare + raport planeitate FF/FL |
+
 ---
 
 ## 15. NORME SSM ȘI PSI ÎN EXECUȚIE
@@ -791,6 +839,9 @@ Valori orientative (esențiale — cele definitive din SR EN 1090-2, funcție de
 - Respectarea **Legii 307/2006** și a normelor PSI; **permis de lucru cu foc** obligatoriu pentru sudură/tăiere/polizare, cu supraveghere și mijloace de stingere la punct de lucru (stingătoare adecvate), curățarea zonei de materiale combustibile, verificare post-operație.
 - Depozitarea controlată a materialelor inflamabile (solvenți, grunduri, vopsele — inclusiv anticorozive/intumescente), ventilație, semnalizare ATEX unde e cazul; interzicerea fumatului/focului deschis în zonele cu vapori inflamabili.
 - Căi de acces/evacuare libere în timpul execuției; plan de organizare de șantier cu poziționarea mijloacelor PSI.
+- Punctele de lucru cu foc (sudură, tăiere, polizare) se izolează de materialele combustibile și de zonele de depozitare a vopselelor/solvenților; scânteile de la tăiere/polizare nu se direcționează spre materiale inflamabile sau spre protecțiile intumescente/anticorozive proaspete. La finalul programului se face verificarea zonelor cu risc (reaprinderi).
+- Se instruiește personalul asupra amplasării stingătoarelor și a procedurii de alarmare; se semnalizează căile de evacuare și punctele de prim-ajutor; se asigură iluminat de siguranță în zonele de lucru pe timp de noapte/vizibilitate redusă.
+- Deșeurile din execuție (resturi metal, cofraje, ambalaje vopsele) se colectează selectiv și se evacuează controlat; se evită acumularea de materiale combustibile în incinta halei aflate în montaj.
 
 ---
 

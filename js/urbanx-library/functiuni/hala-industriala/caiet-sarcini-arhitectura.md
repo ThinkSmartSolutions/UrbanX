@@ -186,6 +186,10 @@ Punctele slabe ale unei învelitori de hală sunt racordurile și penetrările, 
 
 La panourile sandwich de acoperiș (fără membrană separată), rolul de hidroizolație îl asigură profilul cutat al feței exterioare și îmbinările etanșe; racordurile transversale (la coamă, la dolii, la ferestrele de acoperiș) se rezolvă cu piese de tinichigerie prefasonate cu suprapuneri ≥ 200 mm în sensul pantei și cu benzi de etanșare comprimabilă sub șuruburile de străpungere. La panouri cu pantă mică (spre 5%), suprapunerile transversale se dublează cu bandă de etanșare la nivelul fiecărei nervuri.
 
+### 3.6 Circulația și protecția pe acoperiș
+
+Acoperișul de hală are trafic tehnic (mentenanța echipamentelor de pe acoperiș — exhaustoare, unități de climatizare, luminatoare). Se prevăd trasee de circulație marcate/protejate (dale/pasarele de protecție pe membrană, plăci de repartizare pe panourile sandwich pentru evitarea deformării locale a tablei subțiri de acoperiș sub greutatea persoanelor). Se interzice circulația directă pe zonele nervurilor de panou fără protecție și pe luminatoarele/plăcile translucide (risc de străpungere și cădere — a se vedea cap. 13, protecția golurilor). Punctele de ancorare pentru lucru la înălțime (linii de viață, puncte fixe) se prevăd conform proiectului de siguranță și se recepționează separat, cu documente de sarcină admisibilă.
+
 ---
 
 ## 4. Termoizolații și bariere de vapori
@@ -206,7 +210,17 @@ Reacția la foc a termoizolațiilor din zonele cu cerință de securitate la inc
 
 ### 4.2 Tratarea punților termice
 
-Punțile termice (racord soclu-perete, atice, buiandrugi, penetrări, prinderi metalice) se tratează prin continuitatea termoizolației, prin întreruperea contactului metal-metal cu piese termoizolante (rupere de punte) și prin izolarea perimetrală a plăcii pe sol. Se interzic penetrările metalice necontrolate prin anvelopă. Zonele de risc (colțuri, racorduri) se verifică prin calcul de temperatură superficială pentru a evita condensul și mucegaiul (factor de temperatură fRsi peste valoarea critică conform C107).
+Punțile termice (racord soclu-perete, atice, buiandrugi, penetrări, prinderi metalice) se tratează prin continuitatea termoizolației, prin întreruperea contactului metal-metal cu piese termoizolante (rupere de punte) și prin izolarea perimetrală a plăcii pe sol. Se interzic penetrările metalice necontrolate prin anvelopă. Zonele de risc (colțuri, racorduri) se verifică prin calcul de temperatură superficială pentru a evita condensul și mucegaiul (factor de temperatură fRsi peste valoarea critică conform C107). Punțile termice liniare cele mai frecvente la o hală și tratarea lor de execuție:
+
+| Punte termică | Cauză | Tratare de execuție |
+|---|---|---|
+| Racord soclu–perete | întreruperea izolației la fundație | continuitatea XPS pe soclu + izolarea perimetrală a plăcii pe sol pe ≥ 1,0 m |
+| Atic | element de beton/metal expus pe trei fețe | izolarea aticului pe interior și exterior, continuu cu izolația acoperișului |
+| Buiandrug/spaleți goluri | element structural neizolat la conturul golului | izolarea conturului golului, rupere de punte la tâmplărie |
+| Prinderi metalice ale panourilor | penetrarea izolației cu metal | limitarea numărului, piese cu rupere de punte unde e cazul |
+| Racord perete–acoperiș (streașină) | continuitatea greu de realizat la colț | detaliu cu suprapunerea izolației perete-acoperiș fără gol |
+
+Punțile netratate produc, în regim rece, temperaturi superficiale sub punctul de rouă, cu condens, pete și mucegai la interior — motiv de neconformitate la cerința higrotermică (C, F).
 
 ### 4.3 Bariere de vapori și execuție
 
@@ -300,7 +314,21 @@ Rosturile dintre plăci se armează cu bandă și se șpăcluiesc în minimum 2�
 
 Unde proiectul prevede zidărie (pereți despărțitori grei, incinte tehnice, socluri), aceasta se execută din blocuri ceramice/BCA cu mortar de zidărie, cu rosturi complet umplute (grosime 10–12 mm), țesere corectă la colțuri, armare în rost la nevoie și centuri/buiandrugi conform structurii. Zidăria nu preia funcție structurală decât dacă este declarată portantă în proiectul de rezistență. Verticalitatea se verifică cu firul cu plumb (abatere ≤ 3 mm/m, ≤ 10 mm/etaj). Zidăria de umplutură/despărțire se ancorează de structura metalică prin conectori care permit mișcarea diferențiată (fără a transmite eforturi din deformarea cadrului metalic în perete) și se prevede rost superior de compensare între capul zidăriei și grinda/planșeul de deasupra, umplut cu material compresibil, pentru a evita fisurarea la deformarea structurii. Buiandrugii peste goluri se dimensionează și se rezemă conform detaliilor. Blocurile se pun în operă curate, umezite în prealabil (ceramică) pentru controlul absorbției apei din mortar.
 
-### 6.3 Toleranțe și verificări
+### 6.3 Cerințe acustice ale compartimentărilor (cerința E)
+
+Compartimentările corpului administrativ și ale zonelor sociale respectă cerințele de izolare la zgomot (cerința fundamentală E — Legea 10/1995). Prescripții de execuție pentru atingerea indicilor:
+
+| Element | Indice țintă (Rw) | Soluție de execuție |
+|---|---|---|
+| Perete între birouri | ≥ 43 dB | dublă placare pe fiecare față + vată minerală în cavitate, rosturi șpăcluite etanș |
+| Perete birou–coridor | ≥ 43 dB | idem, cu ușă cu garnitură |
+| Perete sală de ședințe / confidențial | ≥ 50 dB | perete dublu structural / placare triplă + vată, decuplare la planșeu |
+| Perete grup sanitar | izolare fonică + hidrofug | placă H + vată, etanșare la instalații |
+| Planșeu mezanin (zgomot de impact) | conform funcțiune | strat de separare/plutitor sub șapă unde e cazul |
+
+Continuitatea izolării fonice este condiționată de etanșeitatea perimetrală: rosturile la racordul perete–planșeu, perete–fațadă și trecerile de instalații se etanșează, întrucât orice fisură/gol scurtcircuitează acustic peretele (căi de flancare). Pereții cu cerință acustică ridicată se ridică până la planșeu (nu se opresc la tavanul fals), pentru a bloca transmisia peste tavan.
+
+### 6.4 Toleranțe și verificări
 
 | Parametru | Toleranță |
 |---|---|
@@ -311,7 +339,7 @@ Unde proiectul prevede zidărie (pereți despărțitori grei, incinte tehnice, s
 
 Verificarea EI a pereților și a etanșărilor de traversare se face prin PVLA înainte de închiderea/placarea finală (fază determinantă unde scenariul PSI o cere).
 
-### 6.4 Etanșări la foc ale traversărilor
+### 6.5 Etanșări la foc ale traversărilor
 
 Toate traversările de instalații (conducte, ghene de ventilație, jgheaburi de cabluri, tuburi de protecție) prin pereții și planșeele cu rezistență la foc trebuie să **mențină clasa EI a elementului străpuns**, prin sisteme de etanșare la foc certificate (ETA/agrement), alese în funcție de natura traversării:
 
@@ -365,6 +393,10 @@ Suportul de beton trebuie să fie: **matur** (rezistență și umiditate rezidua
 | Epoxidic autonivelant | ≥ +10 °C (și ≥ +3 °C peste punctul de rouă) | UR aer < 75%, umiditate suport ≤ 4% CM | fără curenți/praf în timpul întăririi |
 
 Condiția "temperatura suportului cu ≥ 3 °C peste punctul de rouă" este obligatorie la epoxidice pentru a evita condensul care produce voalarea/albirea și decolarea filmului. Se interzice aplicarea pe timp friguros sub minimul de întărire fără măsuri de încălzire controlată a spațiului (C 16/1984).
+
+### 7.3.1 Driscuirea, curarea și maturarea pardoselii dry-shake
+
+Finisarea mecanică (driscuirea cu elicopter) se execută în ferestre de timp corelate cu priza betonului: prima trecere după evaporarea apei de mustire și încorporarea întăritorului, ultimele treceri pentru închiderea și lustruirea suprafeței, fără a supralucra (risc de exfoliere a peliculei fine). Imediat după finisare se aplică **agentul de curare (curing)** — membrană de protecție care reține apa în beton și previne fisurarea de contracție plastică și praful de suprafață; alternativ se aplică protecție cu folie/umezire menținută. Betonul nu se expune la vânt puternic, soare direct sau curenți în primele ore (fisurare plastică). Rezistența de exploatare (circulație stivuitoare) se atinge după maturarea prescrisă; circulația pietonală ușoară se admite mai devreme, conform GP 114 și indicațiilor de rețetă. Tăierea rosturilor de contracție se face în fereastra de 24–48 h — prea devreme antrenează smulgeri pe muchie, prea târziu fisuri necontrolate în afara rostului.
 
 ### 7.4 Alte pardoseli
 
@@ -558,7 +590,18 @@ Execuția lucrărilor de arhitectură se desfășoară cu respectarea **Legii 31
 
 Pe durata execuției se respectă normele de apărare împotriva incendiilor: se stabilesc căi de acces și evacuare libere, se organizează dotarea cu mijloace de primă intervenție (stingătoare la fronturile de lucru cu foc), se reglementează lucrul cu foc deschis prin **permis de lucru cu foc** (sudură, aplicare membrane cu flacără, tăiere cu disc), se depozitează controlat materialele combustibile (spume PU, rășini, ambalaje, deșeuri) departe de sursele de aprindere, și se instituie supraveghere după terminarea lucrărilor cu foc (minim intervalul prescris de reglementările de apărare împotriva incendiilor). Deșeurile inflamabile se evacuează zilnic. Instalațiile de detectare/stingere permanente ale halei se pun în funcțiune și se recepționează conform documentelor de instalații și scenariului de securitate la incendiu (P118-1/2/3), fără suprapunere cu prezentul caiet.
 
-### 13.4 Managementul deșeurilor din execuție
+### 13.4 Permisul de lucru cu foc — procedură
+
+Lucrările cu foc deschis (sudura membranelor bituminoase, tăierea cu disc abraziv, sudura/tăierea metalului la conturarea golurilor din panouri) se execută numai pe baza **permisului de lucru cu foc** emis pe zi/loc/echipă, care condiționează începerea lucrării de:
+
+- îndepărtarea sau protejarea materialelor combustibile din raza de acțiune a scânteilor/flăcării (inclusiv miezul PIR al panourilor, ambalaje, deșeuri);
+- prezența la punctul de lucru a mijloacelor de primă intervenție (stingătoare corespunzătoare) și a unei persoane de supraveghere;
+- verificarea zonei de sub punctul de lucru (scânteile cad — risc de aprindere la nivel inferior);
+- instituirea supravegherii după terminarea lucrării, pe intervalul prescris de reglementările de apărare împotriva incendiilor (supraveghere post-lucru pentru focare mocnite).
+
+Sudura membranelor cu flacără în vecinătatea panourilor cu miez combustibil (PIR) este activitatea cu risc maxim la o hală; unde este posibil se preferă tehnologii fără flacără (membrane autoadezive, sudură cu aer cald pentru membrane sintetice) pentru eliminarea riscului.
+
+### 13.5 Managementul deșeurilor din execuție
 
 Deșeurile de arhitectură (resturi de panouri, membrane, ambalaje, rășini întărite, deșeuri de gips-carton) se colectează selectiv și se predau spre valorificare/eliminare la operatori autorizați, conform legislației de gestionare a deșeurilor; deșeurile periculoase (ambalaje de rășini, solvenți, adezivi) se gestionează separat, cu evidență. Nu se admite arderea deșeurilor pe șantier.
 

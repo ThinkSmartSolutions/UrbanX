@@ -518,6 +518,37 @@
       ];
       return { cat: 'Recepție & Urmărire', file: 'Grafic_executie_finantare.doc', html: docHtml(_meta(D, 'GRAFIC DE EXECUȚIE ȘI FINANȚARE', 'eșalonare Gantt + grafic de finanțare C+M'), secs) };
     },
+    'Cartea tehnică a construcției': function (D, v) {
+      var ac = v.calc || {}; var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
+      var fnLabel = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție';
+      var ampl = (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : '');
+      // A — proiectare
+      var A = ['Certificatul de urbanism + avizele și acordurile obținute (dosarele de avize)', 'Autorizația de construire + documentația tehnică D.T.A.C.', 'Proiectul tehnic de execuție (P.Th.+D.E.) — memorii pe specialități, caiete de sarcini, liste de cantități', 'Memoriile tehnice: general, arhitectură, rezistență, instalații', 'Scenariul de securitate la incendiu + avizul/autorizația ISU', 'Studiul geotehnic (verificat Af) și, după caz, studiul topografic', 'Referatele verificatorilor de proiect atestați (cerințele A-F)', 'Piese desenate: plan de situație/încadrare, planuri, fațade, secțiuni, detalii, planșe de rezistență și instalații', 'Programul de control al calității (PCCVI) însușit și avizat ISC', 'Devizul general (HG 907/2016)'];
+      // B — execuție
+      var B = ['Procesele-verbale de trasare a lucrărilor', 'Procesele-verbale de recepție a terenului de fundare și a fazelor de execuție', 'Procesele-verbale de lucrări ascunse (PVLA)', 'Procesele-verbale de fază determinantă (PVFD) — cu participarea ISC', 'Certificatele de calitate / declarațiile de performanță (DoP) ale materialelor puse în operă', 'Buletinele de încercări (beton, oțel, suduri VT/UT, compactări, prize de pământ)', 'Condica de betoane și registrul de procese-verbale', 'Dispozițiile de șantier ale proiectantului și soluțiile la neconformități', 'Jurnalul evenimentelor (Anexa)', 'Cartea tehnică a echipamentelor și instalațiilor (fișe, agremente, PIF)'];
+      // C — recepție
+      var C = ['Procesul-verbal de recepție la terminarea lucrărilor', 'Referatele proiectantului și ale dirigintelui de șantier la recepție', 'Procesul-verbal de recepție finală (după perioada de garanție)', 'Lista de remedieri și confirmarea executării lor', 'Certificatul de performanță energetică a clădirii'];
+      // D — urmărire comportare în timp
+      var Dsec = ['Programul de urmărire a comportării în timp (P130/1999) — curentă/specială', 'Rezultatele urmăririi (tasări, fisuri, coroziune, degradări) și interpretarea lor', 'Procesele-verbale de control periodic și după evenimente deosebite (seism, incendiu, inundație)', 'Instrucțiunile de exploatare și întreținere (mentenanță)', 'Documentele privind intervențiile ulterioare (reparații, consolidări, modificări)'];
+      function opisSec(arr) { return opisCheck(arr.map(function (d, i) { return ['' + (i + 1), d]; }), ['Nr.', 'Document / piesă']); }
+      var jurnal = tbl([['', '', '', ''], ['', '', '', ''], ['', '', '', '']], ['Data', 'Evenimentul (execuție/recepție/exploatare/intervenție/eveniment deosebit)', 'Documentul de referință', 'Semnătura responsabilului']);
+      var resp = sigTable([
+        ['Întocmirea cărții tehnice', 'investitorul / proiectantul (până la recepție)', ''],
+        ['Completarea și păstrarea', 'proprietarul / administratorul', ''],
+        ['Urmărirea comportării în timp', 'responsabil desemnat (P130/1999)', '']
+      ], ['Obligație', 'Cine răspunde', 'Nume și prenume']);
+      var secs = [
+        { h: '1. Obiect și cadru legal', html: '<p>Cartea tehnică a construcției pentru obiectivul „' + esc(fnLabel) + '", ' + esc(ampl || '—') + ', se întocmește și se completează conform <b>Legii 10/1995</b> (calitatea în construcții), <b>HG 273/1994</b> (Regulamentul de recepție, modificat prin HG 343/2017) și <b>HG 766/1997 — Anexa 6</b> (Regulament privind conducerea și asigurarea calității / cartea tehnică). Cuprinde ansamblul documentelor privind proiectarea, execuția, recepția și urmărirea comportării în exploatare, grupate în secțiunile A–D.</p>' + tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Faza', isPth ? 'P.Th. + D.E.' : 'D.T.A.C.'], ['Categorie/clasă importanță', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—')]], ['Element', 'Valoare']) },
+        { h: '2. Structura cărții tehnice (borderou general)', html: '<p>Cartea tehnică se organizează în patru secțiuni și centralizatorul pieselor:</p>' + tbl([['A', 'Documentația privind proiectarea', '' + A.length + ' piese'], ['B', 'Documentația privind execuția', '' + B.length + ' piese'], ['C', 'Documentația privind recepția', '' + C.length + ' piese'], ['D', 'Documentația privind urmărirea comportării în exploatare și intervenții', '' + Dsec.length + ' piese']], ['Secț.', 'Conținut', 'Piese']) },
+        { h: 'Secțiunea A — Documentația privind proiectarea', html: opisSec(A) },
+        { h: 'Secțiunea B — Documentația privind execuția', html: opisSec(B) },
+        { h: 'Secțiunea C — Documentația privind recepția', html: opisSec(C) },
+        { h: 'Secțiunea D — Urmărirea comportării în timp și intervenții', html: opisSec(Dsec) },
+        { h: '3. Jurnalul evenimentelor', html: '<p>Se completează cronologic, pe toată durata de existență a construcției, de către proprietar/administrator:</p>' + jurnal },
+        { h: '4. Responsabilități și predare-primire', html: resp + '<p style="margin-top:6pt">Cartea tehnică se predă proprietarului la recepția la terminarea lucrărilor și se păstrează pe toată durata de existență a construcției; la înstrăinare se predă noului proprietar (Legea 10/1995). Nepredarea/necompletarea constituie contravenție.</p><p style="margin-top:6pt">Întocmit: ' + esc(D.proiectant || '____________________') + ' &nbsp; Data: ______________ &nbsp; Semnătura: ______________</p>' }
+      ];
+      return { cat: 'Recepție & Urmărire', file: 'Cartea_tehnica_a_constructiei.doc', html: docHtml(_meta(D, 'CARTEA TEHNICĂ A CONSTRUCȚIEI', 'Legea 10/1995 · HG 273/1994 · HG 766/1997 Anexa 6 — secțiuni A–D + jurnal'), secs) };
+    },
     'Memorii avizatori': function (D, v) {
       var ac = v.calc || {};
       var avize = Object.keys(D._avize || {}).filter(function (k) { return D._avize[k]; });

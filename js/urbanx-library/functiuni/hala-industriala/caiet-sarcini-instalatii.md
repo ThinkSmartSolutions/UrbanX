@@ -2,6 +2,8 @@
 ## Hală industrială / logistică cu mezanin birouri
 
 > **Scop și delimitare.** Prezentul caiet de sarcini prescrie **CALITATEA materialelor și echipamentelor**, **TEHNOLOGIA DE MONTAJ**, **PROBELE și VERIFICĂRILE** și **RECEPȚIA** lucrărilor de instalații, faza *Proiect Tehnic (PTh) + Detalii de Execuție (DE)*. Caietul de sarcini **NU redimensionează** instalațiile — dimensionarea (debite, sarcini termice, secțiuni, presiuni de calcul) este stabilită prin Memoriul Tehnic de Instalații și pe planșe. Orice contradicție între prezentul caiet și piesele desenate se rezolvă în favoarea soluției **mai acoperitoare** din punct de vedere al siguranței și al cerinței fundamentale, cu decizia scrisă a proiectantului de specialitate.
+>
+> **Relația cu celelalte piese scrise.** Prezentul document se corelează cu: Memoriul Tehnic de Instalații (soluții și dimensionare), Scenariul de Securitate la Incendiu (cerințe pentru stingere/detecție/desfumare), și documentul de Recepție/Carte Tehnică (procedura generală de recepție și urmărire în timp a construcției). Pentru a evita suprapunerea, aici NU se reiau calculele de dimensionare și NU se reia procedura generală de recepție a construcției — se prescriu strict calitatea execuției instalațiilor, probele specifice și documentele de calitate pe specialități.
 
 ---
 
@@ -45,6 +47,33 @@ Caietul de sarcini se aplică execuției instalațiilor aferente unei hale indus
 3. **Trasabilitate:** fiecare lot de materiale se recepționează cu certificat de calitate/conformitate al producătorului, iar antreprenorul menține un **registru de trasabilitate** (produs — lot — certificat — poziție în lucrare — dată punere în operă). Documentele intră în Cartea Tehnică.
 4. Materialele care nu corespund calitativ sau care prezintă defecte se **resping**, se marchează vizibil și se **evacuează din șantier** în max. 48 h.
 5. Depozitarea se face în condiții care exclud degradarea: țevi PP-R/PEHD ferite de UV și temperaturi > 40 °C, tablouri și aparataj electric în spații uscate, cabluri pe tamburi ferite de deteriorare mecanică.
+6. **Substituirea (echivalarea) de produse:** orice propunere de înlocuire a unui produs prescris cu un „echivalent" se face numai cu **acordul scris al proiectantului de specialitate**, pe baza fișelor tehnice care demonstrează performanțe cel puțin egale (clasă de reacție/rezistență la foc, presiune nominală, clasă de izolație, K-factor, debit etc.). Nu se acceptă echivalări care reduc nivelul de siguranță sau de performanță prescris.
+7. **Prelevare de mostre și încercări la cerere:** dirigintele/proiectantul poate solicita mostre și încercări de laborator pe loturi (ex. presiune de spargere țeavă, comportare la foc), pe cheltuiala antreprenorului, la suspiciune de neconformitate; rezultatul condiționează punerea în operă.
+
+### 1.3.1 Toleranțe generale de montaj
+
+| Element | Toleranță admisă |
+|---|---|
+| Verticalitate coloane (conducte, țevi) | ≤ 2 mm/m, max. 10 mm pe înălțimea nivelului |
+| Orizontalitate/pantă conducte cu pantă impusă | pantă efectivă ≥ pantă de proiect, fără contrapante |
+| Poziția obiectelor sanitare (ax, cotă) | ± 10 mm față de proiect |
+| Aliniere jgheaburi de cabluri / tubulatură | fără denivelări bruște; suporți la interax normat |
+| Aliniere pompe (motor-pompă) | conform toleranța producătorului (cuplaj) |
+
+### 1.3.2 Sinteza cerințelor de calitate a materialelor (recapitulativ)
+
+| Specialitate | Materiale/echipamente-cheie | Cerință de calitate / certificare |
+|---|---|---|
+| Sanitare | PP-R, PEHD, obiecte, baterii | SR EN ISO 15874 / EN 12201; DoP + CE; contact apă potabilă |
+| Canalizare | PVC/PP scurgere, PVC-KG, separator | SR EN 1451/1401/13476; EN 858 (separator); capace EN 124 D400 |
+| Termice | oțel/cupru/PP-R, aeroterme, cazane | EN 10255/1057; randament Mc001; agrement aparate ardere |
+| Ventilare/desfumare | tablă zincată, CTA, clapete EI, ventilatoare F300/F400 | EN 1505/1506; clase etanșeitate; clasificare/certificare la foc |
+| Electrice | cabluri, tablouri, aparataj, corpuri | I7; cabluri LSZH pe evacuare; RF (E30/E90) pt. securitate |
+| IPT / priză | oțel zincat OL-Zn 40×4, electrozi | I20 / EN 62305; îmbinări protejate anticoroziv |
+| Stingere | oțel/PEHD, capete sprinkler/ESFR, pompe, alarm valve | EN 12845 / EN 12259 / EN 671; certificare componente |
+| Detecție | detectoare, butoane, sirene, centrală | seria EN 54 (54-2/-4/-3/-11/-23) |
+| Gaze | oțel sudat, PEHD gaz, SRM, detecție+electrovalvă | NTPEE / EN 1775 / EN 1555; sudori autorizați |
+| Curenți slabi | cablu Cat.6/6A, fibră, camere IP, control acces | EN 50173 / 62676 / 50131 / 60839 |
 
 ### 1.4 Obligațiile antreprenorului de instalații
 
@@ -59,6 +88,15 @@ Caietul de sarcini se aplică execuției instalațiilor aferente unei hale indus
 - Se respectă **distanțele minime de vecinătate** dintre instalațiile electrice și cele cu fluide (I7): jgheaburile de cabluri se pozează **deasupra** conductelor de apă; distanța liberă minimă între cablu electric neizolat termic și conductă caldă neizolată ≥ 100 mm (sau se izolează).
 - Golurile, ancorele, suporții și pasajele prin elemente de compartimentare se stabilesc înainte de închideri; **etanșările rezistente la foc** (EI) la trecerile prin pereți/planșee cu rol de compartimentare sunt obligatorii și se documentează cu fișe de produs certificat.
 - Antreprenorul general întocmește **planul de coordonare a instalațiilor** (composite drawing) înainte de montaj și îl supune spre avizare proiectanților de specialitate; nicio conductă/tubulatură nu se montează pe baza planșelor de specialitate izolate dacă există conflict cu altă specialitate. La structura metalică cu grinzi cu inimă plină/zăbrele, trecerile prin inima grinzii se fac **numai în golurile prevăzute prin proiectul de structură** — este interzisă găurirea/tăierea profilelor metalice fără acordul scris al inginerului de structură.
+
+### 1.5.1 Organizarea și eșalonarea execuției instalațiilor
+
+Execuția instalațiilor se eșalonează corelat cu stadiul construcției și cu montajul structurii metalice, respectând ordinea logică ce evită refacerile:
+
+- **Faza de infrastructură/platformă:** rețelele îngropate (apă, canalizare menajeră și pluvială, inel hidranți, branșament gaz, priză de pământ pe conturul fundației, tuburi de protecție pentru cabluri) se execută și se probează **înainte** de turnarea plăcilor și a platformelor betonate — orice conductă/tub sub placă rămasă neexecutată impune spargeri ulterioare, care nu se admit fără acordul proiectantului.
+- **Faza de suprastructură (structură metalică montată):** montajul suporților, jgheaburilor, conductelor aeriene de stingere/termice/sanitare, tubulaturii de ventilare-desfumare, folosind punctele de prindere prevăzute pe structură (fără intervenții neautorizate asupra profilelor metalice).
+- **Faza de finisaje/închideri:** montajul aparatelor terminale (obiecte sanitare, corpuri, guri, capete sprinkler, detectoare), tablourilor, echipamentelor din centrale (pompe, CTA, cazane); mascarea traseelor se face **numai după probele de presiune reușite**.
+- **Faza de PIF și recepție:** reglaje, probe funcționale, probe integrate de securitate la incendiu, instruire, predare documentație.
 
 ### 1.6 Verificarea calității pe faze de execuție (PCCVI)
 
@@ -139,6 +177,7 @@ Antreprenorul întocmește și respectă un **Plan de Control al Calității, Ve
 
 - **Pante minime** conducte orizontale interioare: Ø ≤ 110 mm — **2 %**; Ø 125–160 mm — **1,5–2 %**; colectoare exterioare Ø ≥ 200 mm — min. **0,5–1 %** (verificat la viteza de autocurățire 0,7 m/s, SR EN 12056/SR 1846).
 - **Cămine** (de vizitare, de racord, de rupere de pantă) din beton prefabricat sau PP, cu capac carosabil clasa **D400** pe platforme auto (SR EN 124), etanșe pe garnitură; trepte/scări de acces conform. Distanța maximă între cămine pe colector conform SR 1846 (orientativ ≤ 60 m la Ø mic, mai mare la diametre mari); cămine obligatorii la schimbări de direcție, de pantă, de diametru și la joncțiuni.
+- **Canalizarea pluvială a halei:** colectarea apelor de pe acoperiș prin jgheaburi/receptoare și burlane (sau sistem sifonic de acoperiș, dacă e proiectat) dimensionate la ploaia de calcul; burlanele se fixează pe fațadă/structură cu brățări, cu piese de dilatare la trasee lungi; racordul la rețeaua exterioară prin cămine. Se verifică absența infiltrațiilor la traversarea învelitorii (etanșare la receptoare) și evacuarea controlată (fără eroziune) la deversarea în rețea/bazin de retenție dacă este prevăzut. Apele de pe platformele auto se dirijează la separatorul de hidrocarburi înainte de evacuare.
 - Ventilarea coloanelor de canalizare menajeră: **coloane de ventilare** conduse peste acoperiș, cu căciulă; se admit aeratoare (valve de aerisire) doar unde proiectul o permite.
 
 **Tehnologia de montaj a canalizării gravitaționale:** (1) trasarea cotelor de radier cu nivelă/laser rotativ, verificarea pantei continue descendente fără contrapante; (2) pat de nisip compactat sub conducta îngropată, cu suport continuu (fără sprijinire punctuală pe pietre); (3) îmbinări cu mufă și garnitură inelară, cu lubrifiant admis (nu unsori minerale care atacă cauciucul), introduse până la reperul de montaj lăsând jocul de dilatare; (4) la conducta interioară suspendată — brățări la interax care împiedică săgeata (deformarea) și menține panta, cu brățară fixă la fiecare mufă; (5) umplutura laterală și de acoperire se compactează în straturi, evitând deplasarea sau ovalizarea tubului flexibil (grad de compactare conform proiect). Se lasă **piese de curățire (curățitoare)** la baza coloanelor și pe colectoarele orizontale lungi.
@@ -174,6 +213,8 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 | **Centrală termică** (dacă e cazul) | Cazane cu randament ≥ cerință Mc001; montaj în CT cu ventilare permanentă (grile jos/sus), detecție gaz + electrovalvă; vas de expansiune închis + supapă de siguranță tarată |
 | **Corpuri de încălzire birouri/mezanin** | Radiatoare oțel/aluminiu sau ventiloconvectoare; robinet cu cap termostatic + robinet de retur reglabil (lockshield) |
 
+**Montajul aerotermelor și tuburilor radiante:** aerotermele se fixează pe console dimensionate la greutatea aparatului plus solicitările din racorduri, la înălțimea și cu unghiul de refulare din proiect (astfel încât jetul de aer cald să acopere zona de lucru fără a crea curenți inconfortabili); racordurile la agentul termic se fac cu robineți de izolare, robinet de golire și racord flexibil antivibrant, iar condensul (la aeroterme cu răcire) se colectează și se dirijează la canalizare prin sifon. Tuburile radiante cu gaz se suspendă cu lanțuri/tije care permit dilatarea liberă, se respectă distanțele de siguranță față de materiale combustibile și mărfuri (conform producător și scenariu PSI), iar arzătorul și evacuarea gazelor arse se execută conform NTPEE și cărții tehnice. La ambele tipuri se verifică lipsa transmiterii de vibrații și zgomot în structura metalică a halei.
+
 ### 4.2 Conducte, distribuție, izolații termice
 
 | Utilizare | Material | Standard | Îmbinare |
@@ -187,6 +228,8 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 
 **Tehnologia de montaj a conductelor de oțel (agent termic):** debitare perpendiculară, șanfrenare la sudură cap-la-cap, curățarea capetelor; sudura executată de sudor autorizat cu procedeu calificat; la îmbinări filetate — etanșare cu fibră + pastă sau bandă PTFE, fără exces care să pătrundă în circuit; flanșe cu garnituri adecvate temperaturii/presiunii, strângere în cruce a șuruburilor la cuplul prescris. Vopsire anticorozivă (grund + strat final rezistent la temperatură) pe suprafață curățată. Punctele înalte se prevăd cu **aerisitoare** (automate sau manuale), punctele joase cu **robineți de golire**.
 
+**Vopsitorii și protecții anticorozive:** suprafețele metalice (conducte de oțel neizolate, suporți, tubulatură negalvanizată) se pregătesc prin curățare (îndepărtarea ruginii, grăsimilor, oxizilor), apoi se aplică sistemul de vopsire prescris (grund anticoroziv + strat de acoperire) în grosimile de peliculă uscată din fișa tehnică; conductele se codifică cromatic pe destinații (incendiu = roșu, gaz = galben) și se marchează sensul de curgere. Verificarea aderenței și a grosimii peliculei se face conform cerinței.
+
 **Ordinea la punerea în funcțiune a circuitelor termice:** spălare (flushing) pentru evacuarea impurităților de montaj (șpan, particule) înainte de conectarea echipamentelor sensibile (schimbătoare, pompe, ventiloconvectoare); montarea filtrelor de impurități (Y) în amonte de pompe și robineți de reglaj; umplere cu apă tratată (dedurizare/inhibitor de coroziune conform cerință producător cazan) și dezaerisire completă.
 
 ### 4.3 Ventilare — CTA și tubulatură
@@ -194,6 +237,8 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 - **Centrale de tratare aer (CTA)** cu recuperator de căldură, filtre (clase conform ISO 16890 / min. ePM din proiect), ventilatoare EC, baterii; montaj pe **rame antivibrante**, racorduri flexibile la tubulatură; acces pentru înlocuit filtrele.
 - **Tubulatură** din tablă zincată (SR EN 1505/1506) — falțuri și îmbinări etanșe, **clasă de etanșeitate min. B** (recomandat C la trasee lungi), susținere pe suporți antivibranți; garnituri la flanșe/mufe.
 - **Clapete antifoc (EI)** la trecerile prin pereți/planșee de compartimentare, cu resort și fuzibil / servomotor, cablate la centrala de incendiu (unde e cazul); montaj în poziția și cu sensul din proiect, acces pentru revizie.
+- **Materiale de izolație termică a tubulaturii de ventilare/climatizare:** vată minerală cu manta Al sau spumă elastomerică, cu reacție la foc corespunzătoare (clasă conform proiect/mediu), montată continuu; bariera de vapori la canalele de aer rece pentru evitarea condensului. Suporții tubulaturii cu element antivibrant și pat de repartizare a sarcinii peste izolație (fără strivirea izolației).
+- **Igiena tubulaturii:** canalele se livrează și se montează curate, cu capetele obturate pe durata montajului pentru a împiedica pătrunderea prafului/molozului; înainte de PIF se verifică curățenia interioară (canale accesibile prin uși de vizitare).
 - **Grile/anemostate** de refulare și aspirație; jaluzele de suprapresiune; guri exterioare cu plasă anti-insecte și clapetă anti-retur.
 
 **Tehnologia de montaj a tubulaturii de ventilare:** confecționare din tablă zincată cu grosime corelată cu dimensiunea canalului (grosimi mai mari la secțiuni mari), falțuri Pittsburgh/colțare; asamblarea tronsoanelor cu flanșe și garnitură continuă sau cu profile de îmbinare cu clemă, cu garnitură care asigură clasa de etanșeitate; rigidizări (fălțuiri transversale/cruci) la canalele mari pentru evitarea vibrațiilor („zgomot de tobă"); susținere pe suporți cu element antivibrant, la interax care limitează săgeata. La CTA și ventilatoare — racord flexibil (pânză) pentru decuplarea vibrațiilor de tubulatură. Registrele de reglaj, clapetele antifoc și gurile se montează accesibile pentru revizie (uși de vizitare la clapete). Se prevăd guri/uși de curățare pentru mentenanța canalelor (igienizare).
@@ -226,7 +271,8 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 - **Trape de desfumare (SHEV)** pe acoperiș / luminatoare cu dublă funcție (fum + iluminat natural), cu servomotor pneumatic (CO₂/aer comprimat) sau electric, agrementate, cu **suprafață utilă de evacuare (Aa)** conform proiect/scenariu PSI; deschidere automată la comandă și posibilitate de acționare manuală.
 - **Ventilatoare de evacuare fum** (unde desfumarea e mecanică): clasificate **F300 / F400** (rezistență 300–400 °C, 60–120 min), montate cu suporți și racorduri rezistente la foc; alimentare electrică pe circuit de securitate.
 - **Tubulatură de desfumare** rezistentă la foc (clasa EI conform proiect), etanșă, susținută cu suporți certificați pentru condiții de incendiu.
-- **Guri/clapete de introducere aer** (compensare) — cu acționare corelată cu evacuarea; grile mobile / uși automate / trape de admisie la partea inferioară.
+- **Guri/clapete de introducere aer** (compensare) — cu acționare corelată cu evacuarea; grile mobile / uși automate / trape de admisie la partea inferioară. Aerul de compensare se introduce la partea joasă, sub stratul de fum, cu viteză limitată pentru a nu perturba stratificarea; suprafața de introducere trebuie corelată cu suprafața de evacuare (raport conform scenariu/NP 086).
+- **Presurizarea casei de scări / a spațiilor protejate** (dacă e prevăzută prin scenariu): ventilator de introducere aer cu reglaj astfel încât să mențină suprapresiunea normată în casa de scări cu ușile închise și viteza minimă de trecere prin ușa deschisă, fără a împiedica deschiderea ușilor; montaj cu alimentare pe circuit de securitate și comandă de la centrala de incendiu.
 
 ### 5.2 Comenzi și integrare
 
@@ -292,6 +338,10 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 | Verificare declanșare **RCD** | Tester diferențial | declanșare la ≤ IΔn, timp în limita normată |
 | Verificare polaritate / faze / succesiune | Multimetru / testor de fază | corectă |
 | Verificare **SPD** (descărcătoare) | Vizual + indicatoare de stare | integre, indicator verde |
+| Verificare termografică tablouri (la PIF) | Cameră termică sub sarcină | fără puncte fierbinți (contacte slabe) |
+| Verificare căderi de tensiune | Măsurare/calcul la sarcină | ≤ 3 % iluminat / ≤ 5 % forță |
+
+**Ordinea verificărilor electrice la PIF:** (1) verificarea vizuală a montajului, marcării și etichetării; (2) măsurarea rezistenței de izolație pe circuite scoase de sub tensiune și cu receptoarele sensibile deconectate; (3) verificarea continuității conductorului de protecție PE de la fiecare masă până la bara de împământare; (4) măsurarea rezistenței buclei de defect și verificarea timpului de declanșare a protecțiilor; (5) testarea RCD (curent și timp de declanșare); (6) punerea sub tensiune progresivă, verificarea fazelor și a echilibrării sarcinilor; (7) verificarea termografică sub sarcină. Fiecare rezultat se trece în buletinul de verificare cu valoarea măsurată, aparatul folosit (cu certificat de etalonare) și criteriul de acceptare.
 
 - Toate rezultatele se consemnează în **buletine de verificare / măsurări** emise de electrician autorizat ANRE și de laborator autorizat unde e cazul; intră în Cartea Tehnică.
 
@@ -357,6 +407,12 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 | Probă post de control sprinkler | Deschidere robinet de test → declanșare alarmă (presostat + clopot hidraulic) în timpul normat |
 | Probă hidranți interiori | Presiune și debit la ajutaj la hidrantul cel mai defavorizat, conform P118-2 |
 
+**Montajul hidranților interiori:** cutiile se montează pe traseul căilor de acces/evacuare, la înălțime accesibilă, cu robinetul la cota normată, geam vizibil, marcaj și iluminat de siguranță deasupra; furtunul se așază pe tambur fără îndoituri care blochează debitarea. Se verifică raza de acțiune (furtun + jet) astfel încât să acopere toate punctele conform P118-2. Hidranții exteriori (inelul perimetral) se montează cu vane de secționare care permit izolarea unui tronson fără scoaterea din funcțiune a întregii rețele; căminele/hidranții subterani — cu capace marcate și accesibile iarna (deszăpezire).
+
+**Protecția la îngheț a instalației de stingere:** tronsoanele expuse la îngheț (rețele exterioare, zone neîncălzite) se protejează prin pozare sub adâncimea de îngheț, însoțire cu cablu de degivrare sau sisteme cu aer/preacțiune, conform proiect; rezervorul și camera pompelor se mențin la temperatură pozitivă.
+
+**Procedura probei de presiune a rețelei de stingere:** (1) izolarea tronsonului, montarea aparatelor de măsură (manometru înregistrator etalonat) și evacuarea completă a aerului; (2) creșterea lentă și controlată a presiunii, în trepte, până la presiunea de probă (min. 15 bar sau 1,5 × P_regim, care e mai mare), cu personalul retras din zona de risc; (3) menținerea presiunii **2 ore**, timp în care nu se admite nicio scădere de presiune (peste toleranța de temperatură) și nicio scurgere la îmbinări/capete; (4) inspecția vizuală a tuturor îmbinărilor. La eșec se depresurizează, se remediază și se reia proba. La rețeaua exterioară îngropată proba se face **înainte de acoperirea șanțului** (Hold Point, lucrare ascunsă). Rezultatele se consemnează în PV cu diagrama înregistratorului anexată.
+
 ### 8.4 Recepția instalației de stingere
 
 - Recepția se face cu **verificare integrată** (pompe + rețea + posturi + alarme) și în prezența reprezentantului **ISU** conform HG 571/2016 (autorizare securitate la incendiu).
@@ -370,7 +426,7 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 
 - **Centrală de detecție și semnalizare (CDSAI)** adresabilă, certificată SR EN 54-2/-4, cu sursă de rezervă (acumulatori) pentru autonomie **min. 24 h în veghe + 30 min în alarmă** (P118-3).
 - **Detectoare** de fum (optic), de temperatură, sau multisenzor, adecvate mediului (în depozit înalt — detecție prin aspirație/ASD sau detectoare liniare de fum unde e cazul); **butoane manuale** (SR EN 54-11) pe căile de evacuare.
-- **Dispozitive de avertizare** acustice/optice (sirene, flash-uri, SR EN 54-3/-23).
+- **Dispozitive de avertizare** acustice/optice (sirene, flash-uri, SR EN 54-3/-23), amplasate astfel încât alarma să fie percepută în toate zonele ocupate, inclusiv în hala cu zgomot de fond ridicat (nivel acustic peste zgomotul de fond) și în spațiile fără vizibilitate directă a sirenelor (dispozitive optice suplimentare).
 - Cablare pe **cabluri rezistente la foc** pentru circuitele care trebuie să funcționeze în incendiu (bucle, sirene, comenzi), conform P118-3.
 
 ### 9.2 Montaj și integrare
@@ -409,8 +465,9 @@ Pentru apele pluviale de pe platformele auto/parcare TIR (risc de scurgeri de ca
 
 ### 10.2 Detecție gaz + electrovalvă
 
-- Sistem de **detecție automată a scăpărilor de gaz** (detectoare de CH₄ la partea superioară, plus CO în spații cu ardere) cuplat la **electrovalvă (electroventil) normal închisă** pe conducta de alimentare — la depășirea pragului (ex. 10 % LIE) închide automat gazul și dă alarmă.
+- Sistem de **detecție automată a scăpărilor de gaz** (detectoare de CH₄ la partea superioară — gazul natural este mai ușor decât aerul —, plus CO în spații cu ardere) cuplat la **electrovalvă (electroventil) normal închisă** pe conducta de alimentare — la depășirea pragului (ex. 10 % LIE) închide automat gazul și dă alarmă acustică/optică; readucerea în funcțiune se face manual, după remedierea cauzei și aerisire.
 - Ventilare permanentă a spațiilor cu aparate de ardere (grile jos/sus, suprafață conform NTPEE); evacuarea gazelor arse pe coșuri/tiraj adecvate.
+- **Stația de reglare-măsurare (SRM/postul de reglare)** se amplasează într-un spațiu ventilat, ferit de surse de aprindere, accesibil pentru citirea contorului și intervenție; regulatorul, filtrul, supapa de blocare/descărcare și contorul se montează conform schemei operatorului, cu robineți de izolare amonte/aval; racordul electric al eventualelor echipamente în zona clasificată — în execuție antiex conform NTPEE.
 
 ### 10.3 Probe și recepție gaze
 
@@ -539,6 +596,60 @@ Recepția se face conform **HG 273/1994 + HG 343/2017** și Legii 10/1995, pe ba
 - **Lucrări electrice**: numai cu instalația scoasă de sub tensiune (unde e posibil), verificarea lipsei de tensiune, scurtcircuitare și legare la pământ, personal autorizat.
 - **Probe de presiune**: zonă de siguranță delimitată, personal la distanță, creștere lentă a presiunii, manometre verificate metrologic; la gaze — interdicție de foc deschis pe durata probei.
 - Semnalizare de securitate pe șantier, căi de circulație, ordine și curățenie; gestiunea deșeurilor (inclusiv izolații/materiale periculoase) conform legislației de mediu.
+- **Lucru la înălțime** (montaj sprinklere, corpuri, tubulatură, trape SHEV la 8–9,5 m în hală): schele/platforme mobile (nacele) verificate, ancoraje și sisteme de oprire a căderii, delimitarea zonei de lucru la sol; interzicerea lucrului simultan pe verticală fără protecție.
+- **Riscuri specifice instalațiilor:** electrocutare (lucru sub tensiune interzis fără măsuri), explozie/incendiu la lucrul cu gaze și la probele de gaz (verificarea absenței atmosferei explozive, interzicerea surselor de aprindere), proiectare de fluid sub presiune la probele hidraulice (zonă de siguranță, creștere lentă a presiunii, purjarea aerului), arsuri la sudură și la conductele calde.
+- Instructaj introductiv general, la locul de muncă și periodic; fișe de instruire; verificarea calificărilor/autorizărilor (sudori, electricieni ANRE, instalatori gaze) înainte de admiterea la lucru.
+
+---
+
+## 15. GARANȚII ȘI MENTENANȚĂ
+
+- Perioada de garanție conform contract; în interiorul ei antreprenorul remediază pe cheltuiala proprie defectele imputabile execuției/materialelor.
+- Se predau **programele de mentenanță periodică** (obligatorii pentru instalațiile de securitate la incendiu — verificări săptămânale/lunare/trimestriale/anuale conform SR EN 12845 și P118-2/3; verificarea periodică a prizei de pământ și a instalației de gaze; înlocuirea filtrelor la CTA; revizia clapetelor antifoc și a trapelor SHEV).
+
+**Program-cadru de verificări periodice (orientativ):**
+
+| Instalație | Operație | Periodicitate |
+|---|---|---|
+| Sprinklere/pompe (SR EN 12845) | Probă pornire pompe, verificare presiuni, nivel rezervor | săptămânal |
+| Sprinklere/pompe | Probă completă pompă Diesel sub sarcină, alarm valve | lunar |
+| Sprinklere/pompe | Revizie generală, verificare capete, curbe pompe | anual |
+| Hidranți interiori/exteriori | Verificare debit/presiune, stare furtun/robinet | anual |
+| Detecție incendiu (P118-3) | Test funcțional zone, sirene, matrice C&E | trimestrial/anual |
+| Detecție | Curățare/înlocuire detectoare, verificare baterii | anual / la termen |
+| Clapete antifoc | Test acționare și revenire | anual |
+| Trape SHEV / ventilatoare fum | Test deschidere/pornire | anual |
+| Priză de pământ / IPT | Măsurare rezistență dispersie | periodic (conform I20) |
+| Instalație de gaze | Verificare tehnică periodică (VTP) | conform NTPEE |
+| CTA / ventilare | Înlocuire filtre, verificare recuperator | conform grad de colmatare |
+| Separator hidrocarburi | Golire nămol/hidrocarburi, curățare coalescent | periodic (contract vidanjare) |
+- Recepția finală se face după expirarea perioadei de garanție, verificând comportarea în timp și remedierea eventualelor neconformități semnalate în perioada de garanție.
+
+---
+
+## 16. LISTA PIESELOR DESENATE CONEXE (referință)
+
+Prezentul caiet de sarcini se aplică împreună cu piesele desenate ale fiecărei specialități (planuri de instalații pe niveluri, scheme coloane sanitare/termice, scheme monofilare electrice, schema instalației de stingere și a grupului de pompare, planul de detecție cu matricea cauză-efect, planul de gaze cu SRM, detalii de montaj și de trecere prin compartimentări). Cantitățile și dimensiunile se citesc din listele de cantități și din planșe; prezentul document **nu le modifică**, ci prescrie calitatea execuției lor.
+
+---
+
+---
+
+## 17. DOCUMENTELE DE CALITATE ȘI TRASABILITATEA
+
+Antreprenorul de instalații întocmește și menține pe toată durata execuției un dosar de calitate pe fiecare specialitate, care se predă la recepție ca parte a Cărții Tehnice. Documentele minime:
+
+- **Registrul de trasabilitate a materialelor** (produs — lot — certificat/DoP — poziție în lucrare — dată punere în operă), care permite regăsirea provenienței oricărui element pus în operă;
+- **Certificatele de calitate/conformitate și declarațiile de performanță (DoP)** ale producătorilor, cu marcaj CE sau agrement tehnic, pentru toate materialele și echipamentele;
+- **Fișele sudorilor** autorizați (gaze, incendiu, termic) și **procedurile de sudare calificate (WPS/WPQR)**, precum și fișele de sudură pe îmbinări (PEHD/oțel);
+- **Buletinele NDT** (control nedistructiv) pentru sudurile supuse controlului (gaze, incendiu);
+- **Procesele-verbale de lucrări ascunse**, semnate de executant, diriginte și, la fazele determinante, de proiectant și ISC;
+- **Procesele-verbale de probe** (presiune, etanșeitate, funcționale) și **buletinele de măsurări** (electrice, priză de pământ, apă potabilă), emise de personal/laboratoare autorizate, cu certificatele de etalonare ale aparatelor;
+- **Protocoalele de reglaj** hidraulic și aeraulic;
+- **Planurile as-built** (conform execuției), actualizate cu toate modificările avizate;
+- **Cărțile tehnice** ale echipamentelor și **instrucțiunile de exploatare-întreținere**.
+
+Documentele se întocmesc pe măsura avansării lucrărilor (nu retroactiv), se numerotează și se corelează cu poziția din proiect. Lipsa oricărui document de calitate obligatoriu constituie motiv de neconformitate și poate conduce la amânarea sau respingerea recepției.
 
 ---
 
