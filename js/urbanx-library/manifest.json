@@ -3,25 +3,31 @@
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "bess": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "birouri": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"scenariu_psi",
+"receptie",
+"carte_tehnica"
 ],
 "bloc-locuinte": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "centru-social-zi": [
 "arhitectura",
@@ -38,13 +44,15 @@
 "dtoe",
 "aviz_mediu",
 "dali",
-"receptie"
+"receptie",
+"carte_tehnica"
 ],
 "cladire-mixta": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "gradinita": [
 "arhitectura",
@@ -54,7 +62,8 @@
 "arh_pth",
 "str_pth",
 "inst_pth",
-"scenariu_psi"
+"scenariu_psi",
+"carte_tehnica"
 ],
 "hala-industriala": [
 "arhitectura",
@@ -66,84 +75,98 @@
 "caiet_inst",
 "scenariu_psi",
 "dtoe",
-"receptie"
+"receptie",
+"carte_tehnica"
 ],
 "hotelier": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "infrastructura-drum": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "locuinta-individuala": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "mall": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "medical": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "parc-fotovoltaic": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "parcare": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "pod": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "scoala": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "skid": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "spatiu-comercial": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "sport": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ],
 "statie-transformare": [
 "arhitectura",
 "structura",
 "instalatii",
-"general"
+"general",
+"carte_tehnica"
 ]
 }
