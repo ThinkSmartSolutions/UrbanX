@@ -6,9 +6,36 @@
 (function (G) {
   'use strict';
   var KEY = 'uxdoc-versiuni';
+  var CLOUD_ID = 'uxdoc-versiuni'; // record dedicat în tabela de proiecte Supabase (fără schemă nouă)
   function el(t, a, h) { var e = document.createElement(t); if (a) for (var k in a) e.setAttribute(k, a[k]); if (h != null) e.innerHTML = h; return e; }
   function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
-  function save(list) { try { localStorage.setItem(KEY, JSON.stringify(list.slice(-50))); } catch (e) {} }
+  function save(list) { try { localStorage.setItem(KEY, JSON.stringify(list.slice(-50))); } catch (e) {} cloudSave(list.slice(-50)); }
+
+  // ── CLOUD (Supabase, prin _CloudSync existent — nu se pierd la golirea browserului) ──
+  function cloudOn() { try { return !!(G._CloudSync && G._CloudSync.saveToCloud && G._CloudSync.loadFromCloud); } catch (e) { return false; } }
+  function cloudConfigured() { try { return cloudOn() && !!(localStorage.getItem('wx_supabase_url') && localStorage.getItem('wx_supabase_url') !== 'YOUR_SUPABASE_URL'); } catch (e) { return false; } }
+  function cloudSave(list) {
+    if (!cloudConfigured()) return;
+    try { G._CloudSync.saveToCloud({ id: CLOUD_ID, name: 'DTAC — versiuni proiect', _uxversions: list, modified: new Date().toISOString() }); } catch (e) {}
+  }
+  function cloudLoad() {
+    if (!cloudConfigured()) return Promise.resolve(null);
+    try {
+      return G._CloudSync.loadFromCloud().then(function (all) {
+        var rec = (all || []).find(function (p) { return p && (p.id === CLOUD_ID || p.cloud_id === CLOUD_ID); });
+        return (rec && rec._uxversions) ? rec._uxversions : null;
+      }).catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  // union fără duplicate (păstrează local + cloud) — cheie = ts|nota|dimensiune date
+  function mergeLists(a, b) {
+    var seen = {}, out = [];
+    (a || []).concat(b || []).forEach(function (v) {
+      if (!v) return; var k = (v.ts || '') + '|' + (v.nota || '') + '|' + JSON.stringify(v.data || {}).length;
+      if (!seen[k]) { seen[k] = 1; out.push(v); }
+    });
+    return out.slice(-50);
+  }
   function snapshot(D, nota, tsLabel) { var l = load(); l.push({ ts: tsLabel || '', nota: nota || '', data: JSON.parse(JSON.stringify(D || {})) }); save(l); return l.length; }
   function diff(a, b) { // câmpuri numerice cheie modificate
     var keys = ['Sc', 'Sd', 'Steren', 'POT_max', 'CUT_max', 'niv_supraterane', 'functiune', 'faza']; var out = [];
@@ -44,8 +71,22 @@
       });
     }
     bSave.onclick = function () { var ts = ''; try { ts = new Date().toLocaleString('ro-RO'); } catch (e) { try { ts = new Date().toISOString().slice(0, 16).replace('T', ' '); } catch (e2) {} } snapshot(D, note.value, ts); note.value = ''; render(); if (G.ss) G.ss('✓ Versiune salvată (' + ts + ').'); };
-    saveRow.appendChild(note); saveRow.appendChild(bSave); wrap.appendChild(saveRow); wrap.appendChild(listBox);
+    // status cloud + conectare
+    var cloudRow = el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:10px;display:flex;gap:10px;align-items:center' });
+    function cloudStatus() {
+      cloudRow.innerHTML = '';
+      var on = cloudConfigured();
+      cloudRow.appendChild(el('span', null, on ? '☁️ Cloud: <b style="color:#34d399">conectat</b> — versiunile se salvează și în cloud (nu se pierd la golirea browserului).' : '💾 Local: versiunile sunt salvate în acest browser. <span style="color:#fbbf24">Conectează cloud ca să nu se piardă.</span>'));
+      if (!on && G._CloudSync && G._CloudSync.showSetupModal) {
+        var b = el('button', { style: 'background:rgba(56,189,248,.16);color:#7dd3fc;border:1px solid rgba(56,189,248,.4);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer' }, '☁️ Conectează cloud');
+        b.onclick = function () { G._CloudSync.showSetupModal(); }; cloudRow.appendChild(b);
+      }
+    }
+    cloudStatus();
+    saveRow.appendChild(note); saveRow.appendChild(bSave); wrap.appendChild(saveRow); wrap.appendChild(cloudRow); wrap.appendChild(listBox);
     ov.appendChild(wrap); document.body.appendChild(ov); render();
+    // la deschidere: preia din cloud și îmbină cu local (nu se pierd nici local, nici cloud)
+    cloudLoad().then(function (cloudList) { if (cloudList && cloudList.length) { var merged = mergeLists(load(), cloudList); try { localStorage.setItem(KEY, JSON.stringify(merged)); } catch (e) {} render(); } });
   }
   G.UXVersion = { snapshot: snapshot, list: load, diff: diff, open: open };
 })(window);
