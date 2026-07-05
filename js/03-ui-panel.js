@@ -483,6 +483,17 @@ function htmlMobRapoarte(){
   <div style="padding:4px 0 6px">
   <div class="section">📋 Rapoarte & Studii Urbane</div>
   ${warn}
+  <button onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():(window.ss&&ss('Se inițializează')));document.getElementById('mob-sheet')?.classList.remove('open')" style="width:100%;margin-bottom:10px;padding:12px 14px;
+    background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.1));
+    border:1px solid rgba(139,92,246,.5);border-radius:10px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;text-align:left">
+    <span style="font-size:22px">📑</span>
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:800;color:#c4b5fd">Generator Documentații Tehnice (DTAC/PTh)</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:1px">Formular → validare → avizatori → ~80 documente autorizabile</div>
+    </div>
+    <span style="margin-left:auto;font-size:11px;color:#c4b5fd;font-weight:700">→</span>
+  </button>
   <button onclick="openStudyMap()" style="width:100%;margin-bottom:10px;padding:11px 14px;
     background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(99,102,241,.1));
     border:1px solid rgba(212,175,55,.35);border-radius:10px;cursor:pointer;

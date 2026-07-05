@@ -19,14 +19,34 @@
   var C = { auto: 'background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35)', manual: 'background:rgba(59,130,246,.10);border:1px solid rgba(59,130,246,.3)', select: 'background:rgba(234,179,8,.10);border:1px solid rgba(234,179,8,.3)' };
   var INP = 'width:100%;background:#0a1120;border:1px solid rgba(148,163,184,.25);border-radius:7px;color:#e6edf7;padding:7px 9px;font-size:12.5px;font-family:inherit;box-sizing:border-box';
 
+  function ensureResponsiveCss() {
+    if (document.getElementById('uxdoc-responsive-css')) return;
+    var st = document.createElement('style'); st.id = 'uxdoc-responsive-css';
+    st.textContent =
+      '#uxdoc-wrap{max-width:1100px;margin:0 auto;padding:18px 16px 60px}' +
+      '@media(max-width:820px){' +
+      '  #uxdoc-grid{grid-template-columns:1fr !important}' +
+      '  #uxdoc-side{position:static !important;top:auto !important;margin-top:14px}' +
+      '  #uxdoc-head{flex-wrap:wrap;gap:8px}' +
+      '  #uxdoc-hd-btns{flex-wrap:wrap;width:100%;justify-content:flex-start}' +
+      '}' +
+      '@media(max-width:600px){' +
+      '  #uxdoc-wrap{padding:12px 10px 72px}' +
+      '  #uxdoc-hd-btns button{padding:8px 10px !important;font-size:11.5px !important;flex:1 1 auto;min-height:40px}' +
+      '  #uxdoc-ov select,#uxdoc-ov input{font-size:16px !important}' + /* >=16px evita zoom auto iOS */
+      '}';
+    document.head.appendChild(st);
+  }
+
   function openPanel() {
     if (!G.UXDoc) { if (G.ss) G.ss('Motorul de documentații nu e încărcat.'); return; }
-    var ov = el('div', { id: 'uxdoc-ov', style: 'position:fixed;inset:0;background:#070c18;z-index:4000;overflow:auto;font-family:system-ui,-apple-system,sans-serif;color:#e6edf7' });
-    var wrap = el('div', { style: 'max-width:1100px;margin:0 auto;padding:18px 16px 60px' });
+    ensureResponsiveCss();
+    var ov = el('div', { id: 'uxdoc-ov', style: 'position:fixed;inset:0;background:#070c18;z-index:4000;overflow:auto;font-family:system-ui,-apple-system,sans-serif;color:#e6edf7;-webkit-overflow-scrolling:touch' });
+    var wrap = el('div', { id: 'uxdoc-wrap' });
     // header
-    var head = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#070c18;padding:8px 0 12px;z-index:5;border-bottom:1px solid rgba(148,163,184,.15)' });
+    var head = el('div', { id: 'uxdoc-head', style: 'display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#070c18;padding:8px 0 12px;z-index:5;border-bottom:1px solid rgba(148,163,184,.15)' });
     head.appendChild(el('div', null, '<div style="font-size:19px;font-weight:800;color:#8b5cf6">📑 Generator Documentații Tehnice</div><div style="font-size:11px;color:#94a3b8">Formular → validare live → avizatori → documente → ZIP (~80 documente autorizabile)</div>'));
-    var hbtns = el('div', { style: 'display:flex;gap:8px' });
+    var hbtns = el('div', { id: 'uxdoc-hd-btns', style: 'display:flex;gap:8px' });
     var bImp = el('button', { style: 'background:rgba(59,130,246,.18);color:#93c5fd;border:1px solid rgba(59,130,246,.45);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '📥 Import documente');
     bImp.onclick = function () { if (G.UXIngest) G.UXIngest.open(D, function () { renderForm(); recalc(); }); else if (G.ss) G.ss('Modulul de import nu e încărcat.'); };
     var bProg = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.45);border-radius:8px;padding:8px 13px;font-size:12.5px;font-weight:700;cursor:pointer' }, '🧩 Program funcțional');
@@ -44,7 +64,7 @@
       '<span><span style="display:inline-block;width:10px;height:10px;' + C.auto + ';border-radius:2px"></span> calculat automat</span>'));
 
     // layout: formular (stânga) + validare (dreapta sticky)
-    var grid = el('div', { style: 'display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start' });
+    var grid = el('div', { id: 'uxdoc-grid', style: 'display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start' });
     var form = el('div', { id: 'uxdoc-form' });
     var side = el('div', { id: 'uxdoc-side', style: 'position:sticky;top:70px' });
     grid.appendChild(form); grid.appendChild(side); wrap.appendChild(grid);
