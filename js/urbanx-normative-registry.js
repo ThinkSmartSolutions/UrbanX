@@ -15,6 +15,63 @@
 (function (G) {
   'use strict';
   var REVIEW_LUNI = 6; // interval de re-verificare recomandat
+  var PROXY = G._PROXY_URL || 'https://urbanx-proxy.3dtravelsoftart.workers.dev';
+  var OVR_KEY = 'urbanx_normreg_ovr_v1'; // suprascrieri utilizator (verificat/stare/an/nota) persistate
+
+  // ── PERSISTENȚĂ SUPRASCRIERI (localStorage) — „preluarea" modificărilor ──
+  function _loadOvr() { try { return JSON.parse(localStorage.getItem(OVR_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function _saveOvr(o) { try { localStorage.setItem(OVR_KEY, JSON.stringify(o)); } catch (e) {} }
+  function _ymNow() { try { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); } catch (e) { return ''; } }
+
+  // Aplică suprascrierile utilizatorului peste catalogul de bază (fără a-l muta).
+  function _merged() {
+    var ovr = _loadOvr();
+    return NORME.map(function (n) {
+      var o = ovr[n.cod]; if (!o) return n;
+      var m = {}; for (var k in n) m[k] = n[k];
+      if (o.stare) m.stare = o.stare; if (o.an) m.an = o.an;
+      if (o.verificat) m.verificat = o.verificat; if (o.nota != null) m.nota = o.nota;
+      m._userVerified = !!o.verificat; return m;
+    });
+  }
+
+  // „Preia" o modificare / marchează verificat: persistă în localStorage.
+  function marcheazaVerificat(cod, patch) {
+    var ovr = _loadOvr(); patch = patch || {};
+    ovr[cod] = ovr[cod] || {};
+    ovr[cod].verificat = patch.verificat || _ymNow();
+    if (patch.stare) ovr[cod].stare = patch.stare;
+    if (patch.an) ovr[cod].an = patch.an;
+    if (patch.nota != null) ovr[cod].nota = patch.nota;
+    _saveOvr(ovr); return ovr[cod];
+  }
+  function resetOvr(cod) { var ovr = _loadOvr(); if (cod) delete ovr[cod]; else ovr = {}; _saveOvr(ovr); }
+
+  // ── VERIFICARE ONLINE la sursa oficială (prin proxy Cloudflare, fără CORS) ──
+  // Interoghează legislatie.just.ro (căutare după cod) și extrage indicii de
+  // stare (rezultate găsite, date, cuvinte „abrogat/modificat"). Best-effort:
+  // nu înlocuiește confirmarea manuală, dar aduce informația la sursă.
+  function verificaOnline(cod) {
+    var q = (cod || '').replace(/\s*\/.*$/, '').replace(/^(SR EN|STAS|Ord\.|Ordin|HG|Legea|Dir\.|CR|NP|PT|P|C|I|NTE|NTPEE)\s*/i, '').trim() || cod;
+    var target = 'https://legislatie.just.ro/Public/RezultateCautare?nume=' + encodeURIComponent(cod);
+    var url = PROXY + '/proxy?url=' + encodeURIComponent(target);
+    return fetch(url).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+      html = html || '';
+      var dates = (html.match(/\b\d{2}\.\d{2}\.(19|20)\d{2}\b/g) || []);
+      var abrogat = /abrogat|abrogare/i.test(html);
+      var modificat = /modificat|modificare|completat/i.test(html);
+      var rezultate = (html.match(/RezultateCautare|DetaliiDocument|rezultate/gi) || []).length;
+      var lastDate = dates.sort().slice(-1)[0] || null;
+      return {
+        ok: html.length > 200, found: rezultate > 0 || dates.length > 0,
+        abrogat: abrogat, modificat: modificat, lastDate: lastDate,
+        url: target, hint: !html ? 'Nu s-a putut prelua pagina (verifică manual la sursă).' :
+          (abrogat ? 'Sursa menționează „abrogat/abrogare" — VERIFICĂ dacă norma e încă în vigoare.' :
+            modificat ? ('Sursa menționează modificări' + (lastDate ? ' (ultima dată găsită: ' + lastDate + ')' : '') + ' — confirmă forma consolidată.') :
+              'Nu s-au detectat marcaje de abrogare/modificare pe pagina de căutare — confirmă vizual la sursă.')
+      };
+    }).catch(function () { return { ok: false, found: false, hint: 'Eroare rețea/proxy — verifică manual la sursă.', url: target }; });
+  }
 
   // Surse oficiale de verificare a stării legale:
   var SURSE = {
@@ -103,14 +160,15 @@
   }
 
   function check() {
-    var out = { total: NORME.length, in_vigoare: 0, de_verificat: 0, modificat: 0, abrogat: 0, expirate: 0, items: [] };
-    NORME.forEach(function (n) {
+    var LIST = _merged();
+    var out = { total: LIST.length, in_vigoare: 0, de_verificat: 0, modificat: 0, abrogat: 0, expirate: 0, items: [] };
+    LIST.forEach(function (n) {
       var luni = _luniDe(n.verificat);
       var stare = n.stare;
       // mecanism periodic: dacă a trecut > REVIEW_LUNI de la ultima verificare → forțează 'de_verificat'
       if (stare === 'in_vigoare' && luni > REVIEW_LUNI) { stare = 'de_verificat'; out.expirate++; }
       out[stare === 'de_verificat' ? 'de_verificat' : stare === 'modificat' ? 'modificat' : stare === 'abrogat' ? 'abrogat' : 'in_vigoare']++;
-      out.items.push({ cod: n.cod, titlu: n.titlu, dom: n.dom, an: n.an, stare: stare, verificat: n.verificat, luni: luni, nota: n.nota || '' });
+      out.items.push({ cod: n.cod, titlu: n.titlu, dom: n.dom, an: n.an, stare: stare, verificat: n.verificat, luni: luni, nota: n.nota || '', userVerified: !!n._userVerified });
     });
     // grupare pe domeniu + sortare (de_verificat/modificat/abrogat sus)
     var ord = { abrogat: 0, modificat: 1, de_verificat: 2, in_vigoare: 3 };
@@ -121,48 +179,128 @@
   function _stColor(s) { return s === 'abrogat' ? '#f87171' : s === 'modificat' ? '#fb923c' : s === 'de_verificat' ? '#fbbf24' : '#34d399'; }
   function _stLabel(s) { return s === 'abrogat' ? 'ABROGAT' : s === 'modificat' ? 'MODIFICAT' : s === 'de_verificat' ? 'DE VERIFICAT' : 'în vigoare'; }
 
+  function _esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
   function openPanel() {
-    var r = check();
     var ov = document.createElement('div');
     ov.id = 'normreg-ov';
     ov.style.cssText = 'position:fixed;inset:0;background:#070c18;z-index:4300;overflow:auto;font-family:system-ui,-apple-system,sans-serif;color:#e6edf7;-webkit-overflow-scrolling:touch';
-    var rows = r.items.map(function (n) {
-      var c = _stColor(n.stare);
-      var lnk = SURSE.just + encodeURIComponent((n.cod || '').split('/')[0].replace(/SR EN|STAS|Ord\.|HG|Legea|Dir\.|CR|NP|PT|Normativ/gi, '').trim() || n.cod);
-      return '<tr style="border-top:1px solid rgba(148,163,184,.12)">' +
-        '<td style="padding:6px 8px;font-weight:700;color:#e6edf7;white-space:nowrap">' + n.cod + '</td>' +
-        '<td style="padding:6px 8px;color:#cbd5e1">' + n.titlu + (n.nota ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">⚠ ' + n.nota + '</div>' : '') + '</td>' +
-        '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap">' + n.dom + '</td>' +
-        '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap">' + n.an + '</td>' +
-        '<td style="padding:6px 8px;white-space:nowrap"><span style="background:' + c + '22;color:' + c + ';border:1px solid ' + c + '55;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700">' + _stLabel(n.stare) + '</span></td>' +
-        '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap;font-size:10px">' + (n.verificat || '—') + '</td>' +
-        '<td style="padding:6px 8px;white-space:nowrap"><a href="' + lnk + '" target="_blank" rel="noopener" style="color:#7dd3fc;font-size:11px">verifică ↗</a></td>' +
-        '</tr>';
-    }).join('');
-    var attention = r.de_verificat + r.modificat + r.abrogat;
-    ov.innerHTML =
-      '<div style="max-width:1100px;margin:0 auto;padding:18px 14px 60px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;background:#070c18;padding:8px 0 12px;border-bottom:1px solid rgba(148,163,184,.15)">' +
-      '<div><div style="font-size:18px;font-weight:800;color:#7dd3fc">📚 Registru Normative — verificare la zi</div>' +
-      '<div style="font-size:11px;color:#94a3b8">Cursivitatea legală a reglementărilor de proiectare · re-verificare recomandată la ' + REVIEW_LUNI + ' luni · sursă: legislatie.just.ro + MDLPA</div></div>' +
-      '<button id="normreg-x" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer">✕</button></div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">' +
-      '<span style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);color:#34d399;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.in_vigoare + ' în vigoare</span>' +
-      '<span style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#fbbf24;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.de_verificat + ' de verificat</span>' +
-      (r.modificat ? '<span style="background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);color:#fb923c;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.modificat + ' modificate</span>' : '') +
-      (r.abrogat ? '<span style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);color:#f87171;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.abrogat + ' abrogate</span>' : '') +
-      '<span style="background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.3);color:#cbd5e1;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.total + ' total</span>' +
-      '</div>' +
-      (attention ? '<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);color:#fcd34d;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:12px;line-height:1.5">⚠ <b>' + attention + ' reglementări</b> necesită re-verificarea stării legale la sursa oficială înainte de a fi folosite ca bază de proiectare. Codurile mari (P100-1, Eurocoduri, IED, EPBD) au revizuiri în curs la nivel național/UE.</div>' : '') +
-      '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:720px">' +
-      '<tr style="text-align:left;color:#94a3b8;font-size:11px"><th style="padding:6px 8px">Cod</th><th style="padding:6px 8px">Titlu</th><th style="padding:6px 8px">Domeniu</th><th style="padding:6px 8px">An/ver.</th><th style="padding:6px 8px">Stare</th><th style="padding:6px 8px">Verificat</th><th style="padding:6px 8px">Sursă</th></tr>' +
-      rows + '</table></div>' +
-      '<div style="font-size:10px;color:#64748b;margin-top:14px;line-height:1.5">Notă onestă: detectarea automată a modificărilor legislative necesită o interfață cu legislatie.just.ro (monitorizare continuă) — nedisponibilă client-side. Acest registru asigură <b>transparența + cadența de re-verificare</b>: fiecare normă are dată de verificare și link direct la sursa oficială pentru confirmare manuală. Reglementările neverificate de peste ' + REVIEW_LUNI + ' luni sunt marcate automat „de verificat".</div>' +
-      '</div>';
     document.body.appendChild(ov);
-    var x = document.getElementById('normreg-x'); if (x) x.onclick = function () { ov.remove(); };
+
+    function render() {
+      var r = check();
+      var rows = r.items.map(function (n) {
+        var c = _stColor(n.stare);
+        var lnk = SURSE.just + encodeURIComponent((n.cod || '').split('/')[0] + '');
+        return '<tr data-cod="' + _esc(n.cod) + '" style="border-top:1px solid rgba(148,163,184,.12)">' +
+          '<td style="padding:6px 8px;font-weight:700;color:#e6edf7;white-space:nowrap">' + _esc(n.cod) + (n.userVerified ? ' <span title="preluat/verificat de utilizator" style="color:#34d399">✓</span>' : '') + '</td>' +
+          '<td style="padding:6px 8px;color:#cbd5e1">' + _esc(n.titlu) + (n.nota ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">⚠ ' + _esc(n.nota) + '</div>' : '') + '</td>' +
+          '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap">' + _esc(n.dom) + '</td>' +
+          '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap">' + _esc(n.an) + '</td>' +
+          '<td style="padding:6px 8px;white-space:nowrap"><span style="background:' + c + '22;color:' + c + ';border:1px solid ' + c + '55;border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700">' + _stLabel(n.stare) + '</span></td>' +
+          '<td style="padding:6px 8px;color:#94a3b8;white-space:nowrap;font-size:10px">' + (n.verificat || '—') + '</td>' +
+          '<td style="padding:6px 8px;white-space:nowrap">' +
+          '<button data-act="verif" data-cod="' + _esc(n.cod) + '" style="background:rgba(56,189,248,.15);color:#7dd3fc;border:1px solid rgba(56,189,248,.4);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-right:4px">🔎 verifică</button>' +
+          '<button data-act="preia" data-cod="' + _esc(n.cod) + '" style="background:rgba(52,211,153,.14);color:#34d399;border:1px solid rgba(52,211,153,.4);border-radius:6px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;margin-right:4px">✓ preia</button>' +
+          '<a href="' + lnk + '" target="_blank" rel="noopener" style="color:#64748b;font-size:10px">just.ro ↗</a>' +
+          '<div class="normreg-res" data-cod="' + _esc(n.cod) + '" style="font-size:10px;color:#94a3b8;margin-top:3px"></div>' +
+          '</td></tr>';
+      }).join('');
+      var attention = r.de_verificat + r.modificat + r.abrogat;
+      ov.innerHTML =
+        '<div style="max-width:1180px;margin:0 auto;padding:18px 14px 60px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;background:#070c18;padding:8px 0 12px;border-bottom:1px solid rgba(148,163,184,.15)">' +
+        '<div><div style="font-size:18px;font-weight:800;color:#7dd3fc">📚 Registru Normative — verificare la zi</div>' +
+        '<div style="font-size:11px;color:#94a3b8">Cursivitatea legală a reglementărilor de proiectare · re-verificare la ' + REVIEW_LUNI + ' luni · sursă: legislatie.just.ro + MDLPA</div></div>' +
+        '<button id="normreg-x" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer">✕</button></div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center">' +
+        '<span style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);color:#34d399;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.in_vigoare + ' în vigoare</span>' +
+        '<span style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#fbbf24;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.de_verificat + ' de verificat</span>' +
+        (r.modificat ? '<span style="background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);color:#fb923c;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.modificat + ' modificate</span>' : '') +
+        (r.abrogat ? '<span style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);color:#f87171;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.abrogat + ' abrogate</span>' : '') +
+        '<span style="background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.3);color:#cbd5e1;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700">' + r.total + ' total</span>' +
+        '<button id="normreg-all" style="background:rgba(56,189,248,.18);color:#7dd3fc;border:1px solid rgba(56,189,248,.45);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">🔄 Verifică toate online (just.ro)</button>' +
+        '<button id="normreg-reset" style="background:rgba(148,163,184,.1);color:#94a3b8;border:1px solid rgba(148,163,184,.3);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">↺ Resetează preluările</button>' +
+        '</div>' +
+        (attention ? '<div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);color:#fcd34d;border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:12px;line-height:1.5">⚠ <b>' + attention + ' reglementări</b> necesită re-verificarea stării legale la sursa oficială. Apasă <b>🔎 verifică</b> (interoghează just.ro prin proxy) apoi <b>✓ preia</b> pentru a confirma/actualiza starea (persistat local).</div>' : '') +
+        '<div id="normreg-msg" style="font-size:11px;color:#7dd3fc;margin-bottom:8px"></div>' +
+        '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:760px">' +
+        '<tr style="text-align:left;color:#94a3b8;font-size:11px"><th style="padding:6px 8px">Cod</th><th style="padding:6px 8px">Titlu</th><th style="padding:6px 8px">Domeniu</th><th style="padding:6px 8px">An/ver.</th><th style="padding:6px 8px">Stare</th><th style="padding:6px 8px">Verificat</th><th style="padding:6px 8px">Verificare / preluare</th></tr>' +
+        rows + '</table></div>' +
+        '<div style="font-size:10px;color:#64748b;margin-top:14px;line-height:1.5"><b>Cum funcționează:</b> „🔎 verifică" interoghează legislatie.just.ro prin proxy și semnalează dacă pagina menționează abrogare/modificare + ultima dată găsită. „✓ preia" deschide confirmarea: marchezi norma verificată azi și, dacă e cazul, actualizezi starea (modificat/abrogat) + anul + o notă — salvate local (persistă între sesiuni, marcate ✓). Detecția automată e best-effort (structura just.ro variază) — confirmarea finală o dă proiectantul la sursa oficială.</div>' +
+        '</div>';
+      var x = document.getElementById('normreg-x'); if (x) x.onclick = function () { ov.remove(); };
+      var msg = document.getElementById('normreg-msg');
+      // per-rând
+      ov.querySelectorAll('button[data-act]').forEach(function (b) {
+        b.onclick = function () {
+          var cod = b.getAttribute('data-cod'); var act = b.getAttribute('data-act');
+          var resEl = ov.querySelector('.normreg-res[data-cod="' + (window.CSS && CSS.escape ? CSS.escape(cod) : cod) + '"]');
+          if (act === 'verif') {
+            if (resEl) resEl.textContent = '⏳ verific la just.ro…';
+            verificaOnline(cod).then(function (o) {
+              if (resEl) resEl.innerHTML = (o.abrogat ? '🔴 ' : o.modificat ? '🟠 ' : o.found ? '🟢 ' : '⚪ ') + _esc(o.hint) + ' <a href="' + o.url + '" target="_blank" rel="noopener" style="color:#7dd3fc">deschide ↗</a>';
+            });
+          } else if (act === 'preia') {
+            _preiaModal(cod, render, msg);
+          }
+        };
+      });
+      var allBtn = document.getElementById('normreg-all');
+      if (allBtn) allBtn.onclick = function () {
+        allBtn.disabled = true; allBtn.textContent = '⏳ verific toate…';
+        var items = r.items.slice(); var i = 0, flagged = 0;
+        (function next() {
+          if (i >= items.length) { allBtn.disabled = false; allBtn.textContent = '🔄 Verifică toate online (just.ro)'; if (msg) msg.textContent = '✓ Verificare completă: ' + flagged + ' reglementări cu semnale de abrogare/modificare la sursă. Confirmă și „✓ preia" acolo unde e cazul.'; return; }
+          var n = items[i++]; var resEl = ov.querySelector('.normreg-res[data-cod="' + (window.CSS && CSS.escape ? CSS.escape(n.cod) : n.cod) + '"]');
+          if (resEl) resEl.textContent = '⏳…';
+          if (msg) msg.textContent = 'Verific ' + (i) + '/' + items.length + ': ' + n.cod + '…';
+          verificaOnline(n.cod).then(function (o) {
+            if (o.abrogat || o.modificat) flagged++;
+            if (resEl) resEl.innerHTML = (o.abrogat ? '🔴 ' : o.modificat ? '🟠 ' : o.found ? '🟢 ' : '⚪ ') + _esc(o.hint);
+            setTimeout(next, 250); // throttling politicos față de proxy/sursă
+          });
+        })();
+      };
+      var resetBtn = document.getElementById('normreg-reset');
+      if (resetBtn) resetBtn.onclick = function () { if (confirm('Ștergi toate preluările/verificările salvate local și revii la catalogul de bază?')) { resetOvr(); render(); } };
+    }
+
+    // Modal de preluare/confirmare a modificării (persistat)
+    function _preiaModal(cod, onDone, msg) {
+      var cur = null; check().items.forEach(function (it) { if (it.cod === cod) cur = it; });
+      var m = document.createElement('div');
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:4400;display:flex;align-items:center;justify-content:center;padding:16px';
+      m.innerHTML = '<div style="background:#0f172a;border:1px solid rgba(56,189,248,.35);border-radius:12px;max-width:460px;width:100%;padding:18px;color:#e6edf7;font-family:system-ui,sans-serif">' +
+        '<div style="font-size:15px;font-weight:800;color:#7dd3fc;margin-bottom:4px">Preia / confirmă: ' + _esc(cod) + '</div>' +
+        '<div style="font-size:11px;color:#94a3b8;margin-bottom:12px">Marchează norma verificată azi și, dacă la sursă găsești o modificare, actualizează starea/anul. Se salvează local.</div>' +
+        '<label style="font-size:11px;color:#cbd5e1;display:block;margin-bottom:3px">Stare confirmată</label>' +
+        '<select id="nr-stare" style="width:100%;background:#0a1120;border:1px solid rgba(148,163,184,.3);border-radius:7px;color:#e6edf7;padding:7px;margin-bottom:10px;font-size:13px">' +
+        '<option value="in_vigoare">în vigoare</option><option value="modificat">modificat</option><option value="de_verificat">de verificat</option><option value="abrogat">abrogat</option></select>' +
+        '<label style="font-size:11px;color:#cbd5e1;display:block;margin-bottom:3px">An / versiune (opțional — actualizează dacă s-a schimbat)</label>' +
+        '<input id="nr-an" placeholder="' + _esc(cur ? cur.an : '') + '" style="width:100%;background:#0a1120;border:1px solid rgba(148,163,184,.3);border-radius:7px;color:#e6edf7;padding:7px;margin-bottom:10px;font-size:13px;box-sizing:border-box"/>' +
+        '<label style="font-size:11px;color:#cbd5e1;display:block;margin-bottom:3px">Notă (opțional)</label>' +
+        '<input id="nr-nota" placeholder="ex: verificat forma consolidată just.ro la data …" style="width:100%;background:#0a1120;border:1px solid rgba(148,163,184,.3);border-radius:7px;color:#e6edf7;padding:7px;margin-bottom:14px;font-size:13px;box-sizing:border-box"/>' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end">' +
+        '<button id="nr-cancel" style="background:rgba(148,163,184,.12);color:#cbd5e1;border:1px solid rgba(148,163,184,.3);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer">Anulează</button>' +
+        '<button id="nr-save" style="background:#34d399;color:#04231a;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer">✓ Preia (salvează)</button>' +
+        '</div></div>';
+      document.body.appendChild(m);
+      if (cur) { var sel = m.querySelector('#nr-stare'); if (sel) sel.value = (cur.stare === 'de_verificat' ? 'in_vigoare' : cur.stare); }
+      m.querySelector('#nr-cancel').onclick = function () { m.remove(); };
+      m.querySelector('#nr-save').onclick = function () {
+        var patch = { stare: m.querySelector('#nr-stare').value };
+        var an = m.querySelector('#nr-an').value.trim(); if (an) patch.an = an;
+        var nota = m.querySelector('#nr-nota').value.trim(); if (nota) patch.nota = nota;
+        marcheazaVerificat(cod, patch); m.remove();
+        if (msg) msg.textContent = '✓ ' + cod + ' preluat/verificat azi (' + _ymNow() + ') — salvat local.';
+        if (typeof onDone === 'function') onDone();
+      };
+    }
+
+    render();
   }
 
-  G._NormativeRegistry = { NORME: NORME, check: check, openPanel: openPanel, SURSE: SURSE, REVIEW_LUNI: REVIEW_LUNI };
+  G._NormativeRegistry = { NORME: NORME, check: check, openPanel: openPanel, SURSE: SURSE, REVIEW_LUNI: REVIEW_LUNI, verificaOnline: verificaOnline, marcheazaVerificat: marcheazaVerificat, resetOvr: resetOvr };
   try { var r = check(); console.log('[NormativeRegistry] ' + r.total + ' norme · ' + r.in_vigoare + ' în vigoare · ' + r.de_verificat + ' de verificat'); } catch (e) {}
 })(window);
