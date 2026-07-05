@@ -98,13 +98,13 @@
     }
     function build() {
       var o = collectOpts(); SHEETS = [];
-      function mk(key, label, plansa, gen) {
-        try { var doc = gen(); SHEETS.push({ key: key, label: label, plansa: plansa, svg: doc.emitSVG(), dxf: doc.emit(), fname: plansa.replace(/[^A-Za-z0-9-]/g, '') + '_' + key }); } catch (e) { }
+      var set = [];
+      try { set = G.UX_DRAW.buildFullSet ? G.UX_DRAW.buildFullSet(o) : []; } catch (e) { set = []; }
+      if (!set.length) { // fallback minimal daca setul complet nu e incarcat
+        try { set = [{ key: 'fatada', label: 'Fațadă', plansa: 'A-05', doc: G.UX_DRAW.facadeDoc(Object.assign({}, o, { plansa: 'A-05' })) }, { key: 'sectiune', label: 'Secțiune', plansa: 'A-07', doc: G.UX_DRAW.sectionDoc(Object.assign({}, o, { plansa: 'A-07' })) }]; } catch (e) {}
       }
-      mk('fatada_principala', 'Fațadă principală (N/S)', 'A-05', function () { return G.UX_DRAW.facadeDoc(Object.assign({}, o, { width: o.width, winPerFloor: o.winPerFloor, plansa: 'A-05', orient: 'principală (N/S)' })); });
-      mk('fatada_laterala', 'Fațadă laterală (E/V)', 'A-06', function () { return G.UX_DRAW.facadeDoc(Object.assign({}, o, { width: o.adancime, winPerFloor: Math.max(1, Math.round(o.adancime / 3)), plansa: 'A-06', orient: 'laterală (E/V)' })); });
-      mk('sectiune', 'Secțiune transversală', 'A-07', function () { return G.UX_DRAW.sectionDoc(Object.assign({}, o, { plansa: 'A-07' })); });
-      renderTabs(); renderStage(); renderDownloads();
+      SHEETS = set.map(function (x) { var svg = '', dxf = ''; try { svg = x.doc.emitSVG(); } catch (e) {} try { dxf = x.doc.emit(); } catch (e) {} return { key: x.key, label: x.label, plansa: x.plansa, doc: x.doc, svg: svg, dxf: dxf, fname: ((x.plansa || x.key) + '_' + x.key).replace(/[^A-Za-z0-9_-]/g, '') }; });
+      active = 0; renderTabs(); renderStage(); renderDownloads();
     }
 
     function renderTabs() {
@@ -127,9 +127,15 @@
       bSvg.onclick = function () { if (s.svg) { saveBlob(s.fname + '.svg', s.svg, 'image/svg+xml'); if (G.ss) G.ss('✅ Planșă SVG descărcată: ' + s.fname + '.svg'); } };
       var bDxf = el('button', { style: 'background:rgba(125,211,252,.18);color:#7dd3fc;border:1px solid rgba(125,211,252,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Descarcă planșa (DXF)');
       bDxf.onclick = function () { if (s.dxf) { saveBlob(s.fname + '.dxf', s.dxf, 'application/dxf'); if (G.ss) G.ss('✅ Planșă DXF descărcată: ' + s.fname + '.dxf'); } };
-      var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ Descarcă TOT setul (ZIP)');
+      var bPdf = el('button', { style: 'background:#fbbf24;color:#111;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (PDF)');
+      bPdf.onclick = downloadPdf;
+      var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (DXF ZIP)');
       bZip.onclick = downloadZip;
-      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bZip);
+      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bPdf); dlbar.appendChild(bZip);
+    }
+    function downloadPdf() {
+      if (!SHEETS.length || !G.UX_DRAW.sheetsToPdf) { if (G.ss) G.ss('Export PDF indisponibil.'); return; }
+      try { var pdf = G.UX_DRAW.sheetsToPdf(SHEETS, { nrcad: D.nrcad }); if (pdf) { pdf.save('Planse_' + (D.nrcad || 'set') + '.pdf'); if (G.ss) G.ss('✅ Set planșe PDF descărcat (' + SHEETS.length + ' planșe).'); } } catch (e) { if (G.ss) G.ss('Eroare export PDF.'); }
     }
     function downloadZip() {
       if (!SHEETS.length) return;
@@ -178,12 +184,14 @@
       bSvg.onclick = function () { if (s.svg) { saveBlob(s.fname + '.svg', s.svg, 'image/svg+xml'); if (G.ss) G.ss('✅ ' + s.fname + '.svg'); } };
       var bDxf = el('button', { style: 'background:rgba(125,211,252,.18);color:#7dd3fc;border:1px solid rgba(125,211,252,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Planșa (DXF)');
       bDxf.onclick = function () { if (s.dxf) { saveBlob(s.fname + '.dxf', s.dxf, 'application/dxf'); if (G.ss) G.ss('✅ ' + s.fname + '.dxf'); } };
-      var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (ZIP)');
+      var bPdf = el('button', { style: 'background:#fbbf24;color:#111;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (PDF)');
+      bPdf.onclick = function () { if (!G.UX_DRAW.sheetsToPdf) { if (G.ss) G.ss('PDF indisponibil.'); return; } try { var pdf = G.UX_DRAW.sheetsToPdf(sheetsIn, { nrcad: opts.nrcad }); if (pdf) { pdf.save('Planse_' + (opts.nrcad || 'set') + '.pdf'); if (G.ss) G.ss('✅ Set PDF (' + SHEETS.length + ' planșe).'); } } catch (e) {} };
+      var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (DXF ZIP)');
       bZip.onclick = function () {
         if (G.JSZip) { var zip = new G.JSZip(); SHEETS.forEach(function (x) { if (x.dxf) zip.file(x.fname + '.dxf', x.dxf); if (x.svg) zip.file(x.fname + '.svg', x.svg); }); zip.generateAsync({ type: 'blob' }).then(function (blob) { var u = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = u; a.download = 'Planse_' + (opts.nrcad || 'set') + '.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 2000); if (G.ss) G.ss('✅ Set descărcat (' + SHEETS.length + ' planșe · SVG+DXF)'); }); }
         else { SHEETS.forEach(function (x) { if (x.dxf) saveBlob(x.fname + '.dxf', x.dxf, 'application/dxf'); }); }
       };
-      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bZip);
+      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bPdf); dlbar.appendChild(bZip);
     }
     document.body.appendChild(ov); rT(); rS(); rD();
   }
