@@ -11,7 +11,7 @@
   'use strict';
   G.UXLibrary = G.UXLibrary || {};
   G.UXLibrary._ready = G.UXLibrary._ready || {};
-  var VER = '20260704w';
+  var VER = '20260705a';
   var BASE = 'js/urbanx-library/functiuni/';
   // set standard de fișiere per funcțiune (aceleași chei ca la centru-social)
   var STD = {
@@ -26,7 +26,15 @@
     'scoala': 'scoala',
     'bloc-locuinte': 'bloc-locuinte',
     'hala-industriala': 'hala-industriala',
-    'skid': 'skid'
+    'skid': 'skid',
+    'birouri': 'birouri',
+    'medical': 'medical',
+    'hotelier': 'hotelier',
+    'spatiu-comercial': 'spatiu-comercial',
+    'mall': 'mall',
+    'locuinta-individuala': 'locuinta-individuala',
+    'cladire-mixta': 'cladire-mixta',
+    'sport': 'sport'
   };
 
   function mdToHtml(md) { return (typeof G.UXLibMdToHtml === 'function') ? G.UXLibMdToHtml(md) : (md || ''); }
