@@ -149,6 +149,45 @@
     renderBanner(); build(); // generează + afișează IMEDIAT
   }
 
-  G.UXPlanseUI = { open: open, inferParams: inferParams };
+  // ─── PREVIEW REUTILIZABIL: primeste sheets=[{key,label,plansa,doc}] ────────
+  // doc = obiect cu emit() (DXF) + emitSVG(). Afiseaza tab-uri + descarcare.
+  function preview(sheetsIn, opts) {
+    opts = opts || {};
+    var SHEETS = (sheetsIn || []).map(function (s) {
+      var d = s.doc || {}; var svg = ''; var dxf = '';
+      try { svg = d.emitSVG ? d.emitSVG() : ''; } catch (e) {}
+      try { dxf = d.emit ? d.emit() : ''; } catch (e) {}
+      return { key: s.key, label: s.label, plansa: s.plansa || '', svg: svg, dxf: dxf, fname: ((s.plansa || s.key) + '_' + (s.key || '')).replace(/[^A-Za-z0-9_-]/g, '') };
+    });
+    if (!SHEETS.length) { if (G.ss) G.ss('Nicio planșă de afișat.'); return; }
+    var active = 0;
+    var ov = el('div', { style: 'position:fixed;inset:0;background:#070c18;z-index:5200;overflow:auto;font-family:system-ui;color:#e6edf7' });
+    var wrap = el('div', { style: 'max-width:1100px;margin:0 auto;padding:16px 14px 60px' });
+    var head = el('div', { style: 'display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px' });
+    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#7dd3fc">📐 ' + (opts.title || 'Planșe tehnice') + '</div><div style="font-size:11.5px;color:#94a3b8">Le vezi mai jos și le descarci (SVG deschizibil oriunde, DXF în AutoCAD/LibreCAD). Parametrii tehnici derivați sunt în cartuș.</div>'));
+    var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); }; head.appendChild(bX); wrap.appendChild(head);
+    var tabsBar = el('div', { style: 'display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap' });
+    var stage = el('div', { style: 'background:#fff;border:1px solid rgba(148,163,184,.25);border-radius:10px;padding:8px;min-height:420px;overflow:auto' });
+    var dlbar = el('div', { style: 'display:flex;gap:8px;margin-top:12px;flex-wrap:wrap' });
+    wrap.appendChild(tabsBar); wrap.appendChild(stage); wrap.appendChild(dlbar);
+    function rT() { tabsBar.innerHTML = ''; SHEETS.forEach(function (s, i) { var b = el('button', { style: 'background:' + (i === active ? '#7dd3fc' : 'rgba(125,211,252,.14)') + ';color:' + (i === active ? '#062338' : '#7dd3fc') + ';border:1px solid rgba(125,211,252,.4);border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer' }, (s.plansa ? s.plansa + ' · ' : '') + s.label); b.onclick = function () { active = i; rT(); rS(); rD(); }; tabsBar.appendChild(b); }); }
+    function rS() { stage.innerHTML = ''; var s = SHEETS[active]; if (s && s.svg) stage.innerHTML = s.svg; else stage.appendChild(el('div', { style: 'color:#64748b;padding:40px;text-align:center' }, 'Previzualizare indisponibilă — folosiți descărcarea DXF.')); }
+    function rD() {
+      dlbar.innerHTML = ''; var s = SHEETS[active] || {};
+      var bSvg = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Planșa (SVG)');
+      bSvg.onclick = function () { if (s.svg) { saveBlob(s.fname + '.svg', s.svg, 'image/svg+xml'); if (G.ss) G.ss('✅ ' + s.fname + '.svg'); } };
+      var bDxf = el('button', { style: 'background:rgba(125,211,252,.18);color:#7dd3fc;border:1px solid rgba(125,211,252,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Planșa (DXF)');
+      bDxf.onclick = function () { if (s.dxf) { saveBlob(s.fname + '.dxf', s.dxf, 'application/dxf'); if (G.ss) G.ss('✅ ' + s.fname + '.dxf'); } };
+      var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (ZIP)');
+      bZip.onclick = function () {
+        if (G.JSZip) { var zip = new G.JSZip(); SHEETS.forEach(function (x) { if (x.dxf) zip.file(x.fname + '.dxf', x.dxf); if (x.svg) zip.file(x.fname + '.svg', x.svg); }); zip.generateAsync({ type: 'blob' }).then(function (blob) { var u = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = u; a.download = 'Planse_' + (opts.nrcad || 'set') + '.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 2000); if (G.ss) G.ss('✅ Set descărcat (' + SHEETS.length + ' planșe · SVG+DXF)'); }); }
+        else { SHEETS.forEach(function (x) { if (x.dxf) saveBlob(x.fname + '.dxf', x.dxf, 'application/dxf'); }); }
+      };
+      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bZip);
+    }
+    document.body.appendChild(ov); rT(); rS(); rD();
+  }
+
+  G.UXPlanseUI = { open: open, inferParams: inferParams, preview: preview };
   try { console.log('[UXPlanseUI] panou generare planșe tehnice încărcat (preview SVG + DXF/ZIP)'); } catch (e) {}
 })(window);

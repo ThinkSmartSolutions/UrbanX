@@ -619,6 +619,43 @@
   };
   UX.sectionFromBuilding = function (opts) { return UX.sectionDoc(opts).emit(); };
 
+  // ─── GENERATOR: PLAN dintr-un ETAJ RELEVEE (camere reale) ─────────────────
+  // Foloseste logica REALA de camere din modulul Planse (rects in metri), dar la
+  // calitatea motorului comun: layere SR EN ISO, hasuri material, adnotari cu
+  // finisaje, grid structural, cotare, cartus + parametrii tehnici derivati.
+  // rects=[{t,lbl,x,y,w,h,bal}] (metri); opts={bW,bD,rl,rf,W,D,nrCad,utr,floorLabel,
+  //   params,proiect,beneficiar,data,faza,plansa}
+  UX.planFromReleveeFloor = function (rects, opts) {
+    opts = opts || {}; var doc = UX.newDoc(); var K = 1000;
+    var bW = (opts.bW || 12) * K, bD = (opts.bD || 10) * K, th = 375;
+    var TPL = G.UX_TEMPLATES;
+    // parcela (daca avem retrageri + dimensiuni)
+    if (opts.W && opts.D) {
+      var ox = -(opts.rl || 0) * K, oy = -(opts.rf || 0) * K;
+      doc.rect(ox, oy, opts.W * K, opts.D * K, 'C-PARCEL-BDRY');
+    }
+    // perete exterior ca banda cu grosime + hasura zidarie
+    doc.rect(0, 0, bW, bD, 'A-WALL-EXTR-N');
+    doc.rect(-th, -th, bW + 2 * th, bD + 2 * th, 'A-WALL-EXTR-N');
+    try { if (TPL) UX.materialHatch(doc, [[-th, -th], [bW + th, -th], [bW + th, 0], [-th, 0]], TPL.materialFor('wall_exterior')); } catch (e) {}
+    // camere: contur + adnotare (nume + finisaj + arie)
+    (rects || []).forEach(function (r) {
+      var lay = r.bal ? 'A-BALC-N' : (r.t === 'core' ? 'S-COLS-N' : 'A-WALL-PART-N');
+      doc.rect(r.x * K, r.y * K, r.w * K, r.h * K, lay);
+      if (r.t === 'core') { try { UX.materialHatch(doc, [[r.x * K, r.y * K], [(r.x + r.w) * K, r.y * K], [(r.x + r.w) * K, (r.y + r.h) * K], [r.x * K, (r.y + r.h) * K]], 'BETON_ARMAT'); } catch (e) {} }
+      var fin = ''; try { if (TPL) { var f = TPL.finishFor(r.t); fin = f.floor || ''; } } catch (e) {}
+      UX.roomAnnotation(doc, { cx: (r.x + r.w / 2) * K, cy: (r.y + r.h / 2) * K, name: r.lbl || r.t, finish: fin, area: r.w * r.h });
+    });
+    UX.structuralGrid(doc, 0, 0, bW, bD, Math.max(3000, bW / Math.max(3, Math.round(bW / 4500))), Math.max(3000, bD / Math.max(2, Math.round(bD / 3800))));
+    doc.dim(0, 0, bW, 0, -260, 'A-DIMS-PLAN');
+    doc.dim(0, 0, 0, bD, -260, 'A-DIMS-PLAN');
+    UX.northArrow(doc, bW + 700, bD - 400, 320, opts.bearing || 0);
+    UX.scaleBar(doc, 0, -1000, 100, 10);
+    UX.titleBlock(doc, { x: bW + 1200, y: 0, proiect: opts.proiect || ('Plan ' + (opts.floorLabel || 'nivel')), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    if (opts.params) { try { UX.techNotes(doc, bW + 1200, 65, opts.params); } catch (e) {} }
+    return doc;
+  };
+
   // ─── PARTAJAT: parametrii tehnici derivați pt orice motor de planșe ────────
   // Mapează o funcțiune relevee (fn liber) → cheia UXDoc + rulează autoCalc, ca să
   // avem ACEEAȘI calitate de parametri (seism/climă/incendiu) în modulul Planșe.
