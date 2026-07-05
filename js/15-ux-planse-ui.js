@@ -156,6 +156,7 @@
     }
 
     bGen.onclick = build;
+    ov.appendChild(wrap);
     document.body.appendChild(ov);
     renderBanner(); build(); // generează + afișează IMEDIAT
   }
@@ -197,6 +198,7 @@
       };
       dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bPdf); dlbar.appendChild(bZip);
     }
+    ov.appendChild(wrap);
     document.body.appendChild(ov); rT(); rS(); rD();
   }
 
