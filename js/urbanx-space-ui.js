@@ -63,7 +63,8 @@
       paramDefs().forEach(function (d) {
         var b = el('div', null, '<div style="font-size:10px;text-transform:uppercase;color:#94a3b8;margin-bottom:3px">' + d.label + '</div>');
         if (d.type === 'bool') { var s2 = el('select', { style: INP }); [['1', 'Da'], ['', 'Nu']].forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(state.params[d.key] != null ? state.params[d.key] : d.def) === o[0] || (o[0] === '1' && (state.params[d.key] != null ? state.params[d.key] : d.def))) op.setAttribute('selected', 'selected'); s2.appendChild(op); }); s2.onchange = function () { state.params[d.key] = !!s2.value; }; b.appendChild(s2); }
-        else { var inp = el('input', { type: 'number', style: INP + ';width:120px' }); inp.value = state.params[d.key] != null ? state.params[d.key] : d.def; inp.oninput = function () { state.params[d.key] = inp.value === '' ? '' : +inp.value; }; b.appendChild(inp); }
+        else if (d.type === 'select') { var s3 = el('select', { style: INP + ';width:auto;min-width:160px' }); if (state.params[d.key] == null) state.params[d.key] = d.def; (d.options || []).forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (String(state.params[d.key]) === String(o[0])) op.setAttribute('selected', 'selected'); s3.appendChild(op); }); s3.onchange = function () { state.params[d.key] = s3.value; }; b.appendChild(s3); }
+        else { var inp = el('input', { type: (d.type === 'text' ? 'text' : 'number'), style: INP + ';width:120px' }); inp.value = state.params[d.key] != null ? state.params[d.key] : d.def; inp.oninput = function () { state.params[d.key] = (d.type === 'text') ? inp.value : (inp.value === '' ? '' : +inp.value); }; b.appendChild(inp); }
         selRow.appendChild(b);
       });
       var bGen = el('button', { style: 'background:#34d399;color:#04231a;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⚙ Generează programul funcțional');
@@ -163,6 +164,17 @@
         G.UXDocBIM.exportIFC(D);
       };
       sideBox.appendChild(bBim);
+      // SKID GPL — obiect ingineresc: proiectare 3D reala + planse ATEX din optiunile alese
+      if (state.tip === 'skid-gpl' && G.proiecteazaSkid) {
+        var p = state.params || {};
+        var skidOpts = function () { return { destinatie: p.destinatie || 'incalzire_cladiri', nrRec: Math.max(1, Math.min(+p.nrRec || 1, 3)), montaj: p.montaj || 'suprateran', distDisponibil: (p.distDisponibil !== '' && p.distDisponibil != null) ? +p.distDisponibil : null }; };
+        var bSkid = el('button', { style: 'width:100%;margin-top:8px;background:rgba(239,68,68,.14);color:#fca5a5;border:1px solid rgba(239,68,68,.4);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer' }, '🛢 Proiectează SKID 3D (rezervoare + montaj + ATEX)');
+        bSkid.onclick = function () { try { G.proiecteazaSkid(skidOpts()); ov.remove(); } catch (e) { if (G.ss) G.ss('Eroare SKID: ' + e.message); } };
+        sideBox.appendChild(bSkid);
+        var bSkidPdf = el('button', { style: 'width:100%;margin-top:8px;background:rgba(239,68,68,.08);color:#fca5a5;border:1px solid rgba(239,68,68,.28);border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer' }, '📄 Documentație SKID + planșe (amplasare · ATEX · schemă)');
+        bSkidPdf.onclick = function () { try { if (G.skid_calc) { var ap = (G.S && G.S.parcels && G.S.parcels[G.S.activeParcel == null ? 0 : G.S.activeParcel]); if (ap) { G._SKID_PROIECTE = G._SKID_PROIECTE || {}; G._SKID_PROIECTE[ap.nrcad || 'x'] = G.skid_calc(skidOpts()); } } if (G.generateSkidPDF) G.generateSkidPDF(); else if (G.ss) G.ss('Modulul SKID PDF nu e încărcat.'); } catch (e) { if (G.ss) G.ss('Eroare: ' + e.message); } };
+        sideBox.appendChild(bSkidPdf);
+      }
     }
 
     renderParams();
