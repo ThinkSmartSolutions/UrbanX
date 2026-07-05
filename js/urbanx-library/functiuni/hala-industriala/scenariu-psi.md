@@ -169,6 +169,26 @@ $$ q_{f,med} = \frac{(2.400 \times 1.700) + (800 \times 400) + (500 \times 600)}
 
 Rezultă un compartiment dominat de depozitare, cu risc mare de incendiu — determinant pentru dimensionarea protecției pasive și a instalațiilor de stingere.
 
+#### 2.3.5. Analiză de sensibilitate a sarcinii termice (scenariu de depozitare densă)
+
+Deoarece qf este parametrul cel mai sensibil pentru dimensionarea stingerii, se verifică și un scenariu de depozitare densă (depozit logistic cu rafturi metalice pe 4 niveluri, H stivuire 6 m):
+
+- densitate de stocare ridicată: 300 kg/mp de suprafață proiectată (marfă pe verticală);
+- H medie ponderată material 22 MJ/kg (proporție mai mare de mase plastice/ambalaje).
+
+$$ q_{f,dens} = \frac{300 \; kg/m^2 \times 22 \; MJ/kg \times 1.700 \; m^2}{1.700 \; m^2} = 300 \times 22 = \mathbf{6.600 \; MJ/m^2} $$
+
+În acest scenariu qf ajunge la ≈ 6.600 MJ/mp (sarcină termică extrem de mare), ceea ce **confirmă necesitatea sistemului ESFR / in-rack** și a rezervei de apă generoase, și impune ca la faza DE clasa SR EN 12845 să fie stabilită pe fișa reală a mărfurilor. Diferența între scenariul curent (2.400 MJ/mp) și cel dens (6.600 MJ/mp) evidențiază de ce **natura și cantitatea mărfurilor sunt condiție de exploatare** (cap. 11), orice depășire declanșând reevaluarea instalației de stingere.
+
+#### 2.3.6. Corespondența qf — clasa de sarcină termică (STAS 10903/2, orientativ)
+
+| Interval qf (MJ/mp) | Clasa de sarcină termică | Zone corespondente |
+|---|---|---|
+| < 420 | Mică | — |
+| 420 – 840 | Mijlocie | Z3, Z4 birouri (500) |
+| 840 – 1.680 | Mare | Z2 producție (800) |
+| > 1.680 | Foarte mare | Z1 depozitare (2.400 … 6.600) |
+
 ### 2.4. Surse potențiale de aprindere
 
 | Categorie sursă | Exemple concrete în hală | Măsuri de prevenire |
@@ -485,6 +505,20 @@ Conform **SR EN 12845**, clasificarea riscului pentru depozitare:
 
 Pentru depozitare la înălțime cu risc ridicat, soluția recomandată este **sistem ESFR (Early Suppression Fast Response)** amplasat la acoperiș (evită sprinklerele intermediare la rafturi în multe configurații), sau sprinklere OH/HH la tavan + sprinklere intermediare în rafturi (in-rack), în funcție de proiectul de specialitate.
 
+**Alegerea categoriei de stocare (SR EN 12845, clasificarea depozitării):** mărfurile ambalate mixte (carton, mase plastice grupa III, produse combustibile) depozitate pe paleți/rafturi până la 6 m se încadrează, în funcție de coeficientul de material și configurație, în categoria **Cat. II–III de stocare (HHS2/HHS3)**. Această încadrare determină densitatea de stropire și aria de operare. Depășirea înălțimii de stivuire proiectate (6 m) SAU introducerea de produse din grupe superioare (aerosoli, cauciuc, lichide) impune **reclasificare** și posibila trecere la in-rack sprinklers — condiție de exploatare (cap. 11).
+
+**Comparația soluțiilor de sprinklerizare pentru depozit:**
+
+| Criteriu | Tavan HHS + in-rack | ESFR la tavan |
+|---|---|---|
+| Sprinklere în rafturi | Da (la fiecare 3–4 m înălțime) | Nu (în general) |
+| Presiune la cap | Moderată (1,5–2 bar) | Ridicată (3,5–5 bar, K360/K480) |
+| Flexibilitate rearanjare rafturi | Redusă (in-rack fix) | Ridicată | 
+| Debit total | Mai mic | Mai mare (impune pompă/rezervă mai mari) |
+| Recomandare | Depozit cu configurație stabilă | Depozit cu reconfigurare frecventă, culoare libere |
+
+Pentru o hală comercială cu depozitare flexibilă se preferă de regulă **ESFR**, cu condiția respectării culoarelor și înălțimilor libere impuse de furnizorul sistemului.
+
 #### 6.4.2. Parametrii de dimensionare (SR EN 12845)
 
 | Parametru | Zona OH3 (producție) | Zona HHS (depozitare) / ESFR |
@@ -558,6 +592,23 @@ Conform normelor de dotare (nivel minim: 1 stingător portabil de min. 6 kg pulb
 | **Total** | — | — | **≈ 13 portabile + 2 CO₂ + 1 transportabil** |
 
 Amplasare: pe căile de evacuare, la ieșiri, vizibile, la max. 15 m față de orice punct al zonei cu risc mare, la înălțime accesibilă (mâner max. 1,50 m), semnalizate.
+
+### 6.7. Verificarea amplasării hidranților interiori (dubla acoperire)
+
+Condiția P118-2 pentru risc mare: fiecare punct al zonei atins de **2 jeturi**. Lungimea de acoperire a unui hidrant interior:
+
+$$ L_{acoperire} = L_{furtun} + b_{jet} = 20 \; m + 6 \; m = 26 \; m $$
+
+Pentru dubla acoperire, distanța dintre doi hidranți succesivi trebuie să fie ≤ Lfurtun (astfel încât un punct să fie atins de ambii). La 4 hidranți dispuși pe colțuri/laturi ale halei 40×60 m, cu furtun de 20 m, se acoperă întregul perimetru și interiorul cu min. 2 jeturi pe zona centrală de depozit. Se verifică grafic pe planul de amplasare (raze de 26 m suprapuse). Dacă apare o zonă „descoperită" în centru (diagonala 40×60 = 72 m), se adaugă un **al 5-lea hidrant** central sau se mută pozițiile — decizie la faza de proiect pe geometria reală.
+
+### 6.8. Sinteza instalațiilor de stingere și a debitelor
+
+| Instalație | Debit calcul (l/s) | Timp (min) | Volum (m³) | Normativ |
+|---|---|---|---|---|
+| Hidranți interiori (2 jeturi × 2,1) | 4,2 | 10 | 2,5 | P118-2 cap. 4 |
+| Hidranți exteriori | 20,0 | 180 | 216,0 | P118-2 cap. 6 |
+| Sprinklere HHS/ESFR | 54,2 | 90 | 292,7 | P118-2 + SR EN 12845 |
+| **Rezervă totală (funcț. simultană)** | — | — | **≈ 511 → 550** | P118-2 |
 
 ---
 
@@ -680,6 +731,36 @@ Se asigură **menținerea liberă permanentă** a căilor de acces și a platfor
 - **Plan de intervenție** avizat de ISU, care cuprinde: concepția de intervenție, forțele proprii, forțele ISU, sursele de apă, căile de acces.
 - **Registre:** control PSI, instruiri, verificări/mentenanță instalații (IDSAI, sprinklere, hidranți, SHEV, stingătoare — verificare/reîncărcare anuală).
 
+### 10.3. Programul de mentenanță și verificare periodică a instalațiilor de securitate
+
+| Instalație | Verificare | Periodicitate | Referință |
+|---|---|---|---|
+| IDSAI (centrală, detectoare, butoane, sirene) | Funcțional + test detectoare | Lunar (funcțional) / anual (complet, firmă atestată) | P118-3 / normele de mentenanță |
+| Sprinklere / stație pompare | Test pompă (pornire diesel săptămânal), debit/presiune, capete | Săptămânal (pompă) / anual (complet) | SR EN 12845 (regim de întreținere) |
+| Hidranți interiori și exteriori | Presiune, debit, integritate furtun/robinet | Semestrial / anual (probă de debit) | P118-2 |
+| Stingătoare portabile | Verificare stare, presiune, sigiliu | Anual (verificare) / la 5 ani (reîncărcare/probă) | Norme dotare / SR EN 3 |
+| SHEV (trape, ecrane, actuatoare) | Test deschidere automată + manuală | Semestrial | SR EN 12101 |
+| Iluminat de securitate | Test autonomie acumulatori | Lunar (funcțional) / anual (autonomie 1 h) | NP 061 / I7 |
+| Uși antifoc, etanșări | Autoînchidere, integritate garnituri | Semestrial | P118-1 |
+| Instalație electrică (PRAM) | Rezistență izolație, prize pământ, IPT | Anual / bienal | I7 / NTE |
+
+### 10.4. Categorii de personal și responsabilități
+
+- **Administratorul/conducătorul** obiectivului — răspunde de organizarea apărării împotriva incendiilor (Legea 307/2006, art. 19).
+- **Cadrul tehnic PSI** — coordonează activitatea, instruiește, verifică, ține evidențele, propune măsuri.
+- **Șefii de compartimente** — răspund de respectarea regulilor pe locul de muncă.
+- **Echipa de primă intervenție** (voluntari instruiți) — acționează cu mijloacele din dotare până la sosirea ISU.
+- **Toți salariații** — respectă instrucțiunile, participă la instruiri și exerciții, semnalează pericolele.
+
+### 10.5. Concepția generală de intervenție (extras plan de intervenție)
+
+1. **Alarmare:** detecție automată → alarmă acustică/optică → apel 112 → alertare serviciu privat.
+2. **Evacuare:** conform planurilor afișate, pe traseele marcate, către punctul de adunare exterior.
+3. **Primă intervenție:** echipa proprie cu stingătoare/hidranți interiori pe focar incipient; întreruperea alimentării electrice și a gazelor.
+4. **Intervenția ISU:** acces autospeciale pe drumul de incintă, alimentare de la hidranții exteriori/rezervor; localizare și lichidare.
+5. **Protecția:** evacuarea bunurilor de valoare când e posibil fără risc; protejarea vecinătăților.
+6. **Post-incendiu:** izolarea zonei, verificarea structurii (stâlpi metalici solicitați termic), refacerea instalațiilor.
+
 ---
 
 ## 11. CONCLUZII, CONDIȚII ȘI RECOMANDĂRI PRIVIND EXPLOATAREA
@@ -719,6 +800,49 @@ Se asigură **menținerea liberă permanentă** a căilor de acces și a platfor
 - Piesele scrise și desenate ale proiectului (planuri arhitectură, planuri instalații IDSAI/sprinklere/hidranți/SHEV, plan de evacuare, plan de intervenție);
 - Referatul verificatorului de proiect pentru cerința **C — securitate la incendiu** (Legea 10/1995);
 - Documentația pentru **avizul/autorizația de securitate la incendiu** conform Ordinului MAI nr. 129/2016 și HG nr. 571/2016.
+
+### 11.5. Matricea de conformitate (sinteză verificări)
+
+| Nr. | Cerință verificată | Valoare normată | Valoare asigurată | Rezultat |
+|---|---|---|---|---|
+| 1 | Grad rezistență la foc | Min. II (categorie C, 2.400 mp) | II | CONFORM |
+| 2 | Arie max. compartiment (cu sprinklere) | ≈ 4.000 mp | 2.400 mp (1 compartiment) | CONFORM |
+| 3 | Distanța de siguranță N | Min. 6 m | 12 m | CONFORM |
+| 4 | Nr. ieșiri parter | Min. 2 | 3 | CONFORM |
+| 5 | Lungime evacuare 2 sensuri | Max. 40–50 m | ≈ 35 m | CONFORM |
+| 6 | Timp evacuare | Acceptabil (< ASET) | ≈ 49 s | CONFORM |
+| 7 | IDSAI | Obligatoriu, acoperire totală | ASD/liniar + optice + MCP | CONFORM |
+| 8 | Hidranți interiori | 2 jeturi × 2,1 l/s | 4 buc, 4,2 l/s | CONFORM |
+| 9 | Hidranți exteriori | Cf. volum, 20 l/s / 3 h | 2 buc, 20 l/s | CONFORM |
+| 10 | Sprinklere | Obligatoriu (arie + qf) | ESFR/HHS | CONFORM |
+| 11 | Rezervă apă incendiu | ≈ 511 m³ | 550 m³ + pompare diesel | CONFORM |
+| 12 | Desfumare (SHEV) | ≈ 1,5 % arie / zonă fum | 36 m² util, 2 zone | CONFORM |
+| 13 | Iluminat de securitate | Autonomie 1 h | Corpuri autonome 1 h | CONFORM |
+| 14 | Accese pompieri | Drum 3,8 m + platformă | Drum 6 m + platformă | CONFORM |
+| 15 | Dotare stingătoare | Cf. norme dotare | 13 P6 + 2 CO₂ + 1 P50 | CONFORM |
+
+---
+
+## ANEXĂ — DOCUMENTE NORMATIVE DE REFERINȚĂ
+
+| Act normativ | Obiect | Aplicare în scenariu |
+|---|---|---|
+| **Legea nr. 307/2006** (republicată) | Apărarea împotriva incendiilor | Organizarea AII, obligații, dotare (cap. 10) |
+| **Legea nr. 10/1995** (republicată) | Calitatea în construcții | Cerința fundamentală C — securitate la incendiu; verificator atestat |
+| **Ordinul MAI nr. 129/2016** | Norme metodologice avizare/autorizare SU | Structura scenariului (Anexa 3); procedura aviz/autorizație |
+| **HG nr. 571/2016** | Categorii de construcții supuse avizării/autorizării | Încadrarea obiectivului (cap. 1.6) |
+| **OMAI nr. 712/2005** (modif. 786/2005) | Instruirea salariaților în domeniul SU | Programul de instruire PSI (cap. 10) |
+| **OMAI nr. 163/2007** | Norme generale de apărare împotriva incendiilor | Reguli de exploatare, permis de lucru cu foc |
+| **P118-1/2013** | Siguranța la foc a construcțiilor | Risc, grad RF, compartimentare, evacuare (cap. 2–4) |
+| **P118-2/2013** | Instalații de stingere a incendiilor | Hidranți, sprinklere, rezervă apă, desfumare (cap. 6–7) |
+| **P118-3/2015** | Instalații de semnalizare, alarmare, alertare | IDSAI (cap. 5) |
+| **I7/2011** | Instalații electrice de joasă tensiune | Instalații utilitare, IPT (cap. 8) |
+| **NP 061** | Proiectarea iluminatului artificial | Iluminat de securitate (cap. 4.5) |
+| **SR EN 12845** | Instalații fixe cu sprinklere automate | Clasa de risc, densitate, arie operare, pompare (cap. 6.4–6.5) |
+| **SR EN 12101** (-2/-3/-5) | Sisteme de control al fumului și gazelor fierbinți | Desfumare SHEV (cap. 7) |
+| **SR EN 13501-1** | Clasificarea reacției la foc a produselor | Clasele A1/A2/Broof (cap. 2.6) |
+| **SR EN 1991-1-2 / 1993-1-2** | Eurocod — acțiuni și calcul structural la foc | Curba ISO 834, temperatura critică oțel (cap. 3.1) |
+| **STAS 10903/2** | Determinarea sarcinii termice în construcții | Calcul qf (cap. 2.3) |
 
 ---
 

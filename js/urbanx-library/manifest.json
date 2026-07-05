@@ -1,0 +1,145 @@
+{
+"agricol": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"bess": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"birouri": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"bloc-locuinte": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"centru-social-zi": [
+"arhitectura",
+"structura",
+"instalatii",
+"general",
+"caiet_arh",
+"caiet_str",
+"caiet_inst",
+"arh_pth",
+"str_pth",
+"inst_pth",
+"scenariu_psi",
+"dtoe",
+"aviz_mediu",
+"dali",
+"receptie"
+],
+"cladire-mixta": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"gradinita": [
+"arhitectura",
+"structura",
+"instalatii",
+"general",
+"arh_pth",
+"str_pth",
+"inst_pth",
+"scenariu_psi"
+],
+"hala-industriala": [
+"arhitectura",
+"structura",
+"instalatii",
+"general",
+"scenariu_psi",
+"receptie"
+],
+"hotelier": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"infrastructura-drum": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"locuinta-individuala": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"mall": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"medical": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"parc-fotovoltaic": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"parcare": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"pod": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"scoala": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"skid": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"spatiu-comercial": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"sport": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+],
+"statie-transformare": [
+"arhitectura",
+"structura",
+"instalatii",
+"general"
+]
+}

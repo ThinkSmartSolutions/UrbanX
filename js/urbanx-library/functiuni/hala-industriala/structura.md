@@ -198,9 +198,17 @@ Coeficient de presiune interioară: cpi = +0,20 / −0,30 (funcție de permeabil
 Forța de vânt orizontală pe un cadru transversal interior (aria aferentă = 6,0 m × Hs):
 Fw,transv ≈ (0,84 + 0,53)·9,5·6,0 ≈ **78 kN/cadru interior** (presiune față + succiune spate, integrate pe perete).
 
+**Încărcările distribuite pe elementele cadrului** (transfer de la vânt la riglă/stâlpi):
+- Stâlp față (presiune D): w = we·t = 0,84·6,0 = 5,04 kN/m (orizontal, spre interior).
+- Stâlp spate (succiune E): w = 0,53·6,0 = 3,18 kN/m (orizontal, spre exterior).
+- Riglă acoperiș (succiune netă cea mai defavorabilă, zona G/H cu cpi = +0,2): wnet = qp·(cpe − cpi) = 1,05·(−1,26 − 0,20) = −1,53 kN/m² → pe riglă: −1,53·6,0 = **−9,18 kN/m (ridicare)**.
+Această ridicare pe riglă, combinată cu 1,0·G (permanent redus), produce inversarea momentelor și încărcarea la smulgere a ancorajelor (combinația C2) — de aceea vântul de succiune guvernează ancorajele.
+
 ### 4.5. Temperatura (SR EN 1991-1-5)
 
 Variația uniformă de temperatură ΔT = ±35°C față de temperatura de montaj. La lungimea de 60 m se prevede **rost de dilatație** dacă tronsonul depășește ~90 m (nu este cazul); pentru 60 m se verifică eforturile din temperatură în contravântuiri și în placa de pardoseală (rosturi de contracție).
+
+**Verificare deformația liberă de dilatație:** ΔL = α·ΔT·L = 12·10⁻⁶·35·60.000 = **25,2 mm** (dilatația liberă a tronsonului de 60 m). Deoarece capetele nu sunt complet blocate (contravântuiri într-o singură travee, celelalte reazeme libere longitudinal), efortul indus în contravântuiri este limitat. Efortul termic în contravântuirea longitudinală (dacă structura ar fi blocată la ambele capete): Nθ = E·A·α·ΔT — motiv pentru care contravântuirile se concentrează în **o singură travee** (nu la ambele capete), permițând dilatația liberă și evitând eforturi termice mari. Placa de pardoseală preia contracția din hidratare + variația termică prin **rosturi de contracție la 5÷6 m**.
 
 ---
 
@@ -458,9 +466,13 @@ Verificare la SR EN 1993-1-3 (elemente formate la rece), în trei etape:
 
 Săgeata la SLS: w ≤ L/200 = 6000/200 = **30 mm** → verificată cu momentul de inerție efectiv (secțiune eficace, Ieff ≈ 0,85·Igross) → w ≈ 22 mm < 30 mm ✓.
 
-### 8.2. Rigle de perete — Z/C
+### 8.2. Tiranți intermediari (sag-rods) și contravântuire de acoperiș a panelor
 
-Preiau vântul perpendicular pe perete (presiune/succiune) prin încovoiere pe orizontală + greutatea panoului sandwich pe verticală (talpa liberă cu sag-rods). Dimensionare analogă panelor, verificare săgeată L/200 (estetic) și rezistență la succiunea de colț a peretelui.
+Sag-rods (bare rotunde Ø12÷16 mm) dispuse la 1/2 și 1/3 din deschiderea panei preiau componenta paralelă cu panta qz și reduc lungimea de flambaj lateral a tălpii libere. Forța cumulată în sag-rod la coamă (însumarea componentelor pe pantă de la toate panele versantului) se transmite la o pană de coamă întărită sau la o contravântuire de acoperiș. Forța într-un sag-rod ≈ nr. pane × qz·l/2 → se verifică la tracțiune Npl,Rd = As·fyd.
+
+### 8.3. Rigle de perete — Z/C
+
+Preiau vântul perpendicular pe perete (presiune/succiune) prin încovoiere pe orizontală + greutatea panoului sandwich pe verticală (talpa liberă cu sag-rods verticali). Dimensionare analogă panelor, verificare săgeată L/200 (estetic) și rezistență la succiunea de colț a peretelui (zona A cu cpe = −1,2). Rigla de streașină îndeplinește și rolul de tirant longitudinal / colector în sistemul de contravântuiri.
 
 ---
 
@@ -614,8 +626,11 @@ Soluție: plasă sudată **Ø8/150 dublă** (sus + jos) SAU **fibre metalice 30 
 M = 45.000/(4π)·[ln(2·783/113) + 0,616] = 3.581·[ln(13,86) + 0,616] = 3.581·[2,629 + 0,616] = 11.620.000 = **11,62 kNm/m**;
 σ = 6·11,62·10⁶/40.000 = **1,74 N/mm²** ≈ fctd,fl (la limită, acoperit de armare/fibre).
 
-**Verificare poansonare (picior de raft):**
-VRd,punch pe perimetrul critic la 2d de amprentă ≈ **209 kN** > 80 kN → **✓**.
+**Verificare poansonare (picior de raft, SR EN 1992-1-1 §6.4):**
+Perimetrul de control critic u1 la distanța 2d de amprenta 150×150 mm (d ≈ 170 mm pentru h = 200): u1 = 4·150 + 2π·2·170 = 600 + 2.136 = 2.736 mm.
+Rezistența la poansonare fără armătură specifică: vRd,c = CRd,c·k·(100·ρl·fck)^(1/3), cu CRd,c = 0,18/1,5 = 0,12, k = 1+√(200/d) = 1+√(200/170) = 2,08 (≤2,0 → 2,0), ρl ≈ 0,005:
+vRd,c = 0,12·2,0·(100·0,005·30)^(1/3) = 0,24·(15)^(1/3) = 0,24·2,466 = 0,592 N/mm².
+VRd,c = vRd,c·u1·d = 0,592·2.736·170 = 275.000 N ≈ **275 kN** (≥ 209 kN conservator, cu k=2,0) > VEd = 80 kN → **✓, fără armătură de poansonare**.
 
 **Portanța plăcii** ~40÷50 kN/m² (limitată de teren), cu tasarea δ ≤ 20 mm.
 
@@ -760,7 +775,11 @@ Halele parter cu compartiment de incendiu sub aria admisă și cu zid de foc aut
 - Alternativ: placare cu vată minerală / plăci de gips-carton rezistente la foc.
 - **Excepție protejată R30:** stâlpii adiacenți zidului de foc + căile de evacuare (obligatoriu).
 
-**Calculul temperaturii critice** (SR EN 1993-1-2, §4.2.4): θcr = 39,19·ln[1/(0,9674·μ0^3,833) − 1] + 482, cu μ0 = grad de utilizare la temperatura ambiantă. Pentru μ0 = 0,6: θcr ≈ 540°C.
+**Calculul temperaturii critice** (SR EN 1993-1-2, §4.2.4): θcr = 39,19·ln[1/(0,9674·μ0^3,833) − 1] + 482, cu μ0 = grad de utilizare la temperatura ambiantă. Pentru μ0 = 0,6:
+θcr = 39,19·ln[1/(0,9674·0,6^3,833) − 1] + 482 = 39,19·ln[1/(0,9674·0,1587) − 1] + 482 = 39,19·ln[6,514 − 1] + 482 = 39,19·1,707 + 482 = 66,9 + 482 = **549°C**.
+
+**Evoluția temperaturii oțelului neprotejat** (SR EN 1993-1-2, §4.2.5.1, incrementul):
+Δθa,t = (Am/V)·ksh/(ca·ρa)·ḣnet·Δt, cu factor de masivitate Am/V ≈ 100 m⁻¹ pentru HEB 450 expus pe 4 fețe, ca ≈ 600 J/(kg·K), ρa = 7.850 kg/m³. Sub curba standard ISO 834, oțelul neprotejat atinge θcr = 549°C după ~13 minute → **clasa de rezistență la foc a elementului neprotejat ≈ R13**, insuficientă pentru R30. Prin urmare, pentru elementele care necesită R30 se aplică vopseaua intumescentă care reduce factorul efectiv de încălzire (grosime uscată 0,4÷0,8 mm), împingând atingerea lui θcr la ≥ 30 minute.
 
 ---
 
@@ -812,6 +831,34 @@ Documentația necesită verificare de către verificatori atestați MDLPA:
 | Securitate la incendiu | **Ci** | scenariul de securitate la incendiu |
 
 Memoriul este valabil pentru faza DTAC numai însoțit de **referatele favorabile Af și A1** + studiul geotehnic verificat Ag. Detaliile complete (planșe de armare, planșe de îmbinare, liste de bare, caiet de sarcini, extrase de material) se elaborează la faza **PTh + DE**. Toate valorile de amplasament (ag, Tc, sk, qb, pconv, k) se confirmă cu datele reale ale amplasamentului (harta de zonare P100-1, CR 1-1-3, CR 1-1-4 și studiul geotehnic pentru terenul de fundare).
+
+### 17.3. Conformitatea cu cerințele fundamentale (Legea 10/1995)
+
+| Cerință fundamentală | Mod de satisfacere | Referință |
+|---|---|---|
+| A — Rezistență mecanică și stabilitate | verificări SLU pe toate elementele + SLS + capacity design seismic | SR EN 1990/1993/1998 |
+| B — Securitate la incendiu | zid de foc autostabil + protecție R30 selectivă + scenariu | P118-1, SR EN 1993-1-2 |
+| C — Igienă, sănătate, mediu | protecție anticorozivă C3, materiale certificate | ISO 12944 |
+| D — Siguranță și accesibilitate în exploatare | limitarea săgeților/deplasărilor SLS, drift seismic | SR EN 1990 §A1.4 |
+| F — Economie de energie | (cerință de arhitectură/termotehnică — panouri sandwich) | C107 |
+
+### 17.4. Estimarea consumurilor de materiale (orientativ, per hală de referință)
+
+| Material | Cantitate estimată | Observație |
+|---|---|---|
+| Oțel structural (cadre, pane, contravântuiri) | ~35÷45 kg/m² arie construită → ~85÷110 t | funcție de deschidere/pod rulant |
+| Beton fundații (C20/25) | ~55÷70 m³ | 22 fundații izolate + grinzi soclu |
+| Beton placă pardoseală (C30/37) | ~480 m³ (20 cm × 2.400 m²) | + local 22 cm sub rafturi |
+| Armătură / fibre | ~8÷12 t B500B + fibre 30 kg/m³ | placă + fundații + zid foc |
+
+### 17.5. Plan de control al calității (faza execuție)
+
+- Recepția materialelor: certificate 3.1 (SR EN 10204) pentru oțel laminat, table, șuruburi, electrozi.
+- Trasabilitatea sudurilor: procedură WPS/WPQR calificată, sudori autorizați (SR EN ISO 9606).
+- Control nedistructiv: VT 100% + UT/RT pe cusăturile de capacitate/oboseală (grinda de rulare, noduri MRF).
+- Pretensionare șuruburi 10.9: control moment de strângere / metodă combinată, fișe de pretensionare.
+- Control geometric la montaj: verticalitate stâlpi, poziție ancoraje, cote — conform SR EN 1090-2 clasa EXC2.
+- Beton: rețete, conuri de tasare, epruvete pe clase; balastul plăcii — încercări de portanță Ev2.
 
 ---
 

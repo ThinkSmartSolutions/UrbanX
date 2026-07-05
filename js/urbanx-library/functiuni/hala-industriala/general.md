@@ -102,6 +102,10 @@ Alegerea tipologiei de depozitare/producție ușoară determină în cascadă ma
 
 Investiția răspunde cererii de spații logistice/industriale moderne (H liber ≥ 8 m, docuri, planeitate pentru rafturi) într-o zonă cu funcțiune industrial/logistică, cu acces la drum de categorie superioară și utilități la limita amplasamentului, unde POT/CUT reglementate permit soluția. Nerealizarea obiectivului conduce la dependența de spații închiriate, adesea neconforme normelor actuale, cu costuri de exploatare și riscuri operaționale mai mari. Oportunitatea este susținută de disponibilitatea terenului, de accesibilitatea rutieră și de cererea de piață pentru spații clasa A.
 
+Necesitatea investiției se fundamentează pe cerințele operaționale ale unei activități de depozitare/producție ușoară care nu poate fi satisfăcută corespunzător de spațiile existente pe piață: înălțimea liberă redusă a halelor vechi limitează stivuirea pe verticală și, implicit, gradul de utilizare a suprafeței; lipsa docurilor amenajate și a nivelurilor hidraulice de andocare încetinește operațiunile de încărcare/descărcare; planeitatea insuficientă a pardoselilor vechi împiedică folosirea rafturilor înalte și a echipamentelor VNA (very narrow aisle); iar dotările de siguranță la incendiu neconforme expun activitatea unor riscuri și limitări de asigurare. O construcție nouă, proiectată conform normelor actuale, elimină aceste limitări și oferă un cost total de ocupare mai redus pe termen lung.
+
+Oportunitatea se justifică prin conjuncția mai multor condiții favorabile: existența unui teren cu destinație compatibilă și cu indicatori urbanistici permisivi; accesul la o rețea rutieră capabilă să preia trafic greu; disponibilitatea utilităților în proximitate; și o cerere de piață susținută pentru spații logistice moderne, generată de dezvoltarea comerțului și a lanțurilor de aprovizionare. Realizarea în regim propriu (față de închiriere) conferă beneficiarului control asupra configurației spațiului, stabilitate a costurilor și un activ imobiliar cu valoare de piață.
+
 ---
 
 ## 3. REGIMUL JURIDIC, ECONOMIC ȘI TEHNIC AL TERENULUI
@@ -157,6 +161,8 @@ Certificatul de urbanism nu conferă dreptul de a construi, ci reprezintă actul
 ### 4.1. Documentațiile de urbanism aplicabile
 
 Amplasamentul se află în intravilanul UAT, într-o zonă reglementată prin **PUG și RLU** (eventual detaliată prin **PUZ**) ca zonă de unități industriale/logistice. Încadrarea respectă **Legea 350/2001** și RLU aferent. Unitatea teritorială de referință (UTR) este de tip industrial, cu funcțiune dominantă de producție/depozitare.
+
+Legea 350/2001 stabilește ierarhia documentațiilor de urbanism (PATN, PATJ, PUG, PUZ, PUD) și principiul conformării investițiilor la reglementările aprobate. Pentru amplasamentul de față, cadrul de referință este PUG-ul și RLU-ul localității, care alocă zonei funcțiunea industrială și stabilesc indicatorii maximi (POT, CUT), regimul de înălțime, retragerile și procentul minim de spații verzi. Funcțiunea propusă — hală industrială/logistică cu corp administrativ aferent — se încadrează în categoria funcțiunilor admise ale UTR-ului industrial, activitatea administrativă fiind o funcțiune complementară, subordonată funcțiunii dominante de producție/depozitare. Dacă RLU condiționează autorizarea de aprobarea unui PUZ (de exemplu, pentru parcelări mari sau pentru stabilirea detaliată a regimului de înălțime și a circulațiilor), acesta se elaborează și se aprobă în prealabil, iar documentația de autorizare se raportează la reglementările PUZ.
 
 ### 4.2. Indicatori urbanistici — propus vs. reglementat
 
@@ -215,6 +221,8 @@ Accesul carosabil se realizează din drumul public învecinat. Nu există accese
 | Telecomunicații | rețea operator în zonă |
 
 Racordurile efective și capacitățile se stabilesc prin avizele de amplasament ale operatorilor (v. §10, §12).
+
+Analiza situației existente confirmă compatibilitatea amplasamentului cu funcțiunea propusă: terenul are suprafață suficientă pentru construcție și pentru manevrele autovehiculelor grele, relieful permite o sistematizare verticală economică, vecinătățile sunt compatibile (zonă industrială/logistică), accesul la drumul public este asigurat, iar utilitățile sunt disponibile în zonă. Nu se identifică constrângeri majore (zone inundabile, alunecări, situri protejate) care să împiedice realizarea investiției; eventualele condiții speciale (servituți, zone de protecție ale rețelelor) se gestionează prin poziționarea construcției și a rețelelor de incintă în afara culoarelor protejate, aspect confirmat prin planul de situație și prin avizele deținătorilor de rețele.
 
 ### 5.5. Condiții geotehnice — sinteză
 
@@ -465,6 +473,8 @@ Concepția de securitate la incendiu la nivel de ansamblu urmărește limitarea 
 
 Se respectă **Legea 319/2006** (securitatea și sănătatea în muncă) și **HG 300/2006** (șantiere temporare/mobile). Măsuri: căi de circulație marcate și separate marfă/personal, protecție la lucrul la înălțime, protecție utilaje, iluminat de siguranță, semnalizare, dotare PSI, instructaje, plan propriu SSM al executantului, coordonator SSM în faza de execuție. Grupuri sanitare, vestiare-filtru și spații sociale conform normelor de igienă a muncii.
 
+Măsurile de SSM se împart în măsuri aplicabile pe durata execuției (responsabilitatea executantului și a coordonatorului SSM) și măsuri integrate în soluția de proiectare, care asigură securitatea în exploatare. Din a doua categorie fac parte: separarea traseelor pietonale de circulația motostivuitoarelor și a autovehiculelor grele, marcarea culoarelor și a zonelor de manevră, asigurarea unui nivel de iluminare corespunzător activității (inclusiv iluminat de siguranță pentru evacuare), semnalizarea de securitate (indicatoare, marcaje la sol), prevederea de balustrade și protecții la mezanin și la golurile de comunicare, precum și dotarea cu mijloace de primă intervenție. Spațiile sociale (vestiare-filtru, grupuri sanitare, spații de servire a mesei) se dimensionează în raport cu numărul de angajați și cu gradul de murdărire specific activității, conform normelor de igienă a muncii, aspecte detaliate în memoriul de arhitectură.
+
 ### 13.3. Protecția mediului
 
 Se respectă **OUG 195/2005** și **Legea 292/2018**:
@@ -474,9 +484,13 @@ Se respectă **OUG 195/2005** și **Legea 292/2018**:
 - **Zgomot:** încadrare în limitele admise la limita de proprietate; perdea vegetală de protecție.
 - **Sol/subsol:** platforme impermeabilizate, prevenirea infiltrațiilor de la zonele de manevră.
 
+Impactul asupra mediului al unei hale de depozitare/producție ușoară este, prin natura funcțiunii, moderat și controlabil. Principalele aspecte de mediu gestionate prin proiect sunt: apele pluviale de pe platformele carosabile (potențial poluate cu hidrocarburi de la trafic), care sunt trecute obligatoriu printr-un separator de hidrocarburi înainte de retenție și evacuare, cu încadrare în indicatorii NTPA-001; apele uzate menajere, tratate/racordate conform NTPA-002; deșeurile de exploatare (ambalaje, deșeuri asimilabile menajere), colectate selectiv și predate operatorilor autorizați. Absența proceselor cu emisii semnificative în atmosferă și utilizarea unor surse termice cu randament ridicat mențin emisiile la un nivel redus. Condițiile concrete și programul de monitorizare se stabilesc prin actul de reglementare emis de APM, la care investiția se conformează integral.
+
 ### 13.4. Eficiența energetică (cerința F)
 
 Anvelopă termoizolată (panouri sandwich PUR/PIR/vată, U conform C107 / metodologia Mc 001), reducerea punților termice, iluminat LED cu senzori, recuperare de căldură la ventilare (după caz), tâmplărie performantă la corpul administrativ, sisteme termice eficiente (radianți/aeroterme cu randament ridicat). Se întocmește calcul termotehnic și, la finalizare, certificat de performanță energetică. Opțional: pregătire pentru panouri fotovoltaice pe acoperiș (structură dimensionată pentru sarcina suplimentară).
+
+Eficiența energetică se abordează la nivelul întregii clădiri, corelând performanța anvelopei cu performanța instalațiilor. Halele industriale au un raport ridicat între suprafața anvelopei și volumul încălzit, ceea ce face ca izolarea termică și etanșeitatea să fie determinante pentru consumul de energie. Panourile sandwich cu miez izolant asigură simultan închiderea, izolarea termică și un grad ridicat de etanșeitate la aer, cu punți termice reduse la îmbinări. Pentru corpul administrativ, care are cerințe de confort mai ridicate, se prevăd tâmplărie performantă și, după caz, recuperare de căldură la ventilare. Iluminatul LED cu senzori de prezență și de lumină naturală, coroborat cu luminatoarele de pe acoperiș, reduce consumul de energie electrică pentru iluminat. Dimensionarea structurii pentru o eventuală instalație fotovoltaică pe acoperiș pregătește clădirea pentru producerea de energie regenerabilă, în linie cu obiectivele de reducere a consumului de energie primară. Detaliile de calcul termotehnic și bilanțul energetic se prezintă în memoriile de arhitectură și instalații.
 
 ---
 
@@ -494,6 +508,8 @@ Devizul general se întocmește conform **HG 907/2016** privind etapele de elabo
 | **6** | Cheltuieli pentru probe tehnologice și teste | probe, punere în funcțiune (PIF) |
 
 Ponderea dominantă revine **Capitolului 4** (investiția de bază). Valorile pe capitole se completează în devizul general propriu-zis (piesă economică distinctă), pe baza cantităților din antemăsurători (faza PT+DE). Cotele legale aplicabile: cota ISC (0,5% + 0,1%), cota Casa Socială a Constructorilor (după caz), taxa de autorizare (1% din valoarea autorizată).
+
+Structura de cost a unei hale industriale este dominată de investiția de bază (Capitolul 4), în cadrul căreia ponderea cea mai mare o dețin, de regulă, structura metalică (confecție și montaj), anvelopa (panouri sandwich pereți și acoperiș) și pardoseala industrială. Aceste trei componente concentrează majoritatea valorii de construcții-montaj și, prin urmare, sunt și cele mai sensibile la variațiile prețurilor de piață ale oțelului și materialelor izolante. Cheltuielile pentru asigurarea utilităților (Capitolul 2) pot avea o pondere variabilă în funcție de distanța până la rețelele publice și de necesitatea unui post de transformare propriu sau a unui foraj de apă. Cheltuielile de proiectare și asistență tehnică (Capitolul 3) includ studiile de teren (geotehnic, topografic), documentațiile pentru avize, proiectarea pe toate fazele, verificarea tehnică și asistența pe șantier. Devizul general se întocmește ca piesă economică distinctă, valorile finale rezultând din antemăsurătorile fazei PT+DE; prezentul memoriu prezintă doar structura pe capitole conform HG 907/2016, ca element de fundamentare a investiției.
 
 ---
 
@@ -527,6 +543,8 @@ Documentația D.T.A.C. propune o **hală industrială/logistică cu structură m
 - **fezabilitatea execuției** în 8–12 luni.
 
 Investiția este **necesară, oportună, fezabilă tehnic și racordabilă la utilități.**
+
+Soluția propusă echilibrează cerințele funcționale (spațiu logistic clasa A, flexibil și extensibil), cerințele de reglementare (încadrare urbanistică, securitate la incendiu, mediu, calitate) și cerințele economice (structură de cost dominată de o investiție de bază optimizată prin modularitate și prefabricare). Marja de dezvoltare rămasă sub plafoanele urbanistice, modularitatea structurală și dimensionarea acoperișului pentru o eventuală instalație fotovoltaică conferă investiției adaptabilitate pe termen lung.
 
 ### 16.2. Conformitatea cu cerințele fundamentale (Legea 10/1995, art. 5)
 

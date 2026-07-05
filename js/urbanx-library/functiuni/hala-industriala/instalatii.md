@@ -702,6 +702,19 @@ Se prevede **coloană uscată DN 65** (dacă configurația/înălțimea o impune
 | **Rezervă totală de incendiu** | | | **≈ 460 mc** |
 | Stație pompare | 55 l/s @ 80 mCA | — | motor 75 kW + Diesel + jockey |
 
+### 11.8 Rețeaua de conducte de stingere
+
+- **Inelul de sprinklere** de plafon: conductă principală din oțel (galvanizat/negru vopsit), dimensionată hidraulic la 43,3 l/s (DN 150 principal, ramificații DN 65-100, capilarele DN 25-32 la capete), pantă pentru golire, robinete de secționare cu supraveghere de poziție (tamper), aparat de control și semnalizare (ACS) cu clopot de alarmă hidraulic.
+- **Rețeaua de hidranți interiori**: DN 65-80 în inel, cu hidranți DN 25/52 în cutii echipate (furtun, ajutaj, robinet).
+- **Inelul exterior de hidranți**: conductă DN 150 îngropată sub adâncimea de îngheț, cu hidranți supraterani DN 100 și vane de secționare în cămine.
+- **Racord pompieri**: racord tip B pentru alimentarea din autospeciale, la rezervor și la coloana uscată (dacă e cazul).
+
+Verificare hidraulică sprinkler (nod cel mai defavorabil): presiunea la capul cel mai depărtat ≥ presiunea minimă de funcționare (0,5-1,0 bar la K115) + pierderile pe traseu; calculul complet nod-cu-nod se face la PTh cu program hidraulic (SR EN 12845 anexa de calcul).
+
+### 11.9 Rezervorul și camera de pompe
+
+Rezervorul de 460 mc (2 compartimente pentru mentenanță fără scoatere din funcțiune, sau 1 compartiment cu by-pass) se prevede cu: racord de umplere automată (electrovalvă + senzor de nivel), preaplin, golire, sorburi separate pentru fiecare pompă, indicator de nivel cu transmitere la dispecerat. Camera de pompe (SR EN 12845): acces direct din exterior, temperatură menținută > +4 °C (antigel), ventilare pentru motorul Diesel, drenaj, iluminat de securitate, panou de comandă cu semnalizarea stărilor (pompă pornită, defect, nivel scăzut) transmisă la punctul supravegheat permanent.
+
 ---
 
 ## 12. INSTALAȚII DE GAZE NATURALE (NTPEE-2018)
@@ -756,6 +769,22 @@ Dacă procesul de producție folosește scule pneumatice, prese, ambalare automa
 
 Debitul și puterea se stabilesc la PTh în funcție de lista reală de consumatori pneumatici. Camera compresoarelor se ventilează (evacuarea căldurii degajate).
 
+### 14.1 Dimensionare orientativă consum aer comprimat
+
+Considerând o dotare tipică pentru producție/ambalare ușoară:
+
+| Consumator | Buc. | Consum unitar (l/min FAD) | Factor simult. | Consum (l/min) |
+|---|---|---|---|---|
+| Șuruburi/pistoale pneumatice | 6 | 20 | 0,40 | 48 |
+| Presă/dispozitiv ambalare | 2 | 120 | 0,60 | 144 |
+| Suflaj curățare | 3 | 60 | 0,30 | 54 |
+| Diverse/pierderi rețea (10%) | — | — | — | 25 |
+| **Total debit necesar** | | | | **≈ 271 l/min ≈ 16,3 mc/h FAD** |
+
+La 7 bar de lucru, un **compresor cu șurub 2,2-3,0 mc/min FAD (≈ 15-18 kW)** cu variator acoperă cu marjă (funcționare la sarcină parțială — economie de energie). Rezervor tampon dimensionat: V_tampon ≈ (Q · t · p_atm) / (Δp) — pentru limitarea pornirilor/oră; se adoptă **rezervor 1.000 l**. Uscător frigorific (punct de rouă +3 °C) + filtru coalescent (0,01 mg/mc ulei rezidual pentru aer de proces).
+
+Recuperare căldură: până la **70-80% din energia electrică a compresorului** se poate recupera sub formă de căldură (aer cald recuperat pentru încălzirea unei zone sau apă caldă tehnologică).
+
 ---
 
 ## 15. EFICIENȚĂ ENERGETICĂ, RECUPERARE DE CĂLDURĂ ȘI nZEB (Legea 372/2005)
@@ -791,9 +820,46 @@ Se adoptă o instalație FV de **150 kWp** (extensibilă), în regim **prosumato
 
 ---
 
-## 16. CONCLUZII ȘI VERIFICARE TEHNICĂ
+## 16. PROBE, PUNERE ÎN FUNCȚIUNE ȘI EXPLOATARE
 
-### 16.1 Sinteza soluțiilor și a parametrilor de dimensionare
+### 16.1 Probe și verificări la recepție
+
+Fiecare instalație se supune probelor de recepție conform normativelor de specialitate, consemnate în procese-verbale:
+
+| Instalație | Probă | Criteriu de admisie |
+|---|---|---|
+| Sanitare apă | probă de presiune (etanșeitate) | 1,5 × presiunea de regim, min. 6 bar, fără scădere 30 min |
+| Canalizare | probă de etanșeitate + curgere | fără exfiltrații, pantă/curgere corectă |
+| Pluvială sifonic | probă de umplere/amorsare | funcționare sifonică la debit de calcul |
+| Termice | probă la rece + la cald + reglaj hidraulic | etanșeitate, echilibrare, atingere θi |
+| Ventilare | măsurare debite + echilibrare aeraulică | debite ± 10% din proiect, nivel zgomot |
+| Desfumare | probă de deschidere trape + timp | deschidere < 60 s la comandă IDSAI |
+| Electrice | continuitate PE, R_izolație, R_priză, declanșare diferențiale | I7 — R_priză < 1 Ω, R_izol > 0,5 MΩ |
+| Trăsnet | măsurare R_priză + continuitate coborâri | conform SR EN 62305 |
+| Stingere incendiu | probă de presiune + probă funcțională pompe | SR EN 12845, pornire automată < timp normat |
+| IDSAI | test detectoare + matrice de comenzi | P118-3, toate comenzile de interfațare |
+| Gaze | probă de rezistență + etanșeitate | NTPEE, presiune de probă, fără pierderi |
+
+### 16.2 Punerea în funcțiune (PIF)
+
+PIF-ul se realizează pe specialități, cu reglajul final al parametrilor (temperaturi, debite, presiuni, praguri de alarmă), instruirea beneficiarului și predarea **cărții tehnice a construcției** cu: planurile as-built, breviarele de calcul, fișele tehnice ale echipamentelor, instrucțiunile de exploatare și mentenanță, certificatele de conformitate. Instalațiile de securitate la incendiu se pun în funcțiune numai după **autorizarea ISU**.
+
+### 16.3 Exploatare și mentenanță
+
+- **Sanitare/termice**: verificarea periodică a robinetelor, dezaerarea, curățarea filtrelor, șocul termic anti-Legionella la boiler.
+- **Ventilare**: schimbarea filtrelor CTA, curățarea recuperatorului, verificarea clapetelor antifoc.
+- **Electrice**: termografierea tablourilor, verificarea strângerilor, testarea diferențialelor, măsurarea prizei de pământ (anual).
+- **Stingere incendiu**: verificarea săptămânală/lunară a pompelor (pornire de test), controlul nivelului rezervorului, verificarea semestrială a sprinklerelor și hidranților (SR EN 12845 — regim de mentenanță), reîncărcarea/verificarea presiunilor.
+- **IDSAI**: testarea periodică a detectoarelor și a matricei de comenzi, verificarea autonomiei bateriilor.
+- **Gaze**: verificarea detectoarelor CH₄, testarea electrovalvei, revizia tehnică periodică (RTP) autorizată ANRE.
+- **Separator hidrocarburi**: golirea și curățarea periodică (firmă autorizată), verificarea alarmei de nivel.
+- **FV**: curățarea modulelor, verificarea invertoarelor și a producției, termografie.
+
+---
+
+## 17. CONCLUZII ȘI VERIFICARE TEHNICĂ
+
+### 17.1 Sinteza soluțiilor și a parametrilor de dimensionare
 
 | Specialitate | Soluție adoptată | Parametru principal |
 |---|---|---|
@@ -813,7 +879,7 @@ Se adoptă o instalație FV de **150 kWp** (extensibilă), în regim **prosumato
 | Curenți slabi | efracție + CCTV IP + control acces + Cat.6A + FO | switch 48 PoE+ |
 | Eficiență energetică | FV 150 kWp + recuperare căldură + LED | E_an ≈ 150 MWh/an, nZEB |
 
-### 16.2 Verificarea tehnică a proiectului (Legea 10/1995)
+### 17.2 Verificarea tehnică a proiectului (Legea 10/1995)
 
 Documentația se supune verificării de către **verificatori de proiecte atestați MDLPA**, pe cerințe și specialități:
 
@@ -827,7 +893,7 @@ Documentația se supune verificării de către **verificatori de proiecte atesta
 | Instalații de stingere/semnalizare incendiu | **Ii** + scenariu **Cc/Ci** (securitate la incendiu) |
 | Structura (prinderi FV, catarge, suporți) | **A** (rezistență) |
 
-### 16.3 Avizare, autorizare și mențiuni finale
+### 17.3 Avizare, autorizare și mențiuni finale
 
 - **Avizarea și autorizarea de securitate la incendiu** (HG 571/2016, Ordinul MAI 129/2016) pe baza **scenariului de securitate la incendiu** (P118-1) — aprobarea soluțiilor PSI este condiționată de avizul ISU; toate instalațiile de stingere/semnalizare/desfumare se corelează cu scenariul.
 - **Aviz operator apă-canal** (branșament, debit acceptat de descărcare, bazin de retenție), **aviz operator gaz** și **aviz operator energie electrică** (racord, putere aprobată).

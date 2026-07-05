@@ -11,7 +11,7 @@
   'use strict';
   G.UXLibrary = G.UXLibrary || {};
   G.UXLibrary._ready = G.UXLibrary._ready || {};
-  var VER = '20260705f';
+  var VER = '20260705g';
   var BASE = 'js/urbanx-library/functiuni/';
   // set standard de fișiere per funcțiune (aceleași chei ca la centru-social)
   var STD = {
@@ -46,13 +46,16 @@
 
   function mdToHtml(md) { return (typeof G.UXLibMdToHtml === 'function') ? G.UXLibMdToHtml(md) : (md || ''); }
 
-  function loadFunctiune(fnKey, folder) {
-    var files = STD;
-    var content = {}, loaded = 0, total = Object.keys(files).length;
+  function loadFunctiune(fnKey, folder, keysAllowed) {
+    // incarca DOAR cheile din manifest (fisierele care exista) → fara potop de 404.
+    // fallback: daca nu avem manifest, incearca toate cheile STD (comportament vechi).
+    var keys = (keysAllowed && keysAllowed.length) ? keysAllowed.filter(function (k) { return STD[k]; }) : Object.keys(STD);
+    var content = {}, loaded = 0, total = keys.length;
     var resolveReady; var readyP = new Promise(function (r) { resolveReady = r; });
     G.UXLibrary._ready[fnKey] = readyP;
-    Object.keys(files).forEach(function (key) {
-      fetch(BASE + folder + '/' + files[key] + '?v=' + VER)
+    if (!total) { G.UXLibrary[fnKey] = content; resolveReady(content); return; }
+    keys.forEach(function (key) {
+      fetch(BASE + folder + '/' + STD[key] + '?v=' + VER)
         .then(function (r) { return r.ok ? r.text() : ''; })
         .then(function (md) { content[key] = { md: md, html: mdToHtml(md), pages_est: Math.round((md || '').length / 3000) }; })
         .catch(function () { content[key] = { md: '', html: '', pages_est: 0 }; })
@@ -67,8 +70,15 @@
     });
   }
 
-  Object.keys(REG).forEach(function (fnKey) { loadFunctiune(fnKey, REG[fnKey]); });
+  // Citim manifestul (ce fisiere EXISTA per functiune) → incarcam doar acelea.
+  // Fallback robust: daca manifestul lipseste, incarcam toate cheile STD (ca inainte).
+  fetch(BASE.replace('functiuni/', '') + 'manifest.json?v=' + VER)
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .catch(function () { return null; })
+    .then(function (man) {
+      Object.keys(REG).forEach(function (fnKey) { loadFunctiune(fnKey, REG[fnKey], man && man[REG[fnKey]]); });
+    });
 
   // API: înregistrează dinamic o funcțiune nouă (dacă adaugi foldere ulterior)
-  G.UXLibRegister = function (fnKey, folder) { REG[fnKey] = folder || fnKey; loadFunctiune(fnKey, folder || fnKey); };
+  G.UXLibRegister = function (fnKey, folder, keys) { REG[fnKey] = folder || fnKey; loadFunctiune(fnKey, folder || fnKey, keys); };
 })(window);
