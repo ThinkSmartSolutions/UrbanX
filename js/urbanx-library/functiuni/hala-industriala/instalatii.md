@@ -209,6 +209,8 @@ Izolarea termică (I9, C107): grosime izolație conform diametru — De 20-32: 2
 
 ## 4. CANALIZARE PLUVIALĂ ACOPERIȘ (CRITIC — suprafață mare)
 
+Canalizarea pluvială este, la o hală, un capitol cu risc tehnic ridicat: o suprafață de acoperiș de 2.400 mp generează, la ploaia de calcul, un debit de zeci de litri pe secundă care trebuie evacuat rapid și în siguranță, pentru a nu supraîncărca structura ușoară a acoperișului (o acumulare de apă de câțiva cm reprezintă zeci de tone). În plus, tendința actuală de reglementare impune **atenuarea** debitului deversat în rețeaua publică (bazine de retenție), pentru a nu suprasolicita canalizarea orașului. Proiectarea urmărește SR 1846-2 (ape meteorice) și SR EN 12056-3 (calcul sisteme pluviale, inclusiv sifonice).
+
 ### 4.1 Calculul debitului pluvial de pe acoperiș
 
 Suprafața de acoperiș de colectat: Sc = 2.400 mp = 0,24 ha.
@@ -315,6 +317,8 @@ Pantele minime (autocurățare, v ≥ 0,7 m/s): DN 160 — 0,5%, DN 200 — 0,4%
 ---
 
 ## 6. INSTALAȚII TERMICE / ÎNCĂLZIRE (I13/2015)
+
+Încălzirea unei hale de mare volum este dificilă din cauza înălțimii (stratificarea aerului cald spre acoperiș) și a pierderilor mari prin anveloparea extinsă și prin deschiderea repetată a porților. Necesarul de căldură se calculează conform SR 1907-1/2 (pierderi prin transmisie + prin ventilare/infiltrații), iar alegerea sistemului urmărește confortul la nivelul zonei de lucru (nu încălzirea inutilă a întregului volum de aer). Se aplică o **zonare termică** — regim de lucru (+16 °C) unde e personal și regim antigel (+5 °C) în depozitul automat/cu prezență redusă — pentru economie de energie. Mezaninul de birouri se tratează ca o clădire de birouri clasică (20-22 °C, climatizare vară).
 
 ### 6.1 Calculul necesarului termic al halei (zona de lucru +16 °C)
 
@@ -862,6 +866,8 @@ Recuperare căldură: până la **70-80% din energia electrică a compresorului*
 
 ## 15. EFICIENȚĂ ENERGETICĂ, RECUPERARE DE CĂLDURĂ ȘI nZEB (Legea 372/2005)
 
+Halele industriale/logistice sunt mari consumatoare de energie (încălzire pe volum mare, iluminat pe suprafață extinsă, utilaje), dar oferă și oportunități excelente de eficientizare: acoperișul vast e ideal pentru fotovoltaic, iar sarcinile termice recuperabile (aer evacuat, căldura compresorului) sunt semnificative. Legea 372/2005 (transpunerea EPBD) impune clădirilor noi standardul **nZEB** (consum de energie aproape zero, cu aport substanțial de surse regenerabile). Măsurile de mai jos concură la atingerea acestui standard și la reducerea costurilor de exploatare, cu perioade de amortizare atractive (în special FV și LED).
+
 ### 15.1 Fotovoltaic pe acoperiș
 
 Suprafața de acoperiș disponibilă: 2.400 mp, din care ≈ 70% utilă (1.680 mp) după deducerea trapelor, luminatoarelor și distanțelor. Densitate de putere modulară ≈ 0,18-0,20 kWp/mp → **potențial 300-336 kWp**.
@@ -893,9 +899,45 @@ Se adoptă o instalație FV de **150 kWp** (extensibilă), în regim **prosumato
 
 ---
 
-## 16. PROBE, PUNERE ÎN FUNCȚIUNE ȘI EXPLOATARE
+## 16. SPECIFICAȚII DE MATERIALE, MONTAJ ȘI COORDONARE INTERDISCIPLINARĂ
 
-### 16.1 Probe și verificări la recepție
+### 16.1 Materiale și tehnologii de montaj
+
+Materialele se aleg pentru durabilitate, compatibilitate cu mediul industrial și conformitate cu normativele și cu marcajul CE. Sinteza pe specialități:
+
+| Specialitate | Material / echipament | Observații de montaj |
+|---|---|---|
+| Apă rece/caldă | PP-R (PN20 la ACM), multistrat PE-Xc/Al | îmbinări sudate termic/presate, izolate |
+| Canalizare interioară | PVC-KA fonoabsorbant, PP | mufe cu garnitură, piese de curățire la bază coloane |
+| Canalizare exterioară | PVC-KG SN8 / PP structurat | pat de nisip, cămine prefabricate |
+| Pluvial sifonic | PE-HD sudat cap la cap | suporți antivibrație, dilatare liberă |
+| Termice (agent) | oțel/cupru/PP-R, radiante inox | compensatoare de dilatare, suporți glisanți |
+| Ventilare | tablă zincată (canale), spiro | garnituri, flanșe, suspendare antifonică |
+| Gaze | oțel (interior), PE-HD (îngropat) | sudură autorizată ANRE, probe presiune |
+| Electrice | cabluri CYABY/N2XH, jgheab metalic | separare tari/slabi, cabluri E90 pt PSI |
+| Stingere incendiu | oțel galvanizat/negru, capete sprinkler certificate | îmbinări canelate/filetate, suporți seismici |
+
+Toate echipamentele purtătoare de presiune/temperatură vor avea agremente tehnice, iar cele PSI — certificare/agrement conform legislației (produse pentru construcții cu rol la incendiu).
+
+### 16.2 Coordonarea cu celelalte specialități
+
+Instalațiile se coordonează spațial și funcțional cu arhitectura, structura și tehnologia:
+- **cu structura**: goluri de trecere prin grinzi/planșee (dimensiune, poziție — fără a afecta rezistența), încărcări suplimentare din echipamente (FV pe acoperiș, tuburi radiante, unități VRF, rezervor), prinderi și suporți seismici pentru conducte grele/PSI;
+- **cu arhitectura**: ghene verticale și plafoane tehnice pentru trasee, camere tehnice (pompe incendiu, SRM, tablou general, CTA), acces pentru mentenanță, cote de trecere sub grinzi (înălțime liberă utilă);
+- **cu tehnologia/procesul**: poziția utilajelor și a racordurilor (apă, aer comprimat, electric, evacuări), sarcini termice și noxe de proces, cerințe speciale (ATEX, frig — v. § 2.1);
+- **între instalații**: separarea traseelor de curenți tari/slabi, distanțele minime între conducte de fluide diferite, corelarea IDSAI cu desfumarea/ventilarea/gazele (matricea de comenzi).
+
+Coordonarea se materializează la PTh/DDE în **planuri de trasee suprapuse** (BIM/2D coordonat), evitând conflictele de execuție.
+
+### 16.3 Securitate și sănătate în muncă la execuție (HG 1146/2006, HG 300/2006)
+
+Execuția instalațiilor respectă cerințele SSM: lucrul la înălțime (montaj pe acoperiș — FV, receptoare, tuburi radiante), lucrări electrice sub tensiune interzise, probe de presiune cu zone de securitate, autorizarea sudorilor (gaze, oțel), fișe tehnologice și plan de securitate și sănătate (coordonator SSM în șantier). Instalațiile finale asigură condiții de muncă sigure în exploatare (iluminat, ventilare, temperatură, protecție electrică).
+
+---
+
+## 17. PROBE, PUNERE ÎN FUNCȚIUNE ȘI EXPLOATARE
+
+### 17.1 Probe și verificări la recepție
 
 Fiecare instalație se supune probelor de recepție conform normativelor de specialitate, consemnate în procese-verbale:
 
@@ -913,11 +955,11 @@ Fiecare instalație se supune probelor de recepție conform normativelor de spec
 | IDSAI | test detectoare + matrice de comenzi | P118-3, toate comenzile de interfațare |
 | Gaze | probă de rezistență + etanșeitate | NTPEE, presiune de probă, fără pierderi |
 
-### 16.2 Punerea în funcțiune (PIF)
+### 17.2 Punerea în funcțiune (PIF)
 
 PIF-ul se realizează pe specialități, cu reglajul final al parametrilor (temperaturi, debite, presiuni, praguri de alarmă), instruirea beneficiarului și predarea **cărții tehnice a construcției** cu: planurile as-built, breviarele de calcul, fișele tehnice ale echipamentelor, instrucțiunile de exploatare și mentenanță, certificatele de conformitate. Instalațiile de securitate la incendiu se pun în funcțiune numai după **autorizarea ISU**.
 
-### 16.3 Exploatare și mentenanță
+### 17.3 Exploatare și mentenanță
 
 - **Sanitare/termice**: verificarea periodică a robinetelor, dezaerarea, curățarea filtrelor, șocul termic anti-Legionella la boiler.
 - **Ventilare**: schimbarea filtrelor CTA, curățarea recuperatorului, verificarea clapetelor antifoc.
@@ -930,9 +972,9 @@ PIF-ul se realizează pe specialități, cu reglajul final al parametrilor (temp
 
 ---
 
-## 17. CONCLUZII ȘI VERIFICARE TEHNICĂ
+## 18. CONCLUZII ȘI VERIFICARE TEHNICĂ
 
-### 17.1 Sinteza soluțiilor și a parametrilor de dimensionare
+### 18.1 Sinteza soluțiilor și a parametrilor de dimensionare
 
 | Specialitate | Soluție adoptată | Parametru principal |
 |---|---|---|
@@ -952,7 +994,7 @@ PIF-ul se realizează pe specialități, cu reglajul final al parametrilor (temp
 | Curenți slabi | efracție + CCTV IP + control acces + Cat.6A + FO | switch 48 PoE+ |
 | Eficiență energetică | FV 150 kWp + recuperare căldură + LED | E_an ≈ 150 MWh/an, nZEB |
 
-### 17.2 Verificarea tehnică a proiectului (Legea 10/1995)
+### 18.2 Verificarea tehnică a proiectului (Legea 10/1995)
 
 Documentația se supune verificării de către **verificatori de proiecte atestați MDLPA**, pe cerințe și specialități:
 
@@ -966,7 +1008,7 @@ Documentația se supune verificării de către **verificatori de proiecte atesta
 | Instalații de stingere/semnalizare incendiu | **Ii** + scenariu **Cc/Ci** (securitate la incendiu) |
 | Structura (prinderi FV, catarge, suporți) | **A** (rezistență) |
 
-### 17.3 Avizare, autorizare și mențiuni finale
+### 18.3 Avizare, autorizare și mențiuni finale
 
 - **Avizarea și autorizarea de securitate la incendiu** (HG 571/2016, Ordinul MAI 129/2016) pe baza **scenariului de securitate la incendiu** (P118-1) — aprobarea soluțiilor PSI este condiționată de avizul ISU; toate instalațiile de stingere/semnalizare/desfumare se corelează cu scenariul.
 - **Aviz operator apă-canal** (branșament, debit acceptat de descărcare, bazin de retenție), **aviz operator gaz** și **aviz operator energie electrică** (racord, putere aprobată).
