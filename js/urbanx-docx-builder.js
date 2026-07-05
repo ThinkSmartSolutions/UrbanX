@@ -542,6 +542,11 @@
           emitent = 'Operatorul de distribuție gaze naturale (aviz + acord acces)'; temei = 'Legea 123/2012, NTPEE-2018, Ordine ANRE';
           body = 'Se solicită avizul de racordare la gaze naturale. Se prezintă necesarul de gaz (debit de calcul), poziția postului de reglare-măsurare (SRM), traseul de racord, măsurile de siguranță (detector gaz + electrovalvă).';
           docs = ['Cerere de racordare + fișa de solicitare debit', 'Memoriu tehnic instalații gaze (debit, SRM, trasee)', 'Plan de situație cu poziția branșamentului și SRM', 'Schema izometrică a instalației de utilizare'];
+        } else if (/transelectrica|transport.*energ|inalta tensiune|\blea\b|\bret\b|statie.*transformare/.test(k)) {
+          emitent = 'C.N. Transelectrica S.A. — Aviz de amplasament (rețeaua electrică de transport — RET)'; temei = 'Legea 123/2012 (energiei electrice), Ordine ANRE, Norme tehnice privind delimitarea zonelor de protecție și de siguranță';
+          body = '<p>Se solicită <b>avizul de amplasament Transelectrica</b> întrucât obiectivul se află în/în vecinătatea zonei de protecție și de siguranță a unei linii electrice aeriene de transport (LEA 220/400 kV) sau a unei stații de transformare din RET.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă poziția construcției față de axul LEA și față de conductoare, respectarea culoarului de trecere și a distanțelor de siguranță (pe orizontală și verticală) conform normelor tehnice, gabaritele construcției și utilajelor de execuție (macarale) sub linie, precum și măsurile de protecție împotriva tensiunilor induse și a apropierii de instalațiile RET.</p>';
+          docs = ['Plan de situație cu poziția față de axul LEA/stație și culoarul de trecere', 'Plan de încadrare în zonă cu traseul RET', 'Profil transversal cu distanțele de siguranță (orizontal/vertical)', 'Descrierea gabaritelor de execuție (macarale) sub/în apropierea LEA'];
         } else if (/electric|energie|electrica/.test(k)) {
           emitent = 'Operatorul de distribuție energie electrică (Aviz tehnic de racordare — ATR)'; temei = 'Legea 123/2012, Ordine ANRE (Regulament racordare)';
           body = 'Se solicită avizul tehnic de racordare (ATR). Puterea instalată/absorbită rezultă din bilanțul electric (memoriu IE). Se prezintă poziția branșamentului, tabloul general, puterea solicitată.';
@@ -575,6 +580,46 @@
           body = '<p>Se solicită <b>avizul de gospodărire a apelor</b> (Legea 107/1996). Se prezintă sursa de alimentare cu apă, modul de evacuare a apelor uzate (menajere/pluviale/tehnologice) și încadrarea în limitele de calitate NTPA-001/002.</p>' +
             '<p><b>Bilanțul apei:</b> necesarul de apă, debitele de ape uzate menajere și pluviale (cu calculul debitului pluvial de pe suprafețele impermeabile), soluția de preepurare (separator de hidrocarburi pe platforme — SR EN 858), atenuarea/retenția pluvială și punctul de descărcare (rețea/emisar). Se verifică poziția față de cursuri de apă, zone inundabile și zone de protecție sanitară.</p>';
           docs = ['Plan de situație cu rețelele de apă-canal și punctele de descărcare', 'Breviar de calcul debite (apă, menajer, pluvial)', 'Studiu de gospodărire a apelor / memoriu tehnic', 'Fișa de date pentru avizul de gospodărire a apelor', 'Descrierea soluției de preepurare și atenuare pluvială'];
+        } else if (/\bcfr\b|cale ferat|feroviar|infrastructur.*feroviar/.test(k)) {
+          emitent = 'CNCF „CFR" S.A. — Aviz privind zona de siguranță și de protecție a infrastructurii feroviare'; temei = 'OUG 12/1998 (transportul pe căile ferate române), Legea 55/2006, norme tehnice feroviare';
+          body = '<p>Se solicită <b>avizul CFR</b> întrucât obiectivul se află în zona de protecție (max. 100 m de la axul căii) sau de siguranță a infrastructurii feroviare publice.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă distanța construcției față de axul liniei ferate, respectarea zonelor de siguranță și de protecție, măsurile privind vibrațiile și zgomotul, scurgerea apelor, iluminatul (fără orbirea mecanicilor), precum și eventualele traversări/racorduri. Nu se afectează gabaritul și vizibilitatea semnalelor feroviare.</p>';
+          docs = ['Plan de situație cu distanța față de axul căii ferate', 'Plan de încadrare cu zona de protecție/siguranță feroviară', 'Extras CF + plan cadastral', 'Memoriu privind măsurile de protecție (vibrații, zgomot, ape, iluminat)'];
+        } else if (/consiliul jude|consiliu jude|\bcj\b|drum jude/.test(k)) {
+          emitent = 'Consiliul Județean — Aviz (administrator drum județean / competențe județene)'; temei = 'OG 43/1997 (drumuri județene), Legea 215/2001 / OUG 57/2019 (administrație publică)';
+          body = '<p>Se solicită <b>avizul Consiliului Județean</b> pentru accesul la drumul județean și/sau pentru aspectele de competență județeană (după caz, corelare cu PATJ).</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă amenajarea accesului la drumul județean (raze de racordare, vizibilitate, semnalizare), încadrarea în zona drumului și măsurile de scurgere a apelor, corelat cu breviarul de parcaje asigurate în incintă.</p>';
+          docs = ['Plan de situație cu accesul la drumul județean', 'Plan de încadrare în zonă', 'Proiect de semnalizare rutieră', 'Breviar parcaje'];
+        } else if (/primar|\bpug\b|\bpuz\b|\bpud\b|oportunitate/.test(k)) {
+          emitent = 'Primăria / Consiliul Local — Aviz de oportunitate / aviz al arhitectului-șef (după caz)'; temei = 'Legea 350/2001 (urbanism), Legea 50/1991, RLU/PUG local';
+          body = '<p>Se solicită <b>avizul autorității locale</b> privind conformarea la documentațiile de urbanism aprobate (PUG/PUZ/PUD) și, unde e cazul, avizul de oportunitate pentru elaborarea unui PUZ.</p>' +
+            '<p><b>Soluția tehnică:</b> se demonstrează încadrarea funcțiunii în zona reglementată, respectarea indicatorilor urbanistici (POT ' + (ac.POT || 0) + '%, CUT ' + (ac.CUT || 0) + '), a regimului de înălțime și a retragerilor din RLU, integrarea în context și rezolvarea acceselor, parcajelor și spațiilor verzi.</p>';
+          docs = ['Plan de situație și de încadrare conform RLU/PUG', 'Certificat de urbanism', 'Ilustrare urbanistică / volumetrie (după caz)', 'Bilanț teritorial (POT/CUT/verde/parcaje)'];
+        } else if (/patrimoniu|cultur|monument|arheolog|\bdjc\b/.test(k)) {
+          emitent = 'Direcția Județeană pentru Cultură — Aviz (zone protejate / monumente / descărcare de sarcină arheologică)'; temei = 'Legea 422/2001 (monumente istorice), OG 43/2000 (patrimoniu arheologic), Legea 5/2000';
+          body = '<p>Se solicită <b>avizul Direcției pentru Cultură</b> întrucât terenul se află într-o zonă construită protejată / zonă de protecție a unui monument istoric sau cu potențial arheologic.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă impactul asupra zonei protejate (regim de înălțime, aliniere, materiale, cromatică, integrare), iar în cazul potențialului arheologic se prevede <b>descărcarea de sarcină arheologică</b> (diagnostic/săpătură preventivă) înainte de execuție.</p>';
+          docs = ['Plan de situație și de încadrare în zona protejată', 'Studiu istoric / de integrare (după caz)', 'Fotografii, ilustrare volumetrie și fațade', 'Certificat de descărcare de sarcină arheologică (dacă e cazul)'];
+        } else if (/romatsa|aeronautic|obstacol|aviatie|aeroport/.test(k)) {
+          emitent = 'ROMATSA / Autoritatea Aeronautică Civilă Română — Aviz privind servituțile aeronautice'; temei = 'Legea 21/2020 (Codul aerian), RACR-CADT, reglementări AACR privind obstacolarea';
+          body = '<p>Se solicită <b>avizul aeronautic</b> pentru verificarea încadrării în suprafețele de limitare a obstacolelor (servituți aeronautice), în funcție de cota maximă a construcției (' + (D.H ? '+' + D.H + ' m' : 'H construcție') + ') și de amplasarea față de aerodromuri.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă cota maximă absolută a construcției și a instalațiilor de pe acoperiș (coșuri, antene), balizajul de obstacol dacă este necesar și încadrarea în suprafețele de siguranță aeronautică.</p>';
+          docs = ['Plan de situație cu cota maximă absolută a construcției', 'Plan de încadrare cu poziția față de aerodromuri', 'Fișa cu înălțimile și coordonatele obstacolelor (antene/coșuri)'];
+        } else if (/\bsri\b|serviciul roman|obiectiv special|securitate national/.test(k)) {
+          emitent = 'Serviciul Român de Informații — Aviz (obiective de interes pentru securitatea națională, după caz)'; temei = 'Legea 51/1991, HG privind obiectivele speciale';
+          body = '<p>Se solicită <b>avizul SRI</b> în măsura în care obiectivul se află în zona de competență / vecinătatea unui obiectiv de interes pentru securitatea națională, conform mențiunii din Certificatul de Urbanism.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă amplasarea, gabaritele și eventualele elemente relevante (înălțime, vizibilitate, rețele), cu respectarea condițiilor impuse de emitent.</p>';
+          docs = ['Plan de situație și de încadrare în zonă', 'Memoriu tehnic sintetic', 'Certificat de urbanism'];
+        } else if (/mapn|militar|aparare|ministerul apararii/.test(k)) {
+          emitent = 'Ministerul Apărării Naționale — Aviz (zone de interes militar / servituți militare)'; temei = 'Legea 477/2003 (pregătirea economiei și teritoriului pentru apărare), reglementări MApN';
+          body = '<p>Se solicită <b>avizul MApN</b> întrucât obiectivul se află în vecinătatea unei zone de interes militar sau este supus unor servituți militare.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă amplasarea față de obiectivul militar, respectarea zonelor de protecție/servituților, regimul de înălțime și eventualele restricții privind rețelele și înălțimea, conform condițiilor emitentului.</p>';
+          docs = ['Plan de situație cu poziția față de zona de interes militar', 'Plan de încadrare în zonă', 'Memoriu privind respectarea servituților'];
+        } else if (/telekom|orange|vodafone|digi|rcs|telecom|fibra|comunicatii electron/.test(k)) {
+          emitent = 'Operatorul de comunicații electronice (telecom) — Aviz de amplasament / protejare rețele'; temei = 'OUG 111/2011 (comunicații electronice), Legea 159/2016 (infrastructura fizică)';
+          body = '<p>Se solicită <b>avizul operatorului de comunicații electronice</b> pentru protejarea/relocarea rețelelor de telecomunicații (cabluri, fibră optică, canalizație) din zona amplasamentului, respectiv pentru racordul de date al obiectivului.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă poziția rețelelor telecom existente față de construcție și săpături, măsurile de protejare/relocare, precum și punctul de racord pentru serviciile de comunicații ale obiectivului.</p>';
+          docs = ['Plan de situație cu rețelele telecom existente și punctul de racord', 'Plan de încadrare în zonă', 'Descrierea măsurilor de protejare/relocare rețele'];
         } else {
           emitent = 'Emitentul menționat în Certificatul de Urbanism pentru „' + a + '"'; temei = 'conform mențiunii din Certificatul de Urbanism și legislației specifice emitentului';
           body = '<p><b>Obiectul solicitării.</b> Se întocmește prezentul memoriu tehnic pentru obținerea avizului/acordului „' + esc(a) + '", solicitat prin Certificatul de Urbanism pentru obiectivul „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție') + '", ' + esc(D.uat || '') + (D.nrcad ? ', nr. cad. ' + esc(D.nrcad) : '') + '.</p>' +

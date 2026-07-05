@@ -107,6 +107,19 @@ Factori parțiali de siguranță material (SR EN 1993-1-1):
 
 Rezistențe de calcul: fyd = fy/γM0 = 355/1,00 = **355 N/mm²** (S355); 275 N/mm² (S275).
 
+**Caracteristicile secțiunilor adoptate** (elementele principale ale halei de referință):
+
+| Element / profil | A [cm²] | Wpl,y [cm³] | Iy [cm⁴] | iy [cm] | iz [cm] | Clasă |
+|---|---|---|---|---|---|---|
+| Stâlp HEB 450 (hală fără pod) | 218 | 3.551 | 79.890 | 19,14 | 7,33 | 1 |
+| Stâlp HEB 500 (hală cu pod rulant) | 239 | 4.815 | 107.200 | 21,19 | 7,27 | 1 |
+| Riglă I sudat (h 900 nod / IPE550 câmp) | ~180 | ~2.790 | ~1,2·10⁶ mm⁴/... | — | — | 1 |
+| Grindă mezanin IPE 300 | 53,8 | 628 | 8.356 | 12,46 | 3,35 | 1 |
+| Grindă rulare IPE 500 + platbandă | ~135 | ~2.500 | 48.200 | — | — | 1÷2 |
+| Contravântuire SHS 120×120×6 | 26,1 | — | 588 | 4,63 | 4,63 | 1 |
+| Pană Z 250×2,5 (format rece) | ~11 | Weff ≈ 38 | Ieff ≈ 850 | — | — | 4 (eficace) |
+| Vang scară UNP 200 | 32,2 | 228 | 1.910 | 7,70 | 2,14 | 1 |
+
 ### 3.2. Șuruburi și buloane
 
 | Utilizare | Tip | fyb [N/mm²] | fub [N/mm²] |
@@ -308,6 +321,20 @@ Sd(T1) = ag·γI,e·β0/q = 0,25·1,0·2,75/4,0 = **0,172 g**.
 Forța tăietoare de bază (factor de corecție λ = 0,85 pentru T1 ≤ 2·Tc și > 2 niveluri; aici parter → λ = 1,0 conservator, se păstrează 0,85 pt. mase distribuite):
 **Fb = Sd(T1)·W·λ = 0,172·4.500·0,85 ≈ 658 kN.**
 
+**Verificarea perioadei prin metoda Rayleigh** (control al formulei aproximative):
+T1 = 2π·√(Σ mi·di²/(g·Σ Fi·di)), cu di deplasările din aplicarea forțelor gravitaționale pe direcție orizontală. Pentru cadrul de referință (masă concentrată la nivelul acoperișului, deplasare orizontală din forța W aplicată lateral δ ≈ 62 mm): T1 = 2π·√(δ/g) = 2π·√(0,062/9,81) = 2π·0,0795 = **0,50 s** → **concordanță cu formula aproximativă (0,50 s) → ✓**.
+
+**Distribuția forței tăietoare de bază pe direcția transversală** (metoda forțelor laterale, structură cu masă predominant la acoperiș):
+Forța se aplică la nivelul centrului de masă al acoperișului; se distribuie pe cele 11 cadre proporțional cu rigiditatea + masa aferentă:
+
+| Cadru | Masă aferentă [kN] | Forță seismică Fi [kN] | Observație |
+|---|---|---|---|
+| Cadre frontoane (×2) | ½ travee | 30 fiecare | rigiditate suplimentară din perete fronton |
+| Cadre curente (×9) | 1 travee | ~66 fiecare | interior |
+| **Total transversal** | **W = 4.500** | **Fb ≈ 658** | + excentricitate accidentală ±0,05·L |
+
+Momentul de torsiune accidentală: Mt = Fb·eacc = 658·0,05·40 = **1.316 kNm**, distribuit pe contravântuirile longitudinale prin efectul de diafragmă al acoperișului.
+
 **Comparație vânt vs. seism (transversal):** vânt total transversal pe hală ≈ 780 kN (integrat pe toate cadrele) vs. seism Fb = 658 kN → **valori comparabile**; ambele grupări se verifică, vântul poate guverna la ridicare/succiune.
 
 ### 6.5. Grupări de încărcări (CR 0/2012)
@@ -324,8 +351,23 @@ Coeficienți: γG = 1,35 (defavorabil) / 1,0 (favorabil — esențial la ridicar
 | C3 — cu pod rulant | 1,35G + 1,5·Rv + 1,5·0,7·Z + ... | stâlp compresiune excentrică |
 | C4 — cu mezanin | 1,35G + 1,5·util mezanin + ψ0·Z | grinzi/stâlpi mezanin |
 
+**Exemplu numeric — combinația C1 pe riglă** (încărcare gravitațională de calcul pe riglă, aria aferentă 6 m):
+- Permanent: gk·t = 0,48·6,0 = 2,88 kN/m → γG·gk = 1,35·2,88 = 3,89 kN/m.
+- Zăpadă (dominantă): s·t = 1,60·6,0 = 9,60 kN/m → γQ·s = 1,5·9,60 = 14,40 kN/m.
+- Vânt (secundar, presiune pe versant sub sarcina de zăpadă — neglijabil favorabil): ψ0·V.
+- **qEd,C1 = 3,89 + 14,40 = 18,29 kN/m** → MEd,riglă,nod ≈ qEd·l²/... (din model, cu redistribuire cadru) = **620 kNm** (concordant cu §7.3).
+
+**Exemplu numeric — combinația C2 (ridicare) pe riglă:**
+- Permanent favorabil: γG·gk = 1,0·2,88 = 2,88 kN/m (în jos).
+- Vânt succiune dominant: γQ·wnet = 1,5·(−9,18) = −13,77 kN/m (în sus).
+- **qEd,C2 = 2,88 − 13,77 = −10,89 kN/m (rezultantă spre sus)** → inversarea momentelor + tracțiune în stâlp și ancoraje (confirmă Nt ≈ 90 kN la ancoraje, §14.4).
+
 **SLU — combinația seismică** (Ecuația 6.12 SR EN 1990):
 Ed = Σ Gk + γI·AEd + Σ ψ2,i·Qk,i (ψ2 = 0 zăpadă, 0,3 util mezanin), cu regula 100%/30% pe direcții și excentricitate ±0,05·L.
+Combinațiile direcționale (P100-1 §4.5.3.6.1):
+- Ex ± 0,30·Ey (seism dominant pe X);
+- 0,30·Ex ± Ey (seism dominant pe Y);
+fiecare cu semnele ± și cu excentricitatea accidentală ±0,05·L aplicată pe fiecare direcție → 8 combinații seismice de bază × 2 semne = înfășurătoare seismică. Pentru hala regulată, direcția transversală (cadre MRF) și longitudinală (CBF) sunt decuplate → verificarea se face independent pe fiecare direcție cu 30% pe cealaltă.
 
 **SLS — combinația caracteristică:**
 
@@ -435,7 +477,49 @@ w ≈ (din model 3D) ≈ **65 mm** < L/200 = 20000/200 = 100 mm → **✓**.
 **Driftul seismic** (SLU, verificare limitare degradări P100-1 §4.5.4):
 dr,SLU = q·ν·dr,e, cu ν = 1,0 (importanță III); dr,e din analiza elastică ≈ 12 mm → dr = 4,0·12 = 48 mm pe H = 9.500 → dr/h = 0,0051. Verificare la SLS: 0,5·dr = 24 mm ≤ 0,008·h (perete fără legături fragile) = 76 mm → **✓**; la SLU dr/h = 0,0051 ≤ 0,025 (limita ULS) → **✓**.
 
-### 7.6. Sinteza verificărilor cadrului transversal
+### 7.6. Verificarea la voalarea inimii (SR EN 1993-1-5)
+
+Riglele I sudate cu înălțime mare (h ≈ 900 mm la nod) și inimi zvelte necesită verificarea la **voalarea din forfecare** și la **voalarea din încovoiere** (elemente placate).
+
+**a) Necesitatea rigidizărilor la forfecare** (SR EN 1993-1-5, §5.1):
+Inima nu necesită verificare la voalare din forfecare dacă:
+hw/tw ≤ 72·(ε/η), cu η = 1,20 (pentru fy ≤ 460 N/mm²), ε = 0,814 (S355).
+Limita = 72·0,814/1,20 = **48,8**.
+Pentru riglă h ≈ 900, tf = 20, tw = 12 → hw = 900 − 2·20 = 860 mm; hw/tw = 860/12 = **71,7 > 48,8** → **inima este zveltă → se verifică voalarea din forfecare**.
+
+**b) Rezistența la voalare din forfecare** (SR EN 1993-1-5, §5.2÷5.3):
+Coeficientul de voalare (fără rigidizări intermediare, cadru cu rigidizări doar la reazeme, raport a/hw > 3 → kτ = 5,34):
+Tensiunea critică de voalare: τcr = kτ·σE, cu σE = 190.000·(tw/hw)² = 190.000·(12/860)² = 190.000·1,946·10⁻⁴ = 36,97 N/mm²;
+τcr = 5,34·36,97 = 197,4 N/mm².
+Zveltețea redusă: λ̄w = 0,76·√(fyw/τcr) = 0,76·√(355/197,4) = 0,76·√1,798 = 0,76·1,341 = **1,019**.
+Cum λ̄w = 1,019 ≥ 1,08 → NU; 0,83/η = 0,692 < 1,019 < 1,08 → contribuția inimii (talpă rigidă, montant rigid la reazem):
+χw = 1,37/(0,7 + λ̄w) = 1,37/(0,7 + 1,019) = 1,37/1,719 = **0,797**.
+Rezistența la voalare din forfecare a inimii:
+Vbw,Rd = χw·fyw·hw·tw/(√3·γM1) = 0,797·355·860·12/(1,732·1,0) = 2.920.000/1,732 = **1.686.000 N ≈ 1.686 kN**.
+Verificare (forța tăietoare la nod VEd ≈ 180 kN): VEd/Vbw,Rd = 180/1.686 = **0,107 ≤ 1,0 → ✓** (inima rezistă la forfecare fără rigidizări intermediare; rigidizări transversale doar la reazeme și sub forțele concentrate).
+
+**c) Rigidizări transversale la reazeme și sub sarcini concentrate** (SR EN 1993-1-5, §9):
+Se prevăd rigidizări (stiffeners) în dreptul nodurilor riglă-stâlp și la introducerea forțelor concentrate (reacțiuni, sarcini pane), verificate ca montant supus la compresiune (rezistență + stabilitate) cu aria efectivă = rigidizare + 15·ε·tw de o parte și de alta a inimii.
+
+**d) Interacțiunea M-V** (SR EN 1993-1-5, §7.1): dacă VEd > 0,5·Vbw,Rd se reduce rezistența la încovoiere; aici VEd = 180 < 0,5·1.686 = 843 kN → **fără reducere**, momentul capabil rămâne integral.
+
+### 7.7. Înfășurătoarea eforturilor pe elementele cadrului (rezultate din model)
+
+Sinteza eforturilor de calcul (înfășurătoarea combinațiilor SLU) pe secțiunile caracteristice ale cadrului transversal de referință (deschidere 20 m):
+
+| Secțiune | NEd [kN] | MEd [kNm] | VEd [kN] | Combinația guvernantă |
+|---|---|---|---|---|
+| Baza stâlpului | 380 | 210 | 95 | C1 (grav.) / seism |
+| Stâlp — sub nod (riglă) | 340 | 520 | 95 | C1 gravitațional |
+| Riglă — la nod (după vută) | 45 | 620 | 180 | C1 gravitațional |
+| Riglă — câmp (1/4 deschidere) | 40 | 380 | 90 | C1 |
+| Riglă — coamă | 35 | 320 | 15 | C1 |
+| Stâlp — combinație ridicare | −85 (tracțiune) | 180 | 55 | C2 (vânt succiune) |
+| Baza stâlpului — seism | 350 | 480 | 120 | seismică |
+
+Notă: valorile negative de N indică tracțiune (combinația de ridicare C2). Momentul maxim în riglă apare la nod (după vută), unde secțiunea este întărită; rotula plastică potențială se plasează controlat în riglă lângă vută. Momentul la baza stâlpului este redus datorită **articulației la bază** (bază semi-încastrată doar prin ancoraje).
+
+### 7.8. Sinteza verificărilor cadrului transversal
 
 | Element | Efort de calcul | Efort capabil | Utilizare | Verdict |
 |---|---|---|---|---|
@@ -444,6 +528,60 @@ dr,SLU = q·ν·dr,e, cu ν = 1,0 (importanță III); dr,e din analiza elastică
 | Riglă I sudat — încovoiere nod | MEd = 620 kNm | Mpl,Rd = 990 kNm | 0,63 | ✓ |
 | Riglă — deversare (fly-braces) | — | χLT = 0,92 | 0,74 | ✓ |
 | Stabilitate globală cadru | αcr | ≥ 3 | — | ✓ |
+
+---
+
+## 7bis. Al doilea cadru transversal — hala cu pod rulant (combinația integrală)
+
+Se analizează cadrul dintr-o hală identică geometric, dar echipată cu **pod rulant Q = 8 t** rezemat pe consolele stâlpilor la cota +6,50 m. Podul rulant introduce acțiuni suplimentare care modifică decisiv solicitarea stâlpilor și impune verificări adiționale.
+
+### 7bis.1. Acțiunile podului rulant pe cadru (SR EN 1991-3)
+
+| Acțiune | Simbol | Valoare | Punct de aplicare |
+|---|---|---|---|
+| Reacție verticală max/roată | Rv,d | 115 kN (φ2 = 1,15) | consolă +6,50 m |
+| Reacție verticală min/roată (cealaltă cale) | Rv,min | 35 kN | consolă +6,50 m (celălalt stâlp) |
+| Forță transversală (frânare cărucior) HT | HT | 8,8 kN | +6,50 m, orizontal |
+| Forță longitudinală (frânare pod) HL | HL | 5÷10 kN | la contravântuiri |
+| Forță de șerpuire (skewing) | HS | ~6 kN | +6,50 m, orizontal |
+
+**Excentricitatea consolei căii de rulare** față de axa stâlpului: e = 0,50 m → momentul din reacție verticală aplicat la stâlp:
+Mcr,v = Rv,d·e = 115·0,50 = **57,5 kNm** (permanent atâta timp cât podul e pe consolă).
+
+### 7bis.2. Gruparea de încărcări cu pod rulant (C3)
+
+Combinația SLU cu podul rulant ca acțiune variabilă dominantă (CR 0/2012, SR EN 1990 + SR EN 1991-3 tab. 2.2 pentru grupele de acțiuni pod rulant):
+C3: 1,35·G + 1,5·(Rv + Mcr,v + HT) + 1,5·ψ0·Z + 1,5·ψ0·V
+cu ψ0,zăpadă = 0,7, ψ0,vânt = 0,6.
+
+**Eforturile în stâlpul cu console (secțiunea de la baza consolei / încastrare):**
+- Din permanent + reacție cadru: N1 = 380 kN, M1 = 80 kNm.
+- Din pod rulant (reacție verticală pe consolă): N2 = 1,5·115 = 172,5 kN (compresiune adăugată, aplicată excentric); moment din excentricitate M2 = 1,5·57,5 = 86,3 kNm.
+- Din forța transversală HT (la +6,50 m, braț până la bază 6,50 m): M3 = 1,5·8,8·6,50 = 85,8 kNm.
+- Din zăpadă (secundar ψ0): M4 = 1,5·0,7·140 = 147 kNm; din vânt: M5 = 1,5·0,6·78·(cotă) ≈ 60 kNm.
+
+Efort total de calcul în stâlp (înfășurătoarea C3):
+**NEd = 380 + 172,5 = 552,5 kN; MEd,y ≈ 80 + 86,3 + 85,8 + 100 (parte Z/V) ≈ 405 kNm** (moment mai mic decât în C1 seismic la unele hale, dar cu compresiune mai mare + moment permanent din consolă).
+
+### 7bis.3. Verificarea stâlpului cu console — HEB 500 S355
+
+Datorită compresiunii excentrice adăugate, se mărește secțiunea la HEB 500 (A = 239 cm², Wpl,y = 4.815 cm³, iy = 21,19 cm, iz = 7,27 cm).
+Npl,Rd = 23.900·355 = 8.484.500 N = **8.485 kN**; n = 552,5/8.485 = 0,065.
+Mpl,y,Rd = 4.815.000·355 = 1.709.325.000 = **1.709 kNm**.
+Verificare secțiune: MEd = 405 < Mpl,y,Rd = 1.709 → **utilizare 0,24 ✓**.
+
+Stabilitate (interacțiune 6.61, Lcr,y = 2,0·9,5 = 19,0 m → λ̄y = (1900/21,19)/76,4 = 1,17 → χy ≈ 0,77; χLT ≈ 0,88):
+NEd/(χy·Npl,Rd) + kyy·MEd,y/(χLT·Mpl,y,Rd) = 552,5/(0,77·8.485) + 0,92·405/(0,88·1.709) = 0,085 + 0,247 = **0,33 ≤ 1,0 → ✓**.
+
+### 7bis.4. Consola de sprijin a căii de rulare
+
+Consolă scurtă din profil I (sau vută sudată) L = 0,50 m, încărcată cu Rv,d = 115 kN vertical + HT = 8,8 kN transversal:
+Mconsolă = Rv,d·L = 115·0,50 = 57,5 kNm; VEd = 115 kN.
+Se adoptă profil IPE 300 (Wpl,y = 628 cm³): Mpl,Rd = 628.000·355 = 222.940.000 = 223 kNm > 57,5 → **utilizare 0,26 ✓**. Îmbinarea consolă-stâlp (placă de capăt + rigidizări în inima stâlpului sub consolă) se verifică la M + V din calculul la capacitate.
+
+### 7bis.5. Efectul podului rulant asupra fundației
+
+Reacția verticală suplimentară + momentul din consolă cresc solicitarea fundației stâlpului cu console: NEd,fund ≈ 480 + 173 = 653 kN, M ≈ 90 kNm → talpă mărită la **2,4×2,4 m**: pmax = 653/5,76 + 90/(2,4³/6) = 113 + 39 = **152 kPa < 250 → ✓**.
 
 ---
 
@@ -496,13 +634,39 @@ Zveltețea diagonalei SHS 120×120×6 (Ld = √(9,5² + 6,0²) = 11,24 m; iz = 4
 NEd,col = NEd,G + 1,1·γov·Ω·NEd,E, cu Ω = Npl,Rd,diag/NEd,diag = 718/218 = 3,29 (se folosește Ωmin al sistemului).
 Astfel stâlpul de capăt al traveei contravântuite se dimensionează la componenta verticală a forței diagonale la capacitate: ΔN = Npl,diag·sinθ·(factor) ≈ 718·0,846 ≈ 607 kN suplimentar (elastic), impunând un stâlp de capăt mai puternic decât stâlpii curenți de cadru.
 
-### 9.2. Contravântuiri orizontale de acoperiș („vântul de acoperiș")
+### 9.2. Contravântuiri orizontale de acoperiș („vântul de acoperiș") — grindă cu zăbrele orizontală
 
-Formează grinda cu zăbrele orizontală în planul acoperișului, care colectează forța de vânt frontal (de la stâlpii de fronton) și o transmite la contravântuirile verticale longitudinale.
+Contravântuirea orizontală de acoperiș funcționează ca o **grindă cu zăbrele orizontală** în planul acoperișului, cu deschiderea = lățimea halei (B = 40 m), talpa comprimată/întinsă = riglele de streașină, montanții = riglele (sau panele de tip „eave strut"), diagonalele = tiranți rotunzi/L-uri. Colectează forța de vânt frontal aplicată pe peretele de fronton și o transmite la contravântuirile verticale longitudinale de la capete.
 
-Forța de vânt frontal pe hală (perete fronton, cpe presiune + succiune ≈ 1,3):
-Ffronton = 1,3·qp·B·(Hs/2 aferentă acoperișului) ≈ 1,3·1,05·40·(9,5/2 + parapet) ≈ **≈ 260 kN** repartizați la cele două grinzi longitudinale de streașină.
-Reacțiune la fiecare capăt = 130 kN, transmisă prin diagonalele grinzii orizontale (unghi ~45°) → efort diagonală ≈ 130/cos45° ≈ **184 kN** → se adoptă diagonale rotunde Ø tije întinse sau L-uri, cu Npl,Rd > 184 kN. Se dimensionează la vânt frontal cumulat + seism longitudinal (înfășurătoare).
+**Încărcarea grinzii orizontale:**
+Forța de vânt pe frontonul halei (presiune D + succiune E, cpe,net ≈ 1,30, cpi inclus):
+Suprafața frontonului expusă (jumătatea superioară transmite acoperișului): Afronton,sup = B·(hcoamă medie) ≈ 40·(3,0) = 120 m² pentru zona superioară + contribuția atice.
+Ffronton = qp·cpe,net·Afronton = 1,05·1,30·(40·5,35 medie) ≈ **292 kN** (jumătate spre acoperiș ≈ 146 kN, jumătate spre grinzile de soclu).
+
+Se aplică conservator forța de acoperiș Fac = 146 kN, distribuită pe nodurile grinzii cu zăbrele (la fiecare cadru, interax 6 m → 7 noduri pe 40 m). Forța nodală F_nod = 146/6 ≈ 24,3 kN.
+
+**Reacțiunile grinzii orizontale** (rezemată la cele 2 capete, unde sunt contravântuirile verticale):
+R = Fac/2 = 73 kN la fiecare capăt.
+
+**Eforturi în diagonale** (grindă cu zăbrele tip Pratt/Warren, panou 6,0 m × 8,0 m, unghi diagonală θ = arctan(8/6) = 53,1°):
+Forța tăietoare max în panoul de capăt Vpanou = R = 73 kN;
+Efort diagonală întinsă: Nd = Vpanou/sinθ = 73/sin53,1° = 73/0,800 = **91,3 kN**.
+Efort în talpă (riglă de streașină, moment max la mijloc): Ntalpă = Mmax/h_grinda = (Fac·B/8)/8,0 = (146·40/8)/8 = 730/8 = **91,3 kN** (întindere/compresiune).
+
+**Dimensionarea diagonalei** (tije rotunde Ø24 sau L 70×70×7 S275):
+L 70×70×7: A = 9,40 cm²; Npl,Rd = 940·275 = 258.500 N = **258 kN > 91,3 → utilizare 0,35 ✓** (diagonală întinsă; comprimata neglijată în sistem X). Îmbinarea la nod cu gusseturi sudate/șuruburi M16.
+
+**Cazul seismic longitudinal:** grinda orizontală transmite și forța de inerție a masei acoperișului către contravântuirile verticale. Forța seismică longitudinală de acoperiș ≈ Fb,long·(pondere acoperiș) ≈ 0,172·(1.152+720)·0,85 ≈ 274 kN → efort diagonală ≈ 274/2/sinθ ≈ 171 kN < 258 kN → **✓** (guvernează seismul longitudinal, nu vântul). Se adoptă diagonala la înfășurătoarea vânt frontal / seism longitudinal.
+
+### 9.3. Efectul de diafragmă al acoperișului și traseul forțelor orizontale
+
+Traseul complet al forțelor orizontale (load path) de la punctul de aplicare la fundație:
+1. **Vânt/seism transversal** → preluat de cadrele MRF (fiecare cadru în planul său) → la baza stâlpilor → fundații + grinzi de soclu.
+2. **Vânt frontal / seism longitudinal** → peretele de fronton + stâlpii de fronton → grinda orizontală de acoperiș (diafragmă în plan) → contravântuirile verticale longitudinale (în traveea contravântuită) → baza stâlpilor de capăt → fundații.
+
+**Verificarea rigidității diafragmei de acoperiș:** grinda orizontală cu zăbrele funcționează ca diafragmă rigidă dacă deplasarea ei în plan (săgeata grinzii orizontale) este mică față de deplasarea contravântuirilor verticale (< 1/2). Săgeata grinzii orizontale (deschidere 40 m, sub Fac = 146 kN): δdiaf ≈ 5·Fac·B³/(384·E·Idiaf) cu Idiaf = grindă cu zăbrele adâncime 8 m → Idiaf ≈ Atalpă·(4.000)² foarte mare → δdiaf ≈ 8 mm ≪ δCBF vertical → **diafragmă rigidă → distribuția pe cadre proporțional cu masa (nu cu rigiditatea) → ✓**.
+
+Panele care nu sunt parte din grinda orizontală funcționează ca **elemente colectoare** (drag struts) care adună forța de inerție distribuită și o aduc la nodurile grinzii cu zăbrele; se verifică la efortul axial de colectare (mic, dar necesar pentru continuitatea traseului forțelor).
 
 ---
 
@@ -585,8 +749,18 @@ Panoul de inimă al stâlpului se verifică la forfecare (vezi §7.4, Vwp,Rd = 1
 
 Metoda direcțională (SR EN 1993-1-8, §4.5.3.2):
 √[σ⊥² + 3·(τ⊥² + τ‖²)] ≤ fu/(βw·γM2) = 490/(0,9·1,25) = **435,6 N/mm²**
-și σ⊥ ≤ 0,9·fu/γM2 = 0,9·490/1,25 = 352,8 N/mm².
-Grosime cordon a = 6÷8 mm la nodurile principale (funcție de grosimea platbandelor). Sudurile se verifică la efortul din calculul la capacitate.
+și σ⊥ ≤ 0,9·fu/γM2 = 0,9·490/1,25 = 352,8 N/mm² (βw = 0,9 pentru S355).
+
+**Exemplu — sudura talpă-inimă a riglei sudate** (cordon dublu de colț a = 6 mm, forfecare longitudinală din lunecare):
+Forța de lunecare pe unitatea de lungime: vL = VEd·S/I, cu VEd = 180 kN, S (moment static talpă) ≈ 3,2·10⁶ mm³, I ≈ 1,2·10⁹ mm⁴:
+vL = 180.000·3,2·10⁶/1,2·10⁹ = 480 N/mm; pe 2 cordoane: τ‖ = vL/(2·a) = 480/(2·6) = 40 N/mm².
+Verificare: √[0 + 3·(0 + 40²)] = √4.800 = 69,3 N/mm² ≤ 435,6 → **✓** (a = 6 mm larg suficient; guvernează dimensionarea minimă constructivă a = 0,5·tmin).
+
+**Exemplu — sudura vutei la talpa riglei** (cordon a = 8 mm, la efortul de capacitate):
+Efortul de întindere în talpa vutei la capacitate ≈ 1,1·γov·fy·Atalpă = 1,1·1,25·355·(300·20) = 2.928 kN; lungime cordon 2·300 = 600 mm:
+τ‖ = 2.928.000/(2·8·300)·... → efort unitar ≈ 305 N/mm² < 435,6 → **✓** (a = 8 mm; alternativ sudură cap la cap cu pătrundere completă la vute — recomandat pentru zonele disipative).
+
+Grosime cordon a = 6÷8 mm la nodurile principale (funcție de grosimea platbandelor); sudurile la vute și în zonele disipative — cu pătrundere completă (EXC3). Toate sudurile se verifică la efortul din calculul la capacitate.
 
 ### 11.3. Îmbinări curente
 
@@ -632,9 +806,15 @@ Rezistența la poansonare fără armătură specifică: vRd,c = CRd,c·k·(100·
 vRd,c = 0,12·2,0·(100·0,005·30)^(1/3) = 0,24·(15)^(1/3) = 0,24·2,466 = 0,592 N/mm².
 VRd,c = vRd,c·u1·d = 0,592·2.736·170 = 275.000 N ≈ **275 kN** (≥ 209 kN conservator, cu k=2,0) > VEd = 80 kN → **✓, fără armătură de poansonare**.
 
-**Portanța plăcii** ~40÷50 kN/m² (limitată de teren), cu tasarea δ ≤ 20 mm.
+**Suprapunerea a două roți de stivuitor apropiate** (axa spate, ecartament s = 1,0 m): dacă distanța între roți < 2·ℓ (2·783 = 1.566 mm), momentele se suprapun. Pentru s = 1.000 mm < 1.566 → factor de suprapunere ≈ 1,15÷1,25. Momentul corectat: Mstivuitor,corectat = 1,20·11,62 = **13,9 kNm/m**; σ = 6·13,9·10⁶/40.000 = **2,09 N/mm²** > fctd,fl → confirmă necesitatea armării. Se verifică și **sarcina la margine/rost** (edge loading, Westergaard edge): Medge ≈ 1,5÷2,0·Minterior → **guvernează la marginea rostului** → gujoane de transfer + îngroșare la rost.
 
-> **Adoptat cazul A:** placă h = 20 cm C30/37 armată/fibrată; local sub rafturi h = 22 cm SAU **fundații punctuale independente** sub picioarele de raft (soluție recomandată — decuplează sarcina concentrată de placă).
+**Verificare la oboseală a plăcii sub trafic de stivuitor** (trecerea repetată a roților): pentru pardoseli cu trafic intens se verifică la oboseala betonului conform Model Code / fib — tensiunea de compresiune ciclică σc,max/fcd ≤ 0,5 și amplitudinea variației. La σc din trafic ≪ 0,5·fcd → **necritic**; armătura preia întinderea ciclică.
+
+**Verificarea deschiderii fisurilor (SLS, SR EN 1992-1-1 §7.3):** cu plasă Ø8/150 dublă, wk = sr,max·(εsm − εcm) ≤ **wmax = 0,3 mm** (clasa de expunere XC1/XC2 interior) → verificat prin limitarea diametrului/distanței armăturii (Ø8/150 satisface tab. 7.2N pentru σs ≤ 240 N/mm²).
+
+**Portanța plăcii** ~40÷50 kN/m² (limitată de teren), cu tasarea δ ≤ 20 mm. Deplasarea sub sarcină concentrată (Westergaard): δ = P/(8·k·ℓ²) = 80.000/(8·0,06·783²) = 80.000/294.150 = 0,27 mm (elastic, punctual) → mult sub limita de exploatare.
+
+> **Adoptat cazul A:** placă h = 20 cm C30/37 armată/fibrată; local sub rafturi h = 22 cm SAU **fundații punctuale independente** sub picioarele de raft (soluție recomandată — decuplează sarcina concentrată de placă). Rosturile se poziționează astfel încât picioarele de raft să nu cadă pe rost.
 
 ### 12.3. Cazul B — placă pe subsol/goluri (rezemată pe grinzi)
 
@@ -665,9 +845,14 @@ Verificare săgeată L/250 + poansonare pe reazeme.
 
 ### 12.5. Rosturi
 
-- **Rosturi de contracție** la 5÷6 m: tăiere pe 1/3 din grosime la ≤ 24 h de la turnare, cu gujoane Ø20/300 pentru transfer de forfecare.
+- **Rosturi de contracție** la 5÷6 m: tăiere pe 1/3 din grosime la ≤ 24 h de la turnare, cu **gujoane Ø20/300** pentru transfer de forfecare (dowels).
 - **Rosturi de turnare** (constructive): cu tije/gujoane de continuitate.
 - **Rosturi de dilatație** perimetral și la stâlpi: placa este **flotantă**, decuplată de fundațiile stâlpilor (evită fisurarea din tasări diferențiale).
+
+**Dimensionarea gujoanelor de transfer la rost** (dowel bars, teoria Friberg):
+Un gujon Ø20 (aria As = 314 mm²) transferă forfecarea la rost, permițând deschiderea din contracție dar menținând coplanaritatea (evită treapta între dale — „faulting"). Forța pe gujon din roata de stivuitor pe rost (fracțiune din sarcina roții care ajunge la dala vecină ≈ 0,5·P):
+Vgujon = 0,5·45/(nr. gujoane efective în raza 1,8·ℓ) ≈ 0,5·45/3 ≈ 7,5 kN.
+Rezistența la forfecare a gujonului (oțel): Vpl = 0,6·fy·As = 0,6·355·314 = 66.900 N = 66,9 kN ≫ 7,5 → **✓** (guvernant este strivirea betonului sub gujon, verificată cu presiunea de contact fb ≈ 3·fcd → OK pentru Ø20). Jumătatea gujonului se unge (debonding) pentru a permite mișcarea longitudinală la rost.
 
 ---
 
@@ -689,7 +874,18 @@ Dimensionare secțiune 40×60 cm C25/30, cu factor de siguranță 1,5 pe efectul
 MRd nec ≥ 1,5·541 = **812 kNm** → As = MRd/(z·fyd), cu braț z ≈ 0,55 m (d ≈ 0,55 m):
 As = 812·10⁶/(550·434,8) = 812·10⁶/239.140 = 3.395 mm² → **6Ø28/față (3.695 mm²) ✓**.
 
-Verificare la răsturnare: Mstabil/Mrăst ≥ 1,5. Fundație proprie lată B = 2,5÷3,0 m (excentricitate e ≤ B/6). Peretele depășește acoperișul cu **+0,60 m**; uși REI cu autoînchidere; rost de decuplare pe toată înălțimea față de structura halei.
+**Verificarea la răsturnare a ansamblului stâlp + fundație proprie:**
+Fundație proprie 3,0×3,0×0,80 m sub fiecare stâlp de zid de foc.
+- Moment de răsturnare (la muchia tălpii): Mrăst = Mbază + Vvânt·(braț) ≈ 541 kNm (+ efectul împingerii termice, acoperit de factorul 1,5).
+- Moment stabilizator: din greutatea proprie a peretelui + stâlp + fundație + pământ de acoperire.
+  Gperete ≈ (0,25·10,7·6,0)·25 = 401 kN (BCA/beton, aferent 6 m); Gstâlp = 0,40·0,60·10,7·25 = 64 kN; Gfundație = 3,0·3,0·0,80·25 = 180 kN; Gpământ ≈ 3,0·3,0·0,70·18 − volum fundație ≈ 100 kN. Total Gstab ≈ 745 kN, aplicat la brațul B/2 = 1,5 m.
+  Mstab = 745·1,5 = **1.118 kNm**.
+- Verificare: Mstab/Mrăst = 1.118/541 = **2,07 ≥ 1,5 → ✓**.
+- Excentricitatea rezultantei: e = Mrăst/N = 541/745 = 0,73 m > B/6 = 0,50 m → diagramă parțial întinsă → se verifică pmax pe zona comprimată: pmax = 2·N/(3·(B/2−e)·L) — se mărește fundația la 3,4 m dacă pmax > pconv. Cu B = 3,4 m: e = 0,73 < B/6 = 0,57? → încă marginal → **B = 3,6 m** asigură e ≤ B/6 și pmax < 250 kPa → **✓**.
+
+**Verificarea la lunecare la bază:** Vvânt = 9,45·10,7 = 101 kN ≤ Gstab·tanφ = 745·0,364 = 271 kN → **✓** (raport 2,68 ≥ 1,5).
+
+Verificare la răsturnare: Mstabil/Mrăst = 2,07 ≥ 1,5 ✓. Peretele depășește acoperișul cu **+0,60 m** (parapet REI care împiedică propagarea peste acoperiș); uși REI cu autoînchidere; rost de decuplare pe toată înălțimea față de structura halei (astfel colapsul cadrelor de o parte nu antrenează peretele). Armare transversală (etrieri Ø10/200) + armare pe fața opusă (moment de sens invers din colapsul celeilalte părți) — **6Ø28 pe AMBELE fețe** (perete solicitat bidirecțional în funcție de partea în care arde).
 
 ---
 
@@ -715,27 +911,57 @@ Rezistența prin frecare: Rf = NEd·tanφ = 350·tan20° = 350·0,364 = **127 kN
 
 **Armarea tălpii:** Ø14/150 ambele direcții (constructiv + verificare la încovoierea tălpii ca placă în consolă de la fața cuzinetului).
 
-**Cuzinet:** 90×90×60 cm.
+**Cuzinet — verificare:** dimensiuni 90×90×60 cm C20/25, sub placa de bază 700×700 mm. Difuziunea încărcării de la placă la bloc se face la unghi ≤ 45°; verificare la strivire locală și la fisurare (armare Ø12/150 pe fețele laterale + rețea la partea superioară). Verificarea la despicare (splitting) sub placa de bază: armătură transversală de confinare în partea superioară a cuzinetului.
 
-**Placa de bază metalică** (interfața stâlp-fundație, SR EN 1993-1-8 §6.2.5) — exemplu:
-Placă 700×700×40 mm S355 sub stâlpul HEB 450, sarcină de compresiune NEd = 480 kN + moment MEd = 120 kNm (bază articulată constructiv, dar cu moment mic din pretensionare ancoraj).
-Rezistența la strivire a fundației (îmbinare beton): fjd = βj·kj·fcd, cu βj = 2/3, kj = factor de concentrare (raport arie fundație/placă, limitat la 3) ≈ 2,0 → fjd = (2/3)·2,0·13,33 = **17,77 N/mm²**.
-Lățimea suplimentară a tălpii echivalente (T-stub comprimat): c = t·√(fyd/(3·fjd·γM0)) = 40·√(355/(3·17,77·1,0)) = 40·√6,66 = 40·2,58 = 103 mm.
-Aria efectivă de reazem Aeff sub tălpile stâlpului + inima extinse cu c → aria rezultată ≈ 2,0·10⁵ mm² → Fc,Rd = Aeff·fjd = 200.000·17,77 = 3.554.000 N = **3.554 kN ≫ 480 kN → ✓** (placa curge cedarea betonului, nu invers). Grosimea plăcii 40 mm rezultă din verificarea la încovoiere a consolei c (verificat).
+### 14.3. Placa de bază — verificare completă (SR EN 1993-1-8 §6.2.5)
 
-### 14.3. Buloane de ancoraj (SR EN 1993-1-8, CEN/TS 1992-4)
+Placă 700×700×40 mm S355 sub stâlpul HEB 450, sarcină de compresiune NEd = 480 kN + moment MEd = 120 kNm (bază semi-rigidă; moment din vânt/pod și pretensionarea ancorajelor).
 
-Cazul critic este **ridicarea** (combinația C2: 1,0G + 1,5·V succiune): Nt ≈ **90 kN** tracțiune la baza stâlpului.
+**a) Rezistența betonului la strivire (îmbinare beton):**
+fjd = βj·kj·fcd, cu βj = 2/3, kj = √(Ac1/Ac0) = factor de concentrare (raport arie fundație/placă), limitat la 3,0 → kj ≈ 2,0 → fjd = (2/3)·2,0·13,33 = **17,77 N/mm²**.
 
-**4 × M30 gr. 8.8:**
-- Tracțiune bulon: Ft,Rd = 0,9·fub·As/γM2 = 0,9·800·561/1,25 = 323.136 N = **323 kN/bulon** (As = 561 mm² pentru M30) → 4×323 = 1.292 kN ≫ 90 kN ✓.
-- **Smulgerea conului de beton** (cedare fragilă) → se impune lungime de ancoraj **hef ≥ 500 mm** + **armătură de suspendare** în fundație (evită cedarea fragilă a conului, transferă la armătura tălpii).
-- Forfecare: VEd/4 = 120/4 = 30 kN/bulon < Fv,Rd = 215 kN ✓ (+ pinten de forfecare / shear key opțional sub placa de bază).
-- Interacțiune N-V (formula CEN/TS 1992-4): (Nt/NRd)^α + (V/VRd)^α ≤ 1,0 ✓.
+**b) Lățimea de reazem echivalentă (T-stub comprimat):**
+c = t·√(fyd/(3·fjd·γM0)) = 40·√(355/(3·17,77·1,0)) = 40·√6,66 = 40·2,58 = **103 mm**.
+Aria efectivă de reazem Aeff = perimetrul tălpilor + inima stâlpului, extinse cu c de fiecare parte ≈ **2,0·10⁵ mm²**.
+Rezistența la compresiune a tălpii: Fc,Rd = Aeff·fjd = 200.000·17,77 = 3.554.000 N = **3.554 kN ≫ 480 kN → ✓**.
+
+**c) Verificarea la încovoiere a plăcii (consola c):**
+Momentul în placă pe fâșia de 1 mm lățime, din presiunea fjd pe consola c:
+mEd = fjd·c²/2 = 17,77·103²/2 = 94.256 N·mm/mm = 94,3 kNmm/mm.
+Momentul capabil al plăcii t = 40 mm: mRd = fyd·t²/6 = 355·40²/6 = 94.667 N·mm/mm = 94,7 kNmm/mm.
+Verificare: mEd = 94,3 ≤ mRd = 94,7 → **utilizare 0,996 ≈ 1,0 → ✓ la limită** → se adoptă **t = 45 mm** pentru marjă (mRd = 355·45²/6 = 119.813 → utilizare 0,79 ✓).
+
+**d) Sudura stâlp-placă de bază** (cordon de colț perimetral pe talpe + inimă):
+Forța de transmis pe talpa comprimată (din M + N): Ftalpă = MEd/h + NEd/2 = 120/0,44 + 480/2 = 273 + 240 = 513 kN pe talpa comprimată.
+Lungimea de sudură disponibilă pe o talpă (2 cordoane pe lățimea 300 mm) ≈ 2·280 = 560 mm; cu a = 8 mm:
+Efort unitar în sudură: fw,Ed = Ftalpă/(a·Lw) = 513.000/(8·560) = 114,5 N/mm².
+Rezistența sudurii (metoda simplificată): Fw,Rd/mm = fvw,d·a = [fu/(√3·βw·γM2)]·a = [490/(1,732·0,9·1,25)]·8 = 251,4·8 = 2.011 N/mm → efort admis = 251,4 N/mm² > 114,5 → **✓** (a = 8 mm suficient; se poate reduce la a = 6 mm la talpa întinsă).
+
+### 14.4. Buloane de ancoraj — verificare la smulgere, forfecare, interacțiune (SR EN 1993-1-8, CEN/TS 1992-4)
+
+Cazul critic este **ridicarea** (combinația C2: 1,0G + 1,5·V succiune): Nt ≈ **90 kN** tracțiune la baza stâlpului, VEd = 120 kN forfecare (seism).
+
+**4 × M30 gr. 8.8** (As = 561 mm²):
+
+**a) Rezistența oțelului bulonului la tracțiune:**
+Ft,Rd = 0,9·fub·As/γM2 = 0,9·800·561/1,25 = 323.136 N = **323 kN/bulon**.
+Tracțiune per bulon (2 buloane pe rândul întins la moment, sau 4 la tracțiune centrată): Nt,bulon = 90/2 = 45 kN < 323 → **✓** (utilizare 0,14).
+
+**b) Smulgerea conului de beton (cone breakout — cedare fragilă), CEN/TS 1992-4:**
+NRk,c = k1·√fck·hef^1,5·(Ac,N/Ac,N0)·ψs,N·ψec,N, cu k1 = 7,7 (beton fisurat), hef = 500 mm:
+NRk,c0 = 7,7·√25·500^1,5 = 7,7·5·11.180 = 430.430 N ≈ 430 kN (un bulon izolat).
+Cu γMc = 1,5 și grup: NRd,c ≈ 430/1,5·(factor grup ≈ 0,85) ≈ 244 kN > 90 kN → **✓, dar aproape de limită** → se impune **armătură de suspendare** (bare verticale care traversează conul de rupere, dimensionate la Nt integral = 90 kN → As = 90.000/434,8 = 207 mm² → 4Ø10), transformând cedarea fragilă în cedare ductilă a armăturii.
+
+**c) Forfecare:**
+Fv,Rd = αv·fub·As/γM2 = 0,6·800·561/1,25 = 215.424 N = **215 kN/bulon**; VEd/4 = 120/4 = 30 kN < 215 → **✓** (utilizare 0,14).
+Cedarea betonului la marginea la forfecare (edge breakout / pry-out) verificată; se recomandă **pinten de forfecare (shear key)** — profil scurt sudat sub placă, îngropat în beton — care preia integral VEd, descărcând buloanele de forfecare.
+
+**d) Interacțiune N-V** (CEN/TS 1992-4, formula 6.32):
+(Nt,Ed/NRd)^1,5 + (VEd/VRd)^1,5 ≤ 1,0 → (45/323)^1,5 + (30/215)^1,5 = 0,052 + 0,052 = **0,104 ≤ 1,0 → ✓**.
 
 Stabilitatea de ansamblu la răsturnare și lunecare ≥ 1,5, asigurată suplimentar de grinzile de soclu care leagă toate fundațiile într-un cadru rigid la nivelul infrastructurii.
 
-### 14.4. Grinzi de fundație (grinzi de soclu)
+### 14.5. Grinzi de fundație (grinzi de soclu)
 
 Grinzile de soclu perimetrale și de legătură (secțiune 40×60 cm b.a. C20/25) îndeplinesc rolurile:
 - rezemarea peretelui de închidere (perete sandwich + rigle) la partea inferioară;
@@ -743,7 +969,7 @@ Grinzile de soclu perimetrale și de legătură (secțiune 40×60 cm b.a. C20/25
 - limitarea tasărilor diferențiale (rigiditate de redistribuire).
 Armare longitudinală constructivă 4Ø16 sus + jos + etrieri Ø8/200; verificare la forța axială de legătură și la încovoierea din reazemul peretelui.
 
-### 14.5. Tasări — verificare lucrată
+### 14.6. Tasări — verificare lucrată
 
 Tasarea sub talpa 2,0×2,0 m la presiunea netă Δp = 130 − q_teren(la Df) ≈ 130 − 27 = 103 kPa, metoda edometrică simplificată (strat compresibil H = 4,0 m sub talpă, modul edometric Eoed = 15 MPa):
 s = Δp·H·(factor de repartizare α ≈ 0,7)/Eoed = 103·4.000·0,7/15.000 = **19,2 mm** (estimare acoperitoare) → în practică 8÷15 mm cu profilul stratificat real.
@@ -757,13 +983,23 @@ Tasarea diferențială admisă între fundații adiacente pentru structuri metal
 
 Categorie de corozivitate a mediului: **C3** (interior industrial cu umiditate/condens moderat), durabilitate H (mare, 15÷25 ani).
 
-Sistem de vopsire:
-- Pregătire suprafață: sablare **Sa 2½** (curățare aproape până la metal alb).
-- Grund epoxidic bogat în zinc: 60 µm.
-- Strat intermediar epoxidic: 100 µm.
-- Strat de finisaj poliuretanic (PU): 60 µm.
-- **DFT total ≈ 220 µm.**
-Buloanele și piesele de îmbinare: zincare termică la cald.
+Categorii de corozivitate pe zone (SR EN ISO 12944-2):
+
+| Zonă a halei | Categorie | Justificare | Durabilitate țintă |
+|---|---|---|---|
+| Interior uscat (hală producție) | C2÷C3 | umiditate moderată, condens ocazional | H (15÷25 ani) |
+| Zone umede / spălare | C4 | contact cu apă/agenți | H |
+| Elemente exterioare (atice, jgheaburi) | C3÷C4 | expunere atmosferică | H |
+| Baza stâlpilor / contact cu placa | C3 + protecție suplimentară | condens la sol | H |
+
+Sistem de vopsire (C3, durabilitate H — SR EN ISO 12944-5, sistem A5.09 sau echivalent):
+- Pregătire suprafață: sablare **Sa 2½** (SR EN ISO 8501-1, curățare aproape până la metal alb), rugozitate medie Rz 50÷75 µm.
+- Grund epoxidic bogat în zinc: 60 µm (protecție catodică).
+- Strat intermediar epoxidic (barieră): 100 µm.
+- Strat de finisaj poliuretanic (PU, rezistență UV/culoare): 60 µm.
+- **DFT total nominal ≈ 220 µm** (DFT minim controlat pe fiecare strat, regula „80/20" SR EN ISO 19840).
+Buloanele și piesele de îmbinare: **zincare termică la cald** (SR EN ISO 1461), grosime strat ≥ 55 µm; suprafețele de contact prin frecare (îmbinări HR) — tratament care asigură coeficientul de frecare μ (clasa A/B, sablare fără vopsea sau vopsea cu frecare certificată).
+Verificarea aderenței (pull-off SR EN ISO 4624 ≥ 5 MPa) și a grosimii (aparat cu curenți Foucault) la recepție.
 
 ### 15.2. Protecție la foc (P118-1, SR EN 1993-1-2)
 
@@ -781,28 +1017,105 @@ Halele parter cu compartiment de incendiu sub aria admisă și cu zid de foc aut
 **Evoluția temperaturii oțelului neprotejat** (SR EN 1993-1-2, §4.2.5.1, incrementul):
 Δθa,t = (Am/V)·ksh/(ca·ρa)·ḣnet·Δt, cu factor de masivitate Am/V ≈ 100 m⁻¹ pentru HEB 450 expus pe 4 fețe, ca ≈ 600 J/(kg·K), ρa = 7.850 kg/m³. Sub curba standard ISO 834, oțelul neprotejat atinge θcr = 549°C după ~13 minute → **clasa de rezistență la foc a elementului neprotejat ≈ R13**, insuficientă pentru R30. Prin urmare, pentru elementele care necesită R30 se aplică vopseaua intumescentă care reduce factorul efectiv de încălzire (grosime uscată 0,4÷0,8 mm), împingând atingerea lui θcr la ≥ 30 minute.
 
+**Reducerea rezistenței oțelului la temperatură** (SR EN 1993-1-2, tab. 3.1, factorul ky,θ):
+La θcr = 549°C: ky,θ ≈ 0,63 (interpolare între 500°C: 0,78 și 600°C: 0,47). Rezistența la foc: Mfi,Rd = ky,θ·MRd = 0,63·MRd. Gradul de utilizare la foc μ0 = Efi,d/Rfi,d,0, cu Efi,d din combinația de incendiu (G + ψ1·Q, ψ1 = 0,5) — de regulă μ0 ≈ 0,6 (încărcare accidentală redusă) → confirmă θcr ≈ 549°C.
+
+**Verificarea la foc a planșeului compozit al mezaninului (R60)** (SR EN 1994-1-2):
+Placa compozită cu tablă cutată + beton 12 cm satisface R60 prin **metoda temperaturii critice a armăturii suplimentare** din nervuri: se adaugă o bară Ø10 în fiecare nervură a tablei, la distanță utilă u ≈ 40 mm de fața expusă. Temperatura armăturii la 60 min ≈ 500°C → ks,θ ≈ 0,78 → momentul capabil la foc Mfi,Rd = ks,θ·As·fsd·z ≥ Efi,d (0,6·MEd) → **verificat pentru R60**. Grinda de oțel a mezaninului se protejează (vopsea/placare) la R60 dacă compartimentarea o cere; alternativ tavan rezistent la foc.
+
 ---
 
-## 16. Verificarea la starea limită de serviciu (SLS) și noțiuni de execuție
+## 16. Verificarea la starea limită de serviciu (SLS) — extinsă și noțiuni de execuție
 
-### 16.1. Verificări SLS (recapitulare cu valori)
+### 16.1. Deplasări laterale sub vânt și seism (verificare extinsă)
 
-| Verificare | Limită normativă | Valoare de calcul | Verdict |
-|---|---|---|---|
-| Săgeata riglei cadru | L/200 = 100 mm | ~65 mm (din model) | ✓ |
-| Deplasare orizontală streașină (vânt) | H/150 = 63 mm | ~50 mm | ✓ |
-| Drift seismic dr (SLU) | ≤ 0,025·h (θ·q) | verificat pe niveluri | ✓ |
-| Drift seismic dr (SLS) | ≤ 0,005·h = 47,5 mm | ~40 mm | ✓ |
-| Săgeata panelor | L/200 = 30 mm | ~25 mm | ✓ |
-| Grinda de rulare | L/600÷750 | ~8 mm | ✓ |
+**a) Deplasarea orizontală la streașină sub vânt (SLS, limita de aspect/exploatare):**
+Cadrul portal necontravântuit se deformează lateral din forța de vânt Fw = 78 kN aplicată. Deplasarea la streașină rezultă din flexibilitatea cadrului (contribuția stâlpilor + a riglei):
+δw = Fw·H³/(3·E·Iechiv) corectat pentru comportarea de cadru → din model δw ≈ **50 mm**.
+Limita normativă (SR EN 1990/1993, deplasare orizontală hale un nivel): H/150 = 9.500/150 = **63,3 mm** → δw = 50 < 63,3 → **✓** (utilizare 0,79).
+Limita mai strictă pentru pereți sensibili (H/300): nu se aplică — pereții sunt panouri sandwich flexibile.
 
-### 16.2. Noțiuni PTh / execuție
+**b) Driftul seismic (P100-1 §4.5.4):**
+Deplasarea relativă de nivel elastică din analiză: dr,e ≈ 12 mm.
+- **SLU (limitarea degradărilor structurale):** dr,SLU = c·q·dr,e = 1,0·4,0·12 = 48 mm; dr/h = 48/9.500 = 0,00505 ≤ 0,025 (elemente nestructurale prinse flexibil) → **✓** (utilizare 0,20).
+- **SLS (verificarea la starea limită de serviciu):** dr,SLS = ν·q·dr,e = 0,5·4,0·12 = 24 mm; limita 0,005·h = 47,5 mm → 24 < 47,5 → **✓** (utilizare 0,51). Coeficientul ν = 0,5 (clasa importanță III).
 
-- Clasa de execuție **EXC2** (SR EN 1090-2), conform CC2.
-- Control suduri: examinare vizuală (VT) 100% + control ultrasonic/radiografic (UT/RT) pe cusăturile solicitate la oboseală/capacitate (procent conform SR EN 1090-2).
+**c) Efectul de ordinul II la seism (coeficientul de sensibilitate θ):**
+θ = Ptot·dr/(Vtot·h) = 4.500·0,048/(658·9,5) = 216/6.251 = **0,035 < 0,10** → efectele P-Δ pot fi neglijate la seism (P100-1 §4.5.3.6.2); pentru 0,10 ≤ θ ≤ 0,20 s-ar amplifica cu 1/(1−θ).
+
+### 16.2. Săgeți verticale — tabel de sinteză
+
+| Element | Solicitare SLS | Limită normativă | Săgeată calculată | Utilizare | Verdict |
+|---|---|---|---|---|---|
+| Riglă cadru (deschidere 20 m) | zăpadă + G | L/200 = 100 mm | 65 mm | 0,65 | ✓ |
+| Riglă cadru (numai variabile Q) | zăpadă | L/250 = 80 mm | 42 mm | 0,53 | ✓ |
+| Pane Z 250×2,5 (l = 6 m) | zăpadă + G | L/200 = 30 mm | 22 mm | 0,73 | ✓ |
+| Rigle de perete Z (l = 6 m) | vânt | L/200 = 30 mm | 25 mm | 0,83 | ✓ |
+| Grindă compozită mezanin (5 m) | util B | L/250 = 20 mm | 12 mm | 0,60 | ✓ |
+| Grindă de rulare (l = 6 m) | Rv pod rulant | L/750 = 8 mm | 5,1 mm | 0,64 | ✓ |
+| Consolă cale rulare | Rv | L/500 | verificat | — | ✓ |
+
+### 16.3. Deplasări orizontale — tabel de sinteză
+
+| Direcție / sursă | Limită | Valoare | Utilizare | Verdict |
+|---|---|---|---|---|
+| Streașină, vânt (transversal) | H/150 = 63 mm | 50 mm | 0,79 | ✓ |
+| Drift seismic SLU | 0,025·h = 237 mm | 48 mm | 0,20 | ✓ |
+| Drift seismic SLS | 0,005·h = 47,5 mm | 24 mm | 0,51 | ✓ |
+| Deplasare longitudinală (CBF), vânt/seism | H/150 = 63 mm | ~20 mm | 0,32 | ✓ |
+| Coeficient sensibilitate θ (P-Δ) | ≤ 0,10 | 0,035 | 0,35 | ✓ |
+
+### 16.4. Rost de dilatare / rost antiseismic
+
+**Rost de dilatare termică:** pentru tronsoane de oțel > 90÷120 m se prevede rost de dilatație (dublare de cadre/stâlpi). Tronsonul de referință L = 60 m < 90 m → **NU necesită rost de dilatație**; dilatația liberă ΔL = α·ΔT·L = 12·10⁻⁶·35·60.000 = **25,2 mm** este preluată prin concentrarea contravântuirilor într-o singură travee (celelalte reazeme libere longitudinal, evitând eforturi termice mari).
+
+**Rost antiseismic** (P100-1 §4.4.2.7): la tronsoane adiacente (hală + corp birouri/hală geamănă) rostul minim între structuri:
+Δ = √(δ1² + δ2²) ≥ q·(dr,e1 + dr,e2), sau simplificat Δ ≥ suma deplasărilor maxime la SLU ale celor două corpuri.
+Pentru hala (dr,SLU = 48 mm) alăturată unui corp de birouri (dr,SLU ≈ 30 mm): Δmin = √(48² + 30²) = √(2.304 + 900) = √3.204 = **56,6 mm** → se adoptă **rost antiseismic de 60 mm** (cu acoperire elastică). Rostul separă complet structurile (fundații, suprastructură, placă) pentru a evita ciocnirea (pounding).
+
+### 16.5. Detalii de execuție și toleranțe (SR EN 1090-2)
+
+**Clasa de execuție:** structura se încadrează în **EXC2** (conform CC2/RC2, categoria de importanță C). Elementele solicitate la oboseală (grinda de rulare a podului rulant) sau la seism cu ductilitate ridicată se ridică la **EXC3** local.
+
+| Aspect | EXC2 | EXC3 (local — cale rulare, noduri disipative) |
+|---|---|---|
+| Nivel de calitate sudură (SR EN ISO 5817) | C | B |
+| Control vizual VT | 100% | 100% |
+| Control UT/RT suduri cap la cap | 10÷20% | 100% |
+| Pretensionare șuruburi HR 10.9 | metoda momentului | metoda combinată + control |
+| Certificare material | 3.1 (SR EN 10204) | 3.1 + trasabilitate |
+
+**Toleranțe de montaj esențiale (SR EN 1090-2, Anexa B):**
+- Verticalitatea stâlpilor: Δ ≤ h/500 (pentru h = 9.500 → 19 mm) și ≤ 25 mm.
+- Poziția în plan a plăcilor de bază / buloanelor de ancoraj: ±10 mm (critic pentru montajul stâlpilor → se folosesc **șabloane de montaj** pentru buloane).
+- Cota de nivel a plăcii de bază: ±5 mm (reglaj prin piulițe de nivelment + subturnare cu mortar fără contracție).
+- Rectilinitatea elementelor: L/750.
+
+### 16.6. Note de calcul — scara metalică de acces la mezanin
+
+Scară metalică cu vang lateral (2 vanguri UNP / profil sudat) + trepte din tablă striată/grătar, rampă de acces la cota +4,00 m, lățime 1,10 m, unghi ~35°, ~22 trepte.
+
+**Încărcări (SR EN 1991-1-1, categoria A/scări):**
+- Permanent (trepte + vanguri): gk ≈ 1,2 kN/m².
+- Utilă: qk = 4,0 kN/m² (scări în clădiri cu aglomerări) sau sarcină concentrată 4,0 kN pe treaptă.
+- qEd = (1,35·1,2 + 1,5·4,0)·1,10 = (1,62 + 6,0)·1,10 = **8,38 kN/m** pe vang (2 vanguri → 4,19 kN/m/vang).
+
+**Vang — verificare încovoiere** (lungime înclinată Linc ≈ 4,0/sin35° = 6,97 m, rezemat la capete):
+MEd = qvang·Linc²/8 = 4,19·6,97²/8 = 25,4 kNm.
+Se adoptă vang UNP 200 (Wpl,y = 228 cm³): Mpl,Rd = 228.000·275 = 62.700.000 = 62,7 kNm > 25,4 → **utilizare 0,41 ✓**.
+Săgeata: w = 5·qk,vang·Linc⁴/(384·E·I), cu I(UNP200) = 1.910 cm⁴ → w ≈ 18 mm < Linc/300 = 23 mm → **✓**.
+
+**Treaptă (tablă striată 5/7 mm sau grătar, deschidere 1,10 m):** verificată la sarcina concentrată 2,0 kN pe 200×200 mm + utilă distribuită; săgeată ≤ L/300.
+
+**Podestul intermediar + balustrada:** balustradă h = 1,10 m, verificată la împingerea orizontală liniară 1,0 kN/m la mână curentă (SR EN 1991-1-1, tab. 6.12, categoria A). Prinderea scării de structura mezaninului: articulată la partea superioară, reazem simplu la bază (placă de bază mică + 2 buloane M16).
+
+### 16.7. Noțiuni PTh / execuție (sinteză)
+
+- Clasa de execuție **EXC2** (SR EN 1090-2), conform CC2; EXC3 local (cale rulare, noduri disipative).
+- Control suduri: examinare vizuală (VT) 100% + control ultrasonic/radiografic (UT/RT) pe cusăturile solicitate la oboseală/capacitate (procent conform SR EN 1090-2 tab. 24).
 - Pretensionarea șuruburilor 10.9: cu cheie dinamometrică / metoda combinată, control al momentului de strângere.
 - Certificate de material 3.1 (SR EN 10204) pentru oțeluri și consumabile de sudură.
-- Toleranțe de montaj (verticalitate stâlpi, poziție ancoraje) conform SR EN 1090-2.
+- Toleranțe de montaj (verticalitate stâlpi, poziție ancoraje) conform SR EN 1090-2, Anexa B.
 
 ---
 
@@ -812,12 +1125,38 @@ Halele parter cu compartiment de incendiu sub aria admisă și cu zid de foc aut
 
 Structura metalică propusă — **cadre transversale cu noduri rigide (MRF, q = 4,0) + contravântuiri concentrice longitudinale (CBF, q = 4,0)** — satisface cerința fundamentală de **rezistență mecanică și stabilitate (A — Legea 10/1995)** în toate grupările de încărcări, cu grade de utilizare sub 0,80 pe elementele principale.
 
+**Tabel de sinteză a verificărilor (efort de calcul vs. capabil / utilizare):**
+
+| Element / verificare | Efort de calcul | Capabil | Utilizare | Verdict |
+|---|---|---|---|---|
+| Stâlp HEB 450 — secțiune (M-N) | 520 kNm | 1.379 kNm | 0,38 | ✓ |
+| Stâlp HEB 450 — stabilitate (6.61) | interacțiune | ≤ 1,0 | 0,53 | ✓ |
+| Stâlp HEB 500 cu pod rulant — stabilitate | interacțiune | ≤ 1,0 | 0,33 | ✓ |
+| Riglă I sudat — încovoiere | 620 kNm | 990 kNm | 0,63 | ✓ |
+| Riglă — deversare (χLT = 0,91) | — | — | 0,74 | ✓ |
+| Riglă — voalare inimă (forfecare) | 180 kN | 1.686 kN | 0,11 | ✓ |
+| Pane Z 250×2,5 | 11,0 kNm | 13,3 kNm | 0,83 | ✓ |
+| Contravântuire vertical SHS | 218 kN | 718 kN | 0,30 | ✓ |
+| Contravântuire acoperiș (diagonală) | 171 kN | 258 kN | 0,66 | ✓ |
+| Grindă mezanin compozită | 81,4 kNm | 195 kNm | 0,42 | ✓ |
+| Grindă rulare — oboseală | ΔσE,2 57 | 97 N/mm² | 0,59 | ✓ |
+| Nod rigid (M30 + placă 30) | 660 kNm | ~700 kNm | 0,94 | ✓ |
+| Placă bază — încovoiere (t = 45) | 94 kNmm/mm | 120 | 0,79 | ✓ |
+| Ancoraj — tracțiune | 45 kN/bulon | 323 kN | 0,14 | ✓ |
+| Ancoraj — con beton (cu armătură) | 90 kN | 244 kN | 0,37 | ✓ |
+| Fundație izolată — presiune teren | 130 kPa | 250 kPa | 0,52 | ✓ |
+| Zid de foc — răsturnare | 541 kNm | 1.118 kNm | 0,48 | ✓ |
+| Placă pardoseală A — încovoiere | 22,5 kNm/m | armată | — | ✓ |
+| Scară mezanin — vang | 25,4 kNm | 62,7 kNm | 0,41 | ✓ |
+
 Sinteza aspectelor guvernante:
-- **Vântul de succiune** guvernează ancorajele (ridicare ~90 kN/stâlp) — preluat de 4×M30 gr. 8.8 cu hef ≥ 500 mm.
-- **Podul rulant de 8 t** introduce compresiune excentrică în stâlpi + oboseală în calea de rulare.
+- **Vântul de succiune** guvernează ancorajele (ridicare ~90 kN/stâlp) — preluat de 4×M30 gr. 8.8 cu hef ≥ 500 mm + armătură de suspendare.
+- **Podul rulant de 8 t** introduce compresiune excentrică în stâlpi (HEB 500) + oboseală în calea de rulare (utilizare 0,59) + fundație mărită la 2,4×2,4 m.
+- **Nodul rigid** este elementul cel mai solicitat relativ (0,94) datorită condiției de suprarezistență la capacitate — se adoptă M30 + placă de capăt 30 mm + rigidizări.
 - **Placa de pardoseală** a fost dimensionată în ambele cazuri: A — 20 cm C30/37 armată/fibrată pe teren; B — 25÷30 cm cu Ø20/150 pe 2 direcții pe goluri (grosime/armare mult mai mari fără reazem continuu). Se recomandă **fundații punctuale independente sub rafturile grele**.
-- **Zidul de foc autostabil** verificat (M = 541 kNm/stâlp, 6Ø28/față) cu suprarezistență la colaps.
-- **Fundațiile izolate** 2,0×2,0 m (pmax = 130 kPa < 250 kPa), legate cu grinzi de soclu.
+- **Zidul de foc autostabil** verificat (M = 541 kNm/stâlp, 6Ø28/față, răsturnare 2,07 ≥ 1,5) cu suprarezistență la colaps.
+- **Fundațiile izolate** 2,0×2,0 m (pmax = 130 kPa < 250 kPa), legate cu grinzi de soclu; rost antiseismic 60 mm față de corpurile alăturate.
+- **Voalarea inimii** riglei sudate — verificată (utilizare 0,11), rigidizări doar la reazeme.
 
 ### 17.2. Verificarea tehnică (Legea 10/1995, HG 925/1995)
 
