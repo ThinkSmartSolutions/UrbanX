@@ -367,11 +367,15 @@
     opts = opts || {}; var doc = UX.newDoc(); var K = 1000; // m → mm
     var maxX = 0, maxY = 0;
     (rooms || []).forEach(function (r) { maxX = Math.max(maxX, (r.x + r.w)); maxY = Math.max(maxY, (r.y + r.h)); });
-    // contur clădire
+    var TPL = G.UX_TEMPLATES; var th = 375; // grosime perete exterior (mm, BCA 36.5+finisaj)
+    // perete exterior ca bandă cu grosime (dublu contur) + hașură material
     doc.rect(0, 0, maxX * K, maxY * K, 'A-WALL-EXTR-N');
+    doc.rect(-th, -th, maxX * K + 2 * th, maxY * K + 2 * th, 'A-WALL-EXTR-N');
+    try { if (TPL) UX.materialHatch(doc, [[-th, -th], [maxX * K + th, -th], [maxX * K + th, 0], [-th, 0]], TPL.materialFor('wall_exterior')); } catch (e) {}
     (rooms || []).forEach(function (r) {
       doc.rect(r.x * K, r.y * K, r.w * K, r.h * K, r.bal ? 'A-BALC-N' : 'A-WALL-PART-N');
-      UX.roomAnnotation(doc, { cx: (r.x + r.w / 2) * K, cy: (r.y + r.h / 2) * K, name: r.lbl || r.t, area: r.w * r.h });
+      var fin = ''; try { if (TPL) { var f = TPL.finishFor(r.t); fin = f.floor || ''; } } catch (e) {}
+      UX.roomAnnotation(doc, { cx: (r.x + r.w / 2) * K, cy: (r.y + r.h / 2) * K, name: r.lbl || r.t, finish: fin, area: r.w * r.h });
     });
     UX.structuralGrid(doc, 0, 0, maxX * K, maxY * K, 3000, 3000);
     // cotare totală pe 2 laturi
