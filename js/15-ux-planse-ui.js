@@ -103,7 +103,9 @@
       if (!set.length) { // fallback minimal daca setul complet nu e incarcat
         try { set = [{ key: 'fatada', label: 'Fațadă', plansa: 'A-05', doc: G.UX_DRAW.facadeDoc(Object.assign({}, o, { plansa: 'A-05' })) }, { key: 'sectiune', label: 'Secțiune', plansa: 'A-07', doc: G.UX_DRAW.sectionDoc(Object.assign({}, o, { plansa: 'A-07' })) }]; } catch (e) {}
       }
-      SHEETS = set.map(function (x) { var svg = '', dxf = ''; try { svg = x.doc.emitSVG(); } catch (e) {} try { dxf = x.doc.emit(); } catch (e) {} return { key: x.key, label: x.label, plansa: x.plansa, doc: x.doc, svg: svg, dxf: dxf, fname: ((x.plansa || x.key) + '_' + x.key).replace(/[^A-Za-z0-9_-]/g, '') }; });
+      // LAZY: nu generam SVG/DXF pt toate 15 planșele deodata (ar ingheta pagina) —
+      // doar doc-ul; SVG se face la afisarea tab-ului, DXF la descarcare.
+      SHEETS = set.map(function (x) { return { key: x.key, label: x.label, plansa: x.plansa, doc: x.doc, svg: null, dxf: null, fname: ((x.plansa || x.key) + '_' + x.key).replace(/[^A-Za-z0-9_-]/g, '') }; });
       active = 0; renderTabs(); renderStage(); renderDownloads();
     }
 
@@ -114,19 +116,22 @@
         b.onclick = function () { active = i; renderTabs(); renderStage(); }; tabsBar.appendChild(b);
       });
     }
+    function ensureSVG(s) { if (s && s.svg == null && s.doc) { try { s.svg = s.doc.emitSVG(); } catch (e) { s.svg = ''; } } return s ? s.svg : ''; }
+    function ensureDXF(s) { if (s && s.dxf == null && s.doc) { try { s.dxf = s.doc.emit(); } catch (e) { s.dxf = ''; } } return s ? s.dxf : ''; }
     function renderStage() {
       stage.innerHTML = '';
       if (!SHEETS.length) { stage.appendChild(el('div', { style: 'color:#64748b;padding:40px;text-align:center' }, 'Nicio planșă generată.')); return; }
       var s = SHEETS[active];
-      if (s.svg) stage.innerHTML = s.svg; else stage.appendChild(el('div', { style: 'color:#64748b;padding:40px;text-align:center' }, 'Previzualizarea SVG indisponibilă — folosiți descărcarea DXF.'));
+      var svg = ensureSVG(s);
+      if (svg) stage.innerHTML = svg; else stage.appendChild(el('div', { style: 'color:#64748b;padding:40px;text-align:center' }, 'Previzualizarea SVG indisponibilă — folosiți descărcarea DXF.'));
     }
     function renderDownloads() {
       dlbar.innerHTML = '';
       var s = SHEETS[active] || {};
       var bSvg = el('button', { style: 'background:rgba(52,211,153,.18);color:#6ee7b7;border:1px solid rgba(52,211,153,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Descarcă planșa (SVG)');
-      bSvg.onclick = function () { if (s.svg) { saveBlob(s.fname + '.svg', s.svg, 'image/svg+xml'); if (G.ss) G.ss('✅ Planșă SVG descărcată: ' + s.fname + '.svg'); } };
+      bSvg.onclick = function () { var svg = ensureSVG(s); if (svg) { saveBlob(s.fname + '.svg', svg, 'image/svg+xml'); if (G.ss) G.ss('✅ Planșă SVG descărcată: ' + s.fname + '.svg'); } };
       var bDxf = el('button', { style: 'background:rgba(125,211,252,.18);color:#7dd3fc;border:1px solid rgba(125,211,252,.45);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer' }, '⬇ Descarcă planșa (DXF)');
-      bDxf.onclick = function () { if (s.dxf) { saveBlob(s.fname + '.dxf', s.dxf, 'application/dxf'); if (G.ss) G.ss('✅ Planșă DXF descărcată: ' + s.fname + '.dxf'); } };
+      bDxf.onclick = function () { var dxf = ensureDXF(s); if (dxf) { saveBlob(s.fname + '.dxf', dxf, 'application/dxf'); if (G.ss) G.ss('✅ Planșă DXF descărcată: ' + s.fname + '.dxf'); } };
       var bPdf = el('button', { style: 'background:#fbbf24;color:#111;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (PDF)');
       bPdf.onclick = downloadPdf;
       var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (DXF ZIP)');
@@ -141,7 +146,7 @@
       if (!SHEETS.length) return;
       if (G.JSZip) {
         var zip = new G.JSZip();
-        SHEETS.forEach(function (s) { if (s.dxf) zip.file(s.fname + '.dxf', s.dxf); if (s.svg) zip.file(s.fname + '.svg', s.svg); });
+        SHEETS.forEach(function (s) { var dxf = ensureDXF(s); if (dxf) zip.file(s.fname + '.dxf', dxf); });
         zip.file('CITESTE.txt', 'Set planșe tehnice UrbanX — ' + (D.nume || '') + '\nFaza: ' + (D.faza || 'DTAC') + '\nGenerat parametric; necesită verificarea și asumarea proiectantului autorizat.\nParametrii tehnici derivați sunt incluși în cartușul fiecărei planșe.\n');
         zip.generateAsync({ type: 'blob' }).then(function (blob) {
           var u = URL.createObjectURL(blob); var a = document.createElement('a'); a.href = u; a.download = 'Planse_' + (D.nrcad || 'DTAC') + '.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 2000);
@@ -160,12 +165,11 @@
   function preview(sheetsIn, opts) {
     opts = opts || {};
     var SHEETS = (sheetsIn || []).map(function (s) {
-      var d = s.doc || {}; var svg = ''; var dxf = '';
-      try { svg = d.emitSVG ? d.emitSVG() : ''; } catch (e) {}
-      try { dxf = d.emit ? d.emit() : ''; } catch (e) {}
-      return { key: s.key, label: s.label, plansa: s.plansa || '', svg: svg, dxf: dxf, fname: ((s.plansa || s.key) + '_' + (s.key || '')).replace(/[^A-Za-z0-9_-]/g, '') };
+      return { key: s.key, label: s.label, plansa: s.plansa || '', doc: s.doc, svg: null, dxf: null, fname: ((s.plansa || s.key) + '_' + (s.key || '')).replace(/[^A-Za-z0-9_-]/g, '') };
     });
     if (!SHEETS.length) { if (G.ss) G.ss('Nicio planșă de afișat.'); return; }
+    function eSVG(s) { if (s && s.svg == null && s.doc) { try { s.svg = s.doc.emitSVG ? s.doc.emitSVG() : ''; } catch (e) { s.svg = ''; } } return s ? s.svg : ''; }
+    function eDXF(s) { if (s && s.dxf == null && s.doc) { try { s.dxf = s.doc.emit ? s.doc.emit() : ''; } catch (e) { s.dxf = ''; } } return s ? s.dxf : ''; }
     var active = 0;
     var ov = el('div', { style: 'position:fixed;inset:0;background:#070c18;z-index:5200;overflow:auto;font-family:system-ui;color:#e6edf7' });
     var wrap = el('div', { style: 'max-width:1100px;margin:0 auto;padding:16px 14px 60px' });

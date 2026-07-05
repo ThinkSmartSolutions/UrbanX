@@ -313,7 +313,11 @@
     var xs = poly.map(function (p) { return p[0]; }), ys = poly.map(function (p) { return p[1]; });
     var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
     var y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
-    var L = mat.layer, s = mat.scale || 25, i;
+    var L = mat.layer, i;
+    // pas ADAPTIV: pe regiuni mari (hale de zeci de metri) pasul fix de 25mm ar genera
+    // mii de linii → freeze/crash. Plafonam la ~70 linii pe directie / regiune.
+    var span = Math.max(x1 - x0, y1 - y0);
+    var s = Math.max(mat.scale || 25, span / 70);
     var pat = mat.pat || 'ANSI31';
     if (pat === 'ANSI31' || pat === 'ANSI32') { // beton/lemn: linii la 45°
       for (i = x0 - (y1 - y0); i <= x1; i += s) {
