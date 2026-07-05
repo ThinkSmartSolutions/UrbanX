@@ -11,7 +11,7 @@
   'use strict';
   G.UXLibrary = G.UXLibrary || {};
   G.UXLibrary._ready = G.UXLibrary._ready || {};
-  var VER = '20260705e';
+  var VER = '20260705f';
   var BASE = 'js/urbanx-library/functiuni/';
   // set standard de fișiere per funcțiune (aceleași chei ca la centru-social)
   var STD = {
@@ -39,7 +39,9 @@
     'agricol': 'agricol',
     'parc-fotovoltaic': 'parc-fotovoltaic',
     'bess': 'bess',
-    'statie-transformare': 'statie-transformare'
+    'statie-transformare': 'statie-transformare',
+    'infrastructura-drum': 'infrastructura-drum',
+    'pod': 'pod'
   };
 
   function mdToHtml(md) { return (typeof G.UXLibMdToHtml === 'function') ? G.UXLibMdToHtml(md) : (md || ''); }
