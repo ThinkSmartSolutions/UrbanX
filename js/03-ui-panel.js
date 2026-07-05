@@ -494,6 +494,17 @@ function htmlMobRapoarte(){
     </div>
     <span style="margin-left:auto;font-size:11px;color:#c4b5fd;font-weight:700">→</span>
   </button>
+  <button onclick="(window._NormativeRegistry&&_NormativeRegistry.openPanel?_NormativeRegistry.openPanel():(window.ss&&ss('Se inițializează')));document.getElementById('mob-sheet')?.classList.remove('open')" style="width:100%;margin-bottom:10px;padding:10px 14px;
+    background:linear-gradient(135deg,rgba(56,189,248,.16),rgba(37,99,235,.08));
+    border:1px solid rgba(56,189,248,.35);border-radius:10px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;text-align:left">
+    <span style="font-size:20px">📚</span>
+    <div style="flex:1">
+      <div style="font-size:12px;font-weight:800;color:#7dd3fc">Registru Normative — verificare la zi</div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:1px">Stare legală reglementări proiectare + sursă oficială</div>
+    </div>
+    <span style="margin-left:auto;font-size:11px;color:#7dd3fc;font-weight:700">→</span>
+  </button>
   <button onclick="openStudyMap()" style="width:100%;margin-bottom:10px;padding:11px 14px;
     background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(99,102,241,.1));
     border:1px solid rgba(212,175,55,.35);border-radius:10px;cursor:pointer;

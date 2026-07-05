@@ -1434,6 +1434,7 @@ document.addEventListener('click', function(){
   <!-- IVU mutat în topbar lângă UAT (standard transversal) — nu mai apare în Rapoarte -->
   <!-- Generator Documentații Tehnice (acțiune principală, vizibil) -->
   <button onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.1));border:1px solid rgba(139,92,246,.5);border-radius:8px;color:#c4b5fd;padding:10px;cursor:pointer;font-size:12px;font-weight:800;margin-bottom:8px">📑 Generator Documentații Tehnice (DTAC/PTh) <span style="font-size:9px;font-weight:600;opacity:.8;margin-left:auto">formular + validare + ~80 doc</span></button>
+  <button onclick="(window._NormativeRegistry&&_NormativeRegistry.openPanel?_NormativeRegistry.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(56,189,248,.16),rgba(37,99,235,.08));border:1px solid rgba(56,189,248,.35);border-radius:8px;color:#7dd3fc;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">📚 Registru Normative — verificare la zi <span style="font-size:9px;font-weight:600;opacity:.7;margin-left:auto">stare legală + sursă</span></button>
   <!-- Hartă conexiuni -->
   <button onclick="openStudyMap();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(99,102,241,.08));border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">
     <span style="font-size:16px">🗺</span>
@@ -1910,7 +1911,7 @@ document.addEventListener('click', function(){
 <!-- UrbanX JS Modules — ordinea de incarcare e importanta -->
 <script src="js/00-globals.js?v=20260628role4"></script>
 <script src="js/02-map-core.js?v=20260616ctx"></script>
-<script src="js/03-ui-panel.js?v=20260705mob"></script>
+<script src="js/03-ui-panel.js?v=20260705norm"></script>
 <script src="js/04-search.js?v=2026050601"></script>
 <script src="js/05-cad-utils.js?v=2026050601"></script>
 <script src="js/06-aedis.js?v=20260629alluats"></script>
@@ -5855,7 +5856,8 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/urbanx-library/functiuni/centru-social-zi.js?v=20260704u"></script>
 <script src="js/urbanx-library/lib-loader.js?v=20260705b"></script>
 <script src="js/urbanx-docx-builder.js?v=20260705a"></script>
-<script src="js/urbanx-doc-ui.js?v=20260705aviz"></script>
+<script src="js/urbanx-normative-registry.js?v=20260705a"></script>
+<script src="js/urbanx-doc-ui.js?v=20260705norm"></script>
 <script src="js/cinema-live-sources.js?v=20260525"></script>
 <script src="js/cinema-v5.js?v=20260629poi"></script>
 <script src="js/rlu-miroslava.js?v=20260525a"></script>
