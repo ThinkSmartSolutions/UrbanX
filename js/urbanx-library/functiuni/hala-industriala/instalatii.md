@@ -76,9 +76,22 @@ Alegerea soluțiilor de instalații depinde esențial de destinația halei. Tabe
 
 **Concluzie pentru obiectivul de față:** hală mixtă depozitare + producție ușoară + birouri → dimensionarea instalațiilor de stingere pentru **clasa de pericol mare (HHS III)**, regim termic diferențiat, ventilare hibridă și desfumare naturală prin acoperiș.
 
+### 2.1 Cazuri speciale de dimensionare (semnal pentru PTh)
+
+Dacă la stabilirea procesului tehnologic apare oricare dintre situațiile de mai jos, dimensionarea instalațiilor se modifică radical și trebuie reluată:
+
+- **Atmosfere explozive (ATEX — NP 127, SR EN 60079):** clasificarea zonelor de risc (0/1/2 pentru gaze/vapori, 20/21/22 pentru pulberi), echipamente electrice cu **mod de protecție Ex** (d — carcasă antideflagrantă, e — securitate mărită, i — securitate intrinsecă), ventilare de diluție dimensionată pentru menținerea concentrației sub LII, egalizarea potențialelor și evacuarea sarcinilor electrostatice, evitarea surselor de aprindere. Iluminatul, prizele și motoarele devin Ex — cost și complexitate mult mai mari.
+- **Frig industrial (SR EN 378):** dacă se folosesc agenți frigorifici (amoniac NH₃, CO₂, HFC), se prevăd detecție de agent, ventilare de avarie, stingere adecvată, camere tehnice separate, supape de siguranță dirijate.
+- **Depozitare lichide inflamabile / aerosoli:** clasa de risc la stingere crește, se impun soluții speciale (spumă, apă pulverizată), cuve de retenție, ventilare permanentă.
+- **Densitate de stocare mai mare / rafturi > 7,5 m:** trecere obligatorie la **ESFR** sau sprinklere în rafturi (in-rack), cu creșterea rezervei de apă.
+
+Aceste cazuri nu fac obiectul prezentei documentări (ipoteza „hală uscată, marfă neinflamabilă"), dar se semnalează pentru corelarea cu procesul real la PTh.
+
 ---
 
 ## 3. INSTALAȚII SANITARE (I9/2015)
+
+Instalațiile sanitare cuprind alimentarea cu apă rece și caldă de consum, prepararea apei calde menajere, canalizarea apelor uzate menajere și tehnologice, precum și dotarea grupurilor sanitare și a vestiarelor. Dimensionarea urmărește I9/2015, STAS 1478 (alimentare) și STAS 1795 / SR EN 12056 (canalizare), pornind de la numărul de utilizatori și de la normele de consum specifice funcțiunii industriale (personal cu duș la sfârșit de schimb). Se separă net circuitul de apă menajeră de cel de incendiu (contorizare și rezervă distincte), pentru a evita ca un consum de incendiu să depindă de instalația casnică și invers.
 
 ### 3.1 Sursa de apă și branșamentul
 
@@ -284,6 +297,21 @@ Mărimea nominală a separatorului (Nominal Size, NS):
 
 Volumul de stocare hidrocarburi al separatorului: min. 10 × NS = 400 l. Golirea și mentenanța: periodic prin firmă autorizată (transfer deșeu periculos, cod 13 05).
 
+### 5.3 Rețeaua de canalizare exterioară și limitele de evacuare
+
+Apele colectate se dirijează pe fluxuri separate (principiul separativ), fiecare cu tratamentul propriu înainte de descărcare:
+
+| Flux | Sursă | Tratare | Emisar / receptor |
+|---|---|---|---|
+| Ape uzate menajere | vestiare, birouri, oficiu | — (dacă rețea publică) / fosă+stație epurare | canalizare menajeră publică |
+| Ape meteorice acoperiș | receptoare sifonice | bazin de retenție + vortex | canalizare pluvială / emisar |
+| Ape meteorice platforme | rigole/guri de scurgere | separator hidrocarburi NS 40 + decantor | canalizare pluvială / emisar |
+| Ape tehnologice (dacă e cazul) | proces | pre-tratare specifică + neutralizare | conform aviz, NTPA-002 |
+
+**Limite de evacuare (NTPA):** în emisar natural — NTPA-001 (indicatori mai severi: hidrocarburi ≤ 5 mg/l, MTS, CCO-Cr, pH 6,5-8,5); în canalizarea publică — NTPA-002 (limite negociate cu operatorul). Se prevede **cămin de prelevare probe** pe fiecare flux tratat, pentru monitorizarea conformității. Rețeaua exterioară: tuburi PVC-KG / PP structurat, cămine de vizitare la schimbări de direcție/pantă și la max. 60 m, cămine de racord la limita de proprietate.
+
+Pantele minime (autocurățare, v ≥ 0,7 m/s): DN 160 — 0,5%, DN 200 — 0,4%, DN 250 — 0,3%. Adâncimea de pozare sub adâncimea de îngheț sau protejare termică.
+
 ---
 
 ## 6. INSTALAȚII TERMICE / ÎNCĂLZIRE (I13/2015)
@@ -386,10 +414,14 @@ Necesar de aer proaspăt igienic pentru 32 persoane × 30 mc/h·pers = **960 mc/
 
 **Q_ventilare = n × V = 1,5 × 21.000 / … (aplicat pe volumul zonei de lucru).** Considerând zona de lucru ≈ 60% din volum (12.600 mc): Q = 1,5 × 12.600 = **18.900 mc/h**; pentru întregul volum la n = 1,5 → **31.500 mc/h** (regim de vară/vârf).
 
+Ventilarea unei hale de volum mare urmărește trei obiective simultane: asigurarea aerului proaspăt igienic pentru personal, diluția eventualelor noxe de proces și controlul temperaturii de vară (evitarea supraîncălzirii sub acoperiș). La volume mari, ventilarea integral mecanică ar consuma mult (debite de zeci de mii de mc/h), de aceea soluția rațională este **hibridă**, valorificând tirajul termic natural.
+
 **Soluție hibridă:**
 - **admisie naturală** prin fante/jaluzele joase pe fațade (aport aer proaspăt, secțiune liberă dimensionată la v ≤ 2 m/s);
-- **evacuare naturală** prin luminatoare/trape de acoperiș (efect coș — tiraj termic, ΔH ≈ 8 m);
+- **evacuare naturală** prin luminatoare/trape de acoperiș (efect coș — tiraj termic, ΔH ≈ 8 m); aceleași trape servesc și desfumării (dublă funcție, cu comandă separată);
 - **ventilare mecanică de extracție** pentru zonele cu noxe de proces (dacă apare producție cu emisii — captare la sursă + evacuare cu ventilatoare de acoperiș).
+
+Vara, tirajul natural (aer cald mai ușor evacuat sus, aer rece introdus jos) asigură răcirea gratuită („free cooling"); iarna, admisia naturală se limitează la minimul igienic pentru a nu pierde căldură. Sistemul se completează cu **destratificatoare** care readuc aerul cald acumulat sub acoperiș în zona de lucru, reducând pierderile.
 
 ### 7.2 Extracția noxelor de proces (dacă e cazul)
 
@@ -485,9 +517,11 @@ Verificarea detaliată (CFD sau model de zonă) se face la PTh pentru scenariul 
 
 ## 9. INSTALAȚII ELECTRICE — CURENȚI TARI (I7/2011)
 
+Instalația electrică de joasă tensiune (400/230 V, 50 Hz, schemă de legare la pământ **TN-S**) alimentează toți receptorii clădirii: iluminat, prize, forță (utilaje, ventilare, pompe, termic), curenți slabi și instalațiile de securitate la incendiu. Proiectarea urmărește I7/2011 și seria SR HD 60364, cu obiective de siguranță (protecție la contact direct/indirect, la scurtcircuit și suprasarcină), continuitate (alimentare de rezervă pentru consumatorii vitali) și eficiență (compensarea factorului de putere, comandă inteligentă a iluminatului). Alimentarea se face din rețeaua operatorului de distribuție prin **branșament trifazat** cu bloc de măsură și protecție (BMPT); pentru instalația FV se aplică regimul de prosumator (v. cap. 15).
+
 ### 9.1 Bilanțul de puteri
 
-Se întocmește bilanțul de puteri instalate (Pi), cu factori de utilizare (ku) pe consumator și factor de simultaneitate (ks) global pentru determinarea puterii cerute (Pc/Pa):
+Se întocmește bilanțul de puteri instalate (Pi), cu factori de utilizare (ku) pe consumator și factor de simultaneitate (ks) global pentru determinarea puterii cerute (Pc/Pa). Puterea instalată este suma nominalelor tuturor receptorilor; factorul de utilizare reflectă gradul de încărcare al fiecărui receptor (ex. un motor rareori la 100%), iar factorul de simultaneitate ține cont că nu toți consumatorii funcționează concomitent la vârf. Pompele de incendiu se tratează separat (regim de avarie, nu se cumulează cu consumul normal, dar dimensionează sursa de rezervă):
 
 | Consumator | Pi (kW) | ku | Pi·ku (kW) |
 |---|---|---|---|
@@ -547,6 +581,14 @@ Niveluri de iluminare menținute (Em) pe zone:
 
 Eficiența energetică țintă: ≤ 2,5 W/mp per 100 lx (LED + reflectoare eficiente). Comandă cu **senzori de prezență și de lumină de zi** (dimming) pe culoarele de depozit și în birouri — economie 40-60%.
 
+**Verificarea numărului de corpuri prin metoda fluxului luminos** (metoda utilizării), pentru zona de producție (S = 800 mp, Em = 300 lx):
+- fluxul total necesar: Φ_total = Em · S / (U · MF), unde U = factor de utilizare ≈ 0,60 (highbay, reflexie medie, indice de încăpere favorabil), MF = factor de menținere ≈ 0,80;
+- Φ_total = 300 × 800 / (0,60 × 0,80) = 240.000 / 0,48 = **500.000 lm**;
+- la un corp highbay LED de 200 W cu eficacitate 150 lm/W → flux/corp = 30.000 lm;
+- **N corpuri = 500.000 / 30.000 ≈ 17 corpuri** pentru zona de producție (dispuse în grilă regulată pentru uniformitate ≥ 0,60).
+
+Puterea instalată de iluminat producție: 17 × 200 W = 3,4 kW pe 800 mp → **4,25 W/mp** la 300 lx = 1,42 W/mp/100 lx (sub ținta de 2,5, confirmă eficiența LED). Restul zonelor se dimensionează analog. Iluminatul de depozit se realizează cu corpuri liniare pe culoare (iluminare verticală pe rafturi importantă pentru citirea etichetelor).
+
 ### 9.5 Iluminatul de siguranță și evacuare (SR EN 1838)
 
 | Tip iluminat de siguranță | Nivel | Autonomie |
@@ -594,6 +636,8 @@ Consumatorii de securitate la incendiu (pompe, IDSAI, desfumare, iluminat de eva
 
 ## 10. PRIZĂ DE PĂMÂNT ȘI PROTECȚIE ÎMPOTRIVA TRĂSNETULUI (I7, I20, SR EN 62305)
 
+O construcție de mari dimensiuni, izolată sau amplasată în zonă deschisă (parcuri logistice/industriale), prezintă o suprafață de expunere semnificativă la trăsnet. Protecția se realizează pe două niveluri: **sistemul extern** (captare, coborâri, priză de pământ — deviază curentul de trăsnet spre sol) și **sistemul intern** (egalizarea potențialelor și descărcătoarele de supratensiune SPD — protejează echipamentele față de supratensiunile induse). Priza de pământ este comună pentru protecția la trăsnet și pentru protecția instalației electrice, minimizând diferențele de potențial.
+
 ### 10.1 Priza de pământ
 
 Se realizează **priză de pământ de fundație** (electrod natural) prin platbandă **OL-Zn 40×4 mm** sudată de armătura fundațiilor pe tot conturul, completată la nevoie cu electrozi verticali (țăruși) în cămine de vizitare.
@@ -635,7 +679,9 @@ Nivelul de protecție (NPT) rezultă din analiza de risc R (frecvența lovituril
 
 Densitatea sarcinii termice (P118-1): q_s = Σ(Mi·Hi)/As. Pentru depozit paletizat de ambalaje (carton/lemn/plastic) rezultă orientativ **q_s ≈ 1.200 MJ/mp** (> 840 MJ/mp) → **risc mare de incendiu**. Aceasta impune, cumulativ: **sprinklere + hidranți interiori + hidranți exteriori + detectare-semnalizare + desfumare**.
 
-Clasa de pericol la depozitare (SR EN 12845): stocare pe rafturi cu produse categoria III → **HHS III** (High Hazard Storage cat. III).
+Instalațiile de stingere reprezintă capitolul dimensionant al proiectului de instalații pentru o hală de depozitare: rezerva de apă și stația de pompare influențează direct amplasamentul (spațiu pentru rezervor și cameră de pompe), bilanțul electric (motorul pompei), rețeaua exterioară (inelul de hidranți) și avizarea (ISU). De aceea, dimensionarea lor pornește de la clasificarea corectă a riscului, care depinde de natura reală a mărfii depozitate — element ce trebuie confirmat de beneficiar înainte de faza PTh, întrucât o subestimare a clasei de risc invalidează întregul proiect de stingere.
+
+Clasa de pericol la depozitare (SR EN 12845): stocare pe rafturi cu produse categoria III → **HHS III** (High Hazard Storage cat. III). Categoria de stocare (I-IV) se stabilește în funcție de tipul produsului și al ambalajului (produse combustibile în ambalaje de carton/plastic pe paleți de lemn → categoria III-IV), iar configurația de depozitare (înălțime rafturi, tip stocare — bloc, rafturi paletizate, rafturi cu culoare) determină necesitatea sprinklerelor intermediare (in-rack) sau trecerea la ESFR.
 
 ### 11.2 Hidranți interiori (SR EN 671, P118-2)
 
@@ -663,6 +709,8 @@ Pentru depozitare HHS cat. III (rafturi ≤ 6 m):
 
 **Alternativă ESFR** (Early Suppression Fast Response) pentru rafturi înalte (> 7,5 m): capete **K360/K200** la presiune 3,5-5,0 bar, ≈ 12 capete în aria de operare — **elimină sprinklerele intermediare din rafturi**, simplificând instalația. Debitul ESFR: 12 capete × K360 × √p ≈ echivalent 45-60 l/s (verificare hidraulică la PTh). Pentru rafturi ≤ 6 m se poate menține sprinkler de plafon HHS III.
 
+**Tipul de instalație sprinkler:** pentru o hală încălzită (fie și la +5 °C antigel) se adoptă **instalație cu apă-apă (wet pipe)**, cea mai rapidă și fiabilă (conducte permanent sub presiune, capete cu ampulă termosensibilă care se sparg la temperatura nominală 68 °C și declanșează stropirea local, doar la capul afectat de foc). Pentru zonele expuse la îngheț (fără garanția temperaturii > 4 °C) se folosește instalația cu **aer-apă (dry pipe)** sau **pre-acțiune**. Funcționarea: la spargerea unui cap, scade presiunea în rețea → pornește automat pompa jockey, apoi electropompa principală → alimentează aria de operare; concomitent, aparatul de control și semnalizare (ACS) transmite alarma la IDSAI și la punctul supravegheat permanent. Capetele de sprinkler se dispun la interdistanțe max. 3,7 m (HHS) și la max. 4,6 m de perete, cu evitarea obstrucțiilor (grinzi, tubulaturi) care ar ecrana stropirea.
+
 ### 11.5 Gospodăria de apă pentru incendiu
 
 Volumul rezervei intangibile de incendiu (cumul al scenariului cel mai defavorabil — sprinkler + hidranți interiori concomitent, plus hidranți exteriori):
@@ -682,6 +730,8 @@ Volumul rezervei intangibile de incendiu (cumul al scenariului cel mai defavorab
 Colector de refulare, supape, manometre, recirculare de răcire, panou de comandă conform SR EN 12845 (pornire automată la scădere de presiune, semnalizare la dispecerat).
 
 ### 11.6 Detectare, semnalizare, alarmare (IDSAI — P118-3)
+
+Instalația de detectare, semnalizare și avertizare la incendiu (IDSAI) are rolul de a sesiza incendiul în faza incipientă și de a declanșa automat celelalte instalații de securitate (matricea de comenzi — v. § 13.5), asigurând evacuarea sigură a ocupanților și intervenția rapidă. La hale, provocarea principală este **înălțimea mare**: fumul se diluează și se răcește pe verticală, iar detectoarele punctuale de plafon (montate la 8-9 m) reacționează întârziat. Soluția o reprezintă detecția aspirativă sau liniară, mult mai sensibilă.
 
 - **Centrală de detecție adresabilă** cu autonomie de alimentare de rezervă ≥ 48 h + 30 min alarmă;
 - la **H > 12 m** detectoarele punctuale de plafon devin ineficiente → **detecție aspirativă (ASD/VESDA)** sau **bariere liniare de fum (beam)** pentru volumul mare al halei;
@@ -718,6 +768,8 @@ Rezervorul de 460 mc (2 compartimente pentru mentenanță fără scoatere din fu
 ---
 
 ## 12. INSTALAȚII DE GAZE NATURALE (NTPEE-2018)
+
+Instalația de gaze naturale alimentează aparatele de ardere (tuburile radiante și centrala termică). Proiectarea, execuția și exploatarea se fac conform NTPEE-2018, de către operatori și instalatori autorizați ANRE, cu proiect verificat de verificator atestat **Ig**. Elementele critice sunt: dimensionarea hidraulică (asigurarea presiunii la fiecare aparat), evacuarea în siguranță a gazelor de ardere, aportul de aer de ardere și, mai ales, **prevenirea acumulărilor de gaz** (detecție + electrovalvă de închidere automată).
 
 Consumatorii de gaz: tuburi radiante hală (224 kW), centrală vestiare (30 kW), preparare ACM (15 kW) → **debit total Q_gaz ≈ 29 mc/h** (v. § 6.4).
 
@@ -756,6 +808,27 @@ Cititoare de proximitate (card/tag) pe ușile de acces personal și birouri, **i
 ### 13.4 Rețea date-voce
 
 Cablare structurată **Cat. 6 / 6A** (min. 2 prize RJ45 per post de lucru), **rack de comunicații** cu **switch-uri PoE+** (alimentare camere/AP), **fibră optică** între hală și mezaninul de birouri, **puncte Wi-Fi industriale** pentru scanere/terminale de depozit (WMS). Estimare ≈ 40 porturi active → **switch 48 porturi PoE+**. UPS pentru echipamentele critice de rețea.
+
+### 13.5 Interconectarea instalațiilor (BMS și matricea de comenzi la incendiu)
+
+Instalațiile se integrează într-un **sistem de automatizare a clădirii (BMS)** pentru monitorizare și comandă centralizată (temperaturi, consumuri, stări echipamente, alarme), cu protocoale deschise (Modbus/BACnet/KNX). BMS-ul NU comandă funcțiile de securitate la incendiu (acestea rămân autonome pe IDSAI — cerință P118-3), dar preia semnalizarea.
+
+**Matricea de comenzi la detecția confirmată de incendiu** (cauză → efect, executată autonom de IDSAI):
+
+| Comandă declanșată | Efect |
+|---|---|
+| Deschidere trape de desfumare (canton afectat) | evacuare fum natural |
+| Oprire ventilare normală (CTA, extracții) | evitarea perturbării tirajului |
+| Închidere clapete antifoc pe traversări | limitarea propagării |
+| Deblocare control acces (fail-safe) | căi de evacuare libere |
+| Pornire pompe de incendiu (la scădere presiune) | alimentare sprinkler/hidranți |
+| Oprire alimentare gaze (electrovalvă) | eliminarea sursei de aliment. incendiu |
+| Alarmare acustică + optică (sirene/flash) | avertizarea ocupanților |
+| Iluminat de evacuare la funcțiune 100% | ghidarea evacuării |
+| Transmisie semnal la dispecerat/ISU | intervenție |
+| Oprire selectivă circuite electrice (după caz) | reducerea riscului electric |
+
+Această matrice se detaliază în scenariul de securitate la incendiu și se testează integral la PIF.
 
 ---
 
@@ -899,6 +972,54 @@ Documentația se supune verificării de către **verificatori de proiecte atesta
 - **Aviz operator apă-canal** (branșament, debit acceptat de descărcare, bazin de retenție), **aviz operator gaz** și **aviz operator energie electrică** (racord, putere aprobată).
 - **Breviare de calcul, planuri și scheme complete** se elaborează la fazele **PTh + DDE**; valorile din prezentul memoriu DTAC reprezintă **dimensionare preliminară**, care se definitivează pe date finale (tipul mărfii și clasa de risc reală de depozitare, procesul tehnologic exact, avize de branșament, măsurători de sol/rezistivitate, sarcina termică reală).
 - Orice modificare a ipotezei funcționale (ATEX, lichide inflamabile, frig industrial, densitate de stocare mai mare) **impune re-dimensionarea integrală** a instalațiilor de stingere, ventilare și electrice.
+
+---
+
+## ANEXA A — Breviar centralizat al mărimilor de calcul
+
+Anexa reunește, pentru trasabilitate și pentru corelarea între specialități, toate mărimile de calcul rezultate în memoriu, cu formula sau sursa fiecăreia. Valorile servesc drept date de intrare pentru breviarele detaliate de la faza PTh/DDE.
+
+**A.1 Debite de apă și canalizare:**
+- necesar zilnic mediu Q_zi_med = 2,28 mc/zi; maxim zilnic = 2,96 mc/zi; orar maxim = 0,74 mc/h;
+- debit de calcul apă q_c = 0,20·√ΣE + 0,004·ΣE = 1,0 l/s (ΣE = 20,70 echivalenți);
+- debit canalizare menajeră q_c_u = q_c + q_s = 3,0 l/s;
+- debit pluvial acoperiș Q_p = φ·i·Sc/10.000 = 72,0 l/s;
+- debit pluvial platforme = 40,5 l/s → separator NS 40;
+- volum bazin de retenție V_ret = (Q_p − Q_acc)·t/1000 = 55 mc.
+
+**A.2 Puteri termice:**
+- necesar hală (transmisie + ventilare) Φ = 78,5 + 121,4 = 200 kW → 214 kW cu adaos;
+- necesar mezanin birouri = 29,4 kW; sarcină de frig birouri ≈ 21,4 kW;
+- putere ACM de vârf (instant echivalent) = 125,6 kW → acoperit prin acumulare (500 l, sursă 15 kW);
+- putere sursă gaz totală = 269 kW → debit gaz Q_gaz = P/H_i = 29 mc/h.
+
+**A.3 Ventilare și desfumare:**
+- debit de ventilare hală (n = 1,5 h⁻¹) = 18.900-31.500 mc/h;
+- extracție grupuri sanitare/vestiare + admisie birouri ≈ 2.400 mc/h;
+- suprafață utilă desfumare A_util = 1,3%·2.400 = 31,2 mp; geometric 48,0 mp (24 trape × 2,0 mp); aer compensare ≥ 48 mp;
+- debit masic pană de fum (focar 5 MW) ≈ 24 kg/s ≈ 39 mc/s la 300 °C.
+
+**A.4 Electrice:**
+- putere instalată Pi·ku = 107 kW; putere cerută Pc = 91 kW (ks 0,85);
+- curent de calcul Ic = Pc/(√3·U·cosφ) = 143 A → branșament 3×160 A;
+- compensare Q_c = P·(tanφ₁ − tanφ₂) = 34 kVAr → baterie 40 kVAr;
+- curent de scurtcircuit estimat Ik" ≈ 10-15 kA → aparataj Icu ≥ 15 kA.
+
+**A.5 Protecție la trăsnet:**
+- suprafață de captare Ad ≈ 10.651 mp; Nd = Ng·Ad·Cd ≈ 0,048 lovituri/an → NPT III;
+- rezistență priză de pământ R ≈ ρ/(π·D) = 0,64 Ω < 1 Ω (comună).
+
+**A.6 Stingere incendiu:**
+- sprinkler HHS III: d = 10 mm/min, A_op = 260 mp → Q = 43,3 l/s, 90 min → 233,8 mc;
+- hidranți interiori 4,2 l/s × 10 min → 2,52 mc;
+- hidranți exteriori 20 l/s × 180 min → 216 mc;
+- rezervă totală = 452,3 → 460 mc; putere electropompă P = ρgQH/(1000η) = 61,7 kW → motor 75 kW.
+
+**A.7 Aer comprimat (dacă e cazul):** debit necesar ≈ 271 l/min (16,3 mc/h FAD) → compresor 15-18 kW + rezervor 1.000 l.
+
+**A.8 Eficiență energetică:** FV 150 kWp → E_an = P·radiație·PR = 150·1.250·0,80 = 150 MWh/an; recuperator CTA η ≥ 73%.
+
+Toate valorile de mai sus sunt **preliminare (fază DTAC)** și se recalculează la PTh cu datele definitive de proiect (marfă, proces, avize, măsurători de teren).
 
 ---
 

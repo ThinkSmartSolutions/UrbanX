@@ -408,6 +408,14 @@ Distanța de evacuare pe mezanin de la punctul cel mai îndepărtat la scară: v
 
 Ușile de evacuare: deschidere pe sensul evacuării, prevăzute cu **bare antipanică** la ieșirile cu peste 50 persoane, nezăvorâte în timpul programului.
 
+### 4.8. Cerințe suplimentare privind ușile și traseele de evacuare
+
+- **Sensul de deschidere:** ușile de pe traseul de evacuare care deservesc peste 30 de persoane sau zone cu risc mare se deschid **în sensul de deplasare spre exterior**. Porțile industriale mari (glisante/secționale) nu se consideră ieșiri de evacuare — lângă acestea se prevăd **uși pietonale** de evacuare distincte (min. 0,90 m liber, min. 1,80 m la ieșiri cu flux mare).
+- **Autoblocarea:** ușile de evacuare nu se blochează, nu se încuie și nu se obturează în timpul programului; dacă din motive de securitate a bunurilor se prevăd sisteme de control acces, acestea se **deblochează automat** la alarma de incendiu (fail-safe).
+- **Lățimea liberă real utilă:** se măsoară între canaturile deschise; obstacolele (balamale, brațe de închidere) nu trebuie să reducă lățimea sub minimul de calcul.
+- **Continuitatea traseului:** culoarele de circulație/evacuare din depozit se marchează la pardoseală (benzi), se mențin libere pe toată lățimea (min. 1,20 m) și nu se folosesc pentru depozitare temporară.
+- **Punctul de adunare (loc de refugiu):** exterior, la distanță sigură de construcție și de accesul autospecialelor, semnalizat, cu capacitate pentru toate cele ≈ 68 persoane.
+
 ---
 
 ## 5. INSTALAȚII DE SEMNALIZARE, ALARMARE ȘI ALERTARE (IDSAI)
@@ -415,6 +423,8 @@ Ușile de evacuare: deschidere pe sensul evacuării, prevăzute cu **bare antipa
 ### 5.1. Necesitatea (P118-3/2015)
 
 Conform **P118-3/2015**, instalația de detectare, semnalizare și alarmare la incendiu (IDSAI) este **obligatorie** pentru: construcții de producție/depozitare categoria C cu arie desfășurată peste 600 mp și depozite cu sarcină termică mare. Hala (2.700 mp, qf mare) se echipează cu **IDSAI cu acoperire totală**.
+
+Rolul funcțional al IDSAI în lanțul de securitate al halei este triplu: (1) **detecția timpurie** a incendiului incipient — critică într-un depozit unde focul se poate dezvolta ascuns între stive înainte de a fi vizibil; (2) **alarmarea** ocupanților pentru inițierea evacuării în fereastra de timp disponibilă (ASET); (3) **comanda automată** a instalațiilor cu rol de protecție (SHEV, oprire ventilare, uși antifoc, semnalizare la panoul pompierilor). Fără detecție timpurie, timpul necesar de evacuare (RSET) ar crește peste timpul disponibil, iar sprinklerele ar interveni mai târziu, cu incendiul deja dezvoltat. De aceea IDSAI reprezintă „primul strat" al protecției active, anterior stingerii.
 
 ### 5.2. Compunerea instalației
 
@@ -686,6 +696,21 @@ Interacțiunea SHEV–sprinklere este delicată: deschiderea prematură a trapel
 | **Instalație de protecție împotriva trăsnetului (IPT)** | Structură metalică înaltă | IPT conform I7, cu prize de pământ și legături de echipotențializare |
 | **Gaze naturale** (dacă e cazul) | Robinet de închidere rapidă accesibil, detectoare de gaz | Electrovană de blocare comandată la detecție |
 
+### 8.1. Detaliere — alimentarea electrică a consumatorilor de securitate
+
+Consumatorii vitali pentru securitatea la incendiu trebuie să funcționeze chiar și după întreruperea generală a alimentării normale. Se prevăd două categorii de surse de rezervă:
+
+- **Sursă neîntreruptibilă (UPS/baterii)** — pentru: centrala IDSAI (autonomie min. 48 h + 30 min alarmă), iluminatul de securitate (autonomie min. 1 h), actuatoarele SHEV, sistemele de comandă. Comutarea trebuie să fie fără întrerupere (0 s) pentru IDSAI.
+- **Pompa de incendiu diesel** — independentă de rețeaua electrică (SR EN 12845), pornire automată la scăderea presiunii în rețeaua de sprinklere; rezervor de combustibil pentru min. durata teoretică de funcționare + rezervă.
+
+Circuitele de alimentare a consumatorilor de securitate se execută cu **cabluri rezistente la foc (E30–E90)**, pozate separat de circuitele normale, astfel încât un incendiu într-o zonă să nu întrerupă alimentarea instalațiilor de securitate ale celorlalte zone.
+
+### 8.2. Dispozitivul de întrerupere generală și oprirea instalațiilor tehnologice
+
+- **Întreruptorul general de incendiu** — amplasat la accesul principal, accesibil pompierilor, semnalizat („Oprire generală în caz de incendiu"), permite scoaterea de sub tensiune a instalațiilor de forță și iluminat normal, **fără** a întrerupe circuitele de securitate.
+- **Oprirea automată a ventilării** — la alarmă, instalațiile de tratare/recirculare aer se opresc pentru a nu propaga fumul; clapetele antifoc (EI) montate pe tubulatura care traversează pereți/planșee de compartimentare se închid automat.
+- **Blocarea benzilor/liniilor tehnologice** — oprirea de urgență a echipamentelor de producție din zona afectată.
+
 ---
 
 ## 9. CĂI DE ACCES ȘI INTERVENȚIE PENTRU FORȚELE DE INTERVENȚIE
@@ -703,6 +728,32 @@ Conform **P118-1/2013 (cap. accese și circulații pentru intervenție)** și no
 | Panou de comandă/informare pompieri | La accesul principal: comandă SHEV, oprire generală, planuri | Prevăzut lângă intrarea principală |
 
 Se asigură **menținerea liberă permanentă** a căilor de acces și a platformelor (interdicție de parcare/depozitare).
+
+### 9.1. Dimensionarea platformei și a accesului pentru autospeciale
+
+Autospecialele de intervenție ale ISU (autospecială de stingere cu apă și spumă — greutate ≈ 16–26 t, autoscară/platformă) impun:
+- **capacitate portantă a drumului și platformei** de min. 16 t/osie (structură rutieră dimensionată corespunzător, nu numai suprafață asfaltată);
+- **gabarit liber pe verticală** min. 4,20 m (fără cabluri/conducte joase, copertine);
+- **rază de viraj** compatibilă cu autospeciala (raza interioară ≈ 8–11 m);
+- **platformă de staționare** lângă fațada de intervenție și lângă hidranții exteriori, cu suprafață minimă care să permită desfășurarea și alimentarea (cca 6 × 12 m per poziție).
+
+### 9.2. Timp de răspuns și sursele de apă disponibile pentru intervenție
+
+Pentru intervenția forțelor ISU se pun la dispoziție, cumulat:
+- **rezervorul propriu de 550 m³** (priză de aspirație amenajată pentru autospeciale);
+- **2 hidranți exteriori** de incendiu Dn 100/150 pe rețeaua inelară de incintă, cu debit 20 l/s;
+- eventual, sursă de completare din rețeaua publică.
+
+Debitul cumulat disponibil pentru intervenție (rezervor + hidranți) depășește necesarul de calcul al unei autospeciale medii (cca 20–40 l/s), asigurând continuitatea alimentării pe durata intervenției. Poziționarea hidranților exteriori la 5–15 m de clădire și la max. 150 m distanță de parcurs garantează accesul rapid al furtunurilor la orice fațadă.
+
+### 9.3. Panoul de comandă și informare pentru pompieri
+
+La accesul principal se amplasează un **panou de comandă și informare** care cuprinde:
+- comanda manuală a SHEV (deschidere trape pe zone de fum);
+- indicatorul de stare al IDSAI (zonă în alarmă);
+- comanda de oprire generală electrică și a ventilării;
+- planul construcției cu marcarea compartimentelor, hidranților, tablourilor, rezervorului și a căilor de acces;
+- date de contact ale cadrului tehnic PSI și ale serviciului privat.
 
 ---
 

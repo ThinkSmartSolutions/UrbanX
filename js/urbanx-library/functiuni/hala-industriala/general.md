@@ -47,6 +47,22 @@ Pentru a respecta principiul evitării duplicării de conținut, prezentul memor
 
 Această delimitare asigură că fiecare livrabil are un scop distinct: memoriul general oferă imaginea de ansamblu necesară autorității emitente și verificatorilor pentru a înțelege investiția în întregul ei, iar memoriile de specialitate oferă fundamentarea tehnică aprofundată pe fiecare cerință fundamentală.
 
+### 1.5. Componența documentației D.T.A.C.
+
+Conform conținutului-cadru din Legea 50/1991 (Anexa 1), documentația tehnică pentru autorizarea executării lucrărilor de construire cuprinde piese scrise și piese desenate, structurate astfel:
+
+| Categorie | Conținut |
+|---|---|
+| **Piese scrise** | listă/borderou de piese; memoriu general (prezentul); memorii de specialitate (arhitectură, rezistență, instalații); date/documente de identificare (extras CF, plan de amplasament și delimitare); certificatul de urbanism și avizele/acordurile solicitate prin acesta; referatele verificatorilor pe cerințele A–F |
+| **Piese desenate — arhitectură** | plan de încadrare în zonă; plan de situație (sistematizare, accese, utilități, bilanț teritorial); planuri de nivel (parter, mezanin); secțiuni caracteristice; fațade; plan de învelitoare |
+| **Piese desenate — rezistență** | planuri de fundații și detalii principale (la faza DTAC — la nivel de principiu; detaliile complete la PT+DE) |
+| **Piese desenate — instalații** | scheme de principiu pentru instalațiile aferente |
+| **Piese economice** | deviz general (structura HG 907/2016) |
+
+Prezentul memoriu general se corelează cu toate aceste piese și trimite la cele de specialitate pentru detaliile care nu fac obiectul sintezei generale.
+
+Autorizația de construire se emite de autoritatea administrației publice locale, pe baza documentației D.T.A.C. verificate, a certificatului de urbanism, a avizelor/acordurilor solicitate prin acesta și a dovezii dreptului asupra imobilului. Termenul de valabilitate al autorizației și termenul de începere/finalizare a lucrărilor se stabilesc conform Legii 50/1991. Începerea execuției se anunță autorității emitente și inspectoratului de stat în construcții. Orice modificare a soluției autorizate care depășește limitele admise impune obținerea unei autorizații modificatoare. Aceste aspecte procedurale, deși nu fac obiectul proiectării propriu-zise, sunt esențiale pentru derularea legală a investiției și se au în vedere la planificarea acesteia.
+
 ---
 
 ## 2. TEMA DE PROIECTARE ȘI OBIECTIVELE INVESTIȚIEI
@@ -61,6 +77,8 @@ Beneficiarul solicită realizarea unei **hale industriale/logistice** de referin
 - corp administrativ (birouri, vestiare-filtru, grupuri sanitare) integrat pe mezanin parțial;
 - sistematizare completă a incintei: platforme carosabile, parcaje, spații verzi, împrejmuire;
 - toate utilitățile racordate (apă, canal, energie, gaze, telecomunicații).
+
+Tema de proiectare a fost formulată de beneficiar pe baza necesarului operațional (volum de marfă gestionat, tip de activitate, număr de angajați, program de lucru) și a fost transpusă de proiectant într-un program funcțional care corelează cerințele de exploatare cu constrângerile amplasamentului și cu reglementările urbanistice. Programul stabilește suprafețele necesare pe zone funcționale, gabaritele minime (înălțime liberă, deschideri), dotările de andocare și cerințele de siguranță, constituind baza soluției de ansamblu. Dimensiunea de referință de 2.400 mp și geometria 40 × 60 m reprezintă o configurație uzuală, eficientă din punct de vedere structural (raport favorabil între deschidere și travee) și adaptată unei parcele de circa 6.000 mp cu indicatorii urbanistici menționați. Tema prevede, de asemenea, posibilitatea de extindere ulterioară, motiv pentru care structura se concepe modular, iar amplasarea pe parcelă rezervă direcția de extindere.
 
 ### 2.2. Tipologia halei — încadrare
 
@@ -120,7 +138,11 @@ Oportunitatea se justifică prin conjuncția mai multor condiții favorabile: ex
 | **Categoria de folosință** | teren intravilan cu destinație industrială / *(dacă e cazul)* teren extravilan/agricol ce se introduce în intravilan |
 | **Scoatere din circuitul agricol** | dacă terenul are categoria de folosință agricolă, se realizează **scoaterea definitivă din circuitul agricol** (Legea 18/1991 privind fondul funciar; aprobare + tarif/taxă); se atașează dovada la DTAC |
 
+Din punct de vedere economic, terenul are, prin PUG/PUZ, destinația de zonă de unități industriale/logistice, ceea ce îl face compatibil cu investiția și îi conferă o valoare de piață corelată cu potențialul de dezvoltare permis (POT/CUT). Nu există interdicții definitive de construire; eventualele interdicții temporare (de exemplu, până la aprobarea unui PUZ) se ridică prin parcurgerea procedurii de urbanism corespunzătoare. Obligațiile fiscale (impozit pe teren și, ulterior, pe clădire) și taxele aferente autorizării (taxa de autorizare de 1% din valoarea autorizată, cotele ISC) se au în vedere în fundamentarea economică a investiției.
+
 Terenul este liber de construcții sau conține construcții ce se desființează în baza unei autorizații de desființare separate (după caz). Se respectă condițiile din **Legea 50/1991** privind dreptul de a construi.
+
+Regimul juridic, economic și tehnic al terenului constituie fundamentul legal al investiției și se prezintă distinct pentru a demonstra că sunt îndeplinite toate condițiile prealabile autorizării: existența unui drept care conferă dreptul de a construi, compatibilitatea destinației terenului cu funcțiunea propusă și încadrarea în reglementările urbanistice. Aceste elemente se documentează prin extrasul de carte funciară, planul de amplasament și delimitare, certificatul de urbanism și, după caz, actele privind schimbarea categoriei de folosință.
 
 Dreptul de a executa lucrări de construire se dovedește, conform art. 1 alin. (3) din Legea 50/1991, printr-un act care atestă un drept real principal (proprietate, superficie, concesiune, folosință) sau, în cazuri limitate, un drept de creanță cu acordul proprietarului. Pentru investiția de față se prezintă extrasul de carte funciară actualizat, care confirmă intabularea dreptului și evidențiază eventualele sarcini. În situația în care asupra imobilului sunt înscrise servituți (de trecere, de vedere, de rețele edilitare) sau zone de protecție ale rețelelor magistrale ori ale drumurilor, amplasarea construcției și a rețelelor de incintă se face cu respectarea acestor culoare, aspect verificat pe planul de situație și confirmat prin avizele deținătorilor de rețele.
 
@@ -205,6 +227,8 @@ Terenul are o suprafață de **6.000 mp**, formă *(regulată/neregulată)*, rel
 
 Distanțele de siguranță la foc între construcții (de la limitele de proprietate) se respectă conform P118-1, în funcție de gradul de rezistență la foc al construcțiilor vecine.
 
+Retragerile propuse (5,0–6,0 m lateral, ≥ 5,0 m posterior, 10,0 m la aliniament) asigură atât respectarea prescripțiilor RLU, cât și distanțele de siguranță la foc față de construcțiile de pe parcelele vecine, evitând riscul de propagare a incendiului între imobile. Retragerea generoasă la aliniament (10,0 m) creează, totodată, spațiul necesar frontului de manevră al autovehiculelor grele și zonei de așteptare, fără staționare pe drumul public. Amplasarea construcției pe parcelă ține cont și de orientarea față de punctele cardinale (pentru optimizarea aportului de lumină naturală prin luminatoare și pentru controlul aporturilor solare la corpul administrativ) și de direcția de extindere ulterioară rezervată.
+
 ### 5.3. Accese existente
 
 Accesul carosabil se realizează din drumul public învecinat. Nu există accese pietonale amenajate; acestea se realizează prin proiect, separat de circulația grea.
@@ -238,6 +262,8 @@ Amplasamentul se caracterizează geotehnic prin studiu geotehnic **categoria geo
 
 Soluția de fundare (izolată sub stâlpi, pe strat portant, cu Df sub adâncimea de îngheț) se detaliază în memoriul de rezistență și se confirmă la faza PT+DE pe baza studiului geotehnic complet.
 
+Studiul geotehnic se elaborează conform NP 074, cu încadrare în categoria geotehnică 2 pentru o construcție industrială curentă pe teren cu risc geotehnic redus spre moderat. El furnizează stratificația terenului (obținută prin foraje și/sau penetrări), caracteristicile fizico-mecanice ale straturilor, nivelul apei subterane și agresivitatea acesteia asupra betonului, presiunea convențională de calcul și recomandările privind sistemul de fundare, adâncimea de fundare și eventualele măsuri de îmbunătățire a terenului. Pentru o hală, o atenție specială se acordă comportării terenului sub placa de pardoseală industrială, care transmite încărcări mari și uniforme și pentru care se cere un modul de reacție al terenului (k) corespunzător; insuficiența acestuia impune îmbunătățirea patului prin compactare suplimentară sau prin strat de balast/piatră spartă.
+
 Din perspectiva memoriului general, sinteza geotehnică are rolul de a confirma **fezabilitatea fundării directe** și de a semnala eventualele condiții speciale care ar putea influența costul și organizarea execuției: prezența unui strat superficial de umplutură sau sol vegetal impune decaparea și înlocuirea controlată; un nivel hidrostatic ridicat impune epuizment în perioada săpăturilor și eventual hidroizolarea gospodăriilor subterane; existența unor pământuri sensibile la umezire sau contractile ar impune măsuri suplimentare de sistematizare a apelor și de protecție a fundațiilor. Aceste aspecte se corelează cu sistematizarea verticală (§9) și cu graficul de execuție (§11, §15), întrucât lucrările de terasamente și fundare condiționează întregul flux ulterior de montaj.
 
 ---
@@ -254,6 +280,8 @@ Soluția de ansamblu integrează trei subsisteme care trebuie să funcționeze c
 
 Modularitatea structurală (travee constante de 6 m, cadre transversale repetitive de 24 m deschidere) conferă flexibilitate în amenajarea interioară: dispunerea rafturilor, a culoarelor de motostivuitor și a eventualelor compartimentări ușoare se poate adapta pe parcursul exploatării, fără a afecta structura. Această flexibilitate este o cerință funcțională esențială pentru spațiile logistice, unde configurația internă se modifică frecvent în funcție de chiriaș sau de fluxul de marfă.
 
+Coerența soluției de ansamblu se verifică prin corelarea reciprocă a deciziilor: geometria (deschideri, travee, înălțimi) determină sistemul structural; sistemul structural și înălțimea liberă determină volumul de desfumat și de climatizat; funcțiunea (depozitare de mărfuri combustibile) determină categoria de pericol de incendiu și, implicit, cerințele de compartimentare și stingere; sistematizarea incintei (platforme, docuri, parcaje) decurge din fluxurile de circulație și din gabaritul autovehiculelor grele; iar toate acestea se încadrează în plafoanele urbanistice. Rolul memoriului general este tocmai de a demonstra că aceste decizii, dezvoltate în detaliu de fiecare specialitate, formează un întreg funcțional, sigur și conform, fără contradicții între discipline.
+
 ### 6.2. Organizarea pe zone funcționale
 
 | Zonă | Su orientativ | Descriere |
@@ -264,6 +292,10 @@ Modularitatea structurală (travee constante de 6 m, cadre transversale repetiti
 | Vestiare + grupuri sanitare | ~80 mp | bloc filtru vestiar–duș–WC |
 | Spații tehnice (CT / tablou / pompe) | ~60 mp | compartimentate REI |
 
+### 6.2.1. Capacitatea și dimensionarea funcțională
+
+Capacitatea halei se exprimă prin suprafața utilă de depozitare/producție (~2.000 mp la parter) și prin volumul util disponibil pe verticală, condiționat de înălțimea liberă (≥ 8 m). Pentru depozitare pe rafturi, capacitatea reală de stocare depinde de sistemul de rafturi ales (paletare convențională, drive-in, cantilever, VNA) și de clasa de planeitate a pardoselii, care limitează înălțimea de operare a echipamentelor de manipulare. Configurația 40 × 60 m cu deschideri de 24 m și travee de 6 m oferă un spațiu liber, fără stâlpi intermediari pe deschidere, care maximizează flexibilitatea de amplasare a rafturilor și a culoarelor. Numărul de docuri se corelează cu volumul de marfă vehiculat și cu frecvența livrărilor; fronturile de andocare se dimensionează astfel încât să permită operarea simultană a mai multor autovehicule fără blocarea manevrei. Corpul administrativ pe mezanin (~150 mp) se dimensionează pentru personalul administrativ și de coordonare, iar spațiile sociale (vestiare, grupuri sanitare) pentru numărul total de angajați pe schimb.
+
 ### 6.3. Fluxuri funcționale (sinteză)
 
 - **Recepție:** TIR → dock leveler → uși secționale → zonă recepție → depozitare.
@@ -272,11 +304,19 @@ Modularitatea structurală (travee constante de 6 m, cadre transversale repetiti
 
 Detaliile de dotare a docurilor (niveluri hidraulice, dock shelter, tampoane, uși secționale), normativele sanitare pentru grupuri și organizarea filtrelor sunt tratate în `arhitectura.md` și `instalatii.md`.
 
+Organizarea spațiilor sociale respectă principiul „filtrului": personalul trece dintr-o zonă „curată" (acces, vestiar haine de stradă) printr-o zonă de igienă (dușuri, unde este cazul) într-o zonă „de lucru" (vestiar haine de lucru, acces în hală), evitând contaminarea încrucișată și asigurând condițiile de igienă a muncii. Dimensionarea grupurilor sanitare și a vestiarelor se face pe baza numărului de angajați pe schimb și a normelor de igienă (obiecte sanitare pe număr de persoane și grad de murdărire), iar detalierea se regăsește în memoriul de arhitectură. Evacuarea din corpul administrativ (mezanin) se asigură prin scări conforme P118-1, dimensionate pe flux.
+
 La nivel de ansamblu, principiul director al organizării fluxurilor este **evitarea încrucișărilor** dintre fluxurile de marfă la intrare și la ieșire și dintre fluxul de marfă și cel de personal. Recepția și expediția se dispun astfel încât autovehiculele să circule pe un traseu logic, iar personalul să acceseze zona de lucru printr-un filtru (vestiar) care separă zona „curată" de cea „de lucru". Zonele tampon de recepție/expediție amortizează vârfurile de activitate și evită blocarea docurilor. Această organizare susține atât productivitatea operațională, cât și cerințele de siguranță (D) și de igienă (C).
 
 ### 6.4. Compartimentarea și zidul de foc (sinteză)
 
 La depășirea ariei maxime a compartimentului de incendiu, hala se împarte prin **zid de foc REI 180** autoportant, care depășește acoperișul cu +0,60 m și fațada cu 0,30–0,60 m, cu goluri protejate prin uși EI2 90–120 C cu autoînchidere. Detaliile de conformare, verificarea colapsului unilateral și dimensionarea ariilor de compartiment se prezintă în scenariul de securitate la incendiu și în memoriile de specialitate (v. și §13).
+
+Principiul zidului de foc autoportant este ca prăbușirea structurii metalice de o parte a peretelui, în situația de incendiu (când oțelul își pierde capacitatea portantă la temperaturi ridicate), să nu antreneze și prăbușirea peretelui, astfel încât acesta să continue să separe compartimentele. Din acest motiv, zidul de foc se realizează pe o structură proprie, independentă, verificată la colaps unilateral. Depășirea acoperișului și a fațadei împiedică propagarea flăcărilor peste și în jurul peretelui. Această soluție permite realizarea unor hale de suprafață mare (peste aria maximă a unui singur compartiment) fără a compromite siguranța, prin împărțirea în compartimente independente.
+
+### 6.5. Categoria și clasa de importanță — justificare
+
+Încadrarea în **categoria de importanță C** (construcție de importanță normală, conform HG 766/1997) se justifică prin funcțiunea curentă (depozitare/producție ușoară), fără riscuri deosebite pentru viața oamenilor sau pentru mediu în caz de avarie și fără valoare de patrimoniu. **Clasa de importanță seismică III** (factor de importanță γI,e = 1,0, conform P100-1/2013) corespunde construcțiilor de tip curent, cu aglomerări reduse de persoane. Dacă hala ar adăposti substanțe periculoase sau ar constitui o aglomerare de peste 200 de persoane, s-ar impune clasa de importanță II (γI,e = 1,2), cu solicitări seismice de calcul majorate; pentru destinația de față, această situație nu se aplică. **Gradul II de rezistență la foc** se adoptă în corelație cu categoria de pericol de incendiu C și cu aria compartimentelor, impunând protejarea structurii metalice pentru asigurarea rezistenței la foc necesare. Aceste încadrări constituie premise pentru toate dimensionările din memoriile de specialitate.
 
 ---
 
@@ -305,6 +345,12 @@ La depășirea ariei maxime a compartimentului de incendiu, hala se împarte pri
 
 Numărul de locuri de parcare se stabilește conform **HG 525/1996** (RGU) și RLU local. Pentru componenta administrativă (birouri ~150 mp), norma uzuală este 1 loc / 80–100 mp arie utilă birou, la care se adaugă locuri pentru autoturisme angajați producție/depozit și locuri de așteptare/manevră TIR. Dimensiuni: auto 2,5 × 5,0 m; loc așteptare TIR 3,5 × 18,0 m. Rezultă un necesar de circa **8–12 locuri auto** + locuri TIR la docuri (calculul exact se completează cu suprafețele definitive la PT).
 
+Se prevede cel puțin un loc de parcare adaptat pentru persoane cu dizabilități, dimensionat conform NP 051, poziționat în apropierea accesului în corpul administrativ. Locurile de parcare pentru autoturisme se dispun grupat, în afara zonelor de manevră a autovehiculelor grele, pentru a evita conflictele de circulație. Numărul final de locuri se corelează cu numărul de angajați pe schimb și cu cerințele exprese ale RLU local, care în unele localități impune norme diferite de cele orientative de mai sus.
+
+### 7.2. Semnificația indicatorilor și corelarea lor
+
+Indicatorii tehnico-economici nu sunt valori izolate, ci reflectă coerența soluției de ansamblu. POT-ul de 40% corelat cu 40% platforme și 20% spații verzi descrie o incintă echilibrată, în care suprafața neconstruită este dedicată în principal manevrei autovehiculelor grele — o cerință funcțională, nu o simplă rezervă. CUT-ul redus (0,42) confirmă că volumul edificat este dominat de un singur nivel de mare înălțime, specific halelor, plus un mezanin parțial. Volumul construit de circa 24.000 mc, raportat la suprafața construită, indică o înălțime medie mare, tipică spațiilor de depozitare, cu implicații directe asupra sistemelor de desfumare (volum mare de fum de gestionat) și de climatizare (volum mare de aer). Aceste corelații stau la baza dimensionării instalațiilor și a soluțiilor de siguranță din memoriile de specialitate.
+
 ---
 
 ## 8. SOLUȚII PE SPECIALITĂȚI (SINTEZĂ)
@@ -317,6 +363,8 @@ Rolul acestui capitol în memoriul general este de a demonstra **coerența dintr
 
 Anvelopă din panouri sandwich (pereți PUR/PIR sau vată minerală pentru clasa de foc, 80–120 mm; acoperiș sandwich 100–160 mm), luminatoare ≥ 5% din pardoseală cu dublu rol de desfumare, tâmplărie și uși secționale la docuri, finisaje interioare industriale, corp administrativ cu compartimentări ușoare și grupuri sanitare. Accesibilitate persoane cu dizabilități (NP 051). *Detalii în memoriul de arhitectură.*
 
+La nivel de concept, arhitectura halei subordonează expresia formală funcțiunii: volumul simplu, prismatic, cu acoperiș în două ape cu pantă redusă, reflectă onest structura de cadre metalice și permite o anvelopă economică și etanșă. Alegerea miezului izolant al panourilor (spumă poliuretanică/poliizocianurat pentru performanță termică, sau vată minerală acolo unde cerințele de reacție/rezistență la foc o impun) reprezintă un compromis între performanța termică, comportarea la foc și cost. Luminatoarele de pe acoperiș asigură iluminare naturală (reducând consumul de energie pentru iluminat în timpul zilei) și îndeplinesc simultan rolul de dispozitive de evacuare a fumului și gazelor fierbinți în caz de incendiu, integrând astfel două funcțiuni într-un singur element constructiv.
+
 ### 8.2. Rezistență (→ `structura.md`)
 
 **Suprastructură metalică:** cadre transversale (stâlpi HEB/HEA sau I sudat variabil, încastrați la bază) + rigle acoperiș (ferme cu zăbrele la 24–30 m sau inimă plină cu vute la 18–24 m) + contravântuiri (X pereți + orizontale acoperiș) + pane Z/C + rigle perete. Oțel S235/S355 JR, îmbinări cu șuruburi 8.8/10.9 și sudură (EN 1993-1-8).
@@ -325,11 +373,17 @@ Anvelopă din panouri sandwich (pereți PUR/PIR sau vată minerală pentru clasa
 
 **Acțiuni și verificări (CR 0/2012 + Eurocoduri):** gk 0,35–0,55 kN/mp; zăpadă s0,k 1,5–2,5 kN/mp; vânt qb 0,4–0,6 kPa; seism ag 0,15–0,35g; q = 4 (necontravântuite) / 3 (contravântuite centric); combinații SLU, seismic și SLS (săgeți L/250–L/300, deplasări H/150 seism, H/250 vânt). *Breviarul complet în memoriul de rezistență.*
 
+Alegerea sistemului structural — cadre metalice transversale cu îmbinări rigide, contravântuite longitudinal — este justificată de necesitatea unor deschideri mari libere de stâlpi (24 m), de greutatea proprie redusă (avantaj seismic și la fundare) și de rapiditatea montajului. Pentru deschideri mari, riglele cu zăbrele (ferme) optimizează consumul de oțel și permit trecerea traseelor de instalații prin nodurile fermei; pentru deschideri moderate, riglele cu inimă plină și vute la noduri simplifică fabricația și montajul. Contravântuirile preiau acțiunile orizontale (vânt, seism) pe direcția longitudinală și asigură stabilitatea de ansamblu. Săgețile și deplasările se limitează nu doar din considerente structurale, ci și funcționale: deformațiile excesive ale acoperișului ar afecta etanșeitatea și scurgerea apelor, iar deplasările laterale mari ar deteriora panourile de închidere. Aceste principii se traduc în verificările detaliate din memoriul de rezistență.
+
 **Pardoseala industrială (NP 042/2000):** placă C25/30 (min. C20/25) + fibre oțel 25–35 kg/mc, 180–200 mm, pe balast compactat (Ev2 ≥ 100 MPa), cu strat de uzură dry-shake cuarț/corindon. Portanță uniform 40 kN/mp; picior raft 60–85 kN; roată motostivuitor 35–45 kN. Rosturi de contracție/dilatare cu dowels; planeitate FF35/FL25 (VNA superior). *Detalii și breviar în memoriul de rezistență.*
+
+Pardoseala industrială este, funcțional, cel mai solicitat element al halei: ea preia încărcări uniform distribuite mari (marfă depozitată), încărcări concentrate de la picioarele rafturilor și încărcări dinamice de la traficul de motostivuitoare. Alcătuirea în placă de beton armat cu fibre de oțel pe pat de balast bine compactat asigură capacitatea portantă și controlul fisurării, iar stratul de uzură (dry-shake cu agregate dure) conferă rezistență la abraziune și durabilitate. Planeitatea (exprimată prin clasele FF/FL) este critică pentru operarea echipamentelor la înălțime, mai ales în sistemele cu culoare înguste (VNA); o pardoseală neplană limitează înălțimea de stivuire și accelerează uzura echipamentelor. Rosturile se proiectează pentru a controla contracția betonului și a permite deformațiile, cu asigurarea transferului de sarcină prin dispozitive de tip dowel. Aceste cerințe fac din pardoseală o componentă în care calitatea execuției este determinantă pentru funcționalitatea pe termen lung, motiv pentru care i se acordă o atenție deosebită atât în proiectare, cât și la recepție.
 
 ### 8.3. Instalații (→ `instalatii.md`)
 
 Instalații sanitare (apă rece/caldă, canalizare menajeră NTPA-002, pluvială cu separator hidrocarburi și retenție NTPA-001, hidranți și stingere I9/P118-2), termice (CT/aeroterme/radianți gaz + ventiloconvectoare birouri, I13), electrice (racord MT/JT, post trafo, tablouri, iluminat LED ≥300 lx depozit/≥500 birouri + iluminat de siguranță NP 061, paratrăsnet IPT, I7), ventilare (naturală + mecanică + desfumare, I5), detectare-semnalizare incendiu (P118-3). *Scheme și breviare în memoriul de instalații.*
+
+Concepția instalațiilor se adaptează specificului halei: încălzirea unui volum mare cu ocupare redusă favorizează sistemele cu radianți (care încălzesc direct suprafețele și persoanele, nu întregul volum de aer) sau aeroterme, mai eficiente decât încălzirea convențională a întregului volum. Corpul administrativ, cu cerințe de confort superioare, se tratează separat, cu sisteme de tip ventiloconvector. Iluminatul se dimensionează pe niveluri de iluminare adaptate activității (mai redus în zonele de depozitare, mai ridicat în zonele de lucru și birouri), cu tehnologie LED și comandă zonală pentru eficiență. Instalația electrică include protecția la trăsnet, dimensionată în funcție de nivelul de risc calculat. Instalațiile de stingere, detectare și desfumare, critice pentru siguranța la incendiu, se dimensionează în corelație cu scenariul de securitate la incendiu. Toate soluțiile, schemele și breviarele de dimensionare se regăsesc în memoriul de instalații, prezentul capitol limitându-se la principii și la corelarea cu ansamblul.
 
 ---
 
@@ -346,6 +400,10 @@ Proiectul de sistematizare verticală corelează cota ±0,00 a construcției cu 
 - **Platforme carosabile grele TIR:** beton rutier C30/37 fibrat ~200 mm pe fundație de balast, dimensionate pentru osie 11,5 t; front docuri ≥ 35 m.
 - **Parcaje auto:** 2,5 × 5,0 m, dimensionate conform HG 525/1996 + RLU (v. §7.1); locuri de așteptare TIR 3,5 × 18,0 m.
 - **Circulații pietonale:** trotuare și trasee protejate, separate de trafic greu; accesibilitate NP 051.
+
+Platformele carosabile pentru trafic greu constituie o componentă importantă a investiției, atât ca suprafață (circa 40% din teren), cât și ca valoare. Alcătuirea rutieră (îmbrăcăminte de beton de ciment sau, alternativ, structură rutieră suplă cu asfalt, pe fundație de balast/piatră spartă) se dimensionează pentru osia standard a autovehiculelor grele și pentru solicitările punctuale din staționarea semiremorcilor la docuri. Zonele de andocare, supuse unor solicitări repetate de la manevrele de retragere și de la stabilizatoarele semiremorcilor, se tratează cu atenție sporită (grosime sporită sau dale de beton). Rosturile platformelor de beton se dispun și se armează pentru controlul fisurării din contracție și din variații termice. Panta transversală și longitudinală a platformelor asigură scurgerea apelor către gurile de colectare racordate la separatorul de hidrocarburi.
+
+Parcajele pentru autoturisme se separă de zonele de manevră grea și se poziționează în apropierea accesului personalului. Circulațiile pietonale se conformează cerinței de accesibilitate (NP 051, Legea 448/2006), cu trasee continue, fără trepte pe direcția principală de acces, rampe cu pante admise și un loc de parcare adaptat.
 
 ### 9.3. Spații verzi — calcul
 
@@ -364,6 +422,16 @@ Bilanțul suprafețelor demonstrează respectarea plafonului minim de spații ve
 
 Împrejmuirea incintei se realizează cu **H ≥ 2,0 m** (panouri/plasă bordurată pe soclu beton sau gard opac parțial), cu porți de acces auto (auto ușor + TIR) și pietonal, control acces la poartă. Împrejmuirea nu depășește la aliniament înălțimea admisă prin RLU pentru partea opacă.
 
+Împrejmuirea îndeplinește funcțiuni de securitate a incintei (control al accesului, protecția bunurilor) și de delimitare a proprietății. Poarta de acces greu se dimensionează pentru gabaritul TIR și se dublează, de regulă, cu o poartă pietonală separată la punctul de control acces. La aliniament (spre drumul public), soluția de împrejmuire respectă prescripțiile RLU privind înălțimea și transparența părții superioare; spre limitele laterale și posterioare, împrejmuirea poate fi opacă, cu respectarea acordului vecinilor acolo unde este cerut. Sistematizarea incintei se corelează cu împrejmuirea astfel încât porțile, zonele de așteptare a autovehiculelor și postul de control să nu genereze staționări pe drumul public.
+
+### 9.5. Accesibilitatea persoanelor cu dizabilități
+
+Amenajările exterioare și corpul administrativ se conformează cerințelor de accesibilitate pentru persoanele cu dizabilități, conform **NP 051/2012** și **Legii 448/2006**. Se asigură: cel puțin un loc de parcare adaptat, dimensionat corespunzător și poziționat în apropierea accesului; trasee pietonale continue, fără obstacole și fără trepte pe direcția principală de acces, cu rampe având pantele admise și mâini curente unde este cazul; acces facil în corpul administrativ; iar la nivelul parterului, un grup sanitar adaptat. Aceste cerințe fac parte din cerința fundamentală D (siguranță și accesibilitate în exploatare) și se detaliază în memoriul de arhitectură. Deși activitatea principală este de tip industrial, accesibilitatea este obligatorie pentru zonele administrative și pentru accesele aferente, în conformitate cu legislația privind protecția și promovarea drepturilor persoanelor cu dizabilități.
+
+### 9.6. Gestiunea apelor pluviale la nivel de incintă
+
+Sistematizarea incintei integrează gestiunea apelor pluviale ca element esențial, dat fiind gradul ridicat de impermeabilizare (construcție + platforme ≈ 80% din teren). Apele meteorice de pe acoperiș se colectează prin sistemul de jgheaburi/burlane și se dirijează, împreună cu apele de pe platforme (acestea din urmă în prealabil trecute prin separatorul de hidrocarburi), către un **bazin de retenție** care laminează debitul de vârf la valoarea maximă acceptată de gestionarul emisarului sau al rețelei. Această laminare previne supraîncărcarea rețelei publice și reduce riscul de inundare a zonelor din aval. Volumul bazinului și debitul de restituție se dimensionează în funcție de suprafața impermeabilizată, de coeficienții de scurgere și de intensitatea ploii de calcul, aspecte tratate în memoriul de instalații; la nivel de sistematizare se rezervă suprafața și cota necesare amplasării bazinului și a separatorului.
+
 ---
 
 ## 10. UTILITĂȚI — RACORDURI ȘI BRANȘAMENTE
@@ -378,6 +446,8 @@ Bilanțul suprafețelor demonstrează respectarea plafonului minim de spații ve
 | **Telecomunicații** | racord operator | aviz operator telecom |
 
 Branșamentele efective, capacitățile contractate și punctele de racord se stabilesc pe baza avizelor de amplasament ale operatorilor obținute în urma Certificatului de Urbanism.
+
+Asigurarea utilităților reprezintă Capitolul 2 al devizului general (v. §14) și, în funcție de distanța până la rețelele publice, poate influența semnificativ costul și durata de realizare a investiției. Din acest motiv, disponibilitatea utilităților în proximitate constituie un criteriu major de fezabilitate al amplasamentului. Rețelele de incintă (de la punctul de racord/branșament până la construcție și în interiorul acesteia) se proiectează astfel încât să respecte distanțele de protecție reciprocă între rețele și să nu interfereze cu fundațiile și platformele. Soluțiile se coordonează între specialități pentru a evita conflictele de traseu și pentru a permite mentenanța.
 
 Din perspectiva memoriului general, esențial este să se demonstreze **racordabilitatea** amplasamentului la toate utilitățile necesare funcționării, ceea ce constituie una dintre condițiile de fezabilitate a investiției. Necesarul de utilități rezultă din specificul funcțiunii: consumul de apă potabilă este relativ redus (predominant sanitar, pentru personal), în timp ce **rezerva de apă pentru incendiu** poate deveni dimensionantă pentru gospodăria de apă și pentru sistemul de pompare, în funcție de soluția de stingere adoptată (hidranți + eventual sprinklere/ESFR). Consumul electric este determinat de iluminat, de instalațiile de ventilare/climatizare a corpului administrativ și de eventualele echipamente tehnologice; puterea contractată și necesitatea unui post de transformare propriu se stabilesc pe baza bilanțului energetic din memoriul de instalații. Alimentarea cu gaze naturale deservește centrala termică și/sau radianții, iar dimensionarea branșamentului se corelează cu debitul instalat. Soluțiile tehnice detaliate ale fiecărei rețele, schemele și breviarele de dimensionare se regăsesc în `instalatii.md`.
 
@@ -405,6 +475,22 @@ Succesiunea fazelor respectă logica tehnologică a unei construcții cu structu
 
 Avantajul major al structurii metalice prefabricate este posibilitatea de a comprima durata de execuție prin fabricarea confecției în paralel cu execuția infrastructurii pe șantier, urmată de un montaj rapid pe amplasament. Acest lucru se reflectă în graficul de eșalonare (§15), unde fazele se suprapun parțial pentru optimizarea duratei totale.
 
+**Detalierea fazelor tehnologice:**
+
+- *Faza 1 — Organizare de șantier și terasamente:* trasarea construcției pe teren de către un topograf, împrejmuirea provizorie, amenajarea accesului și a platformei de organizare, decaparea stratului vegetal și a umpluturilor necorespunzătoare, execuția săpăturilor pentru fundații și a umpluturilor compactate pentru pat. Se instituie măsuri de epuizment dacă apa subterană interferează cu săpăturile.
+
+- *Faza 2 — Infrastructură:* turnarea betonului de egalizare, cofrarea și armarea fundațiilor izolate, montarea buloanelor de ancoraj cu șabloane de poziționare (cotele și poziția buloanelor sunt critice pentru montajul ulterior al stâlpilor), turnarea blocurilor și cuzineților, execuția grinzilor de fundare și a gospodăriilor subterane de utilități. Se verifică rezistența betonului înainte de montajul metalic.
+
+- *Faza 3 — Suprastructură metalică:* montajul stâlpilor pe buloanele de ancoraj, ridicarea și îmbinarea riglelor/fermelor, montarea contravântuirilor și a panelor, verificarea verticalității și a geometriei, strângerea controlată a îmbinărilor cu șuruburi de înaltă rezistență. Montajul se realizează cu automacarale, cu respectarea măsurilor de lucru la înălțime.
+
+- *Faza 4 — Închideri:* montajul panourilor sandwich pe pereți și acoperiș, al luminatoarelor și trapelor de desfumare, al jgheaburilor și burlanelor, al tâmplăriei și al ușilor secționale la docuri. La finalizarea acestei faze, clădirea este „închisă", permițând lucrări protejate de intemperii.
+
+- *Faza 5 — Pardoseala industrială:* pregătirea și compactarea patului, așternerea foliei de separare, montarea armăturii/fibrelor și a dispozitivelor de rost, turnarea plăcii de beton, aplicarea stratului de uzură dry-shake și elicopterizarea, tăierea rosturilor de contracție la termen și protejarea suprafeței. Planeitatea se verifică cu aparatura specifică (clase FF/FL).
+
+- *Faza 6 — Instalații și corp administrativ:* execuția traseelor și montarea echipamentelor pentru instalațiile sanitare, termice, electrice, de ventilare și de stingere/detectare; realizarea compartimentărilor și finisajelor la corpul administrativ, vestiare și grupuri sanitare.
+
+- *Faza 7 — Sistematizare, probe, recepție:* execuția platformelor, parcajelor, spațiilor verzi și împrejmuirii; probele instalațiilor (presiune, funcționare, stingere, detectare); punerea în funcțiune și recepția lucrărilor.
+
 ### 11.2. Organizarea de șantier
 
 Organizarea de șantier (POE) cuprinde: împrejmuire provizorie și acces controlat, containere birou/vestiar, platformă de depozitare materiale, alimentare provizorie apă/energie, gestiunea deșeurilor de șantier, plan de circulație, măsuri SSM și PSI de șantier. Se elaborează plan propriu de securitate și coordonare SSM (HG 300/2006). Detalierea se face în proiectul de organizare a execuției (DTOE/POE).
@@ -413,9 +499,13 @@ Organizarea execuției se planifică astfel încât să nu afecteze circulația 
 
 Coordonarea în materie de securitate și sănătate pe durata execuției se asigură prin desemnarea unui coordonator SSM și prin întocmirea planului de securitate și sănătate, conform HG 300/2006, având în vedere riscurile specifice (lucrul la înălțime la montajul metalic și al panourilor, manipularea sarcinilor grele, lucrul cu utilaje de ridicat).
 
+Impactul șantierului asupra vecinătăților și a mediului se limitează prin măsuri specifice: stropirea căilor de circulație și a platformelor pentru reducerea prafului, spălarea roților autovehiculelor la ieșirea din șantier pentru a nu murdări drumul public, gestionarea programului activităților zgomotoase, colectarea și evacuarea controlată a apelor de pe șantier și prevenirea scurgerilor de carburanți/uleiuri de la utilaje. Aceste măsuri fac parte din obligațiile executantului și se corelează cu condițiile din acordul de mediu. La finalizare, se readuc la starea din proiect toate suprafețele afectate temporar de organizarea de șantier.
+
 ---
 
 ## 12. AVIZE ȘI ACORDURI NECESARE
+
+Lista avizelor și acordurilor necesare autorizării se stabilește prin Certificatul de Urbanism, în funcție de amplasament, de funcțiune și de rețelele/servituțile care pot fi afectate. Fiecare aviz certifică, din perspectiva emitentului, compatibilitatea investiției cu un interes public sau cu o infrastructură existentă și condiționează, alături de proiectul verificat, emiterea autorizației de construire. Tabelul de mai jos sintetizează avizele uzuale pentru o hală industrială/logistică, cu emitentul și temeiul legal.
 
 | Aviz / acord | Emitent | Temei legal / obiect |
 |---|---|---|
@@ -467,21 +557,29 @@ Verificarea tehnică de calitate a proiectului, realizată de verificatori atest
 
 **Măsuri (sinteză):** compartimentare la depășirea ariei maxime (fără sprinklere ~2.500–4.500 mp; cu sprinkler ≥ 6.000 mp) prin **zid de foc REI 180** autoportant (§6.4); căi de evacuare pe 2 direcții ≤ 40 m / o direcție ≤ 25 m, uși în sensul evacuării + antipanică; desfumare prin trape acoperiș ≥ 1% din pardoseală + aer proaspăt jos + ecrane; stingere cu hidranți interiori (2 jeturi), hidranți exteriori (10–20 l/s, interdistanță ≤ 120 m), sprinklere/ESFR la depozitare înaltă (EN 12845/NFPA 13), rezervă de apă + pompare (30–60 min); detectare-semnalizare (centrală + detectoare + butoane). **Detaliile complete și dimensionarea se prezintă în scenariul de securitate la incendiu avizat ISU** (P118-1/2/3). *ATEX — nu este cazul.*
 
+Categoria de pericol de incendiu se stabilește în funcție de natura materialelor depozitate/prelucrate și de modul lor de comportare la foc. Pentru depozitarea de mărfuri combustibile solide (paletate, ambalate), categoria tipică este C; pentru depozitarea de materiale incombustibile, categoria poate fi D sau E. Sarcina termică (densitatea de sarcină termică, exprimată în MJ/mp) se calculează pe baza cantității și puterii calorice a materialelor și determină durata potențială și severitatea unui incendiu, influențând cerințele de rezistență la foc și de stingere. Pentru depozitare, sarcina termică poate fi ridicată, motiv pentru care hala se încadrează, de regulă, la risc mijlociu spre mare de incendiu, cu cerințe corespunzătoare de compartimentare și stingere.
+
+Sistemul de evacuare se dimensionează astfel încât toate persoanele să poată părăsi clădirea în timp util: se limitează distanțele de parcurs până la o ieșire (mai mari când există două direcții de evacuare, mai mici când există o singură direcție), se asigură lățimi de trecere corelate cu numărul de persoane (pe flux de evacuare) și se prevăd uși care se deschid în sensul evacuării, cu dispozitive antipanică. Marcarea și iluminatul de siguranță pentru evacuare completează sistemul.
+
+Desfumarea are rolul de a menține, pe durata evacuării și a intervenției, un strat liber de fum la nivelul căilor de circulație, prin evacuarea gazelor fierbinți și a fumului pe la partea superioară (trape pe acoperiș) și admisia de aer proaspăt pe la partea inferioară, cu ecrane de compartimentare a fumului între zone. Volumul mare al halei și înălțimea liberă favorizează stratificarea fumului, ceea ce este avantajos pentru desfumarea naturală. Dimensionarea suprafețelor de desfumare și a admisiei de aer se realizează în scenariul de securitate la incendiu, integrat cu soluția de luminatoare/trape.
+
 Concepția de securitate la incendiu la nivel de ansamblu urmărește limitarea propagării incendiului și asigurarea evacuării în siguranță a persoanelor, în corelație cu categoria de pericol (C — combustibile solide, tipic pentru depozitare) și cu sarcina termică rezultată din natura și cantitatea materialelor depozitate. Adoptarea gradului II de rezistență la foc impune protejarea structurii metalice (vopsele termospumante sau protecții echivalente pentru asigurarea R60/R30, după rolul elementului), aspect detaliat în memoriile de specialitate. Menținerea ariilor de compartiment sub limitele admise sau, la depășire, împărțirea prin zid de foc autoportant este decizia de bază care influențează atât arhitectura, cât și structura și instalațiile. Sistemul de desfumare menține un strat liber de fum deasupra căilor de evacuare pe durata necesară, iar sistemele de stingere se dimensionează în funcție de clasa de risc a mărfii și de înălțimea de stivuire. Toate aceste elemente se corelează și se dimensionează prin **scenariul de securitate la incendiu**, care constituie documentul de referință pentru avizarea ISU și pentru verificarea pe cerința B.
 
 ### 13.2. Protecția muncii (SSM)
 
 Se respectă **Legea 319/2006** (securitatea și sănătatea în muncă) și **HG 300/2006** (șantiere temporare/mobile). Măsuri: căi de circulație marcate și separate marfă/personal, protecție la lucrul la înălțime, protecție utilaje, iluminat de siguranță, semnalizare, dotare PSI, instructaje, plan propriu SSM al executantului, coordonator SSM în faza de execuție. Grupuri sanitare, vestiare-filtru și spații sociale conform normelor de igienă a muncii.
 
+Pe durata execuției, riscurile principale sunt lucrul la înălțime (montaj metalic, panouri de acoperiș, luminatoare), manipularea sarcinilor grele cu utilaje de ridicat, lucrul în apropierea săpăturilor și operațiunile de sudură. Aceste riscuri se gestionează prin planul propriu de securitate al executantului, prin instruirea personalului, prin utilizarea echipamentelor individuale de protecție (inclusiv sisteme anticădere) și prin coordonarea SSM. În faza de exploatare, riscurile specifice sunt legate de circulația motostivuitoarelor în prezența personalului, de operațiunile de andocare și de manipularea mărfii la înălțime pe rafturi.
+
 Măsurile de SSM se împart în măsuri aplicabile pe durata execuției (responsabilitatea executantului și a coordonatorului SSM) și măsuri integrate în soluția de proiectare, care asigură securitatea în exploatare. Din a doua categorie fac parte: separarea traseelor pietonale de circulația motostivuitoarelor și a autovehiculelor grele, marcarea culoarelor și a zonelor de manevră, asigurarea unui nivel de iluminare corespunzător activității (inclusiv iluminat de siguranță pentru evacuare), semnalizarea de securitate (indicatoare, marcaje la sol), prevederea de balustrade și protecții la mezanin și la golurile de comunicare, precum și dotarea cu mijloace de primă intervenție. Spațiile sociale (vestiare-filtru, grupuri sanitare, spații de servire a mesei) se dimensionează în raport cu numărul de angajați și cu gradul de murdărire specific activității, conform normelor de igienă a muncii, aspecte detaliate în memoriul de arhitectură.
 
 ### 13.3. Protecția mediului
 
 Se respectă **OUG 195/2005** și **Legea 292/2018**:
-- **Gestiunea deșeurilor:** colectare selectivă (Legea 211/2011), spații amenajate, contracte cu operatori autorizați; deșeuri de șantier gestionate distinct.
-- **Ape uzate:** menajere → NTPA-002 (racord/epurare); pluviale de pe platforme → **separator de hidrocarburi clasa I** (coalescent, < 5 mg/l) + **bazin de retenție** cu laminarea debitului la valoarea impusă de gestionar → NTPA-001.
-- **Emisii:** surse reduse (CT/radianți gaz cu randament ridicat); fără procese poluante majore (producție ușoară); monitorizare conform acord APM.
-- **Zgomot:** încadrare în limitele admise la limita de proprietate; perdea vegetală de protecție.
+- **Gestiunea deșeurilor:** colectare selectivă (Legea 211/2011), spații amenajate, contracte cu operatori autorizați; deșeuri de șantier gestionate distinct. Se prevăd platforme/spații amenajate pentru containere de colectare selectivă (hârtie/carton, plastic, metal, deșeuri asimilabile menajere), accesibile pentru vehiculul de colectare. Deșeurile din construcție-desființare rezultate în faza de execuție (beton, metal, ambalaje) se gestionează prin plan de gestionare a deșeurilor de șantier, cu prioritizarea valorificării/reciclării. Beneficiarul încheie contracte cu operatori autorizați și ține evidența deșeurilor conform legii.
+- **Ape uzate:** menajere → NTPA-002 (racord/epurare); pluviale de pe platforme → **separator de hidrocarburi clasa I** (coalescent, < 5 mg/l) + **bazin de retenție** cu laminarea debitului la valoarea impusă de gestionar → NTPA-001. Apele uzate menajere provin exclusiv din activitatea sanitară a personalului și se încadrează, ca încărcare, în limitele NTPA-002 pentru evacuarea în rețeaua de canalizare; în lipsa rețelei, se prevede bazin etanș vidanjabil sau microstație de epurare, cu evacuare conform NTPA-001. Apele pluviale de pe acoperiș sunt convențional curate și pot fi dirijate direct către retenție, în timp ce apele de pe platformele carosabile, potențial poluate cu hidrocarburi și suspensii de la trafic, se trec obligatoriu prin decantor-separator de hidrocarburi înainte de retenție și evacuare. Separatorul se dimensionează la debitul de calcul și se prevede cu alarmă de colmatare/nivel ulei; golirea și întreținerea periodică sunt obligații de exploatare.
+- **Emisii:** surse reduse (CT/radianți gaz cu randament ridicat); fără procese poluante majore (producție ușoară); monitorizare conform acord APM. Emisiile în atmosferă se limitează la gazele de ardere ale echipamentelor termice pe gaz, care au randamente ridicate și emisii reduse; nu există surse de proces cu emisii semnificative de poluanți. Traficul de autovehicule grele în incintă generează emisii difuze, gestionate prin organizarea fluxurilor și prin limitarea staționării cu motorul pornit.
+- **Zgomot:** încadrare în limitele admise la limita de proprietate; perdea vegetală de protecție. Sursele de zgomot (echipamente de ventilare, trafic de autovehicule, activități de andocare) se dimensionează și se amplasează astfel încât nivelul de zgomot la limita de proprietate să se încadreze în limitele admise pentru zona respectivă. Perdeaua vegetală perimetrală contribuie la atenuarea zgomotului și la reducerea impactului vizual. Programul activităților cu potențial de zgomot (în special livrările) se corelează, unde este cazul, cu restricțiile de vecinătate.
 - **Sol/subsol:** platforme impermeabilizate, prevenirea infiltrațiilor de la zonele de manevră.
 
 Impactul asupra mediului al unei hale de depozitare/producție ușoară este, prin natura funcțiunii, moderat și controlabil. Principalele aspecte de mediu gestionate prin proiect sunt: apele pluviale de pe platformele carosabile (potențial poluate cu hidrocarburi de la trafic), care sunt trecute obligatoriu printr-un separator de hidrocarburi înainte de retenție și evacuare, cu încadrare în indicatorii NTPA-001; apele uzate menajere, tratate/racordate conform NTPA-002; deșeurile de exploatare (ambalaje, deșeuri asimilabile menajere), colectate selectiv și predate operatorilor autorizați. Absența proceselor cu emisii semnificative în atmosferă și utilizarea unor surse termice cu randament ridicat mențin emisiile la un nivel redus. Condițiile concrete și programul de monitorizare se stabilesc prin actul de reglementare emis de APM, la care investiția se conformează integral.
@@ -490,7 +588,9 @@ Impactul asupra mediului al unei hale de depozitare/producție ușoară este, pr
 
 Anvelopă termoizolată (panouri sandwich PUR/PIR/vată, U conform C107 / metodologia Mc 001), reducerea punților termice, iluminat LED cu senzori, recuperare de căldură la ventilare (după caz), tâmplărie performantă la corpul administrativ, sisteme termice eficiente (radianți/aeroterme cu randament ridicat). Se întocmește calcul termotehnic și, la finalizare, certificat de performanță energetică. Opțional: pregătire pentru panouri fotovoltaice pe acoperiș (structură dimensionată pentru sarcina suplimentară).
 
-Eficiența energetică se abordează la nivelul întregii clădiri, corelând performanța anvelopei cu performanța instalațiilor. Halele industriale au un raport ridicat între suprafața anvelopei și volumul încălzit, ceea ce face ca izolarea termică și etanșeitatea să fie determinante pentru consumul de energie. Panourile sandwich cu miez izolant asigură simultan închiderea, izolarea termică și un grad ridicat de etanșeitate la aer, cu punți termice reduse la îmbinări. Pentru corpul administrativ, care are cerințe de confort mai ridicate, se prevăd tâmplărie performantă și, după caz, recuperare de căldură la ventilare. Iluminatul LED cu senzori de prezență și de lumină naturală, coroborat cu luminatoarele de pe acoperiș, reduce consumul de energie electrică pentru iluminat. Dimensionarea structurii pentru o eventuală instalație fotovoltaică pe acoperiș pregătește clădirea pentru producerea de energie regenerabilă, în linie cu obiectivele de reducere a consumului de energie primară. Detaliile de calcul termotehnic și bilanțul energetic se prezintă în memoriile de arhitectură și instalații.
+Eficiența energetică se abordează la nivelul întregii clădiri, corelând performanța anvelopei cu performanța instalațiilor. Halele industriale au un raport ridicat între suprafața anvelopei și volumul încălzit, ceea ce face ca izolarea termică și etanșeitatea să fie determinante pentru consumul de energie. Panourile sandwich cu miez izolant asigură simultan închiderea, izolarea termică și un grad ridicat de etanșeitate la aer, cu punți termice reduse la îmbinări. Pentru corpul administrativ, care are cerințe de confort mai ridicate, se prevăd tâmplărie performantă și, după caz, recuperare de căldură la ventilare. Iluminatul LED cu senzori de prezență și de lumină naturală, coroborat cu luminatoarele de pe acoperiș, reduce consumul de energie electrică pentru iluminat. Dimensionarea structurii pentru o eventuală instalație fotovoltaică pe acoperiș pregătește clădirea pentru producerea de energie regenerabilă, în linie cu obiectivele de reducere a consumului de energie primară. Suprafața mare, plană și bine expusă a acoperișului constituie un amplasament ideal pentru panouri fotovoltaice; anticiparea acestei sarcini încă din faza de proiectare structurală evită consolidări ulterioare costisitoare. Detaliile de calcul termotehnic și bilanțul energetic se prezintă în memoriile de arhitectură și instalații.
+
+Abordarea eficienței energetice se corelează cu prevederile privind clădirile al căror consum de energie este aproape egal cu zero (nZEB), în măsura aplicabilității pentru funcțiunea industrială: reducerea necesarului prin anvelopă performantă și instalații eficiente, urmată de acoperirea unei părți a consumului rămas din surse regenerabile (fotovoltaic). Deși cerințele nZEB se aplică în principal clădirilor cu ocupare permanentă, principiile de reducere a consumului și de valorificare a resurselor regenerabile sunt urmărite și pentru corpul administrativ și, în măsura posibilului, pentru hală.
 
 ---
 
@@ -513,6 +613,16 @@ Structura de cost a unei hale industriale este dominată de investiția de bază
 
 ---
 
+### 14.1. Fundamentarea economică a investiției
+
+Devizul general nu este doar o structură formală, ci reflectă opțiunile tehnice ale proiectului. Alegerea structurii metalice, față de o structură din beton armat, este determinată nu numai de considerente tehnice (deschideri mari, greutate proprie redusă, montaj rapid), ci și economice: deși prețul unitar al oțelului este ridicat, viteza de montaj reduce durata de execuție și costurile indirecte, iar greutatea redusă a suprastructurii diminuează solicitările transmise fundațiilor, cu economii la infrastructură. Pardoseala industrială, deși reprezintă o pondere semnificativă din cost, este o investiție critică pentru funcționalitate: o pardoseală subdimensionată sau cu planeitate insuficientă generează costuri operaționale mari (uzura echipamentelor, limitarea înălțimii de stivuire, reparații) pe toată durata de exploatare, astfel încât economia la acest capitol este contraproductivă.
+
+Din perspectiva costurilor de exploatare (care nu fac parte din devizul de investiție, dar fundamentează oportunitatea), o hală proiectată conform normelor actuale, cu anvelopă termoizolată și instalații eficiente, are consumuri energetice și costuri de întreținere reduse comparativ cu spațiile vechi. Durata de recuperare a investiției și indicatorii de performanță economică se analizează, dacă e cazul, într-un studiu de fezabilitate distinct; prezentul memoriu confirmă doar fundamentarea tehnico-economică generală a soluției.
+
+### 14.2. Sursele de finanțare
+
+Sursele de finanțare a investiției (fonduri proprii, credit bancar, fonduri europene/naționale de sprijin, după caz) se stabilesc de beneficiar și se corelează cu graficul de eșalonare (§15) prin planul de finanțare. Eșalonarea plăților urmărește progresul fizic al lucrărilor, cu concentrarea în perioada de execuție a structurii, anvelopei și pardoselii, care cumulează cea mai mare parte a valorii de construcții-montaj. Sincronizarea fluxului de finanțare cu graficul fizic este esențială pentru evitarea întreruperilor de șantier, care ar prelungi durata și ar majora costurile indirecte.
+
 ## 15. GRAFICUL DE EȘALONARE — SINTEZĂ
 
 | Luna | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
@@ -528,13 +638,15 @@ Structura de cost a unei hale industriale este dominată de investiția de bază
 
 Graficul de eșalonare orientativ (8–10 luni activitate efectivă, până la 12 luni cu marje) se detaliază în graficul fizic și valoric (piesă distinctă), corelat cu fluxul de finanțare. Activitățile critice: montajul structurii metalice (condiționează închiderile) și turnarea plăcii de pardoseală (condiționează dotarea cu rafturi).
 
+Suprapunerea parțială a fazelor scurtează durata totală, dar impune o coordonare atentă a fronturilor de lucru și a aprovizionării. Drumul critic al proiectului trece prin: finalizarea fundațiilor și atingerea rezistenței betonului → montajul structurii metalice → închideri → turnarea și maturarea plăcii de pardoseală → recepție. Instalațiile și corpul administrativ se execută în paralel, fără a afecta drumul critic, atât timp cât nu condiționează recepția finală. Rezervele de timp (marjele) se prevăd pentru activitățile cu risc de întârziere (fabricația confecției metalice, condițiile meteo la turnarea plăcii). Un grafic realist, corelat cu fluxul de finanțare și cu termenele de livrare ale furnizorilor, este premisa încadrării în durata estimată de 8–12 luni.
+
 ---
 
 ## 16. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995
 
 ### 16.1. Concluzii
 
-Documentația D.T.A.C. propune o **hală industrială/logistică cu structură metalică** (cadre 24 m, travee 6 m, anvelopă sandwich, pardoseală C25/30 fibrat 180–200 mm pe balast, portanță 40 kN/mp), cu corp administrativ pe mezanin, categoria de importanță **C**, clasa de importanță seismică **III (II)**, grad **II** de rezistență la foc. Soluția asigură:
+Documentația D.T.A.C. propune o **hală industrială/logistică cu structură metalică** (cadre 24 m, travee 6 m, anvelopă sandwich, pardoseală C25/30 fibrat 180–200 mm pe balast, portanță 40 kN/mp), cu corp administrativ pe mezanin, categoria de importanță **C**, clasa de importanță seismică **III (II)**, grad **II** de rezistență la foc. Soluția reprezintă rezultatul unei abordări integrate, în care deciziile arhitecturale, structurale, de instalații și de sistematizare se articulează coerent în jurul funcțiunii logistice și al reglementărilor aplicabile. Soluția asigură:
 
 - **încadrarea urbanistică** (POT 40% < 60%, CUT 0,42 < 1,2, spații verzi 20%, retrageri și accese conforme RLU);
 - **siguranța la incendiu** (compartimentare cu zid de foc autoportant REI 180, hidranți/ESFR, desfumare, detectare — scenariu ISU);
@@ -557,9 +669,30 @@ Soluția propusă echilibrează cerințele funcționale (spațiu logistic clasa 
 | **E — Protecție împotriva zgomotului** | încadrare în limite la limita de proprietate, perdea vegetală; verificator E (după caz) |
 | **F — Economie de energie și izolare termică** | anvelopă termoizolată (C107/Mc 001), iluminat LED, sisteme eficiente, calcul termotehnic + CPE; verificator F |
 
-### 16.3. Precizări finale
+### 16.3. Recepția lucrărilor și urmărirea comportării în timp
+
+La finalizarea execuției, lucrările se recepționează conform reglementărilor privind recepția construcțiilor, cu participarea comisiei de recepție și pe baza documentelor de calitate întocmite pe parcurs (procese-verbale de lucrări ascunse, buletine de încercări pentru betoane și suduri, certificate de conformitate ale materialelor, procese-verbale de probe pentru instalații). Punerea în funcțiune a instalațiilor de stingere, detectare și desfumare se confirmă prin probe și, după caz, prin autorizația de securitate la incendiu emisă de ISU în baza documentelor de recepție.
+
+Construcția se înscrie în programul de urmărire a comportării în timp, cu urmărire curentă (observarea periodică a stării elementelor structurale, a tasărilor, a stării pardoselii industriale și a rosturilor, a etanșeității anvelopei) și, unde este cazul, urmărire specială. Cartea tehnică a construcției se completează și se predă beneficiarului la recepție, constituind documentul de referință pentru exploatare, întreținere și eventuale intervenții ulterioare. Aceste obligații decurg din Legea 10/1995 și asigură menținerea în timp a cerințelor fundamentale.
+
+### 16.4. Analiza riscurilor și măsuri de gestionare
+
+| Risc identificat | Impact | Măsură de gestionare |
+|---|---|---|
+| Condiții geotehnice diferite de așteptări | fundare mai costisitoare / întârzieri | studiu geotehnic cat. 2 complet la PT, cu foraje suficiente; soluții alternative de fundare pregătite |
+| Variația prețurilor oțelului/materialelor | depășire buget | ofertare fermă a confecției metalice și panourilor; marjă de diverse și neprevăzute în deviz (Cap. 5) |
+| Termen de fabricație confecție metalică | întârziere montaj | comandă timpurie, corelată cu graficul; suprapunerea fabricației cu infrastructura pe șantier |
+| Condiții meteo nefavorabile la turnarea plăcii | defecte pardoseală | turnare în incintă închisă, cu control temperatură/umiditate; tratarea betonului |
+| Modificarea destinației (substanțe periculoase) | reîncadrare clasă/siguranță | condiția de destinație fixată prin proiect; orice schimbare impune reevaluare și avize noi |
+| Depășirea ariei de compartiment fără măsuri | risc securitate la incendiu | verificare arie de compartiment în scenariu; zid de foc REI 180 la depășire |
+
+Gestionarea proactivă a acestor riscuri, prin măsuri integrate în proiectare și în planificarea execuției, susține fezabilitatea și predictibilitatea investiției.
+
+### 16.5. Precizări finale
 
 Dimensionările finale (elementele structurale, hidraulica de stingere, desfumarea, breviarul pardoselii, devizul pe cantități) se stabilesc la faza **PT + DE**, pe baza studiului geotehnic complet și a scenariului de securitate la incendiu avizat ISU. Prezentul memoriu general sintetizează investiția și se completează cu memoriile de specialitate (arhitectură, rezistență, instalații), cu piesele desenate și cu piesele economice, conform Legii 50/1991 (Anexa 1) și Legii 10/1995.
+
+Faza D.T.A.C. stabilește soluția de principiu și permite obținerea autorizației de construire; ea nu se substituie fazei de proiect tehnic și detalii de execuție (PT+DE), în care se realizează dimensionările definitive, detaliile constructive și antemăsurătorile pe baza cărora se contractează și se execută lucrarea. Trecerea de la principiu (DTAC) la detaliu (PT+DE) se face fără modificarea concepției de ansamblu autorizate; eventualele modificări care depășesc limitele autorizației impun reautorizarea. Prin această structurare, prezentul memoriu general asigură coerența și trasabilitatea de la faza de autorizare până la execuție.
 
 ---
 

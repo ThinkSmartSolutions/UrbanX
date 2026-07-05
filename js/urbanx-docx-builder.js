@@ -558,20 +558,62 @@
           emitent = 'ISU — protecție civilă'; temei = 'Legea 481/2004, HG 862/2016 (ALA)';
           body = 'Se solicită avizul de protecție civilă privind necesitatea/scutirea de adăpost ALA, în funcție de suprafața desfășurată' + (D.Sd ? ' (' + (+D.Sd).toLocaleString('ro-RO') + ' mp)' : '') + '.';
           docs = ['Memoriu tehnic ALA (necesitate/scutire, capacitate)', 'Planuri subsol/adăpost (dacă e cazul)', 'Plan de situație'];
-        } else if (/circulat|rutier|drum|acces/.test(k)) {
-          emitent = 'Administratorul drumului (CNAIR/CJ/Primărie) + Poliția Rutieră'; temei = 'OG 43/1997, norme tehnice drumuri';
-          body = 'Se solicită avizul de acces la drumul public și de sistematizare a circulației. Se prezintă accesele auto/pietonale, razele de racordare, vizibilitatea, numărul de locuri de parcare.';
-          docs = ['Plan de situație cu accesele și circulațiile', 'Studiu/plan de circulație (după caz)', 'Breviar parcaje (necesar vs. asigurat)'];
+        } else if (/circulat|rutier|drum|acces|cnair|cestrin|dispozitiv rutier/.test(k)) {
+          emitent = 'Administratorul drumului (CNAIR S.A. — drumuri naționale / CJ — drumuri județene / Primărie — străzi) + Poliția Rutieră (IPJ)'; temei = 'OG 43/1997 (regimul drumurilor), Ordin 49/1998 (norme tehnice proiectare/realizare accese), Ordin 358/2018 (CNAIR), Legea 265/2008';
+          body = '<p>Se solicită <b>acordul/avizul de amplasament și acces la drumul public</b>, respectiv autorizația de amplasare și acces în zona drumului (OG 43/1997). Obiectivul se racordează la ' + esc(D.uat || 'drumul public adiacent') + ' prin accese auto și pietonale dimensionate conform Ordin 49/1998.</p>' +
+            '<p><b>Soluția de acces:</b> se prezintă poziția acceselor (auto grei/ușori, pietonal), razele de racordare, unghiul de intersecție, triunghiurile/distanțele de vizibilitate, benzile de decelerare/accelerare (unde e cazul pe drum național), semnalizarea rutieră (verticală și orizontală) și amenajarea pentru scurgerea apelor la limita zonei drumului. Se respectă zona de siguranță și de protecție a drumului.</p>' +
+            '<p><b>Parcaje:</b> necesarul de locuri de parcare rezultă din funcțiune (' + ((ac.parcaje_necesare != null) ? ac.parcaje_necesare + ' locuri necesare' : 'breviar parcaje anexat') + '), asigurate în incintă, fără staționare pe drumul public.</p>';
+          docs = ['Plan de situație cu accesele, razele de racordare și vizibilitatea (scara 1:500)', 'Plan de încadrare în zonă', 'Proiect de semnalizare rutieră (vertical + orizontal)', 'Breviar de calcul parcaje (necesar vs. asigurat)', 'Studiu/plan de circulație (după caz, pe drum național)'];
+        } else if (/anif|imbunatatir|irigat|desec|amenajar.*funciar/.test(k)) {
+          emitent = 'Agenția Națională de Îmbunătățiri Funciare (ANIF) — filiala teritorială'; temei = 'Legea 138/2004 (îmbunătățiri funciare), OUG 82/2011, Ordin MADR privind avizarea';
+          body = '<p>Se solicită <b>avizul ANIF</b> întrucât terenul este situat în/în vecinătatea unei amenajări de îmbunătățiri funciare (irigații, desecare-drenaj, combaterea eroziunii solului) aflate în administrarea ANIF.</p>' +
+            '<p><b>Soluția tehnică:</b> se prezintă poziția obiectivului față de canalele/conductele/stațiile de pompare și infrastructura de îmbunătățiri funciare, măsurile de protecție a acestora, menținerea funcționalității rețelei de desecare-drenaj și a scurgerii apelor, precum și modul de traversare/racordare dacă este cazul. Se tratează gestiunea apelor pluviale de pe platforme și acoperiș astfel încât să nu afecteze amenajarea.</p>' +
+            '<p>Dacă terenul face parte dintr-o amenajare, se solicită, după caz, <b>scoaterea din amenajarea de îmbunătățiri funciare</b> (documentație distinctă).</p>';
+          docs = ['Plan de situație cu poziția față de infrastructura ANIF (canale/conducte/stații)', 'Plan de încadrare în zonă', 'Extras CF + plan cadastral', 'Memoriu privind gestiunea apelor și protecția amenajării', 'Aviz de principiu / documentație scoatere din amenajare (dacă e cazul)'];
+        } else if (/anar|apele rom|gospodarir.*ap|bazin.*hidro|aba/.test(k)) {
+          emitent = 'Administrația Națională „Apele Române" (ANAR) — Administrația Bazinală de Apă'; temei = 'Legea 107/1996 (Legea apelor), Ordin 828/2019 (avize/autorizații de gospodărire a apelor)';
+          body = '<p>Se solicită <b>avizul de gospodărire a apelor</b> (Legea 107/1996). Se prezintă sursa de alimentare cu apă, modul de evacuare a apelor uzate (menajere/pluviale/tehnologice) și încadrarea în limitele de calitate NTPA-001/002.</p>' +
+            '<p><b>Bilanțul apei:</b> necesarul de apă, debitele de ape uzate menajere și pluviale (cu calculul debitului pluvial de pe suprafețele impermeabile), soluția de preepurare (separator de hidrocarburi pe platforme — SR EN 858), atenuarea/retenția pluvială și punctul de descărcare (rețea/emisar). Se verifică poziția față de cursuri de apă, zone inundabile și zone de protecție sanitară.</p>';
+          docs = ['Plan de situație cu rețelele de apă-canal și punctele de descărcare', 'Breviar de calcul debite (apă, menajer, pluvial)', 'Studiu de gospodărire a apelor / memoriu tehnic', 'Fișa de date pentru avizul de gospodărire a apelor', 'Descrierea soluției de preepurare și atenuare pluvială'];
         } else {
-          emitent = '(emitent conform CU)'; temei = 'conform mențiunii din Certificatul de Urbanism';
-          body = 'Memoriu tehnic pentru obținerea avizului „' + esc(a) + '", cu descrierea soluției relevante pentru acest avizator și temeiul legal aplicabil.';
-          docs = ['Memoriu tehnic specific', 'Plan de situație', 'Piese desenate relevante'];
+          emitent = 'Emitentul menționat în Certificatul de Urbanism pentru „' + a + '"'; temei = 'conform mențiunii din Certificatul de Urbanism și legislației specifice emitentului';
+          body = '<p><b>Obiectul solicitării.</b> Se întocmește prezentul memoriu tehnic pentru obținerea avizului/acordului „' + esc(a) + '", solicitat prin Certificatul de Urbanism pentru obiectivul „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție') + '", ' + esc(D.uat || '') + (D.nrcad ? ', nr. cad. ' + esc(D.nrcad) : '') + '.</p>' +
+            '<p><b>Descrierea obiectivului.</b> ' + esc(_caracConstr(D, v)) + '</p>' +
+            '<p><b>Soluția relevantă pentru acest avizator.</b> Se prezintă elementele proiectului care fac obiectul competenței emitentului (amplasare, gabarite, racorduri/traversări, măsuri de protecție și de siguranță), corelate cu piesele desenate anexate. Se respectă condițiile și restricțiile impuse prin Certificatul de Urbanism și reglementările specifice domeniului avizatorului.</p>' +
+            '<p><b>Măsuri și conformare.</b> Proiectul asigură conformarea la cerințele emitentului privind siguranța, protecția rețelelor/zonelor de protecție și continuitatea funcțională, urmând a se însuși condițiile din avizul emis în documentația de autorizare.</p>';
+          docs = ['Memoriu tehnic specific pentru acest aviz', 'Plan de încadrare în zonă', 'Plan de situație (scara 1:500)', 'Piese desenate relevante pentru emitent', 'Certificat de urbanism (copie)'];
         }
+        var faza = (D.faza === 'PTh' || D.faza === 'PTh+DE') ? 'P.Th. + D.E.' : 'D.T.A.C.';
+        var fnLabel = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție';
+        var ampl = (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : '');
+        var specHtml = (body.indexOf('<p') === 0 || body.indexOf('</p>') >= 0) ? body : '<p>' + body + '</p>';
+        // Indicatori tehnici sintetici (comuni oricărui dosar de aviz)
+        var indTbl = tbl([
+          ['Suprafață teren', (D.Steren ? (+D.Steren).toLocaleString('ro-RO') + ' mp' : '—')],
+          ['Suprafață construită (SC)', (D.Sc ? (+D.Sc).toLocaleString('ro-RO') + ' mp' : '—')],
+          ['Suprafață desfășurată (SD)', (D.Sd ? (+D.Sd).toLocaleString('ro-RO') + ' mp' : '—')],
+          ['Regim de înălțime', 'P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + (D.H ? ' (H ' + D.H + ' m)' : '')],
+          ['POT / CUT propuse', (ac.POT || 0) + '% / ' + (ac.CUT || 0)],
+          ['Categorie/clasă importanță', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—')],
+          ['Risc/categorie incendiu', (String(ac.risc_incendiu || 'mediu')) + ' · Cat. ' + (D.psi || ac.psi_default || 'C')]
+        ], ['Indicator', 'Valoare']);
+        // MEMORIU COMPLET, structurat — identic ca schelet, DIFERIT ca fond (per emitent)
+        var memoriu =
+          '<h3>1. Obiectul solicitării</h3><p>Prin prezenta se solicită avizul/acordul emis de <b>' + esc(emitent) + '</b> pentru obiectivul de investiții „' + esc(fnLabel) + '", amplasat în ' + esc(ampl || '—') + (D.nrCU ? ', conform Certificatului de Urbanism nr. ' + esc(D.nrCU) : ', conform Certificatului de Urbanism') + '. Avizul este solicitat prin CU și condiționează emiterea autorizației de construire (Legea 50/1991). Prezentul memoriu fundamentează tehnic solicitarea.</p>' +
+          '<h3>2. Descrierea obiectivului</h3><p>' + esc(_caracConstr(D, v)) + '</p>' + indTbl +
+          '<h3>3. Soluția tehnică relevantă pentru ' + esc(emitent.split('(')[0].split('—')[0].trim()) + '</h3>' + specHtml +
+          '<h3>4. Măsuri de conformare și corelări</h3><p>Proiectul asigură conformarea la cerințele și restricțiile impuse de emitent prin Certificatul de Urbanism, precum și la reglementările tehnice specifice domeniului. Condițiile din avizul emis se însușesc obligatoriu în documentația tehnică pentru autorizarea executării lucrărilor (D.T.A.C.) și, după caz, în proiectul tehnic de execuție. Soluția este corelată interdisciplinar cu celelalte specialități (arhitectură, rezistență, instalații) și cu piesele desenate anexate.</p>' +
+          '<h3>5. Temei legal și normativ</h3><p>' + esc(temei) + '. Documentația respectă Legea 50/1991 (autorizarea executării lucrărilor de construcții), Legea 350/2001 (urbanism) și reglementările specifice emitentului.</p>';
         var html =
-          tbl([['Emitent aviz', esc(emitent)], ['Temei legal', esc(temei)], ['Faza', (D.faza === 'PTh' || D.faza === 'PTh+DE') ? 'P.Th. + D.E.' : 'D.T.A.C.']], ['Element', 'Conținut']) +
-          '<h3>a) Solicitare / memoriu tehnic</h3><p>' + body + '</p>' +
-          '<h3>b) Opisul documentelor din dosar</h3>' +
-          opisCheck(COMUNE.concat(docs).map(function (d, i) { return ['' + (i + 1), d]; }), ['Nr.', 'Document']);
+          tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Emitent aviz', esc(emitent)], ['Faza', faza]], ['Element', 'Conținut']) +
+          memoriu +
+          '<h3>6. Opisul documentelor din dosar</h3>' +
+          '<p>Dosarul de aviz cuprinde documentele de mai jos; coloana „Anexat" se bifează la constituirea dosarului pentru depunere la emitent.</p>' +
+          opisCheck(COMUNE.concat(docs).map(function (d, i) { return ['' + (i + 1), d]; }), ['Nr.', 'Document']) +
+          '<h3>7. Întocmit / verificat</h3>' +
+          sigTable([['Întocmit — proiectant de specialitate', esc(D.proiectant || ''), 'firmă / nr. atestat'], ['Verificat — șef proiect', '', 'drept de semnătură']], ['Rol', 'Nume și prenume', 'Calitate / atestat']) +
+          '<p style="margin-top:8pt">Întocmit: ' + esc(D.proiectant || '____________________') + ' &nbsp;&nbsp; Data: ______________ &nbsp;&nbsp; Semnătura și ștampila: ______________</p>' +
+          '<p style="font-size:10pt;color:#555">Prezentul memoriu se semnează și se ștampilează de proiectantul de specialitate cu drept de semnătură. Are caracter orientativ și se corelează cu piesele desenate anexate dosarului.</p>';
         return { emitent: emitent, temei: temei, html: html };
       }
       function slug(a) { return String(a).replace(/[ăâ]/gi, 'a').replace(/[îí]/gi, 'i').replace(/[șş]/gi, 's').replace(/[țţ]/gi, 't').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'aviz'; }
