@@ -572,10 +572,21 @@
           '<h3>a) Solicitare / memoriu tehnic</h3><p>' + body + '</p>' +
           '<h3>b) Opisul documentelor din dosar</h3>' +
           opisCheck(COMUNE.concat(docs).map(function (d, i) { return ['' + (i + 1), d]; }), ['Nr.', 'Document']);
-        return { h: 'DOSAR AVIZ — ' + esc(a), html: html };
+        return { emitent: emitent, temei: temei, html: html };
       }
-      var secs = [{ h: 'Notă introductivă', html: '<p>Dosarele de avize se întocmesc conform mențiunilor din Certificatul de Urbanism. Fiecare dosar cuprinde: <b>cererea-tip</b> a emitentului, <b>memoriul tehnic</b> specific avizatorului, <b>piesele desenate</b> relevante și <b>opisul documentelor</b> (checklist de mai jos). Coloana „Anexat" se bifează la constituirea fiecărui dosar. Documentele comune tuturor dosarelor: ' + COMUNE.slice(1).join('; ') + '.</p>' }].concat(avize.map(memAviz));
-      return { cat: 'Avize', file: 'Dosare_avize.doc', html: docHtml(_meta(D, 'DOSARE DE AVIZE — MEMORII ȘI OPISURI DE DOCUMENTE', 'pe avizatori — conform Certificatului de Urbanism'), secs) };
+      function slug(a) { return String(a).replace(/[ăâ]/gi, 'a').replace(/[îí]/gi, 'i').replace(/[șş]/gi, 's').replace(/[țţ]/gi, 't').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) || 'aviz'; }
+      // UN FIȘIER SEPARAT pentru FIECARE avizator bifat (dosar independent de depus) + un opis general
+      var out = [];
+      var opisRows = avize.map(function (a, i) { var m = memAviz(a); return ['' + (i + 1), a, m.emitent, m.temei]; });
+      out.push({ cat: 'Avize', file: 'Avize_00_OPIS_general.doc', html: docHtml(_meta(D, 'AVIZE ȘI ACORDURI — OPIS GENERAL', 'lista dosarelor de avize · un memoriu separat / avizator'),
+        [{ h: 'Notă introductivă', html: '<p>Pentru fiecare avizator bifat în Certificatul de Urbanism s-a generat un <b>memoriu tehnic separat</b> (fișier distinct), pentru a putea depune fiecare dosar independent la emitentul său. Fiecare dosar cuprinde cererea-tip, memoriul tehnic specific, piesele desenate relevante și opisul documentelor. Documente comune tuturor dosarelor: ' + COMUNE.slice(1).join('; ') + '.</p>' },
+         { h: 'Lista avizatorilor și a dosarelor', html: tbl(opisRows, ['Nr.', 'Aviz / acord', 'Emitent', 'Temei legal']) }]) });
+      avize.forEach(function (a, i) {
+        var m = memAviz(a);
+        out.push({ cat: 'Avize', file: 'Aviz_' + ('0' + (i + 1)).slice(-2) + '_' + slug(a) + '.doc',
+          html: docHtml(_meta(D, 'DOSAR AVIZ — ' + a.toUpperCase(), 'memoriu tehnic + opis · ' + m.emitent), [{ h: null, html: m.html }]) });
+      });
+      return out;
     }
   };
 
