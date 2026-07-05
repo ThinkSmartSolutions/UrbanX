@@ -286,6 +286,8 @@ La acest debit se adaugă eventualul debit continuu (Q_c ≈ 0, nu există apara
 - **Ventilare secundară** pe grupuri sanitare cu multe obiecte, pentru menținerea gărzii hidraulice.
 - **Piese de curățire** (curățitoare) la baza coloanelor, la schimbări de direcție și pe colector la max. 15 m.
 
+**Verificarea coloanei Dn 110**: capacitatea hidraulică a unei coloane de canalizare cu ventilare primară (aerisită), conform SR EN 12056-2, la un grad de umplere de 33 % (sistem I, uz intermitent birouri), este de ordinul **4,0 l/s** pentru Dn 110. Debitul pe coloana cea mai încărcată (deservind grupurile sanitare a 3 niveluri suprapuse, ΣDU ≈ 30) este Q = 0,5·√30 = **2,74 l/s < 4,0 l/s** → **conform**. Ventilarea principală (prelungirea coloanei peste terasă cu căciulă de ventilație) menține echilibrul de presiuni și protejează gărzile hidraulice ale sifoanelor de la ultimul nivel împotriva sifonării/desifonării.
+
 ### 3.4 Stație de pompare pentru grupurile sanitare de la subsol
 
 Grupurile sanitare și scurgerile de la subsol (curățenie, garaje, camere tehnice) se află **sub cota canalului public** → evacuarea gravitațională nu este posibilă. Se prevede **stație de pompare ape uzate cu tocător** (bazin de retenție etanș, ~1 mc), echipată cu:
@@ -380,6 +382,17 @@ Se adoptă ca sursă principală **pompă de căldură reversibilă aer-apă tip
 **Avantajul sistemului cu 4 țevi**: permite **încălzire și răcire simultană** pe fațade diferite ale aceleiași clădiri (ex.: fațada sud cu aport solar necesită răcire, în timp ce fațada nord necesită încălzire în semisezon), cu **recuperarea căldurii** din procesul de răcire pentru încălzire — creștere semnificativă de eficiență.
 
 **Back-up pentru vârful de iarnă** (temperaturi < −10 °C, când COP-ul pompei scade): **cazan de condensație pe gaz de 120 kW** (η ≈ 108 % PCI) SAU **rezistențe electrice** integrate în butelia de egalizare. Alegerea între gaz și electric depinde de disponibilitatea racordului de gaze și de bilanțul nZEB (electricul favorizează un scor de emisii mai bun dacă rețeaua este decarbonizată; gazul reduce vârful electric contractat).
+
+**Analiza comparativă a surselor termice:**
+
+| Sursă | Avantaje | Dezavantaje | Verdict |
+|---|---|---|---|
+| Pompă căldură aer-apă 4 țevi | RES, reversibilă, recuperare, nZEB | COP scade la ger, cost inițial | **Adoptată** |
+| Cazan condensație gaz | Cost mic, putere de vârf sigură | Emisii, doar încălzire, racord gaz | **Back-up** |
+| Pompă căldură sol-apă (geotermal) | COP superior, stabil | Cost foraje mare, spațiu | Alternativă premium |
+| District heating (termoficare) | Fără sursă proprie | Disponibilitate locală, doar încălzire | Dacă există racord |
+
+**Consumul energetic sezonier al sursei (estimativ):** la un necesar anual de încălzire de ~75 MWh_termic și SCOP 3,8, consumul electric al pompei de căldură pentru încălzire ≈ 75 / 3,8 = **~19,7 MWh_electric/an**; pentru răcire (~100 MWh_termic frig) la SEER 4,5: ≈ 100 / 4,5 = **~22,2 MWh_electric/an**. Total energie electrică pentru climatizare (fără ventilatoare/pompe): ~42 MWh/an — de comparat cu ~197 MWh_termic livrat (raport de eficiență global ~4,7), ilustrând avantajul soluției aerotermale reversibile față de o sursă clasică cu ardere (η < 1).
 
 ### 5.3 Distribuția termică
 
@@ -479,6 +492,10 @@ Recuperarea de 283 kW este esențială pentru bilanțul nZEB (reduce cu 75 % ene
 - **Night purge (răcire nocturnă)**: ventilare intensivă noaptea vara pentru descărcarea inerției termice a structurii.
 - **DCV (Demand Controlled Ventilation) pe CO₂**: debitul de aer proaspăt se modulează după concentrația reală de CO₂ măsurată în zone (setpoint ~800…1000 ppm), reducând debitul în zonele slab ocupate — economie de 15…30 % la ventilare.
 
+**Estimarea economiei prin free-cooling**: în zona climatică de amplasament, numărul de ore anuale cu entalpie exterioară favorabilă pentru răcire gratuită (semisezon + nopți de vară + zile reci de vară) este de ordinul 1.500…2.000 h. Dacă în aceste ore free-cooling-ul acoperă chiar și parțial sarcina de răcire (înlocuind funcționarea chillerului), economia estimată este de **15…25 % din energia de răcire** anuală. Cumulat cu DCV (−15…30 % ventilare) și cu recuperarea de căldură (−75 % tratare aer proaspăt), pachetul de măsuri aeraulice reduce substanțial consumul HVAC — pilonul principal al încadrării nZEB.
+
+**Filtrarea și calitatea aerului**: filtrele ePM1 50 % (F7) rețin particulele fine (PM2.5, polen, praf urban) protejând ocupanții și bateriile/recuperatorul; prefiltrele ePM10 (M5/G4) prelungesc durata filtrelor fine. Schimbarea filtrelor se comandă la atingerea unui **Δp prag** (presostat diferențial monitorizat în BMS), nu la interval fix — optimizare de mentenanță și energie (un filtru colmatat crește consumul ventilatorului). Opțional, în zonele reprezentative se pot adăuga trepte de filtrare superioară (ePM1 80 %) sau purificare, pentru certificări de tip WELL (calitatea aerului interior).
+
 ### 6.4 Sarcina de răcire (aporturi de căldură)
 
 Aporturile interne de căldură pentru un birou clasă A (densitate 1 pers/10 mp, echipare IT densă):
@@ -559,7 +576,7 @@ Parcajul subteran (volum estimat V_parcaj ≈ 1.960 mc) se ventilează mecanic �
 
 **Regim de exploatare (curent):**
 - 6 volume/h → Q_exploatare = 6 × 1.960 = **11.760 ≈ 12.000 mc/h**
-- Comandă automată pe **senzori de CO** (prag alarmă 100 ppm — pornire ventilare; prag evacuare 200 ppm — semnal de evacuare + ventilare maximă), integrați în BMS.
+- Comandă automată pe **senzori de CO** (prag alarmă 100 ppm — pornire ventilare; prag evacuare 200 ppm — semnal de evacuare + ventilare maximă), integrați în BMS. Numărul de senzori: 1 senzor / ~200…400 mp de parcaj (acoperire uniformă a zonelor de staționare), cu treaptă intermediară de ventilare (funcționare parțială la concentrații medii) pentru economie de energie. Ventilarea în regim normal poate fi oprită complet când parcajul este liber (senzori de prezență/barieră), pornind doar la detecția de mișcare/CO.
 
 **Regim de desfumare (incendiu):**
 - 10 volume/h → Q_desfumare = 10 × 1.960 = **19.600 ≈ 20.000 mc/h**
@@ -633,6 +650,8 @@ Consumatori critici (servere, echipamente de rețea, control acces, CDSAI): P_cr
 E_baterie = 40 kW × 0,25 h = **10 kWh** (≈ 11,1 kWh cu randament invertor 0,90)
 
 Se prevede **UPS on-line dublă conversie 60 kVA / ~48 kW**, configurație **N+1** (module redundante), cu baterii dimensionate pentru 15 min. UPS alimentează tabloul de distribuție al data centerului și rack-urile IT.
+
+**Dimensionarea bateriilor UPS**: pentru P = 40 kW critic, autonomie 15 min, tensiune baterie 480 Vdc, randament invertor 0,90 și factor de îmbătrânire 1,25: energia = 40 / 0,90 × 0,25 h = 11,1 kWh; capacitatea = 11,1 kWh × 1,25 / 480 V = **~29 Ah** la 480 Vdc (string de ~40 baterii 12 V). Se folosesc baterii VRLA cu durată lungă de viață sau, opțional, litiu (durată dublă, gabarit redus). La căderea rețelei, UPS-ul preia instantaneu (0 ms — dublă conversie), iar în ≤ 15 s intră grupul electrogen care realimentează UPS-ul și reîncarcă bateriile — lanț de continuitate fără întrerupere pentru IT.
 
 ### 8.5 Grupul electrogen de siguranță
 
@@ -735,6 +754,10 @@ Puterea instalată totală de iluminat: P_ilum,total ≈ 8 W/mp × 5.000 mp = 40
 
 Corpurile de iluminat de siguranță sunt cu **sursă proprie (kit acumulator)** sau alimentate din **sursa centrală de siguranță** (UPS/grup), cu autotestare integrată și raportare defecte la BMS. Indicatoarele de ieșire (pictograme EN ISO 7010) sunt permanent luminate pe căile de evacuare și la fiecare schimbare de direcție.
 
+### 9.5 Dimensionarea iluminatului de securitate pe căile de evacuare
+
+Lungimea totală a căilor de evacuare (coridoare + scări, 7 niveluri): L ≈ 7 × 60 m ≈ 420 m. La un corp de evacuare la fiecare ~8 m (pentru menținerea ≥ 1 lx pe ax și ≥ 0,5 lx antipanică pe suprafață), rezultă **~55 corpuri de evacuare** + indicatoare la fiecare ieșire/schimbare de direcție (~30 buc.). Puterea instalată de securitate ≈ 55 × 5 W + 30 × 3 W ≈ 365 W. Energia necesară pentru autonomia de 3 h (caz clădire cu > 500 pers): E = 0,365 kW × 3 h = **1,1 kWh** — acoperită de kit-uri de acumulator individuale sau de sursa centrală. Autotestarea automată (test funcțional lunar + test de autonomie anual) raportează defectele la BMS pentru mentenanță.
+
 ---
 
 ## 10. Priză de pământ și paratrăsnet (I20, SR EN 62305)
@@ -744,6 +767,8 @@ Corpurile de iluminat de siguranță sunt cu **sursă proprie (kit acumulator)**
 Se realizează **priză de pământ de fundație** (electrod natural în fundație — platbandă OL-Zn în radier/fundații), completată la nevoie cu electrozi verticali, dimensionată pentru **rezistența de dispersie R ≤ 1 Ω** (priză unică, comună pentru instalația electrică, paratrăsnet și echipotențializare, conform I7/I20).
 
 Se prevede **bară de egalizare a potențialelor (BEP)** principală la care se conectează: nulul de protecție (PE), armătura structurii (prin bare de așteptare), conductele metalice (apă, canal, gaze — prin flanșe izolante la intrare), jgheaburile de cabluri, ecranele curenților slabi, coborârile paratrăsnetului. Echipotențializarea locală suplimentară în băi, camere tehnice și data center.
+
+**Verificarea rezistenței de dispersie**: priza de fundație (electrod natural în beton armat, contur perimetral ~120 m platbandă OL-Zn 40×4 mm) oferă, în soluri de rezistivitate ρ ≈ 100 Ω·m, o rezistență de dispersie estimată R ≈ ρ / (2·L) ... pentru contur închis ≈ 100 / (2 × 120) × factor formă ≈ **sub 1 Ω** → conform cerinței R ≤ 1 Ω pentru priza comună. La soluri de rezistivitate mare se adaugă electrozi verticali (țăruși) legați în paralel până la atingerea valorii. Măsurarea se face la recepție cu punte de măsurare a prizei, prin metoda celor 3 puncte (62 %).
 
 ### 10.2 Evaluarea nivelului de protecție la trăsnet
 
@@ -1088,6 +1113,10 @@ Producția anuală estimată (iradiere specifică zonă ≈ 1.250 kWh/kWp·an, p
 
 Sistemul funcționează în regim de **prosumator** (invertoare cu injecție reglementată + autoconsum), cu **sinergie sezonieră** favorabilă: vârful de producție solară (vară, prânz) coincide cu vârful de răcire — autoconsum ridicat.
 
+**Configurația FV**: ~350 module de ~380 Wp (Ø ~1,95 mp/modul → ~350 mp cu spațiere pentru neumbrire și acces mentenanță), grupate în stringuri pe **invertoare trifazate** (2…3 invertoare de ~20…30 kW) cu monitorizare per string și limitator de injecție (zero-export sau injecție reglementată conform contractului de prosumator). Puterea de vârf 60 kWp se corelează cu puterea aparentă a clădirii (328 kVA) → factor de penetrare FV ~18 %, sub pragul care ar necesita studii de racordare complexe. Structura de montaj pe terasă este balastată (fără perforarea hidroizolației) sau ancorată cu plăci de etanșare, verificată la încărcarea din vânt și zăpadă. Se prevede monitorizare a producției în BMS (kWh, autoconsum vs. injecție) pentru raportarea energetică.
+
+**Estimarea producției lunare** (profil sezonier): iarnă ~2,5 MWh/lună, echinocții ~6,5 MWh/lună, vară ~9 MWh/lună → total ~75 MWh/an, cu **autoconsum estimat ~70 %** (52 MWh consumate direct, restul injectat), datorită suprapunerii cu programul de birou (zi, zile lucrătoare) și cu răcirea estivală.
+
 ### 16.3 Bilanțul energetic și încadrarea nZEB
 
 Consumul de energie primară estimat pentru clădire, după aplicarea măsurilor: **~90…110 kWh/mp·an** (energie primară totală), în intervalul de referință pentru clădiri de birouri nZEB din România (**prag ≤ 90…120 kWh/mp·an**, în funcție de zona climatică). Ponderea energiei din surse regenerabile (aerotermal PC + fotovoltaic) depășește pragul minim de **≥ 10 % RES** cerut de reglementări.
@@ -1164,7 +1193,7 @@ Scenariul de securitate la incendiu (Ordin MAI 129/2016) fundamentează soluții
 
 - **Apă–canal**: aviz de racordare (branșament apă + racord canalizare menajeră și pluvială, debit deversat);
 - **Energie electrică**: ATR/aviz de racordare + aviz de prosumator pentru instalația fotovoltaică;
-- **Gaze naturale** (dacă se prevede cazan pe gaz): aviz de racordare;
+- **Gaze naturale** (dacă se prevede cazan pe gaz): aviz de racordare + proiect instalație de utilizare (I6, NTPEE), cu detector de gaz + electrovalvă de siguranță în centrala termică, ventilare permanentă a încăperii cazanului și evacuare a gazelor de ardere prin coș propriu; instalația de gaz se verifică de verificator atestat Ig;
 - **ISU**: aviz de securitate la incendiu pe baza scenariului de securitate;
 - **Mediu**: după caz (gestionarea apelor pluviale, agenți frigorifici, grup electrogen).
 

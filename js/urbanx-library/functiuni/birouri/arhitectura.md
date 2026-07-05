@@ -36,6 +36,8 @@
 27. Sistematizarea verticală și amenajarea incintei
 28. Instalațiile — interfața arhitecturală (sinteză)
 29. Concluzii
+30. Glosar de termeni și abrevieri
+31. Note finale și responsabilități
 
 ---
 
@@ -309,6 +311,24 @@ Fiecare etaj curent are următoarea stratificare pe verticală:
 
 Înălțimea liberă de 2,80 m este confortabilă pentru birouri clasa A (peste minimul de 2,50–2,60 m).
 
+### 4.5. Definiții BOMA și metoda de măsurare
+
+Standardul BOMA 2017 (ANSI/BOMA Z65.1 — Office Buildings: Standard Methods of Measurement) definește riguros suprafețele pentru a permite compararea corectă între clădiri și facturarea transparentă a chiriei:
+
+- **Gross Area** — suprafața brută construită, măsurată la exteriorul anvelopantei;
+- **Boundary Area / Floor Area** — suprafața nivelului măsurată la fața interioară a anvelopantei;
+- **Occupant Area (Usable)** — suprafața utilizabilă efectiv de ocupant (birou, săli), exclusiv circulațiile comune și spațiile de servicii comune;
+- **Building Common Area** — spațiile comune ale clădirii (lobby, holuri lifturi, grupuri sanitare comune, spații tehnice);
+- **Floor Common Area** — spațiile comune ale unui nivel (coridoare de nivel, holuri);
+- **Rentable Area** — suprafața pe care se calculează chiria = Usable + cota-parte din spațiile comune (prin factorul R/U — load factor);
+- **Load factor (add-on factor)** = Rentable / Usable — coeficientul cu care se majorează suprafața utilizabilă pentru a include cota de spații comune.
+
+Metoda „Method A" (Legacy) sau „Method B" (Single Load Factor) determină cum se distribuie spațiile comune pe chiriași. Alegerea metodei și transparența calculului sunt esențiale în negocierea contractelor de închiriere pentru clasa A.
+
+### 4.6. Optimizarea raportului formă–eficiență
+
+Eficiența planimetrică (Usable/GFA) depinde de raportul dintre suprafața perimetrală de birou și suprafața nucleului. Un nucleu prea mare (multe ascensoare, scări generoase) reduce eficiența; un nucleu subdimensionat compromite serviciul (trafic vertical, sanitare, evacuare). Configurația adoptată (nucleu central compact, coroană de 6,0–8,1 m) atinge eficiența de 67,3%, în ținta clasei A (65–72%). Forma compactă a corpului (raport perimetru/suprafață favorabil) contribuie totodată la performanța energetică (mai puțină anvelopantă per mp util → pierderi termice mai mici).
+
 ---
 
 ## 5. FAȚADA (ANVELOPĂ VITRATĂ — PERETE CORTINĂ)
@@ -415,6 +435,8 @@ Panourile de tavan sunt demontabile individual, asigurând accesul de mentenanț
 ### 6.3. Integrarea coordonată a instalațiilor (BIM / coordonare de specialități)
 
 Coordonarea traseelor din plenum se realizează pe model BIM (federat între arhitectură, structură, HVAC, sanitare, electrice), verificând absența coliziunilor (clash detection) și menținând înălțimea liberă utilă de 2,80 m pe traseele principale. Zonele critice (traversarea grinzilor principale, intersecțiile de ghene) se detaliază la faza D.E.
+
+Ierarhia de rutare în plenum, în ordinea priorității de spațiu, este: (1) tubulatura HVAC principală (cea mai voluminoasă, cu pantă limitată) — se rutează prima, pe traseele cele mai directe; (2) rețeaua de sprinklere (cu pante și cote impuse de norme); (3) canalizarea gravitațională (pante fixe) unde există; (4) traseele electrice și de curenți slabi (cele mai flexibile, se rerutează ușor). Ghenele verticale grupate pe tipuri (a se vedea 3.2) descarcă orizontala în plenum, scurtând traseele. Coordonarea BIM produce planurile de plafon coordonate (RCP — reflected ceiling plan) și secțiunile de plenum, care garantează că toate specialitățile încap în cei 400 mm de plenum fără a coborî tavanul sub cota utilă.
 
 ### 6.4. Structura planșeului
 
@@ -590,6 +612,14 @@ Unitatea de trecere (fluxul de evacuare) este de 0,60 m; pentru evacuarea a circ
 ### 9.4. Iluminatul de siguranță
 
 Casele de scări, holurile și căile de evacuare sunt echipate cu **iluminat de siguranță pentru evacuare** conform NP 061 (nivel de iluminare pe axul căii ≥ 1 lx), cu alimentare de rezervă (baterie / grup electrogen), și cu **indicatoare luminoase de evacuare** (pictograme conform HG 971/2006).
+
+### 9.5. Presurizarea caselor de scări — principiu funcțional
+
+Presurizarea (suprapresiune de 20–50 Pa în casa de scări față de spațiile adiacente) împiedică pătrunderea fumului în casa de scări atunci când ușile sunt închise, și menține un flux de aer dinspre scară spre incendiu atunci când o ușă este deschisă (viteza aerului prin ușa deschisă ≥ 0,75–2 m/s, funcție de scenariu). Sistemul de presurizare (ventilator dedicat, cu alimentare de rezervă, comandat de detecția de incendiu) și clapetele de suprapresiune (pentru a nu depăși presiunea care ar bloca deschiderea ușilor — max. ~100 N forță la mâner) se detaliază în memoriul de instalații de ventilare-desfumare, coordonat cu scenariul de securitate la incendiu. Arhitectura asigură etanșeitatea casei de scări (uși EI-C, absența golurilor necontrolate) necesară funcționării presurizării.
+
+### 9.6. Sasul și accesul la ascensorul de pompieri
+
+Accesul la ascensorul de pompieri se face printr-un sas / palier protejat (EI 60), care izolează puțul ascensorului de restul nivelului, permite intervenția pompierilor în condiții de siguranță și servește ca spațiu-tampon. Sasul se dimensionează pentru manevra echipelor de intervenție și, unde e cazul, ca spațiu de refugiu pentru evacuarea asistată a PMR (a se vedea 11.5).
 
 ---
 
@@ -981,7 +1011,20 @@ Aprovizionarea (mobilier, echipamente, consumabile, catering pentru cafenea) se 
 
 ### 18.5. Gestiunea deșeurilor
 
-Se prevede o **cameră de deșeuri** (la parter sau subsol), ventilată, cu colectare selectivă (hârtie/carton, plastic/metal, sticlă, deșeuri menajere), la distanță de accesele principale și de prizele de aer proaspăt. Evacuarea deșeurilor se face pe traseul de serviciu, fără a interfera cu fluxurile de public / angajați.
+Se prevede o **cameră de deșeuri** (la parter sau subsol), ventilată, cu colectare selectivă (hârtie/carton, plastic/metal, sticlă, deșeuri menajere), la distanță de accesele principale și de prizele de aer proaspăt. Evacuarea deșeurilor se face pe traseul de serviciu, fără a interfera cu fluxurile de public / angajați. Camera de deșeuri se dimensionează pentru volumul generat de populația clădirii, cu ventilare mecanică (evitarea mirosurilor), finisaje lavabile și racord la canalizare (spălare), și cu acces pentru serviciul de salubritate. Pentru cafenea și retail se prevăd spații de stocare temporară a deșeurilor separate (inclusiv fracția organică / ulei uzat), conform normelor sanitare.
+
+### 18.6. Matricea de compatibilitate a fluxurilor
+
+Principiul de bază este ca fluxurile „curate" și reprezentative (public, angajați) să nu se intersecteze cu cele „murdare" sau tehnice (marfă, deșeuri, mentenanță):
+
+| Flux | Public | Angajați | Marfă | Deșeuri |
+|---|---|---|---|---|
+| Public | — | Partajat (lobby) | Separat | Separat |
+| Angajați | Partajat (lobby) | — | Partajat (ascensor marfă la nevoie) | Separat |
+| Marfă | Separat | Partajat controlat | — | Poate partaja traseul de serviciu |
+| Deșeuri | Separat | Separat | Poate partaja traseul de serviciu | — |
+
+Această separare, materializată prin accese, ascensoare și trasee distincte, este o cerință funcțională esențială pentru operarea eficientă și pentru percepția de calitate a unei clădiri clasa A.
 
 ---
 
@@ -1008,6 +1051,16 @@ Un etaj poate fi împărțit pentru mai mulți chiriași, fiecare cu:
 - grupuri sanitare comune (pe nivel) sau, la cerere, private;
 - sub-contorizare a energiei (electricitate, HVAC), pentru facturare corectă;
 - posibilitatea de compartimentare a căilor de evacuare astfel încât fiecare chiriaș să aibă acces la două direcții de evacuare.
+
+### 19.4bis. Scenarii de amenajare tipice
+
+Pentru a demonstra flexibilitatea, planul de etaj curent (660 mp util) admite, fără modificări structurale sau de instalații majore, configurații foarte diferite:
+
+- **Single-tenant open-space** — un singur chiriaș, majoritar open-space (~90 posturi la 10 mp/pers.), cu câteva birouri celulare directoriale, 2–3 săli de ședințe și o zonă socială; eficiență maximă a suprafeței;
+- **Single-tenant celular** — un chiriaj cu cerințe de confidențialitate (avocatură, consultanță), majoritar birouri celulare pe modulul de 1,50 m, cu coridor central; densitate mai redusă;
+- **Multi-tenant (2–3 chiriași)** — etajul împărțit între 2–3 chiriași, fiecare cu acces din holul de lift, cu grupuri sanitare comune și sub-contorizare; fiecare zonă are acces la cele două direcții de evacuare.
+
+Toate scenariile se realizează prin repoziționarea pereților amovibili pe linia modulară, rerutarea cablajului în pardoseala tehnică și reglajul HVAC pe zone, fără intervenții asupra structurii, anvelopantei sau nucleului.
 
 ### 19.4. Adaptabilitatea în timp
 
@@ -1284,6 +1337,35 @@ Prin flexibilitatea funcțională (capitolul 19), clădirea își prelungește d
 
 ---
 
+## 28ter. ORGANIZAREA DE EXECUȚIE ȘI ETAPIZAREA
+
+### 28ter.1. Succesiunea generală a lucrărilor
+
+Execuția clădirii urmează o succesiune logică, corelată cu proiectele de specialitate:
+
+1. **Organizarea de șantier** — împrejmuire, baracamente, utilități provizorii, drum de acces, platformă de lucru, măsuri de protecție a vecinătăților;
+2. **Lucrări de terasamente și susținere** — excavația pentru cele două subsoluri, cu pereți de susținere (mulați / berlinezi) și epuismente dacă e cazul (funcție de nivelul freatic);
+3. **Infrastructura** — radier general, pereți de subsol, hidroizolație, structura celor două subsoluri;
+4. **Suprastructura** — nucleu de b.a. (turnat ascendent, eventual cu cofraj glisant / autoascensor), cadre / planșee etaj cu etaj;
+5. **Anvelopanta** — montajul peretelui cortină unitizat (pe măsură ce structura urcă), fațada ventilată, terasa (hidroizolație, termoizolație);
+6. **Instalațiile** — coloanele verticale, distribuțiile de nivel, echipamentele din spațiile tehnice;
+7. **Finisajele comune (core & shell)** — nucleu, case de scări, lobby, spații tehnice, grupuri sanitare;
+8. **Fit-out** — amenajarea spațiilor de birou pe chiriași (ulterior recepției core & shell).
+
+### 28ter.2. Protecția vecinătăților în timpul execuției
+
+Execuția subsolurilor (excavație adâncă) în context urban impune monitorizarea tasărilor și a construcțiilor învecinate, susținerea corectă a excavației și limitarea vibrațiilor și a zgomotului de șantier (program de lucru, utilaje adecvate). Aceste măsuri se detaliază în proiectul de organizare de execuție (POE) și în planul de sănătate și securitate.
+
+### 28ter.3. Gestiunea deșeurilor de șantier
+
+Deșeurile rezultate din execuție (pământ excavat, deșeuri de construcție) se gestionează selectiv, cu valorificarea / reciclarea fracțiilor recuperabile și eliminarea controlată a restului, conform legislației de mediu — criteriu și de sustenabilitate (BREEAM/LEED — Waste). Reducerea, reutilizarea și reciclarea deșeurilor de șantier fac obiectul unui plan de management al deșeurilor.
+
+### 28ter.4. Recepția și punerea în funcțiune (commissioning)
+
+Înainte de darea în folosință se realizează punerea în funcțiune (commissioning) a instalațiilor și sistemelor (HVAC, iluminat, BMS, detecție, stingere, ascensoare), cu verificarea performanțelor proiectate (debite, temperaturi, presiuni, timpi de răspuns). Recepția lucrărilor se face conform legislației (Legea 10/1995, HG privind recepția lucrărilor de construcții), cu întocmirea cărții tehnice a construcției. Commissioning-ul riguros este și un criteriu de certificare de sustenabilitate (categoria Management).
+
+---
+
 ## 29. CONCLUZII
 
 Imobilul de birouri **2S+P+6E clasa A** este proiectat conform Legii 50/1991 (+ Ord. 839/2009), Legii 10/1995, P118-1/2013, NP 051/2012, OMS 119/2014, C107, Legii 372/2005, C125/2013 și standardului BOMA 2017, cu următoarele caracteristici de sinteză:
@@ -1302,3 +1384,76 @@ Piesa de arhitectură DTAC este corelată cu memoriile de specialitate (rezisten
 ---
 
 *Prezentul memoriu tehnic de arhitectură face parte integrantă din Documentația Tehnică pentru Autorizarea executării lucrărilor de Construire (D.T.A.C.) și se completează cu piesele desenate și cu memoriile de specialitate enumerate. Toate cifrele indicate au caracter de referință pentru clădirea-tip și se confirmă/adaptează la datele concrete ale amplasamentului și temei beneficiarului.*
+
+---
+
+## 30. GLOSAR DE TERMENI ȘI ABREVIERI
+
+| Termen / abreviere | Semnificație |
+|---|---|
+| **DTAC** | Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire |
+| **PTh / DE** | Proiect Tehnic / Detalii de Execuție (faze ulterioare autorizării) |
+| **POT** | Procent de Ocupare a Terenului (Ac / S_teren × 100) |
+| **CUT** | Coeficient de Utilizare a Terenului (SCD / S_teren) |
+| **Ac / SCD** | Arie construită la sol / Suprafață Construită Desfășurată |
+| **NLA** | Net Lettable Area — arie închiriabilă netă |
+| **BOMA** | Building Owners and Managers Association (standard de măsurare a suprafețelor) |
+| **GFA** | Gross Floor Area — suprafață brută de nivel |
+| **Usable / Rentable** | Suprafață utilizabilă / închiriabilă (BOMA) |
+| **Loss factor / Load factor** | Factor de pierdere / de majorare BOMA |
+| **Core & shell** | Livrare „carcasă" (structură + anvelopantă + comune), fără fit-out |
+| **Fit-out** | Amenajarea interioară a spațiului pe chiriaș |
+| **Curtain wall** | Perete cortină (anvelopantă vitrată nestructurală) |
+| **WWR** | Window-to-Wall Ratio — raport suprafață vitrată / fațadă |
+| **U** | Transmitanță termică [W/(m²·K)] |
+| **g** | Factor solar al vitrajului (SHGC) |
+| **τ_v** | Transmisie luminoasă a vitrajului |
+| **Ψ / χ** | Coeficient de punte termică liniară / punctuală |
+| **DF** | Daylight Factor — factor de lumină de zi |
+| **UGR** | Unified Glare Rating — indice de orbire |
+| **Raised floor** | Pardoseală tehnică suprainălțată |
+| **Plenum** | Spațiu tehnic (sub pardoseală / peste tavan fals) |
+| **HVAC** | Heating, Ventilation, Air Conditioning (încălzire, ventilare, climatizare) |
+| **UFAD** | Underfloor Air Distribution — distribuția aerului prin podea |
+| **DCV** | Demand-Controlled Ventilation — ventilare pe cerere |
+| **RTT** | Round Trip Time — timpul de rundă al ascensorului |
+| **HC5** | Handling Capacity la 5 minute (% populație) |
+| **INT** | Intervalul de așteptare al ascensoarelor |
+| **PMR** | Persoană cu Mobilitate Redusă / dizabilități |
+| **RF** | Rezistență la Foc (grad de rezistență la foc) |
+| **R / REI / EI** | Clase de rezistență la foc (R=rezistență, E=etanșeitate, I=izolare) |
+| **-C** | Sufix pentru ușă cu autoînchidere |
+| **nZEB** | nearly Zero-Energy Building (clădire cu consum de energie aproape zero) |
+| **CPE** | Certificat de Performanță Energetică |
+| **BMS / BEMS** | Building (Energy) Management System — sistem de management al clădirii |
+| **BMU** | Building Maintenance Unit — sistem de întreținere a fațadei |
+| **UPS** | Uninterruptible Power Supply — sursă neîntreruptibilă |
+| **CTA** | Centrală de Tratare a Aerului |
+| **CT** | Centrală Termică |
+| **IAQ** | Indoor Air Quality — calitatea aerului interior |
+| **COV** | Compuși Organici Volatili |
+| **R'w** | Indice de izolare la zgomot aerian (in situ) |
+| **T60** | Timp de reverberație |
+| **NR** | Noise Rating — curbă de zgomot |
+| **α_w** | Coeficient de absorbție acustică ponderat |
+| **SUDS** | Sustainable Urban Drainage Systems |
+| **EV** | Electric Vehicle — vehicul electric |
+| **BREEAM / LEED** | Sisteme de certificare a sustenabilității clădirilor |
+| **RSET / ASET** | Required / Available Safe Egress Time (timpi de evacuare) |
+| **Commissioning** | Punerea în funcțiune verificată a instalațiilor |
+
+---
+
+## 31. NOTE FINALE ȘI RESPONSABILITĂȚI
+
+### 31.1. Limitele documentației
+
+Prezentul memoriu de arhitectură prezintă soluțiile de principiu la faza DTAC. Dimensionările detaliate (structură, instalații, securitate la incendiu, performanță energetică) fac obiectul memoriilor de specialitate și al fazelor ulterioare (PTh, DE). Cifrele de referință (suprafețe, indicatori, calcule de trafic vertical și de dotare sanitară) sunt calibrate pentru clădirea-tip descrisă și se verifică / adaptează la datele reale ale amplasamentului, ale temei beneficiarului și ale reglementărilor urbanistice aplicabile.
+
+### 31.2. Coordonarea interdisciplinară
+
+Realizarea unei clădiri de birouri clasa A performante depinde de coordonarea riguroasă între arhitectură, structură și instalații, de preferință pe model BIM federat, cu verificarea coliziunilor și a înălțimilor libere, a traseelor de instalații și a compatibilității soluțiilor. Modificările pe parcursul proiectării se gestionează prin control de versiune și verificare de conformitate cu prezentul memoriu.
+
+### 31.3. Responsabilitatea proiectantului
+
+Proiectul se elaborează de arhitect cu drept de semnătură (OAR) și se verifică tehnic de verificatori atestați MDLPA pe exigențele A–F (Legea 10/1995). Autorizarea se emite pe baza documentației complete și a avizelor / acordurilor solicitate prin certificatul de urbanism, în condițiile Legii 50/1991.
