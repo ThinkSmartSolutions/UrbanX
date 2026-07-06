@@ -143,7 +143,13 @@
         gf('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),
         gf('Suprafață utilă SU (mp)', 'Su', 'manual', { type: 'number', ph: 'auto din SD dacă e gol' }),
         gf('→ SU · SD · SC (reconciliat)', 'arii_calc', 'auto'),
-        gf('Niveluri supraterane', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1' }),
+        gf('Niveluri supraterane (P+etaje)', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1 = P; 5 = P+4' }),
+        gf('Subsoluri (nr.)', 'n_subsol', 'manual', { type: 'number', ph: '0' }),
+        gf('Demisol', 'demisol', 'select', { options: [['', 'Nu'], ['1', 'Da']] }),
+        gf('Mezanin', 'mezanin', 'select', { options: [['', 'Nu'], ['1', 'Da']] }),
+        gf('Etaj tehnic', 'etaj_tehnic', 'select', { options: [['', 'Nu'], ['1', 'Da']] }),
+        gf('Penthouse', 'penthouse', 'select', { options: [['', 'Nu'], ['1', 'Da']] }),
+        gf('→ Regim complet', 'regim_complet', 'auto'),
         gf('Înălțime coamă H (m)', 'H', 'manual', { type: 'number' }),
         gf('Aliniament/față propus (m)', 'retragere_fata', 'manual', { type: 'number' }),
         gf('Retragere laterală propusă (m)', 'retragere_lateral', 'manual', { type: 'number' }),
@@ -255,6 +261,7 @@
       function setA(id, val) { var e = document.getElementById('auto-' + id); if (e) e.textContent = val; }
       setA('POT', (ac.POT || 0) + '%'); setA('CUT', ac.CUT || 0);
       setA('arii_calc', 'SU ' + (ac.Su_total || 0).toLocaleString('ro-RO') + ' · SD ' + (ac.Sd_total || 0).toLocaleString('ro-RO') + ' · SC ' + (ac.Sc_total || 0).toLocaleString('ro-RO') + ' mp (SU/SD ' + (ac.su_coef || 0.8) + ')');
+      setA('regim_complet', (ac.regim_complet || 'P') + ' · ' + (ac.niv_total || 1) + ' niveluri (' + (ac.niv_subterane || 0) + ' subterane)');
       setA('parcaje_necesare', ac.parcaje_necesare); setA('sv', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0).toLocaleString('ro-RO') + ' mp)');
       setA('ag', (ac.seismic.ag) + 'g' + (ac.seismic.estimat ? ' ~est' : '')); setA('Tc', ac.seismic.Tc + ' s');
       setA('sk', ac.clima.sk + ' kN/m²'); setA('Te', ac.clima.Te + ' °C');

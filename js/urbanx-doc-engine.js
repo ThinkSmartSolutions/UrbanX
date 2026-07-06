@@ -105,11 +105,29 @@
     // ── Reconciliere SU ↔ SC ↔ SD (utilă ↔ construită ↔ desfășurată) — completează ce lipsește ──
     // Coeficient util/desfășurat (SU/SD) pe categoria funcțiunii; peretii/circulațiile consumă restul.
     var suCoef = fn.su_coef || ({ rezidential: 0.82, birouri: 0.78, comercial: 0.84, hotelier: 0.72, medical: 0.80, invatamant: 0.80, social: 0.80, industrial: 0.90, energie: 0.85, agrement: 0.85 }[fn.cat]) || 0.80;
-    var nivR = Math.max(1, +d.niv_supraterane || 1), Su = +d.Su || 0;
+    // ── MODEL COMPLET DE NIVELE: subsol / demisol / parter / mezanin / etaje / etaj tehnic / penthouse ──
+    var nSub = Math.max(0, Math.round(+d.n_subsol || 0));
+    var hasDem = !!d.demisol, hasMez = !!d.mezanin, hasEtj = !!d.etaj_tehnic, hasPh = !!d.penthouse;
+    var nivSupra = Math.max(1, +d.niv_supraterane || 1);      // P + etaje (include parterul)
+    var etaje = Math.max(0, nivSupra - 1);
+    var parts = [];
+    if (nSub > 0) parts.push((nSub > 1 ? nSub : '') + 'S');
+    if (hasDem) parts.push('D');
+    parts.push('P');
+    if (hasMez) parts.push('M');
+    if (etaje > 0) parts.push(etaje + 'E');
+    if (hasEtj) parts.push('Et');
+    if (hasPh) parts.push('Ph');
+    var _regimComplet = parts.join('+');                       // ex. 2S+D+P+M+4E+Et+Ph
+    var _nivSubterane = nSub + (hasDem ? 1 : 0);
+    var _nivSupraTotal = nivSupra + (hasMez ? 1 : 0) + (hasEtj ? 1 : 0) + (hasPh ? 1 : 0);
+    var _nivTotal = _nivSubterane + _nivSupraTotal;
+    var nivR = Math.max(1, _nivTotal), Su = +d.Su || 0;   // pentru reconcilierea SC din SD (amprenta ≈ SD / nr niveluri totale)
     if (!Sd) { if (Sc) Sd = Sc * nivR; else if (Su) Sd = Math.round(Su / suCoef); }   // desfășurată din amprentă×niveluri sau din utilă
     if (!Sc && Sd) Sc = Math.round(Sd / nivR);                                          // amprentă din desfășurată/niveluri
     if (!Su && Sd) Su = Math.round(Sd * suCoef);                                        // utilă din desfășurată×coeficient
     var out = {}; out.Sc_total = Sc; out.Sd_total = Sd; out.Su_total = Su; out.su_coef = suCoef; out.nr_corpuri = (d.corpuri && d.corpuri.length) || 0;
+    out.regim_complet = _regimComplet; out.niv_subterane = _nivSubterane; out.niv_supraterane_total = _nivSupraTotal; out.niv_total = _nivTotal;
     out.POT = Steren ? +(Sc / Steren * 100).toFixed(1) : 0;
     out.CUT = Steren ? +(Sd / Steren).toFixed(2) : 0;
     out.sv_min_pct = fn.sv_min; out.sv_min_mp = Math.round(Steren * fn.sv_min / 100);

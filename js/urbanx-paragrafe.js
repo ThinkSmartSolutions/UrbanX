@@ -13,7 +13,19 @@
   function tbl(rows, head) { var h = head ? '<tr>' + head.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>' : ''; return '<table>' + h + rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + (c == null ? '' : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>'; }
   function fnMeta(D) { try { return (G.UXDoc && G.UXDoc.FUNCTIUNI && G.UXDoc.FUNCTIUNI[D.functiune]) || {}; } catch (e) { return {}; } }
   function fnLabel(D) { var m = fnMeta(D); return m.label || D.functiune || 'obiectiv'; }
-  function regim(D) { var niv = Math.max(0, (+D.niv_supraterane || 1) - 1); if (+D.niv_max) niv = Math.min(niv, Math.max(0, (+D.niv_max) - 1)); return niv > 0 ? ('P+' + niv) : 'P'; }
+  function regim(D) {
+    var nSub = Math.max(0, Math.round(+D.n_subsol || 0)), hasDem = !!D.demisol, hasMez = !!D.mezanin, hasEtj = !!D.etaj_tehnic, hasPh = !!D.penthouse;
+    var nivSupra = Math.max(1, +D.niv_supraterane || 1); if (+D.niv_max) nivSupra = Math.min(nivSupra, Math.max(1, +D.niv_max)); // respectă plafonul din CU
+    var et = Math.max(0, nivSupra - 1), p = [];
+    if (nSub > 0) p.push((nSub > 1 ? nSub : '') + 'S');
+    if (hasDem) p.push('D');
+    p.push('P');
+    if (hasMez) p.push('M');
+    if (et > 0) p.push(et + 'E');
+    if (hasEtj) p.push('Et');
+    if (hasPh) p.push('Ph');
+    return p.join('+');
+  }
   function spatiiTbl(D) {
     var sp = D._spatii || []; if (!sp.length) return '';
     var su = 0; sp.forEach(function (r) { su += (+r.buc || 0) * (+r.mp_unit || 0); });
