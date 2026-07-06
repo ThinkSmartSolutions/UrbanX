@@ -107,9 +107,14 @@
       if (!D.faza) D.faza = 'DTAC';
       // ── DASHBOARD ADAPTIV: arată doar câmpurile relevante profilului funcțiunii ──
       var PROFIL = (G.UXDoc.profilFor ? G.UXDoc.profilFor(D.functiune) : 'cladire');
+      // Toate câmpurile de GEOMETRIE DE CLĂDIRE (nu se aplică la energie / infrastructură).
+      var _bldHide = ('POT_max CUT_max H_max niv_max retragere_fata_min retragere_lateral_min retragere_spate_min ' +
+        'Sc Sd Su arii_calc niv_supraterane n_subsol demisol mezanin etaj_tehnic penthouse regim_complet H ' +
+        'retragere_fata retragere_lateral retragere_spate parcaje_propuse POT CUT parcaje_necesare incalzire apa').split(' ');
+      function _set(arr) { var o = {}; arr.forEach(function (k) { o[k] = 1; }); return o; }
       var HIDE = {
-        energie: { POT_max: 1, CUT_max: 1, H_max: 1, niv_max: 1, retragere_fata_min: 1, retragere_lateral_min: 1, retragere_spate_min: 1, Sc: 1, Sd: 1, Su: 1, niv_supraterane: 1, H: 1, retragere_fata: 1, retragere_lateral: 1, retragere_spate: 1, parcaje_propuse: 1, POT: 1, CUT: 1, parcaje_necesare: 1, incalzire: 1, apa: 1 },
-        infrastructura: { POT_max: 1, CUT_max: 1, niv_max: 1, retragere_fata_min: 1, retragere_lateral_min: 1, retragere_spate_min: 1, niv_supraterane: 1, H: 1, retragere_fata: 1, retragere_lateral: 1, retragere_spate: 1, parcaje_propuse: 1, POT: 1, CUT: 1, parcaje_necesare: 1, sv: 1, incalzire: 1, apa: 1 },
+        energie: _set(_bldHide),                          // parc FV: fără geometrie de clădire; păstrează spații verzi + seism + PSI
+        infrastructura: _set(_bldHide.concat(['sv'])),    // pod/drum: fără geometrie de clădire, fără spații verzi
         cladire: {}
       };
       function vis(k) { return !(HIDE[PROFIL] || {})[k]; }
@@ -158,8 +163,8 @@
         gf('POT propus', 'POT', 'auto'), gf('CUT propus', 'CUT', 'auto'),
         gf('Parcaje necesare', 'parcaje_necesare', 'auto'), gf('Spații verzi min.', 'sv', 'auto')
       ].filter(Boolean))));
-      // Multi-corp (opțional): C1/C2/C3 cu regim și indicatori pe corp (ca la proiectele multi-corp)
-      (function () {
+      // Multi-corp (opțional): doar la clădiri (nu are sens la parc FV / pod)
+      if (PROFIL === 'cladire') (function () {
         var sc = el('div', { style: 'margin-bottom:16px' });
         sc.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">5b</span>Corpuri (multi-corp) — opțional'));
         var list = el('div', { id: 'uxdoc-corpuri' });

@@ -23,7 +23,10 @@
     var tipOpts = [];
     if (G.UXSpace.hasTemplate && G.UXSpace.hasTemplate('centru-social')) tipOpts.push(['centru-social', 'Centru social de zi']);
     Object.keys(G.UXSpace.TIPOLOGII || {}).forEach(function (k) { tipOpts.push([k, G.UXSpace.TIPOLOGII[k].label || k]); });
-    var state = { tip: (D.__prog && D.__prog.tip) || (tipOpts[0] && tipOpts[0][0]), params: (D.__prog && D.__prog.params) || {}, rows: (D._spatii && D._spatii.slice()) || null };
+    // Moștenește tipologia din funcțiunea aleasă în dashboard (nu o mai setezi de două ori).
+    var _FN2TIP = { 'centru-social': 'centru-social', 'scoala': 'scoala', 'spital': 'spital', 'medical': 'spital', 'hotelier': 'hotel', 'skid': 'skid-gpl' };
+    var _tipDefault = (D.__prog && D.__prog.tip) || (_FN2TIP[D.functiune] && G.UXSpace.hasTemplate && (G.UXSpace.hasTemplate(_FN2TIP[D.functiune]) || (G.UXSpace.TIPOLOGII && G.UXSpace.TIPOLOGII[_FN2TIP[D.functiune]])) ? _FN2TIP[D.functiune] : null) || (tipOpts[0] && tipOpts[0][0]);
+    var state = { tip: _tipDefault, params: (D.__prog && D.__prog.params) || {}, rows: (D._spatii && D._spatii.slice()) || null };
 
     var paramBox = el('div', { style: 'background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.25);border-radius:10px;padding:12px;margin:12px 0' });
     var tblBox = el('div', { style: 'margin-top:14px' });
@@ -88,9 +91,13 @@
       return { su: Math.round(su), sd: sd, sc: sc, niv: niv, ocup: ocup };
     }
     function _nivOptions() {
-      var NN = +state.params.niveluri || 1;
+      // Model complet de nivele: subsol / demisol / parter / mezanin / etaje / etaj tehnic / penthouse.
+      var NN = Math.max(+state.params.niveluri || 0, +D.niv_supraterane || 0, 1);
       (state.rows || []).forEach(function (r) { var n = parseInt(_nivKey(r.niv), 10); if (!isNaN(n) && n + 1 > NN) NN = n + 1; });
-      var o = [['P', 'Parter']]; for (var i = 1; i < NN; i++) o.push([String(i), 'Etaj ' + i]); o.push(['S', 'Subsol']); return o;
+      var o = [['S', 'Subsol'], ['D', 'Demisol'], ['P', 'Parter'], ['M', 'Mezanin']];
+      for (var i = 1; i < NN; i++) o.push([String(i), 'Etaj ' + i]);
+      o.push(['Et', 'Etaj tehnic'], ['Ph', 'Penthouse']);
+      return o;
     }
 
     function renderTable() {
