@@ -155,6 +155,87 @@
       return doc;
     };
 
+    // ── DETALII DE EXECUȚIE (PTh) — la scara 1:20/1:10 ────────────────────
+    function _cartusDet(doc, W, H, o, plansa, titlu, scara) {
+      UX.scaleBar(doc, 0, -H * 0.12 - 400, scara || 20, 1);
+      UX.titleBlock(doc, { x: W + 400, y: 0, proiect: o.proiect || titlu, faza: 'PTh', plansa: plansa, scara: scara || 20, beneficiar: o.beneficiar, data: o.data });
+      if (o.params) try { UX.techNotes(doc, W + 400, 65, o.params); } catch (e) {}
+    }
+    // Detaliu fundație (secțiune verticală cu armare) 1:20
+    UX.detailFundatieDoc = function (o) {
+      o = o || {}; var doc = UX.newDoc();
+      var bw = 1600, bh = 500, cs = 500, adf = ((o.adancimeFundatie || (o.params && o.params.adancime_inghet_m) || 1.0) * 1000);
+      // teren + pietris + beton egalizare
+      for (var g = -200; g < bw + 200; g += 180) doc.line(g, -adf, g - 140, -adf - 140, 'A-HATCH-PMNT');
+      doc.rect(-100, -adf, bw + 200, 100, 'S-FNDT-N'); // beton egalizare
+      try { UX.materialHatch(doc, [[-100, -adf + 100], [bw - 100, -adf + 100], [bw - 100, -adf + 100 + bh], [-100, -adf + 100]], 'BETON_ARMAT'); } catch (e) {}
+      // talpa fundatie
+      doc.rect(0, -adf + 100, bw, bh, 'S-FNDT-N');
+      try { UX.materialHatch(doc, [[0, -adf + 100], [bw, -adf + 100], [bw, -adf + 100 + bh], [0, -adf + 100 + bh]], 'BETON_ARMAT'); } catch (e) {}
+      // armare talpa (bare longitudinale = cercuri jos, etrieri)
+      for (var i = 0; i < 6; i++) doc.circle(120 + i * (bw - 240) / 5, -adf + 160, 12, 'S-COLS-N');
+      doc.rect(80, -adf + 140, bw - 160, bh - 80, 'S-BEAM-N'); // etrier talpa
+      // stalp + mustati
+      doc.rect(bw / 2 - cs / 2, -adf + 100 + bh, cs, adf - bh - 100 + 300, 'S-COLS-N');
+      try { UX.materialHatch(doc, [[bw / 2 - cs / 2, -adf + 100 + bh], [bw / 2 + cs / 2, -adf + 100 + bh], [bw / 2 + cs / 2, 300], [bw / 2 - cs / 2, 300]], 'BETON_ARMAT'); } catch (e) {}
+      for (var m = 0; m < 4; m++) { var mx = bw / 2 - cs / 2 + 60 + m * (cs - 120) / 3; doc.line(mx, -adf + 160, mx, 300, 'S-COLS-N'); }
+      // hidroizolatie + cota nivel
+      doc.line(-100, 0, bw + 100, 0, 'A-WALL-EXTR-D'); UX.levelMark(doc, bw + 300, 0, 0);
+      UX.levelMark(doc, bw + 300, -adf + 100, -(adf - 100) / 1000);
+      doc.dim(0, -adf + 100, 0, -adf + 100 + bh, -300, 'A-DIMS-ELEV'); doc.dim(0, -adf + 100, bw, -adf + 100, -300, 'A-DIMS-PLAN');
+      doc.text(bw / 2, -adf + 100 + bh + 700, 40, 'DETALIU FUNDAȚIE — talpă b.a. C16/20, armătură B500C, talpa sub îngheț ' + (adf / 1000).toFixed(2) + 'm', 'A-TEXT-NOTE', { align: 'center' });
+      _cartusDet(doc, bw, adf + bh, o, o.plansa || 'D-01', 'Detaliu fundație', 20);
+      return doc;
+    };
+    // Detaliu nod stâlp-grindă (armare) 1:20
+    UX.detailNodDoc = function (o) {
+      o = o || {}; var doc = UX.newDoc(); var cs = 500, gh = 600, gl = 1800;
+      doc.rect(0, 0, cs, 1400, 'S-COLS-N'); try { UX.materialHatch(doc, [[0, 0], [cs, 0], [cs, 1400], [0, 1400]], 'BETON_ARMAT'); } catch (e) {}
+      doc.rect(cs, 700, gl, gh, 'S-BEAM-N'); try { UX.materialHatch(doc, [[cs, 700], [cs + gl, 700], [cs + gl, 700 + gh], [cs, 700 + gh]], 'BETON_ARMAT'); } catch (e) {}
+      // armare stalp (4 bare colt) + etrieri
+      [60, cs - 60].forEach(function (x) { doc.line(x, 40, x, 1360, 'S-COLS-N'); });
+      for (var e2 = 0; e2 < 7; e2++) doc.rect(45, 60 + e2 * 190, cs - 90, 30, 'S-BEAM-N');
+      // armare grinda sup + inf + etrieri
+      doc.line(cs + 40, 760, cs + gl - 40, 760, 'S-COLS-N'); doc.line(cs + 40, 700 + gh - 60, cs + gl - 40, 700 + gh - 60, 'S-COLS-N');
+      for (var e3 = 0; e3 < 9; e3++) doc.rect(cs + 60 + e3 * (gl - 120) / 8, 740, 20, gh - 80, 'S-BEAM-N');
+      doc.circle(cs + 60, 760, 12, 'S-COLS-N'); doc.circle(cs + gl - 60, 700 + gh - 60, 12, 'S-COLS-N');
+      doc.dim(0, 0, cs, 0, -250, 'A-DIMS-PLAN'); doc.dim(cs, 700, cs, 700 + gh, -250, 'A-DIMS-ELEV');
+      doc.text(cs + gl / 2, 700 + gh + 400, 40, 'DETALIU NOD STÂLP-GRINDĂ — armare B500C, etrieri îndesiți în zona critică (P100-1 §5)', 'A-TEXT-NOTE', { align: 'center' });
+      _cartusDet(doc, cs + gl, 1400, o, o.plansa || 'D-02', 'Detaliu nod stâlp-grindă', 20);
+      return doc;
+    };
+    // Detaliu planșeu (armare + stratificație) 1:10
+    UX.detailPlanseuDoc = function (o) {
+      o = o || {}; var doc = UX.newDoc(); var w = 2400, th = 250;
+      doc.rect(0, 0, w, th, 'S-SLAB-N'); try { UX.materialHatch(doc, [[0, 0], [w, 0], [w, th], [0, th]], 'BETON_ARMAT'); } catch (e) {}
+      doc.line(40, 40, w - 40, 40, 'S-COLS-N'); doc.line(40, th - 40, w - 40, th - 40, 'S-COLS-N'); // armare inf/sup
+      for (var i = 0; i < 12; i++) { doc.circle(80 + i * (w - 160) / 11, 40, 8, 'S-COLS-N'); doc.circle(80 + i * (w - 160) / 11, th - 40, 8, 'S-COLS-N'); }
+      // stratificatie peste placa
+      var straturi = [{ grosime: th, nume: 'placă b.a. C25/30', material: 'BETON_ARMAT' }, { grosime: 50, nume: 'șapă egalizare', material: 'MORTAR' }, { grosime: 20, nume: 'finisaj pardoseală', material: 'MORTAR' }];
+      try { UX.strataDetail(doc, w + 300, 0, 700, straturi); } catch (e) {}
+      doc.dim(0, 0, 0, th, -300, 'A-DIMS-ELEV');
+      doc.text(w / 2, -400, 40, 'DETALIU PLANȘEU — placă b.a. h=' + th + 'mm, armare B500C sus/jos, acoperire c=25mm', 'A-TEXT-NOTE', { align: 'center' });
+      _cartusDet(doc, w + 1200, th, o, o.plansa || 'D-03', 'Detaliu planșeu', 10);
+      return doc;
+    };
+    // Detaliu atic terasă (stratificație acoperiș) 1:10
+    UX.detailAticDoc = function (o) {
+      o = o || {}; var doc = UX.newDoc(); var w = 1800, th = 250;
+      doc.rect(0, 0, w, th, 'S-SLAB-N'); try { UX.materialHatch(doc, [[0, 0], [w, 0], [w, th], [0, th]], 'BETON_ARMAT'); } catch (e) {}
+      // straturi acoperis terasa
+      var straturi = [{ grosime: th, nume: 'placă b.a.', material: 'BETON_ARMAT' }, { grosime: 80, nume: 'beton pantă 1.5%', material: 'MORTAR' }, { grosime: 150, nume: 'termoizolație', material: 'TERMOIZOLATIE' }, { grosime: 15, nume: 'hidroizolație 2 straturi', material: 'MORTAR' }, { grosime: 50, nume: 'protecție pietriș/dale', material: 'PIETRIS' }];
+      var cy = th; straturi.slice(1).forEach(function (s2) { doc.rect(0, cy, w - 350, s2.grosime, 'A-WALL-INTR-N'); try { UX.materialHatch(doc, [[0, cy], [w - 350, cy], [w - 350, cy + s2.grosime], [0, cy + s2.grosime]], s2.material); } catch (e) {} cy += s2.grosime; });
+      // atic
+      doc.rect(w - 350, 0, 350, cy + 300, 'A-WALL-EXTR-N'); try { UX.materialHatch(doc, [[w - 350, 0], [w, 0], [w, cy + 300], [w - 350, cy + 300]], 'ZIDARIE_BCA'); } catch (e) {}
+      doc.line(w - 350, cy + 100, w - 500, cy + 250, 'A-WALL-EXTR-N'); // sort/glaf atic
+      // eticheta straturi
+      straturi.forEach(function (s2, i) { doc.text(w + 200, cy - 40 - i * 120, 32, s2.nume + ' ' + s2.grosime + 'mm', 'A-TEXT-FINI'); });
+      doc.dim(0, 0, 0, cy, -300, 'A-DIMS-ELEV');
+      doc.text(w / 2, -400, 40, 'DETALIU ATIC + ACOPERIȘ TERASĂ — stratificație, hidroizolație urcată pe atic, șorț', 'A-TEXT-NOTE', { align: 'center' });
+      _cartusDet(doc, w + 1400, cy + 300, o, o.plansa || 'D-04', 'Detaliu atic/acoperiș', 10);
+      return doc;
+    };
+
     // ── SET COMPLET: arhitectură + rezistență + instalații ────────────────
     UX.buildFullSet = function (o) {
       o = o || {}; var s = [];
@@ -183,6 +264,11 @@
       add('is', 'Instalații sanitare', 'IS-01', UX.installationSchemeDoc('IS', Object.assign({}, o, { plansa: 'IS-01' })));
       add('ie', 'Instalații electrice', 'IE-01', UX.installationSchemeDoc('IE', Object.assign({}, o, { plansa: 'IE-01' })));
       add('it', 'Instalații termice / HVAC', 'IT-01', UX.installationSchemeDoc('IT', Object.assign({}, o, { plansa: 'IT-01' })));
+      // DETALII DE EXECUȚIE (PTh) — detalii de armare + arhitecturale la scara 1:20/1:10
+      add('det_fundatie', 'Detaliu fundație (PTh)', 'D-01', UX.detailFundatieDoc(Object.assign({}, o, { plansa: 'D-01' })));
+      add('det_nod', 'Detaliu nod stâlp-grindă (PTh)', 'D-02', UX.detailNodDoc(Object.assign({}, o, { plansa: 'D-02' })));
+      add('det_planseu', 'Detaliu planșeu (PTh)', 'D-03', UX.detailPlanseuDoc(Object.assign({}, o, { plansa: 'D-03' })));
+      add('det_atic', 'Detaliu atic/acoperiș (PTh)', 'D-04', UX.detailAticDoc(Object.assign({}, o, { plansa: 'D-04' })));
       return s;
     };
 
