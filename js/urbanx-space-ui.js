@@ -35,14 +35,18 @@
     ov.appendChild(wrap); document.body.appendChild(ov);
 
     function paramDefs() {
-      if (state.tip === 'centru-social') return [{ key: 'capacitate', label: 'Nr. beneficiari/zi', type: 'number', def: 50 }];
+      if (state.tip === 'centru-social') return [
+        { key: 'tip_beneficiar', label: 'Tip beneficiari', type: 'select', def: 'varstnici', options: [['varstnici', 'Vârstnici'], ['dizabilitati', 'Persoane cu dizabilități'], ['copii', 'Copii/tineri (after-school, risc)'], ['familii', 'Familii/comunitate'], ['fara_adapost', 'Persoane fără adăpost']] },
+        { key: 'capacitate', label: 'Nr. beneficiari/zi', type: 'number', def: 50 }
+      ];
       var t = (G.UXSpace.TIPOLOGII || {})[state.tip]; return (t && t.params) || [];
     }
     function genereaza() {
       var p = {}; paramDefs().forEach(function (d) { p[d.key] = state.params[d.key] != null ? state.params[d.key] : d.def; });
       state.params = p;
       if (state.tip === 'centru-social') {
-        state.rows = (G.UXSpace.propune('centru-social', p) || []).map(function (r) { return { id: r.nume, nume: r.nume, cat: r.zona, niv: r.niv, buc: r.buc, mp_unit: r.mp_unit, ocup: r.ocup, prov: 'șablon', normativ: 'NP 011 / Ord. 29/2019', ob: r.ob }; });
+        var _norma = (G.UXSpace.normaFor ? G.UXSpace.normaFor('centru-social', p) : 'NP 011 / Ord. 29/2019');
+        state.rows = (G.UXSpace.propune('centru-social', p) || []).map(function (r) { return { id: r.nume, nume: r.nume, cat: r.zona, niv: r.niv, buc: r.buc, mp_unit: r.mp_unit, ocup: r.ocup, prov: 'șablon', normativ: _norma, ob: r.ob }; });
       } else {
         var rz = G.UXSpace.rezolva(state.tip, p);
         state.rows = (rz ? rz.spatii : []).map(function (s) { return { id: s.id, nume: s.label, cat: s.cat, niv: s.niv, buc: s.qty, mp_unit: s.mp_unit, ocup: 0, prov: s.prov, normativ: s.normativ, ob: s.ob }; });

@@ -13,10 +13,111 @@
   //        'lin'  → suprafața scalează liniar cu (capacitate / cap_ref)
   //        'pas'  → nr. bucăți scalează în trepte (o unitate la fiecare `la` beneficiari)
   //  mp = suprafață utilă unitară (mp); buc = nr. unități la capacitatea de referință
+  // Sub-tipuri centru social de zi (Legea 292/2011): fiecare categorie de beneficiari are program + normativ propriu.
+  var CS_VARIANTE = {
+    varstnici: { norma: 'Ord. MMJS 29/2019 (centre de zi vârstnici) · Legea 17/2000 · NP 011 · OMS 119/2014 · NP 051/2012', spatii: null /* = spatii de bază (mai jos) */ },
+    dizabilitati: {
+      norma: 'Ord. MMFPSPV 82/2019 (centre de zi persoane cu dizabilități) · Legea 448/2006 · NP 011 · NP 051/2012 · OMS 119/2014',
+      spatii: [
+        { zona: 'Primire', nume: 'Windfang / tampon acces', niv: 'P', buc: 1, mp: 6.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Primire', nume: 'Hol primire / recepție (accesibil PMR)', niv: 'P', buc: 1, mp: 34, scal: 'lin', ocup: 8, ob: 1 },
+        { zona: 'Administrativ', nume: 'Birou asistent social', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Administrativ', nume: 'Birou manager / coordonator', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Recuperare', nume: 'Sală terapie ocupațională', niv: 'P', buc: 1, mp: 50, scal: 'lin', ocup: 12, ob: 1 },
+        { zona: 'Recuperare', nume: 'Atelier abilitare / preprofesional', niv: 'P', buc: 1, mp: 40, scal: 'lin', ocup: 10, ob: 1 },
+        { zona: 'Recuperare', nume: 'Sală terapie senzorială (Snoezelen)', niv: 'P', buc: 1, mp: 24, scal: 'fix', ocup: 6, ob: 1 },
+        { zona: 'Recuperare', nume: 'Sală kinetoterapie', niv: 'P', buc: 1, mp: 50, scal: 'lin', ocup: 10, ob: 1 },
+        { zona: 'Medical', nume: 'Cabinet logopedie / psihopedagogie', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Medical', nume: 'Cabinet medical', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 3, ob: 1 },
+        { zona: 'Masă', nume: 'Sală de mese / servire', niv: 'P', buc: 1, mp: 60, scal: 'lin', ocup: 30, ob: 1 },
+        { zona: 'Bloc alimentar', nume: 'Oficiu de distribuție a hranei', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS adaptat PMR femei', niv: 'P', buc: 1, mp: 8, scal: 'pas', la: 12, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS adaptat PMR bărbați', niv: 'P', buc: 1, mp: 8, scal: 'pas', la: 12, ocup: 0, ob: 1 },
+        { zona: 'Personal', nume: 'Vestiar personal + grup sanitar', niv: 'P', buc: 1, mp: 12, scal: 'pas', la: 20, ocup: 6, ob: 1 },
+        { zona: 'Tehnic', nume: 'Cameră curățenie', niv: 'P', buc: 1, mp: 3.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Tehnic', nume: 'Spațiu tehnic — centrală termică', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Tehnic', nume: 'Depozit materiale', niv: 'P', buc: 1, mp: 10, scal: 'lin', ocup: 0, ob: 0 }
+      ]
+    },
+    copii: {
+      norma: 'Ord. MMJS 27/2019 (centre de zi pentru copii) · Legea 272/2004 (protecția copilului) · NP 011 · OMS 1955/1995 · NP 051/2012',
+      spatii: [
+        { zona: 'Primire', nume: 'Windfang / tampon acces', niv: 'P', buc: 1, mp: 6, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Primire', nume: 'Hol primire / recepție', niv: 'P', buc: 1, mp: 24, scal: 'lin', ocup: 10, ob: 1 },
+        { zona: 'Administrativ', nume: 'Birou asistent social', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Administrativ', nume: 'Cabinet psiholog / consiliere', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Educațional', nume: 'Sală meditații / teme (tip clasă)', niv: 'P', buc: 1, mp: 50, scal: 'pas', la: 25, ocup: 25, ob: 1 },
+        { zona: 'Educațional', nume: 'Sală activități creative / joc', niv: 'P', buc: 1, mp: 50, scal: 'lin', ocup: 25, ob: 1 },
+        { zona: 'Activități', nume: 'Sală multifuncțională / socializare', niv: 'P', buc: 1, mp: 60, scal: 'lin', ocup: 30, ob: 1 },
+        { zona: 'Educațional', nume: 'Bibliotecă / sală lectură', niv: 'P', buc: 1, mp: 24, scal: 'fix', ocup: 12, ob: 0 },
+        { zona: 'Educațional', nume: 'Sală IT / educație digitală', niv: 'P', buc: 1, mp: 30, scal: 'fix', ocup: 15, ob: 0 },
+        { zona: 'Medical', nume: 'Cabinet medical / prim ajutor', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Medical', nume: 'Izolator', niv: 'P', buc: 1, mp: 10, scal: 'fix', ocup: 1, ob: 1 },
+        { zona: 'Masă', nume: 'Sală de mese / cantină', niv: 'P', buc: 1, mp: 60, scal: 'lin', ocup: 40, ob: 1 },
+        { zona: 'Bloc alimentar', nume: 'Bucătărie / oficiu preparare', niv: 'P', buc: 1, mp: 22, scal: 'lin', ocup: 3, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS copii fete', niv: 'P', buc: 1, mp: 12, scal: 'pas', la: 15, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS copii băieți', niv: 'P', buc: 1, mp: 11, scal: 'pas', la: 15, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS adaptat PMR', niv: 'P', buc: 1, mp: 4.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Personal', nume: 'Vestiar personal', niv: 'P', buc: 1, mp: 10, scal: 'fix', ocup: 4, ob: 1 },
+        { zona: 'Tehnic', nume: 'Cameră curățenie', niv: 'P', buc: 1, mp: 3.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Tehnic', nume: 'Spațiu tehnic — centrală termică', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 0, ob: 1 }
+      ]
+    },
+    familii: {
+      norma: 'Ord. MMJS 28/2019 (servicii pentru familie/comunitate) · Legea 292/2011 · Legea 272/2004 · NP 011 · NP 051/2012',
+      spatii: [
+        { zona: 'Primire', nume: 'Hol primire / recepție', niv: 'P', buc: 1, mp: 24, scal: 'lin', ocup: 8, ob: 1 },
+        { zona: 'Primire', nume: 'Sală de așteptare', niv: 'P', buc: 1, mp: 18, scal: 'fix', ocup: 10, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet consiliere familială', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 4, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet psiholog', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet asistent social', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet consiliere juridică', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 2, ob: 0 },
+        { zona: 'Activități', nume: 'Sală grup de suport', niv: 'P', buc: 1, mp: 40, scal: 'lin', ocup: 20, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cameră mediere', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 6, ob: 0 },
+        { zona: 'Activități', nume: 'Ludotecă / spațiu supraveghere copii', niv: 'P', buc: 1, mp: 24, scal: 'fix', ocup: 10, ob: 1 },
+        { zona: 'Activități', nume: 'Sală activități comunitare', niv: 'P', buc: 1, mp: 60, scal: 'lin', ocup: 30, ob: 1 },
+        { zona: 'Administrativ', nume: 'Birou coordonator', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Bloc alimentar', nume: 'Oficiu / kitchenette', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 2, ob: 0 },
+        { zona: 'Sanitare', nume: 'GS femei', niv: 'P', buc: 1, mp: 8, scal: 'pas', la: 15, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS bărbați', niv: 'P', buc: 1, mp: 8, scal: 'pas', la: 15, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS adaptat PMR', niv: 'P', buc: 1, mp: 4.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Tehnic', nume: 'Cameră curățenie', niv: 'P', buc: 1, mp: 3.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Tehnic', nume: 'Arhivă / depozit', niv: 'P', buc: 1, mp: 10, scal: 'fix', ocup: 0, ob: 0 },
+        { zona: 'Tehnic', nume: 'Spațiu tehnic — centrală termică', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 0, ob: 1 }
+      ]
+    },
+    fara_adapost: {
+      norma: 'Ord. MMJS 2126/2014 / 29/2019 (centre pentru persoane fără adăpost) · Legea 292/2011 · Legea 116/2002 · OMS 119/2014 · NP 051/2012',
+      spatii: [
+        { zona: 'Primire', nume: 'Windfang / tampon acces', niv: 'P', buc: 1, mp: 6, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Primire', nume: 'Hol primire + triaj / evaluare', niv: 'P', buc: 1, mp: 30, scal: 'lin', ocup: 10, ob: 1 },
+        { zona: 'Primire', nume: 'Vestiar / garderobă efecte personale', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Igienizare', nume: 'Grup dușuri femei', niv: 'P', buc: 1, mp: 18, scal: 'pas', la: 10, ocup: 0, ob: 1 },
+        { zona: 'Igienizare', nume: 'Grup dușuri bărbați', niv: 'P', buc: 1, mp: 24, scal: 'pas', la: 10, ocup: 0, ob: 1 },
+        { zona: 'Igienizare', nume: 'Spălătorie / uscătorie', niv: 'P', buc: 1, mp: 20, scal: 'lin', ocup: 1, ob: 1 },
+        { zona: 'Igienizare', nume: 'Sală deparazitare / dezinfecție', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Masă', nume: 'Sală de mese / cantină socială', niv: 'P', buc: 1, mp: 80, scal: 'lin', ocup: 50, ob: 1 },
+        { zona: 'Bloc alimentar', nume: 'Bucătărie — preparare la cald', niv: 'P', buc: 1, mp: 30, scal: 'lin', ocup: 3, ob: 1 },
+        { zona: 'Bloc alimentar', nume: 'Depozit alimente + spațiu răcit', niv: 'P', buc: 1, mp: 14, scal: 'lin', ocup: 0, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet asistent social / orientare', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Consiliere', nume: 'Cabinet consiliere pentru reintegrare', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Medical', nume: 'Cabinet medical / prim ajutor', niv: 'P', buc: 1, mp: 16, scal: 'fix', ocup: 2, ob: 1 },
+        { zona: 'Medical', nume: 'Izolator', niv: 'P', buc: 1, mp: 12, scal: 'fix', ocup: 1, ob: 1 },
+        { zona: 'Activități', nume: 'Sală de zi / repaus', niv: 'P', buc: 1, mp: 50, scal: 'lin', ocup: 30, ob: 1 },
+        { zona: 'Tehnic', nume: 'Magazie donații / îmbrăcăminte', niv: 'P', buc: 1, mp: 20, scal: 'lin', ocup: 0, ob: 0 },
+        { zona: 'Sanitare', nume: 'GS femei', niv: 'P', buc: 1, mp: 10, scal: 'pas', la: 12, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS bărbați', niv: 'P', buc: 1, mp: 10, scal: 'pas', la: 12, ocup: 0, ob: 1 },
+        { zona: 'Sanitare', nume: 'GS adaptat PMR', niv: 'P', buc: 1, mp: 4.5, scal: 'fix', ocup: 0, ob: 1 },
+        { zona: 'Personal', nume: 'Vestiar personal + grup sanitar', niv: 'P', buc: 1, mp: 10, scal: 'fix', ocup: 4, ob: 1 },
+        { zona: 'Tehnic', nume: 'Spațiu tehnic — centrală termică', niv: 'P', buc: 1, mp: 14, scal: 'fix', ocup: 0, ob: 1 }
+      ]
+    }
+  };
   var TEMPLATES = {
     'centru-social': {
       driver: 'capacitate', unit: 'beneficiari', cap_ref: 50, cap_default: 50,
       norma: 'Ord. MMJS 29/2019 (standarde centre de zi vârstnici) · NP 011 · OMS 119/2014 · NP 051/2012',
+      variante: CS_VARIANTE,
       spatii: [
         // zonă, denumire, nivel, buc, mp unitar (la cap_ref), scalare, ocupanți, obligatoriu
         { zona: 'Primire', nume: 'Windfang / tampon acces', niv: 'P', buc: 1, mp: 6.5, scal: 'fix', ocup: 0, ob: 1 },
@@ -57,11 +158,21 @@
   };
 
   // Propune programul de spații pentru o funcțiune + capacitate. Întoarce array de rânduri editabile.
+  // Alege setul de spații după sub-tip (tip_beneficiar) dacă funcțiunea are variante.
+  function _spatiiFor(tpl, params) {
+    if (tpl.variante && params && params.tip_beneficiar && tpl.variante[params.tip_beneficiar] && tpl.variante[params.tip_beneficiar].spatii) return tpl.variante[params.tip_beneficiar].spatii;
+    return tpl.spatii;
+  }
+  function normaFor(fn, params) {
+    var tpl = TEMPLATES[fn]; if (!tpl) return '';
+    if (tpl.variante && params && params.tip_beneficiar && tpl.variante[params.tip_beneficiar]) return tpl.variante[params.tip_beneficiar].norma;
+    return tpl.norma || '';
+  }
   function propune(fn, params) {
     var tpl = TEMPLATES[fn]; if (!tpl) return null;
     var cap = Math.max(1, +(params && params.capacitate) || tpl.cap_default);
     var k = cap / tpl.cap_ref;
-    return tpl.spatii.map(function (s) {
+    return _spatiiFor(tpl, params).map(function (s) {
       var buc = s.buc, mp = s.mp;
       if (s.scal === 'lin') mp = Math.round(s.mp * k * 10) / 10;
       else if (s.scal === 'pas' && s.la) buc = Math.max(s.buc, Math.ceil(cap / s.la) * (s.buc / Math.max(1, Math.ceil(tpl.cap_ref / s.la))) || s.buc);
@@ -538,7 +649,7 @@
   }
 
   G.UXSpace = {
-    TEMPLATES: TEMPLATES, propune: propune, bilant: bilant, hasTemplate: function (fn) { return !!TEMPLATES[fn]; },
+    TEMPLATES: TEMPLATES, propune: propune, bilant: bilant, normaFor: normaFor, hasTemplate: function (fn) { return !!TEMPLATES[fn]; },
     SPACES: SPACES, TIPOLOGII: TIPOLOGII, RULES_COND: RULES_COND, rezolva: rezolva, valideaza: valideaza
   };
   console.log('[UXSpace] motor program funcțional: ' + Object.keys(TEMPLATES).length + ' șabloane + ' + Object.keys(SPACES).length + ' spații atomice + ' + Object.keys(TIPOLOGII).length + ' tipologii cu reguli');
