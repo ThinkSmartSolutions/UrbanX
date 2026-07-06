@@ -26,6 +26,8 @@
 | **Gradul de rezistență la foc** | **II** (P118-1/2013) |
 | **Categoria geotehnică** | **2** — risc geotehnic moderat (NP 074/2014) |
 
+Încadrările din tabelul de mai sus nu sunt formale, ci determină regimul de proiectare și de control. **Categoria de importanță „C" (normală)** — stabilită conform HG 766/1997 în funcție de destinație, de numărul de utilizatori și de consecințele unei eventuale avarii — plasează obiectivul în regimul curent de verificare și urmărire a comportării în timp (nu excepțional, ca la spitale sau la clădiri cu aglomerări mari de persoane). **Clasa de importanță-expunere seismică III** (γ_I,e = 1,0) corespunde locuințelor obișnuite și fixează factorul de amplificare a acțiunii seismice la valoarea unitară (fără majorare, dar nici reducere). **Gradul II de rezistență la foc** exprimă capacitatea elementelor de construcție de a-și păstra funcțiile portante și de compartimentare pe o durată dată, iar **categoria geotehnică 2** (risc moderat) impune un studiu geotehnic complet și verificarea pe cerința Af. Aceste încadrări, corelate, definesc „profilul de exigență" al proiectului și se regăsesc, coerent, în toate memoriile de specialitate.
+
 ### 1.2 Componența documentației D.T.A.C.
 
 Documentația de față se structurează conform **Legii nr. 50/1991, Anexa nr. 1**, în piese scrise și piese desenate, întocmite pe specialități și semnate de proiectanții cu drept de semnătură:
@@ -85,6 +87,8 @@ Tema formulată de beneficiar și asumată de proiectant urmărește:
 - confort acustic conform C125/2013;
 - respectarea integrală a exigențelor minimale de suprafață și dotare din **Legea nr. 114/1996, Anexa nr. 1** și a NP 057/2002.
 
+Tema stabilește, așadar, atât obiective **cantitative** (numărul și structura apartamentelor, numărul de parcaje și de boxe), cât și obiective **calitative** (confort, accesibilitate, eficiență energetică, confort acustic), pe care proiectul trebuie să le satisfacă simultan. Ea reflectă o strategie a beneficiarului orientată spre un produs rezidențial competitiv pe piață — cu apartamente peste minimele legale, dotări complete (parcare acoperită, boxe, spații verzi, loc de joacă) și costuri de întreținere reduse prin eficiența energetică. Din tema de proiectare decurg toate deciziile ulterioare de arhitectură, structură și instalații, iar corelarea lor este responsabilitatea proiectantului general.
+
 ### 2.3 Cadrul normativ de referință
 
 | Domeniu | Acte normative principale |
@@ -102,6 +106,8 @@ Tema formulată de beneficiar și asumată de proiectant urmărește:
 | Acustică | C125/2013 |
 | Protecție civilă (ALA) | HG 862/2016; Legea 481/2004; normele tehnice de aplicare |
 
+Acest cadru normativ nu este o listă de referințe formale, ci **sistemul de reguli** pe care soluția trebuie să le satisfacă simultan, pe toate specialitățile. Actele se ierarhizează: legile (50/1991, 10/1995, 350/2001, 114/1996, 372/2005) stabilesc principiile și obligațiile; hotărârile de guvern (907/2016, 525/1996, 766/1997, 862/2016) detaliază proceduri și conținuturi-cadru; normativele și normele tehnice (P100, P118, C107, C125, NP 057, I9/I13/I5/I7 etc.) fixează cerințele cantitative de proiectare. Proiectantul general are răspunderea de a asigura că toate aceste niveluri sunt respectate coerent și că eventualele actualizări ale reglementărilor (frecvente în domeniul construcțiilor) sunt integrate la data proiectării. Trimiterile din prezentul memoriu la actele-cheie (Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016, HG 525/1996, NP 057/2002) marchează reperele obligatorii ale documentației DTAC pentru această funcțiune.
+
 ---
 
 ## 3. REGIMUL JURIDIC, ECONOMIC ȘI TEHNIC (CONFORM CERTIFICATULUI DE URBANISM)
@@ -114,11 +120,15 @@ Certificatul de Urbanism (CU), emis de autoritatea administrației publice local
 - **Situarea:** imobil situat în **intravilanul** localității; nu este inclus în lista monumentelor istorice și nu se află (după caz) în zonă construită protejată — dacă amplasamentul se află în zona de protecție a unui monument sau în sit protejat, este obligatoriu **avizul Direcției Județene pentru Cultură / Ministerul Culturii**.
 - **Nu se află** (după verificarea CU) în zone cu interdicție temporară/definitivă de construire; orice interdicție semnalată în CU se tratează ca prealabil eliminatoriu.
 
+Verificarea regimului juridic este primul filtru al admisibilității investiției și se face **înaintea** oricărei proiectări: un extras de Carte Funciară actualizat confirmă titularul dreptului de proprietate, suprafața și configurația parcelei, precum și eventualele sarcini (ipoteci, servituți, litigii notate). Servituțile de trecere sau de utilități grevate asupra terenului trebuie identificate și respectate în amplasarea construcției (nu se poate edifica peste o servitute de trecere activă sau peste o conductă cu servitute de protecție). Dacă terenul provine din dezmembrare sau alipire recentă, se verifică corespondența dintre situația din CF și cea din teren (prin ridicare topografică). Orice neconcordanță sau sarcină incompatibilă se clarifică juridic înainte de depunerea documentației, pentru a evita respingerea sau contestarea ulterioară a autorizației.
+
 ### 3.2 Regimul economic
 
 - **Folosința actuală:** teren liber (sau cu construcții ce se desființează în baza autorizației de desființare, după caz);
 - **Destinația stabilită prin PUG/RLU:** **zonă de locuințe colective** (UTR de locuire colectivă);
 - **Reglementări fiscale:** zona de impozitare și taxele locale conform hotărârilor consiliului local; taxa de autorizare (0,5% din valoarea de investiție pentru locuințe, conform Legii 50/1991) se regularizează la recepție.
+
+Regimul economic are relevanță atât pentru fundamentarea investiției (valoarea terenului și potențialul edificabil determină rentabilitatea proiectului), cât și pentru obligațiile fiscale asociate autorizării și exploatării. Taxa de autorizare se calculează inițial pe valoarea declarată a investiției și se **regularizează la recepția lucrărilor**, pe baza valorii reale rezultate din devizul final — de aceea evaluarea corectă a devizului general (cap. 14) are și o miză fiscală. Destinația de locuire colectivă stabilită prin PUG/RLU condiționează, la rândul ei, funcțiunea admisă (nu se poate edifica o funcțiune interzisă în UTR) și indicatorii aplicabili. Odată edificat și recepționat, imobilul intră în regimul de impozitare a clădirilor rezidențiale, iar apartamentele se individualizează cadastral pentru înscriere în Cartea Funciară și pentru tranzacționare.
 
 ### 3.3 Regimul tehnic
 
@@ -160,6 +170,8 @@ Verificarea încadrării în toți acești parametri simultan — și nu doar î
 
 Amplasamentul se află în intravilan, într-o UTR de **locuire colectivă de densitate medie-mare**, servită de drum public modernizat și de toate rețelele edilitare. Vecinătățile sunt predominant rezidențiale (locuințe colective și individuale), cu prezența unor funcțiuni compatibile (comerț de proximitate, servicii). Soluția propusă se integrează în caracterul zonei prin regim de înălțime racordat la fondul construit înalt din UTR, prin retrageri care asigură intimitatea și însorirea reciprocă și printr-o arhitectură contemporană sobră.
 
+Integrarea urbanistică nu se rezumă la respectarea indicatorilor numerici, ci privește și **relația calitativă cu contextul**. Regimul S+P+8E este compatibil cu o UTR de locuire colectivă unde există deja fond construit de înălțime comparabilă; într-o zonă de locuințe individuale scunde, același regim ar fi disonant și, probabil, ar necesita un PUZ/PUD de mediere. Amplasarea volumului pe parcelă (retras generos de la toate limitele, cu POT redus) evită efectul de „zid" față de vecini și lasă respirație urbană. Arhitectura sobră, cu volumetrie simplă și fațade ordonate, se subordonează caracterului zonei fără a-l concura. Funcțiunea rezidențială este, prin definiție, compatibilă cu vecinătățile rezidențiale — nu introduce trafic greu, zgomot industrial sau noxe. Astfel, obiectivul completează țesutul urban existent, contribuind la densificarea firească a unei zone deja destinate acestui scop prin documentațiile de urbanism aprobate.
+
 ### 4.2 Tabelul comparativ al indicatorilor — reglementat vs. propus
 
 Valorile propuse de mai jos sunt orientative de proiect (se rotunjesc/precizează pe geometria reală a lotului); relația de conformitate este însă demonstrată prin marja față de valorile maxime reglementate.
@@ -181,6 +193,8 @@ Valorile propuse de mai jos sunt orientative de proiect (se rotunjesc/precizeaz�
 | Parcaje | min. **1 loc/ap.** | **40 (1/ap.)** sol+subsol | **Conform** |
 
 > **Observație asupra înălțimii.** Regimul S+P+8E este proiectat cu **înălțimea utilă a ultimului nivel folosibil sub 28,00 m** (cota pardoselii ultimului nivel ≈ 23,20 m; cornișă ≈ 26,50 m). Prin aceasta clădirea **NU** se încadrează la „clădire înaltă" în sensul P118-1/2013, ceea ce determină un set de cerințe PSI proporționat (a se vedea cap. 11). Dacă geometria reală ar conduce la depășirea pragului de 28 m, întregul scenariu de securitate la incendiu se recalibrează la regimul de clădire înaltă.
+
+Pragul de 28 m este, în proiectarea blocurilor înalte, o **linie de demarcație economică și normativă majoră**. Depășirea lui declanșează cerințe suplimentare severe: a doua casă de scări de evacuare, presurizarea mecanică obligatorie a scărilor și a ascensoarelor, instalații de stingere automată extinse, dispecerat de securitate la incendiu, ascensor de intervenție pentru pompieri, cerințe sporite de rezistență la foc — toate cu impact semnificativ asupra costului și a suprafeței neproductive. Menținerea deliberată a cotei ultimului nivel folosibil sub acest prag, prin dimensionarea atentă a înălțimilor de nivel (parter ~3,30 m, etaje curente ~2,90 m), este o decizie de proiectare care păstrează densitatea maximă admisă de regimul S+P+8E fără a suporta penalizarea de cost a categoriei de clădire înaltă. Verificarea acestei cote pe geometria finală este critică și se reia la faza P.Th.
 
 ### 4.3 Condiții urbanistice speciale respectate
 
@@ -210,6 +224,8 @@ Rezultatele acestei verificări, prezentate în tabelul de la 4.2, confirmă că
 
 Terenul are o suprafață de ordinul a **2.400 mp** (valoare de ipoteză — se preia din CF), formă sensibil regulată, cu front la drumul public de cca. 40 m. Relieful este cvasiorizontal, cu diferențe de nivel nesemnificative (pantă < 2 %), ceea ce permite o sistematizare verticală economică. Terenul este liber de construcții (sau cu construcții demolabile, desființate anterior în baza autorizației de desființare). Nu se semnalează surse de poluare istorică, depozite de deșeuri sau elemente de patrimoniu subteran; în lipsa lor, nu sunt necesare investigații speciale de decontaminare.
 
+Caracteristicile terenului sunt favorabile edificării obiectivului propus: forma regulată permite un partiu eficient și retrageri echilibrate față de toate limitele; frontul de cca. 40 m la drumul public asigură atât accesul auto și pietonal separate, cât și dezvoltarea fațadei principale; relieful plan reduce costurile de sistematizare și de fundare (fără terasamente ample). Suprafața de ~2.400 mp este suficientă pentru a găzdui amprenta construcției (~520 mp), parcajele la sol, aleile, spațiile verzi peste minimul reglementat și locul de joacă, cu marje confortabile. Datele definitive (suprafață exactă, dimensiuni, orientare cardinală) se preiau din ridicarea topografică și din extrasul de Carte Funciară actualizat, care constituie baza planurilor de situație.
+
 ### 5.2 Vecinătățile
 
 | Latura | Vecinătate (tip) | Regim de tratare |
@@ -221,9 +237,13 @@ Terenul are o suprafață de ordinul a **2.400 mp** (valoare de ipoteză — se 
 
 Amplasarea respectă intimitatea vecinilor (distanțe și orientarea golurilor), regimul de însorire reciprocă și distanțele de siguranță la incendiu. Nu se produce umbrire inadmisibilă a fațadelor vecine.
 
+Relația cu vecinătățile este un punct de atenție special la un imobil de nouă niveluri, deoarece înălțimea sporită poate afecta însorirea și intimitatea proprietăților învecinate. Studiul de însorire (piesă distinctă a documentației) verifică, prin modelare a umbrelor la datele critice (echinocții), că imobilul propus **nu reduce sub minimul legal** durata de însorire a camerelor de locuit din clădirile vecine. Retragerile generoase (min. 6,00 m lateral, 6,50 m posterior — peste minimele reglementate) și amplasarea golurilor astfel încât să nu creeze vederi directe supărătoare în proprietățile vecine asigură intimitatea reciprocă. Plantațiile de protecție de pe latura posterioară completează această mediere. Acolo unde reglementarea locală impune, relația cu vecinătățile se studiază detaliat printr-un Plan Urbanistic de Detaliu aprobat înainte de DTAC.
+
 ### 5.3 Utilitățile existente în zonă
 
 Amplasamentul este servit de rețelele publice existente pe drumul adiacent: **alimentare cu apă** potabilă, **canalizare** (menajeră și pluvială), **energie electrică** (rețea de distribuție), **gaze naturale** (rețea de distribuție de presiune redusă/medie), **telecomunicații** (cupru/fibră optică). Racordarea se face prin branșamente noi, dimensionate pe necesarul obiectivului, conform avizelor de amplasament și de racordare emise de operatori (cap. 10 și cap. 12). Nu se identifică rețele edilitare care traversează amplasamentul și ar impune relocări; eventualele rețele aflate în subsol se protejează/deviază conform avizelor deținătorilor.
+
+Existența tuturor rețelelor pe drumul adiacent este un atu major al amplasamentului și una dintre premisele oportunității investiției: racordarea presupune doar branșamente scurte, fără extinderi costisitoare de rețea, iar capacitatea rețelelor din zonă (verificată prin avizele de racordare) este, de regulă, suficientă pentru un obiectiv de această mărime dintr-o zonă deja destinată locuirii colective. Dacă avizele de racordare ar semnala insuficiența unei rețele (de exemplu, capacitatea de transformare electrică sau presiunea de gaz), soluția s-ar adapta (post de transformare propriu, SRM dedicat) — situație de precizat la obținerea avizelor. Poziția branșamentelor se coordonează pentru a evita interferența cu fundațiile și cu spațiile verzi și pentru a permite mentenanța ulterioară.
 
 ### 5.4 Sinteza studiului geotehnic
 
@@ -238,7 +258,7 @@ Studiul geotehnic (elaborat de specialist geotehnician, **verificat pe cerința 
 | Cota de fundare | ~ −3,20 m (radier general în stratul portant) |
 | Agresivitate | clasa de expunere XC2/XA1 pentru infrastructură (cuvă etanșă) |
 
-Concluzia geotehnică: fundare **directă pe radier general din beton armat**, care uniformizează presiunile transmise de suprastructura cu pereți deși, asigură rolul de cuvă etanșă a subsolului sub nivelul hidrostatic și constituie diafragma de bază a structurii. Tasările estimate sunt reduse și uniforme (Δs/L sub limita admisă).
+Studiul geotehnic este piesa care traduce necunoscuta terenului în date de proiectare: prin foraje și sondaje, cu prelevare de probe și încercări de laborator, el stabilește stratificația, parametrii geotehnici (coeziune, unghi de frecare, modul de deformație), nivelul apei subterane și agresivitatea acesteia. La un imobil de nouă niveluri cu subsol, aceste date sunt critice — ele condiționează tipul și cota de fundare, măsurile de execuție a excavației și protecția anticorozivă a infrastructurii. Concluzia geotehnică: fundare **directă pe radier general din beton armat**, care uniformizează presiunile transmise de suprastructura cu pereți deși, asigură rolul de cuvă etanșă a subsolului sub nivelul hidrostatic și constituie diafragma de bază a structurii. Tasările estimate sunt reduse și uniforme (Δs/L sub limita admisă).
 
 Din perspectiva execuției, prezența nivelului hidrostatic la ~ −2,00 m, deasupra cotei de fundare (~ −3,20 m), impune măsuri specifice în timpul realizării infrastructurii: **epuizment** provizoriu (coborârea temporară a nivelului apei prin puțuri filtrante sau drenaj) și, în funcție de vecinătăți, **sprijinirea malurilor** excavației (taluzare acolo unde spațiul o permite, respectiv pereți de sprijin — palplanșe metalice sau piloți secanți — acolo unde excavația se apropie de construcțiile vecine). Aceste măsuri, împreună cu monitorizarea deplasărilor la vecini, sunt detaliate în planul de organizare a execuției (cap. 13) și în proiectul de infrastructură (`structura.md`). Cuva etanșă a subsolului (beton impermeabil clasa de expunere XC2/XA1, cu waterstop la rosturi) protejează definitiv spațiile subterane împotriva apei sub presiune hidrostatică, condiție esențială pentru funcționarea parcajului, a boxelor, a spațiilor tehnice și a adăpostului ALA.
 
@@ -252,6 +272,8 @@ Imobilul este conceput ca un **corp compact**, cu un **nucleu central de circula
 
 Amprenta la sol de cca. 520 mp și nucleul central permit un partiu rațional cu **circulație comună compactă** (palier cu coridor scurt), minimizând suprafețele comune neproductive și maximizând suprafața locuibilă utilă.
 
+Alegerea schemei cu nucleu central și apartamente dispuse radial în jurul lui — față de alternativa cu coridor lung și apartamente înșiruite pe o singură latură — este justificată de eficiența ei: coridorul scurt reduce suprafața comună neproductivă (care nu se vinde, dar se construiește și se întreține), permite ca fiecare apartament să aibă acces direct din palier și favorizează dubla orientare a apartamentelor de colț. Nucleul (casa scării + două lifturi + ghene de instalații) este plasat central pentru a servi egal toate apartamentele și pentru a concentra pe verticală circulațiile și coloanele de instalații, ceea ce simplifică structura și instalațiile deopotrivă. Regularitatea în plan și în elevație a acestei scheme este, în plus, o condiție favorabilă comportării seismice (cap. 8.2) — un exemplu de decizie arhitecturală și structurală convergentă.
+
 ### 6.2 Distribuția pe niveluri
 
 | Nivel | Cotă (±0,00 = parter) | Destinație | Apartamente |
@@ -263,6 +285,10 @@ Amprenta la sol de cca. 520 mp și nucleul central permit un partiu rațional cu
 | **Terasă (peste E8)** | +26,50 (cornișă) | terasă necirculabilă, agregate tehnice (VMC, PV, casa liftului) | — |
 
 **Total apartamente: 4 + 20 + 16 = 40.**
+
+Cotele de nivel din tabel sunt orientative și ilustrează logica de dimensionare: parterul cu înălțime liberă sporită (pentru accese și eventuale spații comune generoase), etajele curente la înălțime de locuit uzuală (~2,90 m brut, ~2,65 m liber), iar terasa la cota care menține ansamblul sub pragul de clădire înaltă. Numerotarea și cotele definitive se stabilesc pe secțiunile din memoriul de arhitectură.
+
+**Subsolul** concentrează toate funcțiunile-suport ale imobilului și este proiectat ca un compartiment tehnic autonom, separat la foc de restul clădirii: parcajul colectiv (22 locuri), boxele individuale (câte una pentru fiecare apartament), spațiile tehnice (gospodăria de apă de incendiu cu rezervor și pompe, hidroforul de ridicare a presiunii, tabloul electric general și contorizările, eventualele stații de pompare a apelor uzate din bașa colectoare) și **adăpostul de protecție civilă (ALA)**. Organizarea subsolului urmărește accesul facil la boxe (fără a traversa zona de manevră a autovehiculelor acolo unde e posibil), circulația și manevra autoturismelor pe alei dimensionate corespunzător, ventilarea și desfumarea (cap. 11) și compartimentarea antifoc a spațiilor cu risc (spații tehnice, parcaj). Cota subsolului (~ −3,00 m) și alcătuirea sa de cuvă etanșă răspund prezenței apei subterane și rolului structural de cutie rigidă la bază.
 
 Ușoara reducere a numărului de apartamente la nivelurile superioare (de la 5 la 4) permite apartamente mai generoase la etajele înalte (cu vedere) și, structural, o **reducere firească a maselor spre vârf**, favorabilă comportării seismice.
 
@@ -279,6 +305,8 @@ Structura de tipologii asigură adresabilitate largă și respectă/depășește
 | **C** | 3 camere (zi + 2 dormitoare + bucătărie + baie + GS + hol; 2 balcoane) | 84 | 10 | 840 | 25 % |
 | **Total** | — | — | **40** | **2.400** | 100 % |
 
+Fiecare apartament dispune de un **spațiu exterior propriu** (logie la garsoniere, balcon la apartamentele de 2 camere, două balcoane la cele de 3 camere), element de confort esențial al locuirii contemporane, care extinde spațiul de zi spre exterior, permite depozitarea sezonieră și oferă vedere și aerisire. Parapetele balcoanelor și logiilor au înălțime ≥ 1,00 m la etaje și interspațiu între bare ≤ 0,10 m, dimensionate special pentru protecția copiilor împotriva căderii și a strangulării (cerința D). Plăcile de balcon se realizează cu **rupere de punte termică** (decuplare termică față de structură), pentru a nu compromite performanța energetică a anvelopei și a evita condensul la intradosul plăcii în apartament — o corelare directă între arhitectură, structură și termotehnică.
+
 ### 6.4 Capacitatea și populația estimată
 
 Estimarea numărului de locuitori (bază pentru dimensionarea instalațiilor sanitare, ventilării și ALA — dezvoltată în `instalatii.md`):
@@ -290,6 +318,8 @@ Estimarea numărului de locuitori (bază pentru dimensionarea instalațiilor san
 | C 3 camere | 10 | 3,5 | 35 |
 | **Total** | **40** | — | **~100–112** |
 
+Numărul estimat de locuitori (~100–112) este o mărime de dimensionare, nu o restricție de ocupare: el servește la stabilirea debitelor de apă și canalizare, a necesarului de aer proaspăt și de ventilare, a capacității adăpostului ALA, a numărului de fluxuri de evacuare la incendiu și a dotărilor comune (loc de joacă, spații de colectare a deșeurilor). Coeficienții de ocupare pe tipologie (1,5 persoane/garsonieră, 2,5/apartament de 2 camere, 3,5/apartament de 3 camere) sunt valori medii consacrate în proiectarea de locuințe, care recunosc corelația dintre suprafață și mărimea gospodăriei. Prin utilizarea lor, dimensionarea instalațiilor și a dotărilor rezultă echilibrată — nici subdimensionată (cu risc de disconfort la vârf), nici supradimensionată (cu risc de cost inutil).
+
 ### 6.5 Fluxurile funcționale
 
 - **Flux pietonal locatari:** din drum public → alee pietonală → hol de acces principal (parter, cu videointerfon și control acces) → nucleu vertical (casa scării + lifturi) → palier → apartament;
@@ -298,6 +328,8 @@ Estimarea numărului de locuitori (bază pentru dimensionarea instalațiilor san
 - **Flux deșeuri:** de la apartamente → camera de deșeuri parter (colectare selectivă, ventilată) → platformă exterioară → colectare operator salubritate;
 - **Flux de evacuare la incendiu:** din apartament → palier → casa scării închisă (cale protejată) → parter → exterior; parcajul subsol are evacuare separată (a se vedea cap. 11);
 - **Flux de aprovizionare/mutări:** prin liftul dimensionat corespunzător (unul dintre lifturi acoperă transportul de mobilier).
+
+Separarea fluxurilor este un principiu de proiectare cu efecte directe asupra siguranței și confortului. Fluxul auto și cel pietonal nu se intersectează periculos (accesele sunt distincte, iar traseul pietonal spre intrare nu traversează zona de manevră auto). Fluxul de deșeuri este izolat de cel al locatarilor (cameră de deșeuri ventilată, cu evacuare spre platforma exterioară amplasată la distanță sanitară de ferestre). Fluxul de evacuare la incendiu este proiectat ca traseu protejat și continuu — condiția esențială a siguranței la un imobil de nouă niveluri, unde evacuarea se face exclusiv pe verticală, pe casa scării (lifturile nu sunt cale de evacuare în incendiu și se aduc automat la parter). Prevederea a **două lifturi** (față de unul singur, minimul la P+4) răspunde regimului înalt și numărului de apartamente: asigură redundanță (funcționare la mentenanța sau avaria unuia), reduce timpii de așteptare la orele de vârf și permite transportul de mobilier/targă medicală fără blocarea circulației curente.
 
 ---
 
@@ -325,6 +357,8 @@ Indicatorii tehnico-economici sunt mărimile cuantificabile care descriu obiecti
 | Suprafață spații verzi pe sol | S_v | ~576 mp (~24 %) |
 
 > **Convenția de raportare a suprafețelor:** S_u se raportează conform Legii 114/1996 și NP 057; **CUT nu include** subsolul tehnic/parcaj (conform RLU); suprafețele exacte se recalculează pe geometria reală și se prezintă în bilanțul suprafețelor din memoriul de arhitectură.
+
+Câțiva indicatori derivați lămuresc eficiența soluției. Raportul dintre **suprafața utilă locuibilă și suprafața desfășurată supraterană** (~2.400 / ~4.680 ≈ 0,51) exprimă cât din construit este suprafață vandabilă/locuibilă versus circulații comune, ziduri, ghene — o valoare firească pentru un bloc cu nucleu central compact. **Suprafața desfășurată medie pe apartament** (~4.680 / 40 ≈ 117 mp brut) și **suprafața utilă medie** (~2.400 / 40 = 60 mp) confirmă un produs echilibrat. **Densitatea de locuire** raportată la teren (~40 ap. / 0,24 ha ≈ 167 ap./ha) se situează în plaja densității medii-mari, coerentă cu UTR-ul. **Volumul construit pe apartament** (~15.500 / 40 ≈ 388 m³) și **numărul de parcaje pe apartament** (1,0) completează tabloul. Acești indicatori derivați se folosesc la evaluarea economică (cost pe metru pătrat util, cost pe apartament) și la compararea cu alte investiții similare.
 
 ### 7.2 Suprafața locuibilă și utilă — verificarea exigențelor minimale (STAS/Legea 114 Anexa 1)
 
@@ -360,7 +394,7 @@ Prezentul capitol **sintetizează** deciziile-cheie pe specialități, pentru a 
 
 ### 8.1 Arhitectură → `arhitectura.md`
 
-Corp compact cu nucleu central de circulație verticală; distribuția pe niveluri urmează schema 4 apartamente la parter, 5 la etajele E1–E4 și 4 la etajele E5–E8 (total 40); tramă structurală regulată, cu suprapunerea coloanelor de instalații; toate camerele de locuit dispun de ferestre spre exterior, cu iluminare și ventilare naturală. Spațiile exterioare (balcoane/logii) au parapet ≥ 1,00 m și interspațiu între bare ≤ 0,10 m (protecția copiilor). Finisajele spațiilor comune sunt durabile și antiderapante (clasa R10). **Accesibilitatea PMR** este integrală (2 apartamente adaptabile la parter, lift cu cabină accesibilă, trasee fără praguri). Anvelopa este de tip nZEB. Confortul acustic se asigură prin izolare fonică între apartamente **R_w ≥ 51 dB** și zgomot de impact **L_n,w ≤ 59 dB** (C125). Studiul de însorire, calculul termotehnic, bilanțul detaliat al suprafețelor și partiurile pe încăperi sunt piese ale memoriului de arhitectură.
+Corp compact cu nucleu central de circulație verticală; distribuția pe niveluri urmează schema 4 apartamente la parter, 5 la etajele E1–E4 și 4 la etajele E5–E8 (total 40); tramă structurală regulată, cu suprapunerea coloanelor de instalații; toate camerele de locuit dispun de ferestre spre exterior, cu iluminare și ventilare naturală. Finisajele se aleg pe criteriul **durabilității și al costului de întreținere pe termen lung**, adecvat unei clădiri de folosință colectivă: în spațiile comune, pardoseli antiderapante rezistente la trafic intens, pereți lavabili, tâmplărie și feronerie robuste; în apartamente, finisaje uzuale de calitate (parchet pe strat fonoizolant în camere, gresie/faianță în zonele umede, vopsitorii lavabile). Marcajele de contrast pe trepte și pardoselile antiderapante contribuie la siguranța în exploatare (cerința D), iar stratul fonoizolant de sub pardoseală la confortul acustic (cerința E). Spațiile exterioare (balcoane/logii) au parapet ≥ 1,00 m și interspațiu între bare ≤ 0,10 m (protecția copiilor). Finisajele spațiilor comune sunt durabile și antiderapante (clasa R10). **Accesibilitatea PMR** este integrală (2 apartamente adaptabile la parter, lift cu cabină accesibilă, trasee fără praguri). Anvelopa este de tip nZEB. Confortul acustic se asigură prin izolare fonică între apartamente **R_w ≥ 51 dB** și zgomot de impact **L_n,w ≤ 59 dB** (C125). La locuirea colectivă, confortul acustic este o exigență de calitate frecvent subestimată, dar decisivă pentru satisfacția locatarilor: zgomotul aerian (voci, televizor) și cel de impact (pași, mutare de mobilier) transmise între apartamente sunt principala sursă de conflicte de vecinătate. Soluțiile — pereți despărțitori grei sau dubli cu vată minerală, planșee cu șapă flotantă pe strat fonoizolant, decuplarea antivibratilă a lifturilor și a instalațiilor de structură — se dimensionează la valorile normate C125 și se verifică pe cerința E. **Accesibilitatea PMR** integrală (2 apartamente adaptabile la parter, lift cu cabină accesibilă, trasee fără praguri) nu este o dotare opțională, ci o obligație legală (Legea 448/2006, NP 051/2012) care asigură ca imobilul să poată fi locuit și de persoane cu mobilitate redusă, vârstnici sau familii cu copii mici — o cerință de incluziune socială cu efecte pe toată durata de viață a clădirii. Studiul de însorire, calculul termotehnic, bilanțul detaliat al suprafețelor și partiurile pe încăperi sunt piese ale memoriului de arhitectură.
 
 ### 8.2 Rezistență → `structura.md`
 
@@ -393,15 +427,20 @@ Incinta se organizează pentru a separa clar fluxurile și pentru a maximiza spa
 |---|---|
 | **Parcaje la sol** | 18 locuri (2,50 × 5,00 m; ≥ 2 adaptate PMR 3,50 × 5,00 m lângă acces), din dale ecologice înierbate parțial |
 | **Rampă auto subsol** | lățime ~3,50 m (sens unic) / 5,50 m (dublu), pantă max. 15 % cu racorduri de 10 %, beton antiderapant + canal de scurgere + separator de hidrocarburi |
+| **Sistem colectare ape rampă** | canal transversal la baza rampei, conectat la separatorul de hidrocarburi, pentru a împiedica pătrunderea apelor pluviale în parcaj |
 | **Alei pietonale** | din drum public la accesul principal, min. 1,50 m lățime, accesibile PMR |
 | **Spații verzi** | ~576 mp (~24 %) pe sol natural — gazon, arbuști, arbori de talie medie (plantații de aliniament și de protecție spre vecini) |
 | **Loc de joacă pentru copii** | zonă echipată cu suprafață de siguranță elastică, îngrădită, ferită de circulația auto |
 | **Platformă deșeuri** | betonată, îngrădită, ventilată, cu recipiente de colectare selectivă, amplasată la ≥ 10 m de ferestrele apartamentelor și accesibilă utilajului operatorului |
 | **Împrejmuire** | gard perimetral transparent/opac spre vecini, cu poartă auto și pietonală |
 
+Platforma de deșeuri și camera de colectare din interior respectă cerințe sanitare stricte (OMS 119/2014 și normele de salubritate): amplasare la **minimum 10 m** de ferestrele apartamentelor și de spațiile de joacă, suprafață betonată și lavabilă, ventilare, posibilitatea spălării și scurgerea apelor uzate, îngrădire și acces controlat pentru operatorul de salubritate. Colectarea selectivă (fracții separate: hârtie/carton, plastic/metal, sticlă, biodeșeuri, deșeuri reziduale) răspunde obligațiilor legale de gestionare a deșeurilor municipale și reduce cantitatea trimisă la depozitare. Traseul deșeurilor, de la apartament la platformă, este separat de circulația locatarilor și de zonele de agrement, pentru a evita disconfortul olfactiv și igienic.
+
 ### 9.2 Calculul spațiilor verzi
 
 Suprafața de spații verzi pe sol natural = ~576 mp raportat la S_t = ~2.400 mp → **~24 %**, peste minimul reglementat de RGU/RLU (min. 20–30 % pentru locuințe colective). Se pot lua în calcul complementar (dacă RLU o permite) spațiile verzi pe terasă/plantații în jardiniere, fără a substitui însă minimul pe sol natural. Se plantează minimum un arbore la fiecare interval impus de RLU (uzual 1 arbore/100–200 mp de spațiu verde).
+
+Spațiile verzi îndeplinesc funcții multiple, dincolo de respectarea unei cerințe de bilanț: ecologic (permeabilitatea solului, reducerea scurgerii pluviale, atenuarea insulei de căldură urbane, îmbunătățirea calității aerului), microclimatic (umbră și răcoare vara), estetic și de confort psihic pentru locatari, precum și de mediere vizuală și fonică față de vecini. Faptul că soluția propune ~24 % — peste minimul reglementat — este consecința directă a POT-ului redus (amprentă mică pe o parcelă generoasă), un beneficiu al regimului de înălțime ridicat: concentrarea suprafeței construite pe verticală eliberează sol la orizontală. Vegetația se alege stratificat (gazon, arbuști, arbori de talie medie-mare), cu specii adaptate climatului local și cu întreținere rezonabilă, iar arborii se plantează la distanțe care să nu afecteze fundațiile sau rețelele îngropate.
 
 ### 9.3 Locul de joacă și dotările de agrement
 
@@ -429,6 +468,8 @@ Alimentarea cu utilități se realizează prin branșamente/racorduri noi la re�
 | **Apă de incendiu** | gospodărie proprie de apă de incendiu în subsol (rezervor + grup de pompare) + racord pompieri | hidranți interiori 2 jeturi × 2,1 l/s; rezervă dimensionată la timpul de funcționare |
 | **Salubritate** | platformă de colectare selectivă + contract cu operatorul | ridicare periodică, acces utilaj |
 
+Câteva observații asupra soluțiilor de racordare specifice regimului S+P+8E: **presiunea apei** din rețeaua publică nu asigură gravitațional debitul la etajele superioare (necesarul de presiune la etajul 8 depășește presiunea disponibilă la branșament), motiv pentru care ridicarea presiunii se face cu un grup de pompare (hidrofor cu turație variabilă, cu pompă activă și pompă de rezervă) amplasat în subsol — soluție tipică la blocurile înalte. **Canalizarea pluvială** se dimensionează la suprafața de colectare a terasei și se descarcă cu limitare de debit (pentru a nu suprasolicita rețeaua publică la ploi intense), eventual prin retenție temporară. **Apa de incendiu** nu se preia direct din rețeaua publică (a cărei presiune și debit nu pot fi garantate la incendiu), ci dintr-o **gospodărie proprie** (rezervor de acumulare + grup de pompare cu pompă activă, de rezervă și pilot) — condiție esențială a scenariului de securitate la incendiu la un imobil de această înălțime. **Energia termică** se produce local (centrale individuale), eliminând necesitatea unui racord termic. Aceste soluții confirmă adaptarea sistemului de utilități la regimul de înălțime, nu simpla preluare a unor soluții de bloc scund.
+
 ---
 
 ## 11. SECURITATEA LA INCENDIU, PROTECȚIA CIVILĂ, SSM, MEDIU, EFICIENȚĂ ENERGETICĂ
@@ -445,6 +486,8 @@ Grad **II** de rezistență la foc; risc mic de incendiu (locuire). La regimul *
 - **iluminat de securitate** autonom (evacuare, antipanică, marcarea hidranților), autonomie 1–3 h;
 - **parcajul subsol**: ventilare/desfumare mecanică cu **ventilatoare F400** (400 °C/2 h), evacuare separată, separator de hidrocarburi;
 - **subsol separat de parter** prin planșeu rezistent la foc; treceri de instalații etanșate la foc; căi de evacuare dimensionate la fluxul de persoane.
+
+Parcajul subteran constituie, din perspectiva incendiului, un compartiment cu specific propriu: risc de incendiu la autovehicule, degajare de fum dens și de monoxid de carbon, spațiu fără iluminare naturală. De aceea el este tratat distinct — cu ventilare pentru evacuarea noxelor în funcționare curentă (senzori de CO care comandă trepte de ventilare), cu desfumare la incendiu (ventilatoare rezistente la temperatură înaltă), cu detecție automată, iluminat de securitate propriu și scurgeri prevăzute cu separator de hidrocarburi (pentru a nu deversa uleiuri/carburanți în canalizare). Separarea subsolului de restul clădirii printr-un planșeu rezistent la foc și prin sas/uși rezistente la foc împiedică propagarea fumului și a flăcărilor de la parcaj spre casa scării și spre apartamente — o măsură esențială, dat fiind că parcajul este sursa de risc cea mai probabilă din întreg imobilul.
 
 Scenariul de securitate la incendiu este piesă distinctă, care se avizează/autorizează de **ISU**. El fundamentează, printr-o analiză a riscului și a nivelurilor de performanță, toate măsurile de mai sus și demonstrează că, în ipoteza unui incendiu, ocupanții se pot evacua în siguranță în timpul disponibil, iar intervenția pompierilor este posibilă. La un imobil de nouă niveluri supraterane, elementele critice ale scenariului sunt: **timpul de evacuare** pe casa scării unică (dimensionată la fluxul de persoane de la nivelul cel mai populat), **menținerea căii de evacuare fără fum** (prin desfumare/presurizare — de aceea soluția scării protejate este obligatorie), **alimentarea neîntreruptă cu apă de incendiu** (gospodărie proprie cu rezervă și pompe pe sursă de rezervă) și **accesul autospecialelor** pe o platformă de intervenție în incintă. Prin apropierea de pragul de clădire înaltă, aceste măsuri se dimensionează conservator, cu marjă.
 
@@ -476,7 +519,7 @@ Conceptul nZEB reunește două componente indisociabile: reducerea necesarului d
 
 ## 12. AVIZE, ACORDURI ȘI VERIFICĂRI TEHNICE
 
-Avizele și acordurile se obțin conform solicitărilor din Certificatul de Urbanism, în original, și se anexează documentației DTAC. Verificarea tehnică a proiectului este obligatorie (Legea 10/1995) și se face de verificatori atestați MDLPA pe cerințele fundamentale.
+Avizele și acordurile se obțin conform solicitărilor din Certificatul de Urbanism, în original, și se anexează documentației DTAC. Ele reprezintă acceptul entităților care gestionează un interes public sau o rețea afectată de investiție (siguranța la incendiu, protecția civilă, mediul, sănătatea publică, rețelele edilitare, drumul, patrimoniul) și condiționează emiterea autorizației de construire: autoritatea nu poate autoriza în lipsa avizelor cerute prin CU. Fiecare aviz are un **temei legal** propriu și un **conținut de verificare** propriu (de exemplu, ISU verifică scenariul de securitate la incendiu, DSP verifică însorirea și igiena, operatorul de apă verifică capacitatea de racordare). Verificarea tehnică a proiectului este, la rândul ei, obligatorie (Legea 10/1995) și se face de verificatori atestați MDLPA pe cerințele fundamentale — o verificare independentă de proiectant, care garantează calitatea soluției înainte de execuție.
 
 ### 12.1 Avize și acorduri
 
@@ -507,11 +550,13 @@ Avizele și acordurile se obțin conform solicitărilor din Certificatul de Urba
 | **F** | economie de energie și izolare termică | verificator F + auditor energetic |
 | — | instalații (Is/It/Ie) | verificatori Is, It, Ie |
 
+Verificarea tehnică se materializează în **referate de verificare** semnate de verificatorii atestați, care fac parte din documentația DTAC și, ulterior, din cartea tehnică. Verificatorul confirmă că proiectul respectă reglementările tehnice aplicabile cerinței pentru care este atestat; el nu preia răspunderea proiectantului, ci adaugă un nivel independent de control al calității. Pentru un imobil de locuințe colective S+P+8E din categoria de importanță „C", verificarea pe cerința **A** (rezistență și geotehnic) este întotdeauna obligatorie, la fel ca cea pe cerințele **B** (incendiu) și **F** (energie); verificarea pe cerințele **C, D, E** se solicită în funcție de specificul proiectului și de cerințele CU. Coordonarea între verificatori și proiectanți asigură că observațiile din referate sunt integrate în soluția finală înainte de depunerea pentru autorizare.
+
 ---
 
 ## 13. ORGANIZAREA EXECUȚIEI (SINTEZĂ)
 
-Organizarea execuției se detaliază în planul de organizare (piesă desenată) și în planul propriu SSM al executantului; sinteza principiilor:
+Deși organizarea de execuție se dezvoltă complet la faza de execuție (proiect de organizare de șantier), memoriul general prezintă principiile care condiționează amplasarea și logistica, întrucât ele au implicații urbanistice (ocupare temporară a domeniului public, accese, împrejmuire) și de siguranță (vecinătăți, excavații). Organizarea execuției se detaliază în planul de organizare (piesă desenată) și în planul propriu SSM al executantului; sinteza principiilor:
 
 - **Împrejmuirea șantierului** pe tot perimetrul, cu panou de identificare a investiției (Legea 50/1991) și accese controlate;
 - **Excavația subsolului** cu sprijiniri (taluzare/palplanșe/piloți secanți în funcție de vecinătăți și de nivelul hidrostatic) și **epuizment** provizoriu al apei subterane; monitorizarea deplasărilor la vecini;
@@ -521,11 +566,15 @@ Organizarea execuției se detaliază în planul de organizare (piesă desenată)
 - **Utilități de șantier** provizorii (apă, energie, WC ecologic), organizate pe amplasament;
 - La finalizare: **refacerea zonelor afectate** pe domeniul public, curățenie, probe și puneri în funcțiune, **recepția la terminarea lucrărilor** (HG 273/1994, modif. HG 343/2017) și constituirea **cărții tehnice** (a se vedea `carte-tehnica.md`).
 
+### 13.1 Recepția și trecerea în exploatare
+
+Finalizarea execuției nu coincide cu punerea în folosință; între ele se interpune **recepția la terminarea lucrărilor**, procedură reglementată de HG 273/1994 (modificată prin HG 343/2017), la care participă comisia de recepție (reprezentanții investitorului, proiectantul, dirigintele de șantier și, unde e cazul, ISC). Recepția verifică conformitatea lucrărilor executate cu proiectul autorizat și cu reglementările tehnice, existența și starea **cărții tehnice** a construcției (fără care recepția nu se poate finaliza) și îndeplinirea condițiilor de siguranță în exploatare (inclusiv obținerea autorizației de securitate la incendiu de la ISU). Odată admisă recepția, imobilul poate fi dat în folosință și începe **perioada de garanție**, pe parcursul căreia se remediază eventualele deficiențe și se urmărește comportarea în timp. La expirarea acestei perioade are loc **recepția finală**, care închide relația contractuală și consfințește buna funcționare a construcției. Regimul juridic și metodologic complet al cărții tehnice și al urmăririi comportării în timp este tratat, ca document-cadru distinct, în `carte-tehnica.md` — la care prezentul memoriu trimite fără a-l dubla.
+
 ---
 
 ## 14. DEVIZUL GENERAL — SINTEZĂ (HG 907/2016)
 
-Devizul general estimativ se întocmește conform structurii-cadru din **HG 907/2016**, pe capitole și subcapitole. Valorile de mai jos sunt **orientative, la nivel de sinteză** (se completează cu prețuri de piață la data ofertării); TVA se adaugă conform cotei legale.
+Devizul general este documentul care centralizează, pe capitole și subcapitole, toate cheltuielile necesare realizării obiectivului de investiții. El se întocmește conform structurii-cadru obligatorii din **HG 907/2016** (Anexa 7), care organizează cheltuielile în șase capitole. Această structură asigură comparabilitatea între proiecte și transparența evaluării investiției; ea este obligatorie pentru investițiile din fonduri publice și constituie buna practică și pentru cele private. La faza DTAC, devizul general are caracter **estimativ** (valori orientative, bazate pe indici și pe experiența proiectantului), urmând a fi detaliat pe devize pe obiecte, categorii de lucrări și liste de cantități la faza P.Th.+DE, respectiv precizat prin ofertele executanților la achiziție. Valorile de mai jos sunt **orientative, la nivel de sinteză** (se completează cu prețuri de piață la data ofertării); TVA se adaugă conform cotei legale.
 
 | Cap. | Denumire (HG 907/2016) | Pondere orientativă |
 |---|---|---|
@@ -541,11 +590,13 @@ Devizul general estimativ se întocmește conform structurii-cadru din **HG 907/
 
 **Structura pe obiecte** (cap. 4) urmează obiectele investiției: obiectul principal (blocul S+P+8E — structură, arhitectură, instalații), rețele și racorduri exterioare, amenajări exterioare/sistematizare, împrejmuire. Devizul general detaliat, devizele pe obiecte și listele de cantități se elaborează la faza **P.Th. + DE**.
 
+Comentariu asupra ponderilor: la locuințele colective, **investiția de bază** (cap. 4) domină net devizul (cca. patru cincimi din total), fiind formată din construcțiile propriu-zise (infrastructură, suprastructură, închideri, finisaje) și instalațiile aferente. În interiorul acesteia, structura de rezistență și infrastructura (radier, subsol, pereți, planșee) rețin o cotă importantă, sporită de prezența subsolului și de regimul de nouă niveluri în zonă seismică, care impune pereți deși și betoane/armături în cantitate mai mare decât la un imobil scund. Instalațiile (sanitare, termice cu centrale individuale, gaze, electrice, ventilare, PSI, lifturi) și finisajele reprezintă cealaltă parte majoră. **Cheltuielile pentru proiectare și asistență tehnică** (cap. 3) includ studiile (geotehnic, topografic, însorire), proiectarea pe faze, verificarea tehnică, expertize (dacă e cazul), dirigenția de șantier și asistența tehnică a proiectantului. **Alte cheltuieli** (cap. 5) cuprind organizarea de șantier, comisioanele și cotele legale (cota ISC pentru controlul statului în construcții, cota pentru Casa Socială a Constructorilor, taxa de autorizare, cota OAR), precum și un procent de **diverse și neprevăzute** (uzual 5–10 %) care acoperă eventualele cantități suplimentare rezultate la detaliere. Evaluarea la valoarea reală a investiției fundamentează atât decizia beneficiarului, cât și regularizarea taxei de autorizare la recepție.
+
 ---
 
 ## 15. EȘALONAREA INVESTIȚIEI
 
-Investiția se realizează, de regulă, într-o singură etapă funcțională (imobil cu recepție unitară), cu următoarea eșalonare orientativă a lucrărilor:
+Un imobil de locuințe colective este, prin natura sa, un **obiect funcțional unitar**: el nu poate fi dat parțial în folosință (nu se pot locui etajele inferioare cât timp structura superioară este în execuție), astfel încât eșalonarea nu este o etapizare pe obiecte funcționale independente, ci o **succesiune tehnologică** a categoriilor de lucrări, condiționată de logica construcției (nu se poate ridica suprastructura înainte de infrastructură, nu se pot monta finisajele înainte de închideri și instalații). Investiția se realizează, de regulă, într-o singură etapă funcțională (imobil cu recepție unitară), cu următoarea eșalonare orientativă a lucrărilor:
 
 | Etapă | Conținut | Durată orientativă |
 |---|---|---|
@@ -557,11 +608,13 @@ Investiția se realizează, de regulă, într-o singură etapă funcțională (i
 | **E5 — Amenajări și racorduri** | sistematizare incintă, spații verzi, loc de joacă, parcaje, racorduri exterioare | ~1–2 luni |
 | **E6 — Probe și recepție** | probe/PIF pe specialități, PRAM, priză de pământ, obținere autorizație ISU, recepție la terminarea lucrărilor, carte tehnică | ~1 lună |
 
-Durata totală estimată de execuție: **~18–24 luni**, condiționată de organizarea de șantier, condițiile meteo și avizele intermediare.
+Durata totală estimată de execuție: **~18–24 luni**, condiționată de organizarea de șantier, condițiile meteo și avizele intermediare. Etapele nu sunt strict secvențiale — o parte se suprapun (de exemplu, închiderile la nivelurile inferioare încep în timp ce suprastructura avansează la cele superioare), ceea ce comprimă durata totală. Punctele critice ale graficului sunt infrastructura (dependentă de condițiile de teren și de apă subterană) și obținerea autorizației ISU la final (condiție a punerii în funcțiune). Fluxul de finanțare al beneficiarului se corelează cu această eșalonare, iar recepția la terminarea lucrărilor marchează trecerea în exploatare și declanșarea perioadei de garanție, la finalul căreia are loc recepția finală.
 
 ---
 
 ## 16. CONCLUZII ȘI CONFORMITATEA CU CERINȚELE FUNDAMENTALE (Legea 10/1995, A–F)
+
+Concluziile memoriului general sintetizează demonstrația desfășurată în capitolele precedente: că obiectivul este **admisibil urbanistic**, **conform normativ**, **sigur și confortabil în exploatare** și **fezabil**. Ele nu introduc informație nouă, ci confirmă îndeplinirea condițiilor de autorizare și pun în relație soluția cu cele șase cerințe fundamentale de calitate care structurează întregul sistem al calității în construcții (Legea 10/1995).
 
 ### 16.1 Sinteza conformității
 
@@ -573,7 +626,7 @@ Imobilul de locuințe colective **S+P+8E, ~40 apartamente**, cu parcaje la sol �
 - **atinge standardul nZEB** de eficiență energetică;
 - **se integrează urbanistic** în caracterul zonei de locuire colectivă.
 
-Investiția este **necesară, oportună și fezabilă tehnic și economic**.
+Investiția este **necesară** (răspunde cererii reale de locuințe într-o zonă echipată), **oportună** (valorifică infrastructura existentă, un teren cu regim juridic clar și un context urbanistic favorabil, fără consum de teren agricol) și **fezabilă tehnic și economic** (soluții constructive și de instalații mature, verificabile, cu un deviz general structurat conform HG 907/2016 și o eșalonare realistă). Ea contribuie la oferta de locuințe, la densificarea controlată a intravilanului și la dezvoltarea urbană durabilă a localității.
 
 ### 16.2 Conformitatea cu cele șase cerințe fundamentale
 
@@ -586,9 +639,15 @@ Investiția este **necesară, oportună și fezabilă tehnic și economic**.
 | **E** | Protecție împotriva zgomotului | Izolare fonică între apartamente R_w ≥ 51 dB, zgomot de impact L_n,w ≤ 59 dB (șapă flotantă), lift decuplat antivibratil, ghene tratate (C125); verificator E |
 | **F** | Economie de energie și izolare termică | Anvelopă nZEB (C107), tâmplărie U_w ≤ 1,30, rupere de punte termică, surse regenerabile (PV + solar), recuperare de căldură, contorizare individuală; certificat de performanță energetică; verificator F + auditor (cap. 11.5) |
 
-### 16.3 Precizare finală
+### 16.3 Documentele-suport ale demonstrației
+
+Conformitatea afirmată în tabelul de la 16.2 nu se sprijină pe declarații, ci pe **piese verificabile** care se anexează documentației: studiul geotehnic verificat (cerința A/Af), breviarele de calcul structural (cerința A), scenariul de securitate la incendiu și avizul ISU (cerința B), acordul de mediu și avizul DSP împreună cu studiul de însorire (cerința C), detaliile de siguranță în utilizare și soluțiile de accesibilitate (cerința D), breviarul acustic (cerința E), calculul termotehnic și certificatul de performanță energetică (cerința F). Fiecare cerință este, așadar, dublu garantată — o dată prin proiectant, o dată prin verificatorul tehnic atestat — iar rezultatul acestei duble garanții este consemnat în referatele de verificare care însoțesc proiectul spre autorizare și, ulterior, intră în cartea tehnică a construcției.
+
+### 16.4 Precizare finală
 
 Prezentul memoriu general se citește **coroborat** cu piesele desenate, cu memoriile de specialitate (`arhitectura.md`, `structura.md`, `instalatii.md`), cu studiile și breviarele-suport (geotehnic, însorire, termotehnic, acustic, scenariu de securitate la incendiu, proiect ALA), cu avizele și cu referatele de verificare tehnică. Ansamblul acestor piese constituie **documentația D.T.A.C. completă**, în baza căreia autoritatea competentă poate emite **autorizația de construire**, conform Legii nr. 50/1991. Detaliile de execuție și breviarele complete de calcul se dezvoltă la faza **Proiect Tehnic (P.Th.) + Detalii de Execuție (DE)**, iar comportarea în timp și cartea tehnică se tratează conform `carte-tehnica.md`.
+
+Se subliniază, în încheiere, caracterul **estimativ și de ipoteză** al valorilor numerice concrete folosite pe parcursul memoriului (suprafață teren, indicatori exacți, vecinătăți, parametri geotehnici, valori de deviz): ele au rol ilustrativ și metodologic, arătând cum se structurează și se demonstrează soluția, și se **înlocuiesc la depunere** cu datele reale ale amplasamentului (extras CF actualizat, Certificat de Urbanism, ridicare topografică, studiu geotehnic pe amplasament, oferte de preț). Metoda de verificare și de demonstrare a conformității rămâne însă identică. Astfel constituit, obiectivul „Imobil de locuințe colective S+P+8E, ~40 apartamente" răspunde temei de proiectare, se încadrează în reglementările urbanistice, satisface cele șase cerințe fundamentale de calitate și este apt de autorizare — o investiție necesară, oportună și fezabilă, care contribuie la dezvoltarea urbană durabilă a localității.
 
 ---
 

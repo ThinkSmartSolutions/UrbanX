@@ -117,6 +117,8 @@ Alimentarea se face din rețeaua publică printr-un **branșament cu cămin de a
 
 Coeficientul de neuniformitate orară K_orar = 2,0 (I9, tabel neuniformitate orară pentru consumatori casnici). Debitul orar maxim este util pentru dimensionarea rezervelor și a echipamentului de pompare; **debitul de calcul pe conducte** se stabilește însă prin metoda unităților de scurgere / debitelor specifice pe obiecte (cap. 2.2), care ține cont de simultaneitatea reală.
 
+**Protecția sanitară a apei potabile (SR EN 1717):** pe branșament, după contorul general, se prevede un **dispozitiv de protecție împotriva refulării** (backflow preventer) corespunzător categoriei de risc — tipic un **disconector cu zone de presiune reduse controlabile (BA)** sau clapetă antiretur (EA) — pentru a împiedica întoarcerea apei din instalația interioară în rețeaua publică (protecția sursei). Separarea rețelei de apă de incendiu de cea de consum se face astfel încât apa din rezervorul de incendiu (stagnantă) să nu contamineze apa potabilă (sorb dedicat, umplere prin întrerupere de jet — air gap AA/AB unde e cazul). Materialele în contact cu apa potabilă: agrementate sanitar (aviz de igienă).
+
 ### 2.2. Debite de calcul pe obiecte și simultaneitate
 
 Debitele specifice pe obiecte sanitare (I9, tabel debite specifice și unități de debit — echipare de referință locuință):
@@ -219,7 +221,8 @@ Diferența dintre 2,79 mCA calculat și 8 mCA adoptat în §2.3 reprezintă reze
 
 Se analizează **două soluții**, în corelație cu soluția de sursă termică (cap. 3):
 
-**Soluția A — ACM individual în centrala de apartament** (recomandată la sursă CT de apartament pe gaz): fiecare apartament are centrală murală în condensație cu producere instantanee de ACM (debit specific ≈ 12–14 l/min la ΔT=30 K). Avantaje: zero pierderi pe rețea de recirculare, contorizare naturală prin gaz, dezinfecție inutilă (apa nu stagnează). Nu necesită coloană de recirculare.
+**Soluția A — ACM individual în centrala de apartament** (recomandată la sursă CT de apartament pe gaz): fiecare apartament are centrală murală în condensație cu producere instantanee de ACM (debit specific ≈ 12–14 l/min la ΔT=30 K). Avantaje: zero pierderi pe rețea de recirculare, contorizare naturală prin gaz, dezinfecție inutilă (apa nu stagnează). Nu necesită coloană de recirculare. Verificarea puterii de ACM instant: pentru un debit de confort de 12 l/min (0,2 l/s) la ΔT = 30 K:
+> P_ACM = 0,2 × 4.186 × 30 = 25.116 W ≈ **25 kW** — motiv pentru care centralele au putere ≥ 24 kW (dimensionantă este ACM, nu încălzirea de 2–4 kW). Pentru confort la duș prelungit, centralele cu micro-acumulare (5–10 l) reduc fluctuațiile de temperatură.
 
 **Soluția B — ACM centralizat** (la racord termoficare / PT / pompe de căldură): boiler de acumulare în subsol/CT + **coloană de recirculare ACM** cu pompă de circulație pentru a asigura apă caldă imediată la robinet.
 
@@ -286,7 +289,7 @@ Unități de scurgere pe obiect (STAS 1795 / SR EN 12056):
 
 **Ventilarea canalizării:** fiecare coloană se prelungește ca **ventilare primară deasupra terasei (+0,50 m peste circulabil)** cu căciulă; se prevăd **ventilări secundare** și **aeratoare cu membrană (valve de aerisire)** la coloanele care nu pot fi ventilate primar, pentru a evita golirea sifoanelor de gardă. Toate obiectele au **sifon de gardă cu înălțime ≥ 50 mm**. În subsol/parcaj: sifoane de pardoseală cu gardă, iar apele din parcaj trec obligatoriu printr-un **separator de hidrocarburi** înainte de canalizare (cap. 11).
 
-Se prevede o **stație de pompare a apelor uzate (SPAU)** doar dacă radierul subsolului este sub cota colectorului stradal (apele din subsol nu pot curge gravitațional): pompă submersibilă cu tocător + pompă rezervă, cămin etanș, ventilat.
+Se prevede o **stație de pompare a apelor uzate (SPAU)** doar dacă radierul subsolului este sub cota colectorului stradal (apele din subsol nu pot curge gravitațional): pompă submersibilă cu tocător + pompă rezervă, cămin etanș, ventilat. Volumul căminului de pompare se dimensionează la debitul afluent și frecvența admisă de porniri (V_util ≈ Q_afluent × t_ciclu); pompele funcționează alternativ (uzură egală) cu comutare la avarie. Conducta de refulare are clapetă antiretur și vană; deasupra nivelului de refulare, conducta urcă peste cota de refulare a rețelei publice (buclă anti-refulare) pentru a împiedica întoarcerea apei în subsol la supraîncărcarea rețelei stradale. Căminul are ventilare (evacuarea gazelor de canalizare) și senzori de nivel (pornire/oprire/alarmă preaplin).
 
 **Verificarea gradului de umplere a coloanei de scurgere:** conform SR EN 12056, coloana de scurgere trebuie să funcționeze cu un grad de umplere care lasă loc coloanei de aer (evitarea sifonării gărzilor). Pentru coloana Dn110 cu ventilare primară, capacitatea hidraulică admisă (sistem I, grad de umplere 0,5) este ≈ 5,2 l/s — superioară debitului de calcul pe coloană (≈ 5,0 l/s), deci Dn110 este verificat. Coloanele care servesc WC-uri se mențin **min. Dn110** indiferent de debit (trecerea materiilor solide).
 
@@ -332,6 +335,8 @@ unde:
 
 > Q_p = 0,0001 × 150 × 640 × 0,90 = **8,64 l/s**
 
+**Notă privind intensitatea de calcul:** intensitatea ploii de calcul se stabilește din curbele IDF (intensitate-durată-frecvență) pentru localitatea de amplasament, funcție de **durata de calcul** (egală cu timpul de concentrare al terasei, tipic 5 min) și **frecvența** (perioada de revenire). Pentru terase se adoptă frecvențe mai severe (perioadă de revenire 1/1…1/2 ani pentru dimensionarea receptoarelor curente și 1/100 ani verificat prin preaplinuri de avarie, conform SR EN 12056-3). Valoarea i ≈ 150 l/s·ha folosită corespunde clasei de importanță medii; la faza P.Th. se preia valoarea exactă din STAS 9470/curbele locale. Debitul de avarie (preaplin) se dimensionează la ploaia excepțională minus capacitatea receptoarelor normale.
+
 ### 3.2. Receptoare și coloane pluviale
 
 Se prevăd **min. 3 receptoare de terasă cu parafrunzar și gulere de hidroizolație**, dimensionate astfel încât fiecare să preia ≈ 3 l/s (Dn110 → capacitate ≈ 4–5 l/s cu strat de apă redus). Se adaugă **preaplinuri (deversoare de siguranță) prin atic** (guri de scurgere de avarie) pentru cazul înfundării receptoarelor sau al ploii excepționale (SR EN 12056-3 — descărcare de urgență obligatorie la terase).
@@ -347,7 +352,14 @@ Se prevăd **min. 3 receptoare de terasă cu parafrunzar și gulere de hidroizol
 
 Apele de pe balcoane/logii se colectează prin **scurgeri punctuale (sifon de balcon)** cu descărcare fie la coloana pluvială dedicată, fie liber controlat (pt. balcoane mici, cu pantă către exterior și lăcrimar), evitând scurgerea necontrolată pe fațadă. Debit balcon ≈ 0,0001 × 150 × 6 mp × 0,90 ≈ 0,08 l/s/balcon → Dn50 suficient.
 
+La balcoanele/logiile de la nivelurile superioare se recomandă **colectarea la o coloană pluvială dedicată de fațadă** (nu descărcare liberă), pentru a evita udarea fațadei și infiltrațiile la nivelurile inferioare; sifonul de balcon are gardă hidraulică (protejat la îngheț prin poziționare/încălzire în zonele reci) și grătar parafrunzar. Panta pardoselii balconului ≥ 1% către punctul de scurgere. Hidroizolația balconului se corelează cu arhitectura (racord la tâmplărie, praguri).
+
 Descărcarea finală a apelor pluviale: la **rețeaua pluvială publică** dacă există separativ, altfel prin **bazin de retenție/infiltrare** dimensionat la diferența dintre debitul generat și debitul acceptat de rețea (atenuare — tot mai frecvent impusă prin aviz de gospodărire a apelor).
+
+**Dimensionarea bazinului de retenție (atenuare):** dacă operatorul limitează debitul de descărcare la un debit specific q_adm (ex. 5 l/s), volumul de retenție necesar se calculează din diferența dintre volumul generat de ploaia de calcul (durată critică) și volumul descărcat:
+> V_ret = (Q_p − q_adm) · t_ploaie ≈ (8,64 − 5,0) × 900 s ≈ 3.276 l ≈ **≈ 3,3 mc** (pentru ploaie de 15 min); pentru ploi de durată mai mare se recalculează pe curba IDF și se adoptă volumul maxim. Bazinul se golește gravitațional/prin pompare la debitul admis, cu preaplin de siguranță.
+
+**Recuperarea apei pluviale (opțional, nZEB/durabilitate):** apa de pe terasă poate fi colectată într-un rezervor și refolosită la udarea spațiilor verzi/spălarea pardoselii parcajului (rețea separată, marcată, fără racord la apa potabilă — SR EN 1717), reducând consumul de apă potabilă și debitul evacuat.
 
 ---
 
@@ -364,6 +376,20 @@ Se analizează trei variante de sursă, cu recomandarea corelată situației de 
 **Varianta 3 — Pompe de căldură (sursă centralizată, nZEB).** Pompe de căldură aer-apă sau sol-apă în cascadă, cu tampon și boiler ACM, distribuție pe apartamente. Cea mai bună performanță nZEB (COP sezonier 3–4), dar CAPEX ridicat și spațiu tehnic amplu. Se poate combina cu fotovoltaic (autoconsum).
 
 **Soluția de referință pentru prezentul memoriu: Varianta 1 (CT individuale în condensație)**, cu observația că bilanțul termic al blocului (cap. 4.3) și racordul de gaze (cap. 5) se dimensionează pe această bază.
+
+**Comparația sintetică a variantelor de sursă:**
+
+| Criteriu | V1 CT individuale gaz | V2 Termoficare/PT | V3 Pompe căldură |
+|---|---|---|---|
+| Investiție inițială | medie | mică–medie (racord existent) | mare |
+| Cost exploatare | mediu (preț gaz) | variabil (tarif termie) | scăzut (COP 3–4) |
+| Contorizare | naturală (gaz) | repartitoare + contor bloc | contor energie/electric |
+| Pierderi rețea | zero (fără rețea comună) | pe rețeaua de distribuție | reduse (tampon) |
+| Emisii locale | ardere gaz/apartament | zero local (sursă centralizată) | zero local |
+| Compatibilitate nZEB | bună (condensație) | funcție de sursa termoficării | foarte bună (+ PV) |
+| Spațiu tehnic | minim (în apartament) | PT în subsol | amplu (sursă + tampon) |
+
+Alegerea finală a variantei se face funcție de disponibilitatea racordurilor (existența termoficării funcționale, presiunea/debitul de gaz aprobat, spațiul tehnic disponibil) și de analiza cost-beneficiu pe durata de viață; pentru zonele fără termoficare și cu racord de gaz disponibil, V1 rămâne soluția uzuală la blocuri noi de locuințe. Trecerea către V3 (pompe de căldură) este favorizată de politicile de decarbonare și de cuplarea cu fotovoltaicul (autoconsum), fiind soluția cu cel mai bun profil nZEB pe termen lung.
 
 ### 4.2. Temperaturi interioare de calcul și date climatice
 
@@ -455,6 +481,12 @@ Distribuția interioară în apartament: **bitubulară orizontală**, radială d
 
 **Echipare centrală de apartament:** vas de expansiune închis cu membrană (8–10 l), supapă de siguranță 3 bar, manometru, pompă de circulație modulantă (clasa A), automatizare cu termostat de ambient/senzor exterior. **Contorizarea energiei termice** se realizează natural prin contorul de gaz individual (soluția CT de apartament) — nu sunt necesare repartitoare.
 
+**Echilibrarea hidraulică a distribuției interioare:** la distribuția bitubulară radială din distribuitor/colector, fiecare circuit (corp de încălzire) se echilibrează prin **robinete de reglaj (presetare) pe retur** sau prin capete termostatice cu preselecție, astfel încât debitul livrat fiecărui corp să corespundă necesarului (evitarea supraîncălzirii corpurilor apropiate de distribuitor și subîncălzirea celor îndepărtate). Debitul total al centralei de apartament (3 cam.): ≈ 0,28 mc/h (§4.3), asigurat de pompa modulantă a centralei (ΔP proporțional cu debitul, economie de energie).
+
+**Vasul de expansiune (verificare):** volumul de apă din instalația de apartament (radiatoare + țevi) ≈ 30–50 l; dilatarea la ΔT = 45 K (de la 10°C umplere la 55°C regim), coeficient de dilatare apă ≈ 1,5%: ΔV ≈ 0,015 × 40 ≈ 0,6 l → vas de 8 l (cu presiune de preîncărcare 1,0–1,5 bar) este suficient, cu marja pentru reglaj. **Supapa de siguranță** (3 bar) protejează instalația la suprapresiune; evacuarea supapei se conduce vizibil (pâlnie cu scurgere).
+
+**Regimul redus și programarea:** automatizarea permite regim redus de noapte/absență (economie), cu repriză matinală — motiv pentru care puterea corpurilor include o rezervă de repriză (§4.3). Termostatele de ambient cu programare orară + senzorul de temperatură exterioară (compensare climatică) optimizează consumul (cerință de eficiență Legea 121).
+
 ---
 
 ## 5. INSTALAȚII DE GAZE NATURALE (NTPEE-2018)
@@ -463,7 +495,7 @@ Distribuția interioară în apartament: **bitubulară orizontală**, radială d
 
 Alimentarea cu gaze naturale se face prin **branșament din rețeaua de distribuție de presiune redusă**, cu **stație/post de reglare-măsurare (SRM/post reglare)** la limita de proprietate. De la SRM, conducta de racord (oțel/PE la exterior, oțel la interior) alimentează **coloanele verticale montate în ghene tehnice dedicate exclusiv gazului**, ventilate direct în exterior (NTPEE — interzisă amplasarea coloanei de gaz în ghene comune cu alte instalații, exceptând condițiile de ventilare permanentă).
 
-La fiecare palier/apartament, pe derivație: **robinet de branșament + contor G4 + robinet de siguranță (cu declanșare)**, montate accesibil.
+La fiecare palier/apartament, pe derivație: **robinet de branșament + contor G4 + robinet de siguranță (cu declanșare)**, montate accesibil în firidă/nișă ventilată. Contoarele de gaz se amplasează la exterior sau în firide ventilate direct în exterior (NTPEE — interzisă amplasarea în spații închise neventilate). Postul de reglare-măsurare (SRM) reduce presiunea de la rețeaua de distribuție la presiunea de utilizare a coloanei (presiune redusă), cu regulator, filtru, dispozitiv de siguranță la suprapresiune/subpresiune și contor general (dacă operatorul contorizează la nivel de bloc, în plus față de contoarele individuale de repartizare).
 
 ### 5.2. Calculul debitului de gaz
 
@@ -475,9 +507,20 @@ La fiecare palier/apartament, pe derivație: **robinet de branșament + contor G
 
 **Debit pe bloc (40 ap.) cu coeficient de simultaneitate NTPEE:**
 
-Simultaneitatea gazului la locuințe colective (NTPEE, tabel simultaneitate în funcție de nr. de aparate/apartamente) — pentru 40 apartamente K_sim ≈ 0,25:
+Simultaneitatea gazului la locuințe colective (NTPEE, tabel simultaneitate în funcție de nr. de aparate/apartamente). Coeficientul de simultaneitate scade cu numărul de consumatori:
+
+| Nr. apartamente | K_sim orientativ |
+|---|---|
+| 1–3 | 1,00–0,70 |
+| 5–10 | 0,55–0,40 |
+| 15–25 | 0,35–0,28 |
+| 30–50 | 0,28–0,22 |
+
+Pentru 40 apartamente K_sim ≈ 0,25:
 
 > Q_bloc = Σq_ap × K_sim = 40 × 4,4 × 0,25 = **≈ 44 mc/h**
+
+Debitul rezultat dimensionează SRM-ul și racordul; pe montant, debitul descrește pe măsură ce se ramifică spre etajele superioare (la ultimul palier rămâne debitul apartamentelor de deasupra × simultaneitatea locală), permițând reducerea diametrului coloanei spre vârf (Dn50 → Dn40 → Dn32).
 
 **Dimensionare conducte gaz (pierdere de sarcină admisă NTPEE, presiune redusă):**
 
@@ -597,6 +640,10 @@ Din TEG pleacă:
 - circuit către **tabloul serviciilor comune (TC)** — iluminat comun, ascensor, hidrofor, ventilare;
 - **circuit prioritar/protejat** către serviciile de siguranță la incendiu (pompe incendiu, desfumare, iluminat de securitate, ascensor de pompieri), alimentat și din **sursa de rezervă**.
 
+**Racordul și puterea aprobată:** puterea maximă simultan absorbită (P_MSA) și puterea aprobată se solicită operatorului de distribuție prin **cerere de racordare**, care emite **ATR (Aviz Tehnic de Racordare)**. Pentru bloc de 40 apartamente + comune, puterea aprobată tipică ≈ **160 kW** (regim normal, fără suprapunerea regimului de incendiu). Racordul poate fi din **postul de transformare** existent al operatorului (JT) sau, la puteri mari, printr-un **post de transformare propriu (PT abonat, MT/JT)** — soluția se stabilește cu operatorul funcție de puterea disponibilă în rețea. **Contorul general** (de decontare cu operatorul) este distinct de contoarele individuale de apartament (de repartizare internă).
+
+**Sursa de rezervă pentru serviciile de siguranță:** conform P118-2/I7, la clădire cu multe niveluri/înaltă, serviciile de siguranță (pompe incendiu, desfumare, iluminat securitate, ascensor pompieri) necesită o **a doua sursă independentă** — **grup electrogen** (pornire automată < 15 s, autonomie corelată cu timpul de intervenție) sau a doua cale de alimentare din SEN. Comutarea se face prin **AAR (Anclanșare Automată a Rezervei)** cu interblocare (evitarea funcționării în paralel neautorizate).
+
 ### 7.2. Bilanțul de puteri
 
 **Puterea instalată și cerută pe categorii:**
@@ -650,7 +697,11 @@ Se adoptă **întrerupător general automat de 400 A** (rezervă de dezvoltare),
 - **iluminat de evacuare** (căi de evacuare, uși, schimbări de direcție) ≥ 1 lx pe axul căii;
 - **iluminat antipanică** (spații deschise) ≥ 0,5 lx;
 - **iluminat de marcare** a hidranților, tablourilor și mijloacelor de intervenție PSI;
-- **indicatoare luminoase de evacuare (pictograme)** deasupra ușilor de ieșire.
+- **indicatoare luminoase de evacuare (pictograme)** deasupra ușilor de ieșire, vizibile de la distanța normată (distanța de recunoaștere ≈ 200 × înălțimea pictogramei).
+
+Autonomia corpurilor de iluminat de securitate: min. **1 h** (pentru evacuare rapidă) — la clădire cu multe niveluri/înaltă se adoptă **3 h** (P118-3), pentru a acoperi durata extinsă de evacuare și intervenție. Corpurile sunt de tip **permanent/nepermanent** cu acumulator propriu (mentenanță și autotest programat) sau alimentate din sursa centrală de rezervă. Se verifică amplasarea la fiecare schimbare de direcție, la scări (fiecare palier și fiecare rampă), la ușile de evacuare, la mijloacele PSI și la tablourile electrice.
+
+**Prize pentru vehicule electrice (opțional, mobilitate durabilă):** la locurile de parcare se pot prevedea prize/stații de încărcare EV (7–22 kW), pe circuite dedicate cu protecție **RCD tip B** (detectează curenți de defect continui), contorizate individual, cu management de sarcină (load balancing) pentru a nu depăși puterea disponibilă — pregătire pentru cerințele viitoare de infrastructură EV la clădiri noi.
 
 **Prize:** dotare pe apartament conform I7 (min. 1 priză dublă/8 mp cameră; bucătărie și baie cu circuite dedicate protejate RCD 30 mA); prize comune pentru întreținere pe casa scării și în tehnice.
 
@@ -758,6 +809,10 @@ Conform tabelelor P118-2 (clădiri de locuit, volum și înălțime corespunzăt
 
 **Rezerva intangibilă de incendiu** se stabilește ca max. între scenariile de stingere; pentru soluția de referință (HI din gospodărie proprie, HE din rețea publică cu hidranți stradali în rază): **rezervă proprie ≈ V_HI + marjă ≈ 3 mc** stocată într-un **rezervor de incendiu** dedicat în subsol. Când și HE trebuie asigurat din rezervă proprie, rezervorul crește la ≈ 55–60 mc (se stabilește prin scenariul de securitate la incendiu avizat ISU).
 
+**Asigurarea hidranților exteriori din rețeaua stradală:** dacă rețeaua publică asigură debitul normat (≥ 5 l/s la presiunea de min. 0,7 bar la hidrant, cu hidranți stradali amplasați în raza normată — max. 150 m față de clădire, P118-2), stingerea exterioară se realizează de la acești hidranți de către ISU, iar rezerva proprie se limitează la HI. În caz contrar (rețea insuficientă), se prevede rezervor propriu cu volumul cumulat HI + HE și grup de pompare corespunzător. Confirmarea capacității rețelei se obține prin **avizul operatorului de apă** și se consemnează în scenariul de securitate la incendiu.
+
+**Rezerva intangibilă (protejarea rezervei la incendiu):** rezervorul de incendiu, dacă e comun cu apa de consum, are sorbul de incendiu poziționat astfel încât consumul menajer să nu poată epuiza rezerva intangibilă (sorb menajer deasupra nivelului rezervei de incendiu). La rezervor dedicat de incendiu, umplerea automată (robinet cu plutitor) menține nivelul, cu indicator de nivel și alarmă la scăderea sub prag.
+
 ### 9.4. Gospodăria de apă de incendiu
 
 - **rezervor de acumulare** cu rezerva intangibilă (racord de umplere + preaplin + indicator nivel + sorb cu împiedicarea folosirii rezervei la consum menajer);
@@ -785,7 +840,7 @@ Când instalația deservește și hidranții exteriori/coloana din rezervă prop
 
 ### 9.5. Coloană uscată / coloană umedă
 
-Pentru intervenția pompierilor la nivelurile superioare se prevede o **coloană uscată Dn75** în casa scării (racord tip B la nivelul accesului exterior + robinete tip C pe fiecare palier), presurizată de autospeciala ISU la intervenție. La configurația de clădire înaltă, coloana devine **umedă** (permanent sub presiune, alimentată din gospodăria de incendiu).
+Pentru intervenția pompierilor la nivelurile superioare se prevede o **coloană uscată Dn75** în casa scării (racord tip B la nivelul accesului exterior + robinete tip C pe fiecare palier), presurizată de autospeciala ISU la intervenție. La configurația de clădire înaltă, coloana devine **umedă** (permanent sub presiune, alimentată din gospodăria de incendiu). Racordul exterior al coloanei uscate se amplasează accesibil autospecialei (max. distanța normată față de calea de acces ISU), semnalizat, la înălțimea de manevră; robinetele de pe paliere sunt de tip C (Ø52 mm) pentru racordarea furtunurilor pompierilor. Coloana uscată se golește după utilizare (robinet de golire la bază) pentru a evita înghețul; coloana umedă are protecție la îngheț (traseu în zonă încălzită sau însoțire termică).
 
 ### 9.6. Sprinklere parcaj (după caz)
 
@@ -802,6 +857,16 @@ Casa de scări (cale de evacuare principală) trebuie protejată de fum. Se adop
 **Soluția A — Evacuare naturală a fumului:** **trapă de fum (exutor) în partea superioară a casei scării ≥ 1 mp arie liberă**, cu deschidere **automată (de la detecție) + manuală (buton la parter)**, coroborată cu **admisie de aer proaspăt jos** (ușă/grilă la parter). Aria geometrică a exutorului ≥ 1 mp; aria de admisie la partea inferioară ≥ aria de evacuare.
 
 **Soluția B — Presurizarea casei scării:** insuflare mecanică de aer proaspăt pentru a menține o **suprapresiune de 20–80 Pa** în casa scării față de nivelurile adiacente (ușile de acces închise), astfel încât fumul să nu pătrundă. Debit dimensionat pentru menținerea a **≥ 0,75 m/s viteză prin ușa deschisă** în scenariul de evacuare. Necesită ventilator dedicat, tubulatură, clapete și comandă de la centrala de incendiu. **Recomandată la clădiri înalte** (S+P+8E în prag de clădire înaltă → se adoptă presurizare + trapă de fum ca redundanță).
+
+**Breviar dimensionare presurizare casa scării (SR EN 12101-6, sistem clasa B/E):**
+
+Debitul de presurizare acoperă două condiții simultan verificate:
+1. *Ușile închise* — menținerea suprapresiunii de 50 Pa (valoare de proiectare, între 20–80 Pa) compensând pierderile prin neetanșeități (interstiții uși/ferestre). Aria totală de neetanșeitate pt. o casă de scări cu 10 uși (A_leak ≈ 0,01 mp/ușă → ΣA ≈ 0,10 mp):
+> Q_1 = 0,83 · A_leak · Δp^0,5 = 0,83 × 0,10 × 50^0,5 = 0,83 × 0,10 × 7,07 ≈ **0,59 mc/s ≈ 2.100 mc/h**
+2. *O ușă deschisă (nivelul incendiat)* — menținerea vitezei de ≥ 0,75 m/s prin ușa deschisă (A_ușă ≈ 2,0 mp) + neetanșeitățile celorlalte uși:
+> Q_2 = A_ușă · v + Q_neetanșeități_rest = 2,0 × 0,75 + ≈ 0,3 = 1,5 + 0,3 ≈ **1,8 mc/s ≈ 6.500 mc/h**
+
+Debitul de dimensionare al ventilatorului de presurizare = **max(Q_1, Q_2) ≈ 6.500 mc/h**, cu reglaj (clapetă de suprapresiune/variație turație) pentru a nu depăși 80 Pa cu ușile închise (altfel forța de deschidere a ușii > 100 N devine periculoasă). Ventilatorul de presurizare aspiră aer proaspăt din exterior (la nivel jos, ferit de fum), pe circuit protejat la foc, cu comandă de la centrala de detecție.
 
 ### 10.2. Desfumarea coridoarelor și a parcajului
 
@@ -843,8 +908,8 @@ Toate sistemele de desfumare se comandă **automat de la centrala de detectare-s
 
 ## 12. INSTALAȚII DE CURENȚI SLABI (I7 — partea de curenți slabi, I18)
 
-- **Videointerfon:** panou de apel cu cameră la intrarea principală + post video în fiecare apartament + **yală electromagnetică** pe ușa de acces; magistrală digitală, alimentare proprie cu acumulator de backup.
-- **Rețea TV / date / fibră optică (FTTH):** coloană verticală cu tubulatură, cutii de distribuție la palier, **rack de comunicații la parter**, pregătit pentru mai mulți operatori (multi-provider).
+- **Videointerfon:** panou de apel cu cameră la intrarea principală (cu listă de apel/cod numeric) + post video în fiecare apartament + **yală electromagnetică** pe ușa de acces; magistrală digitală (2 fire sau IP), alimentare proprie cu acumulator de backup (menținerea funcției la cădere de tensiune). Deblocarea ușii de acces se coordonează cu comanda de la centrala de incendiu (deblocare automată pe traseul de evacuare la alarmă de incendiu, pentru a nu bloca ieșirea).
+- **Rețea TV / date / fibră optică (FTTH):** coloană verticală cu tubulatură (tub de protecție dedicat curenți slabi), cutii de distribuție la palier, **rack de comunicații la parter** (cu alimentare electrică proprie și acces operatori), pregătit pentru mai mulți operatori (multi-provider). În fiecare apartament: min. 1–2 prize RJ45/coaxial în camera de zi și dormitoare, cablu UTP cat.6 / fibră optică până la apartament (infrastructură pregătită pentru servicii gigabit).
 - **Control acces:** cititor/yală la intrarea principală și la accesul în parcaj + **automatizare poartă/barieră parcaj** (telecomandă/tag).
 - **Sistem de detectare-semnalizare incendiu (P118-3):** centrală adresabilă la parter, detectoare de fum/temperatură în spații comune, tehnice, parcaj, casa scării, holuri; **butoane manuale de alarmare** pe căile de evacuare/palier; **sirene de alarmare** acustice+optice. Comenzi automate: desfumare, oprire ventilare curentă parcaj, aducere ascensor la parter, deblocare control acces pe evacuare, alarmă generală.
 
@@ -865,6 +930,30 @@ Toate sistemele de desfumare se comandă **automat de la centrala de detectare-s
 **Puterea și racordarea:** motor 7,7 kW (MRL, cu regenerare energetică pe frânare la unele modele — bonus nZEB), racord trifazat din TC, protecție proprie, telemonitorizare defecte. Verificare periodică ISCIR (transport pe verticală = echipament sub incidența ISCIR).
 
 ---
+
+## 13bis. MATERIALE, TEHNOLOGII ȘI PROTECȚIA LA ZGOMOT
+
+**Materiale principale pe specialități:**
+
+| Specialitate | Material conducte/echipament |
+|---|---|
+| Apă rece/ACM interior | PP-R PN16/PN20 sau PEX-Al-PEX, izolate |
+| Aducțiune exterior | PEHD PE100 SDR17 |
+| Canalizare menajeră | PP fonoabsorbant 3 straturi (interior), PVC-KG (îngropat exterior) |
+| Canalizare pluvială | PP/HDPE (interior), PVC-KG (exterior) |
+| Încălzire | PEX-Al-PEX / cupru; radiatoare oțel |
+| Gaze | oțel (interior), PE (exterior îngropat) |
+| Ventilare | tablă zincată; tubulatură F400 pt. desfumare |
+| Electrice | cabluri Cu N2XH (fără halogen, LSZH) la spații comune/evacuare; NYM/CYYF la apartamente; **cabluri rezistente la foc E90** pt. serviciile de siguranță |
+
+**Protecția la zgomot și vibrații (C125 — acustica în construcții):**
+- canalizarea din PP fonoabsorbant (3 straturi) reduce zgomotul de scurgere sub pragul admis în locuințe (< 30 dB(A) în încăperi adiacente);
+- pompele (hidrofor, incendiu) montate pe **postamente antivibrante** (plăci elastice/amortizoare), cu **racorduri elastice (compensatoare de vibrații)** pe aspirație/refulare;
+- ventilatoarele pe suporți antivibranți + atenuatoare de zgomot pe tubulatură unde e cazul;
+- conductele fixate cu brățări cu garnitură fonică; trecerile prin pereți/planșee cu manșoane elastice (evitarea punților fonice);
+- amplasarea camerelor tehnice (hidrofor, CT/PT) astfel încât să nu fie adiacente direct dormitoarelor, sau cu tratament fonoizolant al pereților/planșeelor.
+
+**Protecția la coroziune și durabilitate:** conductele metalice îngropate se protejează anticoroziv (vopsire/înfășurare); elementele expuse (paratrăsnet, priză) din oțel zincat/inox; legăturile de echipotențializare cu îmbinări protejate.
 
 ## 14. EFICIENȚA ENERGETICĂ — nZEB (Legea 372/2005, Mc001, C107)
 
@@ -902,13 +991,75 @@ Raportat la Sd supraterană utilă (≈ 3.150 mp Su): **indice specific ≈ 48 k
 
 ---
 
+## 14bis. RECAPITULAREA MĂRIMILOR DIMENSIONANTE (SINTEZĂ)
+
+Tabel centralizator al principalilor parametri de calcul (utili la coordonarea cu proiectanții de rețele și la solicitarea avizelor de racord):
+
+| Parametru | Simbol | Valoare | Sursă calcul |
+|---|---|---|---|
+| Utilizatori echivalenți | N | 112 persoane | §1.1 |
+| Necesar zilnic maxim apă | Q_zi_max | 18,14 mc/zi | §2.1 |
+| Debit orar maxim apă | Q_orar_max | 1,51 mc/h | §2.1 |
+| Debit de calcul apă (conducte) | q_c | 2,76 l/s | §2.2 |
+| Înălțime pompare hidrofor | H_p | ≈ 28 mCA | §2.3 |
+| Necesar zilnic ACM | Q_ACM_zi | 6,72 mc/zi | §2.5 |
+| Debit canalizare menajeră | q_c | 9,2 l/s | §2.6 |
+| Debit pluvial terasă | Q_p | 8,64 l/s | §3.1 |
+| Necesar termic bloc (simultan) | Q_înc | ≈ 88 kW | §4.3 |
+| Debit gaz bloc | Q_gaz | ≈ 44 mc/h | §5.2 |
+| Ventilare curentă parcaj | Q_CO | ≈ 10.000 mc/h | §6.3 |
+| Desfumare parcaj | Q_desf | ≈ 20.000 mc/h | §6.3 |
+| Putere electrică cerută (normal) | P_c | ≈ 158 kW | §7.2 |
+| Curent de calcul | I_c | ≈ 298 A | §7.2 |
+| Debit hidranți interiori | Q_HI | 4,2 l/s | §9.2 |
+| Rezervă apă incendiu (HI) | V | ≈ 2,52 mc | §9.2 |
+| Debit presurizare casa scării | Q_pres | ≈ 6.500 mc/h | §10.1 |
+| Rezistență priză pământ | R | ≤ 1 Ω | §8.1 |
+| Nivel protecție trăsnet | LPL | III | §8.2 |
+| Producție fotovoltaic | E_PV | ≈ 11.500 kWh/an | §14.1 |
+
 ## 15. CORELAREA CU ALTE SPECIALITĂȚI ȘI TRIMITERI
 
 - **Structură:** goluri de trecere prin planșee/pereți pentru coloane și tubulatură (protejate la foc — etanșări rezistente la foc EI la traversarea pereților/planșeelor de compartimentare, P118-1); spații tehnice și fundații pentru priza de pământ.
 - **Arhitectură:** ghene tehnice (separate: sanitar/termic vs. gaz vs. curenți tari vs. curenți slabi), amplasarea centralelor de apartament (ventilare, evacuare gaze arse), poziționarea receptoarelor de terasă și a exutorului de fum, firidele de palier (contoare).
 - **Securitate la incendiu:** prezentul memoriu se corelează cu **Scenariul de securitate la incendiu** (P118-1) avizat/autorizat ISU — nivelurile de risc, compartimentarea, căile de evacuare și tipurile de instalații (HI/HE/coloană/desfumare/detecție) rezultă din scenariu.
 
+**Corelarea instalațiilor cu căile de evacuare (P118-1):** instalațiile de siguranță susțin evacuarea sigură a persoanelor:
+- **iluminatul de securitate pentru evacuare** marchează traseul și ieșirile (≥ 1 lx pe ax, autonomie 1–3 h) — §7.4;
+- **desfumarea/presurizarea casei scării** menține calea de evacuare liberă de fum — §10;
+- **detecția și alarmarea** avertizează ocupanții din timp — §12;
+- **oprirea ventilării curente** a parcajului la incendiu previne alimentarea cu oxigen a focarului și dispersia fumului pe căile de evacuare;
+- **aducerea ascensorului la parter** (excepție ascensorul de pompieri) previne blocarea persoanelor în cabină;
+- traseele de instalații care traversează pereți/planșee de compartimentare la foc se **etanșează cu sisteme rezistente la foc (EI)** și se prevăd **clapete antifoc** pe tubulaturile de ventilare care traversează compartimente, pentru a nu propaga focul/fumul între compartimente. Casa scării de evacuare este **încăpere tampon/protejată**, cu uși EI cu autoînchidere.
+
 ---
+
+## 15bis. PIESE DESENATE ȘI DOCUMENTE ANEXATE
+
+Prezentul memoriu se completează, la faza D.T.A.C. și dezvoltat la P.Th./D.E., cu următoarele piese desenate și documente (piese scrise și desenate obligatorii pentru avizare/autorizare):
+
+**Piese desenate — sanitare:**
+- planuri de instalații sanitare (apă rece, ACM, canalizare) pe fiecare nivel (subsol, parter, etaj curent, terasă);
+- schema coloanelor de apă rece/ACM și schema coloanelor de canalizare menajeră/pluvială;
+- planul gospodăriei de apă (grup pompare, rezervoare) — subsol.
+
+**Piese desenate — termice/gaze:**
+- planuri de încălzire pe niveluri (corpuri, distribuție, centrale de apartament);
+- schema izometrică a instalației de gaze (branșament, SRM, coloane, contoare, aparate);
+- planul de amplasare a coșurilor de evacuare gaze arse.
+
+**Piese desenate — electrice/curenți slabi:**
+- planuri de instalații electrice (iluminat, prize, forță) pe niveluri;
+- **schema monofilară** a tabloului general (TEG) și a tablourilor de palier/apartament;
+- planul instalației de paratrăsnet (captare terasă, coborâri) și al prizei de pământ;
+- planuri curenți slabi (interfon, date/TV, control acces, detecție incendiu).
+
+**Piese desenate — PSI/ventilare:**
+- planuri instalații de stingere (hidranți, coloane, gospodărie apă incendiu);
+- planuri de desfumare (trape, ventilatoare F400, presurizare casa scării);
+- planuri de ventilare parcaj și apartamente (coșuri șuntă).
+
+**Documente:** breviare de calcul pe specialități, scenariul de securitate la incendiu, referatele verificatorilor de proiect (Is/It/Ie/Ig), avizele de racord (apă-canal, gaz, energie electrică), acordul de gospodărire a apelor (pluvial).
 
 ## 16. PROBE, VERIFICĂRI ȘI RECEPȚIE
 
@@ -927,6 +1078,27 @@ La finalizarea execuției (faza D.E./execuție) se efectuează probe și verific
 | Detecție incendiu | Test detectoare/butoane/sirene + verificare comenzi automate (desfumare, ascensor, ventilare) |
 
 ---
+
+## 16bis. EXPLOATARE, MENTENANȚĂ ȘI SIGURANȚĂ ÎN FUNCȚIONARE
+
+Pentru asigurarea funcționării în siguranță pe durata de viață a construcției, se prevăd următoarele obligații de exploatare (cartea tehnică a construcției, instrucțiuni de exploatare pe specialități):
+
+| Instalație | Operație de mentenanță | Periodicitate |
+|---|---|---|
+| Grup pompare apă / hidrofor | verificare presiune vas, curățare filtre, test pompă rezervă | trimestrial |
+| Rezervor apă potabilă | curățare/dezinfecție, control microbiologic | anual/semestrial |
+| Boiler ACM (soluția B) | dezinfecție termică anti-Legionella, verificare anod | periodic/anual |
+| Centrale termice apartament | revizie ISCIR/tehnică, verificare arzător, evacuare gaze arse | anual |
+| Instalație gaze | verificare etanșeitate, detectoare gaz, electrovalvă | anual (ANRE) |
+| Ventilare/desfumare | test ventilatoare F400, curățare filtre, verificare clapete | anual/semestrial |
+| Detecție incendiu | test detectoare/butoane/sirene, acumulatori centrală | trimestrial/anual |
+| Stingere incendiu | test pompe (activă/rezervă/pilot), presiuni, rezervă apă | lunar/anual |
+| Priză pământ / paratrăsnet | măsurare PRAM, verificare coborâri | anual/periodic ISU |
+| Tablouri electrice | strângere conexiuni, test RCD, termografie | anual |
+| Separator hidrocarburi | golire, curățare, control obturator | semestrial |
+| Ascensor | revizie ISCIR, verificare cabluri/frâne | conform ISCIR |
+
+**Siguranța în exploatare:** semnalizarea robinetelor generale (apă, gaz), a tablourilor și a mijloacelor PSI; instruirea administratorului/locatarilor; afișarea planurilor de evacuare (P118-1); registrul de control ISU.
 
 ## 17. CONCLUZII ȘI VERIFICARE TEHNICĂ
 

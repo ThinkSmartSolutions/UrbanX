@@ -42,6 +42,24 @@ Deschideri curente în plan: 3 travee de 5,40 m pe direcția lungă (16,20 m uti
 
 Justificarea clasei de importanță III: clădire de locuit obișnuită, mai mult de un nivel, care nu se încadrează în clasele I sau II (nu adăpostește > 300 persoane într-o singură incintă, nu are funcțiuni esențiale post-seism). Coeficientul de importanță γ_I,e = 1,00 se aplică forței seismice.
 
+### 1.3 bis. Sinteza parametrilor structurali de proiectare
+
+| Parametru | Simbol | Valoare |
+|---|---|---|
+| Accelerația terenului | a_g | 0,25·g |
+| Perioada de colț | T_C | 0,70 s |
+| Factor de comportare | q | 3,45 |
+| Perioadă proprie fundamentală | T_1 | 0,55–0,62 s |
+| Ordonata spectrului de proiectare | S_d | 0,181·g |
+| Forța seismică de bază | F_b | ≈ 7.083 kN/direcție |
+| Coeficient seismic global | c | 0,154 |
+| Greutate seismică totală | G_seism | 46.038 kN |
+| Deplasare la vârf (SLU) | d_top | ≈ 62 mm (H/425) |
+| Presiune pe teren (serviciu) | p_ef | 142,4 kPa |
+| Tasare absolută | s | ≈ 15 mm |
+
+Aceste valori-cheie sunt rezultatul calculelor detaliate din capitolele următoare și constituie „amprenta" seismică a clădirii.
+
 ### 1.4. Cerințe fundamentale
 
 Conform Legii 10/1995 și P100-1/2013 §2.1, structura satisface:
@@ -86,6 +104,20 @@ Proiectarea structurii se realizează pe baza **eurocodurilor structurale adopta
 Pentru calculul la starea limită ultimă seismică, rigiditatea la încovoiere și forfecare a elementelor de beton fisurat se ia (P100-1 §4.5.3.3, notă) egală cu **50% din rigiditatea secțiunii nefisurate** (E·I_eff = 0,5·E·I_c). Aceasta ține cont de fisurarea betonului sub acțiuni ciclice și conduce la o alungire realistă a perioadelor proprii și implicit la deplasări mai mari, verificate la SLS/SLU.
 
 ---
+
+### 2.4. Ipoteze și convenții de modelare
+
+Modelul de calcul spațial este alcătuit pe baza următoarelor convenții:
+
+- **Planșee**: diafragme rigide în planul lor (constrângere de tip „rigid diaphragm"), justificat prin L/d în plan < 4 și goluri < 15%. Fiecare planșeu are 3 grade de libertate (2 translații + 1 rotație în jurul axei verticale) concentrate în centrul maselor.
+- **Pereți**: elemente de suprafață (shell cu comportare membrană + încovoiere) discretizate în plasă de elemente finite; la baza pereților se colectează eforturile secționale (N, M, V) prin secțiuni de integrare.
+- **Grinzi și stâlpi**: elemente de bară (frame) cu deformabilitate la încovoiere, forfecare și axial; zone rigide la noduri (offset-uri) pentru captarea dimensiunii finite a nodurilor.
+- **Rigiditate fisurată**: 0,5·E·I la toate elementele pentru gruparea seismică (SLU/SLS seismic), 1,0·E·I pentru grupări gravitaționale de serviciu la săgeți (cu corecție de fluaj).
+- **Rezemare**: la nivelul plăcii peste subsol se consideră încastrare (subsolul rigid + radier = „cutie" indeformabilă); alternativ, model complet cu resoarte Winkler sub radier (§11.4ter) pentru dimensionarea radierului.
+- **Amortizare**: ξ = 5% (beton armat), inclusă în spectrul de proiectare.
+- **Verificarea participării masei**: min. 90% masă modală acumulată pe fiecare direcție (§11bis.2).
+
+Rezultatele modelului se validează prin verificări independente „de mână" (forța de bază, perioada, deplasarea la vârf, presiunea pe teren) — coincidența acestora cu modelul (ex. d_top ≈ 62 mm din model vs. S_De ≈ 60 mm din spectru) confirmă corectitudinea calculului.
 
 ## 3. Alegerea sistemului structural și justificarea
 
@@ -202,6 +234,10 @@ c_nom = c_min + Δc_dev (Δc_dev = 10 mm):
 | Pereți, stâlpi suprastructură | XC1 | 15 | **25 mm** |
 | Grinzi, planșee | XC1 | 15 | **25 mm** |
 
+### 4.5. Justificarea neconsiderării componentei seismice verticale
+
+Componenta verticală a mișcării seismice se ia în considerare (P100-1 §4.5.3.6.2) doar când a_vg ≥ 0,25g **și** există elemente sensibile: console orizontale cu deschidere > 5 m, grinzi precomprimate, elemente rezemate indirect pe alte grinzi sau grinzi cu deschideri foarte mari. La clădirea de față a_vg = 0,7·a_g = 0,175g < 0,25g **și** nu există console > 5 m (balcoanele ≤ 1,5 m) ⇒ **componenta verticală se neglijează** justificat. Balcoanele scurte se verifică local la gruparea fundamentală cu un spor dinamic acoperitor.
+
 ---
 
 ## 5. Amplasament — parametri seismici, zăpadă, vânt
@@ -218,6 +254,14 @@ Amplasament caracterizat prin (P100-1/2013, hărți de zonare — zonă tip Mold
 | T_D | 3,00 s | P100-1 fig. 3.3 |
 | Factor de amplificare dinamică maximă β_0 | **2,50** | P100-1 §3.1 |
 | Clasa de teren (V_s,30 ≈ 200 m/s) | teren tip C/D | — |
+
+### 5.1 bis. Caracterizarea hazardului seismic și condițiile de teren
+
+Amplasamentul este guvernat de **sursa seismică subcrustală Vrancea**, caracterizată prin cutremure de adâncime intermediară (70–170 km) cu conținut de frecvențe joase și perioade de colț mari (T_C = 0,7 s tipic pentru zona Moldova/est). Aceasta influențează direct proiectarea: structurile rigide (cu T_1 < T_C) intră pe palierul de amplificare maximă, iar structurile flexibile (T_1 > 1 s) sunt puternic solicitate din cauza conținutului energetic la perioade lungi. Alegerea unui sistem dual rigid (T_1 ≈ 0,6 s) este o decizie conștientă de a menține structura pe palier cu deplasări mici, în locul unei structuri flexibile cu deplasări mari greu de controlat.
+
+**Condițiile de teren** (clasa C/D, V_s,30 ≈ 200 m/s, terenuri de adâncime medie) sunt deja înglobate în valorile a_g și T_C din hărțile de zonare P100-1 (spectrul normativ este calibrat pe condițiile medii de teren din zonă). Nu se impune un studiu de răspuns seismic de amplasament specific (site-specific), acesta fiind necesar doar pentru clase de importanță superioare sau condiții de teren atipice (foarte moi, V_s,30 < 180 m/s). Spectrul normativ (P100-1) se aplică direct.
+
+**Intervalul mediu de recurență (IMR)** de referință este 225 ani pentru starea limită ultimă (probabilitate de depășire 20% în 50 ani), respectiv 40 ani pentru starea limită de serviciu — a se vedea §1.4. Raportul dintre cele două nivele de hazard este captat prin factorul ν = 0,5 aplicat la verificarea driftului SLS.
 
 ### 5.2. Spectrul de răspuns elastic (accelerații)
 
@@ -390,6 +434,23 @@ $$ p_{d,niv} = 1,35\cdot g_k + 1,50\cdot q_k = 1,35\cdot5,85 + 1,50\cdot2,0 = 7,
 | **N_Ed la baza stâlpului subsol** | **≈ 3.639 kN** |
 
 Cu N_Ed ≈ 3.640 kN (gravitațional) + variația seismică (≈ ±560 kN) → **N_Ed,max ≈ 4.200 kN**, valoare folosită la §8.4. Verificarea ν_d = 0,50 este confirmată. Coborârea completă pentru toți stâlpii și pereții se prezintă tabelat în breviarul PTh.
+
+### 6.7. Coborârea încărcărilor pe peretele structural (exemplu — perete Y de capăt)
+
+Peretele transversal de capăt (l_w = 6,0 m) preia aria aferentă de planșeu A_af,perete ≈ 6,0 × 2,70 = 16,2 m² (jumătate din traveea adiacentă) plus greutatea proprie:
+
+| Contribuție | Valoare [kN] |
+|---|---|
+| Planșee (9 niv × 10,90 kN/m² × 16,2) | 1.589 |
+| Terasă (permanent) | 1,35·6,80·16,2 = 149 |
+| Greutate proprie perete (0,30·6,0·30,4·25) | 1.368 |
+| Anvelopă aferentă (perete de capăt) | ~420 |
+| Grinzi/centuri | ~180 |
+| **N_Ed gravitațional la baza peretelui** | **≈ 3.706 kN** |
+| + variație seismică (± din răsturnare) | ± 2.700 |
+| **N_Ed,max (grup seismic)** | **≈ 6.400 kN** |
+
+Valoare consistentă cu N_Ed = 6.400 kN folosit la §8.2 (ν_d = 0,153). Variația seismică mare (± 2.700 kN) provine din faptul că peretele lucrează ca talpă a „grinzii" de răsturnare a clădirii — la un capăt se comprimă, la celălalt se întinde. Se verifică că peretele nu ajunge la efort axial de întindere care să anuleze compresiunea (N_min = 3.706 − 2.700 = +1.006 kN > 0 ⇒ rămâne comprimat) ✓.
 
 ---
 
@@ -585,6 +646,26 @@ Din model (rigidități relative), la baza clădirii:
 
 Deoarece pereții preiau > 50% ⇒ confirmă clasificarea **dual cu pereți predominanți**. Cadrele se verifică pentru minimum 25% din forța seismică (cerință de redundanță pentru sistemul dual, P100-1 §5.2.2.1).
 
+### 8.1 pre. Densitatea de pereți structurali și grosimi minime
+
+Un indicator de bună alcătuire pentru clădirile cu pereți este **densitatea de pereți** (raportul dintre aria secțiunii orizontale a pereților pe o direcție și aria planșeului):
+
+$$ \rho_{perete} = \frac{\sum (l_w\cdot b_w)}{A_{plan\text{ș}eu}} $$
+
+**Direcția X (pereți longitudinali + componenta X a nucleului):**
+- 2 pereți longitudinali: 2·(5,40·0,30) = 3,24 m²
+- Nucleu (pereți orientați X): 2·(4,0·0,30) = 2,40 m²
+- Total X: 5,64 m² / 384 m² = **1,47%**
+
+**Direcția Y (pereți transversali + componenta Y a nucleului):**
+- 4 pereți transversali: 2·(6,0·0,30) + 2·(4,0·0,30) = 3,60 + 2,40 = 6,00 m²
+- Nucleu (pereți orientați Y): 2·(6,0·0,30) = 3,60 m²
+- Total Y: 9,60 m² / 384 = **2,50%**
+
+Ambele valori sunt în domeniul recomandat pentru clădiri de locuit în zonă seismică (1,5–3,0% pe direcție); direcția X, la limita inferioară, este completată de aportul cadrelor (sistem dual), motiv pentru care X preia doar 68% din forță prin pereți (față de 72% pe Y). 
+
+**Grosimi minime pereți** (P100-1 §5.4.3.4.1): b_w ≥ max(150 mm; h_et/20 = 2900/20 = 145 mm) = **150 mm** ⇒ grosimile adoptate (200–300 mm) satisfac cu marjă ✓.
+
 ### 8.1 bis. Diagrama înfășurătoare a forței tăietoare în pereți (sistem dual)
 
 În sistemele duale, interacțiunea cadru-perete modifică distribuția forței tăietoare pe înălțimea peretelui față de rezultatul analizei liniare: la partea superioară, cadrul „trage înapoi" peretele, generând forțe tăietoare suplimentare. P100-1 §5.2.4 impune adoptarea unei **diagrame înfășurătoare acoperitoare** pentru forța tăietoare de proiectare în pereți:
@@ -766,6 +847,24 @@ Rezultă V_jhd (929) > V_Rd,nod estimativ — se prevede **armătură orizontal�
 
 ---
 
+### 8.12. Verificarea planșeului ca diafragmă orizontală
+
+Planșeul colectează forțele de inerție de nivel F_i și le transmite la elementele verticale de rigidizare (pereți, nucleu). Se verifică diafragma ca o „grindă-perete" orizontală, cu efortul de proiectare amplificat cu γ_d = 1,3 (P100-1 §5.10):
+
+$$ F_{d,diafragma} = \gamma_d\cdot F_i = 1,3\cdot 1.446 = 1.880\ kN \quad (\text{la E8, forța de nivel maximă}) $$
+
+**Model grindă-perete**: diafragma (24 m deschidere între pereți de capăt) încărcată cu F_d distribuit; moment maxim și forfecare:
+
+$$ M_{diaf} = \frac{F_d\cdot L}{8} = \frac{1.880\cdot24}{8} = 5.640\ kNm $$
+
+**Armătura colectorului marginal** (talpa întinsă a grinzii-perete, braț z ≈ 0,8·16 = 12,8 m):
+
+$$ T = \frac{M_{diaf}}{z} = \frac{5.640}{12,8} = 440,6\ kN \Rightarrow A_s = \frac{440,6\cdot10^3}{435} = 1.013\ mm^2 \Rightarrow \mathbf{6\ Ø16\ (1.206\ mm^2)} \ \checkmark $$
+
+Se prevăd **centuri-colectori** perimetrale (6Ø16) și în jurul golurilor de planșeu (scară/lift) — armătura care „strânge" diafragma și transmite forța la pereți. Racordul diafragmă-perete (forfecare de lunecare la interfață) se verifică cu conectori/armătură de legătură. Grosimea plăcii (15 cm) asigură cu marjă rezistența la forfecare a diafragmei (τ = F_d/(b·h) ≪ f_ctd).
+
+---
+
 ## 9. Detalii de armare seismică (DCM)
 
 ### 9.1. Zona critică (potențial plastic) a pereților
@@ -846,6 +945,14 @@ Stratificație de referință:
 
 **Agresivitatea apei subterane:** clasa de expunere chimică XA1 (agresivitate slabă, SO₄²⁻ 200–600 mg/l); se prevede ciment rezistent la sulfați (SR) pentru radier și pereții subsolului.
 
+### 11.1 bis. Implicații structurale ale garajului de la subsol
+
+Subsolul funcționează ca garaj/spații tehnice, cu implicații asupra structurii:
+- **Rampa auto de acces** creează un gol în placa peste subsol; conturul golului se bordează cu grinzi/centuri și armătură suplimentară de colector (diafragma de bază trebuie să rămână continuă în jurul golului).
+- **Trama de stâlpi** la subsol (60×60) trebuie corelată cu geometria locurilor de parcare (min. 2,50 × 5,00 m/loc); poziția stâlpilor nu trebuie să obtureze accesul auto — se verifică compatibilitatea arhitectură-structură.
+- **Înălțimea liberă** subsol 2,80 m minus grinzi/instalații → gabarit liber ≥ 2,20 m (norma parcaje). Grinzile de la placa peste subsol se pot înlocui local cu **placă groasă fără grinzi** (dală groasă 25 cm) pentru a maximiza gabaritul liber sub instalații.
+- **Încărcarea utilă garaj** (categorie F, 2,5 kN/m²) este acoperită de dimensionarea plăcii peste subsol (20 cm).
+
 ### 11.2. Sistem de fundare — radier general din beton armat
 
 Se adoptă **radier general (placă groasă) din beton armat**, justificat prin:
@@ -890,6 +997,10 @@ Presiune netă medie transmisă Δσ_0 = p_ef − γ·D_f = 142,4 − 18·4,0 = 
 | **Total** | | | | **s ≈ 14,8 mm** |
 
 **Tasarea absolută s ≈ 1,5 cm** — sub limita admisă pentru radiere pe terenuri de acest tip (NP 112, tasare medie admisă ~8–10 cm pentru clădiri de acest tip; radierul rigid uniformizează). **Tasarea diferențială** Δs/L < 1/500 (radier rigid) ⇒ nu produce eforturi suplimentare inacceptabile în suprastructură ✓.
+
+**Evoluția în timp a tasării:** pentru stratul de bază (nisip argilos, permeabilitate medie), o parte din tasare este imediată (elastică, ~60%) și o parte prin consolidare (~40%, se dezvoltă în câteva luni). Nu există straturi groase de argilă normal-consolidată sub radier ⇒ nu apare tasare secundară semnificativă pe termen lung. Se recomandă **monitorizarea tasărilor** prin repere topografice în primele 12 luni de la turnarea radierului (borne de tasare, măsurători periodice), pentru validarea predicției de calcul — practică obligatorie pentru clădiri de acest regim de înălțime în categoria geotehnică 2.
+
+**Rigiditatea relativă radier-teren** (verificare model radier rigid): K_r = (E_b/E_s)·(t/B)³. Cu E_b = 33 GPa, E_s ≈ 30 MPa (modul edometric mediu), t = 0,85 m, B = 17 m: K_r = (33.000/30)·(0,85/17)³ = 1.100·0,000125 = 0,138 > 0,10 ⇒ radier de rigiditate **intermediară-rigidă**; se justifică modelarea cu resoarte Winkler (nu radier infinit rigid), captând corect distribuția momentelor.
 
 ### 11.4 bis. Capacitatea portantă a terenului (SR EN 1997-1, NP 112 — abordarea de proiectare)
 
@@ -1168,6 +1279,24 @@ Tabelul de mai jos centralizează verificările principale ale elementelor struc
 
 ---
 
+## 14 quater. Estimarea cantităților de materiale (predimensionare)
+
+Pentru dimensionarea preliminară a devizului de rezistență (orientativ, la nivel DTAC):
+
+| Element | Volum beton [m³] | Armătură [kg] |
+|---|---|---|
+| Radier (425 m² × 0,85 m mediu) | 361 | ~43.300 (120 kg/m³) |
+| Pereți subsol (perimetru 80 m × 2,8 × 0,30) | 67 | ~7.400 (110 kg/m³) |
+| Placă peste subsol (384 × 0,20) | 77 | ~9.200 |
+| Stâlpi (subsol–E8, ~14 stâlpi) | ~180 | ~28.800 (160 kg/m³) |
+| Pereți structurali + nucleu (S–terasă) | ~640 | ~89.600 (140 kg/m³) |
+| Grinzi (9 niveluri) | ~230 | ~34.500 (150 kg/m³) |
+| Planșee curente (8 × 384 × 0,15 + terasă) | ~518 | ~46.600 (90 kg/m³) |
+| Scări | ~28 | ~2.800 |
+| **Total structură** | **≈ 2.101 m³** | **≈ 262.200 kg** |
+
+Consum specific de armătură ≈ 262.200 / 2.101 = **125 kg/m³** beton — valoare tipică pentru structuri duale de locuințe în zonă seismică ag = 0,25g (domeniu uzual 110–140 kg/m³). Consumul de beton raportat la aria construită desfășurată totală (~3.840 m² inclusiv subsol): 2.101/3.840 = 0,55 m³/m². Aceste cantități se detaliază exact prin extrasele de armătură din planurile PTh.
+
 ## 15. Program de urmărire a execuției — faze determinante
 
 Fiind clasa de importanță III și zonă seismică ag = 0,25g, se instituie program de control al calității cu **faze determinante** (avizate de proiectant + ISC):
@@ -1257,6 +1386,44 @@ Structura **satisface cerința fundamentală A1** — rezistență mecanică și
 **Verificare:** documentația se supune verificării de către verificatori de proiecte atestați MDLPA pentru cerința esențială **A** (rezistență mecanică și stabilitate) — exigența **A1** (construcții civile, structuri de beton) și, pentru infrastructură, **Af** (geotehnică). Coordonare cu verificatorul **Cc** (siguranța la foc) pentru validarea rezistenței la foc a elementelor structurale. Se recomandă expertizarea geotehnică pe amplasament (studiu geotehnic verificat Af) anterior fazei PTh.
 
 **Documente ulterioare (faza PTh + DDE):** breviar de calcul complet cu ieșiri din programul de element finit (mase modale, participări, spectre, eforturi, verificări), planuri de cofraj și armare (radier, pereți, stâlpi, grinzi, planșee, scări, buiandrugi de cuplare), detalii de armare zone critice, extrase de armătură, caiet de sarcini pentru betoane și armături, program de control al calității.
+
+---
+
+## 17. Cadru normativ complet (referințe)
+
+Documentația a fost întocmită cu respectarea următoarelor acte normative și standarde, în vigoare la data elaborării:
+
+**Legislație:**
+- Legea nr. 10/1995 privind calitatea în construcții (republicată), cerința fundamentală A1;
+- HG nr. 766/1997 — regulamente privind calitatea, categorii de importanță;
+- HG nr. 907/2016 — conținutul-cadru al documentațiilor tehnico-economice;
+- HG nr. 925/1995 — verificarea și expertizarea proiectelor.
+
+**Coduri de proiectare românești:**
+- P100-1/2013 — Cod de proiectare seismică, partea I (clădiri);
+- P100-3/2019 — evaluare seismică (referință, nu se aplică — construcție nouă);
+- CR 0-2012 — bazele proiectării construcțiilor;
+- CR 1-1-3/2012 — evaluarea acțiunii zăpezii;
+- CR 1-1-4/2012 — evaluarea acțiunii vântului;
+- CR 6-2013 — zidărie (elemente nestructurale, dacă e cazul);
+- NP 112-2014 — proiectarea fundațiilor de suprafață;
+- NP 074-2022 — documentații și studii geotehnice;
+- NP 122-2010 — determinarea valorilor caracteristice ale parametrilor geotehnici;
+- P118/1999 și NP 118 — siguranța la foc.
+
+**Eurocoduri (SR EN) + anexe naționale:**
+- SR EN 1990:2004/A1 — bazele proiectării structurale;
+- SR EN 1991-1-1 — greutăți proprii, încărcări utile;
+- SR EN 1991-1-2 — acțiuni în situație de incendiu;
+- SR EN 1991-1-3 — încărcări din zăpadă;
+- SR EN 1991-1-4 — acțiuni ale vântului;
+- SR EN 1991-1-7 — acțiuni accidentale (robustețe);
+- SR EN 1992-1-1 — proiectarea structurilor de beton (reguli generale);
+- SR EN 1992-1-2 — proiectarea la foc a structurilor de beton;
+- SR EN 1997-1 — proiectare geotehnică (Eurocod 7);
+- SR EN 1998-1 — proiectare seismică (Eurocod 8);
+- SR EN 206 — beton (specificație, performanță, producție);
+- SR EN 10080 — oțel pentru armarea betonului (B500C).
 
 ---
 

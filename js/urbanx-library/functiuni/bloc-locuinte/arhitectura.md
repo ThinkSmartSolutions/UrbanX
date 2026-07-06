@@ -13,6 +13,14 @@ Metodologic, memoriul urmează logica **celor șapte cerințe fundamentale** ale
 
 Toate suprafețele indicate în memoriu sunt exprimate în metri pătrați (mp), înălțimile în metri (m), iar valorile de rezistență termică în m²K/W. Suprafețele utile (Su), construite (Sc) și desfășurate (Sd) sunt definite conform **STAS 4908** și practicii de măsurare din **Legea nr. 114/1996** (Legea locuinței) și **NP 057/2002** (Normativ privind proiectarea clădirilor de locuințe). Pentru spațiile de birouri sau comerciale eventual integrate la parter se aplică suplimentar standardul de măsurare **BOMA** (net/gross area), menționat distinct.
 
+### 0.1. Structura documentului și logica de lectură
+
+Memoriul este structurat pe secvența logică a proiectării: (1) date generale și încadrare (cap. 1); (2) amplasament, orientare, însorire (cap. 2); (3–8) concepția funcțional-spațială — de la programul general la apartament și la spațiile exterioare; (8A–9) igiena și fizica construcției (acustică); (10–11) finisaje și anvelopa termică; (12–12B) amenajări, parcare, mix; (13) securitate la incendiu; (14) accesibilitate; (15) bilanțuri; (15A–15G) interfețe (volumetrie, structură, instalații, materiale, execuție, calitate, exploatare); (16–16C) piese desenate, registru normativ, terminologie, specificul clădirii înalte; (17) concluzii pe cerințe fundamentale. Fiecare capitol este autonom, dar corelat prin trimiteri interne explicite, evitând repetiția.
+
+### 0.2. Ipotezele de dimensionare
+
+Valorile numerice (suprafață teren, amprentă, număr de apartamente) sunt **ipoteze de dimensionare** care ilustrează metodologia pe un caz-tip și se ajustează la parcela reală, la certificatul de urbanism și la tema concretă a beneficiarului. Metoda de verificare (formule POT/CUT, calcul termic, dimensionare căi de evacuare, norme de parcare) rămâne aceeași, indiferent de valorile de intrare — biblioteca UrbanX aplicând-o parametric pe fiecare proiect.
+
 ---
 
 ## 1. Date generale, tema de proiectare, categoria și clasa de importanță
@@ -68,6 +76,25 @@ Tema-program solicită un imobil de locuințe colective adresat unui **spectru l
 - spații verzi amenajate ≥ minimul reglementat local (20–30%);
 - terasă necirculabilă/tehnică; posibil spații comerciale/servicii la parter (opțional).
 
+### 1.5. Obiectivele de performanță ale investiției
+
+Tema stabilește, dincolo de conformitate, un set de **obiective de performanță** care ghidează deciziile de proiectare:
+
+| Obiectiv | Indicator-țintă |
+|---|---|
+| Eficiența planului | raport Su/Sc ≥ 0,75 |
+| Adresabilitate | mix minim 3 tipologii (garsonieră/2/3 camere) |
+| Performanță energetică | clasă energetică A, nZEB |
+| Confort acustic | R'w ≥ 51 dB, L'n,w ≤ 59 dB |
+| Accesibilitate | 100% spații comune accesibile + ≥ 2 ap. adaptabile |
+| Parcare | ≥ 1,0 loc/apartament |
+| Spații verzi | ≥ minim RLU (20–30%) |
+| Durabilitate | structură ≥ 50 ani, componente mentenabile |
+
+### 1.6. Delimitarea competențelor pe specialități
+
+Prezentul memoriu (arhitectură) tratează concepția funcțional-spațială, anvelopa, compartimentările și demonstrarea conformității de competența arhitectului. Aspectele de calcul aparțin memoriilor de specialitate: **rezistență** (dimensionarea structurii, fundații, seism), **instalații** (sanitare, termice, electrice, ventilare-desfumare), **securitate la incendiu** (scenariul SU), **termotehnică** (Mc 001, CPE), **acustică** (verificarea C125), **geotehnic** (terenul de fundare). Memoriul trimite la aceste piese fără a le duplica, respectând principiul de non-suprapunere a livrabilelor.
+
 ---
 
 ## 2. Amplasament, sistematizare verticală, orientare și studiul de însorire
@@ -85,6 +112,12 @@ Retragerile față de limitele de proprietate respectă regulamentul local de ur
 | Față (aliniament stradal) | 5,00 m | conform RLU / aliniere front construit existent |
 | Laterală | H/2, min. 3,00 m | asigură însorirea și accesul intervenției |
 | Posterioară | 5,00 m (min. H/2) | grădină/spațiu verde |
+
+Regula **retragerii laterale H/2** are dublă justificare: (1) **însorire** — garantează că fațada nu umbrește excesiv vecinul și viceversa; (2) **acces de intervenție** — asigură spațiul necesar autospecialelor de pompieri și evită propagarea focului între clădiri. Pentru S+P+4E (H ≈ 16 m) retragerea laterală rezultă min. 8 m dacă se aplică strict H/2, ceea ce poate depăși minimul de 3 m — regula mai restrictivă (cea care dă valoarea mai mare) se aplică. La S+P+10E (H ≈ 33 m) retragerile cresc semnificativ și pot condiționa amprenta clădirii pe parcelă.
+
+### 2.2.1. Verificarea încadrării urbanistice (certificat de urbanism / RLU)
+
+Proiectul se conformează prevederilor **certificatului de urbanism** și ale **regulamentului local de urbanism (RLU)** aferent UTR-ului parcelei, verificând: funcțiunea admisă (locuire colectivă), regimul maxim de înălțime, POT_max, CUT_max, retragerile minime, procentul minim de spații verzi, norma de parcare și condițiile de aliniere/racord la vecinătăți. În platforma UrbanX, aceste reglementări sunt extrase automat din baza de date PUG/RLU a UAT-ului (a se vedea studiile de urbanism — piese distincte).
 
 ### 2.3. Sistematizarea verticală și amenajările exterioare
 
@@ -261,6 +294,19 @@ Reguli de aliniere respectate:
 
 La regimul **S+P+10E** (11 niveluri supraterane), aceeași plajă generează **88 apartamente** (11 × 8), cu ajustarea numărului de locuri de parcare (a se vedea cap. 11) și a nucleului de circulație (a se vedea cap. 5).
 
+### 4.4. Regularitatea structurală și organizarea în plan
+
+Schema „dublu tract cu nucleu central" adoptată are avantaje directe pentru comportarea seismică (cerința 1) și pentru eficiența exploatării:
+
+- **simetria** distribuției apartamentelor și a maselor față de nucleul central reduce excentricitatea dintre centrul de masă și centrul de rigiditate, limitând răsucirea (torsiunea) la seism;
+- **compactitatea** planului (fără aripi lungi/decroșuri majore) favorizează un răspuns dinamic regulat;
+- **repetitivitatea** nivelurilor curente simplifică execuția (cofraje repetabile) și reduce costurile;
+- **nucleul central** de b.a. (casa scării + putul liftului) funcționează ca element rigid de referință, contribuind la preluarea forțelor orizontale.
+
+### 4.5. Coordonarea golurilor pe verticală
+
+Golurile de fereastră și ușile-fereastră ale balcoanelor se suprapun pe verticală de la un nivel la altul, ceea ce: (1) simplifică curgerea încărcărilor prin buiandrugi/centuri; (2) creează un ritm ordonat pe fațadă (cap. 15A); (3) permite montajul repetabil al tâmplăriei și al elementelor de rupere a punții termice la balcoane.
+
 ---
 
 ## 5. Nucleul de circulație verticală — scări, ascensoare, coridoare (calcul)
@@ -305,6 +351,20 @@ Conform NP 057/2002, **ascensorul este obligatoriu** pentru clădirile de locuin
 
 Casa scării constituie **cale de evacuare protejată** și se tratează integral la cap. 13 (securitate la incendiu), inclusiv desfumarea și — la clădire înaltă — presurizarea.
 
+### 5.5. Dimensionarea nucleului pe regim
+
+| Element nucleu | S+P+4E | S+P+10E |
+|---|---|---|
+| Case de scări | 1 | 2 (independente) |
+| Ascensoare | 1 (630 kg) | 2 (unul de intervenție) |
+| Palier lift | 1,50 × 1,50 | 1,50 × 1,50 (×2 nuclee) |
+| Sas/degajament protejat | — | da (între ap. și casa scării) |
+| Alimentare rezervă ascensor | — | da (intervenție) |
+
+### 5.6. Verificarea traficului vertical (metodă simplificată)
+
+Metoda simplificată de verificare a capacității ascensorului evaluează dacă bateria de ascensoare poate transporta, în intervalul de vârf de 5 minute, un procent din populația clădirii (uzual 6–8% pentru rezidențial) cu un **timp de așteptare** acceptabil (< 60 s la rezidențial). Pentru S+P+4E (~120 loc.), un singur ascensor de 8 persoane la 1,0 m/s satisface criteriul (vârful rezidențial e modest, distribuit). Pentru S+P+10E (~260 loc.), traficul de vârf și înălțimea de cursă impun **2 ascensoare** grupate — verificate atât la trafic, cât și la redundanță (dacă unul e în mentenanță, al doilea menține serviciul).
+
 ---
 
 ## 6. Subsolul — parcaje, boxe, spații tehnice, rampă
@@ -346,6 +406,18 @@ Subsolul, cu **înălțime liberă 2,50 m** (min. 2,20 m gabarit auto sub grinzi
 - **gospodărie de apă pentru incendiu** — rezervor de acumulare + grup de pompare (conform P118-2, dimensionat pentru hidranți interiori/exteriori);
 - **tablou electric general**, camera contoarelor, camera de telecomunicații;
 - **bașă (put) cu pompe de epuizment** pentru colectarea și evacuarea apelor accidentale/de infiltrație.
+
+Fiecare spațiu tehnic cu risc specific (CT pe gaz, gospodărie apă incendiu, tablou general) este **compartimentat la foc** (pereți/planșee REI, uși EI-C), ventilat corespunzător și, unde e cazul, prevăzut cu detecție (gaz/incendiu). Amplasarea spațiilor tehnice la subsol eliberează parterul pentru funcțiuni de locuire/servicii și scoate sursele de zgomot/vibrație departe de camerele de locuit.
+
+### 6.9. Cerințe dimensionale ale spațiilor tehnice (orientativ)
+
+| Spațiu tehnic | Suprafață orientativă | Cerințe |
+|---|---|---|
+| Centrală termică / punct termic | 12–20 mp | ventilare, evacuare gaze arse, detecție gaz, acces service |
+| Gospodărie apă incendiu (rezervor + pompe) | 15–25 mp | volum rezervor conform P118-2, grup pompare + rezervă |
+| Cameră tablou general + contoare | 8–12 mp | acces autorizat, ventilare, protecție la umezeală |
+| Cameră tehnică date/telecom | 4–6 mp | rack, ventilare |
+| Bașă cu pompe | 2–4 mp | 2 pompe (una de rezervă), senzor de nivel |
 
 ### 6.6. Diferența de parcare între regimuri
 
@@ -487,6 +559,57 @@ Fiecare depășire a minimului este justificată funcțional, nu decorativ — a
 - **balustrade fără elemente escaladabile** (fără traverse orizontale la înălțime accesibilă copiilor);
 - închiderile de balcon (dacă se admit) se reglementează unitar prin regulamentul de condominiu, pentru coerența fațadei.
 
+### 8.3. Detalierea nodului de balcon (rupere de punte termică)
+
+Placa de balcon în consolă este una dintre cele mai severe **punți termice** din anvelopă (dacă e continuă cu planșeul, „extrage" căldura ca o aripioară de radiator). Soluțiile:
+
+| Soluție | Descriere | Avantaj |
+|---|---|---|
+| Element cu izolație încorporată (Isokorb) | conector structural cu strat termoizolant care transmite momentul/forfecarea, întrerupând puntea termică | continuitate termică fără decuplare completă |
+| Balcon complet decuplat | balcon pe structură proprie (stâlpi/console independente) sau prefabricat prins punctual | eliminare totală a punții |
+| Placă continuă + izolare pe intrados și extrados | izolarea plăcii de jur-împrejur (paliativ) | economic, dar punte reziduală |
+
+Se preferă **elementul cu izolație încorporată** sau **decuplarea**, pentru a evita condensul și mucegaiul la nodul planșeu–balcon (verificat conform C107/3, cap. 11.6). Hidroizolația balconului se racordează etanș la tâmplăria ușii-fereastră, cu prag hidroizolat și scurgere organizată.
+
+### 8.4. Siguranța copiilor și a utilizatorilor
+
+- parapetul complet fără interspații/traverse escaladabile pe direcție verticală accesibilă copiilor;
+- interspațiu între bare/elemente **≤ 0,10 m** (o sferă de 10 cm nu trebuie să treacă);
+- mâna curentă/coama parapetului fără muchii tăioase;
+- geam securizat (dacă parapetul e din sticlă) rezistent la impact și cu comportare de spargere sigură.
+
+---
+
+## 8A. Igiena, sănătatea și confortul interior (cerința 3, OMS 119)
+
+Cerința fundamentală (3) „igienă, sănătate și mediu înconjurător" se realizează prin măsuri de arhitectură coordonate cu instalațiile:
+
+### 8A.1. Calitatea aerului interior
+
+- **ventilare** care asigură împrospătarea aerului (VMC cu recuperare + ventilarea băilor/bucătăriilor) — evită acumularea de CO₂, umiditate și poluanți;
+- **evacuarea mirosurilor** din băi și bucătării prin canale verticale individuale (fără retur între apartamente);
+- **materiale cu emisii reduse de COV** (vopsele, adezivi, mobilier) — reduce poluarea interioară;
+- controlul umidității pentru a preveni **mucegaiul** (legat de punțile termice — cap. 11.6).
+
+### 8A.2. Iluminarea naturală și confortul vizual
+
+- raport fereastră/pardoseală ≥ 1/8 la camerele de locuit (cap. 7.5);
+- orientarea și însorirea (cap. 2) asigură lumină naturală și aport solar;
+- protecția la supraîncălzire și la orbire (parasolare, geam cu control solar — cap. 2.7).
+
+### 8A.3. Confortul higrotermic
+
+- temperaturi de suprafață peste punctul de rouă (fără condens/mucegai);
+- inerție termică (masa zidăriei/betonului) care atenuează variațiile de temperatură;
+- confort estiv fără supraîncălzire (umbrire + ventilare + eventual răcire pasivă/activă eficientă).
+
+### 8A.4. Apa, salubritatea și mediul
+
+- **apă potabilă** la parametri (instalații sanitare), **evacuare corectă** a apelor uzate (canalizare);
+- **colectare selectivă** a deșeurilor (spații dimensionate — cap. 3.4, 12);
+- **distanțe sanitare** față de sursele de disconfort (gene deșeuri, spații tehnice) respectate în plan;
+- protecția mediului în execuție și exploatare (gestiunea deșeurilor de șantier, controlul poluării).
+
 ---
 
 ## 9. Compartimentări, planșee și izolarea acustică (C125/2013)
@@ -578,6 +701,24 @@ Zgomotul echipamentelor (lift, pompe, VMC, conducte) se transmite predominant **
 | Uși interioare | MDF/lemn, foaie 0,80 m liber (**0,90 m la ap. PMR**) | — |
 | Ușă de intrare apartament | metalică antiefracție/antifoc, 0,90 m liber | EI 30 (spre casa scării), fonoizolantă |
 
+### 10.4. Caiet de sarcini — cerințe minime pe categorii de finisaje
+
+| Categorie | Cerință de performanță | Standard/referință |
+|---|---|---|
+| Gresie/gres circulații și băi | clasă antiderapantă R10 (uscat)/R11 (băi), rezistență la uzură PEI IV–V | siguranță în exploatare |
+| Faianță zone umede | absorbție apă redusă, montaj cu adeziv + rostuire hidrofugă | igienă |
+| Parchet camere | strat de uzură ≥ 2,5 mm (stratificat), clasă trafic domestic ridicat | durabilitate |
+| Vopsea lavabilă | lavabilă (rezistentă la spălare), emisii COV reduse | igienă interioară (cerința 3) |
+| Tencuială exterioară pe termosistem | rezistentă la fisurare (plasă + adeziv), clasă de reacție la foc conform înălțimii | anvelopă + foc |
+| Hidroizolație terasă/băi | membrană/mortar hidroizolant cu garanție ≥ 10 ani | protecție la apă |
+
+### 10.5. Coordonarea finisajelor cu instalațiile și accesibilitatea
+
+- **pardoseli antiderapante** obligatorii pe toate circulațiile comune, băi, balcoane, rampe (siguranță + PMR);
+- **marcaje de contrast cromatic** pe treptele scării și la ușile spații comune (orientare PMR/vârstnici);
+- **plinte și racorduri** care permit curățenia și evită acumularea de praf (igienă);
+- coordonarea cotelor de finisaj între încăperi (praguri ≤ 2,5 cm sau absente la apartamentele adaptate).
+
 ---
 
 ## 11. Anvelopanta termică, punți termice, nZEB (C107, Mc 001)
@@ -649,6 +790,14 @@ Pentru fiecare element de anvelopă se verifică, conform **C107/3 (Glaser)**:
 - **controlul condensului interstițial** (cantitatea de apă condensată în masa elementului iarna trebuie să se poată evapora vara — bilanț anual pozitiv), prin dispunerea corectă a straturilor (bariera/frâna de vapori spre interior, permeabilitate crescândă spre exterior).
 
 Tratarea punților termice (cap. 11.2) este esențială tocmai pentru a menține temperatura de suprafață peste punctul de rouă și a preveni mucegaiul — o cerință simultană de energie (6) și de igienă/sănătate (3).
+
+### 11.7. Etanșeitatea la aer și testul blower-door
+
+Performanța nZEB depinde critic de **etanșeitatea la aer** a anvelopei (infiltrațiile necontrolate anulează beneficiul izolației și al recuperării de căldură). Se prevede un **strat de etanșare la aer continuu** (folie/tencuială internă continuă, benzi de etanșare la racorduri tâmplărie–perete, treceri de instalații etanșate) și se verifică prin **test blower-door** (presurizare/depresurizare a clădirii cu măsurarea debitului de aer la 50 Pa — indicatorul n50). Un n50 scăzut confirmă etanșeitatea și, coroborat cu VMC, asigură calitatea aerului fără pierderi energetice.
+
+### 11.8. Verificarea confortului estiv (supraîncălzire)
+
+Pe lângă performanța de iarnă, se verifică **confortul estiv** (evitarea supraîncălzirii), tot mai relevant în contextul climatic actual: aport solar controlat prin umbrire (cap. 2.7), inerția termică a masei construcției, ventilarea nocturnă (răcire pasivă) și, dacă e necesar, răcire activă eficientă (pompa de căldură reversibilă). Confortul estiv se corelează cu factorul solar al geamurilor și cu orientarea, evitând soluții cu vitraje mari neumbrite la S/V.
 
 ---
 
@@ -791,6 +940,24 @@ La regimul S+P+10E, casele de scări (și, după caz, degajamentele/sasurile de 
 - **racord la coloana uscată/umedă** accesibil pompierilor (la clădirea înaltă);
 - **ascensor de intervenție (pompieri)** la S+P+10E: cabină dimensionată, ușă rezistentă la foc, alimentare electrică de rezervă, sas presurizat;
 - **hidranți exteriori** în raza de acțiune impusă de P118-2.
+
+### 13.10. Evacuarea și securitatea subsolului/parcajului
+
+Subsolul (parcaj + boxe + tehnice) are cerințe proprii de securitate la incendiu:
+
+- **căi de evacuare proprii** ale parcajului către exterior/casa scării protejată, cu distanțe de evacuare verificate (parcajul are risc mai mare decât locuirea — sarcină termică a vehiculelor);
+- **desfumare mecanică** dimensionată pe suprafața și volumul parcajului, cu ventilatoare rezistente la temperatură și trasee separate de introducere/evacuare;
+- **compartimentarea** parcajului față de spațiile tehnice și față de casa scării (uși EI-C);
+- **detecție incendiu** în parcaj și tehnice, cu alarmare;
+- **iluminat de securitate** pe căile de evacuare din subsol;
+- separarea etanșă la foc a subsolului de parter (planșeu REI + treceri de instalații etanșate) — evită propagarea către zona de locuire.
+
+### 13.11. Comportarea la foc a fațadei
+
+Sistemul de termoizolație exterioară (ETICS) trebuie să limiteze **propagarea focului pe verticala fațadei**:
+
+- la clădiri joase (S+P+4E) — termosistem cu clasă de reacție la foc admisă, cu eventuale bariere la nivelul planșeelor;
+- la **clădirea înaltă (S+P+10E)** — **fâșii/bariere orizontale de vată minerală bazaltică incombustibilă** la fiecare planșeu, care întrerup propagarea flăcării în masa termoizolației, conform cerințelor P118-1 pentru fațade la clădiri înalte.
 
 ---
 
@@ -959,6 +1126,25 @@ Terasa este **necirculabilă (tehnică)**, cu:
 - amplasarea **unităților exterioare de climatizare** pe suporți antivibratili;
 - camera mașinii ascensorului (dacă tehnologia o impune) sau troliu în put (machine-room-less).
 
+### 15A.4. Tratarea parterului
+
+Parterul are un rol dublu — acces și interfață cu spațiul public — și se tratează distinct:
+
+- **holul de intrare** generos, luminat natural, cu acces direct la nucleul de circulație și la cutiile poștale;
+- **transparență** la stradă (vitraje) unde există spații comerciale/servicii, activând frontul urban;
+- **apartamente de parter** (inclusiv cele 2 adaptate PMR) protejate de intimitate prin retragere/plantare și cu cota pardoselii ușor ridicată față de trotuar (fără a compromite accesibilitatea — rampă/prag conform);
+- **accesul auto la subsol** (rampa) separat de accesul pietonal principal, pentru siguranță;
+- **gestiunea deșeurilor** cu acces din exterior, fără a traversa holul locatarilor.
+
+### 15A.5. Coerența compozițională
+
+Fațada urmează principii de **ordonare compozițională**:
+
+- **ritm** dat de repetiția golurilor și a balcoanelor, cu accente la capete/colțuri;
+- **proporții** ale golurilor corelate cu funcțiunea din spate (ferestre mari la camerele de zi, mai mici la băi/bucătării);
+- **ierarhie** verticală bază–corp–coronament (mai ales la clădirea înaltă);
+- **unitate** cromatică și de material, cu variații controlate care evită atât monotonia, cât și aglomerarea vizuală.
+
 ---
 
 ## 15B. Interfața cu structura de rezistență
@@ -973,6 +1159,22 @@ Deși dimensionarea structurală aparține memoriului de rezistență, arhitectu
 - **fundarea** (radier general, fundații izolate/continue, piloți — conform geotehnicului) condiționează cota subsolului și adâncimea săpăturii; arhitectura preia cota tehnică rezultată.
 
 La S+P+10E, unde efectele seismice și de vânt cresc semnificativ, colaborarea arhitect–structurist devine critică pentru **regularitatea în plan și în elevație** (cerință P100-1 pentru comportare seismică favorabilă): simetria distribuției maselor și rigidităților, evitarea etajelor „slabe" (parter mult mai flexibil decât etajele — soft-story), continuitatea diafragmelor pe verticală.
+
+### 15B.1. Justificarea alegerii sistemului structural
+
+Sistemul **dual (cadre + diafragme)** a fost ales pentru avantajele lui în context seismic românesc:
+
+- **diafragmele** preiau majoritatea forțelor orizontale (seism, vânt) și limitează deplasările laterale (driftul), protejând compartimentările și fațadele;
+- **cadrele** asigură flexibilitatea planului (deschideri mari pentru camere) și redundanța (a doua linie de apărare seismică);
+- **regularitatea** (simetria diafragmelor față de centrul de greutate) evită **torsiunea** la seism — o cauză majoră de avarii;
+- **planșeele de b.a.** funcționează ca **șaibe rigide** care distribuie forțele orizontale la elementele verticale.
+
+### 15B.2. Coordonarea arhitectură–structură în plan
+
+- diafragmele „ancorate" pe pereții dintre apartamente și pe conturul nucleului (nu apar în mijlocul camerelor);
+- deschiderile în diafragme (uși, treceri) limitate și poziționate conform regulilor structurale;
+- **continuitatea verticală** a stâlpilor și diafragmelor de la fundație la ultimul nivel (fără „stâlpi care se opresc" — sursă de discontinuități periculoase);
+- integrarea grinzilor în tavane false sau în grosimea pereților pentru a păstra înălțimea liberă de 2,65 m.
 
 ---
 
@@ -1035,6 +1237,26 @@ Recomandat, coordonarea arhitectură–structură–instalații se realizează p
 - **colectarea selectivă** a deșeurilor (spații dimensionate pentru fracții multiple);
 - pavaje permeabile și suprafețe verzi care reduc scurgerea și insula de căldură.
 
+### 15D.4. Bilanțul energetic și emisiile (sinteză)
+
+Din perspectiva economiei de energie (cerința 6) și a resurselor (cerința 7), soluția integrează măsurile într-un **bilanț coerent**:
+
+| Vector | Măsură | Efect |
+|---|---|---|
+| Cerere de energie | anvelopă performantă + eliminare punți + etanșeitate | reducerea necesarului de încălzire/răcire |
+| Recuperare | VMC cu recuperare de căldură | reduce pierderile prin ventilare (≥ 75%) |
+| Sursă | pompă de căldură / solar / fotovoltaic | acoperire regenerabilă (nZEB) |
+| Consum comun | LED + senzori + BMS | reduce consumul spațiilor comune |
+| Monitorizare | contorizare individuală | responsabilizare, menținere performanță |
+
+Rezultatul-țintă: clasă energetică **A**, consum de energie primară aproape de zero și emisii de CO₂ minime — verificat în CPE.
+
+### 15D.5. Rezistența la schimbări climatice (adaptare)
+
+- **confort estiv** asigurat pasiv (umbrire, inerție, ventilare) pentru a reduce dependența de răcire în verile tot mai calde;
+- **managementul apelor pluviale** (retenție/infiltrare) pentru episoade de precipitații intense;
+- **reducerea insulei de căldură** prin spații verzi, terase verzi parțiale și materiale cu albedo favorabil.
+
 ---
 
 ## 15E. Etapizarea execuției și organizarea de șantier (aspecte de arhitectură)
@@ -1051,6 +1273,22 @@ Deși organizarea de șantier este piesă distinctă, memoriul de arhitectură s
 8. **probe, verificări, recepție** (a se vedea cap. 15F).
 
 Organizarea de șantier trebuie să asigure accesele de intervenție (inclusiv pentru pompieri — coordonat cu scenariul SU), depozitarea materialelor și protecția vecinătăților (praf, zgomot, vibrații — corelat cu OMS 119 pentru zone locuite).
+
+### 15E.1. Puncte critice de execuție (din perspectiva arhitecturii)
+
+| Punct critic | Risc dacă e greșit | Măsură |
+|---|---|---|
+| Hidroizolația subsolului | infiltrații, degradare | execuție continuă, protecție mecanică, control la faza determinantă |
+| Racord termosistem la goluri/soclu/atic | punți termice, condens | detalii de execuție cotate (A.11), control montaj |
+| Șapa flotantă desolidarizată | pierderea izolării la impact | bandă perimetrală continuă, fără punți rigide |
+| Rupere punte termică balcon | condens, mucegai | montaj corect al elementului izolant |
+| Etanșarea trecerilor de instalații la foc | propagarea focului | colier/mastic termoexpandabil, control SU |
+| Hidroizolația terasei (ridicări atic, guri scurgere) | infiltrații la ultimul nivel | 2 straturi, ridicări ≥ 15 cm, test la inundare |
+| Etanșeitatea la aer (nZEB) | pierderi, condens | benzi de etanșare, test blower-door |
+
+### 15E.2. Toleranțe și trasarea
+
+Trasarea în plan și pe verticală (axe, cote de nivel) se realizează conform toleranțelor din normativele de execuție, cu verificarea **verticalității** (importantă la clădirea înaltă, unde abaterile cumulate pot fi semnificative) și a **planeității** planșeelor (pentru montajul corect al pardoselilor și tâmplăriei).
 
 ---
 
@@ -1086,6 +1324,23 @@ La finalizare se întocmește **cartea tehnică a construcției** (documentul ca
 - **siguranța în exploatare curentă:** pardoseli antiderapante, marcaje de contrast, iluminat suficient pe circulații, parapete conforme, protecție la geamurile mari (sticlă securizată la parapete accesibile);
 - **accesibilitate menținută** (rampe, ascensor, trasee libere de obstacole);
 - **monitorizarea consumurilor** (contorizare individuală) pentru menținerea performanței nZEB în exploatare.
+
+### 15G.1. Program orientativ de mentenanță
+
+| Element | Cadență verificare/mentenanță | Responsabil |
+|---|---|---|
+| Ascensoare | revizii periodice + verificare ISCIR (autorizare funcționare) | firmă autorizată |
+| Instalații de securitate la incendiu (hidranți, detecție, desfumare) | verificări periodice conform normelor | firmă atestată |
+| Hidroizolație terasă | inspecție anuală + refacere la sfârșit de durată | administrator |
+| Termosistem / fațadă | inspecție periodică (fisuri, desprinderi) | administrator |
+| Tâmplărie (garnituri, feronerie) | anual | locatar/administrator |
+| VMC (filtre, recuperator) | curățare/înlocuire filtre periodic | locatar/administrator |
+| Separator hidrocarburi (parcaj) | vidanjare periodică | administrator |
+| Bașă/pompe epuizment | test funcțional periodic | administrator |
+
+### 15G.2. Durabilitatea în exploatare și valoarea pe termen lung
+
+Menținerea calității în exploatare (mentenanță, contorizare, regulament de condominiu) protejează atât **valoarea investiției** (imobil cu clasă energetică A, confort acustic, accesibilitate menținută), cât și **sănătatea locatarilor** (aer curat, absența mucegaiului, siguranță în utilizare). Cartea tehnică a construcției (cap. 15F.3) documentează toate intervențiile, asigurând trasabilitatea pe durata de viață a clădirii.
 
 ---
 
@@ -1211,4 +1466,27 @@ Regimul înalt nu este o simplă „multiplicare a etajelor", ci un **prag regle
 | 6 | Economie de energie și izolare termică | anvelopă peste C107 (R' pereți ≥ 1,80; terasă ≥ 5,00; U_w ≤ 1,30), punți termice tratate, **nZEB** (VMC + fotovoltaic + pompă căldură) | calcul Mc 001, CPE |
 | 7 | Utilizare sustenabilă a resurselor | surse regenerabile, retenție apă pluvială, materiale durabile, contorizare individuală | — |
 
-**Concluzie generală:** soluția de arhitectură respectă integral Legea nr. 50/1991 (conținut DTAC), Legea nr. 10/1995 (cele 7 cerințe), Legea nr. 114/1996 + Anexa 1 (suprafețe minime locuință), NP 057/2002 (proiectare locuințe), OMS 119/2014 (însorire, igienă), NP 051/2012 + Legea 448/2006 (accesibilitate PMR), C125/2013 (acustică), C107 + Mc 001 + Legea 372/2005 (energie/nZEB), P118-1/2/3 (securitate la incendiu) și HG 525/1996 (parcaje, POT/CUT). Mixul de apartamente (garsoniere/2/3/4 camere) asigură adresabilitate largă; imobilul dispune de ascensor, accesibilitate PMR, hidranți, izolare fonică R'w ≥ 51 dB și anvelopă nZEB. Indicatorii urbanistici POT și CUT se încadrează în reglementările de zonă (pentru varianta S+P+10E fiind necesară o reglementare permisivă/PUZ). Prezentul memoriu se completează obligatoriu cu memoriile de specialitate (rezistență, instalații), studiul de însorire, calculul termotehnic Mc 001, certificatul de performanță energetică și scenariul de securitate la incendiu, care aprofundează aspectele de competența respectivelor specialități.
+### 17.1. Sinteza indicatorilor de conformitate
+
+| Indicator | Cerință | Valoare proiect | Stare |
+|---|---|---|---|
+| POT | ≤ 40% | 25,8–35% | conform |
+| CUT (S+P+4E) | ≤ 2,2 | 1,29–1,90 | conform |
+| Spații verzi | ≥ 20–30% | 22–30% | conform |
+| Parcare | ≥ 1,0/ap. | 1,0/ap. (40 locuri) | conform |
+| Însorire | ≥ 1½h la echinocțiu | ≥ 1 cameră/ap. | conform |
+| Su cameră zi | ≥ 18 mp | 20–24 mp | conform |
+| Su dormitor | ≥ 12/14 mp | 12,5–16 mp | conform |
+| H liber | ≥ 2,55 m | 2,65 m | conform |
+| R' perete exterior | ≥ 1,80 m²K/W | > 1,80 | conform |
+| R' terasă | ≥ 5,00 m²K/W | ≥ 5,00 | conform |
+| U_w tâmplărie | ≤ 1,30 W/m²K | ≤ 1,30 | conform |
+| R'w între apartamente | ≥ 51 dB | 52–58 dB | conform |
+| L'n,w impact | ≤ 59 dB | 55–58 dB | conform |
+| Accesibilitate PMR | NP 051 integral | spații comune 100% + 2 ap. adaptabile | conform |
+| Ascensor | obligatoriu ≥ P+4 | prevăzut (2 la S+P+10E) | conform |
+| Securitate la incendiu | P118-1/2/3 | grad II RF, evacuare, hidranți, desfumare | conform |
+
+### 17.2. Concluzie generală
+
+Soluția de arhitectură respectă integral Legea nr. 50/1991 (conținut DTAC), Legea nr. 10/1995 (cele 7 cerințe fundamentale), Legea nr. 114/1996 + Anexa 1 (suprafețe minime locuință), NP 057/2002 (proiectare locuințe), OMS 119/2014 (însorire, igienă), NP 051/2012 + Legea 448/2006 (accesibilitate PMR), C125/2013 (acustică), C107 + Mc 001 + Legea 372/2005 (energie/nZEB), P118-1/2/3 (securitate la incendiu) și HG 525/1996 (parcaje, POT/CUT). Mixul de apartamente (garsoniere/2/3/4 camere) asigură adresabilitate largă; imobilul dispune de ascensor, accesibilitate PMR, hidranți, izolare fonică R'w ≥ 51 dB și anvelopă nZEB. Indicatorii urbanistici POT și CUT se încadrează în reglementările de zonă (pentru varianta S+P+10E fiind necesară o reglementare permisivă/PUZ). Prezentul memoriu se completează obligatoriu cu memoriile de specialitate (rezistență, instalații), studiul de însorire, calculul termotehnic Mc 001, certificatul de performanță energetică și scenariul de securitate la incendiu, care aprofundează aspectele de competența respectivelor specialități. Concepția integrează cele trei componente ale abordării urbanistice — **analitică** (date, suprafețe, indicatori verificați cu formule și surse normative), **grafică** (piesele desenate A.01–A.14) și **predictivă/proiectivă** (extinderea metodologică la S+P+10E, flexibilitatea planului și obiectivele de performanță pe termen lung).
