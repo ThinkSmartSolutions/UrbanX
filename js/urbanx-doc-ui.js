@@ -11,7 +11,7 @@
   var AVIZATORI = ['ISU', 'DSP', 'APM', 'Apele Române', 'ANIF', 'Distribuitor gaze', 'Distribuitor electric', 'Transelectrica', 'Operator apă-canal', 'CFR', 'CNAIR', 'Consiliul Județean', 'Primăria (PUG/PUZ)', 'Patrimoniu/Cultură', 'ROMATSA', 'SRI', 'MApN', 'Orange', 'Vodafone', 'Digi/RCS-RDS', 'Telekom'];
   var DOCUMENTE = ['Borderou piese scrise și desenate', 'Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Memoriu DTOE (organizare execuție)', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Cartea tehnică a construcției', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
   // Documente CONDIȚIONATE de funcțiune (apar doar când sunt relevante) — nu în lista generică.
-  var DOC_FUNCTIUNE = { 'Clădire mixtă — separări funcțiuni (P118)': ['cladire-mixta'] };
+  var DOC_FUNCTIUNE = { 'Clădire mixtă — separări funcțiuni (P118)': ['cladire-mixta'], 'Studiu de fezabilitate energetică (SF)': ['parc-fotovoltaic', 'bess', 'statie-transformare'] };
   // Documente pe AVIZATOR — memoriul specific pt fiecare aviz din CU. Se generează din capitolul Avizatori,
   // când bifezi operatorul (Memorii avizatori = dosarul comun; cele de mai jos = memorii/documente specifice).
   var AVIZ_DOCS = [
@@ -120,7 +120,9 @@
         fld('→ Nr. module', 'energie_module', 'auto'),
         fld('→ Teren necesar', 'energie_teren', 'auto'),
         fld('→ Producție anuală', 'energie_prod', 'auto'),
-        fld('→ Densitate', 'energie_densitate', 'auto')
+        fld('→ Densitate', 'energie_densitate', 'auto'),
+        fld('CAPEX (EUR/kWp)', 'capex_kwp', 'manual', { type: 'number', ph: '700' }),
+        fld('Preț energie (EUR/MWh)', 'pret_energie_mwh', 'manual', { type: 'number', ph: '90' })
       ] : []).concat([
         fld('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
         fld('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),

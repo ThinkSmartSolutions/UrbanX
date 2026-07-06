@@ -410,6 +410,39 @@
       ];
       return { cat: 'Memorii Tehnice', file: 'DALI_constructie_existenta.doc', html: docHtml(_meta(D, 'D.A.L.I. — CONSTRUCȚIE EXISTENTĂ', esc(ti.t) + ' · HG 907/2016'), secs) };
     },
+    'Studiu de fezabilitate energetică (SF)': function (D, v) {
+      var e = v && v.calc && v.calc.energie; if (!e || !e.putere_dc_kwp) return null; // doar pt funcțiuni de energie cu putere setată
+      function f(x) { return (x == null ? '—' : Math.round(x).toLocaleString('ro-RO')); }
+      var pdc = e.putere_dc_kwp;
+      var capexKwp = +D.capex_kwp || 700;          // EUR/kWp instalat (referință piață RO)
+      var pretMwh = +D.pret_energie_mwh || 90;     // EUR/MWh (PPA/piață)
+      var opexPct = (+D.opex_pct || 1.5) / 100;    // %/an din CAPEX
+      var rata = (+D.rata_actualizare || 8) / 100; // rată de actualizare
+      var ani = +D.durata_ani || 25;               // durata de analiză
+      var degr = 0.005;                            // degradare 0,5%/an
+      var capex = pdc * capexKwp;
+      var prodAn = e.productie_anuala_mwh;
+      var opexAn = capex * opexPct;
+      var crf = rata / (1 - Math.pow(1 + rata, -ani));
+      var lcoe = (capex * crf + opexAn) / prodAn;   // EUR/MWh
+      function npvAt(r) { var s = -capex; for (var t = 1; t <= ani; t++) { var cf = prodAn * (1 - degr * (t - 1)) * pretMwh - opexAn; s += cf / Math.pow(1 + r, t); } return s; }
+      var npv = npvAt(rata);
+      var irr = null; for (var rr = 0.005; rr <= 0.5; rr += 0.005) { if (npvAt(rr) < 0) { irr = +((rr - 0.005) * 100).toFixed(1); break; } }
+      var cum = -capex, payback = null, flows = [];
+      for (var t = 1; t <= ani; t++) { var prod_t = prodAn * (1 - degr * (t - 1)); var venit_t = prod_t * pretMwh; var cf = venit_t - opexAn; cum += cf; if (payback === null && cum >= 0) payback = t; if (t <= 6 || t === ani) flows.push([t, f(prod_t), f(venit_t), f(opexAn), f(cf), f(cum)]); }
+      var venitAn1 = prodAn * pretMwh;
+      var verdict = (npv > 0 && irr != null && irr >= rata * 100) ? 'FAVORABIL' : (npv > 0 ? 'MARGINAL' : 'NEFAVORABIL');
+      var sens = [0.7, 1.0, 1.3].map(function (k) { var savePret = pretMwh; var pv = pdc; var nvA; (function () { var s = -capex; for (var t = 1; t <= ani; t++) { s += (prodAn * (1 - degr * (t - 1)) * (savePret * k) - opexAn) / Math.pow(1 + rata, t); } nvA = s; })(); return [Math.round(savePret * k) + ' EUR/MWh (' + Math.round(k * 100) + '%)', f(nvA) + ' EUR']; });
+      var secs = [
+        { h: '1. Obiectul și scopul studiului', html: '<p>Prezentul studiu de fezabilitate (SF), întocmit în structura HG 907/2016, evaluează viabilitatea tehnico-economică a unui parc fotovoltaic de <b>' + f(pdc) + ' kWp</b> (montaj: ' + e.montaj_label + '). Spre deosebire de investițiile imobiliare, veniturile NU provin din suprafață închiriabilă, ci din <b>energia livrată în rețea</b>; de aceea analiza folosește un model energetic-financiar (producție × preț), nu unul bazat pe chirie.</p>' },
+        { h: '2. Parametri de intrare', html: tbl([['Putere instalată DC', f(pdc) + ' kWp'], ['Producție anuală (an 1)', f(prodAn) + ' MWh (' + e.yield_kwh_kwp + ' kWh/kWp)'], ['CAPEX unitar', f(capexKwp) + ' EUR/kWp'], ['CAPEX total', f(capex) + ' EUR'], ['OPEX', (opexPct * 100).toFixed(1) + '% CAPEX/an = ' + f(opexAn) + ' EUR/an'], ['Preț energie', f(pretMwh) + ' EUR/MWh'], ['Rată de actualizare', (rata * 100).toFixed(0) + '%'], ['Durata de analiză', ani + ' ani'], ['Degradare module', (degr * 100).toFixed(1) + '%/an']], ['Parametru', 'Valoare']) + '<p>Valorile marcate sunt orientative și se actualizează cu ofertele reale (EPC, PPA) și cu un Energy Yield Assessment (PVGIS/PVsyst, P50/P90) la faza următoare.</p>' },
+        { h: '3. Indicatori economici', html: tbl([['Venit brut an 1', f(venitAn1) + ' EUR'], ['VAN (NPV) la ' + (rata * 100).toFixed(0) + '%', f(npv) + ' EUR'], ['RIR (IRR)', (irr != null ? irr + '%' : '< 0,5%')], ['Termen de recuperare (payback simplu)', (payback != null ? payback + ' ani' : '> ' + ani + ' ani')], ['LCOE (cost nivelat)', lcoe.toFixed(1) + ' EUR/MWh'], ['Verdict', '<b>' + verdict + '</b>']], ['Indicator', 'Valoare']) + '<p>Verdict: proiectul este <b>' + verdict + '</b> la ipotezele curente (VAN ' + (npv > 0 ? 'pozitiv' : 'negativ') + ', RIR ' + (irr != null ? irr + '%' : 'sub prag') + ' vs. rată de actualizare ' + (rata * 100).toFixed(0) + '%). LCOE ' + lcoe.toFixed(1) + ' EUR/MWh se compară cu prețul de vânzare ' + f(pretMwh) + ' EUR/MWh.</p>' },
+        { h: '4. Flux de numerar (extras)', html: tbl(flows, ['An', 'Producție MWh', 'Venit EUR', 'OPEX EUR', 'Cash-flow EUR', 'Cumulat EUR']) },
+        { h: '5. Analiză de senzitivitate (preț energie)', html: tbl(sens, ['Scenariu preț', 'VAN rezultat']) + '<p>Rentabilitatea este sensibilă la prețul energiei (PPA vs. piață spot) și la producția reală (P50/P90). Se recomandă contract PPA pe termen lung (10–15 ani) pentru stabilizarea veniturilor.</p>' },
+        { h: '6. Structura devizului (HG 907/2016) și finanțare', html: '<p>Devizul general se structurează pe capitolele HG 907/2016 (studii/avize, proiectare, investiția de bază — module/invertoare/structuri/PT/racord, organizare de șantier, diverse și neprevăzute). Surse de finanțare posibile: fonduri proprii, credit bancar (BEI/comercial), PNRR C6, Fondul pentru Modernizare, contract CfD (Legea 101/2023) sau PPA. Cerințe uzuale finanțatori: EYA P50/P90, Technical Due Diligence, asigurări, contract O&M.</p>' }
+      ];
+      return { cat: 'Studii', file: 'Studiu_fezabilitate_energetica.doc', html: docHtml(_meta(D, 'STUDIU DE FEZABILITATE — PARC FOTOVOLTAIC', 'model energetic-financiar · HG 907/2016'), secs) };
+    },
     'Clădire mixtă — separări funcțiuni (P118)': function (D, v) {
       var secs = [
         { h: '1. Funcțiuni combinate', html: '<p>Obiectivul cuprinde funcțiuni mixte' + (D.corpuri && D.corpuri.length ? ' (' + D.corpuri.map(function (c) { return esc(c.functiune || c.nume); }).join(', ') + ')' : '') + '. Conform P118-1/2013, între funcțiuni cu risc/destinație diferită se prevăd separări la foc și accese independente.</p>' },
