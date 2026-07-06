@@ -117,20 +117,24 @@
       if (!state.rows) { tblBox.appendChild(el('div', { style: 'color:#94a3b8;font-size:12.5px;padding:20px;text-align:center' }, 'Alege tipologia și parametrii, apoi apasă „Generează".')); return; }
       tblBox.appendChild(el('div', { style: 'font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:8px' }, '2 · Program de spații generat — editează liber (buc / suprafață / șterge / adaugă)'));
       var t = el('table', { style: 'width:100%;border-collapse:collapse;font-size:11.5px' });
-      t.appendChild(el('tr', { style: 'text-align:left;color:#94a3b8' }, '<th style="padding:4px">Spațiu</th><th>Cat.</th><th>Niv</th><th style="width:52px">Buc</th><th style="width:78px">Su/buc</th><th style="width:64px">Su tot</th><th>Proveniență / normativ</th><th></th>'));
+      var _coef = 0.80; // Su/Sd (utilă/construită-desfășurată): construita ≈ utilă / coef
+      t.appendChild(el('tr', { style: 'text-align:left;color:#94a3b8' }, '<th style="padding:4px">Spațiu (funcțiune) — editabil</th><th>Cat.</th><th>Niv</th><th style="width:52px">Buc</th><th style="width:78px">Su/buc<br>(utilă)</th><th style="width:60px">Su tot</th><th style="width:70px">Sc/buc<br>(constr.)</th><th style="width:58px">Sc tot</th><th>Proveniență / normativ</th><th></th>'));
       (state.rows).forEach(function (r, idx) {
         var tr = el('tr', { style: 'border-top:1px solid rgba(148,163,184,.12)' });
         var provColor = r.prov && r.prov.indexOf('regulă') === 0 ? '#fbbf24' : (r.prov && r.prov.indexOf('generat') === 0 ? '#93c5fd' : '#6ee7b7');
-        tr.appendChild(el('td', { style: 'padding:4px' }, '<span style="color:#e6edf7">' + r.nume + '</span>' + (r.ob ? ' <span title="obligatoriu" style="color:#f87171">*</span>' : '')));
-        tr.appendChild(el('td', { style: 'color:#94a3b8' }, r.cat || '—'));
+        // NUMELE (funcțiunea spațiului) — EDITABIL
+        var tdNm = el('td', { style: 'padding:4px' }); var iNm = el('input', { style: INP + ';width:170px;padding:3px', placeholder: 'ex: Depozit, Birou...' }); iNm.value = r.nume || ''; iNm.oninput = function () { r.nume = iNm.value; }; tdNm.appendChild(iNm); if (r.ob) tdNm.appendChild(el('span', { title: 'obligatoriu', style: 'color:#f87171' }, ' *')); tr.appendChild(tdNm);
+        // CATEGORIA — EDITABILĂ
+        var tdC = el('td'); var iC = el('input', { style: INP + ';width:96px;padding:3px', placeholder: 'categorie' }); iC.value = r.cat || ''; iC.oninput = function () { r.cat = iC.value; }; tdC.appendChild(iC); tr.appendChild(tdC);
         var tdN = el('td'); var selN = el('select', { style: INP + ';padding:2px' }); _nivOptions().forEach(function (o) { var op = el('option', { value: o[0], title: o[1] }, o[0]); if (_nivKey(r.niv) === o[0]) op.setAttribute('selected', 'selected'); selN.appendChild(op); }); selN.onchange = function () { r.niv = selN.value; renderSide(); }; tdN.appendChild(selN); tr.appendChild(tdN);
         var tdB = el('td'); var iB = el('input', { type: 'number', style: INP + ';width:46px;padding:3px' }); iB.value = r.buc; iB.oninput = function () { r.buc = +iB.value || 0; upd(); }; tdB.appendChild(iB); tr.appendChild(tdB);
         var tdM = el('td'); var iM = el('input', { type: 'number', style: INP + ';width:70px;padding:3px' }); iM.value = r.mp_unit; iM.oninput = function () { r.mp_unit = +iM.value || 0; upd(); }; tdM.appendChild(iM); tr.appendChild(tdM);
-        var tdT = el('td', { style: 'color:#e6edf7' }, Math.round((r.buc || 0) * (r.mp_unit || 0)) + '');
-        tr.appendChild(tdT);
+        var tdT = el('td', { style: 'color:#e6edf7' }, Math.round((r.buc || 0) * (r.mp_unit || 0)) + ''); tr.appendChild(tdT);
+        var tdScU = el('td', { style: 'color:#93c5fd' }, Math.round((r.mp_unit || 0) / _coef) + ''); tr.appendChild(tdScU);
+        var tdScT = el('td', { style: 'color:#93c5fd' }, Math.round((r.buc || 0) * (r.mp_unit || 0) / _coef) + ''); tr.appendChild(tdScT);
         tr.appendChild(el('td', { style: 'font-size:10px;color:' + provColor }, (r.prov || '') + (r.normativ ? ' · <span style="color:#94a3b8">' + r.normativ + '</span>' : '')));
         var tdX = el('td'); var bd = el('button', { style: 'background:none;border:none;color:#f87171;cursor:pointer;font-size:14px' }, '✕'); bd.onclick = function () { state.rows.splice(idx, 1); renderTable(); renderSide(); }; tdX.appendChild(bd); tr.appendChild(tdX);
-        function upd() { tdT.textContent = Math.round((r.buc || 0) * (r.mp_unit || 0)); renderSide(); }
+        function upd() { tdT.textContent = Math.round((r.buc || 0) * (r.mp_unit || 0)); tdScU.textContent = Math.round((r.mp_unit || 0) / _coef); tdScT.textContent = Math.round((r.buc || 0) * (r.mp_unit || 0) / _coef); renderSide(); }
         t.appendChild(tr);
       });
       tblBox.appendChild(t);
