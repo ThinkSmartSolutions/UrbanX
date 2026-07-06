@@ -974,6 +974,13 @@
     var docs = []; // un builder poate întoarce un document SAU un array de documente (ex. câte un referat/cerință)
     selected.forEach(function (k) { try { var r = DOC_BUILDERS[k](D, v); if (Array.isArray(r)) docs = docs.concat(r.filter(Boolean)); else if (r) docs.push(r); } catch (e) {} });
     var base = 'Documentatie_' + (D.nrcad || (D.uat || 'proiect').replace(/\s+/g, '_'));
+    // Numele de foldere în ZIP: FĂRĂ diacritice (altfel unzip pe macOS/Windows dă „Illegal byte sequence").
+    function _folderAscii(s) {
+      return String(s || 'Documente')
+        .replace(/[șşŞȘ]/g, 's').replace(/[țţŢȚ]/g, 't').replace(/[ăâĂÂ]/g, 'a').replace(/[îÎ]/g, 'i')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9 &_.-]/g, '').replace(/\s+/g, ' ').trim() || 'Documente';
+    }
     if (G.JSZip) {
       var zip = new G.JSZip();
       // Fiecare document ca .DOCX REAL (OOXML) — Word îl deschide și SALVEAZĂ nativ.
@@ -981,12 +988,13 @@
       docs.forEach(function (dc) {
         chain = chain.then(function () {
           var name = dc.file.replace(/\.docx?$/i, '') + '.docx';
-          return _docxBytes(dc.html).then(function (bytes) { zip.folder(dc.cat).file(name, bytes); })
-            .catch(function () { zip.folder(dc.cat).file(dc.file, docBlob(dc.html)); }); // fallback la .doc dacă conversia eșuează
+          var cat = _folderAscii(dc.cat);
+          return _docxBytes(dc.html).then(function (bytes) { zip.folder(cat).file(name, bytes); })
+            .catch(function () { zip.folder(cat).file(dc.file, docBlob(dc.html)); }); // fallback la .doc dacă conversia eșuează
         });
       });
       chain.then(function () {
-        zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente (.docx — editabile și salvabile în Word)\n\n' + docs.map(function (d) { return '· ' + d.cat + '/' + d.file.replace(/\.docx?$/i, '') + '.docx'; }).join('\n'));
+        zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente (.docx — editabile și salvabile în Word)\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file.replace(/\.docx?$/i, '') + '.docx'; }).join('\n'));
         return zip.generateAsync({ type: 'blob' });
       }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente .docx generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
     } else {
