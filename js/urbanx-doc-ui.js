@@ -8,6 +8,10 @@
 (function (G) {
   'use strict';
   var D = {}; // starea formularului
+  // ── AUTOSAVE: proiectul se salvează automat în localStorage și se restaurează la redeschidere ──
+  var _DKEY = 'uxdoc_draft_v1';
+  function _saveDraft() { try { localStorage.setItem(_DKEY, JSON.stringify(D)); } catch (e) {} }
+  function _restoreDraft() { try { var s = localStorage.getItem(_DKEY); if (s) { var o = JSON.parse(s); if (o && typeof o === 'object') { for (var k in o) if (o.hasOwnProperty(k)) D[k] = o[k]; return true; } } } catch (e) {} return false; }
   var AVIZATORI = ['ISU', 'DSP', 'APM', 'Apele Române', 'ANIF', 'Distribuitor gaze', 'Distribuitor electric', 'Transelectrica', 'Operator apă-canal', 'CFR', 'CNAIR', 'Consiliul Județean', 'Primăria (PUG/PUZ)', 'Patrimoniu/Cultură', 'ROMATSA', 'SRI', 'MApN', 'Orange', 'Vodafone', 'Digi/RCS-RDS', 'Telekom'];
   var DOCUMENTE = ['Borderou piese scrise și desenate', 'Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Memoriu DTOE (organizare execuție)', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Cartea tehnică a construcției', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
   // Documente CONDIȚIONATE de funcțiune (apar doar când sunt relevante) — nu în lista generică.
@@ -304,6 +308,7 @@
         setA('energie_densitate', (en.densitate_kwp_ha || 0).toLocaleString('ro-RO') + ' kWp/ha · ' + en.teren_per_mwp_ha + ' ha/MWp');
       }
       renderSide(v);
+      _saveDraft();
     }
     function renderSide(v) {
       side.innerHTML = '';
@@ -346,6 +351,7 @@
       if (G._initStudyPdf) { _fisaValidarePDF(D, v); }
       else if (G.ss) G.ss('Generatorul de documente se inițializează.');
     }
+    if (Object.keys(D).length === 0) { if (_restoreDraft() && G.ss) G.ss('↺ Proiect restaurat automat (salvat local). Poți continua de unde ai rămas.'); }
     renderForm();
   }
 
