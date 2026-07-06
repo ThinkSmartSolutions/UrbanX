@@ -164,7 +164,57 @@
       '<table><tr><th>Spațiu</th><th>Categorie</th><th>Niv</th><th>Buc</th><th>Su/buc (mp)</th><th>Su tot (mp)</th></tr>' + rows + '</table>';
     return { h: 'Programul funcțional aplicat proiectului' + (tip ? (' (' + esc(tip) + ')') : ''), html: html };
   }
-  function _withProgram(secs, D) { var s = _programAplicatSec(D); if (!s) return secs; var out = secs.slice(); out.splice(1, 0, s); return out; }
+  // Date energetice derivate PARAMETRIC din puterea instalată (parc fotovoltaic / energie).
+  function _energieSec(D, v) {
+    var e = (v && v.calc && v.calc.energie); if (!e || !e.putere_dc_kwp) return null;
+    function f(x) { return (x == null ? '—' : (typeof x === 'number' ? x.toLocaleString('ro-RO') : x)); }
+    var rows = [
+      ['Sens de dimensionare', 'putere↔teren', e.directie || '—'],
+      ['Tip montaj', 'fix / tracker', e.montaj_label],
+      ['Putere instalată DC', 'P_DC', f(e.putere_dc_kwp) + ' kWp'],
+      ['Putere AC (invertoare)', 'P_AC = P_DC / ILR', f(e.putere_ac_kva) + ' kVA (ILR ' + e.ilr + ')'],
+      ['Număr module', 'N = P_DC / P_modul', f(e.nr_module) + ' × ' + e.putere_modul_wp + ' Wp'],
+      ['Masă module (total)', 'N × ' + e.masa_modul_kg + ' kg', f(e.masa_module_t) + ' t'],
+      ['Număr stringuri', '≈ N_module / ' + e.module_pe_string + ' (Voc<sub>−10°C</sub> < 1500 V)', f(e.nr_stringuri)],
+      ['Număr invertoare', '≈ P_AC / ' + e.putere_invertor_kva + ' kVA', f(e.nr_invertoare)],
+      ['Post transformare (PT)', '~1 PT / 1600 kVA', f(e.nr_pt) + ' × ' + f(e.putere_pt_kva) + ' kVA · racord ' + e.racord],
+      ['Suprafață module', 'N × arie modul', f(e.arie_module_mp) + ' m²'],
+      ['Teren necesar', 'arie module / GCR ' + e.gcr, f(e.teren_necesar_mp) + ' m² (~' + e.teren_necesar_ha + ' ha)'],
+      ['Teren disponibil', 'introdus (Steren)', e.teren_disponibil_mp ? (f(e.teren_disponibil_mp) + ' m²') : '—'],
+      ['Densitate de putere', 'P_DC / teren', f(e.densitate_kwp_ha) + ' kWp/ha · ' + e.teren_per_mwp_ha + ' ha/MWp'],
+      ['Producție anuală', 'E = P_DC × PSH (' + e.psh_poa + ' h) × PR (' + e.pr + ') × k_montaj (' + e.gain_montaj + ')', f(e.productie_anuala_mwh) + ' MWh/an'],
+      ['Randament specific', 'PSH × PR × k_montaj', f(e.yield_kwh_kwp) + ' kWh/kWp·an'],
+      ['Producție cumulată 25 ani', 'cu degradare ' + e.degradare_an_pct + ' %/an', f(e.productie_25ani_mwh) + ' MWh'],
+      ['CO₂ evitat', 'E × 0,25 tCO₂/MWh (mix SEN)', f(e.co2_evitat_t_an) + ' t/an']
+    ];
+    var html = '<p>Valorile de mai jos sunt derivate <b>parametric</b>, în ambele sensuri: din <b>puterea instalată</b> setată de proiectant se obține terenul necesar, sau — dacă puterea nu e dată — din <b>terenul disponibil</b> se obține puterea maximă instalabilă. Tipul de montaj (ficși / trackere) modifică gradul de acoperire (GCR) și producția. Formulele de scalare sunt în coloana a doua; documentul rămâne valabil pentru orice putere sau suprafață.</p>' +
+      '<table><tr><th>Parametru</th><th>Formulă / temei</th><th>Valoare</th></tr>' + rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>'; }).join('') + '</table>';
+    return { h: 'Date energetice ale proiectului (derivate din puterea instalată)', html: html };
+  }
+  // Capacitate de dezvoltare + constrângerea determinantă (DE CE atât și nu mai mult) — orice funcțiune.
+  function _capacitateSec(D, v) {
+    var c = v && v.calc && v.calc.capacitate; var e = v && v.calc && v.calc.energie;
+    function f(x) { return (x == null ? '—' : (typeof x === 'number' ? x.toLocaleString('ro-RO') : x)); }
+    if (e && e.putere_dc_kwp) {
+      var inv = (e.directie || '').indexOf('teren→') === 0;
+      var budget = (e.teren_budget || []).map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + f(r[1]) + ' m²</td></tr>'; }).join('');
+      var ex1000 = Math.round(1000 * (1 - (e.overhead_pct / 100)) * e.gcr / 2.58 * e.putere_modul_wp / 1000);
+      var html = '<p><b>Principiul dimensionării (teren ↔ putere).</b> Suprafața de teren și puterea instalabilă sunt legate biunivoc. ' +
+        (inv ? ('Pe terenul disponibil de <b>' + f(e.teren_disponibil_mp) + ' m²</b> se pot instala <b>maxim ' + f(e.putere_dc_kwp) + ' kWp</b>.')
+          : ('Pentru <b>' + f(e.putere_dc_kwp) + ' kWp</b> este nevoie de <b>' + f(e.teren_necesar_mp) + ' m² (~' + e.teren_necesar_ha + ' ha)</b>.')) +
+        ' <b>Constrângerea determinantă este SUPRAFAȚA</b> (nu POT/CUT, neglijabile la parcuri FV): terenul se consumă de câmpul de module — limitat de gradul de acoperire GCR ' + e.gcr + ' impus de evitarea umbririi între rânduri — plus drumurile de mentenanță, platformele posturilor de transformare și ale invertoarelor, retragerile perimetrale, împrejmuirea și spațiile verzi. <b>De aceea nu se poate declara mai multă putere pe o suprafață dată: fizic nu ar avea unde fi amplasate modulele, invertoarele și PT-ul cu distanțele normate.</b> Platforma verifică automat această corelație și semnalează depășirile.</p>' +
+        '<p>Repartiția terenului (montaj: ' + e.montaj_label + '):</p>' +
+        '<table><tr><th>Component</th><th>Suprafață</th></tr>' + budget + '<tr><td><b>Total teren</b></td><td><b>' + f(e.teren_necesar_mp) + ' m²</b></td></tr></table>' +
+        '<p>Densitate rezultată: <b>' + f(e.densitate_kwp_ha) + ' kWp/ha</b> (' + e.teren_per_mwp_ha + ' ha/MWp). Exemplu al principiului: pe <b>1.000 m²</b> se pot instala ~<b>' + f(ex1000) + ' kWp</b> la aceiași parametri — nu mai mult.</p>';
+      return { h: 'Capacitate: teren ↔ putere și constrângerea determinantă', html: html };
+    }
+    if (c) {
+      var html2 = '<p><b>Principiul dimensionării (teren ↔ construcție).</b> Pe terenul de <b>' + f(c.teren_mp) + ' m²</b>, capacitatea maximă de construire este limitată de indicatorii urbanistici și de constrângerile de amplasare: amprenta la sol <b>SC ≤ POT × S_teren = ' + c.pot_max + '% × ' + f(c.teren_mp) + ' = ' + f(c.sc_max_mp) + ' m²</b>; aria desfășurată <b>SD ≤ CUT × S_teren = ' + c.cut_max + ' × ' + f(c.teren_mp) + ' = ' + f(c.sd_max_mp) + ' m²</b> (≈ ' + c.niv_ech + ' niveluri la amprenta maximă). Din teren se scad spațiile verzi minime <b>' + f(c.sv_min_mp) + ' m²</b>, retragerile obligatorii (reduc amprenta utilă) și cele <b>' + f(c.parcaje) + ' locuri de parcare</b> (~' + f(c.parcaje_area_mp) + ' m² la sol). <b>Constrângerea determinantă</b> este cel mai restrictiv dintre POT, CUT, retrageri, parcaje și spații verzi — de aceea nu se poate construi mai mult: nu ar mai rămâne teren pentru accese, parcare și spațiile verzi impuse. Invers, pentru o arie desfășurată dorită, terenul minim = SD / CUT, cu verificarea amprentei la POT. Platforma semnalează automat depășirile de POT/CUT.</p>';
+      return { h: 'Capacitate de dezvoltare și constrângerea determinantă', html: html2 };
+    }
+    return null;
+  }
+  function _withProgram(secs, D, v) { var out = secs.slice(); var cap = _capacitateSec(D, v); if (cap) out.splice(1, 0, cap); var e = _energieSec(D, v); if (e) out.splice(1, 0, e); var s = _programAplicatSec(D); if (s) out.splice(1, 0, s); return out; }
 
   var DOC_BUILDERS = {
     'Memoriu general DTAC': function (D, v) {
@@ -176,7 +226,7 @@
         { h: 'Bilanț de suprafețe și standard specific funcțiunii', html: '<p>Suprafețele utilă/construită/desfășurată și standardul de măsurare specific funcțiunii (ex. BOMA la birouri, GLA la comercial):</p>' + _ariiStandardTbl(D, v) },
         { h: 'Parametri tehnici derivați (sinteză structură · seism · climă · incendiu)', html: '<p>Valorile de mai jos sunt derivate automat din funcțiune, amplasament (județ), sistemul structural și indicatorii geometrici, conform normativelor în vigoare. Ele fundamentează proiectarea pe toate specialitățile și se preiau în piesele scrise și desenate.</p>' + _parametriDerivatiTbl(D, v) },
         { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ], D) : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
+      ], D, v) : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
         { h: '1. Date de identificare', html: '<p>Autorizarea obiectivului „' + esc(fn) + '", ' + esc(D.uat || '—') + '.</p>' }, { h: '2. Indicatori', html: _indicatoriTbl(D, v) }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), secs) };
@@ -186,27 +236,27 @@
       var secs = deep ? _withProgram([
         { h: null, html: deep },
         { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + _ariiStandardTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
-      ], D) : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
+      ], D, v) : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
         { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '.</p>' }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_arhitectura.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE ARHITECTURĂ'), secs) };
     },
     'Memoriu rezistență': function (D, v) {
       var deep = _lib(D, 'structura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'str_pth');
-      var secs = deep ? [
+      var secs = deep ? _withProgram([
         { h: null, html: deep },
         { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997)', esc(v.calc.categorie_importanta || '—')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) }
-      ] : (G.UXParagrafe ? G.UXParagrafe.rezistenta(D, v) : [
+      ], D, v) : (G.UXParagrafe ? G.UXParagrafe.rezistenta(D, v) : [
         { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '.</p>' }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_rezistenta.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE REZISTENȚĂ'), secs) };
     },
     'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)': function (D, v) {
       var deep = _lib(D, 'instalatii'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'inst_pth');
-      var secs = deep ? [
+      var secs = deep ? _withProgram([
         { h: null, html: deep },
         { h: 'Anexă — soluții alese pentru proiect', html: tbl([['Încălzire', esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit')], ['Alimentare cu apă', esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit')]], ['Instalație', 'Soluție']) }
-      ] : (G.UXParagrafe ? G.UXParagrafe.instalatii(D, v) : [
+      ], D, v) : (G.UXParagrafe ? G.UXParagrafe.instalatii(D, v) : [
         { h: 'Instalații', html: '<p>Instalații termice, sanitare, electrice, ventilare și PSI conform destinației și normativelor I13/I9/I7/I5/P118.</p>' }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memorii_instalatii.doc', html: docHtml(_meta(D, 'MEMORII TEHNICE — INSTALAȚII'), secs) };

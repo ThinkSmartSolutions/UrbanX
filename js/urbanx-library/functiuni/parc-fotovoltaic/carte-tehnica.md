@@ -1,612 +1,602 @@
-# Cartea Tehnică a Construcției — Conținut, Întocmire, Completare, Păstrare și Urmărirea Comportării în Timp
+# CARTEA TEHNICĂ A CONSTRUCȚIEI — PARC FOTOVOLTAIC (CENTRALĂ ELECTRICĂ FOTOVOLTAICĂ)
+## Conținut, întocmire, completare, recepție, exploatare și urmărirea comportării în timp
 
-*Document metodologic generic, aplicabil oricărei construcții. Întocmit de responsabilul tehnic / consultant în managementul calității în construcții, în conformitate cu Legea 10/1995 (republicată), HG 766/1997 — Anexa 6, HG 273/1994 (modificată prin HG 343/2017), Normativul P130/1999 și HG 907/2016.*
+*Document tehnic specific pentru o Centrală Electrică Fotovoltaică (CEF) racordată la Sistemul Energetic Național (SEN), întocmit în conformitate cu Legea nr. 10/1995 privind calitatea în construcții (republicată), HG nr. 766/1997 — Anexa 6 (Regulamentul privind urmărirea comportării în exploatare, intervențiile în timp și postutilizarea construcțiilor), HG nr. 273/1994 (Regulament de recepție a lucrărilor de construcții și instalații aferente, modificat prin HG nr. 343/2017), Normativul P130/1999, HG nr. 907/2016 și legislația specifică sectorului energetic — Legea nr. 123/2012 a energiei electrice și gazelor naturale, Ordinele ANRE aplicabile, Codul Tehnic al RET/RED.*
 
-> **Precizare de rang.** Prezentul document tratează **regimul juridic și metodologic** al Cărții tehnice a construcției — obiect distinct de studiile de recepție pe faze, de caietele de sarcini sau de memoriile tehnice pe specialități. Este un document-cadru cu conținut **generic**: regulamentul este identic pentru orice funcțiune (hală, locuință, clădire de birouri, dotare publică, infrastructură). Exemplificările se dau la nivel de principiu, nu pe o construcție anume.
+> **NOTĂ METODOLOGICĂ — DOCUMENT PARAMETRIC.** Cartea tehnică se întocmește pentru un parc fotovoltaic cu putere instalată în curent continuu **P_DC [kWp/MWp] — variabilă de proiect** (500 kWp, 1 MWp, 2 MWp, 5 MWp, 50 MWp etc.). Toate cantitățile de documente, procese-verbale, buletine de încercări și componente urmărite **scalează cu P_DC** prin relațiile de scalare din memoriile de specialitate (număr de module, număr piloți, număr posturi de transformare, număr invertoare). Pentru claritate se dau exemple etichetate explicit **„Exemplu pentru P_DC = 2 MWp"**, care NU sunt ipoteză fixă — cititorul recalculează pentru puterea proiectului său. Cartea tehnică a unui parc de 500 kWp și a unuia de 50 MWp au aceeași structură și aceleași categorii de piese; diferă numărul de exemplare (ex. câte un set de buletine I-V pe fiecare string, câte un PV de fază determinantă pe fiecare post de transformare).
 
----
-
-## 1. Obiect, definiție, rol și cadru legal
-
-### 1.1 Definiție
-
-**Cartea tehnică a construcției** reprezintă ansamblul organizat al documentelor tehnice, economice și juridice referitoare la o construcție, întocmit pe parcursul proiectării, execuției și recepției acesteia și completat pe întreaga durată de existență a construcției, inclusiv în faza de postutilizare. Ea constituie **documentul oficial de referință** privind proiectarea, execuția, recepția, exploatarea, întreținerea, repararea și urmărirea comportării în timp a construcției.
-
-Cartea tehnică se definește și se reglementează prin **Regulamentul privind urmărirea comportării în exploatare, intervențiile în timp și postutilizarea construcțiilor**, aprobat ca **Anexa nr. 6 la HG nr. 766/1997**, coroborat cu **Legea nr. 10/1995** privind calitatea în construcții.
-
-### 1.2 Rol funcțional
-
-Cartea tehnică îndeplinește simultan mai multe funcții:
-
-- **Memorie tehnică a construcției** — consemnează concepția de proiectare, soluțiile constructive adoptate, materialele puse în operă, modificările intervenite pe parcursul execuției („as built") și pe durata exploatării;
-- **Instrument de urmărire a comportării în timp** — furnizează datele de referință (starea inițială, parametrii urmăriți) față de care se raportează evoluția construcției;
-- **Bază de decizie pentru intervenții** — orice reparație, consolidare, extindere, schimbare de destinație sau expertiză tehnică pornește de la datele consemnate în cartea tehnică;
-- **Document juridic** — probează îndeplinirea obligațiilor factorilor implicați (investitor, proiectant, executant, proprietar), servește la stabilirea răspunderilor și însoțește construcția la înstrăinare;
-- **Condiție de recepție** — recepția la terminarea lucrărilor și recepția finală **nu se pot finaliza** în absența cărții tehnice constituite.
-
-Prin aceste funcții, cartea tehnică depășește statutul de simplă „arhivă a proiectului": ea este **memoria activă** a construcției, cea care asigură continuitatea informației tehnice între factorii care se succed în timp (proiectanți diferiți la intervenții succesive, proprietari succesivi, echipe de exploatare). Fără ea, fiecare intervenție ar trebui precedată de o reconstituire costisitoare și incertă a stării construcției, iar răspunderile ar deveni imposibil de individualizat.
-
-### 1.3 Cadrul legal aplicabil
-
-| Act normativ | Obiect | Incidența asupra Cărții tehnice |
-|---|---|---|
-| **Legea nr. 10/1995** privind calitatea în construcții (republicată 2016) | Sistemul calității în construcții; cele 7 cerințe fundamentale; obligațiile și răspunderile factorilor; recepția și urmărirea comportării în timp | Instituie obligația întocmirii, păstrării și predării cărții tehnice; stabilește urmărirea comportării în timp ca componentă a sistemului calității; prevede sancțiuni pentru neîntocmire/nepăstrare (cap. privind obligații și răspunderi + cap. privind contravenții) |
-| **HG nr. 766/1997** — pentru aprobarea unor regulamente privind calitatea în construcții | Aprobă, între altele, **Anexa 3** (categorii de importanță) și **Anexa 6** (urmărirea comportării, intervenții, postutilizare) | **Anexa 6** este actul care reglementează detaliat **componența, întocmirea, completarea și păstrarea cărții tehnice** (secțiunile A–D, fișa sinteză, centralizatorul, jurnalul evenimentelor) |
-| **HG nr. 273/1994** — Regulament de recepție a lucrărilor de construcții și instalații aferente | Procedura recepției la terminarea lucrărilor (RTL) și a recepției finale (RF) | Cartea tehnică se predă/verifică la recepție; recepția finală se face după perioada de garanție, pe baza urmăririi comportării consemnate în cartea tehnică |
-| **HG nr. 343/2017** — modifică și completează HG 273/1994 | Actualizarea regulamentului de recepție (componența comisiei, rolul proiectantului și dirigintelui, referate, ISC) | Predarea cărții tehnice către proprietar este condiție a recepției; comisia consemnează existența și starea acesteia |
-| **Normativ P130/1999** — Normativ privind comportarea în timp a construcțiilor | Urmărirea curentă și urmărirea specială; parametri, periodicitate, responsabili, program de urmărire | Detaliază conținutul **secțiunii D** a cărții tehnice; stabilește obligația programului de urmărire și consemnarea în jurnalul evenimentelor |
-| **HG nr. 907/2016** privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice | Conținutul studiilor de fezabilitate, DALI, proiectului tehnic (PT), detaliilor de execuție (DE) | Documentațiile de proiectare astfel elaborate constituie piesele **secțiunii A** a cărții tehnice |
-| **Legea nr. 50/1991** (rep.) privind autorizarea executării lucrărilor de construcții | Autorizația de construire / desființare; regularizarea taxei; recepția ca precondiție | Autorizația de construire și procesul-verbal de recepție sunt piese ale cărții tehnice (secțiunile A–B–C); autorizația de desființare — la postutilizare |
-
-> **Regulă de fidelitate.** Numerotarea exactă a articolelor din Legea 10/1995 a fost modificată prin republicare; în text se face trimitere la **materia** reglementată (obligații, urmărire, recepție, contravenții) și la **actul/anexa/capitolul** de referință. Detaliile procedurale privind componența cărții tehnice sunt cele din **Anexa 6 la HG 766/1997**, care este textul de bază pentru acest document.
-
-### 1.4 Poziția Cărții tehnice în sistemul calității în construcții
-
-Legea 10/1995 organizează calitatea în construcții printr-un **sistem al calității** format din mai multe componente corelate: reglementările tehnice; certificarea/declararea performanței produselor pentru construcții; agrementele tehnice; verificarea proiectelor și expertizarea tehnică; conducerea și asigurarea calității la executant; autorizarea și acreditarea laboratoarelor; controlul de stat al calității (ISC); recepția construcțiilor; **comportarea în exploatare și intervențiile în timp**; și **postutilizarea construcțiilor**. Cartea tehnică este liantul documentar al acestor componente: în ea se materializează, sub forma pieselor, rezultatul fiecărei verigi a sistemului. Fără cartea tehnică, componentele sistemului nu ar putea fi probate, corelate și transmise pe durata de existență a construcției.
-
-De aici decurge principiul esențial: cartea tehnică **nu este un dosar administrativ constituit „la sfârșit"**, ci un proces continuu care începe odată cu proiectarea (secțiunea A), se dezvoltă în execuție (secțiunea B), se închide provizoriu la recepție (secțiunea C) și rămâne deschis pe toată durata exploatării și până la postutilizare (secțiunea D).
-
-### 1.5 Cerințele fundamentale — reperul de conținut al documentației
-
-Toate documentele tehnice care intră în cartea tehnică fac dovada, direct sau indirect, a satisfacerii **cerințelor fundamentale aplicabile construcțiilor**, așa cum sunt definite de Legea 10/1995:
-
-| Cod | Cerință fundamentală | Documente-cheie în cartea tehnică |
-|---|---|---|
-| **A** | Rezistență mecanică și stabilitate | Breviare de calcul structural, referatul verificatorului cerința A, PV faze determinante structură, buletine încercări materiale, urmărire specială deplasări/tasări |
-| **B** | Securitate la incendiu | Scenariul de securitate la incendiu, referatul verificatorului B, avizul/autorizația ISU, PV echipamente PSI |
-| **C** | Igienă, sănătate și mediu înconjurător | Studii de mediu, avize sanitare, documente de gestiune a deșeurilor, soluții de ventilare/salubritate |
-| **D** | Siguranță și accesibilitate în exploatare | Detalii de siguranță în utilizare (parapete, scări, pardoseli), soluții de accesibilitate persoane cu dizabilități |
-| **E** | Protecție împotriva zgomotului | Breviare acustice, referatul verificatorului E, măsurători |
-| **F** | Economie de energie și izolare termică | Breviarul de performanță energetică, certificatul de performanță energetică, referatul verificatorului F |
-
-La aceste cerințe se adaugă, prin reglementările ulterioare, **utilizarea sustenabilă a resurselor naturale**. Verificatorul de proiecte și expertul tehnic sunt atestați **pe domenii și pe cerințe**; referatele lor, piese ale secțiunii A, probează conformarea proiectului la cerințele incidente.
+> **PRECIZARE DE RANG ȘI DE NATURĂ HIBRIDĂ.** Parcul fotovoltaic are un statut juridic dublu: din perspectiva **dreptului construcțiilor** este un ansamblu de „construcții și instalații" supus autorizării de construire (Legea 50/1991), recepției (HG 273/1994) și urmăririi comportării în timp (P130/1999) — deci are Carte tehnică a construcției; din perspectiva **dreptului energiei** este o „capacitate de producere a energiei electrice" supusă autorizării de înființare și licențierii ANRE (Legea 123/2012). Cele două regimuri se suprapun, iar Cartea tehnică a construcției trebuie să conțină, pe lângă piesele clasice (secțiunile A–D din Anexa 6), și **piesele specifice de sector energetic** (ATR, Autorizația de înființare, Contractul de racordare, Certificatul de racordare, Licența de producere, PV de punere sub tensiune — PIF, buletinele PRAM). Prezentul document integrează ambele registre.
 
 ---
 
-## 2. Componența Cărții tehnice
+## 1. Obiect, definiție, rol și cadru legal specific FV
 
-Conform **Anexei 6 la HG 766/1997**, cartea tehnică a construcției se compune dintr-un **capitol de prezentare (ansamblul de piese scrise sintetice)** și **patru secțiuni** care grupează, pe etape ale ciclului de viață, întreaga documentație:
+### 1.1 Definiție și obiect
 
-- **Capitolul de prezentare** — fișa de date sinteză + centralizatorul dosarelor;
-- **Secțiunea A** — documentația privind **proiectarea**;
-- **Secțiunea B** — documentația privind **execuția**;
-- **Secțiunea C** — documentația privind **recepția**;
-- **Secțiunea D** — documentația privind **exploatarea, întreținerea, repararea și urmărirea comportării în timp**.
+**Cartea tehnică a construcției** unui parc fotovoltaic reprezintă ansamblul organizat al documentelor tehnice, economice, juridice și de reglementare energetică referitoare la Centrala Electrică Fotovoltaică, întocmit pe parcursul proiectării, execuției și recepției și completat pe întreaga durată de existență a centralei (tipic 25–35 ani, corelat cu durata de garanție de performanță a modulelor și cu durata contractelor de teren/racordare), inclusiv în faza de dezafectare și reciclare a deșeurilor de echipamente electrice și electronice (DEEE).
 
-**Principiul completitudinii:** cartea tehnică trebuie să permită reconstituirea integrală a construcției și a istoriei ei **exclusiv din piesele proprii**, fără a fi necesară consultarea unor arhive externe. O carte tehnică incompletă (lipsă „as built", lipsă referate de verificare, lipsă procese-verbale de faze determinante) nu își îndeplinește rolul și expune construcția la riscuri la orice intervenție viitoare. De aceea Anexa 6 impune atât o structură fixă (A–D), cât și instrumente de control al completitudinii (fișa sinteză, centralizatorul, borderourile pe dosare).
+Ea constituie documentul oficial de referință privind proiectarea, execuția, recepția, punerea în funcțiune (PIF), exploatarea, mentenanța și urmărirea comportării în timp a construcțiilor și instalațiilor parcului: mese fotovoltaice și piloți de fundare, module, invertoare (string sau centrale), tablouri și cabluri DC/AC, posturi de transformare 0,4/(20–110) kV, stație de conexiune/racord, rețele electrice interioare îngropate, priză de pământ și instalație de protecție la trăsnet, drumuri tehnologice, împrejmuire și sistem de securitate/monitorizare (SCADA).
 
-Fiecare secțiune se organizează în **dosare** numerotate, iar piesele din fiecare dosar se înscriu într-un **borderou (centralizator)**. Piesele nu se rup din contextul lor; documentele originale se păstrează, iar acolo unde originalul rămâne la o altă autoritate (ex. autorizații), se păstrează copie conformă.
+### 1.2 Rol funcțional — accente specifice unui parc FV
 
-**Logica ciclului de viață** care stă la baza împărțirii pe secțiuni este cronologică și funcțională: A răspunde la întrebarea *„cum a fost gândită construcția?"*, B la *„cum a fost realizată efectiv?"*, C la *„cum s-a atestat că este conformă și aptă de utilizare?"*, iar D la *„cum se comportă, se întreține, se repară și evoluează pe durata de existență?"*. Un cititor al cărții tehnice — expert, proiectant al unei intervenții, organ de control, cumpărător — trebuie să poată reconstitui, exclusiv din piesele cărții, întregul parcurs al construcției, de la titlul de proprietate asupra terenului până la ultima inspecție de urmărire.
+Pe lângă rolurile generice (memorie tehnică, instrument de urmărire, bază de decizie pentru intervenții, document juridic, condiție de recepție), la un parc fotovoltaic Cartea tehnică îndeplinește câteva funcții proprii sectorului:
 
-**Reguli generale de organizare** (Anexa 6):
-- piesele se ordonează pe secțiuni și, în interiorul secțiunii, pe dosare și pe categorii de lucrări/specialități;
-- fiecare dosar are un borderou propriu (opis) și paginație proprie;
-- documentele se păstrează cu integritatea lor (nu se extrag file individuale din procese-verbale sau din referate);
-- planurile se păstrează pliate/rulate în ordine, cu indicativ și titlu vizibile;
-- suportul electronic (dacă se folosește) dublează, nu înlocuiește, piesele care prin lege trebuie păstrate în original.
+- **Bază pentru urmărirea performanței energetice (KPI).** Datele de referință din Cartea tehnică (putere DC/AC nominală, curbe I-V de referință la punere în funcțiune, rezistența de izolație inițială, parametrii de garanție ai producătorilor) constituie reperul față de care se calculează, pe toată durata de exploatare, Performance Ratio (PR), disponibilitatea (availability), producția specifică (specific yield) și rata de degradare a modulelor.
+- **Suport pentru relația cu operatorul de rețea (OD/OTS) și cu ANRE.** ATR, avizul tehnic de racordare, certificatul de racordare, buletinele PRAM și programul de mentenanță al echipamentelor de MT/IT se corelează cu Cartea tehnică; reviziile periodice cerute de operatorul de rețea și de licență se consemnează în secțiunea D.
+- **Trasabilitatea produselor cu regim special.** Modulele, invertoarele și transformatoarele au serii unice, declarații de performanță/conformitate și garanții pe termen lung (10–12 ani produs, 25–30 ani performanță la module); trasabilitatea serie–lot–poziție în parc (string/tracker) este esențială pentru garanții și pentru înlocuirea componentelor defecte.
+- **Fundament pentru dezafectarea responsabilă.** La finalul duratei de viață, Cartea tehnică furnizează inventarul exact de module (masă de sticlă, siliciu, argint, aluminiu, plastic), invertoare și cabluri pentru gestiunea DEEE (OUG 5/2015 / Directiva DEEE) și pentru readucerea terenului la starea agricolă.
 
-**Original, copie conformă, suport electronic:**
+### 1.3 Cadrul legal aplicabil (construcții + energie)
+
+| Act normativ | Obiect | Incidența asupra Cărții tehnice a parcului FV |
+|---|---|---|
+| **Legea nr. 10/1995** (rep.) | Sistemul calității; cele 7 cerințe fundamentale; recepție; urmărirea comportării în timp; contravenții | Instituie obligația întocmirii, păstrării și predării Cărții tehnice; urmărirea comportării structurilor (mese, piloți, PT) și a instalațiilor |
+| **HG nr. 766/1997 — Anexa 6** | Regulamentul urmăririi comportării, intervenții, postutilizare; componența Cărții tehnice (secțiunile A–D) | Actul de bază pentru structura Cărții tehnice; secțiunea D „vie" pe 25–35 ani |
+| **HG nr. 273/1994** (mod. **HG 343/2017**) | Regulament de recepție a lucrărilor de construcții și instalații | Recepția la terminarea lucrărilor (RTL) și recepția finală (RF); PV, referate proiectant/diriginte, participare ISC |
+| **Normativ P130/1999** | Comportarea în timp: urmărire curentă și specială | Detaliază secțiunea D — program de urmărire, jurnal evenimente, praguri |
+| **HG nr. 907/2016** | Etape și conținut SF/DALI, PT, DE | Piesele documentației economice și de proiectare — secțiunea A |
+| **Legea nr. 50/1991** (rep.) | Autorizarea executării lucrărilor | Autorizația de construire (AC) și de desființare (postutilizare) — piese A/B/D |
+| **Legea nr. 123/2012** a energiei | Autorizarea de înființare; licențierea; racordarea la SEN | Autorizația de înființare ANRE, Licența de producere, Contractul/Certificatul de racordare — piese specifice A/C/D |
+| **Ord. ANRE nr. 59/2013** (rep. prin ord. ulterioare) — **Regulamentul de racordare** la rețelele electrice de interes public | Procedura CTE → ATR → contract de racordare → certificat de racordare (PIF) | ATR și certificatul de racordare — condiție de PIF; piese A și C |
+| **Ord. ANRE de atestare (nr. 116/2016 și ulterioare)** | Atestarea operatorilor economici și autorizarea electricienilor | Calificarea proiectantului/executantului instalațiilor electrice — condiție de valabilitate a pieselor B |
+| **Normativ I7-2011**; **SR EN 62305** (I–IV) | Instalații electrice de joasă tensiune; protecția la trăsnet | Buletine priză de pământ, verificări izolație, IPT — piese B/D |
+| **Normativ PE 116/1994; NTE 002/2003** | Încercări și măsurători la echipamente și instalații electrice (PRAM) | Buletine PRAM la PT/stație — condiție de PIF; piese B/C/D |
+| **NP 123-2010; NP 074-2014; SR EN 1997** | Piloți/fundații speciale; documentații geotehnice; Eurocod 7 | Studiu geotehnic, PV batere piloți, teste de smulgere — piese A/B |
+| **CR 1-1-4/2012 (vânt); CR 1-1-3/2012 (zăpadă); P100-1/2013** | Acțiuni și proiectare seismică | Breviare de calcul structură mese/piloți/PT — piese A |
+| **Legea nr. 292/2018; OUG nr. 195/2005** | Evaluarea impactului asupra mediului; protecția mediului | Decizia etapei de încadrare / Acordul de mediu — piese A |
+| **OUG nr. 5/2015 (DEEE)** | Deșeuri de echipamente electrice și electronice | Gestiunea la dezafectare (module, invertoare) — piese D (postutilizare) |
+
+> **Regulă de fidelitate.** Numerotarea articolelor din Legea 10/1995 și din Legea 123/2012, precum și numerele Ordinelor ANRE, se modifică prin republicări și acte succesive; în text se trimite la **materia** reglementată și la actul/anexa de referință. Ordinele ANRE de racordare și de atestare se citesc în versiunea în vigoare la data proiectării/execuției.
+
+### 1.4 Cerințele fundamentale — reperul de conținut, adaptate la parcul FV
+
+Documentele Cărții tehnice fac dovada satisfacerii cerințelor fundamentale aplicabile. La un parc fotovoltaic incidența lor este particulară:
+
+| Cod | Cerință fundamentală | Documente-cheie în Cartea tehnică a parcului FV |
+|---|---|---|
+| **A** | Rezistență mecanică și stabilitate | Breviare de calcul mese/piloți/fundații PT la **vânt (CR 1-1-4)** — acțiunea determinantă la structuri ușoare cu arie mare — și zăpadă; verificarea la **smulgere (uplift)** a piloților; referatul verificatorului A; PV faze determinante fundare/piloți; buletine teste smulgere; buletine zincare |
+| **B** | Securitate la incendiu | Scenariul de securitate la incendiu (dacă e cazul — clădire pază/gospodărie); riscul specific FV (arc DC, incendii de invertor/transformator); avizul/punctul de vedere ISU; măsuri de stingere transformator (cuvă de retenție ulei) |
+| **C** | Igienă, sănătate și mediu | Acord/decizie de mediu; gestiunea uleiului electroizolant (transformator); managementul deșeurilor; absența poluanților în exploatare (producție „curată") |
+| **D** | Siguranță și accesibilitate în exploatare | Semnalizări pericol electric; îngrădiri; distanțe de protecție; proceduri LOTO (blocare-etichetare); accesibilitate drumuri tehnologice |
+| **E** | Protecție împotriva zgomotului | Nivel de zgomot invertoare/transformatoare (ventilatoare) la limita amplasamentului; măsurători, dacă sunt vecinătăți sensibile |
+| **F** | Economie de energie | Prin natura obiectului — producție de energie regenerabilă; certificatul de racordare și declarația de producție confirmă funcția energetică |
+
+La acestea se adaugă **utilizarea sustenabilă a resurselor naturale** (reversibilitatea ocupării terenului, reciclarea DEEE la dezafectare). Cerința A este dominantă la structuri, iar **verificarea la vânt și la smulgere** este specificul de rezistență al parcului (structuri cu masă proprie mică și suprafață colectoare mare — vântul este de regulă mai defavorabil decât seismul).
+
+---
+
+## 2. Componența Cărții tehnice a parcului FV
+
+Conform Anexei 6 la HG 766/1997, Cartea tehnică se compune dintr-un **capitol de prezentare** și **patru secțiuni** (A — proiectare, B — execuție, C — recepție, D — exploatare/urmărire), la care, pentru parcul FV, se atașează organizat **piesele de sector energetic** distribuite pe secțiuni. Fiecare secțiune se organizează în dosare numerotate, cu borderou (centralizator) propriu.
+
+**Principiul completitudinii** este aici deosebit de important: la înstrăinarea unui parc FV (frecventă — activele fotovoltaice se tranzacționează), cumpărătorul și finanțatorul (due diligence tehnic) reconstituie integral centrala **exclusiv din Cartea tehnică** — de la titlul asupra terenului, ATR și Licență, până la buletinele I-V de referință și istoricul de mentenanță. O Carte tehnică incompletă blochează tranzacția și expune la riscuri de garanție.
+
+Structura de dosare recomandată (capitolul de prezentare + A/B/C/D) este detaliată la capitolele 3–5; conținutul specific FV al fiecărei secțiuni este tratat la **capitolele A, B, C** de mai jos (structura HG 273/1994 Anexa, adaptată).
+
+**Original, copie conformă, suport electronic** — regula generică se aplică, cu accente FV:
 
 | Categorie de piese | Formă de păstrare | Motivație |
 |---|---|---|
-| Procese-verbale (lucrări ascunse, faze determinante, recepții) | **Original** | Valoare probatorie directă; semnături ale factorilor |
-| Referate verificatori / experți | **Original** | Angajează răspunderea semnatarului atestat |
-| Buletine de încercări | **Original** | Emise de laborator autorizat, cu regim de evidență |
-| Autorizații, avize, acorduri | **Copie conformă** | Originalul rămâne la autoritatea emitentă |
-| Certificate/DoP produse | Original sau copie de la producător | Trasabilitate produs–lot |
-| Planuri „as designed" / „as built" | Original (exemplar al cărții tehnice) | Referință geometrică și tehnică |
-| Jurnalul evenimentelor, fișe de urmărire | **Original**, continuu | Piesă unică, netransferabilă în copie |
+| PV lucrări ascunse (piloți, cabluri DC/AC îngropate, priză de pământ) | **Original** | Lucrări inaccesibile după acoperire; valoare probatorie |
+| PV faze determinante (fundare piloți, radiere PT, priză de pământ) | **Original** | Semnate de ISC/proiectant/executant/diriginte |
+| Buletine PRAM, buletine priză de pământ, buletine izolație | **Original** | Emise de laborator/personal autorizat; condiție de PIF |
+| Buletine încercări I-V module/stringuri | **Original** | Curbe de referință pentru urmărirea degradării (KPI) |
+| ATR, Autorizația de înființare, Licența, Certificatul de racordare | **Copie conformă** | Originalul rămâne la OD/ANRE |
+| DoP / certificate module, invertoare, transformatoare, cabluri | Original/copie producător | Trasabilitate serie–lot–garanție |
+| Planuri „as built" (layout mese, trasee cabluri DC/AC, priză, PT) | **Original** | Referință geometrică pentru mentenanță și intervenții |
+| Jurnalul evenimentelor, rapoarte de urmărire, log SCADA arhivat | **Original**, continuu | Piesă unică; istoricul de performanță și incidente |
 
-Regula de bază: piesele care **angajează o răspundere** (procese-verbale, referate, buletine) se păstrează în **original**; piesele emise de o autoritate care păstrează ea originalul se păstrează în **copie conformă**. Digitalizarea de siguranță este recomandată pentru toate piesele, dar nu suprimă obligația păstrării originalelor.
+### 2.1 Corespondența secțiuni Anexa 6 ↔ capitole HG 273/1994
 
-### 2.0 Capitolul de prezentare
+Enunțul temei cere structurarea pe **cele 3 capitole ale documentației de recepție** (HG 273/1994 Anexa): **A — proiectare**, **B — execuție**, **C — recepție + exploatare/urmărire**. Acestea coincid, ca materie, cu secțiunile A, B și (C+D) din Anexa 6 la HG 766/1997. Corespondența:
 
-Capitolul de prezentare deschide cartea tehnică și cuprinde:
-
-1. **Fișa de date sinteză** a construcției (v. cap. 3);
-2. **Centralizatorul (borderoul general)** al pieselor cuprinse în dosarele secțiunilor A, B, C și D (v. cap. 4);
-3. Lista factorilor implicați (investitor, proiectant general și de specialitate, verificatori de proiect atestați, executant, diriginți de șantier, responsabili tehnici cu execuția, laboratoare, experți), cu datele de identificare și de autorizare/atestare;
-4. Date de identificare a construcției: denumire, adresă/amplasament, număr cadastral, categoria de importanță (HG 766/1997 — Anexa 3), clasa de importanță și de expunere seismică, an de punere în funcțiune.
-
-### 2.1 Secțiunea A — Documentația privind proiectarea
-
-Grupează toate piesele care fundamentează concepția construcției, elaborate de proiectant și verificate de verificatori de proiecte atestați, împreună cu actele juridice și de reglementare care au permis proiectarea și autorizarea.
-
-**Conținut (lista de documente):**
-
-- Acte privind dreptul asupra terenului / imobilului (titlu de proprietate, contract, extras de carte funciară);
-- **Certificatul de urbanism** și documentele de reglementare urbanistică incidente (PUG/PUZ/PUD, după caz);
-- **Avizele și acordurile** obținute (utilități, mediu, apărare împotriva incendiilor / referat/aviz ISU, sănătate publică, transporturi, patrimoniu etc.), în original sau copie conformă;
-- **Studiul geotehnic** (și, după caz, studiul geotehnic verificat Af) și alte studii de fundamentare (topografic, hidrologic, de trafic etc.);
-- **Expertize tehnice** anterioare (la intervenții pe construcții existente) și rapoarte de expertiză;
-- **Documentațiile tehnico-economice** conform HG 907/2016: studiul de fezabilitate / DALI, tema de proiectare, proiectul tehnic (PT) și detaliile de execuție (DE);
-- **Documentația pentru autorizarea executării lucrărilor (DTAC)** și memoriile tehnice pe specialități;
-- **Breviarele de calcul** (structură, instalații, eficiență energetică, acustică etc.);
-- **Caietele de sarcini** pe categorii de lucrări;
-- **Referatele verificatorilor de proiecte atestați** pe cerințele fundamentale aplicabile (A — rezistență mecanică și stabilitate; B — securitate la incendiu; C — igienă, sănătate, mediu; D — siguranță și accesibilitate în exploatare; E — protecție la zgomot; F — economie de energie și izolare termică);
-- Planurile și piesele desenate „**as designed**" (arhitectură, rezistență, instalații), semnate și verificate;
-- Programul de control al calității pe faze, avizat de ISC (unde este cazul), și programul de faze determinante.
-
-**Observații privind secțiunea A:**
-- Proiectul cuprins în secțiunea A trebuie să fie **cel verificat** de verificatori atestați pe cerințele aplicabile; un proiect neverificat nu poate fundamenta autorizarea și nici recepția, deci nu îndeplinește rolul de piesă a cărții tehnice.
-- La construcțiile realizate pe amplasamente cu **construcții preexistente** sau la **intervenții**, secțiunea A include obligatoriu expertiza tehnică și, după caz, auditul energetic care au fundamentat soluția.
-- Documentațiile HG 907/2016 (SF/DALI, PT, DE) se depun în forma finală, coordonată pe specialități; temele de proiectare și notele de comandă intermediare se păstrează ca justificare a soluțiilor.
-- Avizele și acordurile trebuie să fie **în termen de valabilitate** la momentul autorizării; expirarea ulterioară nu afectează valabilitatea lor ca piese istorice ale cărții tehnice.
-
-### 2.2 Secțiunea B — Documentația privind execuția
-
-Grupează piesele care atestă modul concret în care a fost realizată construcția, calitatea materialelor și lucrărilor, precum și abaterile controlate față de proiect.
-
-**Conținut (lista de documente):**
-
-- **Autorizația de construire** (copie) și anexele acesteia;
-- **Procesul-verbal de predare a amplasamentului** și a bornei de reper (nivelment);
-- **Procesul-verbal de trasare** a lucrărilor;
-- **Certificatele de calitate / declarațiile de performanță (DoP)** și agrementele tehnice pentru materialele, produsele și echipamentele puse în operă;
-- **Procesele-verbale de recepție calitativă a materialelor** la aprovizionare;
-- **Procesele-verbale de lucrări ascunse** (fundații, armături, hidroizolații, izolații ascunse, rețele îngropate etc.);
-- **Procesele-verbale de faze determinante**, încheiate cu participarea ISC, proiectantului, executantului și dirigintelui;
-- **Buletinele de încercări** (laborator autorizat/acreditat): beton, oțel-beton, îmbinări (sudate/bulonate), compactări, încercări NDT, probe de etanșeitate, probe de presiune instalații etc.;
-- **Certificatele de calificare** ale procedurilor și operatorilor (unde este cazul — sudori, procedee de sudare);
-- **Dispozițiile de șantier** ale proiectantului și **notele de constatare**, cu efectele lor asupra proiectului;
-- **Jurnalul de șantier** (registrul de evidență a lucrărilor);
-- **Procesele-verbale de probe** ale instalațiilor și de punere în funcțiune a echipamentelor;
-- Planurile și piesele desenate „**as built**" (construit efectiv), cu consemnarea abaterilor față de proiect;
-- Documentele privind gestiunea și eliminarea/valorificarea deșeurilor din construcții (unde este cazul).
-
-**Observații privind secțiunea B:**
-- **Procesele-verbale de lucrări ascunse** se încheie pentru toate lucrările care devin inaccesibile controlului direct după acoperire (armături, izolații, rețele îngropate, straturi de fundare); ele probează calitatea unor lucrări ce nu mai pot fi verificate vizual după recepție și sunt piese-cheie pentru urmărirea comportării în timp.
-- **Fazele determinante** sunt stabilite prin proiect și programul de control avizat de ISC; procesul-verbal de fază determinantă autorizează continuarea execuției și se semnează de investitor (prin diriginte), executant, proiectant și ISC.
-- **Documentele de calitate ale materialelor** (declarații de performanță — DoP, certificate, agremente tehnice) trebuie să corespundă produselor efectiv puse în operă; trasabilitatea (lot/livrare) se asigură prin corelarea cu procesele-verbale de recepție calitativă.
-- **Planurile „as built"** consemnează construcția așa cum a fost realizată, cu toate modificările acceptate prin dispoziții de șantier; ele constituie referința geometrică pentru orice intervenție ulterioară și pentru urmărirea comportării în timp.
-- **Jurnalul de șantier** consemnează cronologic desfășurarea execuției, condițiile meteo relevante, dispozițiile, întreruperile și evenimentele; nu se confundă cu jurnalul evenimentelor din secțiunea D, care privește exploatarea.
-
-### 2.3 Secțiunea C — Documentația privind recepția
-
-Grupează piesele întocmite de comisiile de recepție și documentele care condiționează și atestă recepția.
-
-**Conținut (lista de documente):**
-
-- **Procesul-verbal de recepție la terminarea lucrărilor (RTL)**, cu anexele sale: lista obiectelor/instalațiilor recepționate, lista remedierilor și termenele, valoarea lucrărilor;
-- **Referatul proiectantului** privind modul de execuție (calitatea lucrărilor față de proiect);
-- **Referatul dirigintelui / responsabilului tehnic** privind execuția;
-- Documentele privind **punerea în funcțiune** și autorizările de funcționare a instalațiilor și echipamentelor supuse regimurilor speciale (ex. ISCIR, PRAM, autorizație de securitate la incendiu);
-- Actele de constatare ale organelor de control (după caz);
-- **Procesul-verbal de recepție finală (RF)**, întocmit după expirarea perioadei de garanție, cu referatele privind comportarea în perioada de garanție.
-
-> Recepția se desfășoară în două etape distincte — **la terminarea lucrărilor** și **finală** — conform HG 273/1994 modificată prin HG 343/2017. Documentele ambelor etape fac parte din secțiunea C.
-
-**Observații privind secțiunea C:**
-- La **recepția la terminarea lucrărilor (RTL)**, comisia (numită de investitor, cu participarea obligatorie a proiectantului și a dirigintelui, iar la construcțiile de anumite categorii — cu invitarea ISC) examinează lucrarea, verifică documentele și **existența cărții tehnice constituite**, și poate: admite recepția; admite cu obiecții și termene de remediere; sau respinge/amâna recepția.
-- **Referatul proiectantului** cu privire la modul în care a fost executată lucrarea și **referatul dirigintelui** sunt piese obligatorii, prevăzute prin HG 343/2017; ele exprimă poziția tehnică a factorilor care au condus proiectarea și supravegherea execuției.
-- **Recepția finală (RF)** se convoacă de investitor/proprietar după expirarea **perioadei de garanție**, luând în considerare comportarea construcției în această perioadă (consemnată deja în secțiunea D) și modul de remediere a eventualelor defecte apărute în garanție.
-- Numai după recepția finală și predarea cărții tehnice complete se consideră încheiat, din punct de vedere al sistemului calității, ciclul de realizare a investiției.
-
-**Relația RTL – perioadă de garanție – RF** (HG 273/1994 mod. HG 343/2017):
-
-| Etapă | Ce constată | Efect asupra cărții tehnice |
+| Capitol HG 273/1994 (temă) | Secțiune Anexa 6 (HG 766/1997) | Conținut la parcul FV |
 |---|---|---|
-| **RTL** — recepția la terminarea lucrărilor | Lucrarea este terminată conform proiectului; existența și starea cărții tehnice; eventuale remedieri cu termene | Consemnare în secțiunea C; predarea cărții tehnice constituite; începerea perioadei de garanție |
-| **Perioada de garanție** | Comportarea construcției; apariția și remedierea defecțiunilor imputabile executantului | Prime înscrieri în secțiunea D (jurnal, urmărire); documente de remediere |
-| **RF** — recepția finală | Modul de comportare în garanție; remedierea completă a defecțiunilor | Consemnare în secțiunea C; predarea cărții tehnice complete către proprietar |
+| **A — Documentația privind proiectarea** | Secțiunea A | Temă, avize/acorduri (CU, mediu, ATR, Autorizație de înființare ANRE, utilități), SF, PT, DE, referate verificatori |
+| **B — Documentația privind execuția** | Secțiunea B | AC, PV faze determinante și lucrări ascunse, certificate/DoP, buletine (smulgere, I-V, izolație, priză, PRAM), jurnal de șantier, „as built" |
+| **C — Documentația privind recepția + exploatarea și urmărirea** | Secțiunile C + D | PV RTL/RF, Certificat de racordare, Licența ANRE, jurnal evenimente, program mentenanță, monitorizare KPI, garanții, reciclare DEEE |
 
-Perioada de garanție se stabilește prin contract, în limitele reglementărilor, în funcție de categoria de importanță; ea este intervalul în care executantul răspunde de remedierea defecțiunilor apărute din cauze imputabile lui. Comportarea în garanție, deja consemnată în secțiunea D, este examinată la recepția finală.
-
-### 2.4 Secțiunea D — Documentația privind exploatarea, întreținerea, repararea și urmărirea comportării în timp
-
-Este secțiunea „**vie**" a cărții tehnice: se deschide la recepție și se completează pe toată durata de existență a construcției. Corelată direct cu Normativul P130/1999.
-
-**Conținut (lista de documente):**
-
-- **Instrucțiunile de exploatare și întreținere** a construcției și a instalațiilor, elaborate de proiectant/furnizori;
-- **Programul de urmărire a comportării în timp** (curentă și, după caz, specială), conform P130/1999, cu parametrii urmăriți, metodele, aparatura, periodicitatea și responsabilii;
-- **Fișele și rapoartele de urmărire** (rezultatele inspecțiilor curente și ale măsurătorilor din urmărirea specială);
-- **Jurnalul evenimentelor** (v. cap. 5);
-- **Expertizele tehnice** ulterioare și **proiectele de intervenție** (reparații capitale, consolidări, modernizări, schimbări de destinație), cu autorizațiile aferente și procesele-verbale de recepție ale intervențiilor;
-- Documentele privind **evenimentele excepționale** (cutremure, incendii, inundații, tasări, avarii) și măsurile luate;
-- Documentele de **postutilizare** (când este cazul — v. cap. 9).
-
-**Observații privind secțiunea D:**
-- Este singura secțiune care **crește pe toată durata de existență** a construcției; celelalte se închid la recepție.
-- Instrucțiunile de exploatare și întreținere trebuie să fie **specifice construcției** (nu generice): includ parametrii de exploatare admisibili (încărcări, temperaturi, umidități), operațiile de întreținere și periodicitatea lor, restricțiile de utilizare și situațiile care impun oprirea/limitarea folosirii.
-- Programul de urmărire (P130/1999) se **corelează cu categoria de importanță** și cu comportarea preconizată; el se revizuiește la producerea unor evenimente sau la modificarea condițiilor de exploatare.
-- Toate documentele intervențiilor ulterioare (expertize, proiecte, autorizații, recepții) **se depun aici**, iar planurile se actualizează, astfel încât secțiunea D să reflecte permanent starea reală și istoricul construcției.
+Aceste trei capitole formează structura părții a doua a prezentului document (capitolele A, B, C de mai jos).
 
 ---
 
-## 3. Fișa de date sinteză a construcției
+## CAP. A — DOCUMENTAȚIA PRIVIND PROIECTAREA (Secțiunea A)
 
-Fișa de date sinteză este piesa de identificare care deschide cartea tehnică; concentrează, pe o singură structură, elementele esențiale ale construcției și ale ciclului ei de realizare. Conținut recomandat conform Anexei 6:
+Capitolul A grupează piesele care fundamentează concepția parcului fotovoltaic: tema de proiectare, actele juridice asupra terenului, avizele și acordurile (cu accent pe **componenta energetică specifică** — ATR și Autorizația de înființare ANRE), documentațiile HG 907/2016 (SF, PT, DE) și referatele verificatorilor de proiecte atestați. Este capitolul care răspunde la întrebarea *„cum a fost gândit parcul?"*.
 
-| Rubrică | Conținut |
+### A.1 Tema de proiectare și documentele de fundamentare
+
+- **Tema de proiectare** aprobată de investitor: puterea instalată P_DC țintă (variabilă de proiect), soluția tehnologică (module cristaline mono-PERC/TOPCon, structuri fixe sau trackere, invertoare string sau centrale), tensiunea de racordare (MT 20 kV sau IT 110 kV pentru parcuri mari), orizontul de producție estimat;
+- **Nota conceptuală și tema** conform HG 907/2016;
+- **Studiul de resursă solară** (PVGIS/Meteonorm/SolarGIS): iradiația în planul modulelor (POA — Plane of Array), 1.300–1.500 kWh/m²·an la latitudinile României; energia anuală estimată E [MWh] = P_DC × POA × PR / 1000 (PR ≈ 0,80–0,84);
+- **Studiul de umbrire** (profil de orizont, distanța dintre rânduri — pitch — pentru limitarea autoumbririi);
+- **Studiul geotehnic** (obligatoriu, NP 074-2014): stratificație, capacitate portantă pentru piloți, **rezistivitatea solului** (pentru dimensionarea prizei de pământ) și **agresivitatea chimică** (coroziunea structurilor îngropate); include, ideal, rezultatele piloților de probă (v. cap. B);
+- **Studiul topografic** (Stereo 70, cote Marea Neagră 1975): plan de situație, pantă, curbe de nivel.
+
+### A.2 Actele privind dreptul asupra terenului
+
+- Titlu de proprietate / contract de superficie / concesiune / arendă pe **min. 25–30 ani** (durata de viață a parcului);
+- Extras de carte funciară, plan cadastral, nr. cadastral;
+- Documentele de **scoatere temporară (reversibilă) din circuitul agricol** (dacă terenul e agricol) — specific parcurilor FV, care ocupă temporar terenul fără a-l impermeabiliza integral.
+
+### A.3 Avize, acorduri și autorizări — matricea specifică FV
+
+Parcul fotovoltaic are cea mai extinsă matrice de avize dintre construcțiile energetice, tocmai din cauza dublului regim (construcții + energie). Tabelul de mai jos grupează piesele obligatorii ale secțiunii A:
+
+| Nr. | Aviz / acord / autorizație | Emitent | Rol / condiționare | Piesă în Cartea tehnică |
+|---|---|---|---|---|
+| 1 | **Certificat de urbanism (CU)** | Primărie / Consiliu Județean | Solicită avizele; stabilește regimul juridic/economic/tehnic | Copie conformă (A) |
+| 2 | **Decizia etapei de încadrare / Acord de mediu** | APM / ANPM | Impactul asupra mediului (Legea 292/2018); Natura 2000 dacă e cazul | Copie conformă (A) |
+| 3 | **Aviz tehnic de racordare (ATR)** | OD/OTS (Distribuție / Transelectrica) | Fixează **soluția de racordare** (punct, tensiune, putere evacuabilă); condiție a AC | Copie conformă (A) — piesă cheie |
+| 4 | **Autorizația de înființare (ANRE)** | ANRE | Autorizează realizarea capacității de producere (Legea 123/2012) | Copie conformă (A) — piesă cheie |
+| 5 | **Aviz de amplasament** | OD (energie), operator apă, gaz, telecom | Verifică suprapunerea cu rețele existente | Copie conformă (A) |
+| 6 | **Aviz gospodărirea apelor / ANAR** | ANAR / ABA | Dacă amplasamentul e în bandă de protecție/zonă inundabilă | Copie conformă (A) |
+| 7 | **Aviz/punct de vedere ISU (securitate la incendiu)** | IGSU / ISU județean | Dacă există clădiri/riscuri care impun; transformator cu ulei | Copie conformă (A) |
+| 8 | **Aviz DSP (sănătate publică)** | Direcția de Sănătate Publică | Dacă e cazul (zgomot, vecinătăți) | Copie conformă (A) |
+| 9 | **Avize servituți aeronautice / MApN / STS** | AACR / MApN | Reflexia luminoasă, proximitate aeroport, zone militare | Copie conformă (A) |
+| 10 | **Aviz DJC (patrimoniu) / descărcare arheologică** | Direcția Județeană de Cultură | Dacă zona are potențial arheologic | Copie conformă (A) |
+| 11 | **Avize deținători de rețele traversate (LEA, drumuri, CF)** | Transelectrica, CNAIR, CFR etc. | Traversări/apropieri de LES 20 kV până la punctul de racordare | Copie conformă (A) |
+
+> **Interfața cheie proiectare–energie:** AC nu poate fi emisă coerent fără **ATR** (care fixează soluția de racordare și lungimea/traseul LES până la stație/PA), iar **Autorizația de înființare ANRE** presupune terenul, ATR-ul și soluția tehnică. Ordinea reală: CU → SF → ATR → Acord de mediu → Autorizație de înființare ANRE → AC.
+
+### A.4 Documentațiile tehnico-economice (HG 907/2016)
+
+- **Studiul de fezabilitate (SF)** — soluțiile tehnice, indicatorii tehnico-economici, planul de amplasare, devizul general;
+- **Proiectul tehnic (PT)** pe specialități: arhitectură (organizare de șantier, împrejmuire, drumuri), rezistență (mese, piloți, fundații PT), instalații electrice (DC — module/string/invertor; AC JT; MT — PT/LES/stație), instalații de curenți slabi (SCADA, securitate, IPT);
+- **Detaliile de execuție (DE)**: detalii piloți și prinderi mese, scheme monofilare DC și AC, planuri de trasee cabluri, detalii priză de pământ și paratrăsnet, detalii radier PT;
+- **Caietele de sarcini** pe categorii de lucrări (structuri metalice zincate, baterea/înșurubarea piloților, pozarea cablurilor DC/AC, montaj module/invertoare, montaj PT, priză de pământ);
+- **Breviarele de calcul**: structural (mese/piloți/PT la vânt CR 1-1-4, zăpadă CR 1-1-3, seism P100-1, cu verificarea la smulgere), electric (dimensionare stringuri, căderi de tensiune DC/AC, dimensionare cabluri și protecții, calcul priză de pământ), energetic (producție anuală, PR estimat).
+
+### A.5 Verificarea proiectului — referatele verificatorilor atestați (MLPAT/MDLPA)
+
+Piese obligatorii ale secțiunii A, care angajează răspunderea semnatarului atestat:
+
+| Cerință / specialitate | Verificator atestat | Obiectul verificării la parcul FV |
+|---|---|---|
+| **A — Rezistență mecanică și stabilitate** | Verificator cerința A (construcții metalice / fundații speciale) | Mese, piloți (inclusiv smulgere), radiere/fundații PT; acțiuni vânt/zăpadă/seism |
+| **Af — Geotehnic** (dacă e cazul) | Verificator Af | Studiul geotehnic și soluția de fundare pe piloți |
+| **Ie — Instalații electrice** | Verificator Ie | Instalațiile DC/AC/MT, protecții, priză de pământ, IPT, coordonarea izolației |
+| **B — Securitate la incendiu** (dacă e cazul) | Verificator B / expert Bi | Scenariul de securitate (clădiri, transformator cu ulei) |
+
+> **Condiție de valabilitate:** proiectul cuprins în secțiunea A trebuie să fie **cel verificat**. Un proiect neverificat nu poate fundamenta autorizarea (AC) și nici recepția, deci nu îndeplinește rolul de piesă a Cărții tehnice. Suplimentar, proiectantul de instalații electrice trebuie să fie **atestat/autorizat ANRE** (Ord. 116/2016 și ulterioare) — condiție specifică sectorului energetic.
+
+### A.6 Programul de control al calității și fazele determinante
+
+Piesă a secțiunii A: **Programul de control al calității pe faze**, elaborat de proiectant, avizat de ISC și acceptat de executant și diriginte, care stabilește punctele de control și **fazele determinante** ale parcului (v. cap. B). El este documentul de referință pentru toate procesele-verbale ale secțiunii B.
+
+### A.7 Particularitățile breviarelor de calcul cuprinse în secțiunea A
+
+Breviarele de calcul depuse în secțiunea A merită o dezvoltare aparte, întrucât ele fundamentează cerințele fundamentale și constituie reperul tehnic al oricărei intervenții ulterioare. La un parc fotovoltaic, breviarele se grupează pe trei registre corelate:
+
+**(a) Breviarul structural.** Documentează dimensionarea structurii unitare repetitive — masa fotovoltaică tip, pilotul tip și fundația tip a postului de transformare — prin metoda stărilor limită (SR EN 1990). Elementul central, specific FV, este că acțiunile determinante (vântul, conform CR 1-1-4/2012, și zăpada, conform CR 1-1-3/2012) se exercită pe unitatea de suprafață captatoare (kN/m²) și, prin urmare, pe structura unitară, independent de puterea totală a parcului. Vântul este de regulă mai defavorabil decât seismul, deoarece masa proprie a mesei este mică (forța seismică de bază, proporțională cu masa, rezultă redusă), în timp ce presiunea dinamică a vântului acționează pe o arie colectoare mare. Breviarul dezvoltă verificarea la **smulgere (uplift)** a piloților — acțiunea critică a construcțiilor fotovoltaice — pornind de la coeficienții de presiune netă pe planul înclinat al modulelor (efectele de acoperiș/marchiză) și de la capacitatea la extracție a pilotului determinată prin testele de probă (v. B). Numărul total de mese, piloți și posturi de transformare scalează liniar cu puterea instalată, ceea ce trebuie să reiasă explicit din breviar (relații de scalare), pentru ca la orice putere de proiect cititorul să poată reconstitui cantitățile.
+
+**(b) Breviarul electric.** Documentează dimensionarea stringurilor (număr de module în serie, în funcție de tensiunea de intrare admisă a invertorului și de coeficientul de temperatură al modulelor la temperatura minimă de proiect), numărul de stringuri în paralel pe intrare MPPT, căderile de tensiune pe circuitele DC (limitate uzual sub 1–1,5% pentru minimizarea pierderilor), dimensionarea cablurilor solare DC (EN 50618) și a cablurilor AC de joasă și medie tensiune, alegerea și coordonarea protecțiilor (siguranțe de string, descărcătoare de supratensiune DC/AC de tip 1+2, protecții de interfață cu rețeaua conform cerințelor operatorului), precum și calculul prizei de pământ (pe baza rezistivității solului determinate în studiul geotehnic) și al instalației de protecție la trăsnet (SR EN 62305, nivel de protecție rezultat din analiza de risc). Coordonarea izolației și verificarea la scurtcircuit în punctul de racordare completează acest breviar.
+
+**(c) Breviarul energetic.** Documentează estimarea producției anuale de energie plecând de la iradiația în planul modulelor (POA), aplicând lanțul de pierderi (soiling, temperatură, cablaj DC/AC, invertor, indisponibilitate, mismatch, degradare de an 1) care conduce la Performance Ratio-ul de proiect (PR ≈ 0,80–0,84). Rezultatele acestui breviar — energia anuală estimată și producția specifică țintă — devin, în secțiunea D, reperul față de care se evaluează performanța reală măsurată prin SCADA (v. cap. C.5). Este astfel un breviar care „traversează" ciclul de viață: elaborat în proiectare, dar folosit ca referință în exploatare.
+
+Cele trei breviare sunt semnate de proiectanții de specialitate și, respectiv, verificate de verificatorii atestați pe cerințele aplicabile; ele nu se rezumă în fișa sinteză, ci se păstrează integral, întrucât orice repowering, extindere de putere sau reevaluare structurală (ex. după revizuirea hărților de vânt) pornește de la ipotezele și rezultatele consemnate aici.
+
+---
+
+## CAP. B — DOCUMENTAȚIA PRIVIND EXECUȚIA (Secțiunea B)
+
+Capitolul B grupează piesele care atestă modul concret de realizare a parcului și calitatea materialelor și lucrărilor. Răspunde la întrebarea *„cum a fost realizat efectiv parcul?"*. La un parc FV, ponderea lucrărilor **ascunse** (piloți bătuți/înșurubați, cabluri DC/AC îngropate, priză de pământ) este mare, iar procesele-verbale de lucrări ascunse și buletinele de încercări specifice (smulgere piloți, curbe I-V, izolație, priză, PRAM) sunt piesele centrale.
+
+### B.1 Autorizația de construire și predarea amplasamentului
+
+- **Autorizația de construire (AC)** (copie) și anexele ei;
+- **PV de predare-primire a amplasamentului** și a bornelor de reper topografic;
+- **PV de trasare** a rândurilor de mese, drumurilor, PT și traseelor de cabluri (trasare topo pe Stereo 70).
+
+### B.2 Certificate de calitate, DoP și trasabilitate — produse specifice FV
+
+Produsele parcului au regim de trasabilitate serie–lot, esențial pentru garanții (10–30 ani):
+
+| Produs | Document de calitate | Trasabilitate specifică |
+|---|---|---|
+| **Module fotovoltaice** | DoP / certificat IEC 61215 (rezistență mecanică), IEC 61730 (securitate), flash-test din fabrică | Serie unică per modul; asociere serie ↔ string ↔ masă (poziție în parc) |
+| **Invertoare** (string/central) | Certificat conformitate, certificat de conformitate cu **Codul Rețelei (NC RfG / Ord. ANRE)** | Serie per invertor; firmware/setări de rețea |
+| **Transformator(oare) PT** | Certificat, buletin de încercări din fabrică (raport de tip: rigiditate dielectrică ulei, raport transformare, pierderi) | Serie, putere kVA, tip ulei |
+| **Cabluri DC (solar)** | DoP, certificat TÜV/EN 50618 (H1Z2Z2-K) | Lot, secțiune, lungime pe traseu |
+| **Cabluri AC JT/MT** | DoP, certificat | Lot, secțiune, lungime |
+| **Structuri metalice (mese)** | Certificat oțel + **certificat de zincare** (grosime strat Z, SR EN ISO 1461) | Lot, tip profil |
+| **Piloți / șuruburi fundare** | Certificat oțel + zincare | Lot |
+| **Celule MT, aparataj** | Certificate, buletine încercări dielectrice | Serie |
+
+- **PV de recepție calitativă a materialelor** la aprovizionare, corelate cu certificatele/DoP de mai sus.
+
+### B.3 Procese-verbale de lucrări ascunse — piese-cheie FV
+
+Lucrările care devin inaccesibile controlului direct după acoperire, pentru care se încheie obligatoriu **PV de lucrări ascunse**:
+
+| Lucrare ascunsă | Ce se verifică și consemnează |
 |---|---|
-| **Identificare** | Denumirea construcției; adresa/amplasamentul; numărul cadastral și de carte funciară; UAT-ul |
-| **Investitor / proprietar** | Denumire, date de identificare, calitate juridică |
-| **Factori implicați** | Proiectant general și de specialitate; verificatori de proiecte atestați (pe cerințe); executant (constructor); diriginți de șantier autorizați; responsabili tehnici cu execuția (RTE) atestați; laboratoare de încercări autorizate; experți tehnici (dacă e cazul) |
-| **Autorizare** | Certificat de urbanism (nr./dată); autorizație de construire (nr./dată/emitent); avize și acorduri (listă) |
-| **Caracteristici tehnice** | Regim de înălțime; suprafață construită / desfășurată; volum; sistem structural; materiale principale; tip de fundare; utilități |
-| **Încadrare normativă** | Categoria de importanță (HG 766/1997 — Anexa 3); clasa de importanță și de expunere seismică; nivelurile de performanță pentru cerințele fundamentale aplicabile; durata normată de utilizare |
-| **Date de execuție** | Data începerii; data terminării; data recepției la terminarea lucrărilor; data recepției finale; data punerii în funcțiune |
-| **Valori** | Valoarea de investiție; valoarea lucrărilor recepționate |
-| **Urmărire în timp** | Tipul urmăririi (curentă / specială — P130/1999); responsabilul cu urmărirea; periodicitatea inspecțiilor |
-| **Referințe la dosare** | Trimiteri la dosarele A, B, C, D unde se regăsesc piesele-suport |
+| **Baterea / înșurubarea piloților** | Cota de îngropare (adâncimea de încastrare), verticalitatea, refuzul la batere (sau cuplul de înșurubare pentru ground screws), integritatea zincării |
+| **Pozarea cablurilor DC îngropate** | Adâncimea de pozare, pat de nisip, banda avertizoare, raza de curbură, protecția mecanică (tuburi/dale), etanșarea la treceri |
+| **Pozarea LES AC / MT îngropate** | Idem + distanțe de coexistență, marcaje, protecție la traversări (drumuri, alte rețele) |
+| **Priza de pământ (electrozi îngropați)** | Traseul buclei/prizei, adâncimea, sudurile/îmbinările electrozi, legăturile la structuri și PT, continuitatea |
+| **Radier / fundații PT (armare, cofraj)** | Armarea înainte de betonare, poziția pieselor înglobate, cota radierului |
 
-### 3.1 Rolul fișei de date sinteză
+### B.4 Procese-verbale de faze determinante
 
-Fișa de date sinteză este „**cartea de identitate**" a construcției: permite oricărui utilizator al cărții tehnice (expert, proiectant al unei intervenții, organ de control, evaluator, cumpărător) să înțeleagă, într-o singură pagină, natura, încadrarea și istoria de bază a construcției, înainte de a intra în detaliul dosarelor. Ea se **completează la constituirea cărții tehnice** și se **actualizează** la fiecare eveniment care modifică datele esențiale — schimbare de proprietar, schimbare de destinație, intervenție majoră (consolidare, extindere), reevaluarea categoriei/clasei de importanță.
+Fazele determinante sunt stabilite prin proiect și prin programul de control avizat de ISC; PV de fază determinantă autorizează continuarea execuției și se semnează de investitor (prin diriginte), executant, proiectant și **ISC**. Fazele determinante tipice ale unui parc FV:
 
-Fișa nu înlocuiește documentele-suport, ci trimite la ele: fiecare dată trecută în fișă are, în principiu, o piesă justificativă în dosarele A–D (ex. data recepției → PV din secțiunea C; categoria de importanță → memoriul tehnic și încadrarea din secțiunea A).
+| Nr. | Fază determinantă | Moment | Participanți | Ce se atestă |
+|---|---|---|---|---|
+| FD-1 | **Piloți de probă și teste de smulgere (pull-out)** | Înainte de baterea în serie | ISC, proiectant, geotehnician, executant, diriginte | Capacitatea portantă la smulgere/împingere; validarea soluției de fundare |
+| FD-2 | **Fundare piloți (câmp de mese)** | La finalizarea baterii pe zone | ISC (după caz), proiectant, executant, diriginte | Cotele, verticalitatea, refuzul, aliniamentul |
+| FD-3 | **Radier / fundație post(uri) de transformare** | Înainte de betonare (armare) | ISC, proiectant structură, executant, diriginte | Armarea, cofrajul, piesele înglobate |
+| FD-4 | **Priza de pământ și instalația de protecție la trăsnet** | Înainte de acoperire | ISC (după caz), proiectant Ie, executant, diriginte | Traseul, sudurile, valoarea măsurată R_priză |
+| FD-5 | **Montaj și racordare posturi de transformare / stație** | Înainte de PIF | ISC (după caz), proiectant Ie, executant, diriginte, OD | Montajul, protecțiile, buletinele PRAM |
 
-### 3.2 Actualizarea fișei — evenimente declanșatoare
+> Numărul de PV-uri de fază determinantă **scalează cu P_DC**: la un parc de 2 MWp (ex. un singur PT de 1.600 kVA) există un set FD-3/FD-5; la parcuri mari (mai multe PT + stație de racord), fazele FD-3 și FD-5 se repetă pe fiecare unitate.
 
-| Eveniment | Rubrici afectate |
+### B.5 Buletine de încercări — specificul FV
+
+Buletinele se emit de **laborator/personal autorizat (ISC / RENAR / atestat ANRE-PRAM)** și sunt condiție a punerii în funcțiune și piese de referință pentru urmărirea în timp:
+
+| Buletin / încercare | Standard / normativ | Rol în Cartea tehnică |
+|---|---|---|
+| **Test de smulgere (pull-out) piloți de probă** | NP 123-2010 / SR EN 1997 | Validează capacitatea la uplift — acțiunea critică FV; piesă a FD-1 |
+| **Buletin curbe I-V pe string / invertor** (măsurare I-V curve tracer) | IEC 62446-1 | **Curbe de referință** la PIF pentru urmărirea degradării (KPI); piesă esențială |
+| **Buletin măsurare rezistență de izolație** DC (module/stringuri) și AC | IEC 62446-1 / I7-2011 | Starea de izolație inițială; reper pentru mentenanță |
+| **Buletin priză de pământ** (valoarea R_priză) | I7-2011 / SR EN 62305 | Condiție de siguranță; reper urmărire |
+| **Buletin continuitate legături de echipotențializare / IPT** | SR EN 62305 | Protecția la trăsnet; reper urmărire |
+| **Buletine PRAM la PT / stație** (rezistență izolație transformator, verificare protecții, rigiditate ulei, raport de transformare) | PE 116/1994 / NTE 002/2003 | Condiție de PIF; reper urmărire periodică |
+| **Buletin verificare polaritate / secvență faze / funcționalitate protecții AC** | IEC 62446-1 | Punerea în funcțiune corectă a invertoarelor |
+| **Certificat de zincare (grosime strat)** | SR EN ISO 1461 | Durabilitatea anticorozivă a structurilor (25–30 ani) |
+
+> Cantitatea de buletine I-V și izolație **scalează cu numărul de stringuri/invertoare**: ex. la 2 MWp cu invertoare string (~40–50 invertoare, câteva sute de stringuri), se emit buletine pe fiecare string/invertor conform IEC 62446-1. Setul complet formează „amprenta electrică de referință" a parcului.
+
+### B.6 Alte piese ale secțiunii B
+
+- **Dispozițiile de șantier** ale proiectantului și **notele de constatare**, cu efectele asupra proiectului;
+- **Jurnalul de șantier** (registrul de evidență a lucrărilor): cronologia execuției, condiții meteo relevante (vânt/precipitații — importante la montaj mese/module), întreruperi, evenimente;
+- **PV de probe și punere în funcțiune** a echipamentelor (invertoare, PT, SCADA), inclusiv testul de comunicație/telecontrol cu OD (cerință de racordare);
+- **Planurile „as built"**: layout final al meselor și rândurilor, traseele reale ale cablurilor DC/AC/MT îngropate, poziția prizei de pământ și a IPT, poziția PT/stației, cu abaterile față de proiect;
+- Documentele privind **gestiunea deșeurilor** din execuție (ambalaje module/invertoare, resturi cabluri).
+
+### B.7 Observații privind procesele-verbale de lucrări ascunse la parcul FV
+
+Ponderea și importanța lucrărilor ascunse justifică o atenție specială la modul de întocmire a proceselor-verbale corespunzătoare, deoarece ele probează calitatea unor lucrări ce nu mai pot fi verificate vizual după acoperire și care condiționează atât siguranța (priza de pământ, izolația cablurilor), cât și mentenanța ulterioară (localizarea traseelor îngropate).
+
+La **baterea/înșurubarea piloților**, procesul-verbal trebuie să consemneze, pentru fiecare zonă/rând, adâncimea de încastrare efectiv realizată în comparație cu cea de proiect, verticalitatea în limitele de toleranță (abaterea unghiulară afectează geometria mesei și, implicit, planeitatea câmpului de module), refuzul la batere sau cuplul de înșurubare (pentru șuruburile elicoidale — ground screws), precum și integritatea stratului de zincare după operațiune (o zincare deteriorată la cap inițiază coroziunea, care în teren agresiv poate reduce durata de viață a fundației sub cei 25–30 de ani preconizați). Corelarea cu buletinele testelor de smulgere (FD-1) este obligatorie: soluția de fundare validată pe piloții de probă este cea care se aplică în serie.
+
+La **pozarea cablurilor DC și AC/MT îngropate**, procesul-verbal consemnează adâncimea de pozare, patul și acoperirea de nisip, banda avertizoare montată deasupra, raza minimă de curbură respectată (esențială pentru integritatea izolației cablurilor solare), protecția mecanică la traversări (tuburi de protecție, dale) și etanșarea la trecerile prin fundații sau pereți de PT. Aceste consemnări, împreună cu planul „as built" al traseelor, sunt vitale pentru siguranța oricărei lucrări ulterioare de săpătură pe amplasament — un traseu DC neconsemnat corect reprezintă un risc real de electrocutare/arc la intervenții de mentenanță.
+
+La **priza de pământ**, procesul-verbal descrie traseul buclei perimetrale și al electrozilor, adâncimea de îngropare, tipul și execuția îmbinărilor (sudură aluminotermică sau cleme certificate), legăturile la structurile metalice ale meselor, la carcasele invertoarelor și la postul de transformare, precum și valoarea rezistenței de dispersie măsurate imediat după realizare (comparată cu valoarea de proiect). Această valoare devine reperul de referință pentru urmărirea din secțiunea D — creșterea rezistenței prizei în timp (coroziunea electrozilor, uscarea solului) este un fenomen urmărit anual.
+
+---
+
+## CAP. C — DOCUMENTAȚIA PRIVIND RECEPȚIA + EXPLOATAREA ȘI URMĂRIREA COMPORTĂRII ÎN TIMP (Secțiunile C + D)
+
+Capitolul C acoperă, conform temei, atât **recepția** (Secțiunea C, HG 273/1994 mod. HG 343/2017), cât și **exploatarea, mentenanța și urmărirea comportării în timp** (Secțiunea D, P130/1999) — inclusiv piesele specifice de sector energetic (Licența ANRE, Certificatul de racordare) și monitorizarea KPI de performanță.
+
+### C.1 Recepția lucrărilor (HG 273/1994 mod. HG 343/2017)
+
+Recepția se desfășoară în două etape distincte:
+
+- **Recepția la terminarea lucrărilor (RTL):** comisia numită de investitor (cu participarea obligatorie a proiectantului și dirigintelui, iar la anumite categorii — cu invitarea ISC) examinează lucrarea, verifică documentele și **existența Cărții tehnice constituite** (secțiunile A, B și instrucțiunile din D). Poate: admite; admite cu obiecții și termene de remediere; sau respinge/amâna.
+- **Recepția finală (RF):** se convoacă după expirarea perioadei de garanție, luând în considerare comportarea parcului în această perioadă (producția reală vs. estimat, PR, defecte remediate).
+
+**Piese ale secțiunii C:**
+
+| Piesă | Emitent | Observații FV |
+|---|---|---|
+| **PV de recepție la terminarea lucrărilor (RTL)** + anexe | Comisia RTL | Lista obiectelor (câmp de mese, PT, stație, drumuri, împrejmuire), lista remedierilor, valoarea |
+| **Referatul proiectantului** privind execuția | Proiectant general + Ie | Calitatea lucrărilor față de proiect (structură + instalații) |
+| **Referatul dirigintelui / RTE** | Diriginte de șantier | Sinteza controalelor pe faze |
+| **Documente PIF / punere sub tensiune** | OD + executant + investitor | PV de punere sub tensiune (energizare) a PT/stației și a invertoarelor |
+| **Buletinele PRAM finale** | Personal autorizat | Condiție de energizare |
+| Acte de constatare ISC (după caz) | ISC | — |
+| **PV de recepție finală (RF)** + referate comportare în garanție | Comisia RF | După perioada de garanție |
+
+> **Interfața recepție–energie:** punerea sub tensiune (energizarea) și începerea evacuării în rețea sunt condiționate de **Certificatul de racordare** emis de OD (după probele de PIF și confirmarea buletinelor PRAM), iar exploatarea comercială (vânzarea energiei) — de **Licența de producere ANRE**. RTL a construcțiilor/instalațiilor și PIF energetic sunt evenimente corelate, dar distincte, ambele consemnate în Cartea tehnică.
+
+**Relația RTL — garanție — RF:**
+
+| Etapă | Ce constată la parcul FV | Efect asupra Cărții tehnice |
+|---|---|---|
+| **RTL** | Lucrări terminate conform proiect; Cartea tehnică constituită; PIF realizat | Secțiunea C; predarea Cărții tehnice; început perioadă de garanție |
+| **Perioadă de garanție** | PR real, disponibilitate, defecte de tinerețe (invertoare, module hot-spot) remediate în garanție | Prime înscrieri secțiunea D (jurnal, KPI, remedieri) |
+| **RF** | Comportarea în garanție; producția confirmată; degradarea în limite | Secțiunea C; predarea Cărții tehnice complete |
+
+### C.2 Piese specifice de sector energetic (secțiunile C și D)
+
+| Piesă | Emitent | Rol | Secțiune |
+|---|---|---|---|
+| **Certificat de racordare** | OD (Distribuție/Transelectrica) | Confirmă racordarea și permite punerea sub tensiune | C |
+| **Licența de producere a energiei electrice** | ANRE | Permite exploatarea comercială (vânzarea energiei) | C/D |
+| **Contract de racordare** și **Contract de exploatare/mentenanță a instalației de racordare** | OD | Regimul relației cu rețeaua | D |
+| **Contract de furnizare/PPA și avize de dispecer (dispecerizare)** | Furnizor / OD-OTS | Regimul de injecție în SEN | D |
+| **Programul de mentenanță convenit cu OD** pentru echipamentele de racordare | OD | Revizii periodice PT/stație | D |
+
+### C.3 Exploatarea și mentenanța (Secțiunea D) — program specific FV
+
+Secțiunea D se deschide la recepție și se completează pe **toată durata de exploatare** (25–35 ani). Instrucțiunile de exploatare și programul de mentenanță trebuie să fie **specifice parcului**:
+
+**Program de mentenanță (preventivă) — tabel parametric:**
+
+| Activitate de mentenanță | Periodicitate tipică | Scalare cu P_DC / observații |
+|---|---|---|
+| **Inspecție vizuală generală** (mese, module fisurate, conexiuni, împrejmuire) | Trimestrial | Proporțional cu suprafața parcului |
+| **Curățare module (spălare — soiling)** | 1–2×/an (mai des în zone praf/agricole) | Volum apă/manoperă ∝ nr. module = P_DC / P_modul |
+| **Termografie IR module și conexiuni** (dronă IR la parcuri mari) | Anual | Detectează hot-spots, diode bypass defecte, conexiuni slabe; efort ∝ suprafață |
+| **Cosire vegetație / management teren** | 2–4×/an sezonier | ∝ suprafață teren |
+| **Verificare invertoare** (curățare filtre, ventilatoare, firmware, log erori) | Semestrial / anual | ∝ nr. invertoare |
+| **Măsurare rezistență de izolație și priză de pământ** | Anual | ∝ nr. stringuri; comparare cu buletinele de referință B.5 |
+| **Verificări PRAM la PT / stație** (revizie, analiză ulei, protecții) | Anual / conform OD | ∝ nr. PT |
+| **Strângere cuplu conexiuni electrice** (torque check) | Anual | ∝ nr. conexiuni |
+| **Verificare structuri (coroziune, prinderi, cliplocuri module)** | Anual + după evenimente vânt | ∝ nr. mese |
+| **Verificare sistem SCADA / monitorizare / securitate** | Continuu + revizie anuală | — |
+
+> **Mentenanță corectivă:** înlocuirea modulelor defecte (respectând trasabilitatea serie–poziție din B.2), a invertoarelor (garanție/RMA), remedierea defectelor de string; fiecare intervenție se consemnează în jurnalul evenimentelor cu seria componentei înlocuite.
+
+### C.4 Urmărirea comportării în timp (P130/1999)
+
+**Urmărirea curentă** (obligatorie, toate construcțiile) — inspecție vizuală și măsurători simple, la periodicitatea din program și **după fiecare eveniment excepțional** (furtună/vânt puternic, grindină, inundație, cutremur resimțit):
+
+| Domeniu urmărit | Ce se urmărește | Semn de alarmă |
+|---|---|---|
+| **Structuri mese / piloți** | Coroziune, deformații, slăbirea prinderilor, ridicare/tasare piloți, aliniament rânduri | Piloți smulși/înclinați după vânt puternic; deformații |
+| **Fundații / radiere PT** | Tasări, fisuri, umezeală | Tasare diferențială, fisuri active |
+| **Module** | Fisuri (grindină), delaminare, decolorare (PID), hot-spot, geam spart | Module fisurate în serie; hot-spot la termografie |
+| **Instalații electrice DC/AC** | Coroziune conectori, izolație cabluri, arc/urme de supraîncălzire | Cădere izolație sub prag; urme de arc |
+| **Priză de pământ / IPT** | Valoarea R_priză, continuitate, coroziune electrozi | R_priză peste valoarea admisă |
+| **PT / transformator** | Nivel/analiză ulei, temperatură, protecții, zgomot | Depășire prag ulei/temperatură; declanșări repetate |
+| **Drumuri / împrejmuire / securitate** | Accesibilitate, integritate gard, funcționare CCTV/detecție | Breșe în perimetru; sistem indisponibil |
+
+**Urmărirea specială** (dacă o impun categoria de importanță/amplasamentul — ex. teren cu tasări, versant, seismicitate ridicată): măsurare instrumentală a tasărilor/deplasărilor piloților și PT, cu **valori de referință** (la PIF) și **praguri de atenție / avertizare / alarmare**; depășirea unui prag impune analiză/expertiză/măsuri și consemnare în jurnal.
+
+### C.5 Monitorizarea KPI de performanță — reper energetic al urmăririi
+
+Specificul urmăririi unui parc FV este monitorizarea continuă (SCADA) a **indicatorilor de performanță**, cu logurile arhivate ca parte a secțiunii D și raportate periodic. KPI de referință:
+
+| KPI | Definiție / formulă | Valoare de referință | Rol în Cartea tehnică |
+|---|---|---|---|
+| **Performance Ratio (PR)** | PR = E_real / (P_DC × POA / G_STC); raportul dintre energia produsă și cea teoretic posibilă | 0,80–0,84 (parcuri noi bine întreținute) | Indicator sintetic de „sănătate"; scădere = soiling/defecte |
+| **Disponibilitate (Availability)** | timp de funcționare / timp total (ponderat pe putere) | > 98–99% | Măsoară fiabilitatea invertoare/rețea |
+| **Producția specifică (Specific Yield)** | E_anual [kWh] / P_DC [kWp] = kWh/kWp·an | 1.100–1.350 kWh/kWp·an (RO) | Compară cu estimarea din SF |
+| **Rata de degradare** | scăderea anuală a puterii/PR (comparat cu curbele I-V de referință B.5) | ≤ 0,5–0,7%/an (garanție module) | Verifică respectarea garanției de performanță |
+| **Energie evacuată în SEN** | contorizare la punctul de racordare | conform ATR/certificat | Baza decontării și a raportării ANRE |
+
+> Curbele I-V de referință din B.5 și producția specifică estimată din SF (secțiunea A) sunt **reperele** față de care se evaluează degradarea; aceasta este legătura directă între secțiunile A/B și urmărirea din D — un lanț de trasabilitate energetică pe 25–35 ani.
+
+**Interpretarea KPI în urmărirea comportării în timp.** Monitorizarea KPI nu este un exercițiu financiar, ci un instrument tehnic de diagnoză, corelat cu urmărirea curentă P130/1999. O scădere a Performance Ratio-ului sub valoarea de referință, la aceeași iradiație, semnalează una dintre cauzele tipice care se investighează în ordine: **soiling** (murdărire a modulelor — se corectează prin curățare, iar recuperarea PR după spălare confirmă diagnoza), **umbriri noi** apărute (vegetație necosită, obstacole), **defecte de string** (siguranțe arse, conectori corodați — vizibile ca abateri între invertoare comparabile), **hot-spots și diode bypass defecte** (localizate prin termografie IR), **degradarea indusă de potențial (PID)** sau **degradarea normală** a modulelor. Fiecare diagnoză conduce la o măsură de mentenanță consemnată în jurnalul evenimentelor, iar rezultatul măsurii (revenirea KPI) închide bucla. Rata de degradare măsurată se compară anual cu panta garantată de producător (uzual ≤ 0,5–0,7%/an după anul 1): depășirea susținută a acestei pante activează procedura de garanție de performanță, care se probează exclusiv prin măsurări comparate cu curbele I-V de referință din secțiunea B. Astfel, secțiunea D a Cărții tehnice devine, la parcul FV, un instrument activ de protejare a valorii activului, nu doar o evidență pasivă.
+
+### C.6 Garanțiile și relația cu producătorii
+
+Piese ale secțiunii D, cu regim de urmărire propriu:
+
+| Garanție | Durată tipică | Ce acoperă | Trasabilitate |
+|---|---|---|---|
+| **Garanție de produs module** | 10–12 ani | Defecte de fabricație | Serie modul ↔ poziție (B.2) |
+| **Garanție de performanță module** | 25–30 ani | Menținerea puterii peste un prag (ex. ≥ 84–87% la 25 ani) | Curbe I-V referință (B.5) + măsurări periodice |
+| **Garanție invertoare** | 5–10 ani (extensibilă) | Defecte; înlocuire RMA | Serie invertor |
+| **Garanție structuri (anticorozivă)** | ~25 ani | Zincare | Certificat zincare (B.2) |
+| **Garanție lucrări (executant)** | conform contract | Vicii de execuție | Secțiunea C — perioadă de garanție |
+
+Invocarea garanției de performanță a modulelor se face **pe baza măsurărilor comparate cu curbele I-V de referință** din Cartea tehnică — motiv pentru care aceste buletine sunt piese esențiale, nu formale.
+
+### C.7 Postutilizarea — dezafectarea și reciclarea DEEE
+
+La finalul duratei de viață, secțiunea D se completează cu documentele de postutilizare, cu specific FV pronunțat (reversibilitate + DEEE):
+
+- **Expertiză tehnică** a stării (dacă e cazul) și **proiect de dezafectare**;
+- **Autorizație de desființare** (Legea 50/1991);
+- **Plan de gestiune a deșeurilor** cu tratare distinctă a **DEEE** (OUG 5/2015 / Directiva DEEE): modulele fotovoltaice sunt DEEE reciclabile (recuperare sticlă ~ 70% din masă, aluminiu ramă, siliciu, argint, cupru; invertoare și cabluri — reciclare metale); uleiul transformatorului — gestionat ca deșeu periculos;
+- **Readucerea terenului la starea agricolă** (dat fiind că fundarea pe piloți/șuruburi este reversibilă, fără impermeabilizare majoră) — avantaj de mediu specific FV, consemnat ca reper de proiectare încă din secțiunea A;
+- **PV de recepție a lucrărilor de desființare**, radierea cadastrală și **arhivarea Cărții tehnice** conform reglementărilor Fondului Arhivistic Național.
+
+---
+
+## 3. Capitolul de prezentare și Fișa de date sinteză a parcului FV
+
+Capitolul de prezentare deschide Cartea tehnică și cuprinde **Fișa de date sinteză** + **centralizatorul (borderoul general)** + lista factorilor implicați și datele de identificare.
+
+**Fișa de date sinteză** — conținut recomandat, cu rubricile specifice FV:
+
+| Rubrică | Conținut (specific parc FV) |
 |---|---|
-| Schimbare de proprietar/administrator | Investitor/proprietar; referință PV predare carte tehnică |
-| Schimbare de destinație | Caracteristici; încadrare normativă (categorie/clasă); urmărire |
-| Consolidare / extindere / supraetajare | Caracteristici tehnice; date de execuție (intervenție); referințe dosare |
-| Reevaluare seismică / expertiză | Încadrare normativă; urmărire în timp |
-| Modificarea programului de urmărire | Tipul urmăririi; responsabil; periodicitate |
+| **Identificare** | Denumire CEF; amplasament (extravilan UAT/județ); nr. cadastral/CF |
+| **Investitor / proprietar / titular licență** | Denumire, CUI, calitate juridică |
+| **Factori implicați** | Proiectant general + Ie; verificatori atestați (A, Af, Ie, B); executant; diriginte; RTE; laboratoare; personal PRAM autorizat; operator de rețea (OD/OTS) |
+| **Date energetice** | **P_DC [kWp]**, **P_AC [kW]**, raport DC/AC; nr. module × P_modul; nr. invertoare; nr. și putere PT [kVA]; tensiune de racordare (20/110 kV); punct de racordare |
+| **Autorizare** | CU; AC; **ATR**; **Autorizație de înființare ANRE**; **Certificat de racordare**; **Licență de producere** (nr./dată) |
+| **Caracteristici construcții** | Nr. mese; tip structură (fixă/tracker); tip piloți; suprafață teren; drumuri; împrejmuire |
+| **Încadrare normativă** | Categoria de importanță (uzual **C** — normală; drumuri/gard **D**); clasa de importanță seismică (uzual **III**, γI = 1,0); acțiune determinantă: **vânt** |
+| **Producție** | POA [kWh/m²·an]; E_anual estimat [MWh]; PR estimat; specific yield estimat |
+| **Date de execuție** | Data începerii; terminării; RTL; PIF (punere sub tensiune); RF |
+| **Urmărire în timp** | Tip (curentă / specială — P130); responsabil; periodicitate; KPI monitorizați |
+| **Postutilizare** | Angajament dezafectare + reciclare DEEE + readucere teren |
+
+Fișa se completează la constituire și se actualizează la evenimente majore (repowering — înlocuirea modulelor/invertoarelor cu tehnologie nouă, extindere de putere, schimbare de titular/licență).
 
 ---
 
 ## 4. Centralizatorul (borderoul) pieselor din dosarele A–D
 
-Centralizatorul este **cheia de acces** în cartea tehnică: reflectă structura dosarelor și permite regăsirea rapidă a oricărei piese. Se întocmește un centralizator general (în capitolul de prezentare) și câte un borderou pentru fiecare dosar în parte.
+Centralizatorul este cheia de acces în Cartea tehnică; la un parc FV, volumul de piese seriale (buletine I-V, certificate module) impune și borderouri de detaliu (liste de serii). Model de borderou general:
 
-**Structura borderoului (model):**
-
-| Nr. crt. | Cod dosar / secțiune | Denumirea piesei / documentului | Emitent | Nr. și data documentului | Nr. file | Original / copie | Localizare (dosar/plic/mediu) | Observații |
+| Nr. crt. | Cod dosar | Denumirea piesei | Emitent | Nr./data | Nr. file | Original/copie | Localizare | Observații |
 |---|---|---|---|---|---|---|---|---|
-| 1 | A.1 | Extras de carte funciară | OCPI | ... | ... | copie conformă | dosar A, plic 1 | — |
-| 2 | A.5 | Referat verificator cerința A | Verificator atestat | ... | ... | original | dosar A | pe cerința A (rezistență) |
-| 3 | B.7 | PV fază determinantă fundații | ISC/proiectant/exec./diriginte | ... | ... | original | dosar B | — |
-| 4 | C.1 | PV recepție la terminarea lucrărilor | Comisia RTL | ... | ... | original | dosar C | cu anexe |
-| 5 | D.2 | Program urmărire în timp (P130) | Proiectant | ... | ... | original | dosar D | curentă/specială |
-
-Fără centralizator, o carte tehnică voluminoasă devine inutilizabilă în practică: verificarea completitudinii la recepție, regăsirea unei piese de către un expert sau un organ de control, și corelarea intervențiilor cu documentele originare depind toate de existența unui borderou corect și actualizat. Centralizatorul este, de aceea, prima piesă examinată de comisia de recepție și de orice utilizator ulterior al cărții tehnice.
-
-Reguli de întocmire a borderoului:
-- fiecare piesă primește un cod unic, format din litera secțiunii + numărul de ordine în dosar;
-- se menționează starea (original / copie conformă) și mediul de păstrare (hârtie / electronic);
-- documentele adăugate ulterior (secțiunea D) se înscriu în continuare, fără a rescrie borderoul, cu dată și semnătura celui care le adaugă;
-- borderoul se actualizează la orice completare a cărții tehnice.
+| 1 | A.3 | ATR (aviz tehnic de racordare) | OD | ... | ... | copie conformă | dosar A | soluție racordare |
+| 2 | A.3 | Autorizație de înființare ANRE | ANRE | ... | ... | copie conformă | dosar A | Legea 123/2012 |
+| 3 | A.5 | Referat verificator Ie | Verificator atestat | ... | ... | original | dosar A | instalații electrice |
+| 4 | B.4 | PV fază determinantă piloți probă (smulgere) | ISC/proiectant/geo/exec./diriginte | ... | ... | original | dosar B | FD-1 |
+| 5 | B.5 | Buletine curbe I-V referință (set stringuri) | Laborator autorizat | ... | ... | original | dosar B | IEC 62446-1; listă serii |
+| 6 | B.5 | Buletine PRAM PT | Personal autorizat | ... | ... | original | dosar B | condiție PIF |
+| 7 | C.1 | PV recepție la terminarea lucrărilor | Comisia RTL | ... | ... | original | dosar C | cu anexe |
+| 8 | C.2 | Certificat de racordare | OD | ... | ... | copie conformă | dosar C | permite PIF |
+| 9 | C.2 | Licența de producere | ANRE | ... | ... | copie conformă | dosar C | exploatare comercială |
+| 10 | D.2 | Program urmărire în timp (P130) + KPI | Proiectant / operator | ... | ... | original | dosar D | curentă/specială |
 
 ---
 
-## 5. Jurnalul evenimentelor
+## 5. Jurnalul evenimentelor — specific parc FV
 
-Jurnalul evenimentelor este piesa centrală a **secțiunii D** și instrumentul prin care cartea tehnică rămâne un document „viu" pe toată durata de existență a construcției. În el se consemnează **cronologic**, pe măsura producerii, toate evenimentele relevante pentru comportarea și integritatea construcției.
+Jurnalul evenimentelor este piesa centrală a secțiunii D și instrumentul prin care Cartea tehnică rămâne „vie" pe 25–35 ani. Se înscrie **cronologic**, imediat după producerea/constatarea evenimentului, de către proprietar/operator prin responsabilul cu urmărirea comportării în timp, iar la intervenții — de proiectant/executant/diriginte.
 
-**Cine înscrie:** proprietarul / administratorul, prin responsabilul cu urmărirea comportării în timp, iar la intervenții — proiectantul, executantul intervenției și dirigintele; înscrierile se semnează și se datează. **Când:** imediat după producerea sau constatarea evenimentului.
+**Tipuri de evenimente specifice parcului FV:**
 
-**Ce se înscrie (tipuri de evenimente):**
-
-| Tip eveniment | Ce se consemnează | Cine consemnează |
+| Tip eveniment | Ce se consemnează | Cine |
 |---|---|---|
-| **Rezultate ale urmăririi curente** | Constatările inspecțiilor periodice; degradări, fisuri, tasări, infiltrații, coroziune, uzuri; măsurători | Responsabilul cu urmărirea |
-| **Rezultate ale urmăririi speciale** | Valorile parametrilor măsurați instrumental (deplasări, deformații, tasări, tensiuni), comparate cu pragurile de atenție/avertizare/alarmare | Responsabilul cu urmărirea specială / expert |
-| **Evenimente excepționale** | Cutremure resimțite, incendii, inundații, explozii, alunecări, tasări bruște, avarii; efectele asupra construcției și măsurile imediate | Proprietar / responsabil urmărire |
-| **Schimbări de destinație / de utilizare** | Modificarea funcțiunii sau a încărcărilor de exploatare, cu efectul asupra încadrării și necesitatea reevaluării/expertizei | Proprietar / proiectant |
-| **Lucrări de întreținere și reparații curente** | Natura lucrării, data, executantul, materialele | Proprietar / administrator |
-| **Intervenții (reparații capitale, consolidări, modernizări)** | Proiectul de intervenție, autorizația, execuția, recepția, referințele documentelor | Proprietar / proiectant / diriginte |
-| **Schimbări de proprietar / administrator** | Actul de înstrăinare; predarea-primirea cărții tehnice | Proprietarii succesivi |
-| **Modificări ale mediului / vecinătăților** | Excavații, construcții alăturate, modificări de nivel freatic care pot afecta construcția | Responsabil urmărire |
+| **Urmărire curentă** | Inspecții periodice; coroziune, prinderi, module fisurate, izolație, priză | Responsabil urmărire |
+| **KPI / performanță** | PR, disponibilitate, specific yield, rata de degradare (față de referință) | Operator O&M |
+| **Evenimente meteo excepționale** | Vânt puternic/furtună (piloți smulși/mese deformate), grindină (module fisurate), inundație, cutremur | Responsabil urmărire |
+| **Incidente electrice** | Arc DC, declanșări repetate, defect invertor/transformator, incendiu de echipament | Operator O&M |
+| **Mentenanță corectivă** | Înlocuire module (serie ↔ poziție), invertoare (RMA), remediere string | Operator O&M |
+| **Repowering / extindere** | Înlocuire tehnologie, creștere putere; reevaluare ATR/licență/structură | Proprietar / proiectant |
+| **Relația cu OD/ANRE** | Revizii impuse de OD; verificări PRAM; modificări de licență | Operator / OD / ANRE |
+| **Schimbare titular / vânzare parc** | Act de înstrăinare; predarea Cărții tehnice; transferul licenței | Părți |
 
-Fiecare înscriere cuprinde minim: **data**, **descrierea evenimentului**, **măsurile luate / dispuse**, **responsabilul** și **referința la documentul-suport** (dosar/piesă din cartea tehnică).
+**Model — Jurnalul evenimentelor:**
 
-**Model de tabel — Jurnalul evenimentelor:**
-
-| Nr. crt. | Data | Tipul evenimentului | Descrierea | Măsuri luate / dispuse | Referință document (dosar D) | Nume, calitate, semnătură |
+| Nr. | Data | Tip eveniment | Descriere | Măsuri luate/dispuse | Referință document (dosar D) | Nume, calitate, semnătură |
 |---|---|---|---|---|---|---|
-| 1 | zz.ll.aaaa | Urmărire curentă | Inspecție periodică — fără degradări semnificative | Menținere program | Fișa urmărire nr. ... | ...responsabil urmărire |
-| 2 | zz.ll.aaaa | Eveniment excepțional | Cutremur resimțit | Inspecție post-seism; fără avarii vizibile | Raport inspecție nr. ... | ...responsabil urmărire |
-| 3 | zz.ll.aaaa | Constatare | Fisuri în tencuială, zona ... | Supraveghere; martori de fisură | Fișa urmărire nr. ... | ...responsabil urmărire |
-| 4 | zz.ll.aaaa | Intervenție | Reparație capitală acoperiș | Expertiză + proiect + autorizație | Dosar intervenție nr. ... | ...proprietar/proiectant |
-| 5 | zz.ll.aaaa | Schimbare proprietar | Vânzare imobil | Predare-primire carte tehnică | PV predare nr. ... | ...părți |
+| 1 | zz.ll.aaaa | Urmărire curentă | Inspecție trimestrială — fără degradări | Menținere program | Fișa urmărire nr. ... | responsabil urmărire |
+| 2 | zz.ll.aaaa | KPI | PR = 0,82; specific yield conform estimat | — | Raport lunar SCADA nr. ... | operator O&M |
+| 3 | zz.ll.aaaa | Eveniment meteo | Furtună — 3 mese cu piloți deplasați | Inspecție structuri; refixare/refacere piloți | Raport inspecție nr. ... | responsabil urmărire |
+| 4 | zz.ll.aaaa | Corectivă | Înlocuire invertor string (serie ...) | RMA producător; refacere buletin I-V | PV intervenție nr. ... | operator O&M |
+| 5 | zz.ll.aaaa | Schimbare titular | Vânzare parc | Predare-primire Carte tehnică; transfer licență | PV predare nr. ... | părți |
 
-### 5.1 Continuitatea jurnalului
-
-Jurnalul evenimentelor este o **piesă unică și continuă** pe toată durata de existență a construcției: nu se închide la schimbarea proprietarului, ci se transmite odată cu cartea tehnică și se continuă de noul proprietar. Filele nu se rup și nu se rescriu; corecturile se fac prin înscrieri ulterioare, datate și semnate. Absența înscrierilor pe perioade lungi este, în sine, un indiciu de neîndeplinire a obligației de urmărire a comportării în timp.
+Jurnalul este **piesă unică și continuă**: nu se închide la schimbarea proprietarului/titularului licenței, ci se transmite odată cu Cartea tehnică. Absența înscrierilor pe perioade lungi indică neîndeplinirea obligației de urmărire.
 
 ---
 
-## 6. Întocmirea, completarea, folosirea și păstrarea Cărții tehnice
+## 6. Întocmirea, completarea, folosirea și păstrarea
 
-### 6.1 Întocmirea
+### 6.1 Întocmirea și fluxul de constituire
 
-Cartea tehnică se **întocmește de către investitor**, care are obligația să asigure grupa de piese pentru fiecare secțiune, prin colaborarea factorilor implicați. În practică, coordonarea operativă a constituirii cărții tehnice pe parcursul execuției revine **dirigintelui de șantier** (reprezentantul investitorului), care adună de la executant și proiectant piesele secțiunilor A și B și le organizează pe dosare și borderouri.
+Cartea tehnică se **întocmește de investitor**, coordonarea operativă în execuție revenind **dirigintelui de șantier**, care adună piesele secțiunilor A și B și le organizează pe dosare/borderouri, în paralel cu execuția. La parcul FV, dirigintele verifică suplimentar corelarea pieselor de sector energetic (ATR ↔ soluție de racordare realizată; buletine PRAM ↔ energizare; certificat de racordare ↔ PIF).
 
-Constituirea nu este o operațiune de final, ci un proces derulat **în paralel cu execuția**: fiecare proces-verbal, buletin sau certificat se depune în dosarul corespunzător imediat ce este emis, iar borderoul se actualizează. Această disciplină documentară previne pierderea pieselor și permite verificarea completitudinii înaintea recepției. Dirigintele verifică nu doar existența, ci și **corectitudinea și corelarea** pieselor (ex. corespondența dintre certificatele de calitate și procesele-verbale de recepție calitativă a materialelor, dintre planurile „as built" și dispozițiile de șantier).
+**Fluxul cronologic de constituire (cine, ce, când) — specific FV:**
 
-### 6.2 Completarea
-
-- Pe parcursul **execuției** se completează secțiunile A și B, pe măsura elaborării documentelor și a încheierii proceselor-verbale;
-- La **recepție** se completează secțiunea C și se deschide secțiunea D (instrucțiuni de exploatare, program de urmărire);
-- Pe durata **exploatării** se completează permanent secțiunea D (jurnalul evenimentelor, rapoarte de urmărire, intervenții), de către proprietar/administrator.
-
-**Fluxul cronologic de constituire** (cine, ce, când):
-
-| Etapă | Moment | Cine depune | Ce se adaugă în cartea tehnică |
+| Etapă | Moment | Cine depune | Ce se adaugă |
 |---|---|---|---|
-| Proiectare | Înainte de autorizare | Proiectant + verificatori | Piese secțiunea A (proiect verificat, referate, caiete de sarcini, breviare) |
-| Autorizare | La emiterea AC | Investitor | Autorizația de construire + avize (A/B) |
-| Începerea execuției | Predare amplasament | Diriginte + executant | PV predare amplasament, PV trasare (B) |
-| Pe parcursul execuției | Continuu | Executant + diriginte | PV lucrări ascunse, PV faze determinante, buletine, DoP/certificate, dispoziții de șantier, jurnal de șantier (B) |
-| Finalizarea execuției | Înainte de RTL | Executant + proiectant | Planuri „as built", instrucțiuni de exploatare, program de urmărire (B + deschidere D) |
-| Recepție la terminarea lucrărilor | RTL | Comisia + diriginte + proiectant | PV RTL + referate + anexe (C) |
-| Perioada de garanție | Până la RF | Proprietar + responsabil urmărire | Prime înscrieri în jurnalul evenimentelor, remedieri (D) |
-| Recepție finală | RF | Comisia + proprietar | PV RF; predarea cărții tehnice complete către proprietar (C) |
-| Exploatare | Pe toată durata | Proprietar / administrator | Rapoarte de urmărire, jurnal evenimente, documente intervenții (D) |
-| Postutilizare | La dezafectare | Proprietar + proiectant desființare | Expertiză, proiect desființare, autorizație, PV recepție desființare (D), apoi arhivare |
+| Proiectare | Înainte de autorizare | Proiectant + verificatori | Secțiunea A: SF, PT, DE, referate, breviare (vânt/smulgere/electric) |
+| Avize energetice | Înainte de AC | Investitor | ATR, Autorizație de înființare ANRE, avize (A) |
+| Autorizare | La emiterea AC | Investitor | AC + avize construcții (A/B) |
+| Piloți de probă | Început execuție | Executant + geo + proiectant | FD-1 + buletine smulgere (B) |
+| Execuție | Continuu | Executant + diriginte | PV lucrări ascunse (piloți, cabluri, priză), FD, DoP/certificate, jurnal șantier (B) |
+| Finalizare + PIF | Înainte de RTL | Executant + proiectant + OD | Buletine I-V/izolație/priză/PRAM; „as built"; program mentenanță (B + deschidere D) |
+| Punere sub tensiune | PIF | OD + executant | Certificat de racordare; PV punere sub tensiune (C) |
+| RTL | Recepția | Comisia + diriginte + proiectant | PV RTL + referate (C) |
+| Licențiere | Exploatare comercială | ANRE | Licența de producere (C/D) |
+| Garanție → RF | Până la RF | Operator + responsabil urmărire | Jurnal, KPI, remedieri; PV RF (C+D) |
+| Exploatare | 25–35 ani | Operator O&M | Rapoarte urmărire, KPI, mentenanță, intervenții (D) |
+| Postutilizare | Dezafectare | Proprietar + proiectant desființare | Expertiză, proiect, autorizație desființare, plan DEEE, PV recepție (D) |
 
-### 6.3 Responsabilități pe factori
+### 6.2 Responsabilități pe factori
 
-| Factor implicat | Obligații privind cartea tehnică |
+| Factor | Obligații privind Cartea tehnică a parcului FV |
 |---|---|
-| **Investitorul** | Asigură întocmirea cărții tehnice; obține și depune piesele secțiunilor A–B; predă cartea tehnică proprietarului la recepția finală (dacă investitorul nu este el însuși proprietarul) |
-| **Proiectantul** | Predă piesele secțiunii A (proiect verificat, caiete de sarcini, breviare, referate); elaborează instrucțiunile de exploatare/întreținere și programul de urmărire în timp (secțiunea D); consemnează dispozițiile de șantier |
-| **Executantul (constructorul)** | Predă piesele secțiunii B (PV lucrări ascunse și faze determinante, buletine, certificate de calitate/DoP, jurnal de șantier, planuri „as built"); participă la recepție |
-| **Dirigintele de șantier / RTE** | Coordonează constituirea și organizarea cărții tehnice pe șantier; verifică existența și corectitudinea pieselor; întocmește referatul pentru recepție |
-| **Comisia de recepție** | Verifică existența și starea cărții tehnice ca precondiție a recepției; consemnează în PV |
-| **Proprietarul / administratorul** | Preia și **păstrează** cartea tehnică; o completează cu secțiunea D (urmărire, evenimente, intervenții); o predă la înstrăinare; numește responsabilul cu urmărirea comportării în timp |
+| **Investitorul / titular licență** | Asigură întocmirea; obține/depune piesele A–B și cele energetice (ATR, autorizație înființare); predă Cartea tehnică la RF |
+| **Proiectantul (general + Ie)** | Predă secțiunea A (proiect verificat, breviare, caiete de sarcini, referate); elaborează instrucțiunile de exploatare și programul de urmărire (D); consemnează dispozițiile de șantier |
+| **Executantul (atestat ANRE pt. instalații electrice)** | Predă secțiunea B (PV lucrări ascunse/FD, buletine, DoP/certificate, „as built", jurnal șantier) |
+| **Dirigintele / RTE** | Coordonează și verifică Cartea tehnică pe șantier; corelează piesele de sector energetic; referat pentru recepție |
+| **Laborator / personal PRAM** | Emit buletinele (smulgere, I-V, izolație, priză, PRAM) — piese B |
+| **Operatorul de rețea (OD/OTS)** | Emite ATR și Certificatul de racordare; participă la PIF; impune revizii periodice |
+| **ANRE** | Emite Autorizația de înființare și Licența de producere |
+| **Proprietarul / operatorul O&M** | Preia și păstrează Cartea tehnică; completează secțiunea D (urmărire, KPI, mentenanță, evenimente); o predă la înstrăinare; numește responsabilul cu urmărirea |
 
-### 6.4 Predarea la recepție
+### 6.3 Folosirea și păstrarea
 
-La **recepția la terminarea lucrărilor**, cartea tehnică trebuie să fie constituită (secțiunile A, B și instrucțiunile din D) — comisia verifică acest lucru. La **recepția finală**, cartea tehnică completată cu documentele perioadei de garanție se **predă proprietarului**, cu proces-verbal de predare-primire (v. cap. 13). Absența cărții tehnice constituite este motiv de amânare/respingere a recepției.
+- Se păstrează pe **toată durata de existență** a parcului (25–35 ani), de către proprietar/operator, în condiții care previn deteriorarea, cu **copie electronică de siguranță** (recomandat, în locație distinctă — inclusiv arhiva logurilor SCADA);
+- La **înstrăinarea parcului** (tranzacție de activ, foarte frecventă în sectorul FV), Cartea tehnică se **predă noului proprietar/titular**, cu PV; ea este obiectul central al **due diligence tehnic** al cumpărătorului/finanțatorului;
+- Se pune la dispoziția organelor de control (ISC), a OD/ANRE, a experților și a comisiilor de recepție;
+- La dezafectare, se completează cu documentele de postutilizare și se **arhivează**.
 
-### 6.5 Folosirea și păstrarea
+### 6.4 Deficiențe frecvente de evitat (specific FV)
 
-- Cartea tehnică se **păstrează pe toată durata de existență** a construcției, până la demolarea acesteia;
-- Se păstrează de către **proprietar/administrator**, la sediul/locul stabilit, în condiții care să prevină deteriorarea, pierderea sau distrugerea (recomandabil și în copie electronică de siguranță, în locație distinctă);
-- La **înstrăinarea** construcției (vânzare, donație, aport, comasare/dezmembrare), cartea tehnică se **predă noului proprietar**, cu proces-verbal; obligația de completare și păstrare se transferă;
-- Cartea tehnică se pune la dispoziția organelor de control, a experților, a proiectanților intervențiilor și a comisiilor de recepție, ori de câte ori este necesar;
-- La încetarea existenței construcției (postutilizare), cartea tehnică se **arhivează** conform reglementărilor privind Fondul Arhivistic Național, întrucât păstrează valoare istorică, tehnică și juridică (probarea faptelor din perioada de existență) și după desființare.
-
-Durata obligației de păstrare coincide cu **durata de existență** a construcției: nu există un termen intermediar de casare a cărții tehnice cât timp construcția există. Transmiterea între proprietari succesivi este integrală (cu toate secțiunile și jurnalul evenimentelor), astfel încât continuitatea informației tehnice să nu se întrerupă niciodată.
-
-### 6.6 Regimul special la construcții cu mai mulți proprietari
-
-La construcțiile cu **proprietate comună / mai mulți proprietari** (ex. condominii, clădiri cu spații pe niveluri aparținând unor titulari diferiți), cartea tehnică a părților comune și a structurii se păstrează de **administrator / asociație**, care asigură completarea secțiunii D și punerea la dispoziție a documentelor. Fiecare proprietar are dreptul de a consulta cartea tehnică; obligația de urmărire a comportării în timp a elementelor comune revine administratorului.
-
-### 6.7 Deficiențe frecvente de evitat
-
-Din practica managementului calității, cele mai frecvente neconformități privind cartea tehnică — care trebuie prevenite — sunt:
-- carte tehnică **necompletată la zi** (secțiunea D „îngheață" după recepție, fără jurnal al evenimentelor și fără rapoarte de urmărire);
-- **lipsa planurilor „as built"** sau necorelarea lor cu execuția reală (blochează orice intervenție ulterioară);
-- **procese-verbale de lucrări ascunse / faze determinante incomplete** sau nesemnate de toți factorii;
-- proiect **neverificat** sau referate de verificare lipsă în secțiunea A;
-- **nepredarea** cărții tehnice la înstrăinare, cu pierderea trasabilității;
-- păstrare în **condiții improprii** (fără copie de siguranță), cu risc de pierdere la incendiu/inundație.
+- Lipsa **curbelor I-V de referință** (B.5) — face imposibilă invocarea garanției de performanță a modulelor;
+- **As built" eronat al traseelor de cabluri DC/AC îngropate** — periculos la mentenanță/săpături ulterioare;
+- Secțiunea D „îngheață" după PIF (fără KPI, fără jurnal) — pierderea trasabilității de performanță și a bazei de garanție;
+- Necorelarea seriilor module ↔ poziție — imposibilitatea RMA/înlocuirii țintite;
+- Nepredarea Cărții tehnice la vânzarea parcului — blochează tranzacția.
 
 ---
 
-## 7. Urmărirea comportării în timp (P130/1999) și corelarea cu secțiunea D
+## 7. Contravenții, răspunderi și relația cu alte evidențe
 
-Urmărirea comportării în timp a construcțiilor este o **componentă a sistemului calității** (Legea 10/1995) și se realizează conform **Normativului P130/1999**. Ea se corelează direct cu **secțiunea D** a cărții tehnice, unde se consemnează programul și rezultatele.
+**Legea 10/1995** instituie regimul de contravenții pentru neîntocmirea/necompletarea/nepredarea/nepăstrarea Cărții tehnice și pentru neefectuarea urmăririi comportării în timp; controlul se exercită de **ISC**. La parcul FV, la acest regim se adaugă **obligațiile din Legea 123/2012 și din licența ANRE** (respectarea condițiilor de exploatare, raportări, mentenanța instalației de racordare), a căror nerespectare atrage sancțiuni ANRE distincte.
 
-### 7.1 Urmărirea curentă
+Răspunderea este **individualizată pe fapta fiecărui factor** (investitor, proiectant, executant, diriginte/RTE, proprietar/operator). Răspunderea pentru viciile ascunse ale **structurii de rezistență** (mese, piloți, fundații PT) este pe toată durata de existență; Cartea tehnică este proba esențială în stabilirea originii viciului.
 
-- Activitate de **inspectare vizuală și de măsurători simple**, executată periodic, pe toată durata de existență a construcției;
-- Se aplică **tuturor construcțiilor**;
-- Urmărește: starea generală, apariția și evoluția degradărilor (fisuri, tasări, deplasări, coroziune, infiltrații, degradări ale finisajelor și instalațiilor), funcționarea elementelor de siguranță;
-- Se realizează de **personalul propriu / responsabilul cu urmărirea** desemnat de proprietar, la periodicitatea stabilită prin programul de urmărire (uzual — periodic și după evenimente excepționale);
-- Rezultatele se consemnează în **jurnalul evenimentelor** și în fișele de urmărire (secțiunea D).
-
-**Elemente și fenomene urmărite curent** (orientativ, în funcție de tipul construcției):
-
-| Domeniu | Ce se urmărește vizual | Semn de alarmă |
-|---|---|---|
-| Structură | Fisuri, deschideri, deformații, deplasări vizibile, coroziune, degradarea îmbinărilor | Fisuri noi/în progresie, deformații vizibile, deplasări la reazeme |
-| Fundații / teren | Tasări diferențiale, denivelări, crăpături la soclu, umezeală ascendentă | Tasare bruscă, înclinarea construcției |
-| Anvelopă / acoperiș | Infiltrații, degradarea hidroizolației, desprinderi, coroziune tablă | Infiltrații active, desprinderi de elemente |
-| Instalații | Scurgeri, coroziune conducte, funcționarea echipamentelor de siguranță | Avarii la instalații de siguranță (PSI, evacuare) |
-| Finisaje / siguranță în exploatare | Degradarea pardoselilor, parapetelor, scărilor, ușilor de evacuare | Elemente de siguranță nefuncționale |
-
-Periodicitatea inspecțiilor curente se stabilește prin **programul de urmărire** (uzual anual sau la intervale mai scurte pentru elemente sensibile) și, obligatoriu, **după fiecare eveniment excepțional** (cutremur resimțit, inundație, incendiu, explozie, alunecare, avarie majoră). Constatările se compară cu starea de referință consemnată la recepție.
-
-### 7.2 Urmărirea specială
-
-- Activitate de **măsurare instrumentală** a unor parametri (deplasări, deformații, tasări, rotiri, tensiuni, deschideri de fisuri, nivel freatic etc.), cu aparatură și metodologie specifice;
-- Se instituie prin **proiect** pentru construcțiile la care o impun categoria de importanță, condițiile de amplasament, comportarea deosebită sau prevederile reglementărilor tehnice, precum și pentru construcțiile la care apar fenomene ce necesită monitorizare;
-- Se realizează de **personal specializat / unități autorizate**, sub coordonarea unui responsabil cu urmărirea specială;
-- Presupune stabilirea **valorilor de referință** și a **pragurilor** (atenție / avertizare / alarmare); la depășirea pragurilor se declanșează măsurile prevăzute;
-- Rezultatele (rapoarte de urmărire specială) se depun în **secțiunea D** și se consemnează în jurnalul evenimentelor.
-
-**Pragurile în urmărirea specială:** programul stabilește, pentru fiecare parametru monitorizat, trei niveluri:
-- **prag de atenție** — depășirea impune verificarea aparaturii și analiza cauzei, cu creșterea frecvenței de măsurare;
-- **prag de avertizare** — impune expertiza tehnică și pregătirea măsurilor de intervenție;
-- **prag de alarmare** — impune măsuri imediate de siguranță (limitarea/oprirea exploatării, evacuare, intervenție de urgență).
-
-La depășirea oricărui prag, evenimentul se consemnează în jurnal, se notifică factorii responsabili și se declanșează procedura aferentă. Valorile de referință inițiale (la punerea în funcțiune) și pragurile se stabilesc prin proiectul de urmărire specială și se păstrează în secțiunea D.
-
-Programul de urmărire (curentă și, după caz, specială) — parte a secțiunii D — cuprinde: obiectul urmăririi, parametrii urmăriți, metodele și aparatura, amplasarea punctelor de măsură, periodicitatea, responsabilii și modul de valorificare a datelor.
-
-### 7.3 Corelarea urmăririi cu categoria de importanță
-
-Amploarea urmăririi este proporțională cu **categoria de importanță** (HG 766/1997 — Anexa 3: excepțională A, deosebită B, normală C, redusă D) și cu clasa de importanță seismică. Astfel:
-
-| Categorie de importanță | Tip de urmărire tipic | Caracterizare |
-|---|---|---|
-| **A / B** (excepțională / deosebită) | Curentă **și** specială | Monitorizare instrumentală a parametrilor critici, cu praguri și raportare; program detaliat |
-| **C** (normală) | Curentă, cu urmărire specială dacă o impun amplasamentul sau comportarea | Inspecții periodice; instrumentare punctuală dacă apar fenomene |
-| **D** (redusă) | Curentă simplă | Inspecții vizuale la periodicitate mărită |
-
-### 7.4 Valorificarea datelor de urmărire
-
-Datele de urmărire nu se colectează pentru arhivare, ci pentru **decizie**: evoluția degradărilor sau depășirea pragurilor declanșează expertiza tehnică și, după caz, intervenția. Ciclul este: *inspecție/măsurare → consemnare în jurnal și fișe → analiză și comparare cu referința → decizie (menținere / supraveghere sporită / expertiză / intervenție / limitare de exploatare)*. Continuitatea acestui ciclu, pe toată durata de existență, este scopul secțiunii D și justifică obligația de completare permanentă a cărții tehnice.
+**Relația cu alte evidențe:**
+- **Cadastru / CF** — corelate prin nr. cadastral din fișa sinteză; la dezafectare, radiere după recepția desființării;
+- **Documentațiile de urbanism (CU/PUZ)** — reflectate în secțiunea A;
+- **Cartea tehnică a echipamentelor** (transformatoare, celule MT) — se atașează/corelează cu secțiunile B și D; reviziile periodice se consemnează în D;
+- **SCADA / sistemul de monitorizare** — logurile de performanță arhivate sunt parte a secțiunii D (reper KPI).
 
 ---
 
-## 8. Intervenții în timp (reparații, consolidări, modificări)
+## 8. Concluzii și model de proces-verbal de predare-primire
 
-Intervențiile asupra construcției existente — **reparații capitale, consolidări, modernizări, extinderi, schimbări de destinație** — sunt reglementate de Legea 10/1995 și de Anexa 6 la HG 766/1997 și se supun unui regim strict:
+### 8.1 Concluzii
 
-- **Fundamentare**: orice intervenție care afectează cerințele fundamentale (în special rezistența mecanică și stabilitatea, securitatea la incendiu) se face pe baza unei **expertize tehnice** întocmite de expert atestat și a unui **proiect de intervenție** verificat de verificator de proiecte atestat pe cerințele afectate;
-- **Autorizare**: intervențiile care intră sub incidența Legii 50/1991 se execută în baza **autorizației de construire**;
-- **Execuție și recepție**: intervenția se execută cu respectarea sistemului calității (diriginte, RTE, controale pe faze, faze determinante după caz) și se **recepționează** cu proces-verbal;
-- **Înregistrare în cartea tehnică**: expertiza, proiectul de intervenție, autorizația, documentele de execuție și PV de recepție ale intervenției se **depun în secțiunea D**, iar evenimentul se **consemnează în jurnalul evenimentelor**; planurile se actualizează („as built" post-intervenție);
-- La **schimbarea destinației** sau a încărcărilor de exploatare, se reevaluează încadrarea (categorie/clasă de importanță) și conformarea la cerințele fundamentale, cu consemnare în cartea tehnică.
-
-Intervențiile nu se pot realiza „în afara" cărții tehnice: cartea tehnică furnizează starea inițială și de referință, iar rezultatul intervenției se reflectă obligatoriu în ea.
-
-### 8.1 Tipologia intervențiilor și regimul lor documentar
-
-| Tip de intervenție | Expertiză tehnică | Proiect verificat | Autorizație de construire | Recepție | Înregistrare în cartea tehnică |
-|---|---|---|---|---|---|
-| Întreținere / reparații curente | Nu (de regulă) | Nu | Nu (de regulă) | — | Jurnal evenimente + fișe |
-| Reparații capitale | Da, dacă afectează cerințele | Da, pe cerințele afectate | Da, dacă intră sub Legea 50/1991 | Da | Secțiunea D, integral |
-| Consolidare | Da (obligatoriu) | Da | Da | Da | Secțiunea D + „as built" post-intervenție |
-| Modernizare / reabilitare | Da, dacă afectează cerințele | Da | Da | Da | Secțiunea D + actualizare planuri |
-| Extindere / supraetajare | Da | Da | Da | Da | Secțiunea D + revizuire fișă sinteză |
-| Schimbare de destinație | Da (reevaluare încadrare) | Da, dacă modifică soluțiile | Da, dacă intră sub Legea 50/1991 | Da | Secțiunea D + reevaluare categorie/clasă |
-
-### 8.2 Continuitatea răspunderii la intervenții
-
-La orice intervenție se aplică din nou **întregul sistem al calității**: proiectantul intervenției răspunde de soluție, verificatorul de conformarea proiectului, executantul de calitatea lucrării, iar dirigintele/RTE de supravegherea execuției. Documentele generate (o „mini-carte tehnică" a intervenției) se integrează în secțiunea D a cărții tehnice existente, fără a înlocui piesele istorice — construcția își păstrează astfel întreaga „biografie" tehnică.
-
----
-
-## 9. Postutilizarea construcției
-
-Postutilizarea (dezafectarea, demolarea/desființarea și valorificarea materialelor) este reglementată tot de **Anexa 6 la HG 766/1997** și de Legea 10/1995. Elemente și documente:
-
-- Postutilizarea se declanșează când construcția și-a încheiat durata de utilizare / este dezafectată / prezintă riscuri;
-- Se fundamentează, după caz, pe **expertiză tehnică** privind starea și pe un **proiect de desființare**;
-- Desființarea se autorizează prin **autorizație de desființare** (Legea 50/1991);
-- Se asigură **protecția și securitatea** pe durata lucrărilor, precum și **gestiunea deșeurilor** din construcții și desființări (sortare, valorificare, eliminare conform reglementărilor de mediu);
-- Documentele de postutilizare (expertiză, proiect de desființare, autorizație, PV de recepție a desființării, evidența deșeurilor) se **depun în secțiunea D** / se atașează cărții tehnice, care se **arhivează** conform reglementărilor după finalizare;
-- Se actualizează situația cadastrală (radiere din cartea funciară a construcției desființate).
-
-### 9.1 Etapele postutilizării
-
-Anexa 6 la HG 766/1997 tratează postutilizarea ca ultimă etapă a ciclului de viață, structurată în general astfel:
-1. **Declanșarea** — decizia de dezafectare, fundamentată tehnic (expertiză privind starea și riscurile) și economic;
-2. **Pregătirea** — proiectul de desființare (organizarea lucrărilor, ordinea demontării/demolării, măsuri de siguranță, plan de gestiune a deșeurilor), autorizația de desființare, dezafectarea utilităților;
-3. **Dezafectarea și desființarea propriu-zisă** — cu asigurarea securității muncii și a vecinătăților;
-4. **Valorificarea** — recuperarea și valorificarea materialelor și elementelor refolosibile, sortarea și eliminarea/valorificarea deșeurilor conform reglementărilor de mediu;
-5. **Închiderea** — recepția lucrărilor de desființare, aducerea terenului la starea convenită, radierea cadastrală și **arhivarea cărții tehnice**.
-
-Cartea tehnică rămâne documentul care fundamentează postutilizarea (prin datele „as built" și de urmărire) și se completează cu documentele acesteia înainte de arhivarea finală.
-
----
-
-## 10. Contravenții și răspunderi
-
-**Legea 10/1995** instituie un regim de răspunderi și de contravenții pentru încălcarea obligațiilor privind calitatea în construcții, între care și cele referitoare la cartea tehnică:
-
-- **Neîntocmirea și necompletarea cărții tehnice** a construcției, precum și **nepredarea** ei către proprietar constituie **contravenție** și se sancționează cu amendă (cap. privind contravenții din Legea 10/1995);
-- **Neefectuarea urmăririi comportării în timp** conform prevederilor legale și a programului de urmărire constituie contravenție;
-- **Nepăstrarea** cărții tehnice pe durata de existență a construcției și neîndeplinirea obligației de completare cu intervențiile ulterioare atrag răspunderea proprietarului/administratorului;
-- Răspunderea este graduală (contravențională, civilă, iar în cazuri grave — penală) și se stabilește pe factori (investitor, proiectant, executant, proprietar), fiecare pentru obligațiile ce îi revin;
-- Controlul respectării se exercită de **Inspectoratul de Stat în Construcții (ISC)**.
-
-> **Notă de fidelitate.** Cuantumurile amenzilor și numerotarea exactă a articolelor de contravenție se citesc **direct din textul în vigoare al Legii 10/1995 republicate** la data aplicării; ele se actualizează periodic și nu se reproduc aici pentru a evita erori.
-
-### 10.1 Repartizarea răspunderii pe factori
-
-Răspunderea nu este colectivă și nedeterminată, ci **individualizată pe fapta fiecărui factor**:
-
-| Factor | Fapta care atrage răspundere (privind cartea tehnică) |
-|---|---|
-| **Investitorul** | Neîntocmirea cărții tehnice; nepredarea către proprietar |
-| **Proiectantul** | Nepredarea pieselor secțiunii A; neîntocmirea instrucțiunilor de exploatare și a programului de urmărire |
-| **Executantul** | Nepredarea pieselor secțiunii B (procese-verbale, buletine, „as built") |
-| **Dirigintele / RTE** | Neverificarea și neorganizarea cărții tehnice pe parcursul execuției |
-| **Proprietarul / administratorul** | Nepăstrarea, necompletarea (secțiunea D) și neefectuarea urmăririi comportării în timp |
-
-### 10.2 Prescripția și garanțiile
-
-Neîndeplinirea obligațiilor privind cartea tehnică poate fi invocată și în cadrul **răspunderii pentru viciile ascunse** ale construcției. Legea 10/1995 instituie răspunderea proiectantului și executantului pentru viciile structurii de rezistență **pe toată durata de existență** a construcției, iar pentru celelalte vicii ascunse — pe durata prevăzută de lege de la recepție. Cartea tehnică este proba esențială în stabilirea originii viciului și a factorului răspunzător: absența sau incompletitudinea ei defavorizează factorul care avea obligația să o constituie.
-
----
-
-## 11. Factorii implicați — atestare, autorizare, roluri
-
-Calitatea și integritatea cărții tehnice depind de calificarea factorilor care generează piesele. Legea 10/1995 și reglementările subsecvente condiționează exercitarea rolurilor de **autorizare/atestare**:
-
-| Factor | Rol în raport cu cartea tehnică | Condiție de exercitare |
-|---|---|---|
-| **Investitorul** | Comandă și asigură constituirea; obligat la întocmire și predare | — |
-| **Proiectantul** | Elaborează secțiunea A; instrucțiuni de exploatare și program de urmărire (D) | Persoană cu drept de semnătură; societate cu obiect de activitate |
-| **Verificatorul de proiecte** | Verifică proiectul pe cerințe; referatele sunt piese ale secțiunii A | **Atestat** pe domenii și cerințe (MDLPA) |
-| **Expertul tehnic** | Expertizează construcții existente / la intervenții; rapoarte în A și D | **Atestat** pe domenii/cerințe |
-| **Executantul (constructorul)** | Realizează lucrarea; generează piesele secțiunii B | Sistem propriu de management al calității |
-| **Responsabilul tehnic cu execuția (RTE)** | Admite tehnic execuția; oprește lucrări neconforme; contribuie la B | **Autorizat** (MDLPA) |
-| **Dirigintele de șantier** | Reprezintă investitorul; verifică și organizează cartea tehnică pe șantier | **Autorizat** (ISC) pe domenii |
-| **Laboratorul de încercări** | Emite buletinele de încercări (piese B) | **Autorizat/acreditat** (ISC / RENAR) |
-| **Comisia de recepție** | Verifică existența cărții tehnice; întocmește piesele secțiunii C | Numită de investitor; participarea proiectantului și dirigintelui |
-| **ISC** | Control de stat; participă la faze determinante și recepții | Autoritate publică |
-| **Proprietarul / administratorul** | Păstrează, completează (D), asigură urmărirea | Numește responsabilul cu urmărirea comportării în timp |
-
-> Piesele emise de factori **neatestați/neautorizați** acolo unde legea o cere (proiect neverificat, buletine de la laborator neautorizat, dirigenție neautorizată) nu au valoare probatorie deplină și pot vicia recepția.
-
----
-
-## 12. Relația Cărții tehnice cu alte evidențe
-
-- **Cadastru și carte funciară** — cartea tehnică (evidența calității) este distinctă de evidența de publicitate imobiliară (dreptul de proprietate). Ele se corelează prin datele de identificare (nr. cadastral, CF) din fișa sinteză; la desființare, radierea din CF se face după recepția lucrărilor de desființare, iar cartea tehnică se arhivează.
-- **Documentațiile de urbanism (PUG/PUZ/PUD)** — nu fac parte din cartea tehnică, dar certificatul de urbanism (piesă a secțiunii A) reflectă reglementările urbanistice care au condiționat autorizarea; la schimbarea de destinație se verifică compatibilitatea urbanistică.
-- **Autorizația de securitate la incendiu** și avizele de mediu/sanitare — sunt piese ale secțiunilor A–C și condiționează punerea în funcțiune; modificarea condițiilor (destinație, capacitate) impune reobținerea lor.
-- **Cartea tehnică a echipamentelor** (ISCIR, ascensoare, instalații sub presiune) — se atașează/corelează cu secțiunile B și D; reviziile și autorizările periodice ale echipamentelor se consemnează în secțiunea D.
-
----
-
-## 13. Concluzii și model de proces-verbal de predare-primire
-
-### 13.1 Concluzii
-
-Cartea tehnică a construcției este **documentul de referință pe întreaga durată de viață** a construcției. Ea nu este o formalitate de arhivă, ci un instrument operațional: fundamentează urmărirea comportării în timp, deciziile de intervenție, expertizele, schimbările de destinație și, în final, postutilizarea. Constituirea corectă (capitol de prezentare + secțiunile A–D, fișa sinteză, centralizatorul, jurnalul evenimentelor), completarea permanentă și păstrarea pe toată durata de existență sunt obligații legale a căror neîndeplinire atrage răspunderi. Responsabilitatea se împarte pe factori — investitor, proiectant, executant, diriginte/RTE, proprietar — dar cheia „vieții" cărții tehnice o deține **proprietarul/administratorul**, prin secțiunea D.
+Cartea tehnică a unui parc fotovoltaic este documentul de referință pe întreaga durată de viață a Centralei Electrice Fotovoltaice (25–35 ani). Ea integrează, într-o structură unitară A–D (Anexa 6 la HG 766/1997), atât piesele clasice de construcții (proiectare verificată, PV de faze determinante și lucrări ascunse, buletine, „as built", recepție, urmărire P130/1999), cât și **piesele specifice de sector energetic** (ATR, Autorizația de înființare, Certificatul de racordare, Licența de producere, buletinele PRAM și I-V). Specificul FV impune un accent aparte pe: verificarea structurală la **vânt și smulgere** (secțiunea A), procesele-verbale de **lucrări ascunse** (piloți, cabluri DC/AC, priză — secțiunea B), **curbele I-V de referință** (baza garanției de performanță) și monitorizarea continuă a **KPI** (PR, disponibilitate, specific yield, degradare — secțiunea D). La final, postutilizarea are componentă proprie de **reciclare DEEE** și de **readucere reversibilă a terenului** la starea agricolă.
 
 **Sinteza obligațiilor esențiale:**
-1. Cartea tehnică se **întocmește** de investitor (prin diriginte), pe secțiunile A–D, conform Anexei 6 la HG 766/1997;
-2. Proiectul cuprins în secțiunea A trebuie să fie **verificat** pe cerințele fundamentale aplicabile;
-3. Secțiunile B și C se constituie din piese **originale** care angajează răspunderea factorilor (procese-verbale, referate, buletine);
-4. Cartea tehnică este **precondiție a recepției** și se **predă proprietarului** la recepția finală, cu proces-verbal;
-5. Secțiunea D se **completează permanent** pe durata exploatării (urmărire, jurnal, intervenții), corelat cu P130/1999;
-6. Cartea tehnică se **păstrează pe toată durata** de existență și se **predă la înstrăinare**;
-7. Neîntocmirea, necompletarea, nepredarea sau nepăstrarea constituie **contravenție** (Legea 10/1995) și pot antrena răspunderea pentru vicii.
+1. Cartea tehnică se **întocmește** de investitor (prin diriginte), pe secțiunile A–D, cu piesele energetice atașate;
+2. Proiectul (secțiunea A) trebuie **verificat** (A, Af, Ie, B după caz) și elaborat de proiectant **atestat ANRE** pentru instalații electrice;
+3. Secțiunile B și C conțin piese **originale** care angajează răspunderea (PV faze determinante/lucrări ascunse, buletine, referate);
+4. Cartea tehnică este **precondiție a recepției**, iar punerea sub tensiune este condiționată de **Certificatul de racordare**; exploatarea comercială — de **Licența ANRE**;
+5. Secțiunea D se **completează permanent** (urmărire P130, KPI, mentenanță, jurnal evenimente) pe 25–35 ani;
+6. Cartea tehnică se **păstrează** pe toată durata și se **predă la înstrăinarea parcului** (obiect central al due diligence);
+7. La dezafectare — documente de postutilizare + **gestiune DEEE** + arhivare.
 
-**Recomandare de bună practică:** desemnarea din start a unui responsabil unic cu cartea tehnică (dirigintele în execuție, apoi responsabilul cu urmărirea comportării în timp în exploatare), ținerea unei copii electronice de siguranță în locație distinctă și verificarea periodică a completitudinii — reduc la minim riscul de pierdere a trasabilității și de sancțiune.
-
-### 13.2 Model — Proces-verbal de predare-primire a Cărții tehnice
+### 8.2 Model — Proces-verbal de predare-primire a Cărții tehnice (parc FV)
 
 ```
 PROCES-VERBAL DE PREDARE-PRIMIRE A CĂRȚII TEHNICE A CONSTRUCȚIEI
+— CENTRALĂ ELECTRICĂ FOTOVOLTAICĂ —
 
 Nr. ______ / data __________
 
-Construcția: ___________________________________________
+Obiectivul: Parc fotovoltaic (CEF), P_DC = ______ kWp / P_AC = ______ kW
 Amplasament / adresă: __________________________________
 Nr. cadastral / CF: ____________________________________
-Categoria de importanță: _____   Clasa de importanță seismică: _____
+Racordare: tensiune ____ kV, punct de racordare ______________
+ATR nr. ____   Autorizație de înființare ANRE nr. ____
+Certificat de racordare nr. ____   Licență de producere nr. ____
+Categoria de importanță: __ (uzual C)   Clasa seismică: ___ (uzual III)
 
 Încheiat între:
-  PREDĂTOR: _____________________ (investitor / proprietar anterior),
+  PREDĂTOR: _____________________ (investitor / proprietar / titular anterior),
     reprezentat prin _________________, în calitate de _____________;
-  PRIMITOR: _____________________ (proprietar / administrator),
+  PRIMITOR: _____________________ (proprietar / operator / titular licență),
     reprezentat prin _________________, în calitate de _____________.
 
 Se predă/primește CARTEA TEHNICĂ A CONSTRUCȚIEI, întocmită conform
-Legii 10/1995 și Anexei 6 la HG 766/1997, cuprinzând:
+Legii 10/1995, Anexei 6 la HG 766/1997 și legislației de sector
+(Legea 123/2012, Ord. ANRE), cuprinzând:
 
-  [ ] Capitolul de prezentare (fișa de date sinteză + centralizatorul)
-  [ ] Secțiunea A — Documentația privind proiectarea ...... dosare: ___
-  [ ] Secțiunea B — Documentația privind execuția ......... dosare: ___
-  [ ] Secțiunea C — Documentația privind recepția ......... dosare: ___
-  [ ] Secțiunea D — Exploatare, întreținere, reparații,
-      urmărirea comportării în timp (inclusiv jurnalul
-      evenimentelor și programul de urmărire P130/1999) ... dosare: ___
+  [ ] Capitolul de prezentare (fișa sinteză + centralizatorul)
+  [ ] Secțiunea A — Proiectare (SF/PT/DE, referate, ATR,
+      Autorizație de înființare ANRE, avize) .......... dosare: ___
+  [ ] Secțiunea B — Execuție (AC, PV faze determinante și
+      lucrări ascunse, buletine smulgere/I-V/izolație/
+      priză/PRAM, certificate/DoP, „as built") ........ dosare: ___
+  [ ] Secțiunea C — Recepție (PV RTL/RF, Certificat de
+      racordare, PV punere sub tensiune, Licența ANRE) . dosare: ___
+  [ ] Secțiunea D — Exploatare, mentenanță, urmărire P130,
+      KPI (PR/availability/yield/degradare), jurnalul
+      evenimentelor, garanții, postutilizare/DEEE ...... dosare: ___
 
 Total dosare: ____   Total file: ____   Suport: hârtie / electronic
+Arhivă SCADA / loguri de performanță predate: da / nu
 
 Observații privind starea și completitudinea documentelor:
+(curbe I-V referință complete; „as built" cabluri DC/AC; buletine
+PRAM; corelare serii module ↔ poziție)
 _______________________________________________________________
 
 Odată cu predarea, primitorul preia obligațiile de completare,
-folosire și păstrare a cărții tehnice pe durata de existență a
-construcției, precum și obligația de a o preda la o eventuală
-înstrăinare ulterioară.
+folosire și păstrare a Cărții tehnice pe durata de existență a
+centralei, precum și obligațiile ce decurg din licența ANRE și
+din contractul de racordare, și obligația de a preda Cartea
+tehnică la o eventuală înstrăinare ulterioară.
 
     PREDĂTOR                                PRIMITOR
   (nume, semnătură,                       (nume, semnătură,
@@ -617,4 +607,4 @@ Martori / alți factori prezenți (după caz): ____________________
 
 ---
 
-*Document metodologic generic — parte a bibliotecii de conținut UrbanX. Se corelează, fără a le relua, cu documentul de recepție (secțiunile A–D ca precondiție a recepției), cu caietele de sarcini (piese ale secțiunii A) și cu memoriile tehnice pe specialități (documentație-suport). Trimiterile la articolele Legii 10/1995 se verifică pe textul republicat în vigoare la data utilizării.*
+*Document tehnic specific — parte a bibliotecii de conținut UrbanX pentru funcțiunea „parc fotovoltaic". Se corelează, fără a le relua, cu memoriul general (identificare, avize), memoriul de rezistență (dimensionare mese/piloți la vânt și smulgere), memoriul de instalații (scheme DC/AC/MT, priză, IPT), scenariul de securitate la incendiu și documentul de recepție (secțiunile A–D ca precondiție a recepției). Trimiterile la articolele Legii 10/1995, Legii 123/2012 și la Ordinele ANRE se verifică pe textele în vigoare la data utilizării.*

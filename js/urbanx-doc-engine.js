@@ -164,6 +164,93 @@
     // Adâncime îngheț (STAS 6054, din temperatura de iarnă)
     var Te = (out.clima && out.clima.Te) || -18;
     out.adancime_inghet_m = Te <= -20 ? 1.1 : Te <= -15 ? 1.0 : 0.9;
+
+    // ── PARC FOTOVOLTAIC / ENERGIE: dimensionare PARAMETRICĂ BIDIRECȚIONALĂ ──
+    // (a) putere setată → teren necesar + tot dimensionamentul;
+    // (b) doar teren disponibil (fără putere) → putere maximă instalabilă (invers).
+    // Tip montaj (fix / tracker 1-2 axe) modifică GCR și producția.
+    if (fn.cat === 'energie' || d.functiune === 'parc-fotovoltaic') {
+      var pmod = +d.putere_modul_wp || 555;      // Wp/modul
+      var ilr = +d.ilr || 1.25;                  // raport DC/AC
+      var montaj = d.montaj || 'fix';            // fix | tracker_1ax | tracker_2ax
+      var gcrMap = { fix: 0.40, tracker_1ax: 0.33, tracker_2ax: 0.25 };
+      var gainMap = { fix: 1.00, tracker_1ax: 1.18, tracker_2ax: 1.30 };  // câștig producție vs fix
+      var montajLbl = { fix: 'suporți micști ficși (fixed-tilt, înclinare fixă 25–35°)', tracker_1ax: 'trackere cu 1 axă (urmărire E–V, motorizate)', tracker_2ax: 'trackere cu 2 axe (urmărire azimut + elevație, motorizate)' };
+      var gcr = +d.gcr || gcrMap[montaj] || 0.40;
+      var gain = gainMap[montaj] || 1.00;
+      var psh = +d.psh_poa || 1450;              // ore-soare echiv. în planul modulelor (h)
+      var pr = +d.pr || 0.82;                    // performance ratio
+      var modArea = +d.arie_modul_mp || 2.58;    // m²/modul (~2,384×1,134 m)
+      var modKg = +d.masa_modul_kg || 30;        // kg/modul (~28–32 kg)
+      var terenDisp = Math.max(0, +Steren || 0); // teren disponibil (mp)
+      // Suprafața-anexă (NU intră module): drumuri interioare + platforme PT/invertoare + retrageri + împrejmuire + spații verzi
+      var fOver = (d.overhead_pct != null && d.overhead_pct !== '') ? Math.max(0, Math.min(0.5, +d.overhead_pct / 100)) : 0.18;
+      var pdc = Math.max(0, +d.putere_kwp || +d.putere_instalata || 0); // kWp DC setat
+      var directie = null;
+      if (pdc <= 0 && terenDisp > 0) {
+        // INVERS: teren disponibil → putere maximă instalabilă (după scăderea suprafeței-anexă)
+        var nrModMax = Math.floor(terenDisp * (1 - fOver) * gcr / modArea);
+        pdc = Math.round(nrModMax * pmod / 1000);
+        directie = 'teren→putere (putere maximă instalabilă pe terenul disponibil)';
+      } else if (pdc > 0) {
+        directie = 'putere→teren (teren necesar pentru puterea dorită)';
+      }
+      if (pdc > 0) {
+        var e = {};
+        e.directie = directie; e.montaj = montaj; e.montaj_label = montajLbl[montaj] || montaj;
+        e.putere_dc_kwp = Math.round(pdc);
+        e.putere_ac_kva = Math.round(pdc / ilr);
+        e.ilr = ilr; e.putere_modul_wp = pmod;
+        e.nr_module = Math.round(pdc * 1000 / pmod);          // N = P_DC/P_modul
+        e.masa_modul_kg = modKg;
+        e.masa_module_t = Math.round(e.nr_module * modKg / 1000);
+        e.arie_module_mp = Math.round(e.nr_module * modArea);
+        e.gcr = gcr;
+        e.camp_module_mp = Math.round(e.arie_module_mp / gcr);     // câmp solar (incl. spațiere inter-rânduri)
+        e.overhead_pct = Math.round(fOver * 100);
+        e.teren_necesar_mp = Math.round(e.camp_module_mp / (1 - fOver)); // + drumuri/PT/retrageri/împrejmuire/verzi
+        e.teren_necesar_ha = +(e.teren_necesar_mp / 10000).toFixed(2);
+        e.teren_disponibil_mp = terenDisp || null;
+        e.teren_budget = [
+          ['Câmp de module (incl. spațiere inter-rânduri, GCR ' + gcr + ')', e.camp_module_mp],
+          ['Drumuri interioare + platforme PT/invertoare (~8%)', Math.round(e.teren_necesar_mp * 0.08)],
+          ['Retrageri perimetrale + împrejmuire + spații verzi (~10%)', Math.round(e.teren_necesar_mp * 0.10)]
+        ];
+        // Putere maximă fizic instalabilă pe terenul DECLARAT (pt. verificarea „nu inventa")
+        e.putere_max_teren_kwp = terenDisp > 0 ? Math.round(Math.floor(terenDisp * (1 - fOver) * gcr / modArea) * pmod / 1000) : null;
+        e.densitate_kwp_ha = e.teren_necesar_mp ? Math.round(pdc / (e.teren_necesar_mp / 10000)) : 0; // kWp/ha
+        e.teren_per_mwp_ha = +((e.teren_necesar_mp / 10000) / (pdc / 1000)).toFixed(2); // ha/MWp
+        e.psh_poa = psh; e.pr = pr; e.gain_montaj = gain;
+        e.yield_kwh_kwp = Math.round(psh * pr * gain);        // kWh/kWp·an
+        e.productie_anuala_mwh = Math.round(pdc * psh * pr * gain / 1000); // E = P_DC×PSH×PR×câștig montaj
+        e.module_pe_string = +d.module_string || 27;          // Voc(-10°C) < 1500 V DC
+        e.nr_stringuri = Math.max(1, Math.round(e.nr_module / e.module_pe_string));
+        var pinv = +d.putere_invertor_kva || 100;             // kVA/invertor (string)
+        e.putere_invertor_kva = pinv;
+        e.nr_invertoare = Math.max(1, Math.round(e.putere_ac_kva / pinv));
+        e.putere_pt_kva = Math.max(400, Math.ceil(e.putere_ac_kva / 400) * 400);
+        e.nr_pt = Math.max(1, Math.ceil(e.putere_ac_kva / 1600));  // ~1 PT / 1600 kVA
+        e.co2_evitat_t_an = Math.round(e.productie_anuala_mwh * 0.25); // factor SEN ~0,25 tCO2/MWh
+        e.racord = e.putere_ac_kva <= 100 ? 'JT (0,4 kV)' : (e.putere_ac_kva <= 6000 ? 'MT (20 kV)' : 'ÎT (110 kV)');
+        e.degradare_an_pct = 0.5;
+        e.productie_25ani_mwh = Math.round(e.productie_anuala_mwh * 25 * (1 - 0.005 * 12)); // medie cu degradare liniară 0,5%/an
+        out.energie = e;
+      }
+    }
+    // ── CAPACITATE DE DEZVOLTARE + CONSTRÂNGEREA DETERMINANTĂ (funcțiuni de clădire) ──
+    // Răspunde: pe terenul dat, cât se poate construi și DE CE (ce indicator „leagă").
+    if (!out.energie && Steren > 0) {
+      var potMax = +d.POT_max || fn.pot_rec || 40;
+      var cutMax = +d.CUT_max || fn.cut_rec || 1.0;
+      var scMaxPot = Math.round(Steren * potMax / 100);
+      var sdMaxCut = Math.round(Steren * cutMax);
+      out.capacitate = {
+        tip: 'cladire', teren_mp: Steren, pot_max: potMax, cut_max: cutMax,
+        sc_max_mp: scMaxPot, sd_max_mp: sdMaxCut,
+        niv_ech: scMaxPot > 0 ? +(sdMaxCut / scMaxPot).toFixed(1) : 0,
+        sv_min_mp: out.sv_min_mp, parcaje: out.parcaje_necesare, parcaje_area_mp: (out.parcaje_necesare || 0) * 25
+      };
+    }
     return out;
   }
 
@@ -172,6 +259,17 @@
     d = d || {}; var ac = autoCalc(d); var checks = [];
     var Sc = +d.Sc || 0, H = +d.H || 0;
     function chk(ok, txt, norma, sev) { checks.push({ status: ok === true ? 'conform' : ok === false ? 'neconform' : 'warning', text: txt, norma: norma || '', sev: sev || (ok === false ? 'critic' : 'info') }); }
+    // ── ENERGIE: verificarea „nu inventa" — puterea declarată vs. capacitatea fizică a terenului ──
+    if (ac.energie && ac.energie.putere_max_teren_kwp != null && (+d.putere_kwp) > 0) {
+      var pMax = ac.energie.putere_max_teren_kwp;
+      var pDecl = +d.putere_kwp;
+      var terenMp = +d.Steren || 0;
+      var okCap = pDecl <= pMax * 1.02; // toleranță 2%
+      var mesajCap = okCap
+        ? ('Putere declarată ' + pDecl.toLocaleString('ro-RO') + ' kWp ≤ maxim instalabil ' + pMax.toLocaleString('ro-RO') + ' kWp pe ' + (terenMp).toLocaleString('ro-RO') + ' m²')
+        : ('Putere declarată ' + pDecl.toLocaleString('ro-RO') + ' kWp DEPĂȘEȘTE ce se poate instala fizic pe ' + terenMp.toLocaleString('ro-RO') + ' m²: maxim ~' + pMax.toLocaleString('ro-RO') + ' kWp (montaj ' + (ac.energie.montaj || 'fix') + ', GCR ' + ac.energie.gcr + ', minus drumuri/PT/invertoare/retrageri/spații verzi). Reduceți puterea sau măriți terenul (~' + (ac.energie.teren_necesar_mp || 0).toLocaleString('ro-RO') + ' m² necesari pentru puterea dorită).');
+      chk(okCap, mesajCap, 'Dimensionare fizică teren↔putere (GCR + suprafață-anexă)', okCap ? 'info' : 'critic');
+    }
     // POT / CUT
     if (d.POT_max != null) chk(ac.POT <= +d.POT_max, 'POT propus ' + ac.POT + '% ' + (ac.POT <= +d.POT_max ? '<' : '>') + ' POT max ' + d.POT_max + '%', 'RGU / PUG-PUZ');
     if (d.CUT_max != null) chk(ac.CUT <= +d.CUT_max, 'CUT propus ' + ac.CUT + ' ' + (ac.CUT <= +d.CUT_max ? '<' : '>') + ' CUT max ' + d.CUT_max, 'RGU / PUG-PUZ');

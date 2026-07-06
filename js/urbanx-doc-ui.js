@@ -90,7 +90,7 @@
       kind = kind || 'manual'; var box = el('div', { style: (C[kind] || C.manual) + ';border-radius:8px;padding:7px 9px' });
       box.appendChild(el('div', { style: 'font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#94a3b8;margin-bottom:3px' }, label + (kind === 'auto' ? ' · auto' : '')));
       if (kind === 'auto') { var v = el('div', { id: 'auto-' + key, style: 'font-size:13px;font-weight:700;color:#86efac' }, opts && opts.val != null ? opts.val : '—'); box.appendChild(v); }
-      else if (kind === 'select') { var sel = el('select', { style: INP }); (opts.options || []).forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (D[key] === o[0]) op.setAttribute('selected', 'selected'); sel.appendChild(op); }); sel.onchange = function () { D[key] = sel.value; if (key === 'faza') renderForm(); else recalc(); }; if (!D[key] && opts.options && opts.options[0]) D[key] = opts.options[0][0]; box.appendChild(sel); }
+      else if (kind === 'select') { var sel = el('select', { style: INP }); (opts.options || []).forEach(function (o) { var op = el('option', { value: o[0] }, o[1]); if (D[key] === o[0]) op.setAttribute('selected', 'selected'); sel.appendChild(op); }); sel.onchange = function () { D[key] = sel.value; if (key === 'faza' || key === 'functiune') renderForm(); else recalc(); }; if (!D[key] && opts.options && opts.options[0]) D[key] = opts.options[0][0]; box.appendChild(sel); }
       else { var inp = el('input', { id: 'fld-' + key, type: opts && opts.type || 'text', placeholder: opts && opts.ph || '', style: INP }); if (D[key] != null) inp.value = D[key]; inp.oninput = function () { D[key] = opts && opts.type === 'number' ? (inp.value === '' ? '' : +inp.value) : inp.value; D['__auto_' + key] = false; recalc(); }; box.appendChild(inp); }
       return box;
     }
@@ -107,8 +107,21 @@
       if (!D.faza) D.faza = 'DTAC';
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual'), fld('Faza de proiectare', 'faza', 'select', { options: FAZE })]));
       form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), fld('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), fld('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), fld('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
+      var _isEnergie = ((G.UXDoc.FUNCTIUNI[D.functiune] || {}).cat === 'energie');
       form.appendChild(section('4–5', 'Construcție propusă', [
-        fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts }),
+        fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts })
+      ].concat(_isEnergie ? [
+        fld('⚡ Putere instalată (kWp DC)', 'putere_kwp', 'manual', { type: 'number', ph: 'ex: 2000 — SAU lasă gol + pune Steren pt calcul invers' }),
+        fld('Tip montaj', 'montaj', 'select', { options: [['fix', 'Suporți ficși (fixed-tilt)'], ['tracker_1ax', 'Trackere 1 axă (motorizate)'], ['tracker_2ax', 'Trackere 2 axe (motorizate)']] }),
+        fld('Putere modul (Wp)', 'putere_modul_wp', 'manual', { type: 'number', ph: '555' }),
+        fld('Raport DC/AC (ILR)', 'ilr', 'manual', { type: 'number', ph: '1.25' }),
+        fld('→ Putere DC rezultată', 'energie_dc', 'auto'),
+        fld('→ Putere AC', 'energie_ac', 'auto'),
+        fld('→ Nr. module', 'energie_module', 'auto'),
+        fld('→ Teren necesar', 'energie_teren', 'auto'),
+        fld('→ Producție anuală', 'energie_prod', 'auto'),
+        fld('→ Densitate', 'energie_densitate', 'auto')
+      ] : []).concat([
         fld('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
         fld('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),
         fld('Niveluri supraterane', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1' }),
@@ -119,7 +132,7 @@
         fld('Parcaje propuse', 'parcaje_propuse', 'manual', { type: 'number' }),
         fld('POT propus', 'POT', 'auto'), fld('CUT propus', 'CUT', 'auto'),
         fld('Parcaje necesare', 'parcaje_necesare', 'auto'), fld('Spații verzi min.', 'sv', 'auto')
-      ]));
+      ])));
       // Multi-corp (opțional): C1/C2/C3 cu regim și indicatori pe corp (ca la proiectele multi-corp)
       (function () {
         var sc = el('div', { style: 'margin-bottom:16px' });
@@ -245,6 +258,16 @@
       setA('rezerva_incendiu', (ac.rezerva_incendiu_mc || 0) + ' mc');
       setA('desfumare_oblig', ac.desfumare_oblig ? 'DA' : 'nu');
       setA('sprinklere_oblig', ac.sprinklere_oblig ? 'DA' : 'nu'); setA('idsi_oblig', ac.idsi_oblig ? 'DA' : 'nu'); setA('lift_oblig', ac.lift_oblig ? 'DA' : 'nu');
+      // ENERGIE / parc fotovoltaic — dimensionare bidirecțională live
+      if (ac.energie) {
+        var en = ac.energie; var inv = (en.directie || '').indexOf('teren→') === 0;
+        setA('energie_dc', (en.putere_dc_kwp || 0).toLocaleString('ro-RO') + ' kWp' + (inv ? ' (max pe terenul dat)' : ''));
+        setA('energie_ac', (en.putere_ac_kva || 0).toLocaleString('ro-RO') + ' kVA (ILR ' + en.ilr + ')');
+        setA('energie_module', (en.nr_module || 0).toLocaleString('ro-RO') + ' × ' + en.putere_modul_wp + ' Wp · ' + en.montaj_label);
+        setA('energie_teren', (en.teren_necesar_mp || 0).toLocaleString('ro-RO') + ' mp (~' + en.teren_necesar_ha + ' ha)');
+        setA('energie_prod', (en.productie_anuala_mwh || 0).toLocaleString('ro-RO') + ' MWh/an (' + en.yield_kwh_kwp + ' kWh/kWp)');
+        setA('energie_densitate', (en.densitate_kwp_ha || 0).toLocaleString('ro-RO') + ' kWp/ha · ' + en.teren_per_mwp_ha + ' ha/MWp');
+      }
       renderSide(v);
     }
     function renderSide(v) {
