@@ -91,10 +91,20 @@
 
     function collectOpts() {
       var o = {}; grid.querySelectorAll('[data-k]').forEach(function (i) { o[i.getAttribute('data-k')] = i.value; });
+      // CAMERE REALE din programul funcțional aplicat (D._spatii) → planuri reale în loc de parametric
+      var reledeeFloors = null;
+      try {
+        if (D._spatii && D._spatii.length && G.UXPlanSVG && G.UXPlanSVG.layout) {
+          var lay = G.UXPlanSVG.layout(D._spatii, { bW: num(o.latime, 12), bD: num(o.adancime, 10) });
+          var order = Object.keys(lay).sort(function (a, b) { var ord = function (n) { return n === 'S' ? -1 : n === 'P' ? 0 : n === 'E' ? 1 : (parseInt(n, 10) || 99); }; return ord(a) - ord(b); });
+          reledeeFloors = order.filter(function (n) { return n !== 'S'; }).map(function (n) { return ((lay[n] && lay[n].rects) || []).map(function (rc) { return { t: rc.t, lbl: rc.lbl || (rc.room && rc.room.nume) || rc.t, x: rc.x, y: rc.y, w: rc.w, h: rc.h, bal: rc.bal }; }); }).filter(function (r) { return r.length; });
+          if (!reledeeFloors.length) reledeeFloors = null;
+        }
+      } catch (e) { reledeeFloors = null; }
       return { width: num(o.latime, 12), adancime: num(o.adancime, 10), niv: Math.max(1, Math.round(num(o.niv, 1))),
         hParter: num(o.hParter, 3), hEtaj: num(o.hEtaj, 3), roof: o.roof, winPerFloor: Math.max(1, Math.round(num(o.winPerFloor, 3))),
-        adancimeFundatie: (v.calc && v.calc.adancime_inghet_m) || 0.9, params: v.calc,
-        proiect: D.nume || 'Obiectiv', beneficiar: D.beneficiar || '',
+        adancimeFundatie: (v.calc && v.calc.adancime_inghet_m) || 0.9, params: v.calc, reledeeFloors: reledeeFloors,
+        proiect: D.nume || 'Obiectiv', beneficiar: D.beneficiar || '', nrcad: D.nrcad,
         data: (function () { try { return new Date().toLocaleDateString('ro-RO'); } catch (e) { return ''; } })(), faza: D.faza || 'DTAC' };
     }
     function build() {
@@ -137,7 +147,9 @@
       bPdf.onclick = downloadPdf;
       var bZip = el('button', { style: 'background:#7dd3fc;color:#062338;border:none;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '⬇ TOT setul (DXF ZIP)');
       bZip.onclick = downloadZip;
-      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bPdf); dlbar.appendChild(bZip);
+      var bBim = el('button', { style: 'background:rgba(232,179,65,.16);color:#e8b341;border:1px solid rgba(232,179,65,.4);border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer' }, '🏗 Model 3D + BIM (IFC/GLB)');
+      bBim.onclick = function () { if (G.UXDocBIM && G.UXDocBIM.exportIFC) G.UXDocBIM.exportIFC(D); else if (G.ss) G.ss('Modulul BIM nu e încărcat.'); };
+      dlbar.appendChild(bSvg); dlbar.appendChild(bDxf); dlbar.appendChild(bPdf); dlbar.appendChild(bZip); dlbar.appendChild(bBim);
     }
     function downloadPdf() {
       if (!SHEETS.length || !G.UX_DRAW.sheetsToPdf) { if (G.ss) G.ss('Export PDF indisponibil.'); return; }

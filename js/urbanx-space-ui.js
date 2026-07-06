@@ -146,24 +146,11 @@
         ov.remove(); if (typeof onApply === 'function') onApply(D);
       };
       sideBox.appendChild(bApply);
-      var bPlan = el('button', { style: 'width:100%;margin-top:8px;background:rgba(52,211,153,.15);color:#6ee7b7;border:1px solid rgba(52,211,153,.4);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer' }, '📐 Plan funcțional (SVG / PDF / DXF)');
-      bPlan.onclick = function () {
-        if (!G.UXPlanSVG) { if (G.ss) G.ss('Modulul plan nu e încărcat.'); return; }
-        var fnLbl = (G.UXDoc && G.UXDoc.FUNCTIUNI && G.UXDoc.FUNCTIUNI[D.functiune] ? G.UXDoc.FUNCTIUNI[D.functiune].label : '') || state.tip || '';
-        G.UXPlanSVG.open(state.rows, {
-          titlu: 'PLAN FUNCȚIONAL — ' + fnLbl, D: D,
-          proiect: fnLbl, beneficiar: D.beneficiar || '—', amplasament: D.uat || '—',
-          faza: D.faza || 'DTAC', data: (D.an || '') + ''
-        });
-      };
-      sideBox.appendChild(bPlan);
-      var bBim = el('button', { style: 'width:100%;margin-top:8px;background:rgba(232,179,65,.14);color:#e8b341;border:1px solid rgba(232,179,65,.4);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer' }, '🏗 Model 3D + BIM (IFC / GLB)');
-      bBim.onclick = function () {
-        if (!G.UXDocBIM) { if (G.ss) G.ss('Modulul BIM nu e încărcat.'); return; }
-        var bb = bilant(); D._spatii = state.rows; D.Sc = D.Sc || bb.sc; D.Sd = D.Sd || bb.sd; if (bb.niv) D.niv_supraterane = D.niv_supraterane || bb.niv;
-        G.UXDocBIM.exportIFC(D);
-      };
-      sideBox.appendChild(bBim);
+      // Planșele + modelul 3D/BIM se generează ÎNTR-UN SINGUR LOC: „📐 Generează planșe" (din Generatorul de documentații).
+      // Aici doar definim programul de spații și îl aplicăm la proiect (D._spatii → camerele reale intră automat în planuri).
+      var hint = el('div', { style: 'width:100%;margin-top:8px;background:rgba(125,211,252,.10);border:1px solid rgba(125,211,252,.3);border-radius:9px;padding:10px;font-size:11.5px;color:#9fd8f0;line-height:1.5' },
+        '📐 <b>Planșele</b> (arhitectură + rezistență + instalații, DTAC & PTh) și <b>Modelul 3D + BIM (IFC/GLB)</b> se generează dintr-un singur loc: butonul <b>„Generează planșe"</b> din Generatorul de documentații. După ce apeși <b>„Aplică la proiect"</b>, camerele definite aici intră automat în planurile de nivel.');
+      sideBox.appendChild(hint);
       // SKID GPL — obiect ingineresc: proiectare 3D reala + planse ATEX din optiunile alese
       if (state.tip === 'skid-gpl' && G.proiecteazaSkid) {
         var p = state.params || {};
