@@ -37,8 +37,9 @@
       '<div class="m">Faza: ' + esc(meta.faza || 'DTAC') + '</div></div>' +
       '<br style="page-break-after:always">';
     var body = sections.map(function (s) { return (s.h ? '<h2>' + esc(s.h) + '</h2>' : '') + (s.html || ''); }).join('');
+    var semn = '<div class="semn">' + _semnaturaBlock(meta) + '</div>';
     var foot = '<div class="foot">Document generat de UrbanX (ThinkSmart Solutions) — orientativ, se verifică și se semnează de proiectanții atestați.</div>';
-    return '<html><head><meta charset="utf-8">' + STYLE + '</head><body>' + cover + body + foot + '</body></html>';
+    return '<html><head><meta charset="utf-8">' + STYLE + '</head><body>' + cover + body + semn + foot + '</body></html>';
   }
   function docBlob(html) { return new Blob(['﻿', html], { type: 'application/msword' }); }
 
@@ -60,7 +61,10 @@
     }
     return runs || '<w:r><w:t/></w:r>';
   }
-  function _wmlPara(runsXml, style) { return '<w:p>' + (style ? '<w:pPr><w:pStyle w:val="' + style + '"/></w:pPr>' : '') + runsXml + '</w:p>'; }
+  function _wmlPara(runsXml, style, justify) {
+    var ppr = style ? ('<w:pStyle w:val="' + style + '"/>') : (justify ? '<w:jc w:val="both"/>' : '');
+    return '<w:p>' + (ppr ? '<w:pPr>' + ppr + '</w:pPr>' : '') + runsXml + '</w:p>';
+  }
   function _wmlTable(tbl) {
     var xml = '<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:left w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:right w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="999999"/></w:tblBorders></w:tblPr>';
     var rows = tbl.querySelectorAll('tr');
@@ -81,7 +85,7 @@
       for (var i = 0; i < container.children.length; i++) {
         var el = container.children[i]; var tag = el.tagName.toLowerCase();
         if (/^h[1-6]$/.test(tag)) out += _wmlPara(_wmlRuns(el), 'Heading' + Math.min(3, +tag[1]));
-        else if (tag === 'p') out += _wmlPara(_wmlRuns(el));
+        else if (tag === 'p') out += _wmlPara(_wmlRuns(el), null, true);
         else if (tag === 'table') { out += _wmlTable(el); out += '<w:p/>'; }
         else if (tag === 'ul' || tag === 'ol') { var lis = el.querySelectorAll('li'); for (var j = 0; j < lis.length; j++) out += _wmlPara('<w:r><w:t xml:space="preserve">•  </w:t></w:r>' + _wmlRuns(lis[j])); }
         else if (tag === 'div' || tag === 'section' || tag === 'article' || tag === 'header' || tag === 'main') walk(el);
@@ -134,14 +138,37 @@
   // ── Conținut per document (real, din datele engine) ───────────────────────
   var FAZA_LBL = { DTAC: 'D.T.A.C. (extras pentru autorizare)', PTh: 'P.Th. + D.E. (proiect complet de execuție)', 'PTh+DE': 'P.Th. + D.E. (proiect complet de execuție)' };
   function _meta(D, titlu, subtitlu) {
-    return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: FAZA_LBL[D.faza] || D.faza || 'D.T.A.C.' };
+    return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', proiectant: D.proiectant || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: FAZA_LBL[D.faza] || D.faza || 'D.T.A.C.' };
+  }
+  // Bloc de semnături standard (Întocmit / Verificat / Șef proiect) — apare la finalul fiecărui memoriu.
+  function _semnaturaBlock(meta) {
+    return '<h2>Semnături</h2><table>' +
+      '<tr><th>Rol</th><th>Nume / firmă</th><th>Nr. înregistrare / atestat</th><th>Semnătura</th><th>Data</th></tr>' +
+      '<tr><td>Întocmit (proiectant de specialitate)</td><td>' + esc(meta.proiectant || '—') + '</td><td>—</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
+      '<tr><td>Șef de proiect</td><td>' + esc(meta.proiectant || '—') + '</td><td>—</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
+      '<tr><td>Verificat (verificator de proiecte atestat MLPAT/MDLPA)</td><td>—</td><td>cerința aplicabilă (A/B/C/D/E/F/Is/It/Ie)</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
+      '</table><p>Prezentul document se însușește prin semnătură și ștampilă de proiectanții cu drept de semnătură (OAR/AICPS/CNIR, după caz) și se verifică de verificatori de proiecte atestați conform Legii nr. 10/1995 privind calitatea în construcții.</p>';
   }
   function _indicatoriTbl(D, v) {
-    var ac = v.calc;
+    var ac = v.calc || {}; var e = ac.energie; var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };
+    // Parc fotovoltaic / energie: indicatori ENERGETICI, NU POT/CUT/regim de clădire (ar fi eronat).
+    if (e && e.putere_dc_kwp) {
+      return tbl([
+        ['Suprafață teren', nf(D.Steren) + ' mp'],
+        ['Putere instalată DC', nf(e.putere_dc_kwp) + ' kWp'],
+        ['Putere AC (invertoare)', nf(e.putere_ac_kva) + ' kVA (ILR ' + e.ilr + ')'],
+        ['Tip montaj', e.montaj_label],
+        ['Număr module', nf(e.nr_module) + ' × ' + e.putere_modul_wp + ' Wp'],
+        ['Teren ocupat efectiv', nf(e.teren_necesar_mp) + ' mp (~' + e.teren_necesar_ha + ' ha)'],
+        ['Producție anuală estimată', nf(e.productie_anuala_mwh) + ' MWh/an (' + e.yield_kwh_kwp + ' kWh/kWp)'],
+        ['Racord', e.racord + ' · ' + nf(e.nr_pt) + ' PT × ' + nf(e.putere_pt_kva) + ' kVA'],
+        ['POT / CUT (construcții tehnice — orientativ)', (ac.POT || 0) + '% / ' + (ac.CUT || 0)]
+      ], ['Indicator', 'Valoare']);
+    }
     return tbl([
-      ['Suprafață teren', (D.Steren || '—') + ' mp'], ['Suprafață construită (SC)', (D.Sc || '—') + ' mp'], ['Suprafață desfășurată (SD)', (D.Sd || '—') + ' mp'],
+      ['Suprafață teren', (D.Steren || '—') + ' mp'], ['Suprafață construită (SC)', (D.Sc || ac.Sc_total || '—') + ' mp'], ['Suprafață desfășurată (SD)', (D.Sd || ac.Sd_total || '—') + ' mp'], ['Suprafață utilă (SU)', (ac.Su_total || '—') + ' mp'],
       ['POT propus / max', (ac.POT || 0) + '% / ' + (D.POT_max != null ? D.POT_max + '%' : '—')], ['CUT propus / max', (ac.CUT || 0) + ' / ' + (D.CUT_max != null ? D.CUT_max : '—')],
-      ['Regim de înălțime', 'P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + ' (H ' + (D.H || '—') + ' m)'], ['Parcaje propuse / necesare', (D.parcaje_propuse || 0) + ' / ' + ac.parcaje_necesare],
+      ['Regim de înălțime', (ac.regim_complet || ('P+' + Math.max(0, (D.niv_supraterane || 1) - 1))) + ' (H ' + (D.H || '—') + ' m)'], ['Parcaje propuse / necesare', (D.parcaje_propuse || 0) + ' / ' + ac.parcaje_necesare],
       ['Spații verzi minime', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0) + ' mp)']
     ], ['Indicator urbanistic', 'Valoare']);
   }
@@ -149,14 +176,27 @@
   // Regulă: apare în memorii ȘI planșe ȘI peste tot, pentru ORICE funcțiune.
   function _ariiStandardTbl(D, v) {
     var ac = v.calc || {}; var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };
-    var Sd = +D.Sd || 0, Sc = +D.Sc || 0, niv = +D.niv_supraterane || 1;
-    var Su = +D.Su || (Sd ? Math.round(Sd * 0.82) : 0);
+    // Parc fotovoltaic / energie: BILANȚ TERITORIAL (nu Su/Sc/regim/POT de clădire).
+    if (ac.energie && ac.energie.putere_dc_kwp) {
+      var e = ac.energie;
+      return tbl([
+        ['Suprafață teren', nf(D.Steren) + ' mp'],
+        ['Câmp de module (incl. spațiere inter-rânduri)', nf(e.camp_module_mp || e.arie_module_mp) + ' mp'],
+        ['Grad de acoperire (GCR)', '' + e.gcr],
+        ['Teren ocupat efectiv', nf(e.teren_necesar_mp) + ' mp (~' + e.teren_necesar_ha + ' ha)'],
+        ['Densitate de putere', nf(e.densitate_kwp_ha) + ' kWp/ha (' + e.teren_per_mwp_ha + ' ha/MWp)'],
+        ['Suprafață posturi transformare / invertoare + drumuri', '≈ ' + (e.overhead_pct || 18) + '% din teren'],
+        ['Spații verzi / covor vegetal întreținut', (ac.sv_min_pct || 20) + '% (' + nf(ac.sv_min_mp) + ' mp)']
+      ], ['Bilanț teritorial (parc fotovoltaic)', 'Valoare']);
+    }
+    var Sd = +D.Sd || ac.Sd_total || 0, Sc = +D.Sc || ac.Sc_total || 0, niv = +D.niv_supraterane || 1;
+    var Su = +D.Su || ac.Su_total || (Sd ? Math.round(Sd * 0.82) : 0);
     var rows = [
       ['Suprafață utilă (Su)', Su ? nf(Su) + ' mp' : '—'],
       ['Suprafață construită (Sc)', Sc ? nf(Sc) + ' mp' : '—'],
       ['Suprafață desfășurată (Sd)', Sd ? nf(Sd) + ' mp' : '—'],
       ['Raport Su/Sd (eficiență)', (Sd && Su) ? Math.round(Su / Sd * 100) + '%' : '—'],
-      ['Regim de înălțime', 'P+' + Math.max(0, niv - 1) + (D.H ? ' (H ' + D.H + ' m)' : '')],
+      ['Regim de înălțime', (ac.regim_complet || ('P+' + Math.max(0, niv - 1))) + (D.H ? ' (H ' + D.H + ' m)' : '')],
       ['POT / CUT', (ac.POT || 0) + '% / ' + (ac.CUT || 0)]
     ];
     var fn = D.functiune, extra = [];

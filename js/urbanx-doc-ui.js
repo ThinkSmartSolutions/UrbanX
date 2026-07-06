@@ -293,7 +293,10 @@
       // ENERGIE / parc fotovoltaic — dimensionare bidirecțională live
       if (ac.energie) {
         var en = ac.energie; var inv = (en.directie || '').indexOf('teren→') === 0;
-        setA('energie_dc', (en.putere_dc_kwp || 0).toLocaleString('ro-RO') + ' kWp' + (inv ? ' (max pe terenul dat)' : ''));
+        var _declPeste = (!inv && en.putere_max_teren_kwp != null && (+D.Steren) > 0 && en.putere_dc_kwp > en.putere_max_teren_kwp * 1.02);
+        setA('energie_dc', _declPeste
+          ? ('⚠ declarat ' + (en.putere_dc_kwp || 0).toLocaleString('ro-RO') + ' kWp — pe ' + (en.teren_disponibil_mp || 0).toLocaleString('ro-RO') + ' m² încap max ' + (en.putere_max_teren_kwp || 0).toLocaleString('ro-RO') + ' kWp')
+          : ((en.putere_dc_kwp || 0).toLocaleString('ro-RO') + ' kWp' + (inv ? ' (max pe terenul dat)' : '')));
         setA('energie_ac', (en.putere_ac_kva || 0).toLocaleString('ro-RO') + ' kVA (ILR ' + en.ilr + ')');
         setA('energie_module', (en.nr_module || 0).toLocaleString('ro-RO') + ' × ' + en.putere_modul_wp + ' Wp · ' + en.montaj_label);
         setA('energie_teren', (en.teren_necesar_mp || 0).toLocaleString('ro-RO') + ' mp (~' + en.teren_necesar_ha + ' ha)');
