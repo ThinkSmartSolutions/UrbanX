@@ -70,9 +70,16 @@
     function card(title, note) { var c = el('div', { style: 'background:#0b1220;border:1px solid rgba(148,163,184,.2);border-radius:10px;padding:12px;margin-bottom:12px' }); c.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#93c5fd;margin-bottom:4px' }, title)); if (note) c.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' }, note)); return c; }
     var res = el('div', { id: 'uxing-res', style: 'font-size:12px;color:#6ee7b7;white-space:pre-wrap;margin-top:6px' });
     // Topo DXF
-    var cTopo = card('1 · Ridicare topografică (DXF)', 'Încarcă fișierul DXF (din DWG: exportă DXF sau folosește pipeline ODA). Se extrage conturul cu aria maximă = parcela.');
-    var fTopo = el('input', { type: 'file', accept: '.dxf', style: 'font-size:12px;color:#cbd5e1' });
-    fTopo.onchange = function () { var f = fTopo.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { try { var r = parseDXF(rd.result); if (r.area > 0) { found.Steren = r.area; found._boundary = r.boundary; res.textContent = '✓ Topo: ' + r.polylines + ' polilinii, parcela ≈ ' + r.area.toLocaleString('ro-RO') + ' mp (contur ' + r.boundary.length + ' vârfuri).'; } else res.textContent = '⚠ Nu am găsit un contur închis în DXF (verifică layerul parcelei).'; } catch (e) { res.textContent = '⚠ Eroare la citirea DXF: ' + e.message; } }; rd.readAsText(f); };
+    var cTopo = card('1 · Ridicare topografică (DXF / DWG)', 'Recomandat: DXF (se citește direct în browser). DWG-ul e format binar — nu poate fi parsat client-side; exportă DXF din CAD (Save As → DXF R12/2013) sau rulează pipeline-ul de la pasul 4. Se extrage conturul cu aria maximă = parcela.');
+    var fTopo = el('input', { type: 'file', accept: '.dxf,.dwg', style: 'font-size:12px;color:#cbd5e1' });
+    fTopo.onchange = function () { var f = fTopo.files[0]; if (!f) return; var isDwgName = /\.dwg$/i.test(f.name || ''); var rd = new FileReader(); rd.onload = function () {
+        var txt = String(rd.result || '');
+        // DWG binar: începe cu semnătura ACxxxx (ex. AC1027). Nu se poate parsa în browser.
+        if (isDwgName || /^AC10[0-9][0-9]/.test(txt.slice(0, 6))) {
+          res.textContent = '⚠ „' + (f.name || 'fișier') + '" este DWG (binar) — nu poate fi citit direct în browser.\n→ Deschide-l în CAD și salvează ca DXF (Save As → AutoCAD DXF, versiune R12 sau 2013), apoi încarcă DXF-ul aici.\n→ SAU: rulează „scripts/dwg-to-urbanx.py <fișier.dwg>" (ODA + ezdxf) și importă urbanx_import.json la pasul 4 (extrage și Sc/Sd/regim din desen).';
+          fTopo.value = ''; return;
+        }
+        try { var r = parseDXF(txt); if (r.area > 0) { found.Steren = r.area; found._boundary = r.boundary; res.textContent = '✓ Topo: ' + r.polylines + ' polilinii, parcela ≈ ' + r.area.toLocaleString('ro-RO') + ' mp (contur ' + r.boundary.length + ' vârfuri).'; } else res.textContent = '⚠ Nu am găsit un contur închis în DXF (verifică layerul parcelei — trebuie o polilinie închisă LWPOLYLINE/POLYLINE).'; } catch (e) { res.textContent = '⚠ Eroare la citirea DXF: ' + e.message; } }; rd.readAsText(f); };
     cTopo.appendChild(fTopo); wrap.appendChild(cTopo);
     // CU text
     var cCU = card('2 · Certificat de Urbanism (text)', 'Lipește textul din CU (sau din PDF-ul deschis). Extrage POT/CUT/H max, nr. CU, județ, suprafață.');

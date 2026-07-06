@@ -13,7 +13,7 @@
   function tbl(rows, head) { var h = head ? '<tr>' + head.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>' : ''; return '<table>' + h + rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + (c == null ? '' : c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>'; }
   function fnMeta(D) { try { return (G.UXDoc && G.UXDoc.FUNCTIUNI && G.UXDoc.FUNCTIUNI[D.functiune]) || {}; } catch (e) { return {}; } }
   function fnLabel(D) { var m = fnMeta(D); return m.label || D.functiune || 'obiectiv'; }
-  function regim(D) { return 'P+' + Math.max(0, (+D.niv_supraterane || 1) - 1); }
+  function regim(D) { var niv = Math.max(0, (+D.niv_supraterane || 1) - 1); if (+D.niv_max) niv = Math.min(niv, Math.max(0, (+D.niv_max) - 1)); return niv > 0 ? ('P+' + niv) : 'P'; }
   function spatiiTbl(D) {
     var sp = D._spatii || []; if (!sp.length) return '';
     var su = 0; sp.forEach(function (r) { su += (+r.buc || 0) * (+r.mp_unit || 0); });

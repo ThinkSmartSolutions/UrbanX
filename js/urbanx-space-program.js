@@ -84,7 +84,9 @@
     var su = suP + suE;
     var coef = 0.80; // Su/Sd pt dotări sociale (circulații + pereți)
     var sd = su ? Math.round(su / coef) : 0;
-    var niveluri = suE > 0 ? 2 : 1;
+    // Respectă nr. de niveluri cerut de utilizator (din CU / formular) dacă e transmis; altfel euristica pe suprafața de etaj.
+    var nivCerut = (params && +params.niveluri > 0) ? Math.max(1, Math.round(+params.niveluri)) : 0;
+    var niveluri = nivCerut || (suE > 0 ? 2 : 1);
     var sc = niveluri ? Math.round(sd / niveluri) : 0;
     return {
       su: Math.round(su), suP: Math.round(suP), suE: Math.round(suE), sd: sd, sc: sc, niveluri: niveluri,

@@ -152,28 +152,41 @@
   function _lib(D, key) {
     try { var L = G.UXLibrary && G.UXLibrary[D.functiune]; return (L && L[key] && L[key].html) ? L[key].html : ''; } catch (e) { return ''; }
   }
+  // Programul funcțional APLICAT de utilizator (din generatorul de program → „Aplică la proiect").
+  // Se injectează în memorii ca document să reflecte spațiile REALE ale proiectului, nu doar exemplul din bibliotecă.
+  function _programAplicatSec(D) {
+    var sp = (D && D._spatii) || []; if (!sp.length) return null;
+    var su = 0; sp.forEach(function (r) { su += (+r.buc || 0) * (+r.mp_unit || 0); });
+    var tip = (D.__prog && D.__prog.tip) ? D.__prog.tip : '';
+    var subtip = (D.__prog && D.__prog.params && (D.__prog.params.tip_beneficiar || D.__prog.params.subtip)) || '';
+    var rows = sp.map(function (r) { return '<tr><td>' + esc(r.nume) + (r.ob ? ' *' : '') + '</td><td>' + esc(r.cat || r.zona || '—') + '</td><td>' + esc(r.niv || 'P') + '</td><td>' + (r.buc || 1) + '</td><td>' + (r.mp_unit || 0) + '</td><td>' + Math.round((+r.buc || 0) * (+r.mp_unit || 0)) + '</td></tr>'; }).join('');
+    var html = '<p>Programul de spații de mai jos reflectă configurația <b>confirmată în modelul funcțional al proiectului</b> (capacitate → reguli normative), aplicată prin „Aplică la proiect"' + (subtip ? (', tip beneficiar: <b>' + esc(subtip) + '</b>') : '') + '. Suprafață utilă totală: <b>' + Math.round(su).toLocaleString('ro-RO') + ' mp</b>. Spațiile marcate cu * sunt obligatorii conform normativului aplicabil.</p>' +
+      '<table><tr><th>Spațiu</th><th>Categorie</th><th>Niv</th><th>Buc</th><th>Su/buc (mp)</th><th>Su tot (mp)</th></tr>' + rows + '</table>';
+    return { h: 'Programul funcțional aplicat proiectului' + (tip ? (' (' + esc(tip) + ')') : ''), html: html };
+  }
+  function _withProgram(secs, D) { var s = _programAplicatSec(D); if (!s) return secs; var out = secs.slice(); out.splice(1, 0, s); return out; }
 
   var DOC_BUILDERS = {
     'Memoriu general DTAC': function (D, v) {
       var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
       var deep = _lib(D, 'general');
-      var secs = deep ? [
+      var secs = deep ? _withProgram([
         { h: null, html: deep },
         { h: 'Indicatori urbanistici ai proiectului', html: _indicatoriTbl(D, v) },
         { h: 'Bilanț de suprafețe și standard specific funcțiunii', html: '<p>Suprafețele utilă/construită/desfășurată și standardul de măsurare specific funcțiunii (ex. BOMA la birouri, GLA la comercial):</p>' + _ariiStandardTbl(D, v) },
         { h: 'Parametri tehnici derivați (sinteză structură · seism · climă · incendiu)', html: '<p>Valorile de mai jos sunt derivate automat din funcțiune, amplasament (județ), sistemul structural și indicatorii geometrici, conform normativelor în vigoare. Ele fundamentează proiectarea pe toate specialitățile și se preiau în piesele scrise și desenate.</p>' + _parametriDerivatiTbl(D, v) },
         { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }
-      ] : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
+      ], D) : (G.UXParagrafe ? G.UXParagrafe.general(D, v).concat([{ h: 'Parametri tehnici derivați (sinteză)', html: _parametriDerivatiTbl(D, v) }, { h: 'Verificarea conformității urbanistice', html: _verificariTbl(v) + (v.neconformitati ? '<p><b>Atenție:</b> există ' + v.neconformitati + ' neconformitate(ăți) de rezolvat înainte de depunere.</p>' : '<p>Nu s-au identificat neconformități critice.</p>') }]) : [
         { h: '1. Date de identificare', html: '<p>Autorizarea obiectivului „' + esc(fn) + '", ' + esc(D.uat || '—') + '.</p>' }, { h: '2. Indicatori', html: _indicatoriTbl(D, v) }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_general_DTAC.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC GENERAL', 'Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC)'), secs) };
     },
     'Memoriu arhitectură': function (D, v) {
       var deep = _lib(D, 'arhitectura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'arh_pth');
-      var secs = deep ? [
+      var secs = deep ? _withProgram([
         { h: null, html: deep },
         { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + _ariiStandardTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
-      ] : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
+      ], D) : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
         { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '.</p>' }
       ]);
       return { cat: 'Memorii Tehnice', file: 'Memoriu_arhitectura.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC DE ARHITECTURĂ'), secs) };
