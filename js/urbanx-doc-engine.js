@@ -102,7 +102,14 @@
       if (sSc > 0) Sc = sSc; if (sSd > 0) Sd = sSd;
     }
     var fn = FUNCTIUNI[d.functiune] || FUNCTIUNI['hala-industriala'];
-    var out = {}; out.Sc_total = Sc; out.Sd_total = Sd; out.nr_corpuri = (d.corpuri && d.corpuri.length) || 0;
+    // ── Reconciliere SU ↔ SC ↔ SD (utilă ↔ construită ↔ desfășurată) — completează ce lipsește ──
+    // Coeficient util/desfășurat (SU/SD) pe categoria funcțiunii; peretii/circulațiile consumă restul.
+    var suCoef = fn.su_coef || ({ rezidential: 0.82, birouri: 0.78, comercial: 0.84, hotelier: 0.72, medical: 0.80, invatamant: 0.80, social: 0.80, industrial: 0.90, energie: 0.85, agrement: 0.85 }[fn.cat]) || 0.80;
+    var nivR = Math.max(1, +d.niv_supraterane || 1), Su = +d.Su || 0;
+    if (!Sd) { if (Sc) Sd = Sc * nivR; else if (Su) Sd = Math.round(Su / suCoef); }   // desfășurată din amprentă×niveluri sau din utilă
+    if (!Sc && Sd) Sc = Math.round(Sd / nivR);                                          // amprentă din desfășurată/niveluri
+    if (!Su && Sd) Su = Math.round(Sd * suCoef);                                        // utilă din desfășurată×coeficient
+    var out = {}; out.Sc_total = Sc; out.Sd_total = Sd; out.Su_total = Su; out.su_coef = suCoef; out.nr_corpuri = (d.corpuri && d.corpuri.length) || 0;
     out.POT = Steren ? +(Sc / Steren * 100).toFixed(1) : 0;
     out.CUT = Steren ? +(Sd / Steren).toFixed(2) : 0;
     out.sv_min_pct = fn.sv_min; out.sv_min_mp = Math.round(Steren * fn.sv_min / 100);
@@ -343,6 +350,16 @@
     d._source = 'AEDIS'; return d;
   }
 
-  G.UXDoc = { FUNCTIUNI: FUNCTIUNI, detectFunctiune: detectFunctiune, autoCalc: autoCalc, valideaza: valideaza, dateFromAEDIS: dateFromAEDIS, seismicFor: seismicFor, AEDIS_FN_MAP: AEDIS_FN_MAP };
+  // Profilul funcțiunii → ce câmpuri sunt relevante în dashboard (nu induce în eroare).
+  //   cladire = urbanistic complet; energie = parc FV/BESS (fără retrageri/niveluri/gaze de clădire);
+  //   infrastructura = pod/drum (fără POT/CUT/gaze/apă/niveluri).
+  function profilFor(fnKey) {
+    var fn = FUNCTIUNI[fnKey] || {};
+    if (fn.profil) return fn.profil;
+    if (fn.cat === 'energie') return 'energie';
+    if (fnKey === 'pod' || fnKey === 'infrastructura-drum') return 'infrastructura';
+    return 'cladire';
+  }
+  G.UXDoc = { FUNCTIUNI: FUNCTIUNI, detectFunctiune: detectFunctiune, autoCalc: autoCalc, valideaza: valideaza, dateFromAEDIS: dateFromAEDIS, seismicFor: seismicFor, AEDIS_FN_MAP: AEDIS_FN_MAP, profilFor: profilFor };
   console.log('[UXDoc] engine documentații încărcat (window.UXDoc) — client-side, fără server');
 })(window);

@@ -105,8 +105,23 @@
       form.innerHTML = '';
       var fnOpts = Object.keys(G.UXDoc.FUNCTIUNI).map(function (k) { return [k, G.UXDoc.FUNCTIUNI[k].label]; });
       if (!D.faza) D.faza = 'DTAC';
+      // ── DASHBOARD ADAPTIV: arată doar câmpurile relevante profilului funcțiunii ──
+      var PROFIL = (G.UXDoc.profilFor ? G.UXDoc.profilFor(D.functiune) : 'cladire');
+      var HIDE = {
+        energie: { POT_max: 1, CUT_max: 1, H_max: 1, niv_max: 1, retragere_fata_min: 1, retragere_lateral_min: 1, retragere_spate_min: 1, Sc: 1, Sd: 1, Su: 1, niv_supraterane: 1, H: 1, retragere_fata: 1, retragere_lateral: 1, retragere_spate: 1, parcaje_propuse: 1, POT: 1, CUT: 1, parcaje_necesare: 1, incalzire: 1, apa: 1 },
+        infrastructura: { POT_max: 1, CUT_max: 1, niv_max: 1, retragere_fata_min: 1, retragere_lateral_min: 1, retragere_spate_min: 1, niv_supraterane: 1, H: 1, retragere_fata: 1, retragere_lateral: 1, retragere_spate: 1, parcaje_propuse: 1, POT: 1, CUT: 1, parcaje_necesare: 1, sv: 1, incalzire: 1, apa: 1 },
+        cladire: {}
+      };
+      function vis(k) { return !(HIDE[PROFIL] || {})[k]; }
+      function gf(label, key, kind, opts) { return vis(key) ? fld(label, key, kind, opts) : null; }
+      if (PROFIL !== 'cladire') {
+        var noteTxt = PROFIL === 'energie'
+          ? 'Funcțiune de tip ENERGIE (parc fotovoltaic / BESS): NU se aplică POT/CUT, aliniament sau regim de înălțime de clădire. Retragerile și distanțele minime (drum, LEA, gaze, ape, pădure) sunt impuse de avize și coduri — platforma le furnizează automat în memorii, nu le completezi aici. Dimensionarea pornește de la puterea instalată SAU de la suprafața terenului (bidirecțional).'
+          : 'Funcțiune de tip INFRASTRUCTURĂ (pod / drum): NU se aplică gaze, apă din rețea, încălzire, niveluri sau POT/CUT de clădire. Parametrii relevanți sunt cei tehnici specifici (deschideri, clasă de încărcare, lungime, lățime).';
+        form.appendChild(el('div', { style: 'background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:11.5px;color:#93c5fd;line-height:1.5' }, 'ℹ️ ' + noteTxt));
+      }
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual'), fld('Faza de proiectare', 'faza', 'select', { options: FAZE })]));
-      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), fld('POT max (%)', 'POT_max', 'manual', { type: 'number' }), fld('CUT max', 'CUT_max', 'manual', { type: 'number' }), fld('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), fld('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), fld('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), fld('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), fld('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })]));
+      form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), gf('POT max (%)', 'POT_max', 'manual', { type: 'number' }), gf('CUT max', 'CUT_max', 'manual', { type: 'number' }), gf('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), gf('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), gf('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), gf('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), gf('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })].filter(Boolean)));
       var _isEnergie = ((G.UXDoc.FUNCTIUNI[D.functiune] || {}).cat === 'energie');
       form.appendChild(section('4–5', 'Construcție propusă', [
         fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts })
@@ -124,17 +139,19 @@
         fld('CAPEX (EUR/kWp)', 'capex_kwp', 'manual', { type: 'number', ph: '700' }),
         fld('Preț energie (EUR/MWh)', 'pret_energie_mwh', 'manual', { type: 'number', ph: '90' })
       ] : []).concat([
-        fld('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
-        fld('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),
-        fld('Niveluri supraterane', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1' }),
-        fld('Înălțime coamă H (m)', 'H', 'manual', { type: 'number' }),
-        fld('Aliniament/față propus (m)', 'retragere_fata', 'manual', { type: 'number' }),
-        fld('Retragere laterală propusă (m)', 'retragere_lateral', 'manual', { type: 'number' }),
-        fld('Retragere spate propusă (m)', 'retragere_spate', 'manual', { type: 'number' }),
-        fld('Parcaje propuse', 'parcaje_propuse', 'manual', { type: 'number' }),
-        fld('POT propus', 'POT', 'auto'), fld('CUT propus', 'CUT', 'auto'),
-        fld('Parcaje necesare', 'parcaje_necesare', 'auto'), fld('Spații verzi min.', 'sv', 'auto')
-      ])));
+        gf('Suprafață construită SC (mp)', 'Sc', 'manual', { type: 'number' }),
+        gf('Suprafață desfășurată SD (mp)', 'Sd', 'manual', { type: 'number' }),
+        gf('Suprafață utilă SU (mp)', 'Su', 'manual', { type: 'number', ph: 'auto din SD dacă e gol' }),
+        gf('→ SU · SD · SC (reconciliat)', 'arii_calc', 'auto'),
+        gf('Niveluri supraterane', 'niv_supraterane', 'manual', { type: 'number', ph: 'ex: 1' }),
+        gf('Înălțime coamă H (m)', 'H', 'manual', { type: 'number' }),
+        gf('Aliniament/față propus (m)', 'retragere_fata', 'manual', { type: 'number' }),
+        gf('Retragere laterală propusă (m)', 'retragere_lateral', 'manual', { type: 'number' }),
+        gf('Retragere spate propusă (m)', 'retragere_spate', 'manual', { type: 'number' }),
+        gf('Parcaje propuse', 'parcaje_propuse', 'manual', { type: 'number' }),
+        gf('POT propus', 'POT', 'auto'), gf('CUT propus', 'CUT', 'auto'),
+        gf('Parcaje necesare', 'parcaje_necesare', 'auto'), gf('Spații verzi min.', 'sv', 'auto')
+      ].filter(Boolean))));
       // Multi-corp (opțional): C1/C2/C3 cu regim și indicatori pe corp (ca la proiectele multi-corp)
       (function () {
         var sc = el('div', { style: 'margin-bottom:16px' });
@@ -167,8 +184,8 @@
         fld('Adâncime îngheț (STAS 6054)', 'adancime_inghet', 'auto')
       ]));
       form.appendChild(section('9–10', 'Instalații + PSI (parametri derivați compleți)', [
-        fld('Tip încălzire', 'incalzire', 'select', { options: Object.keys(INCALZIRE).map(function (k) { return [k, INCALZIRE[k]]; }) }),
-        fld('Sursă apă / canalizare', 'apa', 'select', { options: Object.keys(APA).map(function (k) { return [k, APA[k]]; }) }),
+        gf('Tip încălzire', 'incalzire', 'select', { options: Object.keys(INCALZIRE).map(function (k) { return [k, INCALZIRE[k]]; }) }),
+        gf('Sursă apă / canalizare', 'apa', 'select', { options: Object.keys(APA).map(function (k) { return [k, APA[k]]; }) }),
         fld('Categorie pericol PSI', 'psi', 'auto'),
         fld('Risc de incendiu', 'risc_incendiu', 'auto'),
         fld('Grad rezistență la foc (P118)', 'grad_rf', 'auto'),
@@ -182,7 +199,7 @@
         fld('Rezervă apă incendiu (mc)', 'rezerva_incendiu', 'auto'),
         fld('Desfumare oblig.', 'desfumare_oblig', 'auto'),
         fld('Sprinklere oblig.', 'sprinklere_oblig', 'auto'), fld('IDSI oblig.', 'idsi_oblig', 'auto'), fld('Lift oblig.', 'lift_oblig', 'auto')
-      ]));
+      ].filter(Boolean)));
       // avizatori
       var sa = el('div', { style: 'margin-bottom:16px' }); sa.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">13</span>Avizatori (din CU)'));
       var ga = el('div', { style: 'display:grid;grid-template-columns:repeat(3,1fr);gap:5px' }); D._avize = D._avize || {};
@@ -237,6 +254,7 @@
       var v = G.UXDoc.valideaza(D); var ac = v.calc;
       function setA(id, val) { var e = document.getElementById('auto-' + id); if (e) e.textContent = val; }
       setA('POT', (ac.POT || 0) + '%'); setA('CUT', ac.CUT || 0);
+      setA('arii_calc', 'SU ' + (ac.Su_total || 0).toLocaleString('ro-RO') + ' · SD ' + (ac.Sd_total || 0).toLocaleString('ro-RO') + ' · SC ' + (ac.Sc_total || 0).toLocaleString('ro-RO') + ' mp (SU/SD ' + (ac.su_coef || 0.8) + ')');
       setA('parcaje_necesare', ac.parcaje_necesare); setA('sv', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0).toLocaleString('ro-RO') + ' mp)');
       setA('ag', (ac.seismic.ag) + 'g' + (ac.seismic.estimat ? ' ~est' : '')); setA('Tc', ac.seismic.Tc + ' s');
       setA('sk', ac.clima.sk + ' kN/m²'); setA('Te', ac.clima.Te + ' °C');
