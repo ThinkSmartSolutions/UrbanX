@@ -155,6 +155,40 @@
       return doc;
     };
 
+    // ── PLAN DE INSTALAȚII PE NIVEL (PTh) — traseu pe plan, nu doar schemă ──
+    UX.installationPlanDoc = function (kind, o) {
+      o = o || {}; var doc = UX.newDoc(); var g = grid(o);
+      var W = (o.width || 20) * K, D = (o.adancime || 14) * K, gx = W / g.nGX, gy = D / g.nGY, i, j;
+      var lay = kind === 'IE' ? 'M-HVAC-SUPP' : kind === 'IT' ? 'M-HVAC-RETN' : 'M-PIPE-CW'; if (!UX.LAYERS[lay]) lay = 'A-TEXT-NOTE';
+      var titles = { IS: 'PLAN INSTALAȚII SANITARE — trasee apă/canal pe nivel', IE: 'PLAN INSTALAȚII ELECTRICE — circuite/corpuri/prize pe nivel', IT: 'PLAN INSTALAȚII TERMICE/HVAC — trasee + corpuri pe nivel' };
+      // conturul cladirii + grila (baza plan) + coridor central (spina de distributie)
+      doc.rect(0, 0, W, D, 'A-WALL-EXTR-N'); doc.rect(-300, -300, W + 600, D + 600, 'A-WALL-EXTR-N');
+      UX.structuralGrid(doc, 0, 0, W, D, gx, gy);
+      var spineY = D / 2; doc.rect(0, spineY - 900, W, 1800, 'A-WALL-PART-N'); // coridor
+      doc.text(W / 2, spineY, 220, 'CORIDOR TEHNIC / SPINĂ DISTRIBUȚIE', 'A-TEXT-NOTE', { align: 'center' });
+      // magistrala pe coridor + coloane (risers) + racorduri la incaperi
+      doc.line(300, spineY, W - 300, spineY, lay);
+      var racord = kind === 'IS' ? 'obiect sanitar' : kind === 'IE' ? 'circuit/corp' : 'corp încălzire';
+      for (i = 1; i < g.nGX; i++) {
+        var rx = i * gx; doc.circle(rx, spineY, 150, lay); doc.text(rx, spineY - 350, 180, kind + '.' + i, 'A-TEXT-FINI', { align: 'center' });
+        doc.line(rx, spineY - 900, rx, 600, lay); doc.line(rx, spineY + 900, rx, D - 600, lay); // urcare/coborare pe niveluri (coloane)
+        // racorduri la incaperi (puncte)
+        for (j = 0; j < g.nGY; j++) { var py = j * gy + gy / 2; if (Math.abs(py - spineY) > 1000) { doc.line(rx, py, rx + gx * 0.35, py, lay); doc.circle(rx + gx * 0.35, py, 120, lay); } }
+      }
+      // cotare + nord
+      doc.dim(0, 0, W, 0, -300, 'A-DIMS-PLAN'); doc.dim(0, 0, 0, D, -300, 'A-DIMS-PLAN');
+      UX.northArrow(doc, W + 500, D - 400, 300, 0);
+      // legenda + note dimensionare
+      var leg = kind === 'IE' ? 'Legendă: ── circuit · ○ tablou/coloană · ● corp/priză · secțiuni cabluri din breviar IE (I7)' : kind === 'IT' ? 'Legendă: ── conductă tur/retur · ○ coloană · ● corp încălzire · diametre din breviar IT (I13)' : 'Legendă: ── conductă apă/canal · ○ coloană · ● obiect sanitar · diametre din breviar IS (I9)';
+      doc.text(200, D + 700, 200, leg, 'A-TEXT-FINI');
+      doc.text(200, D + 1100, 200, 'Trasee ' + racord + ' racordate la coloane; pantele/diametrele/secțiunile se preiau din memoriul + breviarul de specialitate.', 'A-TEXT-FINI');
+      doc.text(W / 2, D + 1600, 260, titles[kind], 'A-TEXT-NOTE', { align: 'center' });
+      UX.scaleBar(doc, 0, -1000, 100, 10);
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || titles[kind], faza: 'PTh', plansa: o.plansa || (kind + '-02'), scara: 100, beneficiar: o.beneficiar, data: o.data });
+      if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
+      return doc;
+    };
+
     // ── DETALII DE EXECUȚIE (PTh) — la scara 1:20/1:10 ────────────────────
     function _cartusDet(doc, W, H, o, plansa, titlu, scara) {
       UX.scaleBar(doc, 0, -H * 0.12 - 400, scara || 20, 1);
@@ -263,7 +297,11 @@
       // INSTALAȚII
       add('is', 'Instalații sanitare', 'IS-01', UX.installationSchemeDoc('IS', Object.assign({}, o, { plansa: 'IS-01' })));
       add('ie', 'Instalații electrice', 'IE-01', UX.installationSchemeDoc('IE', Object.assign({}, o, { plansa: 'IE-01' })));
-      add('it', 'Instalații termice / HVAC', 'IT-01', UX.installationSchemeDoc('IT', Object.assign({}, o, { plansa: 'IT-01' })));
+      add('it', 'Instalații termice / HVAC (schemă)', 'IT-01', UX.installationSchemeDoc('IT', Object.assign({}, o, { plansa: 'IT-01' })));
+      // INSTALAȚII — PLANURI PE NIVEL (PTh): trasee pe plan, nu doar scheme
+      add('is_plan', 'Plan instalații sanitare (PTh)', 'IS-02', UX.installationPlanDoc('IS', Object.assign({}, o, { plansa: 'IS-02' })));
+      add('ie_plan', 'Plan instalații electrice (PTh)', 'IE-02', UX.installationPlanDoc('IE', Object.assign({}, o, { plansa: 'IE-02' })));
+      add('it_plan', 'Plan instalații termice/HVAC (PTh)', 'IT-02', UX.installationPlanDoc('IT', Object.assign({}, o, { plansa: 'IT-02' })));
       // DETALII DE EXECUȚIE (PTh) — detalii de armare + arhitecturale la scara 1:20/1:10
       add('det_fundatie', 'Detaliu fundație (PTh)', 'D-01', UX.detailFundatieDoc(Object.assign({}, o, { plansa: 'D-01' })));
       add('det_nod', 'Detaliu nod stâlp-grindă (PTh)', 'D-02', UX.detailNodDoc(Object.assign({}, o, { plansa: 'D-02' })));
