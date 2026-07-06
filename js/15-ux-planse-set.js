@@ -270,9 +270,90 @@
       return doc;
     };
 
+    // ══════════════════════════════════════════════════════════════════════
+    // PLANȘE PARC FOTOVOLTAIC (energie) — NU plan de nivel/fațade/acoperiș de clădire
+    // ══════════════════════════════════════════════════════════════════════
+    UX.siteplanPVDoc = function (o) {
+      o = o || {}; var e = (o.params && o.params.energie) || {}; var doc = UX.newDoc();
+      var Steren = e.teren_disponibil_mp || e.teren_necesar_mp || 20000;
+      var side = Math.max(20, Math.round(Math.sqrt(Steren))); var pW = side * K, pD = side * K;
+      doc.rect(0, 0, pW, pD, 'C-PARCEL-BDRY');                                  // limita de proprietate
+      var f = 5 * K; doc.rect(f, f, pW - 2 * f, pD - 2 * f, 'C-ROAD-EDGE');     // împrejmuire (retragere 5 m)
+      var inset = 8 * K, x0 = inset, x1 = pW - inset, y0 = inset, y1 = pD - 2 * K - 6 * K;
+      var pitch = (e.montaj === 'fix' || !e.montaj ? 5 : 6) * K, td = 2.4 * K, seg = 20 * K, gap = 1 * K;
+      var nT = 0;
+      for (var yy = y0; yy + td <= y1; yy += pitch) {
+        for (var xx = x0; xx + seg <= x1; xx += seg + gap) {
+          doc.rect(xx, yy, seg, td, 'A-WALL-EXTR-N');          // masă de module (rând) — fără hașură (site plan 1:1000)
+          doc.line(xx, yy + td / 2, xx + seg, yy + td / 2, 'A-DIMS-PLAN'); // axul mesei
+          nT++;
+        }
+      }
+      doc.rect(x0, y1 + 1 * K, 8 * K, 5 * K, 'C-BLDG-PRPD'); doc.text(x0 + 4 * K, y1 + 3.5 * K, 300, 'PT 0,4/20 kV + invertoare', 'A-TEXT-NOTE', { align: 'center' });
+      doc.rect(pW / 2 - 2 * K, pD, 4 * K, 6 * K, 'C-ROAD-EDGE'); doc.text(pW / 2, pD + 3 * K, 320, 'ACCES', 'A-TEXT-NOTE', { align: 'center' });
+      doc.line(-2 * K, pD + 6 * K, pW + 2 * K, pD + 6 * K, 'C-ROAD-EDGE'); doc.text(pW / 2, pD + 7 * K, 340, 'DRUM PUBLIC', 'A-TEXT-NOTE', { align: 'center' });
+      doc.text(x0 + 300, f + 1800, 380, 'PARC FOTOVOLTAIC' + (e.putere_dc_kwp ? ' — ' + e.putere_dc_kwp.toLocaleString('ro-RO') + ' kWp' : ''), 'A-TEXT-NOTE');
+      doc.text(x0 + 300, f + 3600, 300, (e.nr_module || 0).toLocaleString('ro-RO') + ' module · ' + (e.montaj_label || 'mese fixe'), 'A-TEXT-FINI');
+      doc.text(x0 + 300, f + 5100, 300, 'S teren ' + Steren.toLocaleString('ro-RO') + ' mp · GCR ' + (e.gcr || 0.4) + ' · ' + nT + ' mese', 'A-TEXT-FINI');
+      UX.northArrow(doc, pW + 900, pD - 400, 340, 0); UX.scaleBar(doc, 0, -1600, 1000, 20);
+      UX.titleBlock(doc, { x: pW + 1500, y: 0, proiect: o.proiect || 'Plan de situație — parc fotovoltaic', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 1000, beneficiar: o.beneficiar, data: o.data });
+      if (o.params) try { UX.techNotes(doc, pW + 1500, 65, o.params); } catch (er) {}
+      return doc;
+    };
+    UX.sectionMeseDoc = function (o) {
+      o = o || {}; var e = (o.params && o.params.energie) || {}; var doc = UX.newDoc();
+      var beta = (e.montaj === 'fix' || !e.montaj) ? 30 : 20, Lmod = 4.0, clr = 0.8, pitch = (e.montaj === 'fix' || !e.montaj ? 5 : 6);
+      var rad = beta * Math.PI / 180, dx = Lmod * Math.cos(rad) * K, dy = Lmod * Math.sin(rad) * K;
+      doc.line(-1 * K, 0, (pitch + Lmod + 2) * K, 0, 'S-SLAB-N'); doc.text((pitch + Lmod) / 2 * K, -700, 260, 'TEREN NATURAL', 'A-TEXT-NOTE', { align: 'center' });
+      function table(xo) {
+        var bx = xo * K, by = clr * K;
+        doc.line(bx, 0, bx, -1.5 * K, 'S-FNDT-N'); doc.text(bx, -1.9 * K, 220, 'pilot', 'A-TEXT-NOTE', { align: 'center' });
+        doc.line(bx, by, bx + dx, by + dy, 'A-WALL-EXTR-N');           // modul înclinat
+        doc.line(bx, by, bx, 0.2 * K, 'A-WALL-EXTR-N'); doc.line(bx + dx, by + dy, bx + dx, 0, 'A-WALL-EXTR-N'); // suporți
+        return { bx: bx, by: by };
+      }
+      var t1 = table(0); table(pitch);
+      doc.dim(0, clr * K, 0, 0, -600, 'A-DIMS-ELEV'); doc.text(-1.3 * K, clr * K / 2, 240, 'gardă la sol ' + clr.toFixed(1) + ' m', 'A-TEXT-NOTE', { rot: 90 });
+      doc.dim(0, -0.7 * K, pitch * K, -0.7 * K, -400, 'A-DIMS-PLAN'); doc.text(pitch / 2 * K, -1.1 * K, 240, 'pitch (distanță între rânduri) ' + pitch.toFixed(1) + ' m', 'A-TEXT-NOTE', { align: 'center' });
+      doc.text(dx / 2 + 300, dy / 2 + clr * K + 300, 260, 'modul FV — înclinare β=' + beta + '°', 'A-TEXT-NOTE');
+      UX.scaleBar(doc, 0, -2.6 * K, 50, 5);
+      UX.titleBlock(doc, { x: (pitch + Lmod + 3) * K, y: -1 * K, proiect: o.proiect || 'Secțiune caracteristică — mese FV', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 50, beneficiar: o.beneficiar, data: o.data });
+      return doc;
+    };
+    UX.schemaMonofilaraPVDoc = function (o) {
+      o = o || {}; var e = (o.params && o.params.energie) || {}; var doc = UX.newDoc();
+      var boxes = [
+        ['Câmp FV\n' + (e.nr_module || '—') + ' module\n' + (e.nr_stringuri || '—') + ' stringuri', 0],
+        ['Combiner +\nSPD T1+2 +\nsiguranțe gPV', 1],
+        ['Invertoare\n' + (e.nr_invertoare || '—') + ' × ' + (e.putere_invertor_kva || 100) + ' kVA', 2],
+        ['PT 0,4/20 kV\n' + (e.nr_pt || 1) + ' × ' + (e.putere_pt_kva || '—') + ' kVA', 3],
+        ['Contor\nbidirecțional', 4],
+        ['Racord ' + (e.racord || 'MT 20 kV') + '\n→ SEN', 5]
+      ];
+      var bw = 6 * K, bh = 4 * K, gapx = 3 * K, y = 0;
+      boxes.forEach(function (b) {
+        var x = b[1] * (bw + gapx);
+        doc.rect(x, y, bw, bh, 'C-BLDG-PRPD');
+        b[0].split('\n').forEach(function (ln, i) { doc.text(x + bw / 2, y + bh - 900 - i * 800, 260, ln, 'A-TEXT-NOTE', { align: 'center' }); });
+        if (b[1] > 0) doc.line(x - gapx, y + bh / 2, x, y + bh / 2, 'IE-POWER');
+      });
+      doc.text(0, bh + 1200, 340, 'SCHEMĂ ELECTRICĂ MONOFILARĂ — parc fotovoltaic ' + (e.putere_dc_kwp ? e.putere_dc_kwp.toLocaleString('ro-RO') + ' kWp / ' + e.putere_ac_kva.toLocaleString('ro-RO') + ' kVA' : ''), 'A-TEXT-NOTE');
+      UX.titleBlock(doc, { x: 6 * (bw + gapx) + 1000, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      return doc;
+    };
+    UX.buildPVSet = function (o) {
+      return [
+        { key: 'situatie_pv', label: 'Plan de situație — implantare mese FV', plansa: 'A-01', doc: UX.siteplanPVDoc(Object.assign({}, o, { plansa: 'A-01' })) },
+        { key: 'sectiune_mese', label: 'Secțiune caracteristică — mese/suporți', plansa: 'A-02', doc: UX.sectionMeseDoc(Object.assign({}, o, { plansa: 'A-02' })) },
+        { key: 'schema_monofilara', label: 'Schemă electrică monofilară', plansa: 'E-01', doc: UX.schemaMonofilaraPVDoc(Object.assign({}, o, { plansa: 'E-01' })) }
+      ];
+    };
+
     // ── SET COMPLET: arhitectură + rezistență + instalații ────────────────
     UX.buildFullSet = function (o) {
       o = o || {}; var s = [];
+      // Parc fotovoltaic / energie → set de planșe DEDICAT (nu plan de nivel/fațade de clădire)
+      if (o.params && o.params.energie && o.params.energie.putere_dc_kwp) return UX.buildPVSet(o);
       var niv = Math.max(1, o.niv || 1);
       function add(key, label, plansa, doc) { s.push({ key: key, label: label, plansa: plansa, doc: doc }); }
       // ARHITECTURĂ
