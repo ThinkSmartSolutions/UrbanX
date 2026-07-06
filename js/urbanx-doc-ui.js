@@ -131,7 +131,7 @@
       }
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual'), fld('Faza de proiectare', 'faza', 'select', { options: FAZE })]));
       form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), gf('POT max (%)', 'POT_max', 'manual', { type: 'number' }), gf('CUT max', 'CUT_max', 'manual', { type: 'number' }), gf('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), gf('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), gf('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), gf('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), gf('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })].filter(Boolean)));
-      var _isEnergie = ((G.UXDoc.FUNCTIUNI[D.functiune] || {}).cat === 'energie');
+      var _isEnergie = (D.functiune === 'parc-fotovoltaic'); // câmpurile de putere/montaj FV doar la parc fotovoltaic
       form.appendChild(section('4–5', 'Construcție propusă', [
         fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts })
       ].concat(_isEnergie ? [

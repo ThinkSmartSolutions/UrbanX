@@ -194,7 +194,7 @@
     // (a) putere setată → teren necesar + tot dimensionamentul;
     // (b) doar teren disponibil (fără putere) → putere maximă instalabilă (invers).
     // Tip montaj (fix / tracker 1-2 axe) modifică GCR și producția.
-    if (fn.cat === 'energie' || d.functiune === 'parc-fotovoltaic') {
+    if (d.functiune === 'parc-fotovoltaic') {     // DOAR parc FV (nu BESS/stație/skid — acelea au altă natură)
       var pmod = +d.putere_modul_wp || 555;      // Wp/modul
       var ilr = +d.ilr || 1.25;                  // raport DC/AC
       var montaj = d.montaj || 'fix';            // fix | tracker_1ax | tracker_2ax
@@ -374,9 +374,9 @@
   function profilFor(fnKey) {
     var fn = FUNCTIUNI[fnKey] || {};
     if (fn.profil) return fn.profil;
-    if (fn.cat === 'energie') return 'energie';
+    if (fnKey === 'parc-fotovoltaic') return 'energie';                 // câmp de panouri (fără clădire)
     if (fnKey === 'pod' || fnKey === 'infrastructura-drum') return 'infrastructura';
-    return 'cladire';
+    return 'cladire';   // BESS/stație/skid au clădiri/platforme tehnice → profil clădire (dar planșe dedicate prin dispecer)
   }
   G.UXDoc = { FUNCTIUNI: FUNCTIUNI, detectFunctiune: detectFunctiune, autoCalc: autoCalc, valideaza: valideaza, dateFromAEDIS: dateFromAEDIS, seismicFor: seismicFor, AEDIS_FN_MAP: AEDIS_FN_MAP, profilFor: profilFor };
   console.log('[UXDoc] engine documentații încărcat (window.UXDoc) — client-side, fără server');

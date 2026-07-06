@@ -101,7 +101,14 @@
     var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>';
     var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
     var drels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
-    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:pPr><w:spacing w:before="200" w:after="100"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/></w:rPr></w:style><w:style w:type="table" w:default="1" w:styleId="TableGrid"><w:name w:val="Table Grid"/></w:style></w:styles>';
+    // Stil identic cu standardul UrbanX (referința .doc): Times New Roman 12pt, line 1.5, titluri bleumarin.
+    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="360" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="180" w:line="240" w:lineRule="auto"/></w:pPr><w:rPr><w:b/><w:color w:val="1F3864"/><w:sz w:val="32"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:pPr><w:spacing w:before="280" w:after="120" w:line="240" w:lineRule="auto"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="2" w:color="1F3864"/></w:pBdr></w:pPr><w:rPr><w:b/><w:caps/><w:color w:val="1F3864"/><w:sz w:val="28"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:pPr><w:spacing w:before="200" w:after="100" w:line="240" w:lineRule="auto"/></w:pPr><w:rPr><w:b/><w:color w:val="2F5496"/><w:sz w:val="26"/></w:rPr></w:style>' +
+      '<w:style w:type="table" w:default="1" w:styleId="TableGrid"><w:name w:val="Table Grid"/></w:style></w:styles>';
     var z = new G.JSZip();
     z.file('[Content_Types].xml', ct);
     z.file('_rels/.rels', rels);
@@ -140,14 +147,21 @@
   function _meta(D, titlu, subtitlu) {
     return { titlu: titlu, subtitlu: subtitlu || '', proiect: D.nume || '—', beneficiar: D.beneficiar || '—', proiectant: D.proiectant || '—', amplasament: (D.uat || '') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''), faza: FAZA_LBL[D.faza] || D.faza || 'D.T.A.C.' };
   }
-  // Bloc de semnături standard (Întocmit / Verificat / Șef proiect) — apare la finalul fiecărui memoriu.
+  // Bloc de semnături + responsabili — colectivul de elaborare, la finalul fiecărui memoriu.
   function _semnaturaBlock(meta) {
-    return '<h2>Semnături</h2><table>' +
-      '<tr><th>Rol</th><th>Nume / firmă</th><th>Nr. înregistrare / atestat</th><th>Semnătura</th><th>Data</th></tr>' +
-      '<tr><td>Întocmit (proiectant de specialitate)</td><td>' + esc(meta.proiectant || '—') + '</td><td>—</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
-      '<tr><td>Șef de proiect</td><td>' + esc(meta.proiectant || '—') + '</td><td>—</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
-      '<tr><td>Verificat (verificator de proiecte atestat MLPAT/MDLPA)</td><td>—</td><td>cerința aplicabilă (A/B/C/D/E/F/Is/It/Ie)</td><td>&nbsp;</td><td>&nbsp;</td></tr>' +
-      '</table><p>Prezentul document se însușește prin semnătură și ștampilă de proiectanții cu drept de semnătură (OAR/AICPS/CNIR, după caz) și se verifică de verificatori de proiecte atestați conform Legii nr. 10/1995 privind calitatea în construcții.</p>';
+    var isPth = (meta.faza && /PTh|P\.Th|D\.E|Proiect Tehnic/i.test(meta.faza));
+    var rows = [
+      ['Șef de proiect', meta.proiectant || '—', 'drept de semnătură (OAR/AICPS/OGR)'],
+      ['Proiectant de specialitate (întocmit)', meta.proiectant || '—', 'membru în organizația profesională'],
+      ['Elaborat / desenat', '—', '—'],
+      ['Verificat (verificator de proiecte atestat MLPAT/MDLPA)', '—', 'cerința aplicabilă (A1/A2/B/C/D/E/F/Is/It/Ie)']
+    ];
+    if (isPth) rows.push(['Responsabil tehnic cu execuția (RTE)', '—', 'atestat MDLPA (la execuție)']);
+    var body = rows.map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td>&nbsp;</td><td>&nbsp;</td></tr>'; }).join('');
+    return '<h2>Colectiv de elaborare și responsabilități</h2>' +
+      '<table><tr><th>Rol / responsabilitate</th><th>Nume / firmă</th><th>Atestat / calitate</th><th>Semnătura + ștampila</th><th>Data</th></tr>' + body + '</table>' +
+      '<p>Beneficiar: <b>' + esc(meta.beneficiar || '—') + '</b> · Proiectant general: <b>' + esc(meta.proiectant || '—') + '</b> · Faza: <b>' + esc(meta.faza || 'DTAC') + '</b>. ' +
+      'Prezentul document se însușește prin semnătură și ștampilă de proiectanții cu drept de semnătură (OAR/AICPS/OGR, după caz) și se verifică de verificatori de proiecte atestați conform Legii nr. 10/1995 privind calitatea în construcții. Documentul devine valabil numai semnat, ștampilat și datat.</p>';
   }
   function _indicatoriTbl(D, v) {
     var ac = v.calc || {}; var e = ac.energie; var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };

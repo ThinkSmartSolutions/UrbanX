@@ -349,11 +349,117 @@
       ];
     };
 
+    // ══════════════════════════════════════════════════════════════════════
+    // INFRASTRUCTURĂ LINIARĂ (pod / drum) — situație + profil longitudinal + secțiune transversală (NU etaje/fațade)
+    // ══════════════════════════════════════════════════════════════════════
+    UX.infraSituatieDoc = function (o, kind) {
+      o = o || {}; var doc = UX.newDoc(); var L = (o.lungime || (kind === 'pod' ? 40 : 200)) * K, w = (o.latimePlatforma || (kind === 'pod' ? 10 : 8)) * K;
+      doc.line(0, w / 2, L, w / 2, 'C-ROAD-EDGE'); doc.line(0, -w / 2, L, -w / 2, 'C-ROAD-EDGE'); // marginile căii
+      doc.line(0, 0, L, 0, 'A-DIMS-PLAN'); // axul traseului
+      if (kind === 'pod') {
+        doc.line(L * 0.25, -w, L * 0.75, -w, 'S-FNDT-N'); doc.line(L * 0.25, -w, L * 0.25, w, 'S-FNDT-N'); doc.line(L * 0.75, -w, L * 0.75, w, 'S-FNDT-N');
+        doc.text(L / 2, -w - 800, 300, 'OBSTACOL TRAVERSAT (curs de apă / vale)', 'A-TEXT-NOTE', { align: 'center' });
+        doc.rect(-1.5 * K, -w / 2 - 500, 1.5 * K, w + 1000, 'C-BLDG-PRPD'); doc.rect(L, -w / 2 - 500, 1.5 * K, w + 1000, 'C-BLDG-PRPD');
+        doc.text(-0.7 * K, w / 2 + 900, 240, 'Culee C1', 'A-TEXT-NOTE', { align: 'center' }); doc.text(L + 0.7 * K, w / 2 + 900, 240, 'Culee C2', 'A-TEXT-NOTE', { align: 'center' });
+        doc.text(L * 0.5, 0 + 900, 240, 'Pile intermediare', 'A-TEXT-NOTE', { align: 'center' });
+      } else {
+        for (var km = 0; km <= L; km += 25 * K) { doc.line(km, -w / 2 - 400, km, w / 2 + 400, 'A-DIMS-PLAN'); doc.text(km, w / 2 + 800, 220, (km / K) + ' m', 'A-TEXT-NOTE', { align: 'center' }); }
+      }
+      doc.dim(0, -w / 2 - 1500, L, -w / 2 - 1500, -600, 'A-DIMS-PLAN'); doc.dim(0, w / 2, 0, -w / 2, 400, 'A-DIMS-PLAN');
+      doc.text(L / 2, w / 2 + 2200, 340, (kind === 'pod' ? 'POD / PASARELĂ' : 'DRUM') + ' — plan de situație · L=' + (L / K) + ' m, lățime platformă ' + (w / K) + ' m', 'A-TEXT-NOTE', { align: 'center' });
+      UX.northArrow(doc, L + 2 * K, w, 340, 0); UX.scaleBar(doc, 0, -w / 2 - 2200, 500, 10);
+      UX.titleBlock(doc, { x: L + 3 * K, y: -w, proiect: o.proiect || 'Plan de situație', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 500, beneficiar: o.beneficiar, data: o.data });
+      if (o.params) try { UX.techNotes(doc, L + 3 * K, -w + 65, o.params); } catch (e) {}
+      return doc;
+    };
+    UX.profilLongitudinalDoc = function (o, kind) {
+      o = o || {}; var doc = UX.newDoc(); var L = (o.lungime || (kind === 'pod' ? 40 : 200)) * K, VE = 5; // exagerare verticală
+      var y = function (m) { return m * VE * K; };
+      // teren natural (linie frântă)
+      doc.pline([[0, y(0)], [L * 0.2, y(-3)], [L * 0.5, y(-6)], [L * 0.8, y(-3)], [L, y(0)]], false, 'S-SLAB-N');
+      doc.text(L * 0.5, y(-6) - 700, 260, 'TEREN NATURAL', 'A-TEXT-NOTE', { align: 'center' });
+      // linia roșie (profil în lung) — cotă constantă/ușor curbă
+      doc.line(0, y(1.5), L, y(1.5), 'C-ROAD-EDGE'); doc.text(L * 0.5, y(1.5) + 500, 260, 'LINIA ROȘIE (profil în lung)', 'A-TEXT-NOTE', { align: 'center' });
+      if (kind === 'pod') {
+        doc.line(0, y(1.2), L, y(1.2), 'A-WALL-EXTR-N'); // suprastructură (tablier)
+        [0.25, 0.5, 0.75].forEach(function (p) { doc.line(L * p, y(1.2), L * p, y(-6 + Math.abs(0.5 - p) * 12), 'S-FNDT-N'); });
+        doc.line(0, y(1.2), 0, y(-1), 'S-FNDT-N'); doc.line(L, y(1.2), L, y(-1), 'S-FNDT-N');
+        doc.text(L * 0.5, y(1.2) - 400, 220, 'Suprastructură (tablier) · deschideri pe pile', 'A-TEXT-NOTE', { align: 'center' });
+      }
+      doc.text(L / 2, y(-9), 320, (kind === 'pod' ? 'POD' : 'DRUM') + ' — profil longitudinal (exagerare verticală ' + VE + '×)', 'A-TEXT-NOTE', { align: 'center' });
+      UX.scaleBar(doc, 0, y(-10), 500, 10);
+      UX.titleBlock(doc, { x: L + 2 * K, y: y(-6), proiect: o.proiect || 'Profil longitudinal', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 500, beneficiar: o.beneficiar, data: o.data });
+      return doc;
+    };
+    UX.sectiuneTransversalaInfraDoc = function (o, kind) {
+      o = o || {}; var doc = UX.newDoc(); var w = (o.latimePlatforma || (kind === 'pod' ? 10 : 8)) * K;
+      if (kind === 'pod') {
+        doc.rect(-w / 2, 0, w, 1.2 * K, 'A-WALL-EXTR-N'); try { UX.materialHatch(doc, [[-w / 2, 0], [w / 2, 0], [w / 2, 1.2 * K], [-w / 2, 1.2 * K]], 'BETON_ARMAT'); } catch (e) {}
+        doc.line(-w / 2, 1.2 * K, -w / 2, 2.2 * K, 'A-WALL-EXTR-N'); doc.line(w / 2, 1.2 * K, w / 2, 2.2 * K, 'A-WALL-EXTR-N'); // parapete
+        doc.text(0, 0.6 * K, 240, 'Tablier b.a. + grinzi', 'A-TEXT-NOTE', { align: 'center' }); doc.text(0, 1.5 * K, 240, 'Carosabil ' + (w / K) + ' m + parapete', 'A-TEXT-NOTE', { align: 'center' });
+      } else {
+        var straturi = [['Uzură asfalt BA16', 40], ['Legătură BAD22.4', 60], ['Fundație piatră spartă', 200], ['Balast', 300]];
+        var yy = 0; straturi.forEach(function (st) { doc.rect(-w / 2, yy, w, st[1] * (K / 1000) * 10, 'S-SLAB-N'); doc.text(w / 2 + 500, yy + st[1] * (K / 1000) * 5, 200, st[0] + ' (' + st[1] + ' mm)', 'A-TEXT-NOTE'); yy += st[1] * (K / 1000) * 10; });
+        doc.line(-w / 2 - 1500, 0, -w / 2, 200, 'S-SLAB-N'); doc.line(w / 2, 200, w / 2 + 1500, 0, 'S-SLAB-N'); // acostamente/pantă
+        doc.text(0, yy + 600, 240, 'Structură rutieră · platformă ' + (w / K) + ' m (2 benzi + acostamente), pantă transversală 2,5%', 'A-TEXT-NOTE', { align: 'center' });
+      }
+      UX.scaleBar(doc, -w / 2, -1200, 50, 5);
+      UX.titleBlock(doc, { x: w / 2 + 4 * K, y: -1 * K, proiect: o.proiect || 'Secțiune transversală', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-03', scara: 50, beneficiar: o.beneficiar, data: o.data });
+      return doc;
+    };
+    UX.buildInfraSet = function (o, kind) {
+      return [
+        { key: 'situatie', label: 'Plan de situație (traseu)', plansa: 'A-01', doc: UX.infraSituatieDoc(Object.assign({}, o, { plansa: 'A-01' }), kind) },
+        { key: 'profil_long', label: 'Profil longitudinal', plansa: 'A-02', doc: UX.profilLongitudinalDoc(Object.assign({}, o, { plansa: 'A-02' }), kind) },
+        { key: 'sect_transv', label: 'Secțiune transversală', plansa: 'A-03', doc: UX.sectiuneTransversalaInfraDoc(Object.assign({}, o, { plansa: 'A-03' }), kind) }
+      ];
+    };
+
+    // ══════════════════════════════════════════════════════════════════════
+    // STAȚIE ELECTRICĂ / BESS — monofilară + amplasare echipamente + priză de pământ (NU panouri FV, NU etaje)
+    // ══════════════════════════════════════════════════════════════════════
+    UX.schemaElectricaDoc = function (o, kind) {
+      o = o || {}; var doc = UX.newDoc();
+      var boxes = kind === 'bess'
+        ? [['Baterii\n(rack-uri)', 0], ['PCS / invertor\nbidirecțional', 1], ['Trafo\n0,4/20 kV', 2], ['Celule MT\n+ protecții', 3], ['Racord 20 kV\n→ SEN', 4]]
+        : [['LEA/LES\n110 kV', 0], ['Bare 110 kV\n+ separatoare', 1], ['Autotransformator\n110/20 kV', 2], ['Bare 20 kV\n+ celule', 3], ['Plecări 20 kV\n→ distribuție', 4]];
+      var bw = 6 * K, bh = 4 * K, gapx = 3 * K;
+      boxes.forEach(function (b) {
+        var x = b[1] * (bw + gapx); doc.rect(x, 0, bw, bh, 'C-BLDG-PRPD');
+        b[0].split('\n').forEach(function (ln, i) { doc.text(x + bw / 2, bh - 900 - i * 800, 260, ln, 'A-TEXT-NOTE', { align: 'center' }); });
+        if (b[1] > 0) doc.line(x - gapx, bh / 2, x, bh / 2, 'IE-POWER');
+      });
+      doc.text(0, bh + 1200, 340, 'SCHEMĂ ELECTRICĂ MONOFILARĂ — ' + (kind === 'bess' ? 'stocare energie (BESS)' : 'stație de transformare'), 'A-TEXT-NOTE');
+      UX.titleBlock(doc, { x: 5 * (bw + gapx) + 1 * K, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      return doc;
+    };
+    UX.planAmplasareEchipDoc = function (o, kind) {
+      o = o || {}; var doc = UX.newDoc(); var pW = 40 * K, pD = 30 * K, f = 3 * K;
+      doc.rect(0, 0, pW, pD, 'C-PARCEL-BDRY'); doc.rect(f, f, pW - 2 * f, pD - 2 * f, 'C-ROAD-EDGE');
+      doc.rect(5 * K, 5 * K, 10 * K, 6 * K, 'C-BLDG-PRPD'); doc.text(10 * K, 8 * K, 300, kind === 'bess' ? 'Containere baterii + PCS' : 'Clădire comandă + celule', 'A-TEXT-NOTE', { align: 'center' });
+      doc.rect(20 * K, 5 * K, 8 * K, 6 * K, 'C-BLDG-PRPD'); doc.text(24 * K, 8 * K, 300, 'Transformator', 'A-TEXT-NOTE', { align: 'center' });
+      doc.text(pW / 2, pD - 2 * K, 260, 'Platformă betonată + cuvă de retenție ulei + priză de pământ perimetrală', 'A-TEXT-NOTE', { align: 'center' });
+      UX.northArrow(doc, pW + 900, pD - 400, 340, 0); UX.scaleBar(doc, 0, -1200, 200, 10);
+      UX.titleBlock(doc, { x: pW + 1.5 * K, y: 0, proiect: o.proiect || 'Plan amplasare echipamente', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 200, beneficiar: o.beneficiar, data: o.data });
+      if (o.params) try { UX.techNotes(doc, pW + 1.5 * K, 65, o.params); } catch (e) {}
+      return doc;
+    };
+    UX.buildElectricSet = function (o, kind) {
+      return [
+        { key: 'amplasare', label: 'Plan amplasare echipamente', plansa: 'A-01', doc: UX.planAmplasareEchipDoc(Object.assign({}, o, { plansa: 'A-01' }), kind) },
+        { key: 'schema_mono', label: 'Schemă electrică monofilară', plansa: 'E-01', doc: UX.schemaElectricaDoc(Object.assign({}, o, { plansa: 'E-01' }), kind) }
+      ];
+    };
+
     // ── SET COMPLET: arhitectură + rezistență + instalații ────────────────
     UX.buildFullSet = function (o) {
-      o = o || {}; var s = [];
-      // Parc fotovoltaic / energie → set de planșe DEDICAT (nu plan de nivel/fațade de clădire)
-      if (o.params && o.params.energie && o.params.energie.putere_dc_kwp) return UX.buildPVSet(o);
+      o = o || {}; var s = []; var fn = o.functiune || '';
+      // DISPECER pe funcțiune (coerent, nu „energie" în bloc):
+      if (fn === 'parc-fotovoltaic' || (o.params && o.params.energie && o.params.energie.putere_dc_kwp && fn !== 'bess' && fn !== 'statie-transformare')) return UX.buildPVSet(o);
+      if (fn === 'pod') return UX.buildInfraSet(o, 'pod');
+      if (fn === 'infrastructura-drum') return UX.buildInfraSet(o, 'drum');
+      if (fn === 'statie-transformare') return UX.buildElectricSet(o, 'statie');
+      if (fn === 'bess') return UX.buildElectricSet(o, 'bess');
       var niv = Math.max(1, o.niv || 1);
       function add(key, label, plansa, doc) { s.push({ key: key, label: label, plansa: plansa, doc: doc }); }
       // ARHITECTURĂ
