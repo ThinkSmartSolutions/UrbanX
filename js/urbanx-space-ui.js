@@ -19,6 +19,18 @@
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); };
     head.appendChild(bX); wrap.appendChild(head);
 
+    // Program de camere = doar pentru clădiri. La parc FV / pod / drum / stație NU se aplică (nu induce în eroare cu „Centru social").
+    var _prof = (G.UXDoc && G.UXDoc.profilFor) ? G.UXDoc.profilFor(D.functiune) : 'cladire';
+    if (_prof === 'infrastructura' || _prof === 'energie') {
+      var _lbl = ((G.UXDoc && G.UXDoc.FUNCTIUNI && G.UXDoc.FUNCTIUNI[D.functiune]) || {}).label || D.functiune || 'această funcțiune';
+      wrap.appendChild(el('div', { style: 'background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);border-radius:9px;padding:14px 16px;margin:16px 0;font-size:13px;color:#93c5fd;line-height:1.6' },
+        'ℹ️ <b>' + _lbl + '</b> nu are program de camere. ' + (_prof === 'energie'
+          ? 'Dimensionarea se face în formular (putere instalată / suprafață teren) și în planșele dedicate (situație cu trama meselor, secțiune mese, schemă monofilară).'
+          : 'Dimensionarea se face în formular (lungime, lățime platformă) și în planșele dedicate (plan de situație, profil longitudinal, secțiune transversală).') +
+        '<br><br>Programul de spații (acest panou) se aplică doar clădirilor cu încăperi.'));
+      ov.appendChild(wrap); document.body.appendChild(ov); return;
+    }
+
     // --- selecție tipologie + parametri de program ---
     var tipOpts = [];
     if (G.UXSpace.hasTemplate && G.UXSpace.hasTemplate('centru-social')) tipOpts.push(['centru-social', 'Centru social de zi']);

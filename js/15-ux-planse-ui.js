@@ -30,12 +30,19 @@
     var v = (G.UXDoc && G.UXDoc.valideaza) ? G.UXDoc.valideaza(D) : { calc: {} };
     try { if (G.UX_DRAW && G.UX_DRAW.ariiRows && v.calc) v.calc._ariiRows = G.UX_DRAW.ariiRows(D.functiune, D.Sc, D.Sd, D.niv_supraterane); } catch (e) {}
     var P = inferParams(D);
+    var prof = (G.UXDoc && G.UXDoc.profilFor) ? G.UXDoc.profilFor(D.functiune) : 'cladire';
+    var HEAD = {
+      cladire: ['📐 Planșe tehnice — plan, fațade & secțiune', 'Generate parametric la scara 1:100, cu cote de nivel, ferestre, acoperiș, fundație sub adâncimea de îngheț, stratificații și parametrii tehnici în cartuș.'],
+      energie: ['📐 Planșe — parc fotovoltaic', 'Plan de situație cu trama meselor, secțiune caracteristică mese (înclinare/pitch) și schemă electrică monofilară. Derivate din puterea instalată.'],
+      infrastructura: ['📐 Planșe — infrastructură (pod / drum)', 'Plan de situație (traseu), profil longitudinal și secțiune transversală. Fără elemente de clădire (etaje/fațade/acoperiș).']
+    };
+    var hd = HEAD[prof] || HEAD.cladire;
 
     var ov = el('div', { style: 'position:fixed;inset:0;background:#070c18;z-index:5200;overflow:auto;font-family:system-ui;color:#e6edf7' });
     var wrap = el('div', { style: 'max-width:1100px;margin:0 auto;padding:16px 14px 60px' });
     // header
     var head = el('div', { style: 'display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap' });
-    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#7dd3fc">📐 Planșe tehnice — fațade & secțiune</div><div style="font-size:11.5px;color:#94a3b8;max-width:640px">Generate parametric la scara 1:100, cu cote de nivel, ferestre, acoperiș, fundație sub adâncimea de îngheț, stratificații și parametrii tehnici derivați în cartuș. Le vezi mai jos și le poți descărca (SVG deschizibil în orice browser/Illustrator, sau DXF în AutoCAD/LibreCAD).</div>'));
+    head.appendChild(el('div', null, '<div style="font-size:17px;font-weight:800;color:#7dd3fc">' + hd[0] + '</div><div style="font-size:11.5px;color:#94a3b8;max-width:640px">' + hd[1] + ' Le vezi mai jos și le descarci (SVG în browser/Illustrator, DXF în AutoCAD/LibreCAD).</div>'));
     var bX = el('button', { style: 'background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer' }, '✕'); bX.onclick = function () { ov.remove(); }; head.appendChild(bX);
     wrap.appendChild(head);
 
@@ -48,11 +55,19 @@
       else inp = el('input', { value: val, style: 'width:100%;box-sizing:border-box;background:#0a1120;border:1px solid rgba(148,163,184,.25);border-radius:6px;color:#e6edf7;padding:6px;font-size:12px' });
       inp.setAttribute('data-k', key); w.appendChild(inp); grid.appendChild(w); return inp;
     }
-    field('Lățime frontală (m)', 'latime', P.latime); field('Adâncime (m)', 'adancime', P.adancime);
-    field('Nr. niveluri', 'niv', P.niv); field('H parter (m)', 'hParter', P.hParter);
-    field('H etaj (m)', 'hEtaj', P.hEtaj);
-    field('Acoperiș', 'roof', P.roof, [['sarpanta', 'Șarpantă'], ['terasa', 'Terasă']]);
-    field('Ferestre / nivel', 'winPerFloor', P.winPerFloor);
+    if (prof === 'cladire') {
+      field('Lățime frontală (m)', 'latime', P.latime); field('Adâncime (m)', 'adancime', P.adancime);
+      field('Nr. niveluri', 'niv', P.niv); field('H parter (m)', 'hParter', P.hParter);
+      field('H etaj (m)', 'hEtaj', P.hEtaj);
+      field('Acoperiș', 'roof', P.roof, [['sarpanta', 'Șarpantă'], ['terasa', 'Terasă']]);
+      field('Ferestre / nivel', 'winPerFloor', P.winPerFloor);
+    } else if (prof === 'infrastructura') {
+      field('Lungime (m)', 'lungime', D.lungime || (D.functiune === 'pod' ? 40 : 200));
+      field('Lățime platformă (m)', 'latimePlatforma', D.latimePlatforma || (D.functiune === 'pod' ? 10 : 8));
+    } else if (prof === 'energie') {
+      // parametrii vin din formular (putere/montaj) — planșele se derivă automat; nimic de editat aici
+      grid.appendChild(el('div', { style: 'font-size:11.5px;color:#94a3b8;padding:4px' }, 'Planșele parcului fotovoltaic se derivă automat din puterea instalată și tipul de montaj setate în formular.'));
+    }
     var bGen = el('button', { style: 'align-self:end;background:#7dd3fc;color:#062338;border:none;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;min-height:34px' }, '🔄 Regenerează');
     var bGenW = el('div', { style: 'display:flex;align-items:flex-end' }); bGenW.appendChild(bGen); grid.appendChild(bGenW);
     wrap.appendChild(grid);
@@ -104,6 +119,7 @@
       return { width: num(o.latime, 12), adancime: num(o.adancime, 10), niv: Math.max(1, Math.round(num(o.niv, 1))),
         hParter: num(o.hParter, 3), hEtaj: num(o.hEtaj, 3), roof: o.roof, winPerFloor: Math.max(1, Math.round(num(o.winPerFloor, 3))),
         adancimeFundatie: (v.calc && v.calc.adancime_inghet_m) || 0.9, params: v.calc, reledeeFloors: reledeeFloors,
+        lungime: num(o.lungime, D.functiune === 'pod' ? 40 : 200), latimePlatforma: num(o.latimePlatforma, D.functiune === 'pod' ? 10 : 8),
         functiune: D.functiune, proiect: D.nume || 'Obiectiv', beneficiar: D.beneficiar || '', nrcad: D.nrcad,
         data: (function () { try { return new Date().toLocaleDateString('ro-RO'); } catch (e) { return ''; } })(), faza: D.faza || 'DTAC' };
     }
