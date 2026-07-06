@@ -39,7 +39,12 @@
     var body = sections.map(function (s) { return (s.h ? '<h2>' + esc(s.h) + '</h2>' : '') + (s.html || ''); }).join('');
     var semn = '<div class="semn">' + _semnaturaBlock(meta) + '</div>';
     var foot = '<div class="foot">Document generat de UrbanX (ThinkSmart Solutions) — orientativ, se verifică și se semnează de proiectanții atestați.</div>';
-    return '<html><head><meta charset="utf-8">' + STYLE + '</head><body>' + cover + body + semn + foot + '</body></html>';
+    // Antet „Word HTML" (MSO): Word îl tratează ca document nativ → se poate edita ȘI SALVA fără pierderea formatului.
+    return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta charset="utf-8"><meta name="ProgId" content="Word.Document"><meta name="Generator" content="Microsoft Word 15">' +
+      '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->' +
+      STYLE + '<style>@page WordSection1{size:21cm 29.7cm;margin:2cm}div.WordSection1{page:WordSection1}</style></head>' +
+      '<body><div class="WordSection1">' + cover + body + semn + foot + '</div></body></html>';
   }
   function docBlob(html) { return new Blob(['﻿', html], { type: 'application/msword' }); }
 
@@ -983,20 +988,10 @@
     }
     if (G.JSZip) {
       var zip = new G.JSZip();
-      // Fiecare document ca .DOCX REAL (OOXML) — Word îl deschide și SALVEAZĂ nativ.
-      var chain = Promise.resolve();
-      docs.forEach(function (dc) {
-        chain = chain.then(function () {
-          var name = dc.file.replace(/\.docx?$/i, '') + '.docx';
-          var cat = _folderAscii(dc.cat);
-          return _docxBytes(dc.html).then(function (bytes) { zip.folder(cat).file(name, bytes); })
-            .catch(function () { zip.folder(cat).file(dc.file, docBlob(dc.html)); }); // fallback la .doc dacă conversia eșuează
-        });
-      });
-      chain.then(function () {
-        zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente (.docx — editabile și salvabile în Word)\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file.replace(/\.docx?$/i, '') + '.docx'; }).join('\n'));
-        return zip.generateAsync({ type: 'blob' });
-      }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente .docx generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
+      // Format STANDARD UrbanX (Word HTML .doc): Times New Roman, justify, titluri bleumarin — se deschide și se salvează în Word.
+      docs.forEach(function (dc) { zip.folder(_folderAscii(dc.cat)).file(dc.file, docBlob(dc.html)); });
+      zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n'));
+      zip.generateAsync({ type: 'blob' }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
     } else {
       docs.forEach(function (dc) { _save(docBlob(dc.html), dc.file); });
       if (G.ss) G.ss('✅ ' + docs.length + ' documente Word generate (JSZip indisponibil — salvate individual).');
