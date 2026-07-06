@@ -42,6 +42,71 @@
   }
   function docBlob(html) { return new Blob(['﻿', html], { type: 'application/msword' }); }
 
+  // ── EXPORT .DOCX REAL (OOXML) — Word deschide ȘI salvează nativ (fix „could not be saved") ──
+  function _wx(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function _wmlRuns(node) {
+    var runs = '';
+    for (var i = 0; i < node.childNodes.length; i++) {
+      var n = node.childNodes[i];
+      if (n.nodeType === 3) { var t = n.nodeValue; if (t && t.replace(/\s+/g, ' ') !== '') runs += '<w:r><w:t xml:space="preserve">' + _wx(t.replace(/\s+/g, ' ')) + '</w:t></w:r>'; }
+      else if (n.nodeType === 1) {
+        var tag = n.tagName.toLowerCase();
+        if (tag === 'br') { runs += '<w:r><w:br/></w:r>'; continue; }
+        var txt = (n.textContent || '').replace(/\s+/g, ' '); if (!txt.trim()) continue;
+        var bold = (tag === 'b' || tag === 'strong'), ital = (tag === 'i' || tag === 'em');
+        var rpr = (bold || ital) ? ('<w:rPr>' + (bold ? '<w:b/>' : '') + (ital ? '<w:i/>' : '') + '</w:rPr>') : '';
+        runs += '<w:r>' + rpr + '<w:t xml:space="preserve">' + _wx(txt) + '</w:t></w:r>';
+      }
+    }
+    return runs || '<w:r><w:t/></w:r>';
+  }
+  function _wmlPara(runsXml, style) { return '<w:p>' + (style ? '<w:pPr><w:pStyle w:val="' + style + '"/></w:pPr>' : '') + runsXml + '</w:p>'; }
+  function _wmlTable(tbl) {
+    var xml = '<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:left w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:right w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="999999"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="999999"/></w:tblBorders></w:tblPr>';
+    var rows = tbl.querySelectorAll('tr');
+    for (var r = 0; r < rows.length; r++) {
+      var cells = rows[r].children; xml += '<w:tr>';
+      for (var c = 0; c < cells.length; c++) {
+        var isH = cells[c].tagName.toLowerCase() === 'th';
+        var inner = isH ? ('<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' + _wx((cells[c].textContent || '').replace(/\s+/g, ' ')) + '</w:t></w:r>') : _wmlRuns(cells[c]);
+        xml += '<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr>' + _wmlPara(inner) + '</w:tc>';
+      }
+      xml += '</w:tr>';
+    }
+    return xml + '</w:tbl>';
+  }
+  function _htmlToWml(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html'); var out = '';
+    function walk(container) {
+      for (var i = 0; i < container.children.length; i++) {
+        var el = container.children[i]; var tag = el.tagName.toLowerCase();
+        if (/^h[1-6]$/.test(tag)) out += _wmlPara(_wmlRuns(el), 'Heading' + Math.min(3, +tag[1]));
+        else if (tag === 'p') out += _wmlPara(_wmlRuns(el));
+        else if (tag === 'table') { out += _wmlTable(el); out += '<w:p/>'; }
+        else if (tag === 'ul' || tag === 'ol') { var lis = el.querySelectorAll('li'); for (var j = 0; j < lis.length; j++) out += _wmlPara('<w:r><w:t xml:space="preserve">•  </w:t></w:r>' + _wmlRuns(lis[j])); }
+        else if (tag === 'div' || tag === 'section' || tag === 'article' || tag === 'header' || tag === 'main') walk(el);
+        else if (tag !== 'style' && tag !== 'script') { var t = (el.textContent || '').replace(/\s+/g, ' '); if (t.trim()) out += _wmlPara('<w:r><w:t xml:space="preserve">' + _wx(t) + '</w:t></w:r>'); }
+      }
+    }
+    walk(doc.body);
+    return out || '<w:p/>';
+  }
+  function _docxBytes(html) {
+    var bodyWml = _htmlToWml(html);
+    var documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + bodyWml + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>';
+    var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>';
+    var rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+    var drels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:pPr><w:spacing w:before="240" w:after="120"/></w:pPr><w:rPr><w:b/><w:sz w:val="32"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:pPr><w:spacing w:before="200" w:after="100"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:pPr><w:spacing w:before="160" w:after="80"/></w:pPr><w:rPr><w:b/><w:sz w:val="24"/></w:rPr></w:style><w:style w:type="table" w:default="1" w:styleId="TableGrid"><w:name w:val="Table Grid"/></w:style></w:styles>';
+    var z = new G.JSZip();
+    z.file('[Content_Types].xml', ct);
+    z.file('_rels/.rels', rels);
+    z.file('word/document.xml', documentXml);
+    z.file('word/styles.xml', styles);
+    z.file('word/_rels/document.xml.rels', drels);
+    return z.generateAsync({ type: 'uint8array' });
+  }
+
   // Bloc de semnături — tabel cu casetă goală pentru semnătură + ștampilă
   function sigTable(rows, head) {
     var h = '<tr>' + head.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '<th style="width:150pt">Semnătura / ștampila</th></tr>';
@@ -824,12 +889,20 @@
     var base = 'Documentatie_' + (D.nrcad || (D.uat || 'proiect').replace(/\s+/g, '_'));
     if (G.JSZip) {
       var zip = new G.JSZip();
-      docs.forEach(function (dc) { zip.folder(dc.cat).file(dc.file, docBlob(dc.html)); });
-      // index
-      zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente\n\n' + docs.map(function (d) { return '· ' + d.cat + '/' + d.file; }).join('\n'));
-      zip.generateAsync({ type: 'blob' }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
+      // Fiecare document ca .DOCX REAL (OOXML) — Word îl deschide și SALVEAZĂ nativ.
+      var chain = Promise.resolve();
+      docs.forEach(function (dc) {
+        chain = chain.then(function () {
+          var name = dc.file.replace(/\.docx?$/i, '') + '.docx';
+          return _docxBytes(dc.html).then(function (bytes) { zip.folder(dc.cat).file(name, bytes); })
+            .catch(function () { zip.folder(dc.cat).file(dc.file, docBlob(dc.html)); }); // fallback la .doc dacă conversia eșuează
+        });
+      });
+      chain.then(function () {
+        zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente (.docx — editabile și salvabile în Word)\n\n' + docs.map(function (d) { return '· ' + d.cat + '/' + d.file.replace(/\.docx?$/i, '') + '.docx'; }).join('\n'));
+        return zip.generateAsync({ type: 'blob' });
+      }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente .docx generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
     } else {
-      // fallback fără JSZip — salvează individual primul + PDF
       docs.forEach(function (dc) { _save(docBlob(dc.html), dc.file); });
       if (G.ss) G.ss('✅ ' + docs.length + ' documente Word generate (JSZip indisponibil — salvate individual).');
     }
@@ -843,6 +916,6 @@
   }
   function _save(blob, name) { try { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); } catch (e) {} }
 
-  G.UXDocBuilder = { genereazaDosar: genereazaDosar, docHtml: docHtml, DOC_BUILDERS: DOC_BUILDERS };
+  G.UXDocBuilder = { genereazaDosar: genereazaDosar, docHtml: docHtml, DOC_BUILDERS: DOC_BUILDERS, _htmlToWml: _htmlToWml, _docxBytes: _docxBytes };
   console.log('[UXDocBuilder] generator DOCX încărcat (' + Object.keys(DOC_BUILDERS).length + ' tipuri documente)');
 })(window);
