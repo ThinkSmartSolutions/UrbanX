@@ -37,7 +37,10 @@
     Object.keys(G.UXSpace.TIPOLOGII || {}).forEach(function (k) { tipOpts.push([k, G.UXSpace.TIPOLOGII[k].label || k]); });
     // Moștenește tipologia din funcțiunea aleasă în dashboard (nu o mai setezi de două ori).
     var _FN2TIP = { 'centru-social': 'centru-social', 'scoala': 'scoala', 'spital': 'spital', 'medical': 'spital', 'hotelier': 'hotel', 'skid': 'skid-gpl' };
-    var _tipDefault = (D.__prog && D.__prog.tip) || (_FN2TIP[D.functiune] && G.UXSpace.hasTemplate && (G.UXSpace.hasTemplate(_FN2TIP[D.functiune]) || (G.UXSpace.TIPOLOGII && G.UXSpace.TIPOLOGII[_FN2TIP[D.functiune]])) ? _FN2TIP[D.functiune] : null) || (tipOpts[0] && tipOpts[0][0]);
+    function _tipExists(t) { return t && ((G.UXSpace.hasTemplate && G.UXSpace.hasTemplate(t)) || (G.UXSpace.TIPOLOGII && G.UXSpace.TIPOLOGII[t])); }
+    // Moștenește tipologia din funcțiune: mapare explicită SAU funcțiunea însăși dacă are tipologie proprie (ex. birouri, mall...).
+    var _mapped = (_FN2TIP[D.functiune] && _tipExists(_FN2TIP[D.functiune]) ? _FN2TIP[D.functiune] : null) || (_tipExists(D.functiune) ? D.functiune : null);
+    var _tipDefault = (D.__prog && D.__prog.tip) || _mapped || (tipOpts[0] && tipOpts[0][0]);
     var state = { tip: _tipDefault, params: (D.__prog && D.__prog.params) || {}, rows: (D._spatii && D._spatii.slice()) || null };
 
     var paramBox = el('div', { style: 'background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.25);border-radius:10px;padding:12px;margin:12px 0' });
@@ -99,7 +102,9 @@
       var supra = Object.keys(floors).filter(function (k) { return k !== 'S'; });
       var niv = Math.max(supra.length || 1, +state.params.niveluri || 1);
       var sd = su ? Math.round(su / 0.82) : 0;
-      var sc = maxFloor ? Math.round(maxFloor / 0.82) : (niv ? Math.round(sd / niv) : sd); // amprentă = cel mai mare nivel
+      // Amprenta la sol (Sc) = suprafața desfășurată / nr. niveluri (clădire etajată).
+      // Astfel Sc SCADE când crește nr. niveluri (aceeași Sd distribuită pe mai multe etaje).
+      var sc = niv > 0 ? Math.round(sd / niv) : sd;
       return { su: Math.round(su), sd: sd, sc: sc, niv: niv, ocup: ocup };
     }
     function _nivOptions() {
