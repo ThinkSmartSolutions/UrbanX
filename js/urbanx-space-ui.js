@@ -36,10 +36,12 @@
     if (G.UXSpace.hasTemplate && G.UXSpace.hasTemplate('centru-social')) tipOpts.push(['centru-social', 'Centru social de zi']);
     Object.keys(G.UXSpace.TIPOLOGII || {}).forEach(function (k) { tipOpts.push([k, G.UXSpace.TIPOLOGII[k].label || k]); });
     // Moștenește tipologia din funcțiunea aleasă în dashboard (nu o mai setezi de două ori).
-    var _FN2TIP = { 'centru-social': 'centru-social', 'scoala': 'scoala', 'spital': 'spital', 'medical': 'spital', 'hotelier': 'hotel', 'skid': 'skid-gpl' };
+    var _FN2TIP = { 'centru-social': 'centru-social', 'scoala': 'scoala', 'spital': 'spital', 'medical': 'spital', 'hotelier': 'hotel', 'skid': 'skid-gpl', 'hala-industriala': 'hala-logistica' };
     function _tipExists(t) { return t && ((G.UXSpace.hasTemplate && G.UXSpace.hasTemplate(t)) || (G.UXSpace.TIPOLOGII && G.UXSpace.TIPOLOGII[t])); }
-    // Moștenește tipologia din funcțiune: mapare explicită SAU funcțiunea însăși dacă are tipologie proprie (ex. birouri, mall...).
+    // Moștenește tipologia din funcțiune: mapare explicită SAU funcțiunea însăși dacă are tipologie proprie (ex. birouri, bloc, parcare).
     var _mapped = (_FN2TIP[D.functiune] && _tipExists(_FN2TIP[D.functiune]) ? _FN2TIP[D.functiune] : null) || (_tipExists(D.functiune) ? D.functiune : null);
+    // Dacă funcțiunea NU are o tipologie potrivită, NU preselecta „Centru social" (ar induce în eroare) — cere alegerea conștientă.
+    if (!_mapped && !(D.__prog && D.__prog.tip)) tipOpts.unshift(['', '— alege tipologia potrivită —']);
     var _tipDefault = (D.__prog && D.__prog.tip) || _mapped || (tipOpts[0] && tipOpts[0][0]);
     var state = { tip: _tipDefault, params: (D.__prog && D.__prog.params) || {}, rows: (D._spatii && D._spatii.slice()) || null };
 
@@ -53,6 +55,7 @@
     ov.appendChild(wrap); document.body.appendChild(ov);
 
     function paramDefs() {
+      if (!state.tip) return [];
       if (state.tip === 'centru-social') return [
         { key: 'tip_beneficiar', label: 'Tip beneficiari', type: 'select', def: 'varstnici', options: [['varstnici', 'Vârstnici'], ['dizabilitati', 'Persoane cu dizabilități'], ['copii', 'Copii/tineri (after-school, risc)'], ['familii', 'Familii/comunitate'], ['fara_adapost', 'Persoane fără adăpost']] },
         { key: 'capacitate', label: 'Nr. beneficiari/zi', type: 'number', def: 50 }
@@ -60,6 +63,7 @@
       var t = (G.UXSpace.TIPOLOGII || {})[state.tip]; return (t && t.params) || [];
     }
     function genereaza() {
+      if (!state.tip) { if (G.ss) G.ss('Alege mai întâi tipologia potrivită funcțiunii.'); return; }
       var p = {}; paramDefs().forEach(function (d) { p[d.key] = state.params[d.key] != null ? state.params[d.key] : d.def; });
       state.params = p;
       if (state.tip === 'centru-social') {
