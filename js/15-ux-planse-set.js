@@ -33,7 +33,7 @@
       doc.text(rl + 400, rf + 700, 320, 'Nr. cad. ' + (o.nrCad || '—'), 'A-TEXT-NOTE');
       doc.text(rl + 400, rf + 1400, 260, 'S teren ' + (o.parcelArea || '—') + ' mp · POT ' + (o.pot != null ? Math.round(o.pot * 100) : '—') + '% · CUT ' + (o.cut || '—'), 'A-TEXT-FINI');
       UX.northArrow(doc, pW + 900, pD - 400, 340, 0); UX.scaleBar(doc, 0, -900, 500, 10);
-      UX.titleBlock(doc, { x: pW + 1400, y: 0, proiect: o.proiect || 'Plan de situație', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 500, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: pW + 1400, y: 0, proiect: o.proiect || 'Plan de situație', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 500, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, pW + 1400, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -58,7 +58,7 @@
       UX.levelMark(doc, W / 2, 800, o.cota != null ? o.cota : 0.0);
       doc.text(W / 2, D + 900, 300, (o.floorLabel || 'PLAN NIVEL').toUpperCase() + ' · S ≈ ' + Math.round((o.width || 12) * (o.adancime || 10)) + ' mp', 'A-TEXT-NOTE', { align: 'center' });
       UX.northArrow(doc, W + 700, D - 400, 320, 0); UX.scaleBar(doc, 0, -1000, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || ('Plan ' + (o.floorLabel || 'nivel')), faza: o.faza || 'DTAC', plansa: o.plansa || 'A-03', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || ('Plan ' + (o.floorLabel || 'nivel')), faza: o.faza || 'DTAC', plansa: o.plansa || 'A-03', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -84,7 +84,7 @@
       }
       doc.dim(0, -over, W, -over, -300, 'A-DIMS-PLAN'); doc.dim(0, 0, 0, D, -300, 'A-DIMS-PLAN');
       UX.northArrow(doc, W + over + 500, D - 400, 320, 0); UX.scaleBar(doc, 0, -over - 900, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan acoperiș', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-11', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan acoperiș', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-11', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -103,7 +103,7 @@
       doc.dim(0, 0, W, 0, -400, 'A-DIMS-PLAN'); doc.dim(0, 0, 0, D, -400, 'A-DIMS-PLAN');
       doc.text(W / 2, D + 900, 260, 'Fundații continue/izolate · talpă la −' + ((o.adancimeFundatie || 1.0)).toFixed(2) + 'm (sub îngheț, STAS 6054) · beton C16/20, armătură B500C', 'A-TEXT-NOTE', { align: 'center' });
       UX.northArrow(doc, W + 700, D - 400, 320, 0); UX.scaleBar(doc, 0, -1000, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan fundații', faza: o.faza || 'DTAC', plansa: o.plansa || 'R-01', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan fundații', faza: o.faza || 'DTAC', plansa: o.plansa || 'R-01', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -124,7 +124,7 @@
       doc.dim(0, 0, W, 0, -400, 'A-DIMS-PLAN'); doc.dim(0, 0, 0, D, -400, 'A-DIMS-PLAN');
       doc.text(W / 2, D + 900, 260, 'Placă b.a. h=' + (o.slab || 15) + 'cm · beton C25/30 · armare B500C · grinzi pe axe · direcție armare ↕', 'A-TEXT-NOTE', { align: 'center' });
       UX.scaleBar(doc, 0, -1000, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan cofraj + armare planșeu', faza: o.faza || 'DTAC', plansa: o.plansa || 'R-02', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || 'Plan cofraj + armare planșeu', faza: o.faza || 'DTAC', plansa: o.plansa || 'R-02', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -150,7 +150,7 @@
       doc.text(400, D + 700, 240, kind === 'IE' ? 'Legendă: ● consumator · ○ coloană · TG tablou general · P.i. rezultă din bilanț (memoriu IE)' : kind === 'IT' ? 'Legendă: ● corp încălzire · ○ coloană · CT sursă termică · debit din breviar (memoriu IT)' : 'Legendă: ● obiect sanitar · ○ coloană · racord la colector · debite I9 (memoriu IS)', 'A-TEXT-FINI');
       doc.text(W / 2, D + 1300, 300, titles[kind] || ('Instalații ' + kind), 'A-TEXT-NOTE', { align: 'center' });
       UX.scaleBar(doc, 0, -900, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || titles[kind], faza: o.faza || 'DTAC', plansa: o.plansa || (kind + '-01'), scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || titles[kind], faza: o.faza || 'DTAC', plansa: o.plansa || (kind + '-01'), scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -184,7 +184,7 @@
       doc.text(200, D + 1100, 200, 'Trasee ' + racord + ' racordate la coloane; pantele/diametrele/secțiunile se preiau din memoriul + breviarul de specialitate.', 'A-TEXT-FINI');
       doc.text(W / 2, D + 1600, 260, titles[kind], 'A-TEXT-NOTE', { align: 'center' });
       UX.scaleBar(doc, 0, -1000, 100, 10);
-      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || titles[kind], faza: 'PTh', plansa: o.plansa || (kind + '-02'), scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 1200, y: 0, proiect: o.proiect || titles[kind], faza: 'PTh', plansa: o.plansa || (kind + '-02'), scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 1200, 65, o.params); } catch (e) {}
       return doc;
     };
@@ -192,7 +192,7 @@
     // ── DETALII DE EXECUȚIE (PTh) — la scara 1:20/1:10 ────────────────────
     function _cartusDet(doc, W, H, o, plansa, titlu, scara) {
       UX.scaleBar(doc, 0, -H * 0.12 - 400, scara || 20, 1);
-      UX.titleBlock(doc, { x: W + 400, y: 0, proiect: o.proiect || titlu, faza: 'PTh', plansa: plansa, scara: scara || 20, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: W + 400, y: 0, proiect: o.proiect || titlu, faza: 'PTh', plansa: plansa, scara: scara || 20, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, W + 400, 65, o.params); } catch (e) {}
     }
     // Detaliu fundație (secțiune verticală cu armare) 1:20
@@ -296,7 +296,7 @@
       doc.text(x0 + 300, f + 3600, 300, (e.nr_module || 0).toLocaleString('ro-RO') + ' module · ' + (e.montaj_label || 'mese fixe'), 'A-TEXT-FINI');
       doc.text(x0 + 300, f + 5100, 300, 'S teren ' + Steren.toLocaleString('ro-RO') + ' mp · GCR ' + (e.gcr || 0.4) + ' · ' + nT + ' mese', 'A-TEXT-FINI');
       UX.northArrow(doc, pW + 900, pD - 400, 340, 0); UX.scaleBar(doc, 0, -1600, 1000, 20);
-      UX.titleBlock(doc, { x: pW + 1500, y: 0, proiect: o.proiect || 'Plan de situație — parc fotovoltaic', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 1000, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: pW + 1500, y: 0, proiect: o.proiect || 'Plan de situație — parc fotovoltaic', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 1000, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, pW + 1500, 65, o.params); } catch (er) {}
       return doc;
     };
@@ -317,7 +317,7 @@
       doc.dim(0, -0.7 * K, pitch * K, -0.7 * K, -400, 'A-DIMS-PLAN'); doc.text(pitch / 2 * K, -1.1 * K, 240, 'pitch (distanță între rânduri) ' + pitch.toFixed(1) + ' m', 'A-TEXT-NOTE', { align: 'center' });
       doc.text(dx / 2 + 300, dy / 2 + clr * K + 300, 260, 'modul FV — înclinare β=' + beta + '°', 'A-TEXT-NOTE');
       UX.scaleBar(doc, 0, -2.6 * K, 50, 5);
-      UX.titleBlock(doc, { x: (pitch + Lmod + 3) * K, y: -1 * K, proiect: o.proiect || 'Secțiune caracteristică — mese FV', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 50, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: (pitch + Lmod + 3) * K, y: -1 * K, proiect: o.proiect || 'Secțiune caracteristică — mese FV', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 50, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       return doc;
     };
     UX.schemaMonofilaraPVDoc = function (o) {
@@ -338,7 +338,7 @@
         if (b[1] > 0) doc.line(x - gapx, y + bh / 2, x, y + bh / 2, 'IE-POWER');
       });
       doc.text(0, bh + 1200, 340, 'SCHEMĂ ELECTRICĂ MONOFILARĂ — parc fotovoltaic ' + (e.putere_dc_kwp ? e.putere_dc_kwp.toLocaleString('ro-RO') + ' kWp / ' + e.putere_ac_kva.toLocaleString('ro-RO') + ' kVA' : ''), 'A-TEXT-NOTE');
-      UX.titleBlock(doc, { x: 6 * (bw + gapx) + 1000, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: 6 * (bw + gapx) + 1000, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       return doc;
     };
     UX.buildPVSet = function (o) {
@@ -368,7 +368,7 @@
       doc.dim(0, -w / 2 - 1500, L, -w / 2 - 1500, -600, 'A-DIMS-PLAN'); doc.dim(0, w / 2, 0, -w / 2, 400, 'A-DIMS-PLAN');
       doc.text(L / 2, w / 2 + 2200, 340, (kind === 'pod' ? 'POD / PASARELĂ' : 'DRUM') + ' — plan de situație · L=' + (L / K) + ' m, lățime platformă ' + (w / K) + ' m', 'A-TEXT-NOTE', { align: 'center' });
       UX.northArrow(doc, L + 2 * K, w, 340, 0); UX.scaleBar(doc, 0, -w / 2 - 2200, 500, 10);
-      UX.titleBlock(doc, { x: L + 3 * K, y: -w, proiect: o.proiect || 'Plan de situație', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 500, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: L + 3 * K, y: -w, proiect: o.proiect || 'Plan de situație', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 500, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, L + 3 * K, -w + 65, o.params); } catch (e) {}
       return doc;
     };
@@ -388,7 +388,7 @@
       }
       doc.text(L / 2, y(-9), 320, (kind === 'pod' ? 'POD' : 'DRUM') + ' — profil longitudinal (exagerare verticală ' + VE + '×)', 'A-TEXT-NOTE', { align: 'center' });
       UX.scaleBar(doc, 0, y(-10), 500, 10);
-      UX.titleBlock(doc, { x: L + 2 * K, y: y(-6), proiect: o.proiect || 'Profil longitudinal', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 500, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: L + 2 * K, y: y(-6), proiect: o.proiect || 'Profil longitudinal', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-02', scara: 500, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       return doc;
     };
     UX.sectiuneTransversalaInfraDoc = function (o, kind) {
@@ -404,7 +404,7 @@
         doc.text(0, yy + 600, 240, 'Structură rutieră · platformă ' + (w / K) + ' m (2 benzi + acostamente), pantă transversală 2,5%', 'A-TEXT-NOTE', { align: 'center' });
       }
       UX.scaleBar(doc, -w / 2, -1200, 50, 5);
-      UX.titleBlock(doc, { x: w / 2 + 4 * K, y: -1 * K, proiect: o.proiect || 'Secțiune transversală', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-03', scara: 50, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: w / 2 + 4 * K, y: -1 * K, proiect: o.proiect || 'Secțiune transversală', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-03', scara: 50, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       return doc;
     };
     UX.buildInfraSet = function (o, kind) {
@@ -430,7 +430,7 @@
         if (b[1] > 0) doc.line(x - gapx, bh / 2, x, bh / 2, 'IE-POWER');
       });
       doc.text(0, bh + 1200, 340, 'SCHEMĂ ELECTRICĂ MONOFILARĂ — ' + (kind === 'bess' ? 'stocare energie (BESS)' : 'stație de transformare'), 'A-TEXT-NOTE');
-      UX.titleBlock(doc, { x: 5 * (bw + gapx) + 1 * K, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: 5 * (bw + gapx) + 1 * K, y: 0, proiect: o.proiect || 'Schemă monofilară', faza: o.faza || 'DTAC', plansa: o.plansa || 'E-01', scara: 100, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       return doc;
     };
     UX.planAmplasareEchipDoc = function (o, kind) {
@@ -440,7 +440,7 @@
       doc.rect(20 * K, 5 * K, 8 * K, 6 * K, 'C-BLDG-PRPD'); doc.text(24 * K, 8 * K, 300, 'Transformator', 'A-TEXT-NOTE', { align: 'center' });
       doc.text(pW / 2, pD - 2 * K, 260, 'Platformă betonată + cuvă de retenție ulei + priză de pământ perimetrală', 'A-TEXT-NOTE', { align: 'center' });
       UX.northArrow(doc, pW + 900, pD - 400, 340, 0); UX.scaleBar(doc, 0, -1200, 200, 10);
-      UX.titleBlock(doc, { x: pW + 1.5 * K, y: 0, proiect: o.proiect || 'Plan amplasare echipamente', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 200, beneficiar: o.beneficiar, data: o.data });
+      UX.titleBlock(doc, { x: pW + 1.5 * K, y: 0, proiect: o.proiect || 'Plan amplasare echipamente', faza: o.faza || 'DTAC', plansa: o.plansa || 'A-01', scara: 200, beneficiar: o.beneficiar, proiectant: o.proiectant, data: o.data });
       if (o.params) try { UX.techNotes(doc, pW + 1.5 * K, 65, o.params); } catch (e) {}
       return doc;
     };

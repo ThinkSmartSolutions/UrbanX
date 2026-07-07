@@ -491,7 +491,8 @@
     var rx = x + W * 0.55 + 3;
     doc.text(rx, y + H - 8, 5, (cfg.plansa || 'A-01'), 'T-TITL-TEXT');
     doc.text(rx, y + H * 0.66 - 8, 3.5, 'Sc. 1:' + (cfg.scara || 100), 'T-TITL-TEXT');
-    doc.text(rx, y + H * 0.33 - 10, 2.5, 'Arh. ____ (semnătură + parafă OAR)', 'T-TITL-TEXT');
+    doc.text(rx, y + H * 0.33 - 8, 2.6, 'Proiectant: ' + (cfg.proiectant || '____'), 'T-TITL-TEXT');
+    doc.text(rx, y + H * 0.33 - 12, 2.2, 'Semnătură + ștampilă · Verificat: ____', 'T-TITL-TEXT');
     // notă proiectant (asumare)
     doc.text(x + 3, y - 6, 2.0, 'Document generat parametric UrbanX — necesită verificarea și asumarea proiectantului autorizat.', 'A-TEXT-NTPR');
     return doc;
@@ -567,7 +568,7 @@
     UX.levelMark(doc, maxX * K / 2, maxY * K / 2, opts.cota != null ? opts.cota : 0.0);
     UX.northArrow(doc, maxX * K + 600, maxY * K - 400, 300, opts.bearing || 0);
     UX.scaleBar(doc, 0, -900, 100, 10);
-    UX.titleBlock(doc, { x: maxX * K + 1000, y: 0, proiect: opts.proiect || 'Plan nivel', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    UX.titleBlock(doc, { x: maxX * K + 1000, y: 0, proiect: opts.proiect || 'Plan nivel', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, proiectant: opts.proiectant, data: opts.data });
     // notă cu toți parametrii tehnici derivați (deasupra cartușului)
     if (opts.params) { try { UX.techNotes(doc, maxX * K + 1000, 65, opts.params); } catch (e) {} }
     return doc.emit();
@@ -607,7 +608,7 @@
     for (var c = 0; c < niv; c++) doc.dim(-600, levels[c] * K, -600, levels[c + 1] * K, -300, 'A-DIMS-ELEV');
     doc.dim(-1400, 0, -1400, totalH * K, -300, 'A-DIMS-ELEV'); // total
     UX.scaleBar(doc, 0, cotaT * K - 900, 100, 10);
-    UX.titleBlock(doc, { x: W + 1600, y: 0, proiect: opts.proiect || 'Fațadă ' + (opts.orient || ''), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-05', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    UX.titleBlock(doc, { x: W + 1600, y: 0, proiect: opts.proiect || 'Fațadă ' + (opts.orient || ''), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-05', scara: 100, beneficiar: opts.beneficiar, proiectant: opts.proiectant, data: opts.data });
     if (opts.params) { try { UX.techNotes(doc, W + 1600, 65, opts.params); } catch (e) {} }
     return doc;
   };
@@ -647,7 +648,7 @@
     doc.text(W + th + 2400, totalH * K * 0.5 + 400, 30, 'DETALIU PLANȘEU 1:20', 'A-TEXT-NOTE');
     try { UX.strataDetail(doc, W + th + 2400, totalH * K * 0.5 - 200, 700, straturi); } catch (e) {}
     UX.scaleBar(doc, 0, -adf * K - 900, 100, 10);
-    UX.titleBlock(doc, { x: W + th + 4000, y: 0, proiect: opts.proiect || 'Secțiune transversală', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-07', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    UX.titleBlock(doc, { x: W + th + 4000, y: 0, proiect: opts.proiect || 'Secțiune transversală', faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-07', scara: 100, beneficiar: opts.beneficiar, proiectant: opts.proiectant, data: opts.data });
     if (opts.params) { try { UX.techNotes(doc, W + th + 4000, 65, opts.params); } catch (e) {} }
     return doc;
   };
@@ -685,7 +686,7 @@
     doc.dim(0, 0, 0, bD, -260, 'A-DIMS-PLAN');
     UX.northArrow(doc, bW + 700, bD - 400, 320, opts.bearing || 0);
     UX.scaleBar(doc, 0, -1000, 100, 10);
-    UX.titleBlock(doc, { x: bW + 1200, y: 0, proiect: opts.proiect || ('Plan ' + (opts.floorLabel || 'nivel')), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, data: opts.data });
+    UX.titleBlock(doc, { x: bW + 1200, y: 0, proiect: opts.proiect || ('Plan ' + (opts.floorLabel || 'nivel')), faza: opts.faza || 'DTAC', plansa: opts.plansa || 'A-03', scara: 100, beneficiar: opts.beneficiar, proiectant: opts.proiectant, data: opts.data });
     if (opts.params) { try { UX.techNotes(doc, bW + 1200, 65, opts.params); } catch (e) {} }
     return doc;
   };

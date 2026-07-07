@@ -120,7 +120,7 @@
         hParter: num(o.hParter, 3), hEtaj: num(o.hEtaj, 3), roof: o.roof, winPerFloor: Math.max(1, Math.round(num(o.winPerFloor, 3))),
         adancimeFundatie: (v.calc && v.calc.adancime_inghet_m) || 0.9, params: v.calc, reledeeFloors: reledeeFloors,
         lungime: num(o.lungime, D.functiune === 'pod' ? 40 : 200), latimePlatforma: num(o.latimePlatforma, D.functiune === 'pod' ? 10 : 8),
-        functiune: D.functiune, proiect: D.nume || 'Obiectiv', beneficiar: D.beneficiar || '', nrcad: D.nrcad,
+        functiune: D.functiune, proiect: D.nume || 'Obiectiv', beneficiar: D.beneficiar || '', proiectant: D.proiectant || '', nrcad: D.nrcad,
         data: (function () { try { return new Date().toLocaleDateString('ro-RO'); } catch (e) { return ''; } })(), faza: D.faza || 'DTAC' };
     }
     function build() {
