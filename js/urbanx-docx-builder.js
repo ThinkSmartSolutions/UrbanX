@@ -52,7 +52,30 @@
     var px = mx(lon || 26), py = my(lat || 46);
     return _svg(w, h, '<defs><linearGradient id="sg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFF3B0"/><stop offset="1" stop-color="#E8A33D"/></linearGradient></defs><text x="' + (w / 2) + '" y="17" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">Harta potențialului solar — poziționarea amplasamentului</text><rect x="32" y="26" width="' + (w - 64) + '" height="' + (h - 72) + '" fill="url(#sg)" stroke="#999"/><circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="#c00" stroke="#fff" stroke-width="1.5"/><text x="' + (px + 10).toFixed(1) + '" y="' + (py + 4).toFixed(1) + '" font-size="9" fill="#900" font-weight="bold">' + esc(label || 'Amplasament') + '</text><text x="' + (w / 2) + '" y="' + (h - 12) + '" font-size="8" text-anchor="middle" fill="#555">Iradianță RO ~1.150–1.450 kWh/m²/an (sud-est mai ridicat) · sursă metodologică PVGIS SARAH (JRC)</text>');
   }
-  function tbl(rows, head) { var h = ''; if (head) h = '<tr>' + head.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>'; var b = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join(''); return '<table>' + h + b + '</table>'; }
+  function _diagFluxPV(e, racord) {
+    // Diagramă monofilară / flux energetic: module → stringuri → invertoare → PT → racord rețea
+    var w = 540, h = 200, blocks = [
+      ['MODULE PV', e.nr_module + ' × ' + e.putere_modul_wp + ' Wp', (e.putere_dc_kwp / 1000).toFixed(2) + ' MWp c.c.'],
+      ['STRINGURI', e.nr_stringuri + ' stringuri', e.module_pe_string + ' mod./string'],
+      ['INVERTOARE', e.nr_invertoare + ' × ' + Math.round(e.putere_invertor_kva) + ' kVA', 'c.c. → c.a. 0,4 kV'],
+      ['POST TRAFO', e.nr_pt + ' × ' + Math.round(e.putere_pt_kva) + ' kVA', '0,4 / ' + (String(racord || '').match(/\d+/) ? (racord.match(/\d+/)[0] + ' kV') : 'MT')],
+      ['RACORD REȚEA', esc(racord || 'MT'), Math.round(e.putere_ac_kva) + ' kVA c.a.']
+    ];
+    var n = blocks.length, bw = 88, gap = (w - n * bw) / (n + 1), y = 60, bh = 62, inner = '';
+    blocks.forEach(function (b, i) {
+      var x = gap + i * (bw + gap);
+      inner += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + bw + '" height="' + bh + '" rx="4" fill="#EEF2F9" stroke="#1F3864"/>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y + 16) + '" font-size="8.5" font-weight="bold" text-anchor="middle" fill="#1F3864">' + b[0] + '</text>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y + 34) + '" font-size="8" text-anchor="middle" fill="#333">' + b[1] + '</text>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y + 50) + '" font-size="7.5" text-anchor="middle" fill="#666">' + b[2] + '</text>';
+      if (i < n - 1) { var ax = x + bw, ax2 = ax + gap; inner += '<line x1="' + ax.toFixed(1) + '" y1="' + (y + bh / 2) + '" x2="' + (ax2 - 4).toFixed(1) + '" y2="' + (y + bh / 2) + '" stroke="#C55A11" stroke-width="1.5" marker-end="url(#ar)"/>'; }
+    });
+    var defs = '<defs><marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0 0 L5 2.5 L0 5 z" fill="#C55A11"/></marker></defs>';
+    return _svg(w, h, defs + '<text x="' + (w / 2) + '" y="20" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">Schemă monofilară — flux energetic al parcului</text>' + inner + '<text x="' + (w / 2) + '" y="' + (h - 14) + '" font-size="8" text-anchor="middle" fill="#555">Producerea c.c. → conversie c.a. (invertoare) → ridicare tensiune (PT) → injecție în SEN. Contorizare bidirecțională + protecții conform Cod RET / Ord. ANRE 59/2013.</text>');
+  }
+  // escapează datele, dar re-permite un whitelist de formatare intenționată (b/i/sub/sup/br + &nbsp;)
+  function _cell(c) { return esc(c).replace(/&lt;(\/?)(b|i|sub|sup|br)&gt;/g, '<$1$2>').replace(/&amp;nbsp;/g, '&nbsp;'); }
+  function tbl(rows, head) { var h = ''; if (head) h = '<tr>' + head.map(function (c) { return '<th>' + _cell(c) + '</th>'; }).join('') + '</tr>'; var b = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + _cell(c) + '</td>'; }).join('') + '</tr>'; }).join(''); return '<table>' + h + b + '</table>'; }
 
   // meta: {titlu, subtitlu, proiect, beneficiar, amplasament, faza}
   // sections: [{h, html}]
@@ -546,7 +569,7 @@
           '<p>Formula: E = P_DC × PSH_POA × PR, cu PR ≈ ' + e.pr + ' (pierderi: temperatură, invertor, cabluri DC/AC, soiling, mismatch, indisponibilitate). Se confirmă cu PVsyst/PV-SOL (P50/P90) la faza următoare.</p>' +
           '<p><b>2.5 Obiective și indicatori de realizare (FM/PNRR):</b></p>' + tbl([['I.1 Capacitate nou instalată SRE', f(I1 * 1000) + ' kWp (' + I1 + ' MWp)'], ['I.2 Reducere anuală emisii GES', f(I2) + ' tCO₂ echiv./an (× 0,6119 tCO₂/MWh — factor ANRE)'], ['I.3 Producția medie anuală SRE', f(I3) + ' MWh/an'], ['I.4 Producția totală pe ' + ani + ' ani', f(I4) + ' MWh'], ['I.5 Factor de capacitate', I5 + '% (tipic RO 13–16%)']], ['Indicator', 'Valoare']) },
         { h: 'CAPITOLUL 3 — Scenarii tehnico-economice', html:
-          '<p><b>3.2.1 SCENARIUL I — Parc fotovoltaic ' + f(pdc) + ' kWp (RECOMANDAT).</b> Câmp de ' + f(e.nr_module) + ' module (' + e.putere_modul_wp + ' Wp), ' + e.nr_stringuri + ' stringuri, ' + e.nr_invertoare + ' invertoare, P_AC ' + f(pac) + ' kVA (ILR ' + e.ilr + '), ' + e.nr_pt + ' PT × ' + f(e.putere_pt_kva) + ' kVA, montaj ' + e.montaj_label + ', înclinare 25–35° orientare sud, racord ' + e.racord + '. Teren ocupat ~' + e.teren_necesar_ha + ' ha (GCR ' + e.gcr + ').</p>' +
+          '<p><b>3.2.1 SCENARIUL I — Parc fotovoltaic ' + f(pdc) + ' kWp (RECOMANDAT).</b> Câmp de ' + f(e.nr_module) + ' module (' + e.putere_modul_wp + ' Wp), ' + e.nr_stringuri + ' stringuri, ' + e.nr_invertoare + ' invertoare, P_AC ' + f(pac) + ' kVA (ILR ' + e.ilr + '), ' + e.nr_pt + ' PT × ' + f(e.putere_pt_kva) + ' kVA, montaj ' + e.montaj_label + ', înclinare 25–35° orientare sud, racord ' + e.racord + '. Teren ocupat ~' + e.teren_necesar_ha + ' ha (GCR ' + e.gcr + ').</p>' + _diagFluxPV(e, e.racord) +
           '<p><b>3.2.2 SCENARIUL II — CONTRAFACTUAL (nerecomandat).</b> Referință fără proiect: centrală ciclu combinat pe gaze naturale, aceeași energie. Consum anual gaz ≈ ' + f(gazAn) + ' MWh/an (randament 60%), cheltuieli anuale de combustibil ≈ ' + f(chGazAn) + ' EUR/an — dependent de importuri și emitent de CO₂. Scenariul I elimină aceste cheltuieli și emisii.</p>' },
         { h: 'CAPITOLUL 3.3 — Deviz general (HG 907/2016) — Scenariul I', html: tbl([
           ['CAP.1 Obținere și amenajare teren', lei(g1) + ' lei', f(g1) + ' €'],
