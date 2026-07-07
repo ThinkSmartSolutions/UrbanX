@@ -472,33 +472,81 @@
     'Studiu de fezabilitate energetică (SF)': function (D, v) {
       var e = v && v.calc && v.calc.energie; if (!e || !e.putere_dc_kwp) return null; // doar pt funcțiuni de energie cu putere setată
       function f(x) { return (x == null ? '—' : Math.round(x).toLocaleString('ro-RO')); }
-      var pdc = e.putere_dc_kwp;
-      var capexKwp = +D.capex_kwp || 700;          // EUR/kWp instalat (referință piață RO)
-      var pretMwh = +D.pret_energie_mwh || 90;     // EUR/MWh (PPA/piață)
-      var opexPct = (+D.opex_pct || 1.5) / 100;    // %/an din CAPEX
-      var rata = (+D.rata_actualizare || 8) / 100; // rată de actualizare
-      var ani = +D.durata_ani || 25;               // durata de analiză
-      var degr = 0.005;                            // degradare 0,5%/an
-      var capex = pdc * capexKwp;
-      var prodAn = e.productie_anuala_mwh;
-      var opexAn = capex * opexPct;
-      var crf = rata / (1 - Math.pow(1 + rata, -ani));
-      var lcoe = (capex * crf + opexAn) / prodAn;   // EUR/MWh
-      function npvAt(r) { var s = -capex; for (var t = 1; t <= ani; t++) { var cf = prodAn * (1 - degr * (t - 1)) * pretMwh - opexAn; s += cf / Math.pow(1 + r, t); } return s; }
-      var npv = npvAt(rata);
-      var irr = null; for (var rr = 0.005; rr <= 0.5; rr += 0.005) { if (npvAt(rr) < 0) { irr = +((rr - 0.005) * 100).toFixed(1); break; } }
-      var cum = -capex, payback = null, flows = [];
-      for (var t = 1; t <= ani; t++) { var prod_t = prodAn * (1 - degr * (t - 1)); var venit_t = prod_t * pretMwh; var cf = venit_t - opexAn; cum += cf; if (payback === null && cum >= 0) payback = t; if (t <= 6 || t === ani) flows.push([t, f(prod_t), f(venit_t), f(opexAn), f(cf), f(cum)]); }
+      var curs = +D.curs_eur || 4.97;               // RON/EUR
+      function lei(eur) { return f(eur * curs); }
+      var pdc = e.putere_dc_kwp, pac = e.putere_ac_kva;
+      var capexKwp = +D.capex_kwp || 700, pretMwh = +D.pret_energie_mwh || 90;
+      var opexPct = (+D.opex_pct || 1.5) / 100, rata = (+D.rata_actualizare || 5) / 100, ani = +D.durata_ani || 20, degr = 0.006;
+      var capex = pdc * capexKwp, prodAn = e.productie_anuala_mwh, opexAn = capex * opexPct;
+      // Indicatori FM/PNRR I.1–I.5
+      var I1 = +(pdc / 1000).toFixed(3), I2 = Math.round(prodAn * 0.6119), I3 = prodAn;
+      var degrTot = 0; for (var y = 1; y <= ani; y++) degrTot += (1 - degr * (y - 1)); var I4 = Math.round(prodAn * degrTot);
+      var I5 = +(prodAn * 1000 / (pdc * 8760) * 100).toFixed(1);
+      // Producție lunară (profil RO normalizat)
+      var LUNI = ['Ianuarie', 'Februarie', 'Martie', 'Aprilie', 'Mai', 'Iunie', 'Iulie', 'August', 'Septembrie', 'Octombrie', 'Noiembrie', 'Decembrie'];
+      var PROF = [0.031, 0.049, 0.081, 0.100, 0.121, 0.127, 0.131, 0.118, 0.093, 0.069, 0.041, 0.039]; var ps = 0; PROF.forEach(function (x) { ps += x; });
+      var lunar = LUNI.map(function (m, i) { return [m, f(prodAn * PROF[i] / ps) + ' MWh']; }); lunar.push(['<b>TOTAL an</b>', '<b>' + f(prodAn) + ' MWh</b>']);
+      // Deviz general HG 907/2016 (orientativ, EUR)
+      var g4ci = Math.round(capex * 0.18), g4mont = Math.round(capex * 0.07), g4ut = Math.round(capex * 0.72), g4 = g4ci + g4mont + g4ut;
+      var g1 = Math.round(capex * 0.01), g2 = Math.round(capex * 0.05), g3 = Math.round(capex * 0.045);
+      var cm = g4ci + g4mont + g1;                  // C+M ≈ construcții+instalații+montaj+amenajare teren
+      var iscA = Math.round(cm * 0.005), iscB = Math.round(cm * 0.001), csc = Math.round(cm * 0.005);
+      var g5org = Math.round(capex * 0.015), g5div = Math.round((g1 + g2 + g3 + g4) * 0.05), g5 = g5org + iscA + iscB + csc + g5div;
+      var g6 = Math.round(capex * 0.005);
+      var totFTVA = g1 + g2 + g3 + g4 + g5 + g6, tva = Math.round(totFTVA * 0.19), totTVA = totFTVA + tva;
+      // Scenariul II contrafactual — ciclu combinat gaz (randament 60%)
+      var gazAn = Math.round(prodAn / 0.60), pretGaz = +D.pret_gaz_mwh || 40, chGazAn = Math.round(gazAn * pretGaz / 0.85);
+      // Financiar SI
+      var crf = rata / (1 - Math.pow(1 + rata, -ani)), lcoe = (capex * crf + opexAn) / prodAn;
+      function npvAt(r, k) { k = k || 1; var s = -capex; for (var t = 1; t <= ani; t++) { s += (prodAn * (1 - degr * (t - 1)) * pretMwh * k - opexAn) / Math.pow(1 + r, t); } return s; }
+      var npv = npvAt(rata); var irr = null; for (var rr = 0.005; rr <= 0.6; rr += 0.005) { if (npvAt(rr) < 0) { irr = +((rr - 0.005) * 100).toFixed(1); break; } }
+      var cum = -capex, payback = null, flows = []; for (var t = 1; t <= ani; t++) { var pt = prodAn * (1 - degr * (t - 1)), vt = pt * pretMwh, cf = vt - opexAn; cum += cf; if (payback === null && cum >= 0) payback = t; if (t <= 7 || t % 5 === 0 || t === ani) flows.push([t, f(pt), f(vt), f(opexAn), f(cf), f(cum)]); }
       var venitAn1 = prodAn * pretMwh;
       var verdict = (npv > 0 && irr != null && irr >= rata * 100) ? 'FAVORABIL' : (npv > 0 ? 'MARGINAL' : 'NEFAVORABIL');
-      var sens = [0.7, 1.0, 1.3].map(function (k) { var savePret = pretMwh; var pv = pdc; var nvA; (function () { var s = -capex; for (var t = 1; t <= ani; t++) { s += (prodAn * (1 - degr * (t - 1)) * (savePret * k) - opexAn) / Math.pow(1 + rata, t); } nvA = s; })(); return [Math.round(savePret * k) + ' EUR/MWh (' + Math.round(k * 100) + '%)', f(nvA) + ' EUR']; });
+      var sens = [0.7, 0.85, 1.0, 1.15, 1.3].map(function (k) { var n = npvAt(rata, k); return [Math.round(pretMwh * k) + ' EUR/MWh (' + Math.round(k * 100) + '%)', f(n) + ' EUR', (n > 0 ? 'fezabil' : 'nefezabil')]; });
       var secs = [
-        { h: '1. Obiectul și scopul studiului', html: '<p>Prezentul studiu de fezabilitate (SF), întocmit în structura HG 907/2016, evaluează viabilitatea tehnico-economică a unui parc fotovoltaic de <b>' + f(pdc) + ' kWp</b> (montaj: ' + e.montaj_label + '). Spre deosebire de investițiile imobiliare, veniturile NU provin din suprafață închiriabilă, ci din <b>energia livrată în rețea</b>; de aceea analiza folosește un model energetic-financiar (producție × preț), nu unul bazat pe chirie.</p>' },
-        { h: '2. Parametri de intrare', html: tbl([['Putere instalată DC', f(pdc) + ' kWp'], ['Producție anuală (an 1)', f(prodAn) + ' MWh (' + e.yield_kwh_kwp + ' kWh/kWp)'], ['CAPEX unitar', f(capexKwp) + ' EUR/kWp'], ['CAPEX total', f(capex) + ' EUR'], ['OPEX', (opexPct * 100).toFixed(1) + '% CAPEX/an = ' + f(opexAn) + ' EUR/an'], ['Preț energie', f(pretMwh) + ' EUR/MWh'], ['Rată de actualizare', (rata * 100).toFixed(0) + '%'], ['Durata de analiză', ani + ' ani'], ['Degradare module', (degr * 100).toFixed(1) + '%/an']], ['Parametru', 'Valoare']) + '<p>Valorile marcate sunt orientative și se actualizează cu ofertele reale (EPC, PPA) și cu un Energy Yield Assessment (PVGIS/PVsyst, P50/P90) la faza următoare.</p>' },
-        { h: '3. Indicatori economici', html: tbl([['Venit brut an 1', f(venitAn1) + ' EUR'], ['VAN (NPV) la ' + (rata * 100).toFixed(0) + '%', f(npv) + ' EUR'], ['RIR (IRR)', (irr != null ? irr + '%' : '< 0,5%')], ['Termen de recuperare (payback simplu)', (payback != null ? payback + ' ani' : '> ' + ani + ' ani')], ['LCOE (cost nivelat)', lcoe.toFixed(1) + ' EUR/MWh'], ['Verdict', '<b>' + verdict + '</b>']], ['Indicator', 'Valoare']) + '<p>Verdict: proiectul este <b>' + verdict + '</b> la ipotezele curente (VAN ' + (npv > 0 ? 'pozitiv' : 'negativ') + ', RIR ' + (irr != null ? irr + '%' : 'sub prag') + ' vs. rată de actualizare ' + (rata * 100).toFixed(0) + '%). LCOE ' + lcoe.toFixed(1) + ' EUR/MWh se compară cu prețul de vânzare ' + f(pretMwh) + ' EUR/MWh.</p>' },
-        { h: '4. Flux de numerar (extras)', html: tbl(flows, ['An', 'Producție MWh', 'Venit EUR', 'OPEX EUR', 'Cash-flow EUR', 'Cumulat EUR']) },
-        { h: '5. Analiză de senzitivitate (preț energie)', html: tbl(sens, ['Scenariu preț', 'VAN rezultat']) + '<p>Rentabilitatea este sensibilă la prețul energiei (PPA vs. piață spot) și la producția reală (P50/P90). Se recomandă contract PPA pe termen lung (10–15 ani) pentru stabilizarea veniturilor.</p>' },
-        { h: '6. Structura devizului (HG 907/2016) și finanțare', html: '<p>Devizul general se structurează pe capitolele HG 907/2016 (studii/avize, proiectare, investiția de bază — module/invertoare/structuri/PT/racord, organizare de șantier, diverse și neprevăzute). Surse de finanțare posibile: fonduri proprii, credit bancar (BEI/comercial), PNRR C6, Fondul pentru Modernizare, contract CfD (Legea 101/2023) sau PPA. Cerințe uzuale finanțatori: EYA P50/P90, Technical Due Diligence, asigurări, contract O&M.</p>' }
+        { h: 'CAPITOLUL 1 — Informații generale', html: tbl([['1.1 Denumirea obiectivului', 'Parc fotovoltaic ' + f(pdc) + ' kWp — ' + esc(D.nume || '—')], ['1.2 Investitor / ordonator de credite', esc(D.beneficiar || '—')], ['1.3 Beneficiarul investiției', esc(D.beneficiar || '—')], ['1.4 Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))], ['1.5 Elaborator SF', esc(D.proiectant || '—')], ['Faza', 'S.F. (HG 907/2016)']], ['Element', 'Date']) },
+        { h: 'CAPITOLUL 2 — Situația existentă și necesitatea investiției', html:
+          '<p><b>2.2 Context strategic.</b> Investiția se înscrie în cadrul de politici energetice UE (Directiva (UE) 2018/2001 — RED II, pachetul „Fit for 55", Regulamentul (UE) 2021/1119 — neutralitate climatică 2050) și național (PNIESC 2021–2030 — HG 1076/2021, Legea 220/2008, Legea 123/2012). Surse de finanțare eligibile: Fondul pentru Modernizare (OUG 60/2022, Programul-cheie 1 SRE, grant până la 100% cheltuieli eligibile), PNRR Componenta C6, POCIDIF.</p>' +
+          '<p><b>2.3 Necesitate.</b> Volatilitatea prețului energiei și obiectivele de decarbonare fac oportună producerea de energie regenerabilă pentru acoperirea consumului propriu și/sau injecție în rețea. Parcul acoperă un necesar de ~' + f(prodAn) + ' MWh/an.</p>' +
+          '<p><b>2.4 Potențial solar (metodologie PVGIS SARAH).</b> Producția lunară estimată (profil specific României, înclinare optimă, orientare sud):</p>' + tbl(lunar, ['Luna', 'Producție estimată']) +
+          '<p>Formula: E = P_DC × PSH_POA × PR, cu PR ≈ ' + e.pr + ' (pierderi: temperatură, invertor, cabluri DC/AC, soiling, mismatch, indisponibilitate). Se confirmă cu PVsyst/PV-SOL (P50/P90) la faza următoare.</p>' +
+          '<p><b>2.5 Obiective și indicatori de realizare (FM/PNRR):</b></p>' + tbl([['I.1 Capacitate nou instalată SRE', f(I1 * 1000) + ' kWp (' + I1 + ' MWp)'], ['I.2 Reducere anuală emisii GES', f(I2) + ' tCO₂ echiv./an (× 0,6119 tCO₂/MWh — factor ANRE)'], ['I.3 Producția medie anuală SRE', f(I3) + ' MWh/an'], ['I.4 Producția totală pe ' + ani + ' ani', f(I4) + ' MWh'], ['I.5 Factor de capacitate', I5 + '% (tipic RO 13–16%)']], ['Indicator', 'Valoare']) },
+        { h: 'CAPITOLUL 3 — Scenarii tehnico-economice', html:
+          '<p><b>3.2.1 SCENARIUL I — Parc fotovoltaic ' + f(pdc) + ' kWp (RECOMANDAT).</b> Câmp de ' + f(e.nr_module) + ' module (' + e.putere_modul_wp + ' Wp), ' + e.nr_stringuri + ' stringuri, ' + e.nr_invertoare + ' invertoare, P_AC ' + f(pac) + ' kVA (ILR ' + e.ilr + '), ' + e.nr_pt + ' PT × ' + f(e.putere_pt_kva) + ' kVA, montaj ' + e.montaj_label + ', înclinare 25–35° orientare sud, racord ' + e.racord + '. Teren ocupat ~' + e.teren_necesar_ha + ' ha (GCR ' + e.gcr + ').</p>' +
+          '<p><b>3.2.2 SCENARIUL II — CONTRAFACTUAL (nerecomandat).</b> Referință fără proiect: centrală ciclu combinat pe gaze naturale, aceeași energie. Consum anual gaz ≈ ' + f(gazAn) + ' MWh/an (randament 60%), cheltuieli anuale de combustibil ≈ ' + f(chGazAn) + ' EUR/an — dependent de importuri și emitent de CO₂. Scenariul I elimină aceste cheltuieli și emisii.</p>' },
+        { h: 'CAPITOLUL 3.3 — Deviz general (HG 907/2016) — Scenariul I', html: tbl([
+          ['CAP.1 Obținere și amenajare teren', lei(g1) + ' lei', f(g1) + ' €'],
+          ['CAP.2 Asigurare utilități (racord MT — ATR)', lei(g2) + ' lei', f(g2) + ' €'],
+          ['CAP.3 Proiectare și asistență tehnică', lei(g3) + ' lei', f(g3) + ' €'],
+          ['CAP.4 Investiția de bază (din care:)', lei(g4) + ' lei', f(g4) + ' €'],
+          ['&nbsp;&nbsp;4.1 Construcții și instalații (structuri, fundații, drumuri, împrejmuire, priză)', lei(g4ci) + ' lei', f(g4ci) + ' €'],
+          ['&nbsp;&nbsp;4.2 Montaj utilaje și echipamente', lei(g4mont) + ' lei', f(g4mont) + ' €'],
+          ['&nbsp;&nbsp;4.3 Utilaje cu montaj (module, invertoare, PT, cabluri, SCADA)', lei(g4ut) + ' lei', f(g4ut) + ' €'],
+          ['CAP.5 Alte cheltuieli (organizare + ISC 0,5%+0,1% + CSC 0,5% + diverse 5%)', lei(g5) + ' lei', f(g5) + ' €'],
+          ['CAP.6 Probe tehnologice și teste', lei(g6) + ' lei', f(g6) + ' €'],
+          ['<b>TOTAL fără TVA</b>', '<b>' + lei(totFTVA) + ' lei</b>', '<b>' + f(totFTVA) + ' €</b>'],
+          ['TVA 19%', lei(tva) + ' lei', f(tva) + ' €'],
+          ['<b>TOTAL cu TVA</b>', '<b>' + lei(totTVA) + ' lei</b>', '<b>' + f(totTVA) + ' €</b>'],
+          ['din care C+M (fără TVA)', lei(cm) + ' lei', f(cm) + ' €']
+        ], ['Capitol deviz', 'Valoare (lei)', 'Valoare (€)']) + '<p>Curs utilizat: ' + curs.toFixed(2) + ' lei/€. Valori orientative la faza SF; se actualizează cu oferte EPC și ATR-ul operatorului de rețea.</p>' },
+        { h: 'CAPITOLUL 4 — Analiza scenariilor · cadru și indicatori economici', html:
+          '<p>Perioadă de referință <b>' + ani + ' ani</b>, rată de actualizare <b>' + (rata * 100).toFixed(0) + '%</b> (recomandare CE proiecte publice), monedă lei/€ (curs ' + curs.toFixed(2) + ').</p>' + tbl([
+          ['CAPEX total (fără TVA)', f(totFTVA) + ' € (' + lei(totFTVA) + ' lei)'], ['Venit brut an 1', f(venitAn1) + ' € (' + lei(venitAn1) + ' lei)'], ['OPEX anual', f(opexAn) + ' €/an'],
+          ['VAN (VNA) la ' + (rata * 100).toFixed(0) + '%', f(npv) + ' €'], ['RIR (IRR)', (irr != null ? irr + '%' : '< 0,5%')], ['Termen de recuperare', (payback != null ? payback + ' ani' : '> ' + ani + ' ani')], ['LCOE', lcoe.toFixed(1) + ' €/MWh'], ['Verdict economic', '<b>' + verdict + '</b>']
+        ], ['Indicator', 'Valoare']) },
+        { h: 'CAPITOLUL 4.1 — Flux de numerar (' + ani + ' ani, cu degradare ' + (degr * 100).toFixed(1) + '%/an)', html: tbl(flows, ['An', 'Producție MWh', 'Venit €', 'OPEX €', 'Cash-flow €', 'Cumulat €']) },
+        { h: 'CAPITOLUL 4.2 — Analiză de senzitivitate (preț energie)', html: tbl(sens, ['Scenariu preț', 'VAN rezultat', 'Concluzie']) },
+        { h: 'CAPITOLUL 4.3 — Analiza vulnerabilităților și riscurilor', html: tbl([
+          ['Naturale', 'Grindină/furtuni, îngheț, inundații, seism (a_g/T_c amplasament), incendiu vegetație', 'Module clasă mecanică superioară, drenaj, priză de pământ, management vegetație'],
+          ['Antropice', 'Furt module/cabluri, vandalism, atac SCADA', 'Împrejmuire, CCTV, antiefracție, securitate cibernetică'],
+          ['Piață/legislativ', 'Volatilitate preț energie, schimbări scheme sprijin', 'Contract PPA/CfD pe termen lung, diversificare'],
+          ['Tehnic', 'Degradare peste P90, defecțiuni invertoare, întârzieri racordare', 'Garanții producător, contract O&M, EYA P90, ATR din timp']
+        ], ['Categorie', 'Risc', 'Măsură de atenuare']) },
+        { h: 'CAPITOLUL 4.4 — Sustenabilitate, mediu și impact social', html:
+          '<p><b>Reducere emisii:</b> ' + f(I2) + ' tCO₂ echiv./an (' + f(I2 * ani) + ' t pe ' + ani + ' ani). <b>Forță de muncă:</b> execuție — echipă multidisciplinară pe ' + f(4 + 0.9 * (pdc / 1000)) + ' luni; operare — O&M ~' + f(Math.max(1, 0.7 * pdc / 1000)) + ' persoane. <b>Mediu:</b> impact redus reversibil (structuri pe piloți, teren readus la starea inițială la dezafectare), reciclare module DEEE (Dir. 2012/19/UE, HG 1037/2010, PV CYCLE), fără emisii/deșeuri în operare. Evaluare EIA (Legea 292/2018, Anexa 2) + evaluare adecvată dacă Natura 2000.</p>' },
+        { h: 'CAPITOLUL 5–8 — Implementare, achiziții, concluzii', html:
+          '<p><b>Grafic de realizare (12–18 luni):</b> documentații+avize (l.1–6) → achiziții echipamente (l.4–8) → execuție C+M (l.6–12) → probe/PIF (l.12). <b>Achiziții:</b> conform Legii 98/2016 (dacă finanțare publică). <b>Concluzie:</b> proiectul este <b>' + verdict + '</b> — VAN ' + f(npv) + ' €, RIR ' + (irr != null ? irr + '%' : '<prag') + ', recuperare ' + (payback || '>' + ani) + ' ani, LCOE ' + lcoe.toFixed(1) + ' €/MWh, reducere ' + f(I2) + ' tCO₂/an. Se recomandă promovarea Scenariului I. Studiile de specialitate (topografic Stereo 70, geotehnic NP 074/2014, pedologic pentru scoatere din circuit agricol, EYA P50/P90, soluție de racordare) se anexează la faza următoare.</p>' }
       ];
       return { cat: 'Studii', file: 'Studiu_fezabilitate_energetica.doc', html: docHtml(_meta(D, 'STUDIU DE FEZABILITATE — PARC FOTOVOLTAIC', 'model energetic-financiar · HG 907/2016'), secs) };
     },
