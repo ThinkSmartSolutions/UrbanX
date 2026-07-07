@@ -24,6 +24,34 @@
     '</style>';
 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  // ── GRAFICE + HĂRȚI (SVG inline — se randează în Word 365 / browser) ──
+  function _svg(w, h, inner) { return '<div style="margin:8pt 0;text-align:center"><svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="max-width:100%;border:0.5pt solid #ccc;background:#fff">' + inner + '</svg></div>'; }
+  function _chartBar(title, data, unit) {
+    var w = 540, h = 250, pad = 42, n = data.length || 1, gap = (w - 2 * pad) / n, bw = gap * 0.66;
+    var max = Math.max.apply(null, data.map(function (d) { return +d[1] || 0; })) || 1, bars = '';
+    data.forEach(function (d, i) { var v = +d[1] || 0, bh = (h - 2 * pad) * v / max, x = pad + i * gap + (gap - bw) / 2, y = h - pad - bh; bars += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, bh).toFixed(1) + '" fill="#1F3864"/><text x="' + (x + bw / 2).toFixed(1) + '" y="' + (h - pad + 12) + '" font-size="8" text-anchor="middle" fill="#333">' + esc(String(d[0]).slice(0, 7)) + '</text><text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 3).toFixed(1) + '" font-size="7" text-anchor="middle" fill="#1F3864">' + Math.round(v).toLocaleString('ro-RO') + '</text>'; });
+    return _svg(w, h, '<text x="' + (w / 2) + '" y="17" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">' + esc(title) + (unit ? ' [' + unit + ']' : '') + '</text><line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad) + '" y2="' + (h - pad) + '" stroke="#999"/><line x1="' + pad + '" y1="24" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#999"/>' + bars);
+  }
+  function _chartLine(title, pts, unit) {
+    var w = 540, h = 250, pad = 46, n = pts.length, vals = pts.map(function (p) { return +p[1] || 0; });
+    var mn = Math.min.apply(null, vals); if (mn > 0) mn = 0; var mx = Math.max.apply(null, vals), rng = (mx - mn) || 1;
+    var X = function (i) { return pad + (w - 2 * pad) * i / (n - 1 || 1); }, Y = function (v) { return h - pad - (h - pad - 24) * (v - mn) / rng; };
+    var d = ''; pts.forEach(function (p, i) { d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(+p[1] || 0).toFixed(1) + ' '; });
+    var lab = ''; pts.forEach(function (p, i) { if (i % Math.ceil(n / 8) === 0 || i === n - 1) lab += '<text x="' + X(i).toFixed(1) + '" y="' + (h - pad + 12) + '" font-size="7" text-anchor="middle" fill="#333">' + esc(String(p[0])) + '</text>'; });
+    return _svg(w, h, '<text x="' + (w / 2) + '" y="17" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">' + esc(title) + (unit ? ' [' + unit + ']' : '') + '</text><line x1="' + pad + '" y1="' + Y(0).toFixed(1) + '" x2="' + (w - pad) + '" y2="' + Y(0).toFixed(1) + '" stroke="#c00" stroke-dasharray="3"/><line x1="' + pad + '" y1="24" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#999"/><path d="' + d + '" fill="none" stroke="#1F3864" stroke-width="2"/>' + lab);
+  }
+  function _chartPie(title, data) {
+    var w = 540, h = 250, cx = 125, cy = 135, r = 88, tot = 0; data.forEach(function (d) { tot += +d[1] || 0; }); tot = tot || 1;
+    var cols = ['#1F3864', '#2F5496', '#5B9BD5', '#8FAADC', '#C55A11', '#ED7D31', '#70AD47', '#A9A9A9'];
+    var a0 = -Math.PI / 2, segs = '', leg = '';
+    data.forEach(function (d, i) { var fr = (+d[1] || 0) / tot, a1 = a0 + fr * 2 * Math.PI, x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0), x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1), lg = fr > 0.5 ? 1 : 0; segs += '<path d="M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1) + ' A' + r + ' ' + r + ' 0 ' + lg + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + cols[i % cols.length] + '" stroke="#fff"/>'; leg += '<rect x="265" y="' + (34 + i * 24) + '" width="12" height="12" fill="' + cols[i % cols.length] + '"/><text x="283" y="' + (44 + i * 24) + '" font-size="9" fill="#333">' + esc(String(d[0]).slice(0, 32)) + ' — ' + Math.round(fr * 100) + '%</text>'; a0 = a1; });
+    return _svg(w, h, '<text x="' + (w / 2) + '" y="17" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">' + esc(title) + '</text>' + segs + leg);
+  }
+  function _mapSolarRO(lat, lon, label) {
+    var w = 540, h = 290, mx = function (lo) { return 32 + (w - 64) * (lo - 20.2) / 9.5; }, my = function (la) { return h - 46 - (h - 76) * (la - 43.6) / 4.7; };
+    var px = mx(lon || 26), py = my(lat || 46);
+    return _svg(w, h, '<defs><linearGradient id="sg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFF3B0"/><stop offset="1" stop-color="#E8A33D"/></linearGradient></defs><text x="' + (w / 2) + '" y="17" font-size="11" font-weight="bold" text-anchor="middle" fill="#1F3864">Harta potențialului solar — poziționarea amplasamentului</text><rect x="32" y="26" width="' + (w - 64) + '" height="' + (h - 72) + '" fill="url(#sg)" stroke="#999"/><circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="6" fill="#c00" stroke="#fff" stroke-width="1.5"/><text x="' + (px + 10).toFixed(1) + '" y="' + (py + 4).toFixed(1) + '" font-size="9" fill="#900" font-weight="bold">' + esc(label || 'Amplasament') + '</text><text x="' + (w / 2) + '" y="' + (h - 12) + '" font-size="8" text-anchor="middle" fill="#555">Iradianță RO ~1.150–1.450 kWh/m²/an (sud-est mai ridicat) · sursă metodologică PVGIS SARAH (JRC)</text>');
+  }
   function tbl(rows, head) { var h = ''; if (head) h = '<tr>' + head.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>'; var b = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join(''); return '<table>' + h + b + '</table>'; }
 
   // meta: {titlu, subtitlu, proiect, beneficiar, amplasament, faza}
@@ -504,12 +532,17 @@
       var venitAn1 = prodAn * pretMwh;
       var verdict = (npv > 0 && irr != null && irr >= rata * 100) ? 'FAVORABIL' : (npv > 0 ? 'MARGINAL' : 'NEFAVORABIL');
       var sens = [0.7, 0.85, 1.0, 1.15, 1.3].map(function (k) { var n = npvAt(rata, k); return [Math.round(pretMwh * k) + ' EUR/MWh (' + Math.round(k * 100) + '%)', f(n) + ' EUR', (n > 0 ? 'fezabil' : 'nefezabil')]; });
+      // Serii numerice pentru grafice
+      var lunarNum = LUNI.map(function (m, i) { return [m.slice(0, 3), Math.round(prodAn * PROF[i] / ps)]; });
+      var cumNum = []; var _c = -capex; for (var tt = 1; tt <= ani; tt++) { _c += prodAn * (1 - degr * (tt - 1)) * pretMwh - opexAn; cumNum.push(['An' + tt, Math.round(_c)]); }
+      var sensNum = [0.7, 0.85, 1.0, 1.15, 1.3].map(function (k) { return [Math.round(pretMwh * k) + '€', Math.round(npvAt(rata, k))]; });
+      var devizPie = [['Teren', g1], ['Utilități', g2], ['Proiectare', g3], ['Investiția de bază', g4], ['Alte chelt.', g5], ['Probe', g6]];
       var secs = [
         { h: 'CAPITOLUL 1 — Informații generale', html: tbl([['1.1 Denumirea obiectivului', 'Parc fotovoltaic ' + f(pdc) + ' kWp — ' + esc(D.nume || '—')], ['1.2 Investitor / ordonator de credite', esc(D.beneficiar || '—')], ['1.3 Beneficiarul investiției', esc(D.beneficiar || '—')], ['1.4 Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))], ['1.5 Elaborator SF', esc(D.proiectant || '—')], ['Faza', 'S.F. (HG 907/2016)']], ['Element', 'Date']) },
         { h: 'CAPITOLUL 2 — Situația existentă și necesitatea investiției', html:
           '<p><b>2.2 Context strategic.</b> Investiția se înscrie în cadrul de politici energetice UE (Directiva (UE) 2018/2001 — RED II, pachetul „Fit for 55", Regulamentul (UE) 2021/1119 — neutralitate climatică 2050) și național (PNIESC 2021–2030 — HG 1076/2021, Legea 220/2008, Legea 123/2012). Surse de finanțare eligibile: Fondul pentru Modernizare (OUG 60/2022, Programul-cheie 1 SRE, grant până la 100% cheltuieli eligibile), PNRR Componenta C6, POCIDIF.</p>' +
           '<p><b>2.3 Necesitate.</b> Volatilitatea prețului energiei și obiectivele de decarbonare fac oportună producerea de energie regenerabilă pentru acoperirea consumului propriu și/sau injecție în rețea. Parcul acoperă un necesar de ~' + f(prodAn) + ' MWh/an.</p>' +
-          '<p><b>2.4 Potențial solar (metodologie PVGIS SARAH).</b> Producția lunară estimată (profil specific României, înclinare optimă, orientare sud):</p>' + tbl(lunar, ['Luna', 'Producție estimată']) +
+          '<p><b>2.4 Potențial solar (metodologie PVGIS SARAH).</b> Producția lunară estimată (profil specific României, înclinare optimă, orientare sud):</p>' + _mapSolarRO(+D.lat || 46, +D.lon || 26, D.uat || 'Amplasament') + tbl(lunar, ['Luna', 'Producție estimată']) + _chartBar('Producție lunară estimată', lunarNum, 'MWh') +
           '<p>Formula: E = P_DC × PSH_POA × PR, cu PR ≈ ' + e.pr + ' (pierderi: temperatură, invertor, cabluri DC/AC, soiling, mismatch, indisponibilitate). Se confirmă cu PVsyst/PV-SOL (P50/P90) la faza următoare.</p>' +
           '<p><b>2.5 Obiective și indicatori de realizare (FM/PNRR):</b></p>' + tbl([['I.1 Capacitate nou instalată SRE', f(I1 * 1000) + ' kWp (' + I1 + ' MWp)'], ['I.2 Reducere anuală emisii GES', f(I2) + ' tCO₂ echiv./an (× 0,6119 tCO₂/MWh — factor ANRE)'], ['I.3 Producția medie anuală SRE', f(I3) + ' MWh/an'], ['I.4 Producția totală pe ' + ani + ' ani', f(I4) + ' MWh'], ['I.5 Factor de capacitate', I5 + '% (tipic RO 13–16%)']], ['Indicator', 'Valoare']) },
         { h: 'CAPITOLUL 3 — Scenarii tehnico-economice', html:
@@ -529,14 +562,14 @@
           ['TVA 19%', lei(tva) + ' lei', f(tva) + ' €'],
           ['<b>TOTAL cu TVA</b>', '<b>' + lei(totTVA) + ' lei</b>', '<b>' + f(totTVA) + ' €</b>'],
           ['din care C+M (fără TVA)', lei(cm) + ' lei', f(cm) + ' €']
-        ], ['Capitol deviz', 'Valoare (lei)', 'Valoare (€)']) + '<p>Curs utilizat: ' + curs.toFixed(2) + ' lei/€. Valori orientative la faza SF; se actualizează cu oferte EPC și ATR-ul operatorului de rețea.</p>' },
+        ], ['Capitol deviz', 'Valoare (lei)', 'Valoare (€)']) + _chartPie('Structura devizului general (fără TVA)', devizPie) + '<p>Curs utilizat: ' + curs.toFixed(2) + ' lei/€. Valori orientative la faza SF; se actualizează cu oferte EPC și ATR-ul operatorului de rețea.</p>' },
         { h: 'CAPITOLUL 4 — Analiza scenariilor · cadru și indicatori economici', html:
           '<p>Perioadă de referință <b>' + ani + ' ani</b>, rată de actualizare <b>' + (rata * 100).toFixed(0) + '%</b> (recomandare CE proiecte publice), monedă lei/€ (curs ' + curs.toFixed(2) + ').</p>' + tbl([
           ['CAPEX total (fără TVA)', f(totFTVA) + ' € (' + lei(totFTVA) + ' lei)'], ['Venit brut an 1', f(venitAn1) + ' € (' + lei(venitAn1) + ' lei)'], ['OPEX anual', f(opexAn) + ' €/an'],
           ['VAN (VNA) la ' + (rata * 100).toFixed(0) + '%', f(npv) + ' €'], ['RIR (IRR)', (irr != null ? irr + '%' : '< 0,5%')], ['Termen de recuperare', (payback != null ? payback + ' ani' : '> ' + ani + ' ani')], ['LCOE', lcoe.toFixed(1) + ' €/MWh'], ['Verdict economic', '<b>' + verdict + '</b>']
         ], ['Indicator', 'Valoare']) },
-        { h: 'CAPITOLUL 4.1 — Flux de numerar (' + ani + ' ani, cu degradare ' + (degr * 100).toFixed(1) + '%/an)', html: tbl(flows, ['An', 'Producție MWh', 'Venit €', 'OPEX €', 'Cash-flow €', 'Cumulat €']) },
-        { h: 'CAPITOLUL 4.2 — Analiză de senzitivitate (preț energie)', html: tbl(sens, ['Scenariu preț', 'VAN rezultat', 'Concluzie']) },
+        { h: 'CAPITOLUL 4.1 — Flux de numerar (' + ani + ' ani, cu degradare ' + (degr * 100).toFixed(1) + '%/an)', html: tbl(flows, ['An', 'Producție MWh', 'Venit €', 'OPEX €', 'Cash-flow €', 'Cumulat €']) + _chartLine('Cash-flow cumulat pe ' + ani + ' ani', cumNum, '€') },
+        { h: 'CAPITOLUL 4.2 — Analiză de senzitivitate (preț energie)', html: tbl(sens, ['Scenariu preț', 'VAN rezultat', 'Concluzie']) + _chartBar('VAN la variația prețului energiei', sensNum, '€') },
         { h: 'CAPITOLUL 4.3 — Analiza vulnerabilităților și riscurilor', html: tbl([
           ['Naturale', 'Grindină/furtuni, îngheț, inundații, seism (a_g/T_c amplasament), incendiu vegetație', 'Module clasă mecanică superioară, drenaj, priză de pământ, management vegetație'],
           ['Antropice', 'Furt module/cabluri, vandalism, atac SCADA', 'Împrejmuire, CCTV, antiefracție, securitate cibernetică'],
