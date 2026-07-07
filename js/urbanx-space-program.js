@@ -436,13 +436,26 @@
     },
     'bloc-locuinte': {
       label: 'Bloc de locuințe colective', norma: 'Legea 114/1996 Anexa 1 + NP 057-2002',
-      params: [{ key: 'ap_2cam', label: 'Ap. 2 camere', type: 'number', def: 12 }, { key: 'ap_3cam', label: 'Ap. 3 camere', type: 'number', def: 20 }, { key: 'garsoniere', label: 'Garsoniere', type: 'number', def: 4 }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 6 }],
+      params: [
+        { key: 'subtip', label: 'Tip bloc', type: 'select', def: 'simplu', options: [['simplu', 'Bloc simplu'], ['anl', 'ANL (Legea 152/1998)'], ['comercial_parter', 'Comercial la parter'], ['mixt', 'Mixt (comercial + birouri + locuințe)']] },
+        { key: 'ap_2cam', label: 'Ap. 2 camere', type: 'number', def: 12 }, { key: 'ap_3cam', label: 'Ap. 3 camere', type: 'number', def: 20 }, { key: 'garsoniere', label: 'Garsoniere', type: 'number', def: 4 },
+        { key: 'mp_comercial', label: 'Comercial parter (mp)', type: 'number', def: 600 },
+        { key: 'niveluri', label: 'Niveluri', type: 'number', def: 6 }
+      ],
       baza: function (p) {
+        var st = p.subtip || 'simplu';
+        var nApt = (+p.ap_2cam || 0) + (+p.ap_3cam || 0) + (+p.garsoniere || 0);
         var s = [{ id: 'casa_scarii' }, { id: 'centrala_termica' }, { id: 'camera_pompe' }];
-        if (p.garsoniere) s.push({ id: 'garsoniera', qty: p.garsoniere });
-        if (p.ap_2cam) s.push({ id: 'apartament_2cam', qty: p.ap_2cam });
-        if (p.ap_3cam) s.push({ id: 'apartament_3cam', qty: p.ap_3cam });
-        s.push({ id: 'boxa_subsol', qty: (+p.ap_2cam || 0) + (+p.ap_3cam || 0) + (+p.garsoniere || 0), niv: 'S' });
+        // Comercial la parter / mixt: spații comerciale la parter + acces + grup sanitar public; locuințele urcă la etaje
+        if (st === 'comercial_parter' || st === 'mixt') { s.push({ id: 'spatiu_vanzare', mp: (+p.mp_comercial || 600), niv: 'P' }, { id: 'gs_public', niv: 'P' }); }
+        if (st === 'mixt') { s.push({ id: 'open_space_birou', mp: Math.max(120, (+p.mp_comercial || 600) * 0.5), niv: '1' }); }
+        var apNiv = (st === 'comercial_parter' || st === 'mixt') ? '1' : 'P';
+        if (p.garsoniere) s.push({ id: 'garsoniera', qty: p.garsoniere, niv: apNiv });
+        if (p.ap_2cam) s.push({ id: 'apartament_2cam', qty: p.ap_2cam, niv: apNiv });
+        if (p.ap_3cam) s.push({ id: 'apartament_3cam', qty: p.ap_3cam, niv: apNiv });
+        s.push({ id: 'boxa_subsol', qty: nApt, niv: 'S' });
+        // Parcaje: ANL cu normă redusă (locuințe sociale), restul standard ~1 loc/apartament
+        s.push({ id: 'nivel_parcare', mp: (st === 'anl' ? Math.max(200, nApt * 12) : Math.max(300, nApt * 15)), niv: 'S' });
         return s;
       }
     },
