@@ -135,13 +135,16 @@
       '<div class="ssiui-note">Planul de situație dă Sc/Sd/regim ca text, nu volumul real (nu spune nimic despre panta/forma acoperișului sau dacă podul e amenajabil). Completează o singură dată per tip — se aplică pe toate amprentele identice din plan. Dacă lași necompletat, volumul rămâne necalculat (nu se presupune Sc×3m).</div>' +
       tipuri.map(function (t) {
         var r = STATE.relevee[t.cheie] || {};
+        var ePlat = r.tip_acoperis === 'plat';
         return '<div class="ssiui-row" style="grid-template-columns:1.1fr .8fr .8fr 1fr .8fr auto">' +
           '<div style="font-size:11px;color:#94a3b8;align-self:center">' + t.n + ' clădiri · ' + esc(t.regim) + ', Sc=' + t.sc_mp + ' mp</div>' +
           '<div><div class="ssiui-lbl">H cornișă (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (r.inaltime_cornisa != null ? r.inaltime_cornisa : '') + '" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'inaltime_cornisa\',parseFloat(this.value)||null)"></div>' +
-          '<div><div class="ssiui-lbl">H coamă (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (r.inaltime_coama != null ? r.inaltime_coama : '') + '" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'inaltime_coama\',parseFloat(this.value)||null)"></div>' +
+          (ePlat
+            ? '<div><div class="ssiui-lbl">H coamă (m)</div><input class="ssiui-inp" type="text" value="nu se aplică" disabled title="Acoperiș plat/terasă — nu are coamă, nu e nevoie de această valoare." style="opacity:.5"></div>'
+            : '<div><div class="ssiui-lbl">H coamă (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (r.inaltime_coama != null ? r.inaltime_coama : '') + '" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'inaltime_coama\',parseFloat(this.value)||null)"></div>') +
           '<div><div class="ssiui-lbl">Tip acoperiș</div><select class="ssiui-sel" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'tip_acoperis\',this.value)"><option value="">— selectează —</option>' +
           Object.keys(TIPURI_ACOPERIS).map(function (k) { return '<option value="' + k + '"' + (r.tip_acoperis === k ? ' selected' : '') + '>' + TIPURI_ACOPERIS[k] + '</option>'; }).join('') + '</select></div>' +
-          '<label style="display:flex;gap:4px;align-items:center;font-size:10px;color:#cbd5e1;align-self:end;padding-bottom:8px"><input type="checkbox"' + (r.poduri_amenajabile ? ' checked' : '') + ' onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'poduri_amenajabile\',this.checked)"> pod amenajabil</label>' +
+          '<label style="display:flex;gap:4px;align-items:center;font-size:10px;color:#cbd5e1;align-self:end;padding-bottom:8px"><input type="checkbox"' + (r.poduri_amenajabile ? ' checked' : '') + ' onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'poduri_amenajabile\',this.checked)"' + (ePlat ? ' disabled title="Acoperiș plat — nu are pod"' : '') + '> pod amenajabil</label>' +
           '<div></div>' +
           '</div>';
       }).join('');
@@ -321,7 +324,7 @@
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
-    _setRelevee: function (cheie, camp, val) { if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {}; STATE.relevee[cheie][camp] = val; },
+    _setRelevee: function (cheie, camp, val) { if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {}; STATE.relevee[cheie][camp] = val; if (camp === 'tip_acoperis') render(); },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
