@@ -301,21 +301,51 @@
       });
       var adnotarePotrivita = potrivireLocuintaInterior || potrivireOricareInterior ||
         (dMinLocuinta <= MAX_DIST_FALLBACK_M ? potrivireLocuintaApropiata : null);
-      // Dedup: multe exporturi ArchiCAD deseneaza acelasi contur de doua ori (o data ca umplere/
-      // hasura vizuala, o data ca linie de contur) — daca centrul cade practic peste un poligon deja
-      // retinut si aria e aproape identica, e ACELASI element, nu o cladire distincta (altfel ar aparea
-      // o "distanta 0m fata de vecin" fals-pozitiva pentru fiecare cladire dublata).
+      // Dedup geometric grosier: multe exporturi ArchiCAD deseneaza acelasi contur de doua ori (o data
+      // ca umplere/hasura vizuala, o data ca linie de contur) — daca centrul cade practic peste un
+      // poligon deja retinut SI aria e aproape identica, e ACELASI element. Nu prinde insa cazul unde
+      // a doua reprezentare are o forma mai detaliata (ex. cu treaptă/verandă la intrare, 8-10 varfuri
+      // in loc de 4) — aria ei difera prea mult ca sa treaca acest test, desi e tot acelasi contur;
+      // vezi dedup-ul pe adnotare identica mai jos, care prinde exact acest caz.
       var duplicat = rezultate.some(function (r) {
         return Math.hypot(r.centroid.x - c.x, r.centroid.y - c.y) < 0.5 && Math.abs(r.arie_mp - Math.round(arie)) <= Math.max(1, arie * 0.05);
       });
       if (duplicat) return;
       rezultate.push({
-        id: 'C' + (rezultate.length + 1), poligon: p.puncte, centroid: c,
+        poligon: p.puncte, centroid: c,
         arie_mp: Math.round(arie),
         urbanism_adnotat: adnotarePotrivita
       });
     });
-    return rezultate;
+
+    // Dedup pe IDENTITATEA adnotarii asociate: daca DOUA poligoane diferite (chiar cu arii diferite —
+    // ex. un contur simplu 4 varfuri vs unul detaliat 8-10 varfuri, cu verandă/treaptă) se leaga de
+    // ACEEASI eticheta "Locuinta" din plan (acelasi x,y), sunt DOUA DESENE ale ACELEIASI cladiri, nu
+    // doua cladiri distincte — o cladire reala are o SINGURA eticheta proprie, nu una impartita cu
+    // alta. Confirmat pe fisier real (Cătămărăști): planul desena fiecare casă și ca dreptunghi simplu
+    // și ca contur detaliat, ambele asociate aceleiași etichete — dubla numărătoare (70 în loc de 66).
+    // Pastram varianta a carei arie se potriveste cel mai bine cu Sc declarat in eticheta (cea mai
+    // de incredere sursa a ariei reale).
+    var pePrimaAdnotare = {};
+    rezultate.forEach(function (r) {
+      if (!r.urbanism_adnotat) return;
+      var cheie = r.urbanism_adnotat.x + '_' + r.urbanism_adnotat.y;
+      (pePrimaAdnotare[cheie] = pePrimaAdnotare[cheie] || []).push(r);
+    });
+    Object.keys(pePrimaAdnotare).forEach(function (cheie) {
+      var grup = pePrimaAdnotare[cheie];
+      if (grup.length < 2) return;
+      var scDeclarat = grup[0].urbanism_adnotat.sc_mp;
+      var pastrat = grup[0];
+      if (scDeclarat != null) {
+        pastrat = grup.reduce(function (best, r) { return Math.abs(r.arie_mp - scDeclarat) < Math.abs(best.arie_mp - scDeclarat) ? r : best; }, grup[0]);
+      }
+      grup.forEach(function (r) { r._exclusDuplicatEticheta = (r !== pastrat); });
+    });
+
+    var finale = rezultate.filter(function (r) { return !r._exclusDuplicatEticheta; });
+    finale.forEach(function (r, idx) { r.id = 'C' + (idx + 1); delete r._exclusDuplicatEticheta; });
+    return finale;
   }
 
   // Aria unui poligon (shoelace) — returneaza mp daca unitatile DXF sunt metri (uzual pt planuri RO)
