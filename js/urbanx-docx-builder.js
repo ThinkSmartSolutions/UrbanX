@@ -503,6 +503,9 @@
 
     var indicativNorme = ['P118_1_2025_T2', 'P118_1_2025_T4', 'P118_1_2025_T5', 'P118_1_2025_T41', 'P118_1_2025_T42', 'P118_1_2025_T144', 'P118_1_2025_T145', 'P118_1_2025_T146', 'P118_1_2025_T147', 'P118_1_2025_T148'];
     var statusNevalidat = G.SSI_NORMATIVE_ENGINE.verificaStatusNormativeFolosite(indicativNorme);
+    // Simetrie DRAFT/FINAL (Florin, 11 iul): analiza nu se opreste niciodata pt vecinatati neconfirmate — doar
+    // exportul FINAL (pt depunere la ISU) cere ca fiecare vecinatate estimata implicit sa fi fost confirmata/corectata.
+    var vecinatatiNeconfirmate = (m6b.vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
 
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
@@ -535,7 +538,7 @@
       { h: '3.3. Asigurarea limitării propagării incendiilor la vecinătăți (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 145' : 'Tabelul 4') + ')',
         html: '<p>Distanțele de siguranță față de construcțiile învecinate au fost determinate prin clasificarea fiecărei vecinătăți (destinație + grad de rezistență + prezența peretelui antifoc) și interogarea tabelului oficial P118-1/2025, NU doar prin măsurarea distanței fizice.</p>' +
           _tblVecinatati(m6b.vecinatati, verificariM14) +
-          ((m6b.neconformitati || []).filter(function (n) { return n.cod === 'ERO-VECIN-INCOMPLET'; }).length ? '<p><b>ATENȚIE:</b> ' + (m6b.neconformitati || []).filter(function (n) { return n.cod === 'ERO-VECIN-INCOMPLET'; }).map(function (n) { return esc(n.mesaj); }).join(' ') + '</p>' : '') +
+          ((m6b.avertismente || []).length ? (m6b.avertismente || []).map(function (a) { return '<p style="font-size:9pt;color:#b45309"><b>ⓘ</b> ' + esc(a.mesaj) + '</p>'; }).join('') : '') +
           verificariM14.filter(function (n) { return n.tip === 'DISTANTA_VECINATATE_INSUFICIENTA'; }).map(fmtSolutiiPtNeconformitate).join('') },
       { h: '3.4-3.6. Evacuare, persoane vulnerabile, forțe de intervenție', html: tbl([
         ['Nr. minim ieșiri', '' + (ac.flux_evacuare_m ? Math.max(1, Math.ceil((D.Sc || 0) / 300)) : 1)],
@@ -552,9 +555,10 @@
         '<p>Tabelul de mai jos distinge explicit între cerințe care necesită <b>corectare directă</b> a proiectului (nu au alternativă legală documentată) și cele pentru care există o <b>măsură compensatorie posibilă</b> (selecția rămâne a proiectantului atestat, nu se aplică automat).</p>' +
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
         (fiseNeconformitate.length ? '<p style="font-size:9pt;color:#666">Trasabilitate: fiecare soluție compensatorie aleasă se înregistrează cu nume + nr. atestat proiectant + dată (Ord. MAI 180/2022, Anexa 5, pct. 5). Orice corecție de proiect necesită reimport DWG + recalculul integral al cascadei M0-M17 (o modificare geometrică poate afecta și alte verificări).</p>' : '') },
-      { h: 'Anexă — statusul surselor normative folosite', html: statusNevalidat.length
-        ? '<p><b>ATENȚIE:</b> următoarele tabele normative folosite în acest scenariu nu au încă status „validat" de un inginer/arhitect atestat (extragere confirmată pe text oficial, dar fără semnătura de răspundere profesională cerută de Ord. MAI 180/2022): ' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + '. Documentul este DRAFT — poate fi folosit pentru analiză de proiect, dar necesită validare înainte de depunere ca FINAL la ISU.</p>'
-        : '<p>Toate tabelele normative folosite au status validat.</p>' }
+      { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
+        (statusNevalidat.length ? '<p><b>Surse normative:</b> următoarele tabele nu au încă status „validat" de un inginer/arhitect atestat (extragere confirmată pe text oficial, dar fără semnătura de răspundere profesională cerută de Ord. MAI 180/2022): ' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + '.</p>' : '<p>Toate tabelele normative folosite au status validat.</p>') +
+        (vecinatatiNeconfirmate.length ? '<p><b>Vecinătăți:</b> ' + vecinatatiNeconfirmate.length + ' vecinătate/vecinătăți (' + vecinatatiNeconfirmate.map(function (v) { return esc(v.id); }).join(', ') + ') au clasificare estimată conservator (grad V, risc mare), neconfirmată de proiectant.</p>' : '<p>Toate vecinătățile au clasificarea confirmată de proiectant.</p>') +
+        ((statusNevalidat.length || vecinatatiNeconfirmate.length) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate sursele normative și clasificările de vecinătăți sunt confirmate.</p>') }
     ];
     return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
   }

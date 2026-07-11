@@ -46,17 +46,26 @@
     return Object.keys(T).map(function (k) { return '<option value="' + k + '"' + (STATE.tip_lucrare === k ? ' selected' : '') + '>' + T[k].label + '</option>'; }).join('');
   }
 
+  function _sursaLabel(v) {
+    if (v.sursa_distanta === 'harta_osm') return '📍 din hartă (OSM)';
+    if (v.sursa_distanta === 'dwg') return '📐 din DXF';
+    return '✏️ manual';
+  }
+
   function _rowVecinatate(v, idx) {
     v = v || {};
-    return '<div class="ssiui-row" data-idx="' + idx + '">' +
+    var estimatNeconfirmat = v.sursa_clasificare === 'estimare_conservatoare_neconfirmata' && !v.confirmat;
+    return '<div class="ssiui-row" data-idx="' + idx + '"' + (estimatNeconfirmat ? ' style="border:1px solid rgba(251,191,36,.4)"' : '') + '>' +
       '<div><div class="ssiui-lbl">Destinație vecin</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'destinatie_declarata\',this.value)">' +
       DESTINATII.map(function (d) { return '<option value="' + d + '"' + (v.destinatie_declarata === d ? ' selected' : '') + '>' + d.replace('_', ' ') + '</option>'; }).join('') + '</select></div>' +
       '<div><div class="ssiui-lbl">Grad rezistență</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'grad_rezistenta_estimat\',this.value)">' +
       GRADE.map(function (g) { return '<option value="' + g + '"' + (v.grad_rezistenta_estimat === g ? ' selected' : '') + '>' + g + (g === 'V' ? ' (conservator)' : '') + '</option>'; }).join('') + '</select></div>' +
       '<div><div class="ssiui-lbl">Perete CF</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'perete_CF_pe_fatada_comuna\',this.value===\'da\')"><option value="nu"' + (!v.perete_CF_pe_fatada_comuna ? ' selected' : '') + '>nu</option><option value="da"' + (v.perete_CF_pe_fatada_comuna ? ' selected' : '') + '>da</option></select></div>' +
       '<div><div class="ssiui-lbl">Distanță reală (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (v.distanta_masurata_m != null ? v.distanta_masurata_m : '') + '" onchange="SSI_UI._set(' + idx + ',\'distanta_masurata_m\',parseFloat(this.value)||null)"></div>' +
-      '<div style="font-size:10px;color:#64748b">' + (v.sursa_distanta === 'dwg' ? '📐 din DXF' : '✏️ manual') + '</div>' +
+      '<div style="font-size:9px;color:#64748b;line-height:1.3">' + _sursaLabel(v) + (v.detaliu_sursa ? '<br><span title="' + esc(v.detaliu_sursa) + '" style="cursor:help">ⓘ detaliu</span>' : '') + '</div>' +
       '<button class="ssiui-btn sec" onclick="SSI_UI._remove(' + idx + ')">✕</button>' +
+      (estimatNeconfirmat ? '<label style="grid-column:1/-1;display:flex;gap:6px;align-items:center;font-size:10px;color:#fbbf24;margin-top:-4px">' +
+        '<input type="checkbox" onchange="SSI_UI._confirmaVecinatate(' + idx + ', this.checked)"> Estimare conservatoare neconfirmată (grad V, risc mare) — bifează după ce verifici/corectezi (necesar pentru scenariul FINAL)</label>' : '') +
       '</div>';
   }
 
@@ -70,6 +79,8 @@
       '<div class="ssiui-note">⚠ DXF-ul dă DOAR geometrie (poligoane, distanțe măsurate) — destinația și gradul de rezistență al fiecărei vecinătăți rămân input uman validat de proiectant. Layere așteptate: LIMITA_PROPRIETATE, VECINATATI, CONSTRUCTIE_PROPUSA (sau echivalente).</div>' +
       renderMapareManuala() +
       '<div class="ssiui-lbl" style="margin-top:14px">3.3 — Vecinătăți (clasificare + distanțe minime, Tabelul 4/145)</div>' +
+      '<div class="ssiui-note" style="border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#6ee7b7">📍 Recomandat: auto-detectează din harta platformei (clădiri OSM reale din jurul parcelei active) — se pre-completează cu estimare conservatoare (grad V, risc mare) + distanța reală calculată; tu doar confirmi sau corectezi, ca la o vizită de teren.</div>' +
+      '<button class="ssiui-btn pri" onclick="SSI_UI._autoDetecteaza()" style="margin-bottom:10px">📍 Auto-detectează vecinătățile din hartă</button>' +
       STATE.vecinatati.map(function (v, i) { return _rowVecinatate(v, i); }).join('') +
       '<button class="ssiui-btn sec" onclick="SSI_UI._addVecinatate()">+ Adaugă vecinătate manual</button>';
   }
@@ -157,7 +168,18 @@
       if (!STATE.pendingDxf) return;
       _aplicaGeometrie(STATE.pendingDxf.parsed, { mapare: STATE.pendingDxf.mapareCurenta });
     },
-    _onFile: onFile, _close: close, _save: function () { close(); if (G.ss) G.ss('✅ Date SSI salvate — se vor include la generarea Scenariului de Securitate la Incendiu.'); }
+    _onFile: onFile, _close: close, _save: function () { close(); if (G.ss) G.ss('✅ Date SSI salvate — se vor include la generarea Scenariului de Securitate la Incendiu.'); },
+    _confirmaVecinatate: function (i, checked) { if (STATE.vecinatati[i]) STATE.vecinatati[i].confirmat = !!checked; render(); },
+    _autoDetecteaza: async function () {
+      if (!G.SSI_MAP_VECINATATI) { if (G.ss) G.ss('Motorul de auto-detectare nu e încărcat.'); return; }
+      if (G.ss) G.ss('📍 Se caută clădirile din jurul parcelei active…');
+      var r = await G.SSI_MAP_VECINATATI.autoDetecteazaVecinatati();
+      if (!r.ok) { if (G.ss) G.ss('⚠ ' + r.mesaj); return; }
+      if (!r.nrDetectate) { if (G.ss) G.ss('Nicio clădire găsită în raza de detecție — adaugă vecinătățile manual.'); return; }
+      r.vecinatati.forEach(function (v) { STATE.vecinatati.push(v); });
+      render();
+      if (G.ss) G.ss('📍 ' + r.nrDetectate + ' vecinătăți detectate din hartă (estimare conservatoare, grad V/risc mare) — verifică și corectează unde e cazul.');
+    }
   };
 
   // Preia automat STATE in D la fiecare generare de dosar (aditiv — nu modifica genereazaDosar existent daca nu exista date SSI)

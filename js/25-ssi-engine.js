@@ -107,40 +107,56 @@
     var key = String(destinatie || '').toLowerCase().replace(/\s+/g, '_');
     return RISC_PE_DESTINATIE[key] || 'necunoscut_verifica_manual';
   }
+  // v4.2 (Florin, 11 iul 2026): analiza NU se mai opreste niciodata asteptand clasificare manuala completa.
+  // Daca destinatia/gradul lipsesc, se aplica estimarea conservatoare (grad V, risc mare — exact ce ar
+  // presupune un proiectant care se uita pe harta fara sa intre in casa vecinului), calculul CONTINUA,
+  // si se marcheaza explicit sursa + starea "neconfirmat". Doar generarea scenariului FINAL (pt depunere)
+  // cere ca fiecare vecinatate sa fi fost confirmata/corectata de proiectant (vezi statusFinalizare in
+  // urbanx-docx-builder.js) — simetrie cu statusul de validare a normativelor (v3.0).
   function m6b_clasificareVecinatati(m0, m6, vecinatatiDeclarate) {
     var rezultate = { vecinatati: [], neconformitati: [], avertismente: [] };
     (vecinatatiDeclarate || []).forEach(function (vecin) {
-      if (!vecin.grad_rezistenta_estimat || !vecin.destinatie_declarata) {
-        rezultate.neconformitati.push({
-          tip: 'BLOCANT', cod: 'ERO-VECIN-INCOMPLET', vecinatate: vecin.id,
-          mesaj: 'Vecinătatea ' + (vecin.id || '?') + ': lipsește clasificarea (destinație și/sau grad rezistență) — obligatorie pentru calculul distanței minime.',
-          actiune: 'Completează clasificarea vecinătății înainte de a continua. Dacă gradul e necunoscut cu certitudine, adoptă varianta conservatoare (grad V).'
+      var estimatImplicit = !vecin.destinatie_declarata || !vecin.grad_rezistenta_estimat;
+      var destinatie = vecin.destinatie_declarata || 'altele';
+      var grad = vecin.grad_rezistenta_estimat || 'V';
+      if (estimatImplicit) {
+        rezultate.avertismente.push({
+          cod: 'AVERT-VECIN-ESTIMAT-IMPLICIT', vecinatate: vecin.id,
+          mesaj: 'Vecinătatea ' + (vecin.id || '?') + ': clasificare incompletă — s-a aplicat estimarea conservatoare implicită (grad V, risc mare), NECONFIRMATĂ de proiectant.',
+          actiune: 'Analiza DRAFT continuă cu această estimare; scenariul FINAL (pentru depunere la ISU) cere confirmarea sau corecția ta pentru această vecinătate.'
+        });
+      }
+      if (vecin.distanta_masurata_m == null) {
+        rezultate.avertismente.push({ cod: 'AVERT-DISTANTA-NECUNOSCUTA', vecinatate: vecin.id, mesaj: 'Vecinătatea ' + vecin.id + ': distanța reală nu este completată — nu se poate verifica conformitatea până nu e introdusă (manual, din hartă sau din DXF).' });
+        rezultate.vecinatati.push({
+          id: vecin.id, destinatie_declarata: destinatie, grad_vecin: grad, distanta_necesara_m: null, distanta_masurata_m: null,
+          conforma: null, estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, sursa_distanta: vecin.sursa_distanta || 'manual'
         });
         return;
       }
-      var risc_vecin = vecin.risc_vecin || _estimeazaRiscDinDestinatie(vecin.destinatie_declarata);
+      var risc_vecin = vecin.risc_vecin || (estimatImplicit ? 'mare' : _estimeazaRiscDinDestinatie(destinatie));
       var d = N().getDistantaMinima({
-        tip_lucrare: m0.regim_tabele, grad_propriu: m6.grad_stabilitate, grad_vecin: vecin.grad_rezistenta_estimat,
+        tip_lucrare: m0.regim_tabele, grad_propriu: m6.grad_stabilitate, grad_vecin: grad,
         risc_vecin: risc_vecin, sprinklerizat: !!vecin.sprinklerizat_unadincladiri, perete_CF_pe_fatada_comuna: !!vecin.perete_CF_pe_fatada_comuna
       });
       if (d.eroare) {
         rezultate.avertismente.push({ cod: 'AVERT-DISTANTA-NEDETERMINATA', vecinatate: vecin.id, mesaj: d.eroare + ' (' + d.norma + ')' });
         return;
       }
-      var conforma = (vecin.distanta_masurata_m != null) && (vecin.distanta_masurata_m >= d.valoare_m);
+      var conforma = vecin.distanta_masurata_m >= d.valoare_m;
       rezultate.vecinatati.push({
-        id: vecin.id, destinatie_declarata: vecin.destinatie_declarata, grad_propriu: m6.grad_stabilitate,
-        grad_vecin: vecin.grad_rezistenta_estimat, risc_vecin_estimat: risc_vecin, perete_CF: !!vecin.perete_CF_pe_fatada_comuna,
+        id: vecin.id, destinatie_declarata: destinatie, grad_propriu: m6.grad_stabilitate,
+        grad_vecin: grad, risc_vecin_estimat: risc_vecin, perete_CF: !!vecin.perete_CF_pe_fatada_comuna,
         distanta_necesara_m: d.valoare_m, distanta_necesara_norma: d.norma, note_aplicate: d.note_aplicate,
         distanta_masurata_m: vecin.distanta_masurata_m, sursa_distanta: vecin.sursa_distanta || 'manual',
-        sursa_url: d.sursa_url, pagina: d.pagina, status_validare: d.status_validare, conforma: conforma
+        sursa_url: d.sursa_url, pagina: d.pagina, status_validare: d.status_validare, conforma: conforma,
+        estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true
       });
       if (!conforma) {
         rezultate.neconformitati.push({
           tip: 'CRITIC', cod: 'ERO-DISTANTA-VECIN', vecinatate: vecin.id, compensabil: true,
-          mesaj: 'Vecinătate ' + vecin.id + ': distanță reală ' + (vecin.distanta_masurata_m == null ? 'necunoscută' : vecin.distanta_masurata_m + ' m') + ' < necesar ' + d.valoare_m + ' m.',
-          deficit_m: (vecin.distanta_masurata_m != null) ? Math.max(0, d.valoare_m - vecin.distanta_masurata_m) : null,
-          norma: d.norma
+          mesaj: 'Vecinătate ' + vecin.id + ': distanță reală ' + vecin.distanta_masurata_m + ' m < necesar ' + d.valoare_m + ' m.',
+          deficit_m: Math.max(0, d.valoare_m - vecin.distanta_masurata_m), norma: d.norma
         });
       }
     });
