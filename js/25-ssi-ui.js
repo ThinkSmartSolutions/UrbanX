@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [] };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele'];
   var GRADE = ['I', 'II', 'III', 'IV', 'V'];
@@ -68,6 +68,7 @@
       '<div class="ssiui-lbl" style="margin-top:18px">Import geometrie din DXF (opțional — export din CAD, format ASCII)</div>' +
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
       '<div class="ssiui-note">⚠ DXF-ul dă DOAR geometrie (poligoane, distanțe măsurate) — destinația și gradul de rezistență al fiecărei vecinătăți rămân input uman validat de proiectant. Layere așteptate: LIMITA_PROPRIETATE, VECINATATI, CONSTRUCTIE_PROPUSA (sau echivalente).</div>' +
+      renderMapareManuala() +
       '<div class="ssiui-lbl" style="margin-top:14px">3.3 — Vecinătăți (clasificare + distanțe minime, Tabelul 4/145)</div>' +
       STATE.vecinatati.map(function (v, i) { return _rowVecinatate(v, i); }).join('') +
       '<button class="ssiui-btn sec" onclick="SSI_UI._addVecinatate()">+ Adaugă vecinătate manual</button>';
@@ -90,6 +91,45 @@
   }
   function close() { var m = D.getElementById('ssi-ui-modal'); if (m) m.classList.remove('open'); }
 
+  function _aplicaGeometrie(parsed, mapareFinala) {
+    var geo = G.SSI_DWG_IMPORT.extractGeometrie(parsed, mapareFinala);
+    STATE.geometrie_teren = geo;
+    (geo.vecinatati_geometrie || []).forEach(function (vg) {
+      STATE.vecinatati.push({ id: vg.id, distanta_masurata_m: vg.distanta_min_la_propriu_m, sursa_distanta: 'dwg', destinatie_declarata: null, grad_rezistenta_estimat: null, perete_CF_pe_fatada_comuna: false });
+    });
+    STATE.pendingDxf = null;
+    render();
+    if (G.ss) G.ss('DXF importat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice detectate — completează clasificarea (destinație/grad) manual pentru fiecare.');
+  }
+
+  var CATEGORII_LABEL = {
+    limita_proprietate: 'Limită de proprietate', vecinatati: 'Vecinătăți (clădiri învecinate)',
+    constructie_existenta: 'Construcție existentă', constructie_propusa: 'Construcție propusă',
+    acces_auto_speciale: 'Acces autospeciale', cote_nivel: 'Cote de nivel'
+  };
+
+  // Layerele NU sunt standardizate in Romania (multe CAD-uri, ex. ArchiCAD, au denumiri proprii de tip
+  // "055_EXT_Gard" sau "131_REF_Topo") — cand maparea automata esueaza, cerem mapare manuala explicita
+  // (regula B.2/B.3 addendum v2.1), NU presupunem o corespondenta.
+  function _rowMapareLayer(categorie, layereDisponibile, valoareCurenta) {
+    var opts = '<option value="">— niciun layer / nu există —</option>' +
+      layereDisponibile.map(function (l) { return '<option value="' + esc(l) + '"' + (l === valoareCurenta ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('');
+    return '<div class="ssiui-row" style="grid-template-columns:1fr 2fr">' +
+      '<div class="ssiui-lbl" style="margin:0">' + esc(CATEGORII_LABEL[categorie] || categorie) + '</div>' +
+      '<select class="ssiui-sel" onchange="SSI_UI._setMapareLayer(\'' + categorie + '\', this.value)">' + opts + '</select>' +
+      '</div>';
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  function renderMapareManuala() {
+    var pd = STATE.pendingDxf; if (!pd) return '';
+    return '<div class="ssiui-note" style="border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08);color:#7dd3fc">' +
+      'Layerele acestui DXF (' + pd.parsed.layers.length + ' găsite) nu corespund denumirilor standard așteptate — CAD-urile (ex. ArchiCAD) au propriile convenții. ' +
+      'Alege manual, pentru fiecare categorie, layerul real din fișier care corespunde (sau lasă „niciun layer" dacă nu există în acest plan).</div>' +
+      Object.keys(CATEGORII_LABEL).map(function (cat) { return _rowMapareLayer(cat, pd.parsed.layers, pd.mapareCurenta[cat]); }).join('') +
+      '<button class="ssiui-btn pri" onclick="SSI_UI._confirmaMapare()">✓ Confirmă layerele și extrage geometria</button>';
+  }
+
   async function onFile(file) {
     if (!file) return;
     var fmt = G.SSI_DWG_IMPORT.detectFormat(file);
@@ -97,24 +137,26 @@
     try {
       var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
       var mapare = G.SSI_DWG_IMPORT.mapLayers(parsed);
-      if (!mapare.automata_completa && G.ss) G.ss('Layere nemapate automat: ' + mapare.nemapate.join(', ') + ' — verifică denumirile layerelor în CAD.');
-      var geo = G.SSI_DWG_IMPORT.extractGeometrie(parsed, mapare);
-      STATE.geometrie_teren = geo;
-      (geo.vecinatati_geometrie || []).forEach(function (vg) {
-        STATE.vecinatati.push({ id: vg.id, distanta_masurata_m: vg.distanta_min_la_propriu_m, sursa_distanta: 'dwg', destinatie_declarata: null, grad_rezistenta_estimat: null, perete_CF_pe_fatada_comuna: false });
-      });
+      if (mapare.automata_completa) { _aplicaGeometrie(parsed, mapare); return; }
+      // mapare partiala/esuata -> cerem confirmare/completare manuala explicita (NU presupunem)
+      STATE.pendingDxf = { parsed: parsed, mapareCurenta: mapare.mapare };
       render();
-      if (G.ss) G.ss('DXF importat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice detectate — completează clasificarea (destinație/grad) manual pentru fiecare.');
+      if (G.ss) G.ss('DXF citit (' + parsed.nrEntitati + ' entități, ' + parsed.layers.length + ' layere) — confirmă manual maparea layerelor mai jos.');
     } catch (e) { if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
   }
 
   G.SSI_UI = {
     open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale } : null; },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [] }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null }; },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
     _set: function (i, key, val) { if (STATE.vecinatati[i]) STATE.vecinatati[i][key] = val; },
+    _setMapareLayer: function (categorie, layer) { if (STATE.pendingDxf) STATE.pendingDxf.mapareCurenta[categorie] = layer || null; },
+    _confirmaMapare: function () {
+      if (!STATE.pendingDxf) return;
+      _aplicaGeometrie(STATE.pendingDxf.parsed, { mapare: STATE.pendingDxf.mapareCurenta });
+    },
     _onFile: onFile, _close: close, _save: function () { close(); if (G.ss) G.ss('✅ Date SSI salvate — se vor include la generarea Scenariului de Securitate la Incendiu.'); }
   };
 
