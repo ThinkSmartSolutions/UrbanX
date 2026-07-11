@@ -195,16 +195,25 @@
   // compartimente de incendiu, indiferent daca apartin aceluiasi beneficiar sau nu. Grad si risc
   // identice pe ambele parti (aceeasi functiune/regim in tot ansamblul), spre deosebire de M6b unde
   // vecinul e necunoscut si se estimeaza conservator.
-  function m6c_distanteIntreCladiriProprii(m0, m6, distanteIntreCladiri, riscPropriu) {
+  // v4.4: perechile care fac parte din ACELASI grup constructiv (componenta conexa — vezi
+  // grupeazaInComponenteConexe din 25-ssi-dwg-import.js) NU se verifica la distanta minima, chiar
+  // daca distanta directa dintre ele nu e sub prag (ex. un triplex in L: A-B si B-C alipite, dar
+  // A-C pot fi la >0,3m direct intre ele — tot fac parte din acelasi volum continuu prin B).
+  function m6c_distanteIntreCladiriProprii(m0, m6, distanteIntreCladiri, riscPropriu, grupuriConstructive) {
     var risc = riscPropriu || 'mic';
+    var grupPeCladire = {};
+    (grupuriConstructive || []).forEach(function (g) { (g.cladiri_incluse || []).forEach(function (id) { grupPeCladire[id] = g.id_grup; }); });
     var rezultate = [];
     (distanteIntreCladiri || []).forEach(function (perechi) {
-      // Cladiri practic alipite (contur la contur, <0.3m — posibil duplex/cuplare cu perete comun,
-      // NU se deduce doar din eticheta text): Tabelul 4/145 (distante) nu se aplica aici — cerinta
-      // reala e un perete antifoc (REI) intre unitati, verificare distincta (M4b/materiale), nu distanta.
-      if (perechi.posibil_alipite) {
+      var acelasiGrup = grupPeCladire[perechi.a] != null && grupPeCladire[perechi.a] === grupPeCladire[perechi.b];
+      // Cladiri practic alipite (contur la contur, <0.3m) SAU parte a aceluiasi grup constructiv
+      // continuu (dedus geometric, NU din eticheta): Tabelul 4/145 (distante) nu se aplica aici —
+      // cerinta reala e un perete antifoc (REI) intre unitati, verificare distincta (M4b/materiale).
+      if (perechi.posibil_alipite || acelasiGrup) {
         rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: perechi.distanta_m, alipite: true,
-          nota: 'Clădiri practic alipite (< 0,3 m) — posibil duplex/cuplare cu perete comun. Nu se verifică distanța minimă (Tabelul 4/145), ci prezența și rezistența la foc a peretelui antifoc despărțitor (secțiunea materiale/DoP).' });
+          nota: acelasiGrup && !perechi.posibil_alipite
+            ? 'Parte a aceluiași volum construit continuu (grup ' + grupPeCladire[perechi.a] + ') — nu se verifică distanța minimă între unități ale aceluiași grup.'
+            : 'Clădiri practic alipite (< 0,3 m) — posibil duplex/cuplare cu perete comun. Nu se verifică distanța minimă (Tabelul 4/145), ci prezența și rezistența la foc a peretelui antifoc despărțitor (secțiunea materiale/DoP).' });
         return;
       }
       if (perechi.distanta_m == null) { rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: null, eroare: 'distanta nedeterminata' }); return; }
@@ -244,11 +253,50 @@
     };
   }
 
+  // M5b — compartimentare pe GRUPURI constructive (v4.4): un grup cuplat/duplex/triplex (componenta
+  // conexa de cladiri alipite, vezi grupeazaInComponenteConexe) NU inseamna automat compartimente
+  // separate — daca nu exista un perete despartitor cu rezistenta la foc DECLARATA/calificata drept
+  // element de compartimentare intre unitati, grupul e UN SINGUR compartiment de incendiu, cu aria
+  // insumata a tuturor unitatilor (regula v4.4 #26) — NU se verifica fiecare unitate izolat doar
+  // pentru ca are cartus propriu.
+  function m5b_compartimentareGrupuri(m0, grad, grupuriConstructive, cladiriPropuse, peretiDespartitoriDeclarati) {
+    var cladirePeId = {}; (cladiriPropuse || []).forEach(function (c) { cladirePeId[c.id] = c; });
+    function sdCladire(id) { var c = cladirePeId[id]; return c && c.urbanism_adnotat && c.urbanism_adnotat.sd_mp != null ? c.urbanism_adnotat.sd_mp : (c ? c.arie_mp : 0); }
+    var peretePeGrup = {}; (peretiDespartitoriDeclarati || []).forEach(function (p) { peretePeGrup[p.id_grup] = p; });
+
+    return (grupuriConstructive || []).map(function (g) {
+      if (g.cladiri_incluse.length === 1) {
+        var sdIndiv = sdCladire(g.cladiri_incluse[0]);
+        var rIndiv = m5_compartimentare(m0, { grad: grad, arie_construita_mp: sdIndiv, niveluri: 1 });
+        return { id_grup: g.id_grup, tip: g.tip, cladiri_incluse: g.cladiri_incluse, tratament: 'COMPARTIMENT_PROPRIU', arie_verificata_mp: sdIndiv, verificare: rIndiv };
+      }
+      var perete = peretePeGrup[g.id_grup];
+      var areRezistentaCalificata = perete && perete.rezistenta_foc_declarata;
+      if (areRezistentaCalificata) {
+        var perUnitate = g.cladiri_incluse.map(function (id) { return { id: id, arie_mp: sdCladire(id) }; });
+        return {
+          id_grup: g.id_grup, tip: g.tip, cladiri_incluse: g.cladiri_incluse, tratament: 'COMPARTIMENTE_DISTINCTE',
+          motiv: 'Peretele comun are rezistență la foc declarată (' + perete.rezistenta_foc_declarata + ') suficientă pentru a separa unitățile ca compartimente de incendiu distincte — fiecare unitate se verifică individual.',
+          compartimente: perUnitate.map(function (u) { return { id: u.id, arie_mp: u.arie_mp, verificare: m5_compartimentare(m0, { grad: grad, arie_construita_mp: u.arie_mp, niveluri: 1 }) }; })
+        };
+      }
+      var arieTotala = g.cladiri_incluse.reduce(function (s, id) { return s + sdCladire(id); }, 0);
+      var rUnic = m5_compartimentare(m0, { grad: grad, arie_construita_mp: arieTotala, niveluri: 1 });
+      return {
+        id_grup: g.id_grup, tip: g.tip, cladiri_incluse: g.cladiri_incluse, tratament: 'COMPARTIMENT_UNIC',
+        motiv: 'Nu există un perete de separare cu rezistență la foc calificată declarată între unități — grupul cuplat se tratează ca UN SINGUR compartiment de incendiu, cu aria însumată a tuturor unităților (' + g.cladiri_incluse.length + ' unități).',
+        arie_verificata_mp: arieTotala, verificare: rUnic,
+        avertisment: rUnic.conform === false ? 'Aria însumată depășește limita admisă — soluții: perete antifoc calificat între unități (documentat, cu DoP) SAU tratare ca un singur compartiment supradimensionat (neconform, necesită corecție/măsuri compensatorii).' : null
+      };
+    });
+  }
+
   G.SSI_ENGINE = {
     TIPURI_LUCRARE: TIPURI_LUCRARE,
     m0_tipLucrare: m0_tipLucrare, m5_compartimentare: m5_compartimentare, m6_stabilitate: m6_stabilitate,
     m6b_clasificareVecinatati: m6b_clasificareVecinatati, m9_niveluriMaxime: m9_niveluriMaxime,
     m6c_distanteIntreCladiriProprii: m6c_distanteIntreCladiriProprii, m_urbanismAnsamblu: m_urbanismAnsamblu,
+    m5b_compartimentareGrupuri: m5b_compartimentareGrupuri,
     ruleazaCascada: ruleazaCascada
   };
   console.log('[SSI] cascada M0-M12 incarcata (window.SSI_ENGINE)');

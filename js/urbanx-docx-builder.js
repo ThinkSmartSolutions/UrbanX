@@ -446,7 +446,11 @@
     // INTRE cladirile proprii la fel ca fata de vecinii externi (M6b) — nu doar la limita de proprietate.
     var cladiriPropuse = D._cladiri_propuse || [];
     var distanteIntreCladiri = (D.geometrie_teren && D.geometrie_teren.distante_intre_cladiri) || [];
-    var m6c = (cladiriPropuse.length > 1) ? G.SSI_ENGINE.m6c_distanteIntreCladiriProprii(m0, { grad_stabilitate: grad }, distanteIntreCladiri, 'mic') : null;
+    // Grupuri constructive (v4.4): componente conexe de cladiri alipite (<0,3m intre contururi) —
+    // un duplex/triplex e un SINGUR volum continuu, nu perechi/triplete de cladiri independente.
+    var grupuriConstructive = (D.geometrie_teren && D.geometrie_teren.grupuri_constructive) || (cladiriPropuse.length ? cladiriPropuse.map(function (c) { return { id_grup: c.id, cladiri_incluse: [c.id], tip: 'INDIVIDUAL', volum_continuu: false }; }) : []);
+    var m6c = (cladiriPropuse.length > 1) ? G.SSI_ENGINE.m6c_distanteIntreCladiriProprii(m0, { grad_stabilitate: grad }, distanteIntreCladiri, 'mic', grupuriConstructive) : null;
+    var m5bGrupuri = cladiriPropuse.length ? G.SSI_ENGINE.m5b_compartimentareGrupuri(m0, grad, grupuriConstructive, cladiriPropuse, D._pereti_despartitori_cuplat || []) : null;
     var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.geometrie_teren && D.geometrie_teren.limita_proprietate && D.geometrie_teren.limita_proprietate.arie_mp) : null;
 
     // v4.1 — M14: fiecare neconformitate trece prin taxonomia cu 3 stari (CORECTIE_PROIECT vs MASURA_COMPENSATORIE_POSIBILA),
@@ -482,6 +486,17 @@
           descriere_element: 'Distanța dintre clădirile proprii ' + per.a + ' și ' + per.b, valoare_proiectata: per.distanta_reala_m, valoare_necesara: per.distanta_necesara_m,
           sursa_normativa: per.distanta_necesara_norma
         }));
+      });
+    }
+    if (m5bGrupuri) {
+      m5bGrupuri.forEach(function (g) {
+        if (g.tratament === 'COMPARTIMENT_UNIC' && g.verificare && g.verificare.conform === false) {
+          verificariM14.push(G.SSI_M14.verificaConformitate({
+            id: 'M5b-' + g.id_grup, tip: 'ARIE_COMPARTIMENT_DEPASITA', sens: 'max', unitate: 'm²', element_id: g.id_grup,
+            descriere_element: 'Aria compartimentului unic al grupului constructiv ' + g.id_grup + ' (' + g.cladiri_incluse.length + ' unități alipite, aria însumată)',
+            valoare_proiectata: g.arie_verificata_mp, valoare_necesara: g.verificare.arie_maxima_admisa_mp, sursa_normativa: g.verificare.norma
+          }));
+        }
       });
     }
     // ERO-VECIN-INCOMPLET (clasificare lipsa) — corectie directa (completare date), nu tine de catalog
@@ -578,7 +593,14 @@
           ['POT ansamblu (ΣSc/Steren)', urbanismAnsamblu.pot_ansamblu_pct != null ? urbanismAnsamblu.pot_ansamblu_pct + '%' : '—'],
           ['CUT ansamblu (ΣSd/Steren)', urbanismAnsamblu.cut_ansamblu != null ? '' + urbanismAnsamblu.cut_ansamblu : '—']
         ], ['Indicator', 'Valoare'])
-    }] : []).concat([
+    }].concat((m5bGrupuri && m5bGrupuri.some(function (g) { return g.cladiri_incluse.length > 1; })) ? [{
+      h: '1.4.h. Compartimentare pe grupuri constructive (cuplat/duplex/triplex vs. individual)',
+      html: '<p>Grupurile de mai jos sunt componente conexe geometrice (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — un grup cuplat/duplex/triplex NU înseamnă automat compartimente separate: dacă nu există un perete despărțitor cu rezistență la foc declarată/calificată între unități, grupul se tratează ca <b>UN SINGUR compartiment de incendiu</b>, cu aria însumată a tuturor unităților, nu ca fiecare unitate verificată izolat.</p>' +
+        tbl(m5bGrupuri.map(function (g) {
+          return [esc(g.id_grup), esc(g.tip), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' ')), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—') + (g.verificare && g.verificare.conform === false ? ' — NECONFORM' : '')];
+        }), ['Grup', 'Tip', 'Unități incluse', 'Tratament compartimentare', 'Arie verificată']) +
+        (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '')
+    }] : []) : []).concat([
       { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: '3.1. Rezistența și clasa de reacție la foc a elementelor (materiale/DoP)', html: '<p>Clasa de reacție la foc nu se calculează — e o proprietate declarată a produsului (Declarația de Performanță), nu se presupune pentru materiale cu variabilitate mare.</p>' + htmlMateriale },

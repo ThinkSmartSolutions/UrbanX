@@ -442,7 +442,33 @@
       }
       out.nrPerechiAlipite = out.distante_intre_cladiri.filter(function (p) { return p.posibil_alipite; }).length;
     }
+
+    // Grupare in componente conexe pe graful de adiacenta (muchie = pereche "posibil_alipite") —
+    // generalizeaza dincolo de perechi: 3 cladiri lipite una de alta = un singur grup "triplex",
+    // tratat ca un volum construit continuu, nu ca perechi separate (regula v4.4 #25).
+    out.grupuri_constructive = _grupeazaInComponenteConexe(out.cladiri_propuse, out.distante_intre_cladiri || []);
     return out;
+  }
+
+  // Uniune-gasire simpla pe id-uri de cladiri, cu muchii = perechile "posibil_alipite" — o componenta
+  // conexa cu 1 element = casa individuala; cu 2 = cuplat/duplex; cu 3+ = triplex/cuplat_N (v4.4 #25).
+  function _grupeazaInComponenteConexe(cladiri, distante) {
+    if (!cladiri || !cladiri.length) return [];
+    var parinte = {};
+    cladiri.forEach(function (c) { parinte[c.id] = c.id; });
+    function gaseste(x) { while (parinte[x] !== x) { parinte[x] = parinte[parinte[x]]; x = parinte[x]; } return x; }
+    function uneste(a, b) { var ra = gaseste(a), rb = gaseste(b); if (ra !== rb) parinte[ra] = rb; }
+    (distante || []).forEach(function (p) { if (p.posibil_alipite) uneste(p.a, p.b); });
+    var pe_grup = {};
+    cladiri.forEach(function (c) { var r = gaseste(c.id); (pe_grup[r] = pe_grup[r] || []).push(c.id); });
+    return Object.keys(pe_grup).map(function (r) {
+      var idsGrup = pe_grup[r];
+      return {
+        id_grup: idsGrup.join('-'), cladiri_incluse: idsGrup,
+        tip: idsGrup.length === 1 ? 'INDIVIDUAL' : (idsGrup.length === 2 ? 'CUPLAT_DUPLEX' : ('CUPLAT_' + idsGrup.length + '_UNITATI')),
+        volum_continuu: idsGrup.length > 1
+      };
+    });
   }
 
   // Statistici pe layer (nr. poligoane inchise + aria min/med/max) — ajuta proiectantul sa
@@ -474,7 +500,8 @@
     mapLayers: mapLayers, extractGeometrie: extractGeometrie,
     ariePoligonShoelace: ariePoligonShoelace, calculeazaDistantaMinima: calculeazaDistantaMinima,
     extrageAdnotariUrbanism: extrageAdnotariUrbanism, extrageCladiriDePeLayer: extrageCladiriDePeLayer,
-    analizeazaLayerePoligoane: analizeazaLayerePoligoane
+    analizeazaLayerePoligoane: analizeazaLayerePoligoane, extrageFazaDinDXF: extrageFazaDinDXF,
+    grupeazaInComponenteConexe: _grupeazaInComponenteConexe
   };
   console.log('[SSI] import DXF incarcat (window.SSI_DWG_IMPORT) — parser vanilla JS, fara dependinte externe');
 })(window);
