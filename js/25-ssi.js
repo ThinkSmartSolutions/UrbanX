@@ -1,6 +1,6 @@
 /* ============================================================================
  * UrbanX — SCENARIU DE SECURITATE LA INCENDIU (js/25-ssi.js)
- * Documentul autoritar conform Ordinului MAI nr. 129/2016 (metodologia de
+ * Documentul autoritar conform Ordinului MAI nr. 180/2022, Anexa 5 (metodologia de
  * elaborare a scenariilor de securitate la incendiu) — 7 capitole obligatorii +
  * motor de verificare automată. Fundamentează avizul ISU.
  *
@@ -39,7 +39,7 @@
     parcare: { label: '🚗 Parcare', risc: 'mediu', grad: 'I', dens: 30 }
   };
   var LEGAL = [
-    ['Ordinul MAI nr. 129/2016', 'Metodologia de elaborare a scenariilor de securitate la incendiu'],
+    ['Ordinul MAI nr. 180/2022, Anexa 5', 'Norme metodologice privind avizarea si autorizarea de securitate la incendiu si protectie civila (inlocuieste Ord. 129/2016)'],
     ['Legea nr. 307/2006 (rep.)', 'Apărarea împotriva incendiilor (mod. L.180/2021, L.291/2023)'],
     ['P 118/1-2015', 'Securitatea la incendiu a construcțiilor (completare Ord. MAI 87/2019)'],
     ['P 118/2-2013', 'Instalații de stingere cu apă'],
@@ -105,7 +105,7 @@
     var imp = _importObiect(nrcad);
     var c = ssi_calc({ imp: imp, Sc: ap.area ? Math.round(ap.area * 0.5) : null });
 
-    var d = G._initStudyPdf('Scenariu de Securitate la Incendiu', 'Ord. MAI 129/2016 · fundamentare aviz ISU', 24);
+    var d = G._initStudyPdf('Scenariu de Securitate la Incendiu', 'Ord. MAI 180/2022, Anexa 5 · fundamentare aviz ISU', 24);
     var pdf = d.pdf, W = d.W, H = d.H, sec = d.sec, body = d.body, tblRow = d.tblRow, newPage = d.newPage, checkY = d.checkY, cover = d.cover;
     nrcad = d.nrcad || nrcad; var uat = d.uat || ap.uat || '';
     var TITLE = 'SCENARIU SSI'; var pg = 1, cy;
@@ -114,19 +114,19 @@
     function SEC(t) { cy = checkY(cy, 30, TITLE, pg); cy = sec(t, cy) + 2; }
     var totalProbleme = c.erori.length + c.oblig.length;
 
-    cover('Scenariu de securitate la incendiu conform Ordinului MAI nr. 129/2016\nDocument tehnic de fundamentare a avizului ISU',
+    cover('Scenariu de securitate la incendiu conform Ordinului MAI nr. 180/2022, Anexa 5\nDocument tehnic de fundamentare a avizului ISU',
       null,
       [['Nr. cadastral', nrcad], ['Tipologie', c.T.label], ['Suprafață compartiment', c.Sc.toLocaleString('ro-RO') + ' mp'],
        ['Risc de incendiu', c.risc + (c.imp ? ' (importat din ' + (c.tip === 'skid_GPL' ? 'proiect SKID' : 'proiect Hală') + ')' : '')],
        ['Grad rezistență foc', 'Gradul ' + c.grad]],
       c.erori.length === 0, c.erori.length === 0 ? 'Fără erori critice de conformitate' : c.erori.length + ' neconformități critice de rezolvat');
 
-    page('CUPRINS'); cy = sec('CUPRINS · Ord. MAI 129/2016', cy) + 1;
+    page('CUPRINS'); cy = sec('CUPRINS · Ord. MAI 180/2022, Anexa 5', cy) + 1;
     ['Cadru legal și metodologic', 'Cap.1 — Caracteristici construcție și risc', 'Cap.2 — Riscul de incendiu', 'Cap.3 — Nivelul de performanță (rezistență la foc)',
      'Cap.4 — Echiparea și dotarea cu mijloace tehnice', 'Cap.5 — Căile de evacuare', 'Cap.6 — Alimentarea cu apă pentru stingere', 'Cap.7 — Forțe și mijloace de intervenție',
      'Verificări automate de conformitate', 'Concluzii și interconectare'].forEach(function (t) { cy = body(t, 16, cy) + 0.6; });
     cy += 3; SEC('CADRU LEGAL ȘI METODOLOGIC');
-    P('Scenariul de securitate la incendiu este documentul tehnic care fundamentează avizul/autorizația ISU, elaborat conform Ordinului MAI nr. 129/2016. Structura celor 7 capitole este impusă de metodologie; orice deviere atrage respingerea. Documentul se semnează de un proiectant atestat (cerință legală — software-ul NU semnează).');
+    P('Scenariul de securitate la incendiu este documentul tehnic care fundamentează avizul/autorizația ISU, elaborat conform Ordinului MAI nr. 180/2022, Anexa 5. Structura celor 7 capitole este impusă de metodologie; orice deviere atrage respingerea. Documentul se semnează de un proiectant atestat (cerință legală — software-ul NU semnează).');
     cy = tblRow(['Act normativ', 'Obiect'], cy, true, [58, 124]);
     LEGAL.forEach(function (r) { cy = checkY(cy, 15, TITLE, pg); cy = tblRow(r, cy, false, [58, 124]); });
     cy += 2;
@@ -192,9 +192,9 @@
     if (totalProbleme === 0) P('Nu s-au identificat neconformități critice pentru parametrii introduși. Verificarea automată nu înlocuiește avizarea de către proiectantul atestat și ISU.');
 
     page('CONCLUZII'); SEC('CONCLUZII ȘI INTERCONECTARE');
-    P('Scenariul de securitate la incendiu pentru „' + c.T.label + '" (nr. cadastral ' + nrcad + '), risc ' + c.risc.replace('_', ' ') + ', gradul ' + c.grad + ' de rezistență la foc, cuprinde cele 7 capitole obligatorii conform Ord. MAI 129/2016. ' + (c.erori.length ? 'Există ' + c.erori.length + ' neconformități critice de rezolvat înainte de avizare.' : 'Nu s-au identificat neconformități critice.'));
+    P('Scenariul de securitate la incendiu pentru „' + c.T.label + '" (nr. cadastral ' + nrcad + '), risc ' + c.risc.replace('_', ' ') + ', gradul ' + c.grad + ' de rezistență la foc, cuprinde cele 7 capitole obligatorii conform Ord. MAI 180/2022, Anexa 5. ' + (c.erori.length ? 'Există ' + c.erori.length + ' neconformități critice de rezolvat înainte de avizare.' : 'Nu s-au identificat neconformități critice.'));
     P('Interconectare: acest scenariu preia prin referință datele obiectului proiectat (' + (c.imp ? (c.tip === 'skid_GPL' ? 'instalația SKID GPL' : 'hala industrială') + ' de pe parcelă' : 'valori implicite — asociați un proiect de hală/SKID pentru date exacte') + '), evitând duplicarea. Înlocuiește vechiul Scenariu de Siguranță la Foc (SSF).');
-    P('DISCLAIMER: Document orientativ generat automat de UrbanX. Scenariul oficial se elaborează și se semnează de un proiectant atestat conform Ord. MAI 129/2016 și se avizează de ISU. Verificarea automată acoperă principalele reguli, nu toate situațiile specifice.');
+    P('DISCLAIMER: Document orientativ generat automat de UrbanX. Scenariul oficial se elaborează și se semnează de un proiectant atestat conform Ord. MAI 180/2022, Anexa 5 și se avizează de ISU. Verificarea automată acoperă principalele reguli, nu toate situațiile specifice.');
     cy += 2; SEC('Semnături');
     pdf.setFontSize(9); pdf.setTextColor(90, 100, 120);
     pdf.text('ÎNTOCMIT (proiectant atestat): _______________________', 14, cy + 6);

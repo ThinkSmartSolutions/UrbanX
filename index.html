@@ -1395,7 +1395,7 @@ document.addEventListener('click', function(){
     <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
     <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaHala?proiecteazaHala():ss?.('Se inițializează'));_closeAllMenus()">🏭 Proiectează hală industrială (3D)</button>
     <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaSkid?proiecteazaSkid():ss?.('Se inițializează'));_closeAllMenus()">🛢 Proiectează SKID GPL (3D)</button>
-    <button class="fa-i" style="color:#c4b5fd" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));_closeAllMenus()">📑 Generator Documentații Tehnice</button>
+    <button class="fa-i ux-doc-gen-btn" style="color:#c4b5fd" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));_closeAllMenus()">📑 Generator Documentații Tehnice</button>
     <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
   </div>
   <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">💰 Investiție pe parcelă <span class="fa-cv">▼</span></button>
@@ -1433,7 +1433,8 @@ document.addEventListener('click', function(){
   <!-- TCI (Proiecție Urbanistică) mutat în meniul UrbanX Pro — nu mai apare în Rapoarte -->
   <!-- IVU mutat în topbar lângă UAT (standard transversal) — nu mai apare în Rapoarte -->
   <!-- Generator Documentații Tehnice (acțiune principală, vizibil) -->
-  <button onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.1));border:1px solid rgba(139,92,246,.5);border-radius:8px;color:#c4b5fd;padding:10px;cursor:pointer;font-size:12px;font-weight:800;margin-bottom:8px">📑 Generator Documentații Tehnice (DTAC/PTh) <span style="font-size:9px;font-weight:600;opacity:.8;margin-left:auto">formular + validare + ~80 doc</span></button>
+  <button class="ux-doc-gen-btn" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(139,92,246,.1));border:1px solid rgba(139,92,246,.5);border-radius:8px;color:#c4b5fd;padding:10px;cursor:pointer;font-size:12px;font-weight:800;margin-bottom:8px">📑 Generator Documentații Tehnice (DTAC/PTh) <span style="font-size:9px;font-weight:600;opacity:.8;margin-left:auto">formular + validare + ~80 doc</span></button>
+  <button class="ux-doc-gen-btn" onclick="(window.SSI_UI&&SSI_UI.open?SSI_UI.open():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(239,68,68,.06));border:1px solid rgba(239,68,68,.4);border-radius:8px;color:#fca5a5;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">🔥 Scenariu SSI — Tip lucrare &amp; Vecinătăți <span style="font-size:9px;font-weight:600;opacity:.7;margin-left:auto">P118-1/2025 · Ord. 180/2022</span></button>
   <button onclick="(window._NormativeRegistry&&_NormativeRegistry.openPanel?_NormativeRegistry.openPanel():ss?.('Se inițializează'));toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(56,189,248,.16),rgba(37,99,235,.08));border:1px solid rgba(56,189,248,.35);border-radius:8px;color:#7dd3fc;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">📚 Registru Normative — verificare la zi <span style="font-size:9px;font-weight:600;opacity:.7;margin-left:auto">stare legală + sursă</span></button>
   <!-- Hartă conexiuni -->
   <button onclick="openStudyMap();toggleRapoarteMenu()" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(99,102,241,.08));border:1px solid rgba(212,175,55,.25);border-radius:8px;color:#d4af37;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:700;margin-bottom:8px">
@@ -5862,6 +5863,12 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/urbanx-library/functiuni/centru-social-zi.js?v=20260704u"></script>
 <script src="js/urbanx-library/lib-loader.js?v=20260706c"></script>
 <script src="js/urbanx-docx-builder.js?v=20260710a"></script>
+<script src="js/25-ssi-normative.js?v=20260711a"></script><!-- SSI: accesor normativ P118-1/2025 (sursa+status, date reale) -->
+<script src="js/25-ssi-engine.js?v=20260711a"></script><!-- SSI: cascada M0-M12 (tip lucrare + vecinatati/distante) -->
+<script src="js/25-ssi-dwg-import.js?v=20260711a"></script><!-- SSI: import DXF (geometrie reala, fara dependinte externe) -->
+<script src="js/25-ssi-engine-M14-M15.js?v=20260711a"></script><!-- SSI: conformitate + solutii compensatorii -->
+<script src="js/25-ssi-atex.js?v=20260711a"></script><!-- SSI: motor ATEX (M13) -->
+<script src="js/25-ssi-ui.js?v=20260711a"></script><!-- SSI: UI tip_lucrare + vecinatati + upload DXF -->
 <script src="js/urbanx-normative-registry.js?v=20260705b"></script>
 <script src="js/urbanx-doc-ui.js?v=20260706k"></script>
 <script src="js/cinema-live-sources.js?v=20260525"></script>

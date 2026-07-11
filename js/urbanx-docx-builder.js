@@ -391,6 +391,99 @@
   }
   function _withProgram(secs, D, v) { var out = secs.slice(); var cap = _capacitateSec(D, v); if (cap) out.splice(1, 0, cap); var e = _energieSec(D, v); if (e) out.splice(1, 0, e); var s = _programAplicatSec(D); if (s) out.splice(1, 0, s); return out; }
 
+  // ── Scenariu SSI — cascada M0-M17 (aditiv, js/25-ssi-engine*.js) ──────────
+  // Mapare functiune -> destinatie exacta folosita in T42/T148 (normative.json). Fallback conservator
+  // pt functiunile fara corespondent direct in randurile deja extrase din normativ.
+  var _DESTINATIE_T42 = {
+    'locuinta-individuala': 'Cladiri de locuit', 'bloc-locuinte': 'Cladiri de locuit',
+    'hotelier': 'Cladiri pentru cazare temporara', 'gradinita': 'Cladiri care adapostesc persoane ce nu se pot evacua singure'
+  };
+  function _destinatieT42(functiune) { return _DESTINATIE_T42[functiune] || 'Cladiri cu alte destinatii, fara sali aglomerate'; }
+
+  function _tblVecinatati(vecinatati) {
+    if (!vecinatati || !vecinatati.length) return '<p>Nu au fost declarate vecinătăți (completează formularul de vecinătăți sau importă geometria din DXF).</p>';
+    return tbl(vecinatati.map(function (v) {
+      return [esc(v.id || '—'), esc(v.destinatie_declarata || '—'), esc(v.grad_vecin || '—'), esc((v.risc_vecin_estimat || '—').replace('_', ' ')),
+        v.perete_CF ? 'DA' : 'nu', (v.distanta_necesara_m != null ? v.distanta_necesara_m + ' m' : '—') + ' / ' + (v.distanta_masurata_m != null ? v.distanta_masurata_m + ' m' : 'necunoscută'),
+        v.conforma ? 'DA' : 'NECONFORM'];
+    }), ['Vecinătate', 'Destinație clădire vecină', 'Grad rezistență vecin', 'Risc vecin', 'Perete CF', 'Distanță necesară/reală', 'Conform']);
+  }
+
+  function _buildScenariuSSICascada(D, v) {
+    var ac = v.calc;
+    var m0 = G.SSI_ENGINE.m0_tipLucrare({ tip_lucrare: D.tip_lucrare });
+    if (m0.eroare) {
+      return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5'), [{ h: null, html: '<p><b>' + esc(m0.mesaj) + '</b></p>' }]) };
+    }
+    var grad = D.grad_stabilitate || ac.grad_default || 'II';
+    var destinatieT42 = _destinatieT42(D.functiune);
+    var m5 = G.SSI_ENGINE.m5_compartimentare(m0, { grad: grad, arie_construita_mp: D.Sc, niveluri: D.niv_supraterane });
+    var m6 = G.SSI_ENGINE.m6_stabilitate(m0, { grad: grad, elemente_verificate: D._elemente_structurale || [] });
+    var m9niv = G.SSI_ENGINE.m9_niveluriMaxime(m0, { grad: grad, destinatie: destinatieT42, niveluri_proiectate: D.niv_supraterane });
+    var m6b = G.SSI_ENGINE.m6b_clasificareVecinatati(m0, { grad_stabilitate: grad }, D._vecinatati || []);
+
+    // Neconformitati -> M15 solutii candidate (regula #11: nicio neconformitate fara solutii)
+    var solutiiPropuse = [];
+    if (m5.conform === false) solutiiPropuse.push({ context: 'Arie compartiment (M5)', solutii: G.SSI_M15.genereazaSolutii({ tip: 'ARIE_COMPARTIMENT_DEPASITA', deficit: m5.arie_proiectata_mp - (m5.arie_maxima_admisa_mp || 0) }, { arie_proiectata: m5.arie_proiectata_mp, arie_maxima_admisa: m5.arie_maxima_admisa_mp }) });
+    if (m9niv.conform === false) solutiiPropuse.push({ context: 'Număr niveluri (M9)', solutii: G.SSI_M15.genereazaSolutii({ tip: 'NIVELURI_DEPASITE' }, {}) });
+    (m6b.neconformitati || []).forEach(function (n) {
+      if (n.cod === 'ERO-DISTANTA-VECIN') solutiiPropuse.push({ context: 'Vecinătate ' + n.vecinatate, solutii: G.SSI_M15.genereazaSolutii({ tip: 'DISTANTA_VECINATATE_INSUFICIENTA', deficit: n.deficit_m }, {}) });
+    });
+
+    function fmtSolutii(list) {
+      if (!list.length) return '';
+      return list.map(function (s) {
+        return '<p><b>' + esc(s.context) + ' — soluții candidate (selecția rămâne a proiectantului atestat, nu se aplică automat):</b></p>' +
+          tbl(s.solutii.map(function (x) { return [esc(x.solutie), esc(x.efect_calculat || '—'), (x.recalcul_necesar || []).join(', ')]; }), ['Soluție compensatorie', 'Efect', 'Recalcul necesar']);
+      }).join('');
+    }
+
+    var indicativNorme = ['P118_1_2025_T4', 'P118_1_2025_T5', 'P118_1_2025_T41', 'P118_1_2025_T42', 'P118_1_2025_T144', 'P118_1_2025_T145', 'P118_1_2025_T146', 'P118_1_2025_T147', 'P118_1_2025_T148'];
+    var statusNevalidat = G.SSI_NORMATIVE_ENGINE.verificaStatusNormativeFolosite(indicativNorme);
+
+    var secs = [
+      { h: '1.0. Tipul de lucrare (determină tabelele P118-1/2025 aplicabile)', html: '<p><b>' + esc(m0.label) + '.</b> Regim tabele: ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'construcție EXISTENTĂ (T144/T145/T146/T147/T148, Anexa A.10)' : 'construcție NOUĂ (T2/T4/T5/T41/T42)') + '.' + (m0.nota ? ' ' + esc(m0.nota) : '') + '</p><p style="font-size:9pt;color:#888">Temei: ' + esc(m0.temei_legal) + '</p>' },
+      { h: '1.1-1.4. Caracteristicile construcției', html: tbl([
+        ['Denumire', esc(D.nume || '—')], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
+        ['Faza', esc(D.faza || 'D.T.A.C.')], ['Destinație', esc(destinatieT42)], ['Regim de înălțime', esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1)))],
+        ['Aria construită', (D.Sc || '—') + ' m²'], ['Aria desfășurată', (D.Sd || '—') + ' m²'], ['Categorie importanță', esc(D.categorie_importanta || ac.categorie_importanta || '—')]
+      ], ['Element', 'Valoare']) },
+      { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
+      { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')', html: '<p>Gradul de stabilitate adoptat: <b>' + esc(grad) + '</b>. ' + m6.acoperire_partiala + '</p>' },
+      { h: '3.2. Corelare arie/niveluri (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelele 147/148' : 'Tabelele 41/42') + ')', html: tbl([
+        ['Aria construită proiectată', (m5.arie_proiectata_mp || 0) + ' m²'],
+        ['Aria maximă admisă (' + esc(m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
+        ['Conform arie', m5.conform === false ? 'NECONFORM — vezi soluții compensatorii' : (m5.conform ? 'DA' : 'nedeterminat')],
+        ['Număr niveluri proiectat', (D.niv_supraterane || 1) + ''],
+        ['Număr niveluri maxim admis (' + esc(m9niv.norma || '—') + ')', m9niv.nelimitat ? 'nelimitat' : (m9niv.niveluri_max != null ? m9niv.niveluri_max + '' : '—')],
+        ['Conform niveluri', m9niv.conform === false ? 'NECONFORM — vezi soluții compensatorii' : (m9niv.nelimitat || m9niv.conform ? 'DA' : 'nedeterminat')]
+      ], ['Parametru', 'Valoare']) + fmtSolutii(solutiiPropuse.filter(function (s) { return s.context.indexOf('Vecinătate') === -1; })) },
+      { h: '3.3. Asigurarea limitării propagării incendiilor la vecinătăți (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 145' : 'Tabelul 4') + ')',
+        html: '<p>Distanțele de siguranță față de construcțiile învecinate au fost determinate prin clasificarea fiecărei vecinătăți (destinație + grad de rezistență + prezența peretelui antifoc) și interogarea tabelului oficial P118-1/2025, NU doar prin măsurarea distanței fizice.</p>' +
+          _tblVecinatati(m6b.vecinatati) +
+          ((m6b.neconformitati || []).filter(function (n) { return n.cod === 'ERO-VECIN-INCOMPLET'; }).length ? '<p><b>ATENȚIE:</b> ' + (m6b.neconformitati || []).filter(function (n) { return n.cod === 'ERO-VECIN-INCOMPLET'; }).map(function (n) { return esc(n.mesaj); }).join(' ') + '</p>' : '') +
+          fmtSolutii(solutiiPropuse.filter(function (s) { return s.context.indexOf('Vecinătate') === 0; })) },
+      { h: '3.4-3.6. Evacuare, persoane vulnerabile, forțe de intervenție', html: tbl([
+        ['Nr. minim ieșiri', '' + (ac.flux_evacuare_m ? Math.max(1, Math.ceil((D.Sc || 0) / 300)) : 1)],
+        ['Distanță max. evacuare (2 sensuri / fund de sac)', (ac.dist_evacuare_2sensuri || 35) + ' m / ' + (ac.dist_evacuare_fundsac || 15) + ' m'],
+        ['Desfumare obligatorie', ac.desfumare_oblig ? 'DA' : 'după caz'],
+        ['Acces autospeciale', 'min. o fațadă accesibilă, conform pct. A.10.3.7.2 P118-1/2025']
+      ], ['Parametru', 'Valoare']) },
+      { h: '4. Instalații cu rol în securitatea la incendiu', html: tbl([
+        ['Hidranți interiori', ac.hidranti_int_oblig ? 'DA' : 'după caz'], ['Hidranți exteriori', ac.hidranti_ext_oblig ? 'DA' : 'după caz'],
+        ['Sprinklere', ac.sprinklere_oblig ? 'OBLIGATORII (Sc>3000 mp / H>28m)' : 'după caz'], ['IDSAI', ac.idsi_oblig ? 'OBLIGATORIE (Sc>2500 mp)' : 'după caz'],
+        ['Lift de pompieri', ac.lift_oblig ? 'OBLIGATORIU (P+4 și peste)' : 'nu'], ['Rezervă apă incendiu estimată', (ac.rezerva_incendiu_mc || 0) + ' mc']
+      ], ['Instalație', 'Necesitate']) },
+      { h: '5. Măsuri compensatorii propuse în condițiile legii', html: solutiiPropuse.length
+        ? '<p>Au fost identificate neconformități care necesită măsuri compensatorii (detaliate la secțiunile 3.2/3.3 de mai sus). Selecția soluției finale, cu trasabilitate (nume + nr. atestat proiectant, dată), rămâne responsabilitatea proiectantului/expertului atestat (Ord. MAI 180/2022, Anexa 5, pct. 5).</p>'
+        : '<p>Nu este cazul — construcția/amenajarea proiectată respectă integral, conform verificărilor automate de mai sus, cerințele normativelor tehnice aplicabile privind securitatea la incendiu.</p>' },
+      { h: 'Anexă — statusul surselor normative folosite', html: statusNevalidat.length
+        ? '<p><b>ATENȚIE:</b> următoarele tabele normative folosite în acest scenariu nu au încă status „validat" de un inginer/arhitect atestat (extragere confirmată pe text oficial, dar fără semnătura de răspundere profesională cerută de Ord. MAI 180/2022): ' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + '. Documentul este DRAFT — poate fi folosit pentru analiză de proiect, dar necesită validare înainte de depunere ca FINAL la ISU.</p>'
+        : '<p>Toate tabelele normative folosite au status validat.</p>' }
+    ];
+    return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
+  }
+
   var DOC_BUILDERS = {
     'Memoriu general DTAC': function (D, v) {
       var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
@@ -689,6 +782,11 @@
     },
     'Scenariu securitate incendiu (P118)': function (D, v) {
       var ac = v.calc;
+      // Cascada M0-M17 (aditiv) — activa DOAR daca proiectul a completat tip_lucrare (Sectiunea A, addendum v2.1)
+      // si motoarele sunt incarcate; altfel fallback EXACT la comportamentul anterior (fara nicio schimbare).
+      if (D.tip_lucrare && G.SSI_ENGINE && G.SSI_NORMATIVE_ENGINE) {
+        return _buildScenariuSSICascada(D, v);
+      }
       var deep = _lib(D, 'scenariu_psi');
       var secs = deep ? [
         { h: null, html: deep },
@@ -696,9 +794,9 @@
       ] : [
         { h: '1. Riscul de incendiu și categoria de pericol', html: '<p>Categoria de pericol de incendiu: ' + esc(D.psi || ac.psi_default || 'C') + '. Grad de rezistență la foc recomandat: ' + esc(ac.grad_default || 'II') + '.</p>' },
         { h: '2. Echiparea și dotarea', html: tbl([['Sprinklere', ac.sprinklere_oblig ? 'OBLIGATORII (SC>3000 mp / H>28m)' : 'după caz'], ['IDSI (detectare-semnalizare)', ac.idsi_oblig ? 'OBLIGATORIE (SC>2500 mp)' : 'după caz'], ['Desfumare', (D.functiune === 'hala-industriala' && (D.Sc > 1000)) ? 'OBLIGATORIE (trape SHEV)' : 'după caz'], ['Lift de pompieri', ac.lift_oblig ? 'OBLIGATORIU (P+4 și peste)' : 'nu'], ['Hidranți interiori', (D.Sc > 600) ? 'da' : 'după caz']], ['Sistem', 'Necesitate']) },
-        { h: '3. Referință', html: '<p>Scenariul complet, cu cele 7 capitole și motorul de verificare, se generează prin modulul dedicat SSI (Ord. MAI 129/2016) al platformei, care preia datele acestui proiect.</p>' }
+        { h: '3. Referință', html: '<p>Scenariul complet, cu cele 7 capitole și motorul de verificare, se generează prin modulul dedicat SSI (Ord. MAI 180/2022, Anexa 5) al platformei, care preia datele acestui proiect. Completează „Tip de lucrare" în formularul de proiect pentru scenariul complet (nou/existent, vecinătăți, măsuri compensatorii).</p>' }
       ];
-      return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 129/2016 · fundamentare aviz ISU'), secs) };
+      return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · fundamentare aviz/autorizare ISU'), secs) };
     },
     'Deviz general HG 907': function (D, v) {
       var body;

@@ -40,6 +40,7 @@ var S={
   pug:null,pugIdx:[],cadData:null,cadIdx:new Map(),
   parcels:[],          // array de parcele selectate (multiselect)
   activeParcel:null,   // parcela curentă (index în S.parcels)
+  geometrie_teren:{ sursa:null, limita_proprietate:null, volum_existent:null, volum_propus:null, vecinatati_geometrie:[], fisier_dwg_original:null }, // SSI: import DWG/DXF (js/25-ssi-dwg-import.js)
   utr:'',rule:{},ll:null,
   ctx:null,popup:null,
   tab:'search',multiMode:false,

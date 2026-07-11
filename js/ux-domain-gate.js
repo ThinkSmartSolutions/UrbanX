@@ -65,7 +65,7 @@
 
   function hideStaticButtons() {
     try {
-      var els = document.querySelectorAll('[onclick*="UXDoc"]');
+      var els = document.querySelectorAll('[onclick*="UXDoc"], .ux-doc-gen-btn');
       for (var i = 0; i < els.length; i++) els[i].style.display = 'none';
     } catch (e) {}
   }
