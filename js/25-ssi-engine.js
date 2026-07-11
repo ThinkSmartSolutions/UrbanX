@@ -150,7 +150,7 @@
         distanta_necesara_m: d.valoare_m, distanta_necesara_norma: d.norma, note_aplicate: d.note_aplicate,
         distanta_masurata_m: vecin.distanta_masurata_m, sursa_distanta: vecin.sursa_distanta || 'manual',
         sursa_url: d.sursa_url, pagina: d.pagina, status_validare: d.status_validare, conforma: conforma,
-        estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true
+        estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, certitudine: vecin.certitudine || (estimatImplicit ? 'presupus_conservator' : 'confirmat_manual')
       });
       if (!conforma) {
         rezultate.neconformitati.push({

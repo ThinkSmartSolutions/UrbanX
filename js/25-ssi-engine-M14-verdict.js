@@ -81,6 +81,19 @@
     };
   }
 
-  G.SSI_M14_VERDICT = { genereazaFisaNeconformitate: genereazaFisaNeconformitate, comparaVersiuniProiect: comparaVersiuniProiect, genereazaVerdictGeneral: genereazaVerdictGeneral };
+  // v4.2 (Florin): SINGURA blocare ramasa nu e la introducere, e la FINALIZARE — daca raman vecinatati
+  // neconfirmate de proiectant (estimare automata/conservatoare, nu validata), scenariul NU poate fi
+  // marcat/exportat ca FINAL pentru depunere (desi analiza DRAFT a mers inainte fara nicio blocare).
+  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate) {
+    var neconfirmate = (vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
+    var normativeNevalidate = statusNormativeNevalidate || [];
+    var poate = neconfirmate.length === 0 && normativeNevalidate.length === 0;
+    var motive = [];
+    if (neconfirmate.length) motive.push(neconfirmate.length + ' vecinătate/vecinătăți au doar estimare automată, neconfirmată de proiectant (' + neconfirmate.map(function (v) { return v.id; }).join(', ') + ').');
+    if (normativeNevalidate.length) motive.push(normativeNevalidate.length + ' sursă/surse normative fără validare de inginer/arhitect atestat.');
+    return { poate: poate, motiv: motive.length ? motive.join(' ') : null };
+  }
+
+  G.SSI_M14_VERDICT = { genereazaFisaNeconformitate: genereazaFisaNeconformitate, comparaVersiuniProiect: comparaVersiuniProiect, genereazaVerdictGeneral: genereazaVerdictGeneral, poateFiExportatFinal: poateFiExportatFinal };
   console.log('[SSI] fisa neconformitate + verdict general + bucla reverificare incarcate (window.SSI_M14_VERDICT)');
 })(window);

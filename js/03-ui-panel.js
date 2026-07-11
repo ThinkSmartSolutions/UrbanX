@@ -68,8 +68,10 @@ async function loadContext(){
           const ht=pN(el.tags?.height);
           const h=ht||(lv?lv*3.0:7);
           const fn=el.tags?.building||'yes';
+          const anRaw=el.tags?.start_date||el.tags?.['building:year']||el.tags?.year_built||null;
+          const an=anRaw?parseInt(String(anRaw).match(/\d{4}/)?.[0]||'',10)||null:null; // SSI: an constructie, daca taggat in OSM (rar, dar aditiv)
           return{type:'Feature',
-            properties:{h,lv,fn,col:BLD_COL[fn]||BLD_COL['yes']||'#8a9ab0'},
+            properties:{h,lv,fn,an,col:BLD_COL[fn]||BLD_COL['yes']||'#8a9ab0'},
             geometry:{type:'Polygon',coordinates:[ring]}};
         });
       if(feats.length) ss('✅ Context OSM: '+feats.length+' clădiri');

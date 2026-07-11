@@ -507,6 +507,22 @@
     // exportul FINAL (pt depunere la ISU) cere ca fiecare vecinatate estimata implicit sa fi fost confirmata/corectata.
     var vecinatatiNeconfirmate = (m6b.vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
 
+    // v4.2 — SINGURA blocare reala: daca s-a bifat "Genereaza ca FINAL" si raman vecinatati neconfirmate
+    // sau normative nevalidate, refuza explicit exportul FINAL (analiza DRAFT ramane mereu disponibila neschimbata).
+    if (D._ssi_final_mode) {
+      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat);
+      if (!gateFinal.poate) {
+        return {
+          cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118_BLOCAT.doc',
+          html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU — EXPORT FINAL BLOCAT', 'Ord. MAI 180/2022, Anexa 5'), [
+            { h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;background:#dc262611"><p style="margin:0;font-size:13pt;font-weight:bold;color:#dc2626">EXPORT CA FINAL BLOCAT</p>' +
+              '<p style="margin:6pt 0 0">' + esc(gateFinal.motiv) + '</p>' +
+              '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Analiza DRAFT rămâne disponibilă oricând (debifează „Generează ca FINAL" în panoul SSI) — doar exportul pentru depunerea oficială la ISU cere confirmarea/validarea de mai sus.</p></div>' }
+          ])
+        };
+      }
+    }
+
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
       { h: null, html: '<div style="border:2px solid ' + (CULOARE_VERDICT[verdict.culoare] || '#888') + ';border-radius:6pt;padding:10pt;margin-bottom:8pt;background:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '11">' +

@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele'];
   var GRADE = ['I', 'II', 'III', 'IV', 'V'];
@@ -82,7 +82,11 @@
       '<div class="ssiui-note" style="border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#6ee7b7">📍 Recomandat: auto-detectează din harta platformei (clădiri OSM reale din jurul parcelei active) — se pre-completează cu estimare conservatoare (grad V, risc mare) + distanța reală calculată; tu doar confirmi sau corectezi, ca la o vizită de teren.</div>' +
       '<button class="ssiui-btn pri" onclick="SSI_UI._autoDetecteaza()" style="margin-bottom:10px">📍 Auto-detectează vecinătățile din hartă</button>' +
       STATE.vecinatati.map(function (v, i) { return _rowVecinatate(v, i); }).join('') +
-      '<button class="ssiui-btn sec" onclick="SSI_UI._addVecinatate()">+ Adaugă vecinătate manual</button>';
+      '<button class="ssiui-btn sec" onclick="SSI_UI._addVecinatate()">+ Adaugă vecinătate manual</button>' +
+      '<div style="margin-top:16px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#e6edf7;cursor:pointer">' +
+      '<input type="checkbox"' + (STATE.modFinal ? ' checked' : '') + ' onchange="SSI_UI._setModFinal(this.checked)"> ' +
+      '<b>🔒 Generează ca FINAL</b> (pentru depunere la ISU — necesită toate vecinătățile confirmate; altfel se generează DRAFT, mereu disponibil)</label></div>';
   }
 
   function open() {
@@ -157,8 +161,9 @@
   }
 
   G.SSI_UI = {
-    open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale } : null; },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null }; },
+    open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal } : null; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false }; },
+    _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
@@ -188,7 +193,7 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; }
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; }
       return orig(Dproj, v);
     };
     G.UXDocBuilder.__ssiUiPatched = true;

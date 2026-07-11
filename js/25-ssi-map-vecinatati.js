@@ -31,6 +31,16 @@
   };
   function _destinatieDinOSM(fn) { return OSM_BUILDING_TO_DESTINATIE[String(fn || '').toLowerCase()] || 'altele'; }
 
+  // Indiciu SLAB (nu certificare) — anul construcției nu poate stabili singur gradul de rezistență la foc
+  // (necesită documentație tehnică reală); folosit DOAR ca ajustare orientativă față de varianta conservatoare
+  // implicită V, niciodată ca înlocuitor al confirmării proiectantului.
+  function _gradProbabilDinAnConstructie(an) {
+    if (!an) return null;
+    if (an < 1970) return 'IV';   // constructii vechi, probabil zidarie neconsolidata
+    if (an < 2000) return 'III';
+    return 'II';                 // constructii recente, probabil beton armat/structura moderna — tot orientativ
+  }
+
   // Auto-detectează construcțiile din jurul parcelei active, folosind contextul OSM deja încărcat de platformă.
   // Returnează candidați PRE-COMPLETAȚI (destinație estimată din tag OSM, grad V/risc mare conservator implicit,
   // distanța REALĂ calculată din geometrie) — proiectantul confirmă sau corectează, nu completează de la zero.
@@ -62,17 +72,20 @@
         var fn = (ctx.properties && ctx.properties.fn) || 'yes';
         var h = ctx.properties && ctx.properties.h;
         var lv = ctx.properties && ctx.properties.lv;
+        var an = ctx.properties && ctx.properties.an; // an constructie, DOAR daca taggat in OSM (rar)
+        var gradDinAn = _gradProbabilDinAnConstructie(an);
         candidati.push({
           id: 'V' + (candidati.length + 1),
           destinatie_declarata: _destinatieDinOSM(fn),
-          grad_rezistenta_estimat: 'V',
+          grad_rezistenta_estimat: gradDinAn || 'V',
           risc_vecin: 'mare',
           perete_CF_pe_fatada_comuna: false,
           distanta_masurata_m: r.dist,
           sursa_distanta: 'harta_osm',
           sursa_clasificare: 'estimare_conservatoare_neconfirmata',
+          certitudine: gradDinAn ? 'orientativ' : 'presupus_conservator', // niciodata 'confirmat_oficial' din OSM
           confirmat: false,
-          detaliu_sursa: 'OSM building=' + fn + (lv ? ', ' + Math.round(lv) + ' niveluri' : '') + (h ? ', ~' + Math.round(h) + ' m' : '') + ' — distanță calculată din geometria reală'
+          detaliu_sursa: 'OSM building=' + fn + (lv ? ', ' + Math.round(lv) + ' niveluri' : '') + (h ? ', ~' + Math.round(h) + ' m' : '') + (an ? ', an constructie ~' + an + ' (indiciu OSM, neconfirmat)' : '') + ' — distanță calculată din geometria reală'
         });
       } catch (e) {}
     });
@@ -80,6 +93,6 @@
     return { ok: true, vecinatati: candidati, nrDetectate: candidati.length };
   }
 
-  G.SSI_MAP_VECINATATI = { autoDetecteazaVecinatati: autoDetecteazaVecinatati, RAZA_DETECTIE_M: RAZA_DETECTIE_M, _destinatieDinOSM: _destinatieDinOSM };
+  G.SSI_MAP_VECINATATI = { autoDetecteazaVecinatati: autoDetecteazaVecinatati, RAZA_DETECTIE_M: RAZA_DETECTIE_M, _destinatieDinOSM: _destinatieDinOSM, _gradProbabilDinAnConstructie: _gradProbabilDinAnConstructie };
   console.log('[SSI] auto-detectare vecinatati din harta (OSM) incarcata (window.SSI_MAP_VECINATATI)');
 })(window);
