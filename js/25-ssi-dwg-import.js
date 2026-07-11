@@ -474,6 +474,9 @@
   // Statistici pe layer (nr. poligoane inchise + aria min/med/max) — ajuta proiectantul sa
   // aleaga layerul corect dintr-o lista de nume criptice (ex. ArchiCAD "131_REF_Topo_Pen_No__241"),
   // vazand cate poligoane inchise are si ce arie au, in loc sa ghiceasca dupa nume.
+  // Interval de arie plauzibil pt o amprenta de cladire rezidentiala/mica (folosit si la ghicirea
+  // layerului "constructie propusa" — vezi 25-ssi-ui.js _ghicesteConstructiePropusa).
+  var ARIE_CLADIRE_MIN = 20, ARIE_CLADIRE_MAX = 500;
   function analizeazaLayerePoligoane(parsedDXF) {
     var ents = parsedDXF.entities || [];
     var stats = {};
@@ -481,15 +484,19 @@
       if ((e.type !== 'LWPOLYLINE' && e.type !== 'POLYLINE') || !e.puncte || e.puncte.length < 3) return;
       var l = e.layer || '0';
       var arie = ariePoligonShoelace(e.puncte);
-      if (!stats[l]) stats[l] = { n: 0, arieMin: Infinity, arieMax: 0, arieSum: 0 };
+      if (!stats[l]) stats[l] = { n: 0, arieMin: Infinity, arieMax: 0, arieSum: 0, nInRangeCladire: 0 };
       stats[l].n++; stats[l].arieSum += arie;
       if (arie < stats[l].arieMin) stats[l].arieMin = arie;
       if (arie > stats[l].arieMax) stats[l].arieMax = arie;
+      // Numaram POLIGOANE individuale in intervalul plauzibil de cladire — NU media pe layer, care
+      // e distorsionata daca layerul mixeaza detalii mici (mobilier) cu elemente mari de sit (drumuri,
+      // limita ansamblului) pe langa amprentele reale de cladire (verificat pe fisier real de proiect).
+      if (arie >= ARIE_CLADIRE_MIN && arie <= ARIE_CLADIRE_MAX) stats[l].nInRangeCladire++;
     });
     var out = {};
     Object.keys(stats).forEach(function (l) {
       var s = stats[l];
-      out[l] = { n: s.n, arieMin: Math.round(s.arieMin), arieMax: Math.round(s.arieMax), arieMed: Math.round(s.arieSum / s.n) };
+      out[l] = { n: s.n, arieMin: Math.round(s.arieMin), arieMax: Math.round(s.arieMax), arieMed: Math.round(s.arieSum / s.n), nInRangeCladire: s.nInRangeCladire };
     });
     return out;
   }

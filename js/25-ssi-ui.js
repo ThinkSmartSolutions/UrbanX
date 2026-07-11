@@ -229,25 +229,63 @@
     acces_auto_speciale: 'Acces autospeciale', cote_nivel: 'Cote de nivel'
   };
 
+  // Descrierea "in cuvinte", pt utilizatori care nu stiu CAD — nu trebuie sa inteleaga ce e un
+  // "layer" sau denumirile ArchiCAD (ex. "Pen_No"), doar sa recunoasca forma continutului.
+  var CATEGORII_AJUTOR = {
+    limita_proprietate: 'linia care marchează marginea terenului tău (parcelă/teren) — de obicei UN singur contur mare, care înconjoară tot planul.',
+    vecinatati: 'conturul clădirilor de pe terenurile ALĂTURATE (ale vecinilor), dacă apar desenate în plan.',
+    constructie_existenta: 'conturul unei clădiri care EXISTĂ deja pe teren (dacă e cazul).',
+    constructie_propusa: 'conturul clădirii/clădirilor pe care le construiești (amprenta la sol a casei/caselor din proiect) — de obicei MAI MULTE contururi mici, de mărimea unei case (zeci-sute de mp).',
+    acces_auto_speciale: 'drumul/aleea pe care ar intra o mașină de pompieri, dacă e desenat distinct.',
+    cote_nivel: 'liniile de nivel/cotă ale terenului (dacă sunt desenate).'
+  };
+
   // Layerele NU sunt standardizate in Romania (multe CAD-uri, ex. ArchiCAD, au denumiri proprii de tip
   // "055_EXT_Gard" sau "131_REF_Topo") — cand maparea automata esueaza, cerem mapare manuala explicita
-  // (regula B.2/B.3 addendum v2.1), NU presupunem o corespondenta.
-  function _rowMapareLayer(categorie, layereDisponibile, valoareCurenta) {
+  // (regula B.2/B.3 addendum v2.1), NU presupunem o corespondenta. Pentru utilizatorii care nu stiu
+  // CAD, aratam langa fiecare layer CATE forme inchise are si CE MARIME au (nu doar numele criptic) —
+  // asa poti recunoaste "conturul casei" dupa forma (zeci-sute de poligoane mici) fara sa stii ce
+  // inseamna "Pen_No" in ArchiCAD.
+  function _hintLayer(stats, l) {
+    var s = stats && stats[l];
+    if (!s || !s.n) return '';
+    var arieTxt = s.arieMin === s.arieMax ? ('~' + s.arieMed + ' mp') : (s.arieMin + '–' + s.arieMax + ' mp');
+    var subsetTxt = (s.nInRangeCladire > 0 && s.nInRangeCladire < s.n) ? (', din care ' + s.nInRangeCladire + ' de mărimea unei case') : '';
+    return ' — ' + s.n + ' ' + (s.n === 1 ? 'formă' : 'forme') + ' (' + arieTxt + subsetTxt + ')';
+  }
+  function _rowMapareLayer(categorie, layereDisponibile, valoareCurenta, stats) {
     var opts = '<option value="">— niciun layer / nu există —</option>' +
-      layereDisponibile.map(function (l) { return '<option value="' + esc(l) + '"' + (l === valoareCurenta ? ' selected' : '') + '>' + esc(l) + '</option>'; }).join('');
+      layereDisponibile.map(function (l) { return '<option value="' + esc(l) + '"' + (l === valoareCurenta ? ' selected' : '') + '>' + esc(l) + esc(_hintLayer(stats, l)) + '</option>'; }).join('');
     return '<div class="ssiui-row" style="grid-template-columns:1fr 2fr">' +
-      '<div class="ssiui-lbl" style="margin:0">' + esc(CATEGORII_LABEL[categorie] || categorie) + '</div>' +
+      '<div><div class="ssiui-lbl" style="margin:0">' + esc(CATEGORII_LABEL[categorie] || categorie) + '</div>' +
+      '<div style="font-size:10px;color:#94a3b8;margin-top:2px;max-width:220px">' + esc(CATEGORII_AJUTOR[categorie] || '') + '</div></div>' +
       '<select class="ssiui-sel" onchange="SSI_UI._setMapareLayer(\'' + categorie + '\', this.value)">' + opts + '</select>' +
       '</div>';
   }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
+  // Ghiceste layerul cel mai probabil pt "constructie propusa": cel cu cele mai multe forme in
+  // intervalul de marime plauzibil pt o cladire (20-500mp) — doar o PRESELECTIE, editabila liber;
+  // nu se aplica automat fara confirmarea explicita a utilizatorului (butonul Confirmă ramane necesar).
+  function _ghicesteConstructiePropusa(stats) {
+    // Ordonam dupa CATE poligoane individuale au marimea unei cladiri (nInRangeCladire), NU dupa
+    // media pe layer — media e distorsionata cand layerul mixeaza detalii mici cu elemente mari
+    // de sit pe langa amprentele reale (verificat pe fisier real: media trecea layerul cu adevarat
+    // relevant in afara filtrului, in timp ce un layer de limite de loturi, uniform ca marime, "castiga").
+    var candidati = Object.keys(stats || {}).map(function (l) { return { l: l, s: stats[l] }; })
+      .filter(function (x) { return x.s.nInRangeCladire > 0; })
+      .sort(function (a, b) { return b.s.nInRangeCladire - a.s.nInRangeCladire; });
+    return candidati.length ? candidati[0].l : null;
+  }
+
   function renderMapareManuala() {
     var pd = STATE.pendingDxf; if (!pd) return '';
+    var stats = pd.statsLayere || {};
     return '<div class="ssiui-note" style="border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08);color:#7dd3fc">' +
-      'Layerele acestui DXF (' + pd.parsed.layers.length + ' găsite) nu corespund denumirilor standard așteptate — CAD-urile (ex. ArchiCAD) au propriile convenții. ' +
-      'Alege manual, pentru fiecare categorie, layerul real din fișier care corespunde (sau lasă „niciun layer" dacă nu există în acest plan).</div>' +
-      Object.keys(CATEGORII_LABEL).map(function (cat) { return _rowMapareLayer(cat, pd.parsed.layers, pd.mapareCurenta[cat]); }).join('') +
+      'Layerele acestui DXF (' + pd.parsed.layers.length + ' găsite) nu corespund denumirilor standard așteptate — CAD-urile (ex. ArchiCAD) au propriile convenții, deseori criptice. ' +
+      'Nu trebuie să știi ce înseamnă numele — uită-te la „X forme, Y mp" de lângă fiecare opțiune și alege ce se potrivește cu descrierea de sub fiecare categorie. ' +
+      'Am pre-completat un ghicit rezonabil pentru „Construcție propusă" (layerul cu cele mai multe forme de mărime unei case) — verifică-l și corectează dacă nu e cel corect, apoi apasă Confirmă.</div>' +
+      Object.keys(CATEGORII_LABEL).map(function (cat) { return _rowMapareLayer(cat, pd.parsed.layers, pd.mapareCurenta[cat], stats); }).join('') +
       '<button class="ssiui-btn pri" onclick="SSI_UI._confirmaMapare()">✓ Confirmă layerele și extrage geometria</button>';
   }
 
@@ -259,8 +297,12 @@
       var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
       var mapare = G.SSI_DWG_IMPORT.mapLayers(parsed);
       if (mapare.automata_completa) { _aplicaGeometrie(parsed, mapare); return; }
+      var stats = G.SSI_DWG_IMPORT.analizeazaLayerePoligoane(parsed);
+      // Preselectie doar pt "constructie propusa" (categoria cea mai greu de ghicit din nume) —
+      // ramane pe deplin editabila, nu se aplica fara apasarea explicita a Confirmă.
+      if (!mapare.mapare.constructie_propusa) mapare.mapare.constructie_propusa = _ghicesteConstructiePropusa(stats);
       // mapare partiala/esuata -> cerem confirmare/completare manuala explicita (NU presupunem)
-      STATE.pendingDxf = { parsed: parsed, mapareCurenta: mapare.mapare };
+      STATE.pendingDxf = { parsed: parsed, mapareCurenta: mapare.mapare, statsLayere: stats };
       render();
       if (G.ss) G.ss('DXF citit (' + parsed.nrEntitati + ' entități, ' + parsed.layers.length + ' layere) — confirmă manual maparea layerelor mai jos.');
     } catch (e) { if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
