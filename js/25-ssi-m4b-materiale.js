@@ -68,12 +68,21 @@
       { element: 'Fundații de beton armat', material: 'beton_armat' }
     ]
   };
-  // Elemente care NU sunt niciodată implicite, indiferent de sistem — variabilitate reală, DoP obligatoriu.
-  var ELEMENTE_VARIABILE_COMUNE = [
-    { element: 'Șarpantă lemn (dacă acoperiș în pantă)', material: 'lemn_masiv' },
+  // Elemente cu variabilitate reala — DAR nu toate se aplica intotdeauna: sarpanta de lemn NU exista
+  // fizic pe o cladire cu acoperis plat/terasa (bug real gasit: aparea cerut DoP pt lemn chiar cand
+  // proiectantul declarase explicit tip_acoperis='plat' la releveu — element inexistent in realitate
+  // nu poate necesita DoP). Cele "intotdeauna_prezente" se aplica indiferent de tip acoperis; cele
+  // "doar_daca_sarpanta" / "doar_daca_plat" se filtreaza dupa tipul de acoperis REAL declarat.
+  var ELEMENTE_VARIABILE_INTOTDEAUNA = [
     { element: 'Termoizolație pereți/acoperiș', material: 'polistiren_eps' },
-    { element: 'Tâmplărie exterioară (rame ferestre/uși)', material: 'pvc' },
-    { element: 'Hidroizolație/membrană acoperiș', material: 'membrana_bituminoasa' }
+    { element: 'Tâmplărie exterioară (rame ferestre/uși)', material: 'pvc' }
+  ];
+  var ELEMENTE_VARIABILE_DOAR_SARPANTA = [
+    { element: 'Șarpantă lemn (acoperiș în pantă)', material: 'lemn_masiv' },
+    { element: 'Învelitoare (țiglă/tablă pe șarpantă)', material: 'tigla_ceramica' }
+  ];
+  var ELEMENTE_VARIABILE_DOAR_PLAT = [
+    { element: 'Hidroizolație/membrană terasă (acoperiș plat)', material: 'membrana_bituminoasa' }
   ];
 
   function _normKey(nume) { return String(nume || '').toLowerCase().replace(/\s+/g, '_').replace(/[ăâ]/g, 'a').replace(/î/g, 'i').replace(/ș/g, 's').replace(/ț/g, 't'); }
@@ -81,9 +90,19 @@
   // Genereaza lista IMPLICITA de materiale pe elemente, din sistemul constructiv deja cunoscut —
   // proiectantul NU trebuie sa retasteze "stalpii sunt din beton", doar sa confirme/corecteze si sa
   // ataseze DoP pentru elementele variabile (marcate distinct, nu amestecate cu cele consacrate).
-  function genereazaListaImplicita(sistemConstructiv) {
+  // tipuriAcoperisDeclarate = lista de tip_acoperis REALE declarate in releveu (per tip de cladire) —
+  // daca lipseste/e goala (nu s-a completat inca niciun releveu), aratam ambele variante posibile
+  // (sarpanta SI terasa) ca sa nu ascundem o cerinta reala inainte de completare; daca e completata,
+  // aratam DOAR ce chiar exista fizic pe cladire, nu o lista generica neverificata.
+  function genereazaListaImplicita(sistemConstructiv, tipuriAcoperisDeclarate) {
     var standard = ELEMENTE_STANDARD_PE_SISTEM[sistemConstructiv] || ELEMENTE_STANDARD_PE_SISTEM.zidarie_confinata;
-    return standard.concat(ELEMENTE_VARIABILE_COMUNE).map(function (e) { return { nume: e.material, element: e.element, DoP_atasat: false }; });
+    var tipuri = tipuriAcoperisDeclarate || [];
+    var areSarpanta = !tipuri.length || tipuri.some(function (t) { return t === 'sarpanta_doua_ape' || t === 'sarpanta_patru_ape'; });
+    var arePlat = !tipuri.length || tipuri.some(function (t) { return t === 'plat'; });
+    var variabile = ELEMENTE_VARIABILE_INTOTDEAUNA
+      .concat(areSarpanta ? ELEMENTE_VARIABILE_DOAR_SARPANTA : [])
+      .concat(arePlat ? ELEMENTE_VARIABILE_DOAR_PLAT : []);
+    return standard.concat(variabile).map(function (e) { return { nume: e.material, element: e.element, DoP_atasat: false }; });
   }
 
   function claseMaterial(nume) {

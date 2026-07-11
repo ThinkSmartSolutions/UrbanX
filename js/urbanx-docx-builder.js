@@ -572,7 +572,12 @@
     // reala (sarpanta lemn, termoizolatie, tamplarie, hidroizolatie) raman marcate ca necesitand DoP.
     // Daca proiectantul declara explicit D._materiale, acela are intotdeauna prioritate (nu se ignora
     // datele reale de proiect in favoarea listei implicite).
-    var materialeSursa = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata');
+    // Tipurile de acoperis REALE declarate in releveu (per tip de cladire) — daca proiectantul a
+    // declarat tip_acoperis='plat' pt un tip, sarpanta de lemn NU exista fizic pe acea cladire si
+    // nu poate aparea ca element necesitand DoP (bug real gasit: aparea neconditionat, chiar la
+    // acoperis plat).
+    var tipuriAcoperisDeclarate = D._relevee ? Object.keys(D._relevee).map(function (k) { return D._relevee[k].tip_acoperis; }).filter(Boolean) : [];
+    var materialeSursa = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata', tipuriAcoperisDeclarate);
     var esteListaImplicita = !(D._materiale && D._materiale.length);
     var materialeInfo = G.SSI_M4B.valideazaMateriale(materialeSursa);
     var consacrate = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_acceptat'; });
@@ -672,21 +677,22 @@
         : '<p>Aria construită: ' + ((D.Sc || '—') + ' m²') + '. Aria desfășurată a compartimentului de incendiu: ' + ((D.Sd || '—') + ' m²') + '.</p>' },
       { h: '1.4.e. Înălțimea de referință pentru accesul autospecialelor de intervenție', html: '<p>Distinct de compartimentare (pct. 1.4.c): înălțimea dintre carosabilul adiacent accesibil autospecialelor și pardoseala ultimului nivel folosibil este ' + (cladiriPropuse.length > 1 ? 'variabilă pe tip de clădire — vezi H cornișă din releveu la 1.4.g/panoul de relevee' : (D.H || 'necompletată')) + ', conform criteriilor P118-1/2025 privind accesul forțelor de intervenție (pct. A.10.3.7.2).</p>' },
       { h: '1.4.f. Sinteza compartimentelor de incendiu', html: (m5bGrupuri && m5bGrupuri.length) ? (function () {
-        var rows = m5bGrupuri.map(function (g) {
+        var rows = m5bGrupuri.map(function (g, idx) {
           var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
           // Defensiv (bug real gasit: NaN trecea nefiltrat) — orice valoare non-numerica sau lipsa
           // opreste explicit afisarea unui volum, niciodata "NaN m³" in document.
           var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null && !isNaN(v.volum_total_mc); });
           var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
           var conformTxt = !g.verificare ? 'nedeterminat' : (g.verificare.conform === false ? 'NU' : 'DA');
-          return [esc(g.id_grup), esc(destinatieT42), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
+          return ['' + (idx + 1), esc(g.id_grup), esc(destinatieT42), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
         });
         var nrNeconforme = m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; }).length;
-        return '<p><b>' + m5bGrupuri.length + ' compartimente de incendiu totale</b> (din ' + cladiriPropuse.length + ' clădiri — grupurile cuplate fără perete antifoc declarat formează UN SINGUR compartiment fiecare, cu aria însumată; detaliul complet pe grup e la 1.4.h).' + (nrNeconforme ? ' <span style="color:#dc2626">' + nrNeconforme + ' compartiment/compartimente depășesc aria maximă admisă.</span>' : '') + '</p>' +
-          tbl(rows, ['Compartiment', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
+        return '<p><b>Total: ' + m5bGrupuri.length + ' compartimente de incendiu</b>, listate integral mai jos (' + m5bGrupuri.map(function (g) { return g.id_grup; }).join(', ') + '), rezultate din ' + cladiriPropuse.length + ' clădiri — grupurile cuplate fără perete antifoc declarat formează UN SINGUR compartiment fiecare, cu aria însumată; detaliul complet pe grup (ce clădiri conține fiecare) e la secțiunea „Compunerea compartimentelor" imediat de mai jos.</p>' +
+          (nrNeconforme ? '<p style="color:#dc2626"><b>' + nrNeconforme + ' compartiment/compartimente depășesc aria maximă admisă</b> — vezi secțiunea 5 pentru măsurile compensatorii/corecțiile necesare.</p>' : '<p style="color:#16a34a">Toate cele ' + m5bGrupuri.length + ' compartimente respectă aria maximă admisă.</p>') +
+          tbl(rows, ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
       })() : tbl([
-        ['CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
-      ], ['Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
+        ['1', 'CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
+      ], ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
     ].concat(urbanismAnsamblu ? [{
       h: 'Sinteza clădirilor propuse (plan de situație — ' + urbanismAnsamblu.nrCladiriTotal + ' clădiri detectate)',
       html: '<p>Amprentele la sol au fost extrase automat din planul de situație (DXF) — fiecare clădire distinctă e o compartimentare separată de incendiu, dacă nu sunt alăturate/interconectate fără separare la foc. Suprafețele (Sc/Sd) și indicatorii (POT/CUT) de mai jos provin din adnotările proiectantului din desen, nu sunt recalculate.</p>' +
