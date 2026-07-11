@@ -453,6 +453,12 @@
     var m5bGrupuri = cladiriPropuse.length ? G.SSI_ENGINE.m5b_compartimentareGrupuri(m0, grad, grupuriConstructive, cladiriPropuse, D._pereti_despartitori_cuplat || []) : null;
     var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.geometrie_teren && D.geometrie_teren.limita_proprietate && D.geometrie_teren.limita_proprietate.arie_mp) : null;
 
+    // v5.0 — Motor relevee: volum REAL per clădire (planul de situație nu dă panta/forma acoperișului
+    // sau dacă podul e amenajabil) — daca nu exista releveu incarcat pt un tip, volumul ramane null +
+    // avertisment explicit (nu se aproximeaza Sc×3m).
+    var cladiriCuVolum = (G.SSI_RELEVEE && cladiriPropuse.length) ? G.SSI_RELEVEE.asociazaReleveuLaAmprente(D._relevee || {}, cladiriPropuse) : cladiriPropuse;
+    var volumPeCladire = {}; cladiriCuVolum.forEach(function (c) { volumPeCladire[c.id] = c.volum; });
+
     // v4.1 — M14: fiecare neconformitate trece prin taxonomia cu 3 stari (CORECTIE_PROIECT vs MASURA_COMPENSATORIE_POSIBILA),
     // NU se mai decide manual "compensabil" — se deriva din existenta solutiilor in catalogul M15.
     var verificariM14 = [];
@@ -597,9 +603,13 @@
       h: '1.4.h. Compartimentare pe grupuri constructive (cuplat/duplex/triplex vs. individual)',
       html: '<p>Grupurile de mai jos sunt componente conexe geometrice (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — un grup cuplat/duplex/triplex NU înseamnă automat compartimente separate: dacă nu există un perete despărțitor cu rezistență la foc declarată/calificată între unități, grupul se tratează ca <b>UN SINGUR compartiment de incendiu</b>, cu aria însumată a tuturor unităților, nu ca fiecare unitate verificată izolat.</p>' +
         tbl(m5bGrupuri.map(function (g) {
-          return [esc(g.id_grup), esc(g.tip), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' ')), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—') + (g.verificare && g.verificare.conform === false ? ' — NECONFORM' : '')];
-        }), ['Grup', 'Tip', 'Unități incluse', 'Tratament compartimentare', 'Arie verificată']) +
-        (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '')
+          var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
+          var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null; });
+          var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
+          return [esc(g.id_grup), esc(g.tip), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' ')), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—') + (g.verificare && g.verificare.conform === false ? ' — NECONFORM' : ''), volumTxt];
+        }), ['Grup', 'Tip', 'Unități incluse', 'Tratament compartimentare', 'Arie verificată', 'Volum real (din releveu)']) +
+        (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '') +
+        (cladiriCuVolum.some(function (c) { return c.avertisment_releveu; }) ? '<p style="font-size:9pt;color:#b45309">ⓘ ' + cladiriCuVolum.filter(function (c) { return c.avertisment_releveu; }).length + ' clădire/clădiri fără releveu încărcat pentru tipul lor — volumul acelor unități rămâne necalculat (nu se presupune Sc×3m); completează releveul per tip în panoul SSI pentru volum real.</p>' : '')
     }] : []) : []).concat([
       { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },

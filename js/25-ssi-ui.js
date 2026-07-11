@@ -15,7 +15,8 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {} };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {} };
+  var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
   // Vecinătăți fără construcție reală (teren liber sau limită spre stradă) — nu se aplică distanța minimă
@@ -108,6 +109,40 @@
         return '<div class="ssiui-row" style="grid-template-columns:1fr 2fr">' +
           '<div style="font-size:11px;color:#94a3b8;align-self:center">' + g.n + ' clădiri · Sc=' + g.sc_mp + ' mp</div>' +
           '<input class="ssiui-inp" value="' + esc(STATE.tipuriCladiri[g.cheie] || '') + '" placeholder="ex. Locuință individuală" onchange="SSI_UI._setTipCladire(\'' + g.cheie + '\', this.value)">' +
+          '</div>';
+      }).join('') + renderRelevee();
+  }
+
+  // v5.0 — Motor relevee: planul de situație dă Sc/Sd/regim ca text, NU volumul real (nu spune
+  // nimic despre panta/forma acoperișului sau dacă podul e amenajabil) — volumul cere date dintr-un
+  // releveu (plan+fațadă/secțiune), o singură dată PER TIP de clădire (nu per clădire individuală).
+  // Daca nu se completeaza, volumul ramane necalculat si marcat explicit, nu se presupune Sc×3m.
+  function _grupeazaPeTipReleveu(cladiri) {
+    var grupuri = {};
+    (cladiri || []).forEach(function (c) {
+      var ua = c.urbanism_adnotat || {};
+      var sc = ua.sc_mp != null ? ua.sc_mp : c.arie_mp;
+      var cheie = G.SSI_RELEVEE ? G.SSI_RELEVEE.cheieTipReleveu(ua.regim, sc) : ((ua.regim || '?') + '_' + sc);
+      if (!grupuri[cheie]) grupuri[cheie] = { cheie: cheie, regim: ua.regim || '—', sc_mp: sc, n: 0 };
+      grupuri[cheie].n++;
+    });
+    return Object.keys(grupuri).map(function (k) { return grupuri[k]; }).sort(function (a, b) { return b.n - a.n; });
+  }
+  function renderRelevee() {
+    if (!STATE.cladiriPropuse.length) return '';
+    var tipuri = _grupeazaPeTipReleveu(STATE.cladiriPropuse);
+    return '<div class="ssiui-lbl" style="margin-top:14px">Relevee per tip de clădire (volum real — opțional, dar necesar pt. volum/sarcină termică)</div>' +
+      '<div class="ssiui-note">Planul de situație dă Sc/Sd/regim ca text, nu volumul real (nu spune nimic despre panta/forma acoperișului sau dacă podul e amenajabil). Completează o singură dată per tip — se aplică pe toate amprentele identice din plan. Dacă lași necompletat, volumul rămâne necalculat (nu se presupune Sc×3m).</div>' +
+      tipuri.map(function (t) {
+        var r = STATE.relevee[t.cheie] || {};
+        return '<div class="ssiui-row" style="grid-template-columns:1.1fr .8fr .8fr 1fr .8fr auto">' +
+          '<div style="font-size:11px;color:#94a3b8;align-self:center">' + t.n + ' clădiri · ' + esc(t.regim) + ', Sc=' + t.sc_mp + ' mp</div>' +
+          '<div><div class="ssiui-lbl">H cornișă (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (r.inaltime_cornisa != null ? r.inaltime_cornisa : '') + '" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'inaltime_cornisa\',parseFloat(this.value)||null)"></div>' +
+          '<div><div class="ssiui-lbl">H coamă (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (r.inaltime_coama != null ? r.inaltime_coama : '') + '" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'inaltime_coama\',parseFloat(this.value)||null)"></div>' +
+          '<div><div class="ssiui-lbl">Tip acoperiș</div><select class="ssiui-sel" onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'tip_acoperis\',this.value)"><option value="">— selectează —</option>' +
+          Object.keys(TIPURI_ACOPERIS).map(function (k) { return '<option value="' + k + '"' + (r.tip_acoperis === k ? ' selected' : '') + '>' + TIPURI_ACOPERIS[k] + '</option>'; }).join('') + '</select></div>' +
+          '<label style="display:flex;gap:4px;align-items:center;font-size:10px;color:#cbd5e1;align-self:end;padding-bottom:8px"><input type="checkbox"' + (r.poduri_amenajabile ? ' checked' : '') + ' onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'poduri_amenajabile\',this.checked)"> pod amenajabil</label>' +
+          '<div></div>' +
           '</div>';
       }).join('');
   }
@@ -237,13 +272,14 @@
         tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
         _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
         _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
-        _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri
+        _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee
       } : null;
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {} }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {} }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
+    _setRelevee: function (cheie, camp, val) { if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {}; STATE.relevee[cheie][camp] = val; },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
@@ -273,7 +309,7 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; }
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; Dproj._relevee = Dproj._relevee || pending._relevee; }
       return orig(Dproj, v);
     };
     G.UXDocBuilder.__ssiUiPatched = true;
