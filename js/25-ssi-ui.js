@@ -132,7 +132,7 @@
     if (!STATE.cladiriPropuse.length) return '';
     var tipuri = _grupeazaPeTipReleveu(STATE.cladiriPropuse);
     return '<div class="ssiui-lbl" style="margin-top:14px">Relevee per tip de clădire (volum real — opțional, dar necesar pt. volum/sarcină termică)</div>' +
-      '<div class="ssiui-note">Planul de situație dă Sc/Sd/regim ca text, nu volumul real (nu spune nimic despre panta/forma acoperișului sau dacă podul e amenajabil). Completează o singură dată per tip — se aplică pe toate amprentele identice din plan. Dacă lași necompletat, volumul rămâne necalculat (nu se presupune Sc×3m).</div>' +
+      '<div class="ssiui-note">Planul de situație dă Sc/Sd/regim ca text, nu volumul real (nu spune nimic despre panta/forma acoperișului sau dacă podul e amenajabil). <b>Încarcă fișierul (DXF/PDF)</b> cu fațada/secțiunea — dacă are cote de nivel scrise ca text în DXF, H cornișă/H coamă se pre-completează automat; dacă nu, sau ai un PDF, completează cele 3 câmpuri manual, o singură dată per tip (se aplică pe toate amprentele identice din plan). Dacă lași necompletat, volumul rămâne necalculat (nu se presupune Sc×3m).</div>' +
       tipuri.map(function (t) {
         var r = STATE.relevee[t.cheie] || {};
         var ePlat = r.tip_acoperis === 'plat';
@@ -146,6 +146,10 @@
           Object.keys(TIPURI_ACOPERIS).map(function (k) { return '<option value="' + k + '"' + (r.tip_acoperis === k ? ' selected' : '') + '>' + TIPURI_ACOPERIS[k] + '</option>'; }).join('') + '</select></div>' +
           '<label style="display:flex;gap:4px;align-items:center;font-size:10px;color:#cbd5e1;align-self:end;padding-bottom:8px"><input type="checkbox"' + (r.poduri_amenajabile ? ' checked' : '') + ' onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'poduri_amenajabile\',this.checked)"' + (ePlat ? ' disabled title="Acoperiș plat — nu are pod"' : '') + '> pod amenajabil</label>' +
           '<div></div>' +
+          '<div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;margin-top:2px">' +
+          '<input type="file" accept=".dxf,.pdf" class="ssiui-inp" style="font-size:10px" onchange="SSI_UI._onFileRelevee(\'' + t.cheie + '\', this.files[0])">' +
+          (r.fisier_atasat ? '<span style="font-size:10px;color:#6ee7b7">📎 ' + esc(r.fisier_atasat) + (r.extras_din_fisier ? ' — H cornișă/coamă pre-completate din fișier, verifică' : ' — atașat, completează H manual mai sus') + '</span>' : '') +
+          '</div>' +
           '</div>';
       }).join('');
   }
@@ -311,6 +315,46 @@
     } catch (e) { if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
   }
 
+  // Cauta in textele unui releveu DXF etichete de cota (ex. "H cornisa = 6.00", "cota coama +8.50")
+  // pt a pre-completa H cornișă/H coamă — best-effort, NU inventeaza daca nu gaseste (campurile
+  // raman goale, de completat manual, exact ca la orice alta valoare lipsa din platforma).
+  function _extrageInaltimiDinDXF(parsed) {
+    var out = { cornisa: null, coama: null };
+    (parsed.entities || []).forEach(function (e) {
+      if (e.type !== 'TEXT' && e.type !== 'MTEXT') return;
+      var t = String(e.text || '').replace(/\\P/g, ' ').replace(/\{\\[^;{}]*;/g, '').replace(/[{}]/g, '').replace(/\\[A-Za-z][^;\\]*;/g, '');
+      var mCornisa = t.match(/corni[sș]\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
+      var mCoama = t.match(/coam\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
+      if (mCornisa && out.cornisa == null) out.cornisa = parseFloat(mCornisa[1].replace(',', '.'));
+      if (mCoama && out.coama == null) out.coama = parseFloat(mCoama[1].replace(',', '.'));
+    });
+    return out;
+  }
+
+  async function onFileRelevee(cheie, file) {
+    if (!file) return;
+    if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {};
+    STATE.relevee[cheie].fisier_atasat = file.name;
+    var esteDXF = /\.dxf$/i.test(file.name);
+    if (esteDXF) {
+      try {
+        var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
+        var h = _extrageInaltimiDinDXF(parsed);
+        if (h.cornisa != null || h.coama != null) {
+          if (h.cornisa != null && STATE.relevee[cheie].inaltime_cornisa == null) STATE.relevee[cheie].inaltime_cornisa = h.cornisa;
+          if (h.coama != null && STATE.relevee[cheie].inaltime_coama == null) STATE.relevee[cheie].inaltime_coama = h.coama;
+          STATE.relevee[cheie].extras_din_fisier = true;
+          if (G.ss) G.ss('📎 ' + file.name + ': găsite cote în desen (H cornișă=' + (h.cornisa != null ? h.cornisa : '—') + ', H coamă=' + (h.coama != null ? h.coama : '—') + ') — verifică valorile pre-completate.');
+        } else {
+          if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am găsit cote de nivel scrise ca text în DXF; completează H cornișă/H coamă manual mai jos.');
+        }
+      } catch (e) { if (G.ss) G.ss('Fișier atașat ca referință (nu s-a putut citi geometria: ' + e.message + ') — completează H manual.'); }
+    } else {
+      if (G.ss) G.ss('📎 ' + file.name + ' atașat ca referință (PDF-urile nu se parsează automat) — completează H cornișă/H coamă/tip acoperiș manual, din desen.');
+    }
+    render();
+  }
+
   G.SSI_UI = {
     open: open, getPending: function () {
       return STATE.tip_lucrare ? {
@@ -325,6 +369,7 @@
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
     _setRelevee: function (cheie, camp, val) { if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {}; STATE.relevee[cheie][camp] = val; if (camp === 'tip_acoperis') render(); },
+    _onFileRelevee: onFileRelevee,
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
