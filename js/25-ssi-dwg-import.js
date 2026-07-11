@@ -226,6 +226,22 @@
     return out;
   }
 
+  // Citeste faza proiectului din titlul/cartusul DWG (ex. "faza\nCU", "faza\nD.T.A.C.") — NU se
+  // presupune faza implicit; un scenariu SSI complet are sens abia la D.T.A.C., nu la un plan de
+  // Certificat de Urbanism (CU), etapa anterioara — semnaleaza explicit neconcordanta, nu o ignora.
+  var FAZE_CUNOSCUTE = ['CU', 'DTAC', 'D.T.A.C.', 'PTh', 'P.Th.', 'DE', 'D.E.', 'PAC', 'P.A.C.', 'PT', 'P.T.'];
+  function extrageFazaDinDXF(entities) {
+    var gasit = null;
+    (entities || []).forEach(function (e) {
+      if (gasit || (e.type !== 'TEXT' && e.type !== 'MTEXT')) return;
+      var clean = _cleanMText(e.text || '');
+      var m = clean.match(/\bfaza\b\s*[:\-]?\s*([A-Za-z.\+]{2,10})/i);
+      if (m) gasit = m[1].toUpperCase().replace(/\.+$/, '');
+    });
+    var recunoscuta = gasit && FAZE_CUNOSCUTE.some(function (f) { return f.toUpperCase().replace(/\./g, '') === gasit.replace(/\./g, ''); });
+    return { faza_din_dwg: gasit, recunoscuta: !!recunoscuta };
+  }
+
   function _centroid(puncte) {
     var s = 0, cx = 0, cy = 0, n = puncte.length;
     for (var i = 0; i < n; i++) {
@@ -360,6 +376,11 @@
     // citate, NU recalculate — punctul de plecare pt sectiunea urbanism a scenariului.
     out.adnotari_urbanism = extrageAdnotariUrbanism(ents);
 
+    // Faza proiectului asa cum e scrisa in titlul/cartusul DWG — NU se presupune D.T.A.C./P.Th.
+    // implicit; un plan de faza CU (Certificat de Urbanism) e o etapa anterioara oricarui scenariu
+    // SSI propriu-zis (care se elaboreaza la D.T.A.C.) — neconcordanta se semnaleaza, nu se ignora.
+    out.faza_dwg = extrageFazaDinDXF(ents);
+
     // TOATE poligoanele inchise de pe layerul de constructie propusa = TOATE cladirile din
     // planul de situatie (un ansamblu poate avea zeci de cladiri individuale/duplex) —
     // NU doar prima (regula veche, gresita pt planuri de ansamblu).
@@ -376,6 +397,9 @@
         var arieTotala = out.cladiri_propuse.reduce(function (s, c) { return s + c.arie_mp; }, 0);
         out.volum_propus = { poligon: out.cladiri_propuse[0].poligon, arie_mp: arieTotala, nr_cladiri: out.cladiri_propuse.length, sursa: 'dwg' };
       }
+      // Cladiri detectate geometric dar fara niciun cartus text asociat (Sc/Sd/POT/CUT) — NU se
+      // presupun valorile, se raporteaza explicit ca exceptie de completat manual (regula v4.3 #21).
+      out.nrCladiriFaraCartus = out.cladiri_propuse.filter(function (c) { return !c.urbanism_adnotat; }).length;
     }
 
     var existentPol = existentLayer && primulPoligon(existentLayer);
@@ -401,12 +425,22 @@
       out.distante_intre_cladiri_omise = out.cladiri_propuse.length;
     } else if (out.cladiri_propuse.length > 1) {
       out.distante_intre_cladiri = [];
+      // Prag "alipite" (perete comun): sub 30cm intre contururi = practic in contact — tipologia
+      // individual/cuplat-duplex NU se deduce din eticheta text (arhitectul a scris generic "Locuinta"
+      // peste tot), ci geometric — doua amprente alipite pe o latura comuna sunt, cel mai probabil,
+      // un duplex/cuplare, indiferent ce scrie eticheta (regula v4.3 #3).
+      var PRAG_ALIPIT_M = 0.3;
       for (var i = 0; i < out.cladiri_propuse.length; i++) {
         for (var j = i + 1; j < out.cladiri_propuse.length; j++) {
           var d2 = calculeazaDistantaMinima(out.cladiri_propuse[i].poligon, out.cladiri_propuse[j].poligon);
-          out.distante_intre_cladiri.push({ a: out.cladiri_propuse[i].id, b: out.cladiri_propuse[j].id, distanta_m: d2 != null ? Math.round(d2 * 100) / 100 : null });
+          out.distante_intre_cladiri.push({
+            a: out.cladiri_propuse[i].id, b: out.cladiri_propuse[j].id,
+            distanta_m: d2 != null ? Math.round(d2 * 100) / 100 : null,
+            posibil_alipite: d2 != null && d2 < PRAG_ALIPIT_M
+          });
         }
       }
+      out.nrPerechiAlipite = out.distante_intre_cladiri.filter(function (p) { return p.posibil_alipite; }).length;
     }
     return out;
   }

@@ -199,6 +199,14 @@
     var risc = riscPropriu || 'mic';
     var rezultate = [];
     (distanteIntreCladiri || []).forEach(function (perechi) {
+      // Cladiri practic alipite (contur la contur, <0.3m — posibil duplex/cuplare cu perete comun,
+      // NU se deduce doar din eticheta text): Tabelul 4/145 (distante) nu se aplica aici — cerinta
+      // reala e un perete antifoc (REI) intre unitati, verificare distincta (M4b/materiale), nu distanta.
+      if (perechi.posibil_alipite) {
+        rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: perechi.distanta_m, alipite: true,
+          nota: 'Clădiri practic alipite (< 0,3 m) — posibil duplex/cuplare cu perete comun. Nu se verifică distanța minimă (Tabelul 4/145), ci prezența și rezistența la foc a peretelui antifoc despărțitor (secțiunea materiale/DoP).' });
+        return;
+      }
       if (perechi.distanta_m == null) { rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: null, eroare: 'distanta nedeterminata' }); return; }
       var d = N().getDistantaMinima({
         tip_lucrare: m0.regim_tabele, grad_propriu: m6.grad_stabilitate, grad_vecin: m6.grad_stabilitate,

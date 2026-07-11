@@ -435,6 +435,12 @@
     var m9niv = G.SSI_ENGINE.m9_niveluriMaxime(m0, { grad: grad, destinatie: destinatieT42, niveluri_proiectate: D.niv_supraterane });
     var m6b = G.SSI_ENGINE.m6b_clasificareVecinatati(m0, { grad_stabilitate: grad }, D._vecinatati || []);
 
+    // Faza citita din titlul DWG-ului importat vs. faza declarata a proiectului — NU se presupune
+    // implicit D.T.A.C.; un plan de faza CU (Certificat de Urbanism) e o etapa anterioara oricarui
+    // scenariu SSI propriu-zis (care se elaboreaza la D.T.A.C.) — neconcordanta e eroare de flux.
+    var fazaDwg = D.geometrie_teren && D.geometrie_teren.faza_dwg && D.geometrie_teren.faza_dwg.faza_din_dwg;
+    var fazaPrematura = fazaDwg && /^CU$/i.test(fazaDwg);
+
     // M6c + urbanism ansamblu — cladirile proprii detectate din planul de situatie (DXF), daca sunt
     // mai multe de 1 (ansamblu/plan de lotizare, nu o singura constructie). Tabelul 4/145 se aplica
     // INTRE cladirile proprii la fel ca fata de vecinii externi (M6b) — nu doar la limita de proprietate.
@@ -546,7 +552,11 @@
         '<p style="margin:0;font-size:13pt;font-weight:bold;color:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '">CONCLUZIE GENERALĂ / VERDICT: ' + esc(verdict.verdict) + '</p>' +
         (verdict.motiv ? '<p style="margin:4pt 0 0">' + esc(verdict.motiv) + '</p>' : '') +
         (verdict.lista && verdict.lista.length ? '<ul style="margin:4pt 0 0">' + verdict.lista.map(function (f) { return '<li>' + esc(f.element ? f.element.identificare_in_plan : (f.id || '')) + ': ' + esc(f.actiune || f.mesaj || '') + '</li>'; }).join('') + '</ul>' : '') +
-        '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
+        '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' }
+    ].concat(fazaPrematura ? [{
+      h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
+        '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
+        '<p style="margin:4pt 0 0">Un Certificat de Urbanism (CU) este o etapă anterioară documentației tehnice (D.T.A.C.) — un scenariu de securitate la incendiu complet, conform Ord. MAI 180/2022, se elaborează la faza D.T.A.C., pe un proiect de arhitectură deja stabilizat, nu pe planul de CU. Acest document a fost totuși generat (faza proiect setată: ' + esc(D.faza || 'D.T.A.C.') + ') — verifică dacă planul de situație folosit e cel corect pentru faza curentă înainte de a-l folosi pentru avizare/autorizare.</p></div>' }] : []).concat([
       { h: '1.0. Tipul de lucrare (determină tabelele P118-1/2025 aplicabile)', html: '<p><b>' + esc(m0.label) + '.</b> Regim tabele: ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'construcție EXISTENTĂ (T144/T145/T146/T147/T148, Anexa A.10)' : 'construcție NOUĂ (T2/T4/T5/T41/T42)') + '.' + (m0.nota ? ' ' + esc(m0.nota) : '') + '</p><p style="font-size:9pt;color:#888">Temei: ' + esc(m0.temei_legal) + '</p>' },
       { h: '1.1-1.4. Caracteristicile construcției', html: tbl([
         ['Denumire', esc(D.nume || '—')], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
@@ -588,12 +598,18 @@
           verificariM14.filter(function (n) { return n.tip === 'DISTANTA_VECINATATE_INSUFICIENTA'; }).map(fmtSolutiiPtNeconformitate).join('') }
     ].concat(m6c ? [{
       h: '3.3-bis. Distanțe între clădirile proprii ale ansamblului (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 145' : 'Tabelul 4') + ')',
-      html: '<p>Tabelul 4/145 se aplică între ORICE două construcții/compartimente de incendiu, indiferent dacă aparțin aceluiași beneficiar — nu doar față de vecinătăți externe. Distanțele reale de mai jos sunt distanțe minime muchie-la-muchie, calculate din geometria reală extrasă din DXF (nu din centroizi).</p>' +
-        tbl(m6c.perechi.slice(0, 60).map(function (p) {
-          return [p.a + ' ↔ ' + p.b, p.distanta_necesara_m != null ? p.distanta_necesara_m + ' m' : '—', p.distanta_reala_m != null ? p.distanta_reala_m + ' m' : 'nedeterminată', p.eroare ? 'DE VERIFICAT MANUAL' : (p.conforma ? 'DA' : 'NU')];
-        }), ['Pereche clădiri', 'Distanță necesară', 'Distanță reală', 'Conform']) +
-        (m6c.perechi.length > 60 ? '<p style="font-size:9pt;color:#666">Afișate primele 60 din ' + m6c.perechi.length + ' perechi calculate — toate au fost verificate în cascadă, doar afișarea e trunchiată pentru lizibilitate.</p>' : '') +
-        (m6c.nrNeconforme ? '<p style="color:#dc2626"><b>' + m6c.nrNeconforme + ' pereche/perechi neconforme</b> — vezi măsurile compensatorii posibile la secțiunea 5.</p>' : '<p style="color:#16a34a">Toate perechile de clădiri respectă distanța minimă normată.</p>')
+      html: (function () {
+        var alipite = m6c.perechi.filter(function (p) { return p.alipite; });
+        var neconforme = m6c.perechi.filter(function (p) { return p.conforma === false; });
+        var conformeSample = m6c.perechi.filter(function (p) { return p.conforma === true; }).slice(0, 15);
+        function rand(p) { return [p.a + ' ↔ ' + p.b, p.distanta_necesara_m != null ? p.distanta_necesara_m + ' m' : '—', p.distanta_reala_m != null ? p.distanta_reala_m + ' m' : 'nedeterminată', p.alipite ? 'ALIPITE — vezi perete antifoc' : (p.eroare ? 'DE VERIFICAT MANUAL' : (p.conforma ? 'DA' : 'NU'))]; }
+        var out = '<p>Tabelul 4/145 se aplică între ORICE două construcții/compartimente de incendiu, indiferent dacă aparțin aceluiași beneficiar — nu doar față de vecinătăți externe. Distanțele reale de mai jos sunt distanțe minime muchie-la-muchie, calculate din geometria reală extrasă din DXF (nu din centroizi), pentru toate cele ' + m6c.perechi.length + ' perechi posibile.</p>';
+        if (alipite.length) out += '<p><b>' + alipite.length + ' pereche/perechi de clădiri practic alipite</b> (contur la contur &lt; 0,3 m — posibil duplex/cuplare cu perete comun; tipologia NU rezultă din etichetă, e dedusă geometric). Pentru acestea nu se verifică distanța minimă, ci prezența și rezistența la foc a peretelui antifoc despărțitor:</p>' + tbl(alipite.map(rand), ['Pereche clădiri', 'Distanță necesară', 'Distanță reală', 'Stare']);
+        if (neconforme.length) out += '<p style="color:#dc2626"><b>' + neconforme.length + ' pereche/perechi neconforme</b> (distanță reală sub minimul normat) — vezi măsurile compensatorii posibile la secțiunea 5:</p>' + tbl(neconforme.map(rand), ['Pereche clădiri', 'Distanță necesară', 'Distanță reală', 'Stare']);
+        else out += '<p style="color:#16a34a">Nicio pereche de clădiri (altele decât cele alipite de mai sus) nu este neconformă — toate distanțele reale depășesc minimul normat.</p>';
+        if (conformeSample.length) out += '<p style="font-size:9pt;color:#666">Eșantion din perechile conforme (' + conformeSample.length + ' din ' + m6c.perechi.filter(function (p) { return p.conforma === true; }).length + '):</p>' + tbl(conformeSample.map(rand), ['Pereche clădiri', 'Distanță necesară', 'Distanță reală', 'Stare']);
+        return out;
+      })()
     }] : []).concat([
       { h: '3.4-3.6. Evacuare, persoane vulnerabile, forțe de intervenție', html: tbl([
         ['Nr. minim ieșiri', '' + (ac.flux_evacuare_m ? Math.max(1, Math.ceil((D.Sc || 0) / 300)) : 1)],
@@ -618,7 +634,7 @@
           : '<p>Toate tabelele normative folosite au status validat.</p>') +
         (vecinatatiNeconfirmate.length ? '<p><b>Vecinătăți:</b> ' + vecinatatiNeconfirmate.length + ' vecinătate/vecinătăți (' + vecinatatiNeconfirmate.map(function (v) { return esc(v.id); }).join(', ') + ') au clasificare estimată conservator (grad V, risc mare), neconfirmată de proiectant.</p>' : '<p>Toate vecinătățile au clasificarea confirmată de proiectant.</p>') +
         ((vecinatatiNeconfirmate.length || (statusNevalidat.length && !D._normative_confirmate_de_proiectant)) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate vecinătățile sunt confirmate' + (statusNevalidat.length ? ' și sursele normative sunt asumate pe răspunderea profesională a proiectantului' : ' și sursele normative au status validat') + '.</p>') }
-    ]));
+    ])));
     return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
   }
 
