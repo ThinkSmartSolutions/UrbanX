@@ -538,7 +538,14 @@
       if (v14.status !== 'NECONFORM_MASURA_COMPENSATORIE_POSIBILA') return '';
       var sol = G.SSI_M15.genereazaSolutii(v14, ctxSolutii(v14));
       if (!sol.length) return '';
-      return '<p><b>Soluții candidate (selecția rămâne a proiectantului atestat, nu se aplică automat):</b></p>' +
+      // Identifica EXPLICIT cui i se aplica tabelul de mai jos — fara asta, acelasi tabel generic
+      // apare repetat pentru fiecare neconformitate, fara sa spuna la ce pereche/element se refera
+      // (bug real semnalat: "cine necesita retragere?").
+      var cui = esc(v14.descriere_element || v14.element_id || v14.id || 'cerința neconformă');
+      var cifre = (v14.valoare_proiectata != null && v14.valoare_necesara != null)
+        ? ' (real ' + v14.valoare_proiectata + (v14.unitate || '') + ' vs. necesar ' + v14.valoare_necesara + (v14.unitate || '') + (v14.deficit != null ? ', deficit ' + Math.round(v14.deficit * 100) / 100 + (v14.unitate || '') : '') + ')'
+        : '';
+      return '<p><b>Pentru: ' + cui + cifre + '</b> — soluții candidate (selecția rămâne a proiectantului atestat, nu se aplică automat):</p>' +
         tbl(sol.map(function (x) { return [esc(x.solutie), esc(x.efect_calculat || '—'), (x.recalcul_necesar || []).join(', ')]; }), ['Soluție compensatorie', 'Efect', 'Recalcul necesar']);
     }
     // 2.2 ATEX — declarativ; daca D._spatii_atex nu e furnizat, se confirma explicit absenta substantelor (nu se presupune)

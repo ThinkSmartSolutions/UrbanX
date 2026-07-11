@@ -37,7 +37,13 @@
       return {
         id: verificare.id, status: 'NECONFORM_MASURA_COMPENSATORIE_POSIBILA', tip: verificare.tip,
         deficit: deficit, sursa_normativa: verificare.sursa_normativa, necesita_solutie: true,
-        element_id: verificare.element_id || null
+        element_id: verificare.element_id || null,
+        // pastrate si aici (nu doar pe ramura CORECTIE_PROIECT) — fara ele, tabelul de solutii
+        // compensatorii apare fara sa spuna CUI/CAREI cerinte i se aplica (regasit ca bug real:
+        // acelasi tabel generic aparea repetat, fara sa identifice perechea/elementul vizat).
+        descriere_element: verificare.descriere_element || null,
+        valoare_proiectata: verificare.valoare_proiectata, valoare_necesara: verificare.valoare_necesara,
+        unitate: verificare.unitate || ''
       };
     }
     return {
