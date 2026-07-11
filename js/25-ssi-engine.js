@@ -113,9 +113,21 @@
   // si se marcheaza explicit sursa + starea "neconfirmat". Doar generarea scenariului FINAL (pt depunere)
   // cere ca fiecare vecinatate sa fi fost confirmata/corectata de proiectant (vezi statusFinalizare in
   // urbanx-docx-builder.js) — simetrie cu statusul de validare a normativelor (v3.0).
+  // Laturi fara constructie vecina reala (teren liber sau limita spre strada/drum public) — Tabelul 4/145
+  // (distante MINIME INTRE CONSTRUCTII) nu se aplica, pentru ca nu exista nimic de protejat pe acea latura.
+  var FARA_VECIN_CONSTRUIT = { fara_constructie: 1, strada_drum_public: 1 };
   function m6b_clasificareVecinatati(m0, m6, vecinatatiDeclarate) {
     var rezultate = { vecinatati: [], neconformitati: [], avertismente: [] };
     (vecinatatiDeclarate || []).forEach(function (vecin) {
+      if (FARA_VECIN_CONSTRUIT[vecin.destinatie_declarata]) {
+        rezultate.vecinatati.push({
+          id: vecin.id, destinatie_declarata: vecin.destinatie_declarata, conforma: true,
+          distanta_necesara_m: null, distanta_masurata_m: vecin.distanta_masurata_m != null ? vecin.distanta_masurata_m : null,
+          note_aplicate: ['Nu se aplică distanța minimă (Tabelul 4/145) — fără construcție de protejat pe această latură.'],
+          estimat_implicit: false, confirmat: true, certitudine: 'nu_se_aplica', sursa_distanta: vecin.sursa_distanta || 'manual'
+        });
+        return;
+      }
       var estimatImplicit = !vecin.destinatie_declarata || !vecin.grad_rezistenta_estimat;
       var destinatie = vecin.destinatie_declarata || 'altele';
       var grad = vecin.grad_rezistenta_estimat || 'V';

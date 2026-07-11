@@ -510,7 +510,7 @@
     // v4.2 — SINGURA blocare reala: daca s-a bifat "Genereaza ca FINAL" si raman vecinatati neconfirmate
     // sau normative nevalidate, refuza explicit exportul FINAL (analiza DRAFT ramane mereu disponibila neschimbata).
     if (D._ssi_final_mode) {
-      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat);
+      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant);
       if (!gateFinal.poate) {
         return {
           cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118_BLOCAT.doc',
@@ -572,9 +572,13 @@
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
         (fiseNeconformitate.length ? '<p style="font-size:9pt;color:#666">Trasabilitate: fiecare soluție compensatorie aleasă se înregistrează cu nume + nr. atestat proiectant + dată (Ord. MAI 180/2022, Anexa 5, pct. 5). Orice corecție de proiect necesită reimport DWG + recalculul integral al cascadei M0-M17 (o modificare geometrică poate afecta și alte verificări).</p>' : '') },
       { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
-        (statusNevalidat.length ? '<p><b>Surse normative:</b> următoarele tabele nu au încă status „validat" de un inginer/arhitect atestat (extragere confirmată pe text oficial, dar fără semnătura de răspundere profesională cerută de Ord. MAI 180/2022): ' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + '.</p>' : '<p>Toate tabelele normative folosite au status validat.</p>') +
+        (statusNevalidat.length
+          ? (D._normative_confirmate_de_proiectant
+            ? '<p><b>Surse normative:</b> ' + statusNevalidat.length + ' tabel/tabele (' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + ') nu au status „validat" instituțional, dar proiectantul a confirmat verificarea personală pe textul oficial (M.Of. 204 bis/2025) și își asumă răspunderea profesională pentru acest export.</p>'
+            : '<p><b>Surse normative:</b> următoarele tabele nu au încă status „validat" de un inginer/arhitect atestat (extragere confirmată pe text oficial, dar fără semnătura de răspundere profesională cerută de Ord. MAI 180/2022): ' + statusNevalidat.map(function (s) { return esc(s.id); }).join(', ') + '.</p>')
+          : '<p>Toate tabelele normative folosite au status validat.</p>') +
         (vecinatatiNeconfirmate.length ? '<p><b>Vecinătăți:</b> ' + vecinatatiNeconfirmate.length + ' vecinătate/vecinătăți (' + vecinatatiNeconfirmate.map(function (v) { return esc(v.id); }).join(', ') + ') au clasificare estimată conservator (grad V, risc mare), neconfirmată de proiectant.</p>' : '<p>Toate vecinătățile au clasificarea confirmată de proiectant.</p>') +
-        ((statusNevalidat.length || vecinatatiNeconfirmate.length) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate sursele normative și clasificările de vecinătăți sunt confirmate.</p>') }
+        ((vecinatatiNeconfirmate.length || (statusNevalidat.length && !D._normative_confirmate_de_proiectant)) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate vecinătățile sunt confirmate' + (statusNevalidat.length ? ' și sursele normative sunt asumate pe răspunderea profesională a proiectantului' : ' și sursele normative au status validat') + '.</p>') }
     ];
     return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
   }

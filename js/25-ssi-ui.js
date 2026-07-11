@@ -15,9 +15,15 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false };
 
-  var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele'];
+  var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
+  // Vecinătăți fără construcție reală (teren liber sau limită spre stradă) — nu se aplică distanța minimă
+  // între construcții (Tabelul 4/145), pentru că nu există nicio construcție de protejat pe acea latură.
+  var FARA_VECIN_CONSTRUIT = { fara_constructie: 1, strada_drum_public: 1 };
+  var DESTINATII_LABEL = {
+    fara_constructie: '🟩 fără construcție (teren liber)', strada_drum_public: '🛣️ stradă / drum public'
+  };
   var GRADE = ['I', 'II', 'III', 'IV', 'V'];
 
   function _style() {
@@ -54,10 +60,22 @@
 
   function _rowVecinatate(v, idx) {
     v = v || {};
-    var estimatNeconfirmat = v.sursa_clasificare === 'estimare_conservatoare_neconfirmata' && !v.confirmat;
+    var faraVecin = FARA_VECIN_CONSTRUIT[v.destinatie_declarata];
+    var estimatNeconfirmat = !faraVecin && v.sursa_clasificare === 'estimare_conservatoare_neconfirmata' && !v.confirmat;
+    var optDestinatie = '<select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'destinatie_declarata\',this.value)">' +
+      DESTINATII.map(function (d) { return '<option value="' + d + '"' + (v.destinatie_declarata === d ? ' selected' : '') + '>' + (DESTINATII_LABEL[d] || d.replace(/_/g, ' ')) + '</option>'; }).join('') + '</select>';
+    if (faraVecin) {
+      // Nu există construcție vecină pe această latură (teren liber sau limită spre stradă/drum public) —
+      // Tabelul 4/145 (distanțe MINIME ÎNTRE CONSTRUCȚII) nu se aplică: nu cerem grad/perete CF/distanță,
+      // nu marcăm ca „estimare neconfirmată" (nu e nimic de confirmat).
+      return '<div class="ssiui-row" data-idx="' + idx + '" style="grid-template-columns:1.4fr 2.4fr auto">' +
+        '<div><div class="ssiui-lbl">Destinație vecin</div>' + optDestinatie + '</div>' +
+        '<div style="font-size:10px;color:#6ee7b7;align-self:end;padding-bottom:8px">✓ Nu se aplică distanța minimă (Tabelul 4/145) — nu există construcție de protejat pe această latură.</div>' +
+        '<button class="ssiui-btn sec" onclick="SSI_UI._remove(' + idx + ')">✕</button>' +
+        '</div>';
+    }
     return '<div class="ssiui-row" data-idx="' + idx + '"' + (estimatNeconfirmat ? ' style="border:1px solid rgba(251,191,36,.4)"' : '') + '>' +
-      '<div><div class="ssiui-lbl">Destinație vecin</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'destinatie_declarata\',this.value)">' +
-      DESTINATII.map(function (d) { return '<option value="' + d + '"' + (v.destinatie_declarata === d ? ' selected' : '') + '>' + d.replace('_', ' ') + '</option>'; }).join('') + '</select></div>' +
+      '<div><div class="ssiui-lbl">Destinație vecin</div>' + optDestinatie + '</div>' +
       '<div><div class="ssiui-lbl">Grad rezistență</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'grad_rezistenta_estimat\',this.value)">' +
       GRADE.map(function (g) { return '<option value="' + g + '"' + (v.grad_rezistenta_estimat === g ? ' selected' : '') + '>' + g + (g === 'V' ? ' (conservator)' : '') + '</option>'; }).join('') + '</select></div>' +
       '<div><div class="ssiui-lbl">Perete CF</div><select class="ssiui-sel" onchange="SSI_UI._set(' + idx + ',\'perete_CF_pe_fatada_comuna\',this.value===\'da\')"><option value="nu"' + (!v.perete_CF_pe_fatada_comuna ? ' selected' : '') + '>nu</option><option value="da"' + (v.perete_CF_pe_fatada_comuna ? ' selected' : '') + '>da</option></select></div>' +
@@ -86,7 +104,10 @@
       '<div style="margin-top:16px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">' +
       '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#e6edf7;cursor:pointer">' +
       '<input type="checkbox"' + (STATE.modFinal ? ' checked' : '') + ' onchange="SSI_UI._setModFinal(this.checked)"> ' +
-      '<b>🔒 Generează ca FINAL</b> (pentru depunere la ISU — necesită toate vecinătățile confirmate; altfel se generează DRAFT, mereu disponibil)</label></div>';
+      '<b>🔒 Generează ca FINAL</b> (pentru depunere la ISU — necesită toate vecinătățile confirmate; altfel se generează DRAFT, mereu disponibil)</label>' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:11px;color:#cbd5e1;cursor:pointer;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)">' +
+      '<input type="checkbox"' + (STATE.normativeConfirmate ? ' checked' : '') + ' onchange="SSI_UI._setNormativeConfirmate(this.checked)"> ' +
+      'Confirm, ca proiectant/inginer atestat, că am verificat pe text oficial (M.Of. 204 bis/2025) tabelele P118-1/2025 folosite în acest scenariu — asum răspunderea profesională pentru sursele normative citate.</label></div>';
   }
 
   function open() {
@@ -161,9 +182,10 @@
   }
 
   G.SSI_UI = {
-    open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal } : null; },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false }; },
+    open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal, _normative_confirmate_de_proiectant: STATE.normativeConfirmate } : null; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
+    _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
@@ -193,7 +215,7 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; }
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; }
       return orig(Dproj, v);
     };
     G.UXDocBuilder.__ssiUiPatched = true;

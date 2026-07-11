@@ -84,14 +84,19 @@
   // v4.2 (Florin): SINGURA blocare ramasa nu e la introducere, e la FINALIZARE — daca raman vecinatati
   // neconfirmate de proiectant (estimare automata/conservatoare, nu validata), scenariul NU poate fi
   // marcat/exportat ca FINAL pentru depunere (desi analiza DRAFT a mers inainte fara nicio blocare).
-  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate) {
+  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate, confirmatDeProiectant) {
     var neconfirmate = (vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
     var normativeNevalidate = statusNormativeNevalidate || [];
-    var poate = neconfirmate.length === 0 && normativeNevalidate.length === 0;
+    // Simetrie cu vecinatatile (v4.2): sursele normative pot fi "validate" fie institutional (status
+    // 'validat_sursa' in normative.json), fie prin asumarea raspunderii profesionale a proiectantului
+    // atestat pentru ACEST export (bifa dedicata in panoul SSI) — la fel cum semnatura lui ar fi singura
+    // "validare" si in afara platformei.
+    var normativeBlocheaza = normativeNevalidate.length > 0 && !confirmatDeProiectant;
+    var poate = neconfirmate.length === 0 && !normativeBlocheaza;
     var motive = [];
     if (neconfirmate.length) motive.push(neconfirmate.length + ' vecinătate/vecinătăți au doar estimare automată, neconfirmată de proiectant (' + neconfirmate.map(function (v) { return v.id; }).join(', ') + ').');
-    if (normativeNevalidate.length) motive.push(normativeNevalidate.length + ' sursă/surse normative fără validare de inginer/arhitect atestat.');
-    return { poate: poate, motiv: motive.length ? motive.join(' ') : null };
+    if (normativeNevalidate.length && !confirmatDeProiectant) motive.push(normativeNevalidate.length + ' sursă/surse normative fără validare de inginer/arhitect atestat (bifează confirmarea din panoul SSI pentru a asuma răspunderea profesională).');
+    return { poate: poate, motiv: motive.length ? motive.join(' ') : null, normativeAsumatePeRaspundere: !!(normativeNevalidate.length && confirmatDeProiectant) };
   }
 
   G.SSI_M14_VERDICT = { genereazaFisaNeconformitate: genereazaFisaNeconformitate, comparaVersiuniProiect: comparaVersiuniProiect, genereazaVerdictGeneral: genereazaVerdictGeneral, poateFiExportatFinal: poateFiExportatFinal };
