@@ -471,6 +471,26 @@
     return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']);
   }
 
+  // Model Florin (pct. 4, tabel de sinteza): "Tabel de verificare - praguri instalatii PSI". Pragurile NU
+  // sunt inventate pt acest tabel — sunt EXACT cele deja folosite de motorul de calcul (urbanx-doc-engine.js,
+  // functia care seteaza ac.sprinklere_oblig/idsi_oblig/hidranti_int_oblig/hidranti_ext_oblig/desfumare_oblig),
+  // doar reformatate ca tabel literal cu valoarea reala a proiectului alaturi, pt trasabilitate vizuala.
+  function _tblPraguriInstalatii(D, ac, m5) {
+    var Sc = +D.Sc || (m5 && m5.arie_proiectata_mp) || 0;
+    var Sd = +D.Sd || Sc;
+    var niv = +D.niv_supraterane || 1;
+    var H = +D.H || 0;
+    function da(b) { return b ? 'DA' : 'nu'; }
+    var rows = [
+      ['Hidranți interiori', 'volum > 5.000 m³ SAU Sd > 2.000 m² SAU destinație cu public (mall/sport/medical/parcaj/hală)', 'Sd = ' + Sd + ' m²', da(ac.hidranti_int_oblig), 'Sd proiect ' + Sd + ' m² vs. prag 2.000 m² — ' + (ac.hidranti_int_oblig ? 'pragul e depășit sau destinația e cu public' : 'sub prag, destinație fără public')],
+      ['Hidranți exteriori', 'Sc > 600 m² SAU niveluri ≥ 3', 'Sc = ' + Sc + ' m², niv = ' + niv, da(ac.hidranti_ext_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 600 m²; niv proiect ' + niv + ' vs. prag 3'],
+      ['Sprinklere', 'Sc > 3.000 m² SAU H > 28 m (cap. 7 P118/2-2013)', 'Sc = ' + Sc + ' m², H = ' + H + ' m', da(ac.sprinklere_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 3.000 m²; H proiect ' + H + ' m vs. prag 28 m'],
+      ['IDSAI', 'Sc > 2.500 m² (P118-3/2015 + Ord. 6025/2018)', 'Sc = ' + Sc + ' m²', da(ac.idsi_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 2.500 m²'],
+      ['Desfumare', 'Sc > 2.500 m² SAU H > 28 m SAU parcaj SAU (hală industrială cu H>8m/Sc>1.000m²)', 'Sc = ' + Sc + ' m², H = ' + H + ' m, funcțiune = ' + (D.functiune || '—'), da(ac.desfumare_oblig), 'Sc/H proiect sub praguri și funcțiunea nu e parcaj/hală — verificare explicită, nu presupunere']
+    ];
+    return tbl(rows, ['Instalație', 'Prag normativ (sursă/articol)', 'Valoare proiect', 'Obligatorie', 'Motivare']);
+  }
+
   // v4.1: tabel unic de neconformitati, cu coloanele "Tip" si "Localizare in proiect (DWG)" cerute de completare
   function _tblNeconformitatiV41(fise) {
     if (!fise.length) return '<p>Nu au fost identificate neconformități.</p>';
@@ -843,8 +863,13 @@
       { h: '3.4.c. Geometria căilor de evacuare', html: '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025. Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + (m5bGrupuri ? 'vezi ariile per compartiment la 1.4.f' : ((m5.arie_proiectata_mp || D.Sc || '—') + ' m²')) + '). Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).</p>' },
       { h: '3.4.d. Numărul fluxurilor de evacuare', html: (function () {
         var modul = ac.flux_evacuare_m || 0.60;
-        return '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare (modul de trecere ' + modul + ' m lățime utilă, conform P118-1/2025).</p>' +
-          '<p>Pentru o locuință unifamilială cu ~4 persoane/unitate, un singur flux de evacuare (o ușă/scară cu lățime utilă ≥ 0,90–1,00 m, adică peste un modul de ' + modul + ' m) este suficient — F = N/C ≈ 1 pentru ocupanța redusă tipică rezidențială unifamiliale; căile de evacuare din proiect (uși interioare ≥0,80m, scară ≥0,90m) asigură deja lățimea necesară unui singur flux, fără a fi nevoie de un calcul suplimentar de lărgire.</p>' +
+        var nrUnitatiFlux = cladiriPropuse.length || 1;
+        var Nest = nrUnitatiFlux * 4;
+        return '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare (Tabelul 150, P118-1/2025).</p>' +
+          '<p><b>▤ Tabel de calcul — Fluxuri de evacuare</b></p>' +
+          tbl([['Locuință (per unitate)', Nest / nrUnitatiFlux + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', 'neextras din Tabelul 150 P118-1/2025 — normativ nu conține încă rândul cu capacitatea C (pers./flux) pe destinație în normative.json', 'nedeterminat — necesită C din Tabelul 150', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', '—']],
+            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Tabel 150)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']) +
+          '<p style="font-size:9pt;color:#666">Verificarea F=N/C rămâne nedeterminată numeric până la extracția Tabelului 150 (capacitatea de persoane pe flux, funcție de destinație) în normative.json — se aplică, ca verificare intermediară deja validă, compararea lățimii utile a căilor/ușilor de evacuare din proiect cu modulul de trecere normat: pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.</p>' +
           (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
       })() },
       { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: '<p>' + (D._persoane_vulnerabile && D._persoane_vulnerabile.length
@@ -864,6 +889,9 @@
       { h: '4.9. Instalație de desfumare/evacuare fum și gaze fierbinți', html: '<p>' + (ac.desfumare_oblig ? 'Necesară conform configurației declarate la 3.4.a — metodă, spații desfumate și debite se stabilesc la faza de proiect tehnic.' : 'Nu este cazul, motivat la pct. 3.4.a — control fum prin tiraj natural, suficient pentru configurația proiectului.') + '</p>' },
       { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
       { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru un regim de înălțime redus, într-un ansamblu rezidențial, evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' },
+      { h: '▤ Tabel de verificare — praguri instalații PSI (P118/2-2013, P118-3/2015)', html:
+        '<p>Pragurile provin din pragurile deja aplicate de motorul de calcul al platformei (aceleași valori care produc concluziile DA/NU de la 4.1–4.11 de mai sus) — se compară explicit cu valoarea reală a proiectului pentru fiecare instalație, nu doar concluzia finală.</p>' +
+        _tblPraguriInstalatii(D, ac, m5) },
       { h: '5. Măsuri compensatorii / corecții de proiect', html:
         '<p>Tabelul de mai jos distinge explicit între cerințe care necesită <b>corectare directă</b> a proiectului (nu au alternativă legală documentată) și cele pentru care există o <b>măsură compensatorie posibilă</b> (selecția rămâne a proiectantului atestat, nu se aplică automat).</p>' +
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
