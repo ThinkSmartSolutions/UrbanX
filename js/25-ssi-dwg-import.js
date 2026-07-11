@@ -438,10 +438,23 @@
     if (vecinLayer) {
       var vecini = _entitatiPePoligon(ents, vecinLayer);
       var refPol = (propusPol || existentPol);
+      var identificariProprietati = extrageIdentificareProprietati(ents);
       out.vecinatati_geometrie = vecini.map(function (v, idx) {
         var dist = refPol ? calculeazaDistantaMinima(refPol.puncte, v.puncte) : null;
+        var c = _centroid(v.puncte);
+        // CF/proprietar reale (daca sunt scrise in desen, ex. ridicare topografica) — mult mai de
+        // incredere decat o estimare OSM; se cauta identificarea cea mai apropiata de conturul vecinului.
+        var identPotrivita = null, dMinIdent = Infinity;
+        identificariProprietati.forEach(function (idf) {
+          if (idf.x == null || idf.y == null) return;
+          var d = Math.hypot(idf.x - c.x, idf.y - c.y);
+          if (d < dMinIdent) { dMinIdent = d; identPotrivita = idf; }
+        });
+        var identConfirmata = identPotrivita && dMinIdent <= 40 ? identPotrivita : null;
         return { id: 'V' + (idx + 1), poligon: v.puncte, arie_mp: Math.round(ariePoligonShoelace(v.puncte)),
-          distanta_min_la_propriu_m: dist != null ? Math.round(dist * 100) / 100 : null };
+          distanta_min_la_propriu_m: dist != null ? Math.round(dist * 100) / 100 : null,
+          cf_numar: identConfirmata ? identConfirmata.cf : null,
+          identificare_text: identConfirmata ? identConfirmata.text_brut : null };
       });
     }
 
@@ -477,6 +490,23 @@
     // generalizeaza dincolo de perechi: 3 cladiri lipite una de alta = un singur grup "triplex",
     // tratat ca un volum construit continuu, nu ca perechi separate (regula v4.4 #25).
     out.grupuri_constructive = _grupeazaInComponenteConexe(out.cladiri_propuse, out.distante_intre_cladiri || []);
+    return out;
+  }
+
+  // Ridicarile topografice reale (ex. export Eterra) marcheaza proprietatile vecine cu identificarea
+  // lor REALA — nr. de Carte Funciara si/sau numele proprietarului — mult mai de incredere decat o
+  // estimare din OSM. Cautam generic acest pattern in TEXT/MTEXT (nu doar pe layere numite "Eterra",
+  // orice software de cadastru poate scrie "CF. XXXXX" langa conturul unui vecin).
+  function extrageIdentificareProprietati(entities) {
+    var out = [];
+    (entities || []).forEach(function (e) {
+      if (e.type !== 'TEXT' && e.type !== 'MTEXT') return;
+      var clean = _cleanMText(e.text || '');
+      var mCF = clean.match(/C\.?F\.?\s*(\d{3,7})/i);
+      if (mCF || /^[A-ZĂÂÎȘȚ][A-ZĂÂÎȘȚ ]{4,40}$/.test(clean)) {
+        out.push({ x: e.x, y: e.y, cf: mCF ? mCF[1] : null, text_brut: clean });
+      }
+    });
     return out;
   }
 
@@ -537,6 +567,7 @@
     mapLayers: mapLayers, extractGeometrie: extractGeometrie,
     ariePoligonShoelace: ariePoligonShoelace, calculeazaDistantaMinima: calculeazaDistantaMinima,
     extrageAdnotariUrbanism: extrageAdnotariUrbanism, extrageCladiriDePeLayer: extrageCladiriDePeLayer,
+    extrageIdentificareProprietati: extrageIdentificareProprietati,
     analizeazaLayerePoligoane: analizeazaLayerePoligoane, extrageFazaDinDXF: extrageFazaDinDXF,
     grupeazaInComponenteConexe: _grupeazaInComponenteConexe
   };

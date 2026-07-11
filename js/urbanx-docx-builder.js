@@ -412,7 +412,7 @@
       if (v.distanta_necesara_m == null || v.distanta_masurata_m == null) conformTxt = 'NECUNOSCUT — date incomplete';
       else if (v.conforma === true) conformTxt = 'DA';
       else conformTxt = (n ? (n.status === 'NECONFORM_CORECTIE_PROIECT' ? 'CORECȚIE DIRECTĂ' : 'MĂSURĂ COMPENSATORIE') : 'NECONFORM');
-      return [esc(v.id || '—'), esc(v.destinatie_declarata || '—'), esc(v.grad_vecin || '—'), esc((v.risc_vecin_estimat || '—').replace('_', ' ')),
+      return [esc(v.id || '—') + (v.cf_numar ? ' (CF ' + esc(v.cf_numar) + ')' : ''), esc(v.destinatie_declarata || '—'), esc(v.grad_vecin || '—'), esc((v.risc_vecin_estimat || '—').replace('_', ' ')),
         v.perete_CF ? 'DA' : 'nu', (v.distanta_necesara_m != null ? v.distanta_necesara_m + ' m' : '—') + ' / ' + (v.distanta_masurata_m != null ? v.distanta_masurata_m + ' m' : 'necunoscută'),
         conformTxt];
     }), ['Vecinătate', 'Destinație clădire vecină', 'Grad rezistență vecin', 'Risc vecin', 'Perete CF', 'Distanță necesară/reală', 'Conform']);

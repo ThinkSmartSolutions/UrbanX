@@ -83,6 +83,7 @@
       '<div><div class="ssiui-lbl">Distanță reală (m)</div><input class="ssiui-inp" type="number" step="0.1" value="' + (v.distanta_masurata_m != null ? v.distanta_masurata_m : '') + '" onchange="SSI_UI._set(' + idx + ',\'distanta_masurata_m\',parseFloat(this.value)||null)"></div>' +
       '<div style="font-size:9px;color:#64748b;line-height:1.3">' + _sursaLabel(v) + (v.detaliu_sursa ? '<br><span title="' + esc(v.detaliu_sursa) + '" style="cursor:help">ⓘ detaliu</span>' : '') + '</div>' +
       '<button class="ssiui-btn sec" onclick="SSI_UI._remove(' + idx + ')">✕</button>' +
+      (v.cf_numar ? '<div style="grid-column:1/-1;font-size:10px;color:#6ee7b7;margin-top:-4px">📋 identificare reală din ridicarea topografică: <b>CF ' + esc(v.cf_numar) + '</b>' + (v.identificare_text && v.identificare_text !== ('CF ' + v.cf_numar) && !/^C\.?F\.?/i.test(v.identificare_text) ? ' — ' + esc(v.identificare_text) : '') + '</div>' : '') +
       (estimatNeconfirmat ? '<label style="grid-column:1/-1;display:flex;gap:6px;align-items:center;font-size:10px;color:#fbbf24;margin-top:-4px">' +
         '<input type="checkbox" onchange="SSI_UI._confirmaVecinatate(' + idx + ', this.checked)"> Estimare conservatoare neconfirmată (grad V, risc mare) — bifează după ce verifici/corectezi (necesar pentru scenariul FINAL)</label>' : '') +
       '</div>';
@@ -217,7 +218,10 @@
     var geo = G.SSI_DWG_IMPORT.extractGeometrie(parsed, mapareFinala);
     STATE.geometrie_teren = geo;
     (geo.vecinatati_geometrie || []).forEach(function (vg) {
-      STATE.vecinatati.push({ id: vg.id, distanta_masurata_m: vg.distanta_min_la_propriu_m, sursa_distanta: 'dwg', destinatie_declarata: null, grad_rezistenta_estimat: null, perete_CF_pe_fatada_comuna: false });
+      // CF/proprietar reale (ex. ridicare topografica Eterra) — identificare REALA a vecinului,
+      // nu doar geometrie anonima; destinatia/gradul raman tot input uman (CF-ul nu spune ce fel
+      // de cladire e, doar cine e proprietarul terenului).
+      STATE.vecinatati.push({ id: vg.id, distanta_masurata_m: vg.distanta_min_la_propriu_m, sursa_distanta: 'dwg', destinatie_declarata: null, grad_rezistenta_estimat: null, perete_CF_pe_fatada_comuna: false, cf_numar: vg.cf_numar || null, identificare_text: vg.identificare_text || null });
     });
     STATE.cladiriPropuse = geo.cladiri_propuse || [];
     STATE.tipuriCladiri = {};

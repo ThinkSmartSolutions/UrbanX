@@ -124,7 +124,8 @@
           id: vecin.id, destinatie_declarata: vecin.destinatie_declarata, conforma: true,
           distanta_necesara_m: null, distanta_masurata_m: vecin.distanta_masurata_m != null ? vecin.distanta_masurata_m : null,
           note_aplicate: ['Nu se aplică distanța minimă (Tabelul 4/145) — fără construcție de protejat pe această latură.'],
-          estimat_implicit: false, confirmat: true, certitudine: 'nu_se_aplica', sursa_distanta: vecin.sursa_distanta || 'manual'
+          estimat_implicit: false, confirmat: true, certitudine: 'nu_se_aplica', sursa_distanta: vecin.sursa_distanta || 'manual',
+          cf_numar: vecin.cf_numar || null
         });
         return;
       }
@@ -142,7 +143,8 @@
         rezultate.avertismente.push({ cod: 'AVERT-DISTANTA-NECUNOSCUTA', vecinatate: vecin.id, mesaj: 'Vecinătatea ' + vecin.id + ': distanța reală nu este completată — nu se poate verifica conformitatea până nu e introdusă (manual, din hartă sau din DXF).' });
         rezultate.vecinatati.push({
           id: vecin.id, destinatie_declarata: destinatie, grad_vecin: grad, distanta_necesara_m: null, distanta_masurata_m: null,
-          conforma: null, estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, sursa_distanta: vecin.sursa_distanta || 'manual'
+          conforma: null, estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, sursa_distanta: vecin.sursa_distanta || 'manual',
+          cf_numar: vecin.cf_numar || null
         });
         return;
       }
@@ -162,7 +164,8 @@
         distanta_necesara_m: d.valoare_m, distanta_necesara_norma: d.norma, note_aplicate: d.note_aplicate,
         distanta_masurata_m: vecin.distanta_masurata_m, sursa_distanta: vecin.sursa_distanta || 'manual',
         sursa_url: d.sursa_url, pagina: d.pagina, status_validare: d.status_validare, conforma: conforma,
-        estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, certitudine: vecin.certitudine || (estimatImplicit ? 'presupus_conservator' : 'confirmat_manual')
+        estimat_implicit: estimatImplicit, confirmat: vecin.confirmat === true, certitudine: vecin.certitudine || (estimatImplicit ? 'presupus_conservator' : 'confirmat_manual'),
+        cf_numar: vecin.cf_numar || null
       });
       if (!conforma) {
         rezultate.neconformitati.push({
