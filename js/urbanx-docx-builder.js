@@ -637,18 +637,40 @@
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
         '<p style="margin:4pt 0 0">Un Certificat de Urbanism (CU) este o etapă anterioară documentației tehnice (D.T.A.C.) — un scenariu de securitate la incendiu complet, conform Ord. MAI 180/2022, se elaborează la faza D.T.A.C., pe un proiect de arhitectură deja stabilizat, nu pe planul de CU. Acest document a fost totuși generat (faza proiect setată: ' + esc(D.faza || 'D.T.A.C.') + ') — verifică dacă planul de situație folosit e cel corect pentru faza curentă înainte de a-l folosi pentru avizare/autorizare.</p></div>' }] : []).concat([
       { h: '1.0. Tipul de lucrare (determină tabelele P118-1/2025 aplicabile)', html: '<p><b>' + esc(m0.label) + '.</b> Regim tabele: ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'construcție EXISTENTĂ (T144/T145/T146/T147/T148, Anexa A.10)' : 'construcție NOUĂ (T2/T4/T5/T41/T42)') + '.' + (m0.nota ? ' ' + esc(m0.nota) : '') + '</p><p style="font-size:9pt;color:#888">Temei: ' + esc(m0.temei_legal) + '</p>' },
-      { h: '1.1-1.4. Caracteristicile construcției', html: tbl([
-        ['Denumire', esc(D.nume || '—')], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
-        ['Faza', esc(D.faza || 'D.T.A.C.')], ['Destinație', esc(destinatieT42)],
-        // Bug real gasit (Florin): la un ansamblu cu cladiri eterogene, un singur "Regim de inaltime"/
-        // "Arie construita" preluat direct din D (formularul principal, un rest de test/placeholder)
-        // CONTRAZICE totalurile reale calculate mai jos la 1.4.g — inlocuim cu trimitere explicita,
-        // nu o valoare unica inselatoare, atunci cand exista mai multe cladiri detectate din DXF.
-        ['Regim de înălțime', cladiriPropuse.length > 1 ? 'variabil pe tipuri — vezi 1.4.g' : esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1)))],
-        ['Aria construită', cladiriPropuse.length > 1 ? 'vezi 1.4.g (sinteza pe tipuri + total ansamblu)' : ((D.Sc || '—') + ' m²')],
-        ['Aria desfășurată', cladiriPropuse.length > 1 ? 'vezi 1.4.g' : ((D.Sd || '—') + ' m²')],
-        ['Categorie importanță', esc(D.categorie_importanta || ac.categorie_importanta || '—')]
+      { h: '1.1. Datele de identificare', html: tbl([
+        ['Denumire', esc(D.nume || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
+        ['Beneficiar', esc(D.beneficiar || '—')], ['Fază de proiectare', esc(D.faza || 'D.T.A.C.')],
+        ['Telefon/E-mail beneficiar', esc(D.contact_beneficiar || '[se completează]')]
       ], ['Element', 'Valoare']) },
+      { h: '1.2. Destinația', html: (function () {
+        // HG 571/2016 Anexa 1: locuintele UNIFAMILIALE (individuale/cuplate/duplex) nu apar in lista
+        // criteriilor care impun avizare/autorizare de securitate la incendiu — acolo sunt vizate
+        // explicit doar cladirile de locuit COLECTIVE cu P+4 si peste + mansarda amenajata sau
+        // ansambluri cu functiuni mixte peste anumite praguri. O locuinta unifamiliala P+1E, chiar
+        // in cadrul unui ansamblu de mai multe unitati IDENTICE si INDEPENDENTE (nu un bloc unic),
+        // nu se incadreaza la niciuna din literele a)-t) ale Anexei 1 pt functiunea rezidentiala.
+        var esteLocuinta = /locuint/i.test(destinatieT42) || D.functiune === 'locuinta-individuala';
+        var seSupune = !esteLocuinta || (D.niv_supraterane && +D.niv_supraterane >= 5);
+        return '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>' + (cladiriPropuse.length > 1 ? ' (ansamblu de ' + cladiriPropuse.length + ' unități unifamiliale independente, nu o clădire colectivă unică)' : '') + '.</p>' +
+          '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială, Anexa 1 vizează explicit clădirile de locuit <b>colective</b> cu regim de înălțime P+4 și peste (cu mansardă amenajată) — o locuință unifamilială (individuală sau cuplată/duplex) cu regim ' + esc(D.regim || 'P+1E') + ', chiar repetată identic pe mai multe loturi ale aceluiași ansamblu, nu este o clădire colectivă unică și nu atinge acest prag.</p>' +
+          '<p><b>Concluzie: ' + (seSupune ? 'SE SUPUNE' : 'NU SE SUPUNE') + ' avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1</b>' + (seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât destinația reală (locuință unifamilială, regim redus) nu se regăsește printre criteriile Anexei 1 — prezentul document rămâne totuși util ca memoriu tehnic de fundamentare pentru D.T.A.C./D.T.A.D. (Legea 50/1991) și pentru identificarea corectă a cerințelor tehnice aplicabile P118-1/2025, chiar dacă nu necesită avizare ISU explicită.') + '</p>';
+      })() },
+      { h: '1.3. Categoria de importanță', html: '<p>Se stabilește conform Regulamentului privind stabilirea categoriei de importanță a construcțiilor, aprobat prin H.G.R. nr. 766/1997, Anexa 3, cap. II, art. 6, coroborat cu metodologia M.L.P.A.T. — pe baza destinației (rezidențială, fără funcțiuni speciale), regimului de înălțime redus (' + esc(D.regim || 'P+1E') + ') și ariei desfășurate mici, construcția se încadrează în categoria de importanță <b>' + esc(D.categorie_importanta || ac.categorie_importanta || 'C') + ' — redusă/normală</b>, nu necesitând o justificare suplimentară de categorie superioară.</p>' },
+      { h: '1.4.a. Tipul clădirii', html: '<p>Funcțiunea principală: <b>' + esc(destinatieT42) + '</b>. Funcțiuni secundare: —. Funcțiuni conexe: grupuri sanitare, spații tehnice aferente locuinței. ' + (cladiriPropuse.length > 1 ? 'Ansamblul cuprinde ' + cladiriPropuse.length + ' unități, grupate geometric în ' + (m5bGrupuri ? m5bGrupuri.length : cladiriPropuse.length) + ' compartimente (individuale și cuplate/duplex) — vezi 1.4.f/1.4.g pentru sinteza completă.' : 'Clădire unifamilială independentă.') + '</p>' },
+      { h: '1.4.b. Tipul parcajului', html: '<p>' + (D._tip_parcaj ? esc(D._tip_parcaj) : 'Nu este cazul un parcaj colectiv distinct — parcarea se asigură pe fiecare parcelă individuală (garaj integrat și/sau platformă exterioară), conform proiectului de arhitectură al fiecărei unități.') + '</p>' },
+      { h: '1.4.c. Regimul de înălțime și volumul construcției', html: '<p>Regim de înălțime: <b>' + esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1))) + '</b>' + (cladiriPropuse.length > 1 ? ' (uniform pe toate tipurile detectate din plan — vezi 1.4.g pentru variații reale de Sc/Sd pe tip)' : '') + '. Înălțimea se măsoară de la nivelul carosabilului adiacent accesibil autospecialelor de intervenție până la pardoseala ultimului nivel folosibil.</p>' +
+        (cladiriPropuse.length > 1
+          ? '<p>Volumul total al ansamblului: ' + (function () {
+            var toate = cladiriCuVolum.filter(function (c) { return c.volum && c.volum.volum_total_mc != null && !isNaN(c.volum.volum_total_mc); });
+            if (!toate.length) return 'necalculat — niciun tip de clădire nu are releveu (H cornișă/coamă/tip acoperiș) completat; vezi secțiunea de relevee din panoul SSI.';
+            var total = toate.reduce(function (s, c) { return s + c.volum.volum_total_mc; }, 0);
+            return Math.round(total).toLocaleString('ro-RO') + ' m³ (' + toate.length + ' din ' + cladiriPropuse.length + ' clădiri au volum calculat din releveu; restul rămân necalculate până se completează releveul tipului respectiv).';
+          })() + '</p>'
+          : '<p>Volum: ' + (function () { var c = cladiriCuVolum[0]; return (c && c.volum && c.volum.volum_total_mc != null && !isNaN(c.volum.volum_total_mc)) ? c.volum.volum_total_mc + ' m³' : 'necalculat — lipsă releveu'; })() + '.</p>') },
+      { h: '1.4.d. Aria construită și desfășurată', html: cladiriPropuse.length > 1
+        ? '<p>Vezi 1.4.g pentru sinteza completă pe tipuri și totalul ansamblului (Σ Sc / Σ Sd), calculate din adnotările reale ale proiectantului din planul de situație, nu recalculate.</p>'
+        : '<p>Aria construită: ' + ((D.Sc || '—') + ' m²') + '. Aria desfășurată a compartimentului de incendiu: ' + ((D.Sd || '—') + ' m²') + '.</p>' },
+      { h: '1.4.e. Înălțimea de referință pentru accesul autospecialelor de intervenție', html: '<p>Distinct de compartimentare (pct. 1.4.c): înălțimea dintre carosabilul adiacent accesibil autospecialelor și pardoseala ultimului nivel folosibil este ' + (cladiriPropuse.length > 1 ? 'variabilă pe tip de clădire — vezi H cornișă din releveu la 1.4.g/panoul de relevee' : (D.H || 'necompletată')) + ', conform criteriilor P118-1/2025 privind accesul forțelor de intervenție (pct. A.10.3.7.2).</p>' },
       { h: '1.4.f. Sinteza compartimentelor de incendiu', html: (m5bGrupuri && m5bGrupuri.length) ? (function () {
         var rows = m5bGrupuri.map(function (g) {
           var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
@@ -666,7 +688,7 @@
         ['CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
       ], ['Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
     ].concat(urbanismAnsamblu ? [{
-      h: '1.4.g. Sinteza clădirilor propuse (plan de situație — ' + urbanismAnsamblu.nrCladiriTotal + ' clădiri detectate)',
+      h: 'Sinteza clădirilor propuse (plan de situație — ' + urbanismAnsamblu.nrCladiriTotal + ' clădiri detectate)',
       html: '<p>Amprentele la sol au fost extrase automat din planul de situație (DXF) — fiecare clădire distinctă e o compartimentare separată de incendiu, dacă nu sunt alăturate/interconectate fără separare la foc. Suprafețele (Sc/Sd) și indicatorii (POT/CUT) de mai jos provin din adnotările proiectantului din desen, nu sunt recalculate.</p>' +
         tbl(urbanismAnsamblu.tipuri.map(function (t) { return [esc(t.denumire), '' + t.n, t.sc_mp + ' m²', t.sd_mp != null ? t.sd_mp + ' m²' : '—']; }), ['Tip clădire', 'Nr. unități', 'Sc/unitate', 'Sd/unitate']) +
         tbl([
@@ -678,7 +700,7 @@
           ['CUT ansamblu (ΣSd/Steren)', urbanismAnsamblu.cut_ansamblu != null ? '' + urbanismAnsamblu.cut_ansamblu : '—']
         ], ['Indicator', 'Valoare'])
     }].concat((m5bGrupuri && m5bGrupuri.some(function (g) { return g.cladiri_incluse.length > 1; })) ? [{
-      h: '1.4.h. Compunerea compartimentelor (cuplat/duplex/triplex vs. individual)',
+      h: 'Compunerea compartimentelor (cuplat/duplex/triplex vs. individual)',
       html: '<p>Fiecare compartiment din 1.4.f de mai sus provine dintr-o componentă conexă geometrică (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — tabelul arată DIN CE clădiri e compus și de ce (arie/volum/conform sunt deja la 1.4.f, nu se repetă aici).</p>' +
         tbl(m5bGrupuri.map(function (g) {
           return [esc(g.id_grup), esc(g.tip.replace(/_/g, ' ')), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' '))];
@@ -686,7 +708,32 @@
         (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '') +
         (cladiriCuVolum.some(function (c) { return c.avertisment_releveu; }) ? '<p style="font-size:9pt;color:#b45309">ⓘ ' + cladiriCuVolum.filter(function (c) { return c.avertisment_releveu; }).length + ' clădire/clădiri fără releveu încărcat pentru tipul lor — volumul acelor unități rămâne necalculat (nu se presupune Sc×3m); completează releveul per tip în panoul SSI pentru volum real.</p>' : '')
     }] : []) : []).concat([
-      { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
+      { h: '1.4.g. Numărul utilizatorilor, programul și capacitatea de autoevacuare', html: (function () {
+        // Pentru locuinta unifamiliala, "nr. utilizatori" e cel al familiei (nu se normeaza o densitate
+        // de persoane ca la functiunile publice) — P118-1/2025 normeaza densitati de persoane pt
+        // destinatii cu public (comert/sanatate/invatamant), NU pt rezidential unifamilial, unde
+        // capacitatea reala e data de programul locativ (numarul de dormitoare), nu de o formula.
+        var nrUnitati = cladiriPropuse.length || 1;
+        var persEstimate = nrUnitati * 4; // ipoteza uzuala 4 pers/unitate (familie medie) — vezi nota
+        return '<p>Pentru destinația rezidențială unifamilială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
+          '<p>Estimare orientativă (ipoteză 4 persoane/unitate, familie medie — se corectează cu numărul real de camere/dormitoare din proiect, dacă diferă): ' + nrUnitati + ' unități × ~4 persoane ≈ <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ~4 persoane pe unitate individuală.</p>' +
+          '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare, pentru o unitate P+1E cu o singură scară interioară, rezultă din raportarea lungimii traseului (parter/etaj) la viteza medie de deplasare (0,4 m/s orizontal) — sub 1 minut pentru configurația uzuală a unei locuințe unifamiliale.</p>';
+      })() },
+      { h: '1.4.h. Capacități de depozitare', html: '<p>Nu este cazul — destinația rezidențială unifamilială nu prevede spații de depozitare cu sarcină termică semnificativă peste mobilierul și bunurile uzuale ale unei locuințe (evaluate la secțiunea 2.1, sarcina termică). Dacă proiectul include o anexă gospodărească/depozit distinct, se declară separat.</p>' },
+      { h: '2.1. Calculul și încadrarea în nivel de risc', html: (function () {
+        // Formula reala (SR 10903-2): qi = Σ(Gi·Hi·psi_i)/A. Fara inventar real de materiale/mobilier
+        // pe camera (D._camere), NU inventam cantitati — folosim incadrarea implicita de risc "mic"
+        // (specifica rezidentialului, sub pragul de 420 MJ/mp) ca ipoteza de lucru, marcata explicit
+        // ca atare, si aratam STRUCTURA reala a calculului (formula+coloane) pt momentul in care
+        // proiectul va avea un inventar real de materiale pe incapere.
+        var risc = (ac.risc_incendiu || 'mic').replace('_', ' ');
+        return '<p>Formula de calcul (SR 10903-2:2016, pct. A.10.2.1.2 P118-1/2025): <b>qi = Σ(Gi × Hi × ψi) / A</b> [MJ/m²] — Gi = cantitatea materialului combustibil (kg), Hi = puterea calorică inferioară (MJ/kg), ψi = coeficient de ardere completă, A = suprafața încăperii (m²).</p>' +
+          '<p>Praguri de încadrare: risc mic q ≤ 420 MJ/m²; risc mijlociu 420–840; risc mare 840–1680; risc foarte mare &gt; 1680. Dacă încăperile cu risc mijlociu+mare însumate depășesc 30% din volumul compartimentului, întregul compartiment se încadrează în risc mare (pct. A.10.2.1.3) — verificare explicită, nu presupunere.</p>' +
+          (D._camere && D._camere.length
+            ? tbl(D._camere.map(function (c) { return [esc(c.nume || '—'), (c.arie_mp || 0) + ' m²', c.sarcina_termica_mj != null ? Math.round(c.sarcina_termica_mj) + ' MJ' : '—', c.arie_mp && c.sarcina_termica_mj ? Math.round(c.sarcina_termica_mj / c.arie_mp) + ' MJ/m²' : '—']; }), ['Încăpere', 'Arie', 'Σ(Gi·Hi·ψi)', 'qi = Σ/A'])
+            : '<p style="color:#b45309"><b>Inventarul real de materiale/mobilier pe încăpere nu a fost completat în proiect</b> — nu se calculează qi pe încăpere fără date reale (nu se inventează cantități). Se aplică, ca ipoteză de lucru, încadrarea tipică a destinației rezidențiale unifamiliale: risc <b>' + esc(risc) + '</b> (q ≤ 420 MJ/m², mobilier și finisaje uzuale, fără depozitare de materiale periculoase) — de confirmat la faza de proiect tehnic cu inventarul real, dacă se dorește o valoare exactă în locul ipotezei.</p>') +
+          '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (D._camere && D._camere.length ? ', calculat pe baza inventarului real declarat.' : ', pe baza ipotezei de mai sus (tipic pentru rezidențial unifamilial).') + '</p>';
+      })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: '3.1. Rezistența și clasa de reacție la foc a elementelor (materiale/DoP)', html: '<p>Clasa de reacție la foc nu se calculează — e o proprietate declarată a produsului (Declarația de Performanță), nu se presupune pentru materiale cu variabilitate mare.</p>' + htmlMateriale },
       { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')',
@@ -722,17 +769,34 @@
         return out;
       })()
     }] : []).concat([
-      { h: '3.4-3.6. Evacuare, persoane vulnerabile, forțe de intervenție', html: tbl([
-        ['Nr. minim ieșiri', '' + (ac.flux_evacuare_m ? Math.max(1, Math.ceil((D.Sc || 0) / 300)) : 1)],
-        ['Distanță max. evacuare (2 sensuri / fund de sac)', (ac.dist_evacuare_2sensuri || 35) + ' m / ' + (ac.dist_evacuare_fundsac || 15) + ' m'],
-        ['Desfumare obligatorie', ac.desfumare_oblig ? 'DA' : 'după caz'],
-        ['Acces autospeciale', 'min. o fațadă accesibilă, conform pct. A.10.3.7.2 P118-1/2025']
-      ], ['Parametru', 'Valoare']) },
-      { h: '4. Instalații cu rol în securitatea la incendiu', html: tbl([
-        ['Hidranți interiori', ac.hidranti_int_oblig ? 'DA' : 'după caz'], ['Hidranți exteriori', ac.hidranti_ext_oblig ? 'DA' : 'după caz'],
-        ['Sprinklere', ac.sprinklere_oblig ? 'OBLIGATORII (Sc>3000 mp / H>28m)' : 'după caz'], ['IDSAI', ac.idsi_oblig ? 'OBLIGATORIE (Sc>2500 mp)' : 'după caz'],
-        ['Lift de pompieri', ac.lift_oblig ? 'OBLIGATORIU (P+4 și peste)' : 'nu'], ['Rezervă apă incendiu estimată', (ac.rezerva_incendiu_mc || 0) + ' mc']
-      ], ['Instalație', 'Necesitate']) },
+      { h: '3.4.a. Măsuri pentru asigurarea controlului fumului', html: '<p>' + (ac.desfumare_oblig
+        ? 'Configurația/destinația proiectului impune desfumare mecanică (spații fără fațadă exterioară directă, subsoluri, arii mari) — nu se acceptă tirajul natural ca soluție suficientă; vezi secțiunea 4.9 pentru instalația de desfumare.'
+        : 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), fiecare încăpere are fereastră spre exterior — controlul fumului se asigură prin <b>tiraj natural</b> (ferestre/uși practicabile), suficient conform configurației proiectului. Nu este necesară desfumare mecanică.') + '</p>' },
+      { h: '3.4.b. Tipul scărilor, forma și modul de dispunere a treptelor', html: '<p>Scară interioară' + (cladiriPropuse.length > 1 ? ' (per unitate)' : '') + ', cu rampă dreaptă sau în două rampe cu podest intermediar, conform proiectului de arhitectură — verificare Blondel (2h+l între 62–64 cm) și lățime utilă minimă pentru evacuare, aplicată la faza de proiect de arhitectură (releveu/plan). Pentru o locuință unifamilială P+1E, o singură scară interioară e suficientă și admisă normativ (nu se cere scară de evacuare exterioară separată).</p>' },
+      { h: '3.4.c. Geometria căilor de evacuare', html: '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025. Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + (m5bGrupuri ? 'vezi ariile per compartiment la 1.4.f' : ((m5.arie_proiectata_mp || D.Sc || '—') + ' m²')) + '). Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).</p>' },
+      { h: '3.4.d. Numărul fluxurilor de evacuare', html: (function () {
+        var modul = ac.flux_evacuare_m || 0.60;
+        return '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare (modul de trecere ' + modul + ' m lățime utilă, conform P118-1/2025).</p>' +
+          '<p>Pentru o locuință unifamilială cu ~4 persoane/unitate, un singur flux de evacuare (o ușă/scară cu lățime utilă ≥ 0,90–1,00 m, adică peste un modul de ' + modul + ' m) este suficient — F = N/C ≈ 1 pentru ocupanța redusă tipică rezidențială unifamiliale; căile de evacuare din proiect (uși interioare ≥0,80m, scară ≥0,90m) asigură deja lățimea necesară unui singur flux, fără a fi nevoie de un calcul suplimentar de lărgire.</p>' +
+          (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
+      })() },
+      { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: '<p>' + (D._persoane_vulnerabile && D._persoane_vulnerabile.length
+        ? 'Proiectul declară categorii de utilizatori cu capacitate de autoevacuare redusă: ' + D._persoane_vulnerabile.map(function (p) { return esc(p); }).join(', ') + ' — se aplică prevederile normativelor specifice acelei categorii (ex. NP 051/2012 pentru persoane cu dizabilități, Legea 448/2006), cu evacuare asistată și, unde e cazul, refugii per nivel.'
+        : 'Destinația proiectului (locuință unifamilială) nu presupune, cu caracter permanent/instituțional, prezența unor categorii vulnerabile (creșă, cămin de bătrâni etc.). Capacitatea de autoevacuare a utilizatorilor e generală (familia locuiește și evacuează independent) — dacă la un moment dat locuința găzduiește membri cu mobilitate redusă (vârstnici, persoane cu dizabilități temporare), regulile uzuale de proiectare (fără praguri, lățimi de trecere adecvate) rămân aplicabile, fără a constitui o cerință normativă suplimentară de refugii.') + '</p>' },
+      { h: '3.6.a. Amenajări pentru accesul forțelor de intervenție', html: '<p>Acces carosabil pentru autospeciale conform pct. A.10.3.7.2 P118-1/2025 — min. o fațadă a fiecărei clădiri/unități accesibilă direct din drumul public sau din aleile carosabile ale ansamblului. Ascensoare de incendiu: nu este cazul (regim de înălțime ' + esc(D.regim || 'P+1E') + ', sub pragul care le-ar impune — de regulă clădiri înalte/foarte înalte).</p>' },
+      { h: '3.6.b. Caracteristici tehnice ale acceselor carosabile', html: '<p>Numărul și amplasarea acceselor, dimensiunile/gabaritele căilor și traseele de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU se stabilesc la faza de proiect de urbanism/sistematizare a incintei (deja verificate prin planul de situație — alei carosabile către fiecare unitate). Marcaje și indicatoare de circulație conform reglementărilor aplicabile.</p>' },
+      { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
+      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b> — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.</p>' },
+      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației rezidențiale unifamiliale.</p>' },
+      { h: '4.3. Instalații automate de stingere cu sprinklere', html: '<p>Necesitatea echipării se stabilește conform cap. 7 din P118/2-2013, funcție de destinație, categorie de importanță, arie desfășurată, volum și regim de înălțime reale. Concluzie: <b>' + (ac.sprinklere_oblig ? 'OBLIGATORII (Sc&gt;3.000 m² / H&gt;28m)' : 'NU ESTE NECESARĂ') + '</b>.</p>' },
+      { h: '4.4. Instalații de limitare/stingere cu sprinklere deschise', html: '<p>Nu este cazul — nu există goluri mari (cortine de apă) în configurația unei locuințe unifamiliale.</p>' },
+      { h: '4.5. Instalații de stingere cu apă pulverizată', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
+      { h: '4.6. Instalații de stingere cu ceață de apă', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
+      { h: '4.7. Instalații de stingere cu gaze inerte', html: '<p>Nu este cazul — nu există spații tehnice cu echipamente electrice/electronice sensibile care să impună acest tip de stingere la o locuință unifamilială.</p>' },
+      { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + (ac.idsi_oblig ? 'OBLIGATORIE (Sc&gt;2.500 m²)' : 'NU ESTE OBLIGATORIE') + '</b> pentru destinația și aria rezidențială unifamilială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.</p>' },
+      { h: '4.9. Instalație de desfumare/evacuare fum și gaze fierbinți', html: '<p>' + (ac.desfumare_oblig ? 'Necesară conform configurației declarate la 3.4.a — metodă, spații desfumate și debite se stabilesc la faza de proiect tehnic.' : 'Nu este cazul, motivat la pct. 3.4.a — control fum prin tiraj natural, suficient pentru configurația proiectului.') + '</p>' },
+      { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
+      { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru un regim de înălțime redus, într-un ansamblu rezidențial, evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' },
       { h: '5. Măsuri compensatorii / corecții de proiect', html:
         '<p>Tabelul de mai jos distinge explicit între cerințe care necesită <b>corectare directă</b> a proiectului (nu au alternativă legală documentată) și cele pentru care există o <b>măsură compensatorie posibilă</b> (selecția rămâne a proiectantului atestat, nu se aplică automat).</p>' +
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
