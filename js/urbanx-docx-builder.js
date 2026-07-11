@@ -435,6 +435,14 @@
     var m9niv = G.SSI_ENGINE.m9_niveluriMaxime(m0, { grad: grad, destinatie: destinatieT42, niveluri_proiectate: D.niv_supraterane });
     var m6b = G.SSI_ENGINE.m6b_clasificareVecinatati(m0, { grad_stabilitate: grad }, D._vecinatati || []);
 
+    // M6c + urbanism ansamblu — cladirile proprii detectate din planul de situatie (DXF), daca sunt
+    // mai multe de 1 (ansamblu/plan de lotizare, nu o singura constructie). Tabelul 4/145 se aplica
+    // INTRE cladirile proprii la fel ca fata de vecinii externi (M6b) — nu doar la limita de proprietate.
+    var cladiriPropuse = D._cladiri_propuse || [];
+    var distanteIntreCladiri = (D.geometrie_teren && D.geometrie_teren.distante_intre_cladiri) || [];
+    var m6c = (cladiriPropuse.length > 1) ? G.SSI_ENGINE.m6c_distanteIntreCladiriProprii(m0, { grad_stabilitate: grad }, distanteIntreCladiri, 'mic') : null;
+    var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.geometrie_teren && D.geometrie_teren.limita_proprietate && D.geometrie_teren.limita_proprietate.arie_mp) : null;
+
     // v4.1 — M14: fiecare neconformitate trece prin taxonomia cu 3 stari (CORECTIE_PROIECT vs MASURA_COMPENSATORIE_POSIBILA),
     // NU se mai decide manual "compensabil" — se deriva din existenta solutiilor in catalogul M15.
     var verificariM14 = [];
@@ -461,6 +469,15 @@
         }));
       }
     });
+    if (m6c) {
+      m6c.neconforme.forEach(function (per) {
+        verificariM14.push(G.SSI_M14.verificaConformitate({
+          id: 'M6c-' + per.a + '-' + per.b, tip: 'DISTANTA_VECINATATE_INSUFICIENTA', sens: 'min', unitate: 'm',
+          descriere_element: 'Distanța dintre clădirile proprii ' + per.a + ' și ' + per.b, valoare_proiectata: per.distanta_reala_m, valoare_necesara: per.distanta_necesara_m,
+          sursa_normativa: per.distanta_necesara_norma
+        }));
+      });
+    }
     // ERO-VECIN-INCOMPLET (clasificare lipsa) — corectie directa (completare date), nu tine de catalog
     (m6b.neconformitati || []).filter(function (n) { return n.cod === 'ERO-VECIN-INCOMPLET'; }).forEach(function (n) {
       verificariM14.push({ id: 'M6b-incomplet-' + n.vecinatate, status: 'NECONFORM_CORECTIE_PROIECT', element_id: n.vecinatate, sursa_normativa: 'P118-1/2025 Tabelul 4/145', mesaj: n.mesaj,
@@ -538,7 +555,20 @@
       ], ['Element', 'Valoare']) },
       { h: '1.4.f. Sinteza compartimentelor de incendiu', html: tbl([
         ['CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
-      ], ['Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) },
+      ], ['Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
+    ].concat(urbanismAnsamblu ? [{
+      h: '1.4.g. Sinteza clădirilor propuse (plan de situație — ' + urbanismAnsamblu.nrCladiriTotal + ' clădiri detectate)',
+      html: '<p>Amprentele la sol au fost extrase automat din planul de situație (DXF) — fiecare clădire distinctă e o compartimentare separată de incendiu, dacă nu sunt alăturate/interconectate fără separare la foc. Suprafețele (Sc/Sd) și indicatorii (POT/CUT) de mai jos provin din adnotările proiectantului din desen, nu sunt recalculate.</p>' +
+        tbl(urbanismAnsamblu.tipuri.map(function (t) { return [esc(t.denumire), '' + t.n, t.sc_mp + ' m²', t.sd_mp != null ? t.sd_mp + ' m²' : '—']; }), ['Tip clădire', 'Nr. unități', 'Sc/unitate', 'Sd/unitate']) +
+        tbl([
+          ['Nr. total clădiri', '' + urbanismAnsamblu.nrCladiriTotal],
+          ['Suprafață construită totală (ΣSc)', urbanismAnsamblu.totalSc_mp.toLocaleString('ro-RO') + ' m²'],
+          ['Suprafață desfășurată totală (ΣSd)', urbanismAnsamblu.totalSd_mp ? urbanismAnsamblu.totalSd_mp.toLocaleString('ro-RO') + ' m²' : '—'],
+          ['Suprafață teren (din limita de proprietate DXF)', urbanismAnsamblu.arieTeren_mp ? urbanismAnsamblu.arieTeren_mp.toLocaleString('ro-RO') + ' m²' : 'nedeterminată (mapează layerul LIMITĂ DE PROPRIETATE)'],
+          ['POT ansamblu (ΣSc/Steren)', urbanismAnsamblu.pot_ansamblu_pct != null ? urbanismAnsamblu.pot_ansamblu_pct + '%' : '—'],
+          ['CUT ansamblu (ΣSd/Steren)', urbanismAnsamblu.cut_ansamblu != null ? '' + urbanismAnsamblu.cut_ansamblu : '—']
+        ], ['Indicator', 'Valoare'])
+    }] : []).concat([
       { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: '3.1. Rezistența și clasa de reacție la foc a elementelor (materiale/DoP)', html: '<p>Clasa de reacție la foc nu se calculează — e o proprietate declarată a produsului (Declarația de Performanță), nu se presupune pentru materiale cu variabilitate mare.</p>' + htmlMateriale },
@@ -555,7 +585,16 @@
         html: '<p>Distanțele de siguranță față de construcțiile învecinate au fost determinate prin clasificarea fiecărei vecinătăți (destinație + grad de rezistență + prezența peretelui antifoc) și interogarea tabelului oficial P118-1/2025, NU doar prin măsurarea distanței fizice.</p>' +
           _tblVecinatati(m6b.vecinatati, verificariM14) +
           ((m6b.avertismente || []).length ? (m6b.avertismente || []).map(function (a) { return '<p style="font-size:9pt;color:#b45309"><b>ⓘ</b> ' + esc(a.mesaj) + '</p>'; }).join('') : '') +
-          verificariM14.filter(function (n) { return n.tip === 'DISTANTA_VECINATATE_INSUFICIENTA'; }).map(fmtSolutiiPtNeconformitate).join('') },
+          verificariM14.filter(function (n) { return n.tip === 'DISTANTA_VECINATATE_INSUFICIENTA'; }).map(fmtSolutiiPtNeconformitate).join('') }
+    ].concat(m6c ? [{
+      h: '3.3-bis. Distanțe între clădirile proprii ale ansamblului (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 145' : 'Tabelul 4') + ')',
+      html: '<p>Tabelul 4/145 se aplică între ORICE două construcții/compartimente de incendiu, indiferent dacă aparțin aceluiași beneficiar — nu doar față de vecinătăți externe. Distanțele reale de mai jos sunt distanțe minime muchie-la-muchie, calculate din geometria reală extrasă din DXF (nu din centroizi).</p>' +
+        tbl(m6c.perechi.slice(0, 60).map(function (p) {
+          return [p.a + ' ↔ ' + p.b, p.distanta_necesara_m != null ? p.distanta_necesara_m + ' m' : '—', p.distanta_reala_m != null ? p.distanta_reala_m + ' m' : 'nedeterminată', p.eroare ? 'DE VERIFICAT MANUAL' : (p.conforma ? 'DA' : 'NU')];
+        }), ['Pereche clădiri', 'Distanță necesară', 'Distanță reală', 'Conform']) +
+        (m6c.perechi.length > 60 ? '<p style="font-size:9pt;color:#666">Afișate primele 60 din ' + m6c.perechi.length + ' perechi calculate — toate au fost verificate în cascadă, doar afișarea e trunchiată pentru lizibilitate.</p>' : '') +
+        (m6c.nrNeconforme ? '<p style="color:#dc2626"><b>' + m6c.nrNeconforme + ' pereche/perechi neconforme</b> — vezi măsurile compensatorii posibile la secțiunea 5.</p>' : '<p style="color:#16a34a">Toate perechile de clădiri respectă distanța minimă normată.</p>')
+    }] : []).concat([
       { h: '3.4-3.6. Evacuare, persoane vulnerabile, forțe de intervenție', html: tbl([
         ['Nr. minim ieșiri', '' + (ac.flux_evacuare_m ? Math.max(1, Math.ceil((D.Sc || 0) / 300)) : 1)],
         ['Distanță max. evacuare (2 sensuri / fund de sac)', (ac.dist_evacuare_2sensuri || 35) + ' m / ' + (ac.dist_evacuare_fundsac || 15) + ' m'],
@@ -579,7 +618,7 @@
           : '<p>Toate tabelele normative folosite au status validat.</p>') +
         (vecinatatiNeconfirmate.length ? '<p><b>Vecinătăți:</b> ' + vecinatatiNeconfirmate.length + ' vecinătate/vecinătăți (' + vecinatatiNeconfirmate.map(function (v) { return esc(v.id); }).join(', ') + ') au clasificare estimată conservator (grad V, risc mare), neconfirmată de proiectant.</p>' : '<p>Toate vecinătățile au clasificarea confirmată de proiectant.</p>') +
         ((vecinatatiNeconfirmate.length || (statusNevalidat.length && !D._normative_confirmate_de_proiectant)) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate vecinătățile sunt confirmate' + (statusNevalidat.length ? ' și sursele normative sunt asumate pe răspunderea profesională a proiectantului' : ' și sursele normative au status validat') + '.</p>') }
-    ];
+    ]));
     return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
   }
 

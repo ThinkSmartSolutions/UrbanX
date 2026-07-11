@@ -190,10 +190,57 @@
     };
   }
 
+  // M6c — verificare distante MINIME intre cladirile PROPRII ale aceluiasi ansamblu/plan de situatie
+  // (nu doar fata de vecini externi) — Tabelul 4/145 se aplica intre ORICE doua constructii/
+  // compartimente de incendiu, indiferent daca apartin aceluiasi beneficiar sau nu. Grad si risc
+  // identice pe ambele parti (aceeasi functiune/regim in tot ansamblul), spre deosebire de M6b unde
+  // vecinul e necunoscut si se estimeaza conservator.
+  function m6c_distanteIntreCladiriProprii(m0, m6, distanteIntreCladiri, riscPropriu) {
+    var risc = riscPropriu || 'mic';
+    var rezultate = [];
+    (distanteIntreCladiri || []).forEach(function (perechi) {
+      if (perechi.distanta_m == null) { rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: null, eroare: 'distanta nedeterminata' }); return; }
+      var d = N().getDistantaMinima({
+        tip_lucrare: m0.regim_tabele, grad_propriu: m6.grad_stabilitate, grad_vecin: m6.grad_stabilitate,
+        risc_vecin: risc, sprinklerizat: false, perete_CF_pe_fatada_comuna: false
+      });
+      if (d.eroare) { rezultate.push({ a: perechi.a, b: perechi.b, distanta_reala_m: perechi.distanta_m, eroare: d.eroare }); return; }
+      rezultate.push({
+        a: perechi.a, b: perechi.b, distanta_necesara_m: d.valoare_m, distanta_necesara_norma: d.norma,
+        distanta_reala_m: perechi.distanta_m, conforma: perechi.distanta_m >= d.valoare_m
+      });
+    });
+    var neconforme = rezultate.filter(function (r) { return r.conforma === false; });
+    return { perechi: rezultate, nrNeconforme: neconforme.length, neconforme: neconforme };
+  }
+
+  // M-urbanism — POT/CUT reale ale ansamblului din geometria + adnotarile citite din DXF (nu
+  // recalculate din normativ — sunt date de proiect, doar agregate pe tot ansamblul).
+  function m_urbanismAnsamblu(cladiriPropuse, tipuriCladiri, arieTerenMp) {
+    var grupuri = {};
+    (cladiriPropuse || []).forEach(function (c) {
+      var sc = (c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null) ? c.urbanism_adnotat.sc_mp : c.arie_mp;
+      var sd = (c.urbanism_adnotat && c.urbanism_adnotat.sd_mp != null) ? c.urbanism_adnotat.sd_mp : null;
+      var cheie = 'Sc_' + sc;
+      if (!grupuri[cheie]) grupuri[cheie] = { cheie: cheie, denumire: (tipuriCladiri && tipuriCladiri[cheie]) || ('Tip Sc=' + sc + ' mp'), sc_mp: sc, sd_mp: sd, n: 0 };
+      grupuri[cheie].n++;
+    });
+    var lista = Object.keys(grupuri).map(function (k) { return grupuri[k]; });
+    var totalSc = lista.reduce(function (s, g) { return s + g.n * g.sc_mp; }, 0);
+    var totalSd = lista.reduce(function (s, g) { return s + g.n * (g.sd_mp || 0); }, 0);
+    return {
+      nrCladiriTotal: (cladiriPropuse || []).length, tipuri: lista, totalSc_mp: totalSc, totalSd_mp: totalSd,
+      arieTeren_mp: arieTerenMp || null,
+      pot_ansamblu_pct: arieTerenMp ? +(100 * totalSc / arieTerenMp).toFixed(2) : null,
+      cut_ansamblu: (arieTerenMp && totalSd) ? +(totalSd / arieTerenMp).toFixed(3) : null
+    };
+  }
+
   G.SSI_ENGINE = {
     TIPURI_LUCRARE: TIPURI_LUCRARE,
     m0_tipLucrare: m0_tipLucrare, m5_compartimentare: m5_compartimentare, m6_stabilitate: m6_stabilitate,
     m6b_clasificareVecinatati: m6b_clasificareVecinatati, m9_niveluriMaxime: m9_niveluriMaxime,
+    m6c_distanteIntreCladiriProprii: m6c_distanteIntreCladiriProprii, m_urbanismAnsamblu: m_urbanismAnsamblu,
     ruleazaCascada: ruleazaCascada
   };
   console.log('[SSI] cascada M0-M12 incarcata (window.SSI_ENGINE)');

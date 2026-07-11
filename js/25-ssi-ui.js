@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {} };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
   // Vecinătăți fără construcție reală (teren liber sau limită spre stradă) — nu se aplică distanța minimă
@@ -87,6 +87,31 @@
       '</div>';
   }
 
+  // Sinteza cladirilor detectate automat din planul de situatie (layerul "constructie propusa"
+  // mapat de utilizator) — grupate pe amprenta la sol (Sc), cu Sd/POT/CUT reale citite din
+  // adnotarile proiectantului in desen, NU recalculate. Denumirea tipului (individuala/duplex/etc.)
+  // se da o singura data PE GRUP, nu per cladire (60+ cladiri -> 2-3 click-uri, nu 60+).
+  function renderCladiriDetectate() {
+    if (!STATE.cladiriPropuse.length) return '';
+    var grupuri = _grupeazaCladiri(STATE.cladiriPropuse);
+    var totalSc = STATE.cladiriPropuse.reduce(function (s, c) { return s + (c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null ? c.urbanism_adnotat.sc_mp : c.arie_mp); }, 0);
+    var totalSd = STATE.cladiriPropuse.reduce(function (s, c) { return s + (c.urbanism_adnotat && c.urbanism_adnotat.sd_mp != null ? c.urbanism_adnotat.sd_mp : 0); }, 0);
+    var teren = STATE.geometrie_teren && STATE.geometrie_teren.limita_proprietate && STATE.geometrie_teren.limita_proprietate.arie_mp;
+    var nrDist = (STATE.geometrie_teren && STATE.geometrie_teren.distante_intre_cladiri) ? STATE.geometrie_teren.distante_intre_cladiri.length : 0;
+    return '<div class="ssiui-lbl" style="margin-top:14px">Clădiri proprii detectate din plan (' + STATE.cladiriPropuse.length + ')</div>' +
+      '<div class="ssiui-note" style="border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#6ee7b7">' +
+      STATE.cladiriPropuse.length + ' amprente de clădire găsite pe layerul mapat mai sus, grupate în ' + grupuri.length + ' tip/tipuri după suprafața construită (Sc). ' +
+      'Total Sc≈' + Math.round(totalSc) + ' mp' + (totalSd ? ', Sd≈' + Math.round(totalSd) + ' mp' : '') +
+      (teren ? ', teren≈' + Math.round(teren) + ' mp → POT ansamblu≈' + (100 * totalSc / teren).toFixed(1) + '%' + (totalSd ? ', CUT ansamblu≈' + (totalSd / teren).toFixed(2) : '') : '') +
+      (nrDist ? '. ' + nrDist + ' perechi de distanțe între clădiri calculate (Tabelul 4/145).' : '') + '</div>' +
+      grupuri.map(function (g) {
+        return '<div class="ssiui-row" style="grid-template-columns:1fr 2fr">' +
+          '<div style="font-size:11px;color:#94a3b8;align-self:center">' + g.n + ' clădiri · Sc=' + g.sc_mp + ' mp</div>' +
+          '<input class="ssiui-inp" value="' + esc(STATE.tipuriCladiri[g.cheie] || '') + '" placeholder="ex. Locuință individuală" onchange="SSI_UI._setTipCladire(\'' + g.cheie + '\', this.value)">' +
+          '</div>';
+      }).join('');
+  }
+
   function render() {
     var el = D.getElementById('ssi-ui-body'); if (!el) return;
     el.innerHTML =
@@ -96,6 +121,7 @@
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
       '<div class="ssiui-note">⚠ DXF-ul dă DOAR geometrie (poligoane, distanțe măsurate) — destinația și gradul de rezistență al fiecărei vecinătăți rămân input uman validat de proiectant. Layere așteptate: LIMITA_PROPRIETATE, VECINATATI, CONSTRUCTIE_PROPUSA (sau echivalente).</div>' +
       renderMapareManuala() +
+      renderCladiriDetectate() +
       '<div class="ssiui-lbl" style="margin-top:14px">3.3 — Vecinătăți (clasificare + distanțe minime, Tabelul 4/145)</div>' +
       '<div class="ssiui-note" style="border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08);color:#6ee7b7">📍 Recomandat: auto-detectează din harta platformei (clădiri OSM reale din jurul parcelei active) — se pre-completează cu estimare conservatoare (grad V, risc mare) + distanța reală calculată; tu doar confirmi sau corectezi, ca la o vizită de teren.</div>' +
       '<button class="ssiui-btn pri" onclick="SSI_UI._autoDetecteaza()" style="margin-bottom:10px">📍 Auto-detectează vecinătățile din hartă</button>' +
@@ -127,15 +153,39 @@
   }
   function close() { var m = D.getElementById('ssi-ui-modal'); if (m) m.classList.remove('open'); }
 
+  // Grupeaza cladirile detectate dupa amprenta la sol (Sc din adnotarea "Locuinta", daca exista,
+  // altfel aria poligonului rotunjita) — un ansamblu tipic are 2-3 amprente distincte (ex. individuala
+  // vs duplex/cuplata), nu o denumire per cladire. Proiectantul da numele REAL clusterului o singura
+  // data (2 click-uri, nu 60+), nu clasifica fiecare cladire in parte.
+  function _cheieCluster(c) {
+    var sc = c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null ? c.urbanism_adnotat.sc_mp : c.arie_mp;
+    return 'Sc_' + sc;
+  }
+  function _grupeazaCladiri(cladiri) {
+    var grupuri = {};
+    (cladiri || []).forEach(function (c) {
+      var k = _cheieCluster(c);
+      if (!grupuri[k]) grupuri[k] = { cheie: k, sc_mp: (c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null) ? c.urbanism_adnotat.sc_mp : c.arie_mp, n: 0 };
+      grupuri[k].n++;
+    });
+    return Object.keys(grupuri).map(function (k) { return grupuri[k]; }).sort(function (a, b) { return b.n - a.n; });
+  }
+
   function _aplicaGeometrie(parsed, mapareFinala) {
     var geo = G.SSI_DWG_IMPORT.extractGeometrie(parsed, mapareFinala);
     STATE.geometrie_teren = geo;
     (geo.vecinatati_geometrie || []).forEach(function (vg) {
       STATE.vecinatati.push({ id: vg.id, distanta_masurata_m: vg.distanta_min_la_propriu_m, sursa_distanta: 'dwg', destinatie_declarata: null, grad_rezistenta_estimat: null, perete_CF_pe_fatada_comuna: false });
     });
+    STATE.cladiriPropuse = geo.cladiri_propuse || [];
+    STATE.tipuriCladiri = {};
+    _grupeazaCladiri(STATE.cladiriPropuse).forEach(function (g, idx) {
+      STATE.tipuriCladiri[g.cheie] = 'Tip ' + String.fromCharCode(65 + idx) + ' (Sc=' + g.sc_mp + ' mp)';
+    });
     STATE.pendingDxf = null;
     render();
-    if (G.ss) G.ss('DXF importat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice detectate — completează clasificarea (destinație/grad) manual pentru fiecare.');
+    var msgCladiri = STATE.cladiriPropuse.length > 1 ? (' · ' + STATE.cladiriPropuse.length + ' clădiri proprii detectate în plan (denumește tipurile mai jos)') : '';
+    if (G.ss) G.ss('DXF importat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice detectate' + msgCladiri + ' — completează clasificarea manual unde e cazul.');
   }
 
   var CATEGORII_LABEL = {
@@ -182,10 +232,18 @@
   }
 
   G.SSI_UI = {
-    open: open, getPending: function () { return STATE.tip_lucrare ? { tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren, _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal, _normative_confirmate_de_proiectant: STATE.normativeConfirmate } : null; },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false }; },
+    open: open, getPending: function () {
+      return STATE.tip_lucrare ? {
+        tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
+        _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
+        _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
+        _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri
+      } : null;
+    },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {} }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
+    _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
@@ -215,7 +273,7 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; }
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; }
       return orig(Dproj, v);
     };
     G.UXDocBuilder.__ssiUiPatched = true;
