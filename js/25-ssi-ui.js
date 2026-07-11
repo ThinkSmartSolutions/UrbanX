@@ -399,7 +399,14 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; Dproj._relevee = Dproj._relevee || pending._relevee; }
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; Dproj._relevee = Dproj._relevee || pending._relevee;
+        // BUG REAL gasit (raport Florin): geometrie_teren (distante_intre_cladiri, grupuri_constructive,
+        // limita_proprietate, adnotari_urbanism, faza_dwg) nu era MERGE-uit niciodata aici — doar
+        // testele mele manuale (care setau D.geometrie_teren direct) mascau asta; in fluxul REAL din
+        // UI, Dproj.geometrie_teren era mereu undefined, ceea ce facea ca verificarea de distante intre
+        // cladiri sa ruleze pe 0 perechi si compartimentarea sa cada pe fallback "toate individuale".
+        Dproj.geometrie_teren = Dproj.geometrie_teren || pending.geometrie_teren;
+      }
       return orig(Dproj, v);
     };
     G.UXDocBuilder.__ssiUiPatched = true;

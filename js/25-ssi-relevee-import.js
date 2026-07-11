@@ -20,9 +20,19 @@
   // Formula explicita — nu aproximare presupusa. tip_acoperis necunoscut => eroare explicita,
   // NU forma implicita (un acoperis presupus gresit denatureaza volumul si sarcina termica).
   function calculeazaVolum(releveu, amprentaLaSol) {
-    var h_cornisa = +releveu.inaltime_cornisa, h_coama = +releveu.inaltime_coama;
     var tip = releveu.tip_acoperis;
     var arie = +amprentaLaSol.arie_mp || 0;
+    // Nicio valoare lipsa nu produce NaN tacit — se opreste explicit cu motiv (bug real gasit:
+    // un camp necompletat (undefined) facea ca formula sa produca NaN, care trecea nefiltrat
+    // in document ca "NaN m³" in loc sa fie tratat ca "necalculat, lipsa data").
+    if (releveu.inaltime_cornisa == null || isNaN(+releveu.inaltime_cornisa)) {
+      return { eroare: 'H_CORNISA_LIPSA', actiune: 'H cornișă nu este completată — volumul nu se calculează fără ea.' };
+    }
+    if (!tip) return { eroare: 'TIP_ACOPERIS_NECOMPLETAT', actiune: 'Tipul de acoperiș nu este ales — se cere clarificare din releveu, nu se presupune formă implicită.' };
+    if (tip !== 'plat' && (releveu.inaltime_coama == null || isNaN(+releveu.inaltime_coama))) {
+      return { eroare: 'H_COAMA_LIPSA', actiune: 'H coamă nu este completată (necesară pentru acoperiș ' + tip.replace(/_/g, ' ') + ') — volumul nu se calculează fără ea.' };
+    }
+    var h_cornisa = +releveu.inaltime_cornisa, h_coama = +releveu.inaltime_coama;
     var volumPereti = arie * h_cornisa;
     var volumAcoperis;
     if (tip === 'plat') volumAcoperis = 0;

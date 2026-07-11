@@ -405,9 +405,16 @@
     var byId = {}; (neconformM14 || []).forEach(function (n) { if (n.element_id) byId[n.element_id] = n; });
     return tbl(vecinatati.map(function (v) {
       var n = byId[v.id];
+      // Bug real gasit (Florin): o vecinatate cu date lipsa (distanta necunoscuta) aparea totusi
+      // "Conform: DA" — o comparatie cu date lipsa NU poate produce implicit un rezultat pozitiv.
+      // Verificam EXPLICIT lipsa datelor inaintea oricarei alte interpretari a lui v.conforma.
+      var conformTxt;
+      if (v.distanta_necesara_m == null || v.distanta_masurata_m == null) conformTxt = 'NECUNOSCUT — date incomplete';
+      else if (v.conforma === true) conformTxt = 'DA';
+      else conformTxt = (n ? (n.status === 'NECONFORM_CORECTIE_PROIECT' ? 'CORECȚIE DIRECTĂ' : 'MĂSURĂ COMPENSATORIE') : 'NECONFORM');
       return [esc(v.id || '—'), esc(v.destinatie_declarata || '—'), esc(v.grad_vecin || '—'), esc((v.risc_vecin_estimat || '—').replace('_', ' ')),
         v.perete_CF ? 'DA' : 'nu', (v.distanta_necesara_m != null ? v.distanta_necesara_m + ' m' : '—') + ' / ' + (v.distanta_masurata_m != null ? v.distanta_masurata_m + ' m' : 'necunoscută'),
-        v.conforma ? 'DA' : (n ? (n.status === 'NECONFORM_CORECTIE_PROIECT' ? 'CORECȚIE DIRECTĂ' : 'MĂSURĂ COMPENSATORIE') : 'NECONFORM')];
+        conformTxt];
     }), ['Vecinătate', 'Destinație clădire vecină', 'Grad rezistență vecin', 'Risc vecin', 'Perete CF', 'Distanță necesară/reală', 'Conform']);
   }
 
@@ -571,10 +578,28 @@
     // exportul FINAL (pt depunere la ISU) cere ca fiecare vecinatate estimata implicit sa fi fost confirmata/corectata.
     var vecinatatiNeconfirmate = (m6b.vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
 
+    // BUG 5 (Florin): FINAL nu poate depinde doar de statusul normativelor — integritatea INTERNA
+    // a calculului e o verificare separata si obligatorie (volume NaN, 0 perechi verificate cand
+    // ar fi trebuit N*(N-1)/2, etc.) — altfel un document cu erori de calcul se putea marca FINAL.
+    var eroriIntegritate = [];
+    if (cladiriPropuse.length > 1) {
+      var nrAsteptate = cladiriPropuse.length * (cladiriPropuse.length - 1) / 2;
+      var nrVerificate = m6c ? m6c.perechi.length : 0;
+      if (nrVerificate !== nrAsteptate) eroriIntegritate.push('verificarea de distanțe a rulat pe ' + nrVerificate + ' perechi, nu pe cele ' + nrAsteptate + ' așteptate pentru ' + cladiriPropuse.length + ' clădiri');
+    }
+    if (m5bGrupuri) {
+      m5bGrupuri.forEach(function (g) {
+        g.cladiri_incluse.forEach(function (id) {
+          var v = volumPeCladire[id];
+          if (v && v.volum_total_mc != null && isNaN(v.volum_total_mc)) eroriIntegritate.push('volum invalid (NaN) pentru clădirea ' + id);
+        });
+      });
+    }
+
     // v4.2 — SINGURA blocare reala: daca s-a bifat "Genereaza ca FINAL" si raman vecinatati neconfirmate
     // sau normative nevalidate, refuza explicit exportul FINAL (analiza DRAFT ramane mereu disponibila neschimbata).
     if (D._ssi_final_mode) {
-      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant);
+      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant, { erori: eroriIntegritate });
       if (!gateFinal.poate) {
         return {
           cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118_BLOCAT.doc',
@@ -601,13 +626,22 @@
       { h: '1.0. Tipul de lucrare (determină tabelele P118-1/2025 aplicabile)', html: '<p><b>' + esc(m0.label) + '.</b> Regim tabele: ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'construcție EXISTENTĂ (T144/T145/T146/T147/T148, Anexa A.10)' : 'construcție NOUĂ (T2/T4/T5/T41/T42)') + '.' + (m0.nota ? ' ' + esc(m0.nota) : '') + '</p><p style="font-size:9pt;color:#888">Temei: ' + esc(m0.temei_legal) + '</p>' },
       { h: '1.1-1.4. Caracteristicile construcției', html: tbl([
         ['Denumire', esc(D.nume || '—')], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
-        ['Faza', esc(D.faza || 'D.T.A.C.')], ['Destinație', esc(destinatieT42)], ['Regim de înălțime', esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1)))],
-        ['Aria construită', (D.Sc || '—') + ' m²'], ['Aria desfășurată', (D.Sd || '—') + ' m²'], ['Categorie importanță', esc(D.categorie_importanta || ac.categorie_importanta || '—')]
+        ['Faza', esc(D.faza || 'D.T.A.C.')], ['Destinație', esc(destinatieT42)],
+        // Bug real gasit (Florin): la un ansamblu cu cladiri eterogene, un singur "Regim de inaltime"/
+        // "Arie construita" preluat direct din D (formularul principal, un rest de test/placeholder)
+        // CONTRAZICE totalurile reale calculate mai jos la 1.4.g — inlocuim cu trimitere explicita,
+        // nu o valoare unica inselatoare, atunci cand exista mai multe cladiri detectate din DXF.
+        ['Regim de înălțime', cladiriPropuse.length > 1 ? 'variabil pe tipuri — vezi 1.4.g' : esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1)))],
+        ['Aria construită', cladiriPropuse.length > 1 ? 'vezi 1.4.g (sinteza pe tipuri + total ansamblu)' : ((D.Sc || '—') + ' m²')],
+        ['Aria desfășurată', cladiriPropuse.length > 1 ? 'vezi 1.4.g' : ((D.Sd || '—') + ' m²')],
+        ['Categorie importanță', esc(D.categorie_importanta || ac.categorie_importanta || '—')]
       ], ['Element', 'Valoare']) },
       { h: '1.4.f. Sinteza compartimentelor de incendiu', html: (m5bGrupuri && m5bGrupuri.length) ? (function () {
         var rows = m5bGrupuri.map(function (g) {
           var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
-          var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null; });
+          // Defensiv (bug real gasit: NaN trecea nefiltrat) — orice valoare non-numerica sau lipsa
+          // opreste explicit afisarea unui volum, niciodata "NaN m³" in document.
+          var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null && !isNaN(v.volum_total_mc); });
           var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
           var conformTxt = !g.verificare ? 'nedeterminat' : (g.verificare.conform === false ? 'NU' : 'DA');
           return [esc(g.id_grup), esc(destinatieT42), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
@@ -642,7 +676,11 @@
       { h: '2. Nivelul riscului de incendiu', html: '<p>Densitate sarcină termică estimată: ' + esc(ac.sarcina_termica_note || '—') + ', încadrare risc „' + esc((ac.risc_incendiu || 'mediu').replace('_', ' ')) + '" conform pct. A.10.2.1.2/A.10.2.1.3 P118-1/2025 (prag 30% risc mijlociu+mare → tot compartimentul risc mare, se verifică explicit, nu se presupune).</p>' },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: '3.1. Rezistența și clasa de reacție la foc a elementelor (materiale/DoP)', html: '<p>Clasa de reacție la foc nu se calculează — e o proprietate declarată a produsului (Declarația de Performanță), nu se presupune pentru materiale cu variabilitate mare.</p>' + htmlMateriale },
-      { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')', html: '<p>Gradul de stabilitate adoptat: <b>' + esc(grad) + '</b>. ' + m6.acoperire_partiala + '</p>' },
+      { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')',
+        // Bug real gasit (Florin): "adoptat" implica o decizie finala validata, ceea ce contrazice
+        // fraza de mai jos ("lista de materiale nu a fost completata") — daca DoP/materiale lipsesc,
+        // gradul e provizoriu (implicit/estimat), nu adoptat definitiv.
+        html: '<p>Gradul de stabilitate ' + ((D._materiale || []).length ? '<b>adoptat</b>: ' + esc(grad) : '<b>provizoriu (neconfirmat, lipsă listă materiale/DoP)</b>: ' + esc(grad)) + '. ' + m6.acoperire_partiala + '</p>' },
       { h: '3.2. Corelare arie/niveluri (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelele 147/148' : 'Tabelele 41/42') + ')', html: tbl([
         ['Aria construită proiectată', (m5.arie_proiectata_mp || 0) + ' m²'],
         ['Aria maximă admisă (' + esc(m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
