@@ -565,12 +565,25 @@
       }), ['Încăpere/Zonă', 'Substanță', 'Tip zonă', 'Echipamente Ex necesare', 'Validat de specialist'])
       : '<p>Nu este cazul – nu au fost identificate substanțe cu potențial exploziv (verificat pe toate încăperile/zonele declarate ale proiectului).</p>';
 
-    // Materiale/DoP (M4b) — daca D._materiale nu e furnizat, tabel gol cu regula de completare (nu se presupune conform)
-    var materialeInfo = G.SSI_M4B.valideazaMateriale(D._materiale || []);
-    var htmlMateriale = (D._materiale || []).length
-      ? tbl(materialeInfo.materiale.map(function (m) { return [esc(m.nume), esc(m.clasa || '—'), esc(m.certitudine), m.DoP_atasat ? 'DA' : 'nu']; }), ['Material', 'Clasă reacție la foc', 'Certitudine', 'DoP atașat'])
-        + (materialeInfo.mesaj ? '<p><b>' + esc(materialeInfo.mesaj) + '</b></p>' : '')
-      : '<p>Lista de materiale nu a fost completată în proiect — se va atașa la faza de proiect tehnic, cu Declarația de Performanță (DoP) pentru fiecare material cu variabilitate (lemn, PVC, spume, membrane, compozite); materialele consacrate (beton, cărămidă, BCA, oțel, sticlă, vată bazaltică) sunt acceptate implicit clasa A1.</p>';
+    // Materiale/DoP (M4b) — daca D._materiale nu e furnizat explicit, NU lasam sectiunea goala: se
+    // genereaza automat lista de elemente pt sistemul constructiv cunoscut (zidarie confinata implicit
+    // pt locuinte, sau cadre_beton daca declarat) — materialele CONSACRATE (beton, zidarie, sticla,
+    // otel etc.) sunt clasificate A1 fara nicio actiune necesara; DOAR elementele cu variabilitate
+    // reala (sarpanta lemn, termoizolatie, tamplarie, hidroizolatie) raman marcate ca necesitand DoP.
+    // Daca proiectantul declara explicit D._materiale, acela are intotdeauna prioritate (nu se ignora
+    // datele reale de proiect in favoarea listei implicite).
+    var materialeSursa = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata');
+    var esteListaImplicita = !(D._materiale && D._materiale.length);
+    var materialeInfo = G.SSI_M4B.valideazaMateriale(materialeSursa);
+    var consacrate = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_acceptat'; });
+    var necesitaDoP = materialeInfo.materiale.filter(function (m) { return m.certitudine !== 'implicit_acceptat'; });
+    var htmlMateriale =
+      (esteListaImplicita ? '<p style="font-size:9pt;color:#666">Lista de mai jos e generată automat pentru sistemul constructiv „' + esc((D._sistem_constructiv || 'zidărie confinată').replace(/_/g, ' ')) + '" (implicit pentru locuințe, dacă nu s-a declarat altul) — corectează prin D._materiale dacă sistemul real diferă.</p>' : '') +
+      '<p><b>Materiale consacrate — clasificate implicit, fără DoP necesar</b> (proprietate intrinsecă a materialului, variabilitate neglijabilă între producători):</p>' +
+      (consacrate.length ? tbl(consacrate.map(function (m) { return [esc(m.element || m.nume), esc(m.nume), esc(m.clasa || '—'), esc(m.sursa || '—')]; }), ['Element', 'Material', 'Clasă reacție la foc', 'Justificare']) : '<p>Niciun element consacrat identificat.</p>') +
+      '<p><b>Materiale cu variabilitate reală — necesită DoP/fișă tehnică produs concret</b> (clasa depinde de producător/tratament, nu se presupune):</p>' +
+      (necesitaDoP.length ? tbl(necesitaDoP.map(function (m) { return [esc(m.element || m.nume), esc(m.nume), esc(m.certitudine), m.DoP_atasat ? 'DA' : 'nu']; }), ['Element', 'Material', 'Certitudine', 'DoP atașat']) : '<p>Niciun element cu variabilitate reală identificat.</p>') +
+      (materialeInfo.mesaj ? '<p style="color:#b45309"><b>' + esc(materialeInfo.mesaj) + '</b></p>' : '');
 
     var indicativNorme = ['P118_1_2025_T2', 'P118_1_2025_T4', 'P118_1_2025_T5', 'P118_1_2025_T41', 'P118_1_2025_T42', 'P118_1_2025_T144', 'P118_1_2025_T145', 'P118_1_2025_T146', 'P118_1_2025_T147', 'P118_1_2025_T148'];
     var statusNevalidat = G.SSI_NORMATIVE_ENGINE.verificaStatusNormativeFolosite(indicativNorme);
