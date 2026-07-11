@@ -1,10 +1,17 @@
 /* ============================================================================
  * UrbanX — SSI: M14 CONFORMITATE + M15 SOLUTII COMPENSATORII (js/25-ssi-engine-M14-M15.js)
- * Aditiv, se grefeaza pe rezultatele SSI_ENGINE (M0-M12). Regula critica v4.0
- * #11: nicio neconformitate nu se raporteaza fara solutii candidate — M14 NU
- * se opreste la "NECONFORM", trece prin M15 (daca e compensabila) sau indica
- * explicit ca e prag absolut. Regula #12: nicio solutie NU se aplica automat —
- * decizia ramane a proiectantului, cu trasabilitate completa.
+ * Aditiv, se grefeaza pe rezultatele SSI_ENGINE (M0-M12).
+ *
+ * v4.1 (11 iul 2026, completare Florin): taxonomie CU 3 STARI, nu 2 — nu tot ce e
+ * neconform e o "masura compensatorie". Distinctie:
+ *  - NECONFORM_CORECTIE_PROIECT: cerinta normativa are o SINGURA valoare minima/maxima,
+ *    fara alternativa documentata legal (ex. latime usa) -> se corecteaza direct elementul,
+ *    nu se deschide o discutie de solutii care nu exista legal.
+ *  - NECONFORM_MASURA_COMPENSATORIE_POSIBILA: normativul permite explicit o solutie
+ *    alternativa cu efect echivalent (ex. arie mai mare cu sprinklere) -> catalogul M15.
+ * Regula critica: compensabilitatea e o PROPRIETATE A CATALOGULUI (existenta unor
+ * solutii documentate in CATALOG_SOLUTII pt acel tip), NU o presupunere/flag arbitrar
+ * trimis de apelant — de asta m14 NU mai primeste `compensabil` ca input, il deriva.
  *
  * window.SSI_M14: verificaConformitate()
  * window.SSI_M15: genereazaSolutii() · CATALOG_SOLUTII
@@ -12,8 +19,9 @@
 (function (G) {
   'use strict';
 
-  // ── M14 — Conformitate ──
-  // verificare = { id, tip, valoare_necesara, valoare_proiectata, sursa_normativa, compensabil }
+  // ── M14 — Conformitate (3 stari) ──
+  // verificare = { id, tip, valoare_necesara, valoare_proiectata, sursa_normativa, sens,
+  //                unitate, descriere_element, element_id }
   function m14_verificaConformitate(verificare) {
     var conform = (verificare.valoare_proiectata != null && verificare.valoare_necesara != null)
       ? (verificare.sens === 'min' ? verificare.valoare_proiectata >= verificare.valoare_necesara : verificare.valoare_proiectata <= verificare.valoare_necesara)
@@ -21,17 +29,26 @@
     if (conform === true) return { id: verificare.id, status: 'CONFORM', sursa: verificare.sursa_normativa };
     if (conform === null) return { id: verificare.id, status: 'NEDETERMINAT', sursa: verificare.sursa_normativa, mesaj: 'Lipsesc date de proiect pentru verificare.' };
 
-    if (!verificare.compensabil) {
+    var deficit = (verificare.valoare_necesara != null && verificare.valoare_proiectata != null) ? Math.abs(verificare.valoare_necesara - verificare.valoare_proiectata) : null;
+    // Compensabilitatea = are catalogul (M15) solutii documentate pt acest TIP de cerinta? Nu se presupune, se deriva.
+    var areAlternativa = !!(G.SSI_M15 && G.SSI_M15.CATALOG_SOLUTII && G.SSI_M15.CATALOG_SOLUTII[verificare.tip] && G.SSI_M15.CATALOG_SOLUTII[verificare.tip].length);
+
+    if (areAlternativa) {
       return {
-        id: verificare.id, status: 'NECONFORM_PRAG_ABSOLUT', sursa: verificare.sursa_normativa,
-        mesaj: 'Cerința "' + verificare.tip + '" nu poate fi compensată — este un prag absolut din ' + verificare.sursa_normativa + '.',
-        actiune_obligatorie: 'Modificarea soluției de proiect (relocare, redimensionare) până la respectarea directă a pragului, nu prin măsură compensatorie.'
+        id: verificare.id, status: 'NECONFORM_MASURA_COMPENSATORIE_POSIBILA', tip: verificare.tip,
+        deficit: deficit, sursa_normativa: verificare.sursa_normativa, necesita_solutie: true,
+        element_id: verificare.element_id || null
       };
     }
     return {
-      id: verificare.id, status: 'NECONFORM_COMPENSABIL', tip: verificare.tip,
-      deficit: (verificare.valoare_necesara != null && verificare.valoare_proiectata != null) ? Math.abs(verificare.valoare_necesara - verificare.valoare_proiectata) : null,
-      sursa_normativa: verificare.sursa_normativa, necesita_solutie: true
+      id: verificare.id, status: 'NECONFORM_CORECTIE_PROIECT', tip: verificare.tip,
+      deficit: deficit, sursa_normativa: verificare.sursa_normativa, element_id: verificare.element_id || null,
+      mesaj: 'Cerința "' + (verificare.descriere_element || verificare.tip) + '" nu respectă valoarea normată — nu există o alternativă legală documentată, se corectează direct elementul din proiect.',
+      corectie_necesara: {
+        ce: (verificare.descriere_element || verificare.tip) + ' trebuie adus la valoarea minimă/maximă normată',
+        valoare_actuala: verificare.valoare_proiectata, valoare_necesara: verificare.valoare_necesara,
+        unitate: verificare.unitate || '', sursa: verificare.sursa_normativa
+      }
     };
   }
 
