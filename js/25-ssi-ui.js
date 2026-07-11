@@ -315,20 +315,46 @@
     } catch (e) { if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
   }
 
-  // Cauta in textele unui releveu DXF etichete de cota (ex. "H cornisa = 6.00", "cota coama +8.50")
-  // pt a pre-completa H cornișă/H coamă — best-effort, NU inventeaza daca nu gaseste (campurile
-  // raman goale, de completat manual, exact ca la orice alta valoare lipsa din platforma).
+  // Cauta in textele unui releveu DXF (de regula fisierul de SECTIUNE) cotele de nivel — verificat
+  // pe fisiere reale de proiect (Cătămărăști): eticheta uzuala NU e "H cornisa = 6.00" intr-un singur
+  // text, ci DOUA linii separate de \P intr-un cartus de cota: valoarea ("+6.00"/"±0.00"/"-3.00") pe
+  // primul rand, denumirea nivelului ("Parter"/"Etaj 1"/"Subsol"/"Invelitoare") pe al doilea. Constituie
+  // practic un "tabel de cote" — se parcurg toate etichetele astfel gasite, se construieste o harta
+  // nivel->valoare, apoi se deriva H cornisa (nivelul de invelitoare/cornisa/streasina) si H coama
+  // (nivelul explicit de coama, sau — daca nu exista un nume explicit — cel mai inalt nivel gasit
+  // PESTE cornisa, semn ca acoperisul are un varf; daca nu exista niciun nivel peste cornisa,
+  // acoperisul e probabil plat/terasa).
   function _extrageInaltimiDinDXF(parsed) {
-    var out = { cornisa: null, coama: null };
+    var niveluri = []; // {valoare, nume}
     (parsed.entities || []).forEach(function (e) {
       if (e.type !== 'TEXT' && e.type !== 'MTEXT') return;
-      var t = String(e.text || '').replace(/\\P/g, ' ').replace(/\{\\[^;{}]*;/g, '').replace(/[{}]/g, '').replace(/\\[A-Za-z][^;\\]*;/g, '');
-      var mCornisa = t.match(/corni[sș]\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
-      var mCoama = t.match(/coam\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
-      if (mCornisa && out.cornisa == null) out.cornisa = parseFloat(mCornisa[1].replace(',', '.'));
-      if (mCoama && out.coama == null) out.coama = parseFloat(mCoama[1].replace(',', '.'));
+      var raw = String(e.text || '');
+      var clean = raw.replace(/\\P/g, ' | ').replace(/\{\\[^;{}]*;/g, '').replace(/[{}]/g, '').replace(/\\[A-Za-z][^;\\]*;/g, '').replace(/\s+/g, ' ').trim();
+      // format "cota de nivel": valoare, apoi (dupa separator) numele nivelului
+      var m = clean.match(/^([±+\-]\s?\d+[.,]\d+)\s*\|\s*([A-Za-zĂÂÎȘȚăâîșț0-9 ]{2,30})/);
+      if (m) {
+        var val = parseFloat(m[1].replace('±', '').replace(',', '.').replace(/\s/g, ''));
+        niveluri.push({ valoare: val, nume: m[2].trim() });
+        return;
+      }
+      // fallback: format direct "H cornisa = 6.00" / "cota coama +8.50" intr-un singur text
+      var mCornisaDirect = clean.match(/corni[sș]\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
+      var mCoamaDirect = clean.match(/coam\w*\D{0,10}([+\-]?\d+[.,]\d+|\d+)/i);
+      if (mCornisaDirect) niveluri.push({ valoare: parseFloat(mCornisaDirect[1].replace(',', '.')), nume: 'Cornișă' });
+      if (mCoamaDirect) niveluri.push({ valoare: parseFloat(mCoamaDirect[1].replace(',', '.')), nume: 'Coamă' });
     });
-    return out;
+    if (!niveluri.length) return { cornisa: null, coama: null };
+    var nivelCornisa = niveluri.find(function (n) { return /invelitoare|corni[sș]|strea[sș]in/i.test(n.nume); });
+    var nivelCoama = niveluri.find(function (n) { return /coam|creast[aă]|v[aâ]rf/i.test(n.nume); });
+    var cornisa = nivelCornisa ? nivelCornisa.valoare : null;
+    var coama = nivelCoama ? nivelCoama.valoare : null;
+    // fara nume explicit de coama: daca exista un nivel mai inalt decat cornisa, e probabil coama
+    // (acoperis in panta); daca nu, cornisa e cel mai inalt nivel -> probabil plat/terasa.
+    if (coama == null && cornisa != null) {
+      var maiInalt = niveluri.filter(function (n) { return n.valoare > cornisa + 0.05; }).sort(function (a, b) { return b.valoare - a.valoare; })[0];
+      if (maiInalt) coama = maiInalt.valoare;
+    }
+    return { cornisa: cornisa, coama: coama, niveluri_gasite: niveluri, plat_probabil: cornisa != null && coama == null };
   }
 
   async function onFileRelevee(cheie, file) {
@@ -343,8 +369,10 @@
         if (h.cornisa != null || h.coama != null) {
           if (h.cornisa != null && STATE.relevee[cheie].inaltime_cornisa == null) STATE.relevee[cheie].inaltime_cornisa = h.cornisa;
           if (h.coama != null && STATE.relevee[cheie].inaltime_coama == null) STATE.relevee[cheie].inaltime_coama = h.coama;
+          if (h.plat_probabil && !STATE.relevee[cheie].tip_acoperis) STATE.relevee[cheie].tip_acoperis = 'plat';
+          else if (h.coama != null && !STATE.relevee[cheie].tip_acoperis) STATE.relevee[cheie].tip_acoperis = 'sarpanta_doua_ape';
           STATE.relevee[cheie].extras_din_fisier = true;
-          if (G.ss) G.ss('📎 ' + file.name + ': găsite cote în desen (H cornișă=' + (h.cornisa != null ? h.cornisa : '—') + ', H coamă=' + (h.coama != null ? h.coama : '—') + ') — verifică valorile pre-completate.');
+          if (G.ss) G.ss('📎 ' + file.name + ': găsite cote de nivel în desen (H cornișă=' + (h.cornisa != null ? h.cornisa : '—') + ', H coamă=' + (h.coama != null ? h.coama : (h.plat_probabil ? 'nu există — pare acoperiș plat/terasă' : '—')) + ') — verifică valorile pre-completate.');
         } else {
           if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am găsit cote de nivel scrise ca text în DXF; completează H cornișă/H coamă manual mai jos.');
         }
