@@ -451,7 +451,20 @@
     var grupuriConstructive = (D.geometrie_teren && D.geometrie_teren.grupuri_constructive) || (cladiriPropuse.length ? cladiriPropuse.map(function (c) { return { id_grup: c.id, cladiri_incluse: [c.id], tip: 'INDIVIDUAL', volum_continuu: false }; }) : []);
     var m6c = (cladiriPropuse.length > 1) ? G.SSI_ENGINE.m6c_distanteIntreCladiriProprii(m0, { grad_stabilitate: grad }, distanteIntreCladiri, 'mic', grupuriConstructive) : null;
     var m5bGrupuri = cladiriPropuse.length ? G.SSI_ENGINE.m5b_compartimentareGrupuri(m0, grad, grupuriConstructive, cladiriPropuse, D._pereti_despartitori_cuplat || []) : null;
-    var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.geometrie_teren && D.geometrie_teren.limita_proprietate && D.geometrie_teren.limita_proprietate.arie_mp) : null;
+    // POT/CUT ansamblu au nevoie de aria terenului. Daca layerul LIMITA_PROPRIETATE nu a fost mapat
+    // (frecvent la ansambluri, unde nu exista un contur unic ci loturi individuale), folosim SUMA
+    // adnotarilor reale "S.parcela" deja scrise de proiectant in desen (nu recalculam, doar insumam
+    // ce exista deja) — mai bine o aproximare din date reale decat "—" fara motiv, dar ramane marcata
+    // explicit ca aproximare, nu ca masuratoare exacta a limitei de proprietate.
+    var arieTerenDinLimita = D.geometrie_teren && D.geometrie_teren.limita_proprietate && D.geometrie_teren.limita_proprietate.arie_mp;
+    var arieTerenDinLoturi = null, sursaArieTeren = null;
+    if (!arieTerenDinLimita && D.geometrie_teren && D.geometrie_teren.adnotari_urbanism) {
+      var loturi = D.geometrie_teren.adnotari_urbanism.filter(function (a) { return a.suprafata_parcela_mp != null; });
+      if (loturi.length) { arieTerenDinLoturi = loturi.reduce(function (s, a) { return s + a.suprafata_parcela_mp; }, 0); sursaArieTeren = 'suma a ' + loturi.length + ' adnotări „S.parcelă" din desen (aproximativ — nu limita exactă de proprietate)'; }
+    }
+    var arieTerenFinala = arieTerenDinLimita || arieTerenDinLoturi;
+    var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, arieTerenFinala) : null;
+    if (urbanismAnsamblu) urbanismAnsamblu.sursaArieTeren = arieTerenDinLimita ? 'layer LIMITĂ DE PROPRIETATE' : sursaArieTeren;
 
     // v5.0 — Motor relevee: volum REAL per clădire (planul de situație nu dă panta/forma acoperișului
     // sau dacă podul e amenajabil) — daca nu exista releveu incarcat pt un tip, volumul ramane null +
@@ -584,7 +597,18 @@
         ['Faza', esc(D.faza || 'D.T.A.C.')], ['Destinație', esc(destinatieT42)], ['Regim de înălțime', esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1)))],
         ['Aria construită', (D.Sc || '—') + ' m²'], ['Aria desfășurată', (D.Sd || '—') + ' m²'], ['Categorie importanță', esc(D.categorie_importanta || ac.categorie_importanta || '—')]
       ], ['Element', 'Valoare']) },
-      { h: '1.4.f. Sinteza compartimentelor de incendiu', html: tbl([
+      { h: '1.4.f. Sinteza compartimentelor de incendiu', html: (m5bGrupuri && m5bGrupuri.length) ? (function () {
+        var rows = m5bGrupuri.map(function (g) {
+          var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
+          var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null; });
+          var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
+          var conformTxt = !g.verificare ? 'nedeterminat' : (g.verificare.conform === false ? 'NU' : 'DA');
+          return [esc(g.id_grup), esc(destinatieT42), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
+        });
+        var nrNeconforme = m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; }).length;
+        return '<p><b>' + m5bGrupuri.length + ' compartimente de incendiu totale</b> (din ' + cladiriPropuse.length + ' clădiri — grupurile cuplate fără perete antifoc declarat formează UN SINGUR compartiment fiecare, cu aria însumată; detaliul complet pe grup e la 1.4.h).' + (nrNeconforme ? ' <span style="color:#dc2626">' + nrNeconforme + ' compartiment/compartimente depășesc aria maximă admisă.</span>' : '') + '</p>' +
+          tbl(rows, ['Compartiment', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
+      })() : tbl([
         ['CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
       ], ['Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
     ].concat(urbanismAnsamblu ? [{
@@ -595,19 +619,16 @@
           ['Nr. total clădiri', '' + urbanismAnsamblu.nrCladiriTotal],
           ['Suprafață construită totală (ΣSc)', urbanismAnsamblu.totalSc_mp.toLocaleString('ro-RO') + ' m²'],
           ['Suprafață desfășurată totală (ΣSd)', urbanismAnsamblu.totalSd_mp ? urbanismAnsamblu.totalSd_mp.toLocaleString('ro-RO') + ' m²' : '—'],
-          ['Suprafață teren (din limita de proprietate DXF)', urbanismAnsamblu.arieTeren_mp ? urbanismAnsamblu.arieTeren_mp.toLocaleString('ro-RO') + ' m²' : 'nedeterminată (mapează layerul LIMITĂ DE PROPRIETATE)'],
+          ['Suprafață teren (' + esc(urbanismAnsamblu.sursaArieTeren || 'sursă nedeterminată') + ')', urbanismAnsamblu.arieTeren_mp ? urbanismAnsamblu.arieTeren_mp.toLocaleString('ro-RO') + ' m²' : 'nedeterminată (mapează layerul LIMITĂ DE PROPRIETATE sau adaugă adnotări „S.parcelă" în plan)'],
           ['POT ansamblu (ΣSc/Steren)', urbanismAnsamblu.pot_ansamblu_pct != null ? urbanismAnsamblu.pot_ansamblu_pct + '%' : '—'],
           ['CUT ansamblu (ΣSd/Steren)', urbanismAnsamblu.cut_ansamblu != null ? '' + urbanismAnsamblu.cut_ansamblu : '—']
         ], ['Indicator', 'Valoare'])
     }].concat((m5bGrupuri && m5bGrupuri.some(function (g) { return g.cladiri_incluse.length > 1; })) ? [{
-      h: '1.4.h. Compartimentare pe grupuri constructive (cuplat/duplex/triplex vs. individual)',
-      html: '<p>Grupurile de mai jos sunt componente conexe geometrice (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — un grup cuplat/duplex/triplex NU înseamnă automat compartimente separate: dacă nu există un perete despărțitor cu rezistență la foc declarată/calificată între unități, grupul se tratează ca <b>UN SINGUR compartiment de incendiu</b>, cu aria însumată a tuturor unităților, nu ca fiecare unitate verificată izolat.</p>' +
+      h: '1.4.h. Compunerea compartimentelor (cuplat/duplex/triplex vs. individual)',
+      html: '<p>Fiecare compartiment din 1.4.f de mai sus provine dintr-o componentă conexă geometrică (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — tabelul arată DIN CE clădiri e compus și de ce (arie/volum/conform sunt deja la 1.4.f, nu se repetă aici).</p>' +
         tbl(m5bGrupuri.map(function (g) {
-          var volumeGrup = g.cladiri_incluse.map(function (id) { return volumPeCladire[id]; });
-          var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null; });
-          var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
-          return [esc(g.id_grup), esc(g.tip), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' ')), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—') + (g.verificare && g.verificare.conform === false ? ' — NECONFORM' : ''), volumTxt];
-        }), ['Grup', 'Tip', 'Unități incluse', 'Tratament compartimentare', 'Arie verificată', 'Volum real (din releveu)']) +
+          return [esc(g.id_grup), esc(g.tip.replace(/_/g, ' ')), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' '))];
+        }), ['Compartiment', 'Tip', 'Clădiri incluse', 'Tratament']) +
         (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '') +
         (cladiriCuVolum.some(function (c) { return c.avertisment_releveu; }) ? '<p style="font-size:9pt;color:#b45309">ⓘ ' + cladiriCuVolum.filter(function (c) { return c.avertisment_releveu; }).length + ' clădire/clădiri fără releveu încărcat pentru tipul lor — volumul acelor unități rămâne necalculat (nu se presupune Sc×3m); completează releveul per tip în panoul SSI pentru volum real.</p>' : '')
     }] : []) : []).concat([
