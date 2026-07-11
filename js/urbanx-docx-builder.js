@@ -418,6 +418,59 @@
     }), ['Vecinătate', 'Destinație clădire vecină', 'Grad rezistență vecin', 'Risc vecin', 'Perete CF', 'Distanță necesară/reală', 'Conform']);
   }
 
+  // Model Florin (pct. 3.1): "Tabel de verificare — Rezistenta la foc necesara vs. realizata, pe elemente".
+  // Necesarul provine din normative.json (P118_1_2025_T2/T144, randuri_extrase reale — extractie PARTIALA,
+  // doar stalpi/grinzi/plansee sunt extrase la aceasta data; restul se marcheaza onest ca neextras, nu se
+  // inventeaza un prag). Realizatul NU se presupune din tipul de material (regula #13) — se preia exclusiv
+  // din D._rezistenta_foc_elemente (DoP/certificat/calcul acoperire beton al elementului efectiv pus in
+  // opera); daca lipseste, ramane NEDECLARAT, nu se completeaza cu o valoare estimata.
+  var _ELEMENTE_REZISTENTA_FOC = [
+    { label: 'Stâlpi structură', cheieNormativ: 'STALPI (R)', cheieProiect: 'stalpi' },
+    { label: 'Grinzi', cheieNormativ: 'GRINZI (R)', cheieProiect: 'grinzi' },
+    { label: 'Planșee', cheieNormativ: 'PLANSEE cai de evacuare/incarcari suplimentare (REI)', cheieProiect: 'plansee' },
+    { label: 'Pereți de compartimentare', cheieNormativ: null, cheieProiect: 'pereti_compartimentare' },
+    { label: 'Uși de compartimentare', cheieNormativ: null, cheieProiect: 'usi_compartimentare' },
+    { label: 'Fațade/pereți exteriori', cheieNormativ: null, cheieProiect: 'fatade' },
+    { label: 'Scări/case de scări', cheieNormativ: null, cheieProiect: 'scari' },
+    { label: 'Etanșări treceri instalații', cheieNormativ: null, cheieProiect: 'etansari' }
+  ];
+  function _tblRezistentaFocElemente(m0, grad, D) {
+    var NE = G.SSI_NORMATIVE_ENGINE;
+    var gradCol = (grad === 'I') ? 'I_h_sub_28m' : grad;
+    var realizateDeclarate = D._rezistenta_foc_elemente || {};
+    var rows = _ELEMENTE_REZISTENTA_FOC.map(function (e) {
+      var necesarTxt, necesarMin = null;
+      if (e.cheieNormativ) {
+        var res = NE.getStabilitateElement({ element: e.cheieNormativ, tip_lucrare: m0.regim_tabele });
+        if (res.disponibil && res.rand) {
+          var raw = res.rand[gradCol];
+          if (raw == null) {
+            necesarTxt = 'coloana gradului „' + gradCol + '” negăsită în rândul extras din ' + res.norma;
+          } else {
+            var m = /^(\d+)/.exec(String(raw));
+            necesarMin = m ? +m[1] : null;
+            necesarTxt = (String(raw).trim().indexOf('-') === 0)
+              ? raw + ' (nu se impune la acest grad, cf. ' + res.norma + ')'
+              : raw + ' min. (' + res.norma + (grad === 'I' ? ', grad I, H<28m' : '') + ')';
+          }
+        } else {
+          necesarTxt = 'rând neextras din ' + res.norma + ' — extracția curentă acoperă doar stâlpi/grinzi/planșee; se completează de proiectantul atestat până la extinderea extracției';
+        }
+      } else {
+        necesarTxt = 'rând neextras încă din Tabelul 2/144 (P118-1/2025) — extracția normativă acoperă în prezent doar stâlpi/grinzi/planșee (vezi status normativ); se completează manual de proiectantul atestat';
+      }
+      var realizat = realizateDeclarate[e.cheieProiect];
+      var realizatMin = (realizat && realizat.valoare != null) ? +realizat.valoare : null;
+      var realizatTxt = (realizat && realizat.valoare != null)
+        ? realizat.valoare + ' min.'
+        : 'NEDECLARAT — necesită DoP/certificat/calcul (acoperire beton, grosime, tratament) pentru elementul efectiv pus în operă';
+      var sursaTxt = (realizat && realizat.sursa) ? realizat.sursa : '—';
+      var conform = (necesarMin != null && realizatMin != null) ? (realizatMin >= necesarMin ? 'DA' : 'NU') : '—';
+      return [e.label, esc(necesarTxt), esc(realizatTxt), esc(sursaTxt), conform];
+    });
+    return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']);
+  }
+
   // v4.1: tabel unic de neconformitati, cu coloanele "Tip" si "Localizare in proiect (DWG)" cerute de completare
   function _tblNeconformitatiV41(fise) {
     if (!fise.length) return '<p>Nu au fost identificate neconformități.</p>';
@@ -741,7 +794,15 @@
           '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (D._camere && D._camere.length ? ', calculat pe baza inventarului real declarat.' : ', pe baza ipotezei de mai sus (tipic pentru rezidențial unifamilial).') + '</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
-      { h: '3.1. Rezistența și clasa de reacție la foc a elementelor (materiale/DoP)', html: '<p>Clasa de reacție la foc nu se calculează — e o proprietate declarată a produsului (Declarația de Performanță), nu se presupune pentru materiale cu variabilitate mare.</p>' + htmlMateriale },
+      { h: '3.1. Rezistența și clasa de reacție la foc a celor mai defavorabile elemente de construcție', html:
+        '<p>Materialele și produsele pentru construcții se clasifică din punct de vedere al reacției la foc conform SR EN 13501-1, iar elementele de construcție din punct de vedere al rezistenței la foc conform SR EN 13501-2.</p>' +
+        '<p>Clasa de reacție la foc (A1–F, cu indicii s/d) nu se calculează și nu este o valoare dată de P118 pentru un material anume — P118 stabilește doar clasa minimă necesară pe tip de element/aplicație. Valoarea reală e o proprietate declarată a produsului, preluată din Declarația de Performanță (DoP), fișa tehnică a producătorului sau certificatul de încercare. Pentru materiale cu variabilitate mare între produse (lemn, PVC, spume, membrane, compozite, pardoseli) nu se presupune o clasă implicită — se atașează DoP-ul produsului concret; scenariul FINAL nu poate fi emis fără această confirmare.</p>' +
+        '<p>Golurile tehnologice pentru trecerea instalațiilor prin elementele de compartimentare se etanșează cu sisteme certificate, cu rezistență la foc cel puțin egală cu cea a elementului traversat.</p>' +
+        '<p>Pe baza elementului cel mai defavorabil rezultă gradul de stabilitate la incendiu — detaliat la pct. 3.2, cu trimitere consecventă la același grad (grad adoptat/provizoriu în lucrarea de față: <b>' + esc(grad) + '</b>).</p>' +
+        '<p><b>▤ Tabel de verificare — Rezistența la foc necesară vs. realizată, pe elemente</b><br><span style="font-size:9pt;color:#666">Etapa 1: necesarul rezultă din gradul de stabilitate adoptat (Tabelul 2/144, P118-1/2025), pe tip de element — extras real din normative.json (extracție parțială curentă). Etapa 2: valoarea realizată provine din certificarea/DoP a elementului efectiv pus în operă. Conformitatea cere: realizat ≥ necesar.</span></p>' +
+        _tblRezistentaFocElemente(m0, grad, D) +
+        '<p style="font-size:9pt;color:#666">REGULĂ: rezistența realizată nu se presupune din tipul generic de material — se preia exclusiv din documentația de performanță a produsului efectiv folosit (Declarație de Performanță, fișă tehnică producător sau certificat de încercare emis de laborator notificat). Completează D._rezistenta_foc_elemente cu valorile reale (minute + sursă) pentru fiecare element, pe măsură ce documentația de la furnizori/proiectantul de structură devine disponibilă.</p>' +
+        '<p><b>Materiale — clasa de reacție la foc (SR EN 13501-1), completare la tabelul de mai sus</b></p>' + htmlMateriale },
       { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')',
         // Bug real gasit (Florin): "adoptat" implica o decizie finala validata, ceea ce contrazice
         // fraza de mai jos ("lista de materiale nu a fost completata") — daca DoP/materiale lipsesc,
