@@ -183,6 +183,13 @@
     // Presurizare case de scari (P118-2): clădiri înalte (H>28m), unde evacuarea fumului prin mijloace
     // naturale nu mai e suficientă pe casa de scări interioară — acelasi prag ca desfumarea mecanica.
     out.presurizare_scari_oblig = H > 28;
+    // Protectie la trasnet (I 20-2000, art. 2.2.1 — cazurile de echipare OBLIGATORIE, extras pe text
+    // oficial 13 iul): categorie de pericol de incendiu A/B (litera i), cladiri inalte/f.inalte per
+    // P118 (litera h, acelasi prag H>28m folosit si la desfumare/presurizare), rezidential colectiv
+    // peste P+11E adica 13 niveluri incl. parter (litera e), cosuri/silozuri >=10m (litera d, agricol
+    // = cea mai apropiata functiune din platforma de "siloz"). Bug real gasit: acest camp nu era
+    // NICIODATA calculat inainte (ramanea mereu undefined => sectiunea 4.11 nu se activa niciodata).
+    out.paratraznet_oblig = fn.psi === 'A' || fn.psi === 'B' || H > 28 || (d.functiune === 'bloc-locuinte' && niv > 12) || (d.functiune === 'agricol' && H >= 10);
     // Hidranți interiori (P118-2): volum > 5000 mc sau Sd > 2000; exteriori: Sc mare
     var vol = Sd * 3; // estimare volum (H nivel ~3 m)
     out.hidranti_int_oblig = vol > 5000 || Sd > 2000 || ['mall', 'sport', 'medical', 'parcare', 'hala-industriala'].indexOf(d.functiune) >= 0;
