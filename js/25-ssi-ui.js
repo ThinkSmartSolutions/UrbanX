@@ -147,9 +147,22 @@
           Object.keys(TIPURI_ACOPERIS).map(function (k) { return '<option value="' + k + '"' + (r.tip_acoperis === k ? ' selected' : '') + '>' + TIPURI_ACOPERIS[k] + '</option>'; }).join('') + '</select></div>' +
           '<label style="display:flex;gap:4px;align-items:center;font-size:10px;color:#cbd5e1;align-self:end;padding-bottom:8px"><input type="checkbox"' + (r.poduri_amenajabile ? ' checked' : '') + ' onchange="SSI_UI._setRelevee(\'' + t.cheie + '\',\'poduri_amenajabile\',this.checked)"' + (ePlat ? ' disabled title="Acoperiș plat — nu are pod"' : '') + '> pod amenajabil</label>' +
           '<div></div>' +
-          '<div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;margin-top:2px">' +
-          '<input type="file" accept=".dxf,.pdf" class="ssiui-inp" style="font-size:10px" onchange="SSI_UI._onFileRelevee(\'' + t.cheie + '\', this.files[0])">' +
-          (r.fisier_atasat ? '<span style="font-size:10px;color:#6ee7b7">📎 ' + esc(r.fisier_atasat) + (r.extras_din_fisier ? ' — H cornișă/coamă pre-completate din fișier, verifică' : ' — atașat, completează H manual mai sus') + '</span>' : '') +
+          '<div style="grid-column:1/-1;display:flex;flex-direction:column;gap:6px;margin-top:2px">' +
+          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+          '<input type="file" accept=".dxf,.pdf" multiple class="ssiui-inp" style="font-size:10px;flex:1;min-width:180px" onchange="SSI_UI._onFileRelevee(\'' + t.cheie + '\', this.files)">' +
+          '<span style="font-size:9.5px;color:#94a3b8">Formate acceptate: <b>.dxf</b> (export ASCII din CAD) și <b>.pdf</b> (plan/secțiune/fațadă, cu text selectabil — nu scanat). Poți selecta mai multe fișiere deodată, sau le încarci pe rând — toate se adaugă la listă, niciunul nu se pierde.</span>' +
+          '</div>' +
+          (r.fisiere && r.fisiere.length
+            ? '<div style="font-size:10px;color:#94a3b8;font-weight:700">' + r.fisiere.length + ' fișier(e) încărcat(e) pentru acest tip:</div>' +
+              '<div style="display:flex;flex-direction:column;gap:3px">' + r.fisiere.map(function (f, idx) {
+                return '<div style="display:flex;gap:6px;align-items:flex-start;font-size:10px;background:#0f1a2e;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:5px 8px">' +
+                  '<span>' + (f.tip === 'DXF' ? '📐' : '📄') + '</span>' +
+                  '<span style="flex:1"><b style="color:#e6edf7">' + esc(f.nume) + '</b> <span style="color:#64748b">(' + f.tip + ', ' + f.marime + ')</span><br>' +
+                  '<span style="color:#6ee7b7">' + esc(f.continut.join(' · ')) + '</span></span>' +
+                  '<span style="cursor:pointer;color:#f87171" title="Elimină fișierul din listă (nu retrage datele deja extrase)" onclick="SSI_UI._eliminaFisierRelevee(\'' + t.cheie + '\',' + idx + ')">✕</span>' +
+                  '</div>';
+              }).join('') + '</div>'
+            : '<div style="font-size:10px;color:#64748b">Niciun fișier încărcat încă pentru acest tip.</div>') +
           '</div>' +
           '</div>';
       }).join('');
@@ -361,12 +374,14 @@
     return { cornisa: cornisa, coama: coama, niveluri_gasite: niveluri, plat_probabil: cornisa != null && coama == null };
   }
 
-  async function onFileRelevee(cheie, file) {
-    if (!file) return;
-    if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {};
-    STATE.relevee[cheie].fisier_atasat = file.name;
-    var esteDXF = /\.dxf$/i.test(file.name);
-    if (esteDXF) {
+  function _fmtKB(bytes) { return bytes != null ? Math.round(bytes / 1024) + ' KB' : '—'; }
+
+  // Proceseaza UN singur fisier (DXF sau PDF) pt un tip de cladire — returneaza un rezumat afisabil,
+  // nu mai afiseaza direct (Florin, 12 iul: "vreau sa vad ce fisiere am incarcat, cate" — nevoie de o
+  // LISTA persistenta per camp, nu doar ultimul nume de fisier suprascris peste cel anterior).
+  async function _proceseazaFisierRelevee(cheie, file) {
+    var rezumat = { nume: file.name, tip: /\.dxf$/i.test(file.name) ? 'DXF' : /\.pdf$/i.test(file.name) ? 'PDF' : '?', marime: _fmtKB(file.size), continut: [] };
+    if (rezumat.tip === 'DXF') {
       try {
         var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
         var h = _extrageInaltimiDinDXF(parsed);
@@ -376,12 +391,12 @@
           if (h.plat_probabil && !STATE.relevee[cheie].tip_acoperis) STATE.relevee[cheie].tip_acoperis = 'plat';
           else if (h.coama != null && !STATE.relevee[cheie].tip_acoperis) STATE.relevee[cheie].tip_acoperis = 'sarpanta_doua_ape';
           STATE.relevee[cheie].extras_din_fisier = true;
-          if (G.ss) G.ss('📎 ' + file.name + ': găsite cote de nivel în desen (H cornișă=' + (h.cornisa != null ? h.cornisa : '—') + ', H coamă=' + (h.coama != null ? h.coama : (h.plat_probabil ? 'nu există — pare acoperiș plat/terasă' : '—')) + ') — verifică valorile pre-completate.');
+          rezumat.continut.push('cote de nivel: H cornișă=' + (h.cornisa != null ? h.cornisa + 'm' : '—') + ', H coamă=' + (h.coama != null ? h.coama + 'm' : (h.plat_probabil ? 'plat/terasă' : '—')));
         } else {
-          if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am găsit cote de nivel scrise ca text în DXF; completează H cornișă/H coamă manual mai jos.');
+          rezumat.continut.push('nicio cotă de nivel găsită ca text — completează H manual');
         }
-      } catch (e) { if (G.ss) G.ss('Fișier atașat ca referință (nu s-a putut citi geometria: ' + e.message + ') — completează H manual.'); }
-    } else if (/\.pdf$/i.test(file.name)) {
+      } catch (e) { rezumat.continut.push('eroare la citirea geometriei: ' + e.message); }
+    } else if (rezumat.tip === 'PDF') {
       // Fix real (Florin, 12 iul): planurile/sectiunile PDF contin date reale — stratigrafia peretilor
       // (materiale), inventarul de incaperi cu arie + finisaj pardoseala (deci sarcina termica REALA
       // a finisajului), si uneori gradul de stabilitate/categoria de importanta declarate in cartus —
@@ -392,28 +407,44 @@
         var bufDatePlan = buf.slice(0); // pdf.js poate detasa bufferul original — clonat INAINTE de prima citire
         var materiale = await G.SSI_MATERIALE_EXTRACTIE.extrageMaterialeDinPDF(buf);
         var datePlan = await G.SSI_MATERIALE_EXTRACTIE.extrageDatePlanPDF(bufDatePlan);
-        var mesaje = [];
         if (materiale.length) {
           materiale.forEach(function (m) {
             if (!STATE.materialeExtrase.some(function (x) { return x.nume === m.nume; })) STATE.materialeExtrase.push(m);
           });
-          STATE.relevee[cheie].materiale_extrase = materiale.map(function (m) { return m.nume; });
-          mesaje.push('materiale reale: ' + materiale.map(function (m) { return m.nume; }).join(', '));
+          rezumat.continut.push(materiale.length + ' materiale reale: ' + materiale.map(function (m) { return m.nume; }).join(', '));
         }
         if (datePlan.camere && datePlan.camere.length) {
           datePlan.camere.forEach(function (c) {
             if (!STATE.camereExtrase) STATE.camereExtrase = [];
             if (!STATE.camereExtrase.some(function (x) { return x.nume === c.nume && x.arie_mp === c.arie_mp; })) STATE.camereExtrase.push(c);
           });
-          mesaje.push(datePlan.camere.length + ' încăperi cu arie + sarcină termică reală a pardoselii (' + datePlan.camere.filter(function (c) { return c.sarcina_termica_mj > 0; }).length + ' cu pardoseală combustibilă)');
+          rezumat.continut.push(datePlan.camere.length + ' încăperi (' + datePlan.camere.filter(function (c) { return c.sarcina_termica_mj > 0; }).length + ' cu pardoseală combustibilă → sarcină termică calculată)');
         }
         if (datePlan.cartus && (datePlan.cartus.grad_stabilitate || datePlan.cartus.categorie_importanta)) {
           STATE.cartusExtras = Object.assign({}, STATE.cartusExtras, datePlan.cartus);
-          mesaje.push('cartuș: ' + (datePlan.cartus.grad_stabilitate ? 'grad ' + datePlan.cartus.grad_stabilitate : '') + (datePlan.cartus.categorie_importanta ? ', categorie ' + datePlan.cartus.categorie_importanta : ''));
+          rezumat.continut.push('cartuș: ' + (datePlan.cartus.grad_stabilitate ? 'grad ' + datePlan.cartus.grad_stabilitate : '') + (datePlan.cartus.categorie_importanta ? ', categorie ' + datePlan.cartus.categorie_importanta : ''));
         }
-        if (mesaje.length) { if (G.ss) G.ss('📎 ' + file.name + ': ' + mesaje.join(' · ') + '.'); }
-        else { if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am recunoscut date structurate pe text în PDF (poate fi scanat/imagine); completează manual.'); }
-      } catch (e) { if (G.ss) G.ss('📎 ' + file.name + ' atașat ca referință (nu s-a putut citi textul PDF: ' + e.message + ') — completează manual.'); }
+        if (!rezumat.continut.length) rezumat.continut.push('nu am recunoscut date structurate pe text (poate fi PDF scanat/imagine) — completează manual');
+      } catch (e) { rezumat.continut.push('nu s-a putut citi textul PDF: ' + e.message); }
+    } else {
+      rezumat.continut.push('format neacceptat — folosește .dxf sau .pdf');
+    }
+    return rezumat;
+  }
+
+  // Accepta FIE un singur File, FIE un FileList/array (input multiple) — fiecare fisier se ADAUGA la
+  // lista existenta a campului (nu o suprascrie), ca sa poti incarca Plan Parter + Plan Etaj + Sectiune
+  // + Fatade etc., toate la acelasi tip de cladire, unul cate unul sau tot deodata.
+  async function onFileRelevee(cheie, filesInput) {
+    if (!filesInput) return;
+    var files = filesInput.length != null ? Array.prototype.slice.call(filesInput) : [filesInput];
+    if (!files.length) return;
+    if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {};
+    if (!STATE.relevee[cheie].fisiere) STATE.relevee[cheie].fisiere = [];
+    for (var i = 0; i < files.length; i++) {
+      var rezumat = await _proceseazaFisierRelevee(cheie, files[i]);
+      STATE.relevee[cheie].fisiere.push(rezumat);
+      if (G.ss) G.ss('📎 ' + rezumat.nume + ' (' + rezumat.tip + ', ' + rezumat.marime + '): ' + rezumat.continut.join(' · ') + '.');
     }
     render();
   }
@@ -437,6 +468,10 @@
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
     _setRelevee: function (cheie, camp, val) { if (!STATE.relevee[cheie]) STATE.relevee[cheie] = {}; STATE.relevee[cheie][camp] = val; if (camp === 'tip_acoperis') render(); },
     _onFileRelevee: onFileRelevee,
+    // Elimina un fisier din LISTA afisata pt acel tip (nu retrage retroactiv materialele/incaperile
+    // deja acumulate in STATE.materialeExtrase/camereExtrase — acelea raman validate pana la re-generare;
+    // scopul e doar sa curete lista vizuala de un fisier incarcat gresit/duplicat).
+    _eliminaFisierRelevee: function (cheie, idx) { if (STATE.relevee[cheie] && STATE.relevee[cheie].fisiere) { STATE.relevee[cheie].fisiere.splice(idx, 1); render(); } },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
