@@ -413,7 +413,13 @@
   // pt functiunile fara corespondent direct in randurile deja extrase din normativ.
   var _DESTINATIE_T42 = {
     'locuinta-individuala': 'Cladiri de locuit', 'bloc-locuinte': 'Cladiri de locuit',
-    'hotelier': 'Cladiri pentru cazare temporara', 'gradinita': 'Cladiri care adapostesc persoane ce nu se pot evacua singure'
+    'hotelier': 'Cladiri pentru cazare temporara', 'gradinita': 'Cladiri care adapostesc persoane ce nu se pot evacua singure',
+    // Bug real gasit continuand cu "centru social/azil": functiunea nu era mapata deloc aici, desi
+    // logica SE_SUPUNE/persoane_vulnerabile din alte sectiuni o trateaza deja corect dupa D.functiune —
+    // rezultat: eticheta destinatiei afisata in tot documentul cadea pe genericul "alte destinatii, fara
+    // sali aglomerate", inconsistent cu concluzia reala (SE SUPUNE, persoane care nu se pot evacua singure).
+    'centru-social': 'Cladiri care adapostesc persoane ce nu se pot evacua singure',
+    'medical': 'Cladiri care adapostesc persoane ce nu se pot evacua singure'
   };
   function _destinatieT42(functiune) { return _DESTINATIE_T42[functiune] || 'Cladiri cu alte destinatii, fara sali aglomerate'; }
 
