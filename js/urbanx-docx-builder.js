@@ -893,6 +893,33 @@
         tbl(randuri.map(function (r) { return [esc(r[0]), esc(CERTITUDINE_LABEL[r[1]])]; }), ['Valoare', 'Nivel de certitudine']);
     }
 
+    // Sectiunea 12 (audit v6.0): checklist completitudine documentatie DTAC/PTh — piesele scrise
+    // (memorii) si planse specifice SSI, distincte de checklist-ul de la Sectiunea 11 (planse
+    // arhitectura generale). Generat din ce a fost EFECTIV incarcat (D._relevee[*].fisiere) sau din
+    // datele-sursa care fac memoriul respectiv generabil de platforma — nu presupus existent.
+    function _checklistDocumentatieDTAC() {
+      var toateFisiereleDoc = [];
+      Object.keys(D._relevee || {}).forEach(function (cheie) {
+        ((D._relevee[cheie] || {}).fisiere || []).forEach(function (f) { toateFisiereleDoc.push(f.nume || ''); });
+      });
+      var numeJoinedDoc = toateFisiereleDoc.join(' | ').toLowerCase();
+      function areDoc(re) { return re.test(numeJoinedDoc); }
+      var itemi = [
+        { nume: 'Memoriu arhitectură', prezent: !!(D.geometrie_teren && D.geometrie_teren.cladiri_propuse) },
+        { nume: 'Memoriu structură (rezistență)', prezent: !!(D.grad_stabilitate || D._rezistenta_foc_elemente) },
+        { nume: 'Memoriu instalații', prezent: (D.are_gaze_naturale != null) || (D.are_ventilatie_mecanica != null) || !!(D._materiale && D._materiale.length) },
+        { nume: 'Plan PSI (securitate la incendiu)', prezent: areDoc(/\bpsi\b/) },
+        { nume: 'Plan evacuare', prezent: areDoc(/evacuare/) },
+        { nume: 'Plan intervenție', prezent: areDoc(/interven[tț]ie/) },
+        { nume: 'Plan hidranți', prezent: areDoc(/hidrant/) },
+        { nume: 'Plan detecție (IDSAI)', prezent: areDoc(/detec[tț]ie|idsai/) },
+        { nume: 'Plan desfumare', prezent: areDoc(/desfumare/) }
+      ];
+      var nrLipsa = itemi.filter(function (i) { return !i.prezent; }).length;
+      return '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' piesă/piese încă neatașată/neatașate</b> — pieselor scrise/planurilor SSI specifice le rămâne acest stadiu până la încărcarea efectivă în platformă (nu se presupune existența lor).' : 'Toate piesele scrise/planurile specifice SSI urmărite au fost identificate.') + '</p>' +
+        tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔ prezent' : '✘ lipsă']; }), ['Piesă documentație DTAC/PTh', 'Stare']);
+    }
+
     var _checklistPlanseObj = _checklistPlanse(D);
     var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
     var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
@@ -1072,6 +1099,7 @@
         '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
       { h: 'Checklist Ord. MAI 180/2022, Anexa 5 — completitudine capitol cu capitol', html: _checklistCapitoleObj.html },
       { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html },
+      { h: 'Verificarea completitudinii documentației DTAC/PTh', html: _checklistDocumentatieDTAC() },
       { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() },
       { h: 'Detectarea incompatibilităților între normative aplicabile', html: _detecteazaConflicteNormative() },
       { h: 'Nivelul de certitudine al datelor-cheie ale scenariului', html: _tabelCertitudine() }
