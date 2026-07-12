@@ -16,6 +16,15 @@
   'use strict';
 
   // Fisa de neconformitate — localizeaza EXACT elementul (daca geometria din DWG e disponibila)
+  //
+  // Bug real gasit (Florin, captura tabel §5): 6 perechi de cladiri neconforme (M6c) apareau ca 6
+  // randuri IDENTICE — "Localizare generala", aceeasi "Actiune necesara" generica. Cauza: aceasta
+  // functie ignora complet campurile descriere_element/valoare_proiectata/valoare_necesara/unitate
+  // (care EXISTA deja pe obiectul neconformitate, atasate de m14_verificaConformitate) — folosea
+  // DOAR cautarea in geometrieTeren.vecinatati_geometrie (care nu contine perechi intre cladiri
+  // proprii, ci doar vecinatati externe) si un text static pt ramura MASURA_COMPENSATORIE. Rezultat:
+  // orice neconformitate fara element_id gasit in acel array cadea pe acelasi text generic, indiferent
+  // CARE pereche/cerinta era de fapt vizata — exact bug-ul semnalat ("nu inteleg la ce se aplica").
   function genereazaFisaNeconformitate(neconformitate, geometrieTeren) {
     var element = null;
     if (geometrieTeren && neconformitate.element_id) {
@@ -24,18 +33,25 @@
     }
     var identificare = element
       ? ('Vecinătate ' + element.id + (element.distanta_min_la_propriu_m != null ? ', distanță DWG ' + element.distanta_min_la_propriu_m + ' m' : ''))
-      : (neconformitate.element_id ? ('Element ' + neconformitate.element_id + ' — localizare DWG indisponibilă, verifică manual în plan') : 'Localizare generală (nu ține de un element DWG punctual — vezi indicatorii de proiect)');
+      : (neconformitate.descriere_element
+        ? neconformitate.descriere_element + (neconformitate.element_id ? ' (' + neconformitate.element_id + ')' : '')
+        : (neconformitate.element_id ? ('Element ' + neconformitate.element_id + ' — localizare DWG indisponibilă, verifică manual în plan') : 'Localizare generală (nu ține de un element DWG punctual — vezi indicatorii de proiect)'));
+
+    var valProiectata = neconformitate.corectie_necesara ? neconformitate.corectie_necesara.valoare_actuala : neconformitate.valoare_proiectata;
+    var valNecesara = neconformitate.corectie_necesara ? neconformitate.corectie_necesara.valoare_necesara : neconformitate.valoare_necesara;
+    var unitate = (neconformitate.corectie_necesara ? neconformitate.corectie_necesara.unitate : neconformitate.unitate) || '';
+    var cifre = (valProiectata != null && valNecesara != null)
+      ? ' — proiectat ' + valProiectata + unitate + ' vs. necesar ' + valNecesara + unitate + (neconformitate.deficit != null ? ', deficit ' + Math.round(neconformitate.deficit * 100) / 100 + unitate : '')
+      : '';
 
     return {
       id_neconformitate: neconformitate.id,
       tip: neconformitate.status,
       element: { identificare_in_plan: identificare, element_id: neconformitate.element_id || null },
-      cerinta: { valoare_necesara: neconformitate.corectie_necesara ? neconformitate.corectie_necesara.valoare_necesara : null,
-        valoare_proiectata: neconformitate.corectie_necesara ? neconformitate.corectie_necesara.valoare_actuala : null,
-        sursa_normativa: neconformitate.sursa_normativa },
+      cerinta: { valoare_necesara: valNecesara, valoare_proiectata: valProiectata, sursa_normativa: neconformitate.sursa_normativa },
       actiune: neconformitate.status === 'NECONFORM_CORECTIE_PROIECT'
-        ? 'CORECTARE DIRECTĂ: ' + (neconformitate.corectie_necesara ? neconformitate.corectie_necesara.ce : neconformitate.mesaj)
-        : 'MĂSURĂ COMPENSATORIE POSIBILĂ: alege una din soluțiile propuse (vezi tabelul de soluții)',
+        ? 'CORECTARE DIRECTĂ: ' + (neconformitate.corectie_necesara ? neconformitate.corectie_necesara.ce : neconformitate.mesaj) + cifre
+        : 'MĂSURĂ COMPENSATORIE POSIBILĂ' + cifre + ': alege una din soluțiile propuse (vezi tabelul de soluții)',
       status_rezolvare: 'NEREZOLVAT'
     };
   }

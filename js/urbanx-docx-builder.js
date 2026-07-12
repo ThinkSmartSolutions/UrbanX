@@ -581,7 +581,7 @@
     if (m6c) {
       m6c.neconforme.forEach(function (per) {
         verificariM14.push(G.SSI_M14.verificaConformitate({
-          id: 'M6c-' + per.a + '-' + per.b, tip: 'DISTANTA_VECINATATE_INSUFICIENTA', sens: 'min', unitate: 'm',
+          id: 'M6c-' + per.a + '-' + per.b, tip: 'DISTANTA_VECINATATE_INSUFICIENTA', sens: 'min', unitate: 'm', element_id: 'M6c-' + per.a + '-' + per.b,
           descriere_element: 'Distanța dintre clădirile proprii ' + per.a + ' și ' + per.b, valoare_proiectata: per.distanta_reala_m, valoare_necesara: per.distanta_necesara_m,
           sursa_normativa: per.distanta_necesara_norma
         }));
