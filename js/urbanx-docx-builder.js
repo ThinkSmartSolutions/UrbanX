@@ -445,7 +445,7 @@
       if (v.distanta_necesara_m == null || v.distanta_masurata_m == null) conformTxt = 'NECUNOSCUT — date incomplete';
       else if (v.conforma === true) conformTxt = 'DA';
       else conformTxt = (n ? (n.status === 'NECONFORM_CORECTIE_PROIECT' ? 'CORECȚIE DIRECTĂ' : 'MĂSURĂ COMPENSATORIE') : 'NECONFORM');
-      return [esc(v.id || '—') + (v.cf_numar ? ' (CF ' + esc(v.cf_numar) + ')' : ''), esc(v.destinatie_declarata || '—'), esc(v.grad_vecin || '—'), esc((v.risc_vecin_estimat || '—').replace('_', ' ')),
+      return [(v.id || '—') + (v.cf_numar ? ' (CF ' + v.cf_numar + ')' : ''), v.destinatie_declarata || '—', v.grad_vecin || '—', (v.risc_vecin_estimat || '—').replace('_', ' '),
         v.perete_CF ? 'DA' : 'nu', (v.distanta_necesara_m != null ? v.distanta_necesara_m + ' m' : '—') + ' / ' + (v.distanta_masurata_m != null ? v.distanta_masurata_m + ' m' : 'necunoscută'),
         conformTxt];
     }), ['Vecinătate', 'Destinație clădire vecină', 'Grad rezistență vecin', 'Risc vecin', 'Perete CF', 'Distanță necesară/reală', 'Conform']);
@@ -508,7 +508,7 @@
         realizatTxt = 'de stabilit la faza de calcul static/PT (nu există prag numeric unic de referință — vezi coloana „necesară")';
         sursaTxt = '—'; conform = '—';
       }
-      return [esc(realizatTxt), esc(sursaTxt), conform];
+      return [realizatTxt, sursaTxt, conform];
     }
 
     var byLabel = {}; _ELEMENTE_REZISTENTA_FOC.forEach(function (e) { byLabel[e.label] = randNormativ(e); });
@@ -548,15 +548,27 @@
       'Scări/case de scări': 'Certificat de conformitate (uși de acces certificate EI) + Raport de încercare',
       'Etanșări treceri instalații': 'Agrement tehnic (sistem de etanșare certificat, ex. mansoane/vopsele intumescente)'
     };
-    var rows = ORDINE.map(function (label) {
+    // Tabel SEPARAT pt trasabilitatea documentelor justificative (Sectiunea 7, audit v6.0) — NU
+    // adaugat ca 2 coloane suplimentare la tabelul de mai jos: acela are deja 5 coloane cu text lung
+    // (necesar/realizat/sursa), inghesuite intr-o celula de continut de doar 80% din latimea paginii
+    // (layout tabelar eticheta|continut) — 7 coloane produceau trunchiere vizibila la tipar/PDF (bug
+    // real gasit verificand un document generat, nu doar headless: ultima coloana taiata la marginea
+    // paginii). Impartit in 2 tabele cu scop distinct, fiecare incape confortabil.
+    var rowsPrincipal = ORDINE.map(function (label) {
       var e = _ELEMENTE_REZISTENTA_FOC.filter(function (x) { return x.label === label; })[0];
       var n = e ? byLabel[label] : extra[label];
       var cheieProiect = e ? e.cheieProiect : cheiProiect[label];
-      var docInfo = realizateDeclarate[cheieProiect] && realizateDeclarate[cheieProiect].document_atasat;
-      return [label, esc(n.necesarTxt)].concat(randRealizatConform({ cheieProiect: cheieProiect }, n.necesarMin))
-        .concat([esc(DOCUMENT_JUSTIFICATIV[label] || 'Fișă tehnică'), docInfo ? 'atașat' : 'de_atasat_la_executie']);
+      return [label, n.necesarTxt].concat(randRealizatConform({ cheieProiect: cheieProiect }, n.necesarMin));
     });
-    return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform', 'Document justificativ necesar', 'Stadiu']);
+    var rowsDocumente = ORDINE.map(function (label) {
+      var e = _ELEMENTE_REZISTENTA_FOC.filter(function (x) { return x.label === label; })[0];
+      var cheieProiect = e ? e.cheieProiect : cheiProiect[label];
+      var docInfo = realizateDeclarate[cheieProiect] && realizateDeclarate[cheieProiect].document_atasat;
+      return [label, DOCUMENT_JUSTIFICATIV[label] || 'Fișă tehnică', docInfo ? 'atașat' : 'de_atasat_la_executie'];
+    });
+    return tbl(rowsPrincipal, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']) +
+      '<p style="font-size:9pt;color:#666;margin-top:6pt"><b>Trasabilitate documente justificative la execuție</b> (Secțiunea 7):</p>' +
+      tbl(rowsDocumente, ['Element constructiv', 'Document justificativ necesar', 'Stadiu']);
   }
 
   // Model Florin (pct. 4.1-4.11): fiecare instalatie are o lista FIXA de campuri tehnice proprii
@@ -571,7 +583,7 @@
     return tbl(campuri.map(function (c) {
       var v = valori[c.cheie];
       var valoare;
-      if (v != null) valoare = esc(String(v));
+      if (v != null) valoare = String(v);
       else if (necesara === false) valoare = 'Nu este cazul';
       else if (necesara == null) valoare = 'neevaluat — necesitatea echipării nu e stabilită de motor pentru acest tip de instalație';
       else valoare = 'se dimensionează la faza de proiect tehnic (PTh), conform normativului aplicabil instalației';
@@ -605,7 +617,7 @@
     return tbl(fise.map(function (f) {
       return [
         f.tip === 'NECONFORM_CORECTIE_PROIECT' ? 'CORECȚIE DIRECTĂ NECESARĂ' : 'MĂSURĂ COMPENSATORIE POSIBILĂ',
-        esc(f.element.identificare_in_plan), esc(f.actiune), esc((f.cerinta && f.cerinta.sursa_normativa) || '—')
+        f.element.identificare_in_plan, f.actiune, (f.cerinta && f.cerinta.sursa_normativa) || '—'
       ];
     }), ['Tip', 'Localizare în proiect (DWG)', 'Acțiune necesară', 'Sursă normativă']);
   }
@@ -777,7 +789,7 @@
         ? ' (real ' + v14.valoare_proiectata + (v14.unitate || '') + ' vs. necesar ' + v14.valoare_necesara + (v14.unitate || '') + (v14.deficit != null ? ', deficit ' + Math.round(v14.deficit * 100) / 100 + (v14.unitate || '') : '') + ')'
         : '';
       return '<p><b>Pentru: ' + cui + cifre + '</b> — soluții candidate (selecția rămâne a proiectantului atestat, nu se aplică automat):</p>' +
-        tbl(sol.map(function (x) { return [esc(x.solutie), esc(x.efect_calculat || '—'), (x.recalcul_necesar || []).join(', ')]; }), ['Soluție compensatorie', 'Efect', 'Recalcul necesar']);
+        tbl(sol.map(function (x) { return [x.solutie, x.efect_calculat || '—', (x.recalcul_necesar || []).join(', ')]; }), ['Soluție compensatorie', 'Efect', 'Recalcul necesar']);
     }
     // 2.2 ATEX — declarativ; daca D._spatii_atex nu e furnizat, implicitul e "fara substante" DOAR pt
     // destinatii unde asta chiar reflecta realitatea. Pt "skid" (SKID GPL/hidrogen/gaze — functiune al
@@ -800,7 +812,7 @@
     // sa arate substanta efectiv scrisa in sp.substante_declarate.
     var htmlAtex = atexAplicabilUnele
       ? tbl(rezultateAtex.filter(function (r) { return r.rezultat.ATEX_aplicabil; }).map(function (r) {
-        return [esc(r.nume), esc(r.substante), 'Zona ' + r.rezultat.zona_propusa, esc(r.rezultat.echipamente_necesare), 'DE VALIDAT de proiectant ATEX'];
+        return [r.nume, r.substante, 'Zona ' + r.rezultat.zona_propusa, r.rezultat.echipamente_necesare, 'DE VALIDAT de proiectant ATEX'];
       }), ['Încăpere/Zonă', 'Substanță', 'Tip zonă', 'Echipamente Ex necesare', 'Validat de specialist'])
       : '<p>Nu este cazul – nu au fost identificate substanțe cu potențial exploziv (verificat pe toate încăperile/zonele declarate ale proiectului).</p>';
 
@@ -829,11 +841,11 @@
     var htmlMateriale =
       (esteListaImplicita ? '<p style="font-size:9pt;color:#666">Lista de mai jos e generată automat pentru sistemul constructiv „' + esc((D._sistem_constructiv || 'zidărie confinată').replace(/_/g, ' ')) + '" (implicit pentru clădiri joase, dacă nu s-a declarat altul) — corectează prin D._materiale dacă sistemul real diferă.</p>' : '') +
       '<p><b>Materiale consacrate</b> (proprietate intrinsecă a materialului, variabilitate neglijabilă între producători — clasificare implicită, fără altă confirmare necesară):</p>' +
-      (consacrate.length ? tbl(consacrate.map(function (m) { return [esc(m.element || m.nume), esc(m.nume), esc(m.clasa || '—'), esc(m.sursa || '—')]; }), ['Element', 'Material', 'Clasă reacție la foc', 'Justificare']) : '<p>Niciun element consacrat identificat.</p>') +
+      (consacrate.length ? tbl(consacrate.map(function (m) { return [m.element || m.nume, m.nume, m.clasa || '—', m.sursa || '—']; }), ['Element', 'Material', 'Clasă reacție la foc', 'Justificare']) : '<p>Niciun element consacrat identificat.</p>') +
       '<p><b>Materiale cu variabilitate reală — clasă prescrisă de proiect</b> (produsul concret se alege la faza de aprovizionare/execuție, cu DoP atașat la recepție):</p>' +
       (necesitaDoP.length ? tbl(necesitaDoP.map(function (m) {
         var claseOrientativa = m.clasa ? m.clasa + ' (orientativ, tipic pentru produsul generic)' : 'variază pe producător — se stabilește prin DoP-ul produsului ales';
-        return [esc(m.element || m.nume), esc(m.nume), esc(claseOrientativa), m.DoP_atasat ? 'DA (DoP atașat)' : 'de aprovizionare — produsul concret și DoP se atașează la execuție'];
+        return [m.element || m.nume, m.nume, claseOrientativa, m.DoP_atasat ? 'DA (DoP atașat)' : 'de aprovizionare — produsul concret și DoP se atașează la execuție'];
       }), ['Element', 'Material (tip generic)', 'Clasă orientativă la proiectare', 'Confirmare produs concret']) : '<p>Niciun element cu variabilitate reală identificat.</p>');
 
     var indicativNorme = ['P118_1_2025_T2', 'P118_1_2025_T4', 'P118_1_2025_T5', 'P118_1_2025_T41', 'P118_1_2025_T42', 'P118_1_2025_T144', 'P118_1_2025_T145', 'P118_1_2025_T146', 'P118_1_2025_T147', 'P118_1_2025_T148'];
@@ -911,7 +923,7 @@
       if (!conflicte.length) return '<p>Nu a fost identificat niciun conflict între normativele aplicabile acestui proiect.</p>';
       return '<p><b>' + conflicte.length + ' conflict/conflicte între normative identificat/identificate</b> — semnalate explicit, fără rezolvare tacită (decizia finală rămâne a proiectanților de specialitate):</p>' +
         tbl(conflicte.map(function (c) {
-          return [esc(c.cerinta), esc(c.normativ_A.sursa) + ' — ' + esc(c.normativ_A.pozitie), esc(c.normativ_B.sursa) + ' — ' + esc(c.normativ_B.pozitie), esc(c.actiune)];
+          return [c.cerinta, c.normativ_A.sursa + ' — ' + c.normativ_A.pozitie, c.normativ_B.sursa + ' — ' + c.normativ_B.pozitie, c.actiune];
         }), ['Cerință', 'Normativ A', 'Normativ B', 'Acțiune']);
     }
 
@@ -939,7 +951,7 @@
         ['Capacitatea de utilizatori/persoane', (D.capacitate_persoane || D.capacitate_declarata) ? 'introdus_manual_utilizator' : 'presupus_conservator']
       ];
       return '<p>Fiecare valoare-cheie de mai jos poartă un indicator de proveniență, cu procentul de certitudine asociat (0–100%) — nu doar clasificarea vecinătăților, ca în versiunile anterioare ale motorului.</p>' +
-        tbl(randuri.map(function (r) { return [esc(r[0]), esc(CERTITUDINE_LABEL[r[1]])]; }), ['Valoare', 'Nivel de certitudine']);
+        tbl(randuri.map(function (r) { return [r[0], CERTITUDINE_LABEL[r[1]]]; }), ['Valoare', 'Nivel de certitudine']);
     }
 
     // Sectiunea 12 (audit v6.0): checklist completitudine documentatie DTAC/PTh — piesele scrise
@@ -966,7 +978,7 @@
       ];
       var nrLipsa = itemi.filter(function (i) { return !i.prezent; }).length;
       return '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' piesă/piese încă neatașată/neatașate</b> — pieselor scrise/planurilor SSI specifice le rămâne acest stadiu până la încărcarea efectivă în platformă (nu se presupune existența lor).' : 'Toate piesele scrise/planurile specifice SSI urmărite au fost identificate.') + '</p>' +
-        tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔ prezent' : '✘ lipsă']; }), ['Piesă documentație DTAC/PTh', 'Stare']);
+        tbl(itemi.map(function (i) { return [i.nume, i.prezent ? '✔ prezent' : '✘ lipsă']; }), ['Piesă documentație DTAC/PTh', 'Stare']);
     }
 
     // Sectiunea 10 (audit v6.0): validarea lantului cauzal complet arie->volum->grad de stabilitate->
@@ -985,8 +997,8 @@
       var rezervaConsistenta = (ac.rezerva_incendiu_mc == null) ? null : (ac.rezerva_incendiu_mc === vriAsteptat);
       var verigi = [
         { veriga: 'Arie construită (Sc) → Volum/arie desfășurată (Sd)', stare: (D.Sc != null && D.Sd != null) ? (((+D.Sc) <= (+D.Sd)) ? 'verificat' : 'eroare') : 'date_insuficiente', obs: 'vezi și controlul contradicțiilor de mai sus (Sc nu poate depăși Sd)' },
-        { veriga: 'Volum/arie → Grad de stabilitate la incendiu', stare: D.grad_stabilitate || ac.grad_default ? 'verificat' : 'date_insuficiente', obs: 'gradul declarat (' + esc(grad) + ') e folosit consecvent în toate verificările următoare (compartimentare, niveluri maxime, rezistență la foc)' },
-        { veriga: 'Grad de stabilitate → Compartimentare la incendiu', stare: m5.norma ? 'verificat' : 'date_insuficiente', obs: m5.norma ? ('aria maximă admisă (' + m5.arie_maxima_admisa_mp + ' m²) derivă direct din gradul ' + esc(grad) + ', ' + esc(m5.norma) + ')') : 'rând normativ neextras pentru acest grad' },
+        { veriga: 'Volum/arie → Grad de stabilitate la incendiu', stare: D.grad_stabilitate || ac.grad_default ? 'verificat' : 'date_insuficiente', obs: 'gradul declarat (' + grad + ') e folosit consecvent în toate verificările următoare (compartimentare, niveluri maxime, rezistență la foc)' },
+        { veriga: 'Grad de stabilitate → Compartimentare la incendiu', stare: m5.norma ? 'verificat' : 'date_insuficiente', obs: m5.norma ? ('aria maximă admisă (' + m5.arie_maxima_admisa_mp + ' m²) derivă direct din gradul ' + grad + ', ' + m5.norma + ')') : 'rând normativ neextras pentru acest grad' },
         { veriga: 'Compartimentare → Rezistența la foc a elementelor', stare: 'verificat', obs: 'aceeași pereche (grad, tip de lucrare) folosită la secțiunea 3.1/3.2 — sursă unică, fără introducere independentă' },
         { veriga: 'Rezistența la foc → Evacuare (fluxuri/scări)', stare: 'neconectat_automat', obs: 'motorul actual nu derivă necesarul de evacuare din rezistența elementelor — cele două verigi rezultă independent din geometrie/capacitate (vezi 3.4), verificare manuală de proiectant recomandată' },
         { veriga: 'Evacuare (fluxuri) → Hidranți (necesitate)', stare: 'neconectat_automat', obs: 'necesitatea hidranților rezultă din volum/arie desfășurată (M11), nu din fluxurile de evacuare — ramuri paralele din aceeași sursă (Sc/Sd), nu o veriga lipsă' },
@@ -995,7 +1007,7 @@
       ];
       var STARE_LABEL = { verificat: '✔ verificat', eroare: '❌ neconcordanță', date_insuficiente: '➖ date insuficiente', neconectat_automat: '➖ neconectat automat' };
       return '<p>Fiecare verigă e derivată din cea anterioară, nu introdusă independent — unde motorul chiar calculează o verigă din alta (ex. rezerva de apă din debit × durată), se recalculează și se compară explicit; unde legătura programatică nu există încă, se semnalează onest, nu se presupune validă.</p>' +
-        tbl(verigi.map(function (v) { return [esc(v.veriga), STARE_LABEL[v.stare] || v.stare, esc(v.obs)]; }), ['Verigă a lanțului cauzal', 'Stare', 'Observații']);
+        tbl(verigi.map(function (v) { return [v.veriga, STARE_LABEL[v.stare] || v.stare, v.obs]; }), ['Verigă a lanțului cauzal', 'Stare', 'Observații']);
     }
 
     var _checklistPlanseObj = _checklistPlanse(D);
@@ -1043,7 +1055,7 @@
       return {
         itemi: itemi,
         html: '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' element(e) încă neîncărcate</b> — concluziile care depind de ele rămân marcate onest ca atare în secțiunile corespunzătoare (nu se presupune existența lor).' : 'Toate categoriile de planșe urmărite au cel puțin un fișier încărcat.') + '</p>' +
-          tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare'])
+          tbl(itemi.map(function (i) { return [i.nume, i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare'])
       };
     }
 
@@ -1070,7 +1082,7 @@
         { nr: 5, titlu: 'Măsuri compensatorii', lipsa: cap5Lipsa }
       ];
       var html = tbl(capitole.map(function (c) {
-        return ['Capitol ' + c.nr + ' (' + esc(c.titlu) + ')', c.lipsa.length ? '✘ incomplet' : '✔ complet', c.lipsa.length ? 'lipsește: ' + c.lipsa.map(function (l) { return esc(l.text); }).join(', ') : '—'];
+        return ['Capitol ' + c.nr + ' (' + c.titlu + ')', c.lipsa.length ? '✘ incomplet' : '✔ complet', c.lipsa.length ? 'lipsește: ' + c.lipsa.map(function (l) { return l.text; }).join(', ') : '—'];
       }), ['Capitol Ord. 180/2022, Anexa 5', 'Stare', 'Observații']) +
         (capitole.some(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); }) ? '<p style="font-size:9pt;color:#666">Documentul nu poate fi exportat ca FINAL cât timp orice capitol de mai sus arată „✘ incomplet" pe un element blocant — vezi și gărzile de export FINAL de mai jos.</p>' : '<p style="font-size:9pt;color:#666">Toate cele 5 capitole ale Anexei 5 sunt complete pe baza datelor efectiv încărcate în proiect (limitările platformei încă netrackuite, dacă apar mai sus, nu blochează exportul).</p>');
       return { html: html, capitole: capitole };
@@ -1183,10 +1195,27 @@
     // proiectant/verificator ISU care vrea TOT — status enum, valori exacte, masura, document, certitudine).
     function _tblMotorConformitateDetaliat() {
       var obiecte = _obiecteConformitateLegislativa();
+      // NU esc() aici — tbl()/_cell() escapeaza deja fiecare celula o singura data; un esc() suplimentar
+      // aici produce dublu-escapare (bug real gasit intr-un document generat: "Sc&gt;3.000" afisat
+      // LITERAL in loc de "Sc>3.000" — valorile cu caractere reale >/</& din obiectele de conformitate
+      // (praguri Sc>3000, H>28m) treceau prin esc() de doua ori). Coloanele Status/Cerință nu au nevoie
+      // de citat separat, sunt deja text simplu. Impartit in 2 tabele (nu 9 coloane intr-unul singur —
+      // acelasi bug de trunchiere gasit la tabelul de rezistenta la foc, vezi mai sus) pt lizibilitate.
+      // 3 tabele a cate 3-4 coloane (nu 1 singur de 9, nici 2 de 6) — un tabel de 6 coloane cu text
+      // lung (articol_exact/valori) tot trunchia ultima coloana la marginea paginii (gasit vizual la
+      // randare PDF reala, nu doar headless) — fiecare tabel de mai jos incape confortabil.
       return '<p>Pentru fiecare cerință aplicabilă, motorul emite un verdict explicit cu schema completă (nu doar un calcul izolat) — sursa unică din care derivă atât matricea de sinteză (mai jos), cât și raportul juridic (anexă).</p>' +
         tbl(obiecte.map(function (o) {
-          return [esc(o.cerinta), esc(o.articol_exact), esc(o.normativ), o.status, esc(o.valoare_ceruta || '—'), esc(o.valoare_proiect || '—'), esc(o.masura_daca_neconform || '—'), esc(o.document_justificativ_necesar || '—'), esc(CERTITUDINE_LABEL[o.nivel_certitudine] || o.nivel_certitudine)];
-        }), ['Cerință', 'Articol exact', 'Normativ', 'Status', 'Valoare cerută', 'Valoare proiect', 'Măsură dacă neconform', 'Document justificativ', 'Nivel de certitudine']);
+          return [o.cerinta, o.articol_exact, o.normativ, o.status];
+        }), ['Cerință', 'Articol exact', 'Normativ', 'Status']) +
+        '<p style="font-size:9pt;color:#666;margin-top:6pt"><b>Valoarea cerută vs. valoarea din proiect, per cerință:</b></p>' +
+        tbl(obiecte.map(function (o) {
+          return [o.cerinta, o.valoare_ceruta || '—', o.valoare_proiect || '—'];
+        }), ['Cerință', 'Valoare cerută', 'Valoare proiect']) +
+        '<p style="font-size:9pt;color:#666;margin-top:6pt"><b>Măsură (dacă neconform), document justificativ și nivel de certitudine per cerință:</b></p>' +
+        tbl(obiecte.map(function (o) {
+          return [o.cerinta, o.masura_daca_neconform || '—', o.document_justificativ_necesar || '—', CERTITUDINE_LABEL[o.nivel_certitudine] || o.nivel_certitudine];
+        }), ['Cerință', 'Măsură dacă neconform', 'Document justificativ', 'Nivel de certitudine']);
     }
 
     // Sectiunea 2 (audit v6.0): matricea completa de conformitate — capitol final obligatoriu, PROIECTAT
@@ -1194,12 +1223,16 @@
     // tipul de lucrare, dar formatul tabelului e identic pt orice proiect.
     function _tblMatriceConformitate() {
       var STATUS_DISPLAY = { CONFORM: 'DA', NECONFORM: 'NU', NEAPLICABIL: 'NEAPLICABIL', DATE_INSUFICIENTE: 'DATE INSUFICIENTE' };
-      var randuri = _obiecteConformitateLegislativa().map(function (o) {
-        var obs = [o.valoare_proiect, o.masura_daca_neconform].filter(Boolean).join(' — ') || '—';
-        return [o.cerinta, esc(o.articol_exact), o.normativ, STATUS_DISPLAY[o.status] || o.status, obs];
-      });
+      var obiecte = _obiecteConformitateLegislativa();
+      // Impartit in 2 tabele (5 coloane cu "Observatii" lung trunchia vizibil la randare PDF reala,
+      // acelasi gen de bug ca la tabelele de mai sus) — Cerinta ramane ancora comuna intre ele.
       return '<p>Tabel generat automat din obiectele de conformitate ale Secțiunii 1 (nu o listă fixă scrisă manual per funcțiune) — rândurile aplicabile depind de destinația și tipul de lucrare ale acestui proiect.</p>' +
-        tbl(randuri, ['Cerință legală', 'Articol/Tabel', 'Normativ', 'Conform', 'Observații']);
+        tbl(obiecte.map(function (o) { return [o.cerinta, o.articol_exact, o.normativ, STATUS_DISPLAY[o.status] || o.status]; }), ['Cerință legală', 'Articol/Tabel', 'Normativ', 'Conform']) +
+        '<p style="font-size:9pt;color:#666;margin-top:6pt"><b>Observații per cerință:</b></p>' +
+        tbl(obiecte.map(function (o) {
+          var obs = [o.valoare_proiect, o.masura_daca_neconform].filter(Boolean).join(' — ') || '—';
+          return [o.cerinta, obs];
+        }), ['Cerință legală', 'Observații']);
     }
 
     // Sectiunea 16 (audit v6.0): raport juridic final — anexa DISTINCTA de matricea tehnica (Sectiunea 2):
@@ -1214,10 +1247,10 @@
         { normativ: 'Legea 307/2006, art. 30 (obligativitatea scenariului de securitate la incendiu)', status: 'respectat', obs: 'scenariul a fost elaborat pentru acest proiect' },
         { normativ: 'H.G. 571/2016, Anexa 1 (obligativitate aviz/autorizare de securitate la incendiu)', status: seSupuneRJ == null ? 'date_insuficiente' : (seSupuneRJ ? 'respectat' : 'neaplicabil'), obs: 'vezi secțiunea 1.2 pentru temei și motiv complet' },
         { normativ: 'Ord. MAI 180/2022, Anexa 5 (structura scenariului, capitol cu capitol)', status: capitoleBlocante.length ? 'nerespectat' : 'respectat', obs: capitoleBlocante.length ? capitoleBlocante.length + ' capitol(e) incomplet(e) — vezi checklist-ul de mai sus' : 'toate cele 5 capitole complete' },
-        { normativ: 'P118-1/2025, ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ' (rezistența la foc a elementelor)', status: 'respectat', obs: 'proiectat pentru minimul necesar, grad declarat ' + esc(grad) },
-        { normativ: 'P118-1/2025, ' + esc(m5.norma || 'Tabelul 41/42') + ' (compartimentarea la incendiu)', status: m5.conform === false ? 'nerespectat' : (m5.conform ? 'respectat' : 'date_insuficiente'), obs: 'arie compartiment vs. maxim admis' },
+        { normativ: 'P118-1/2025, ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ' (rezistența la foc a elementelor)', status: 'respectat', obs: 'proiectat pentru minimul necesar, grad declarat ' + grad },
+        { normativ: 'P118-1/2025, ' + (m5.norma || 'Tabelul 41/42') + ' (compartimentarea la incendiu)', status: m5.conform === false ? 'nerespectat' : (m5.conform ? 'respectat' : 'date_insuficiente'), obs: 'arie compartiment vs. maxim admis' },
         { normativ: 'P118-1/2025, Tabelul 4/145 (distanțe de siguranță față de vecinătăți)', status: vecNeconformeRJ ? 'nerespectat' : 'respectat', obs: (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate' },
-        { normativ: 'P118-1/2025, ' + esc(m9niv.norma || 'Tabelul 148') + ' (numărul maxim de niveluri)', status: m9niv.nelimitat ? 'neaplicabil' : (m9niv.eroare ? 'date_insuficiente' : (m9niv.conform ? 'respectat' : 'nerespectat')), obs: m9niv.nelimitat ? 'nelimitat pentru gradul ' + esc(grad) : 'proiectat vs. maxim admis' },
+        { normativ: 'P118-1/2025, ' + (m9niv.norma || 'Tabelul 148') + ' (numărul maxim de niveluri)', status: m9niv.nelimitat ? 'neaplicabil' : (m9niv.eroare ? 'date_insuficiente' : (m9niv.conform ? 'respectat' : 'nerespectat')), obs: m9niv.nelimitat ? 'nelimitat pentru gradul ' + grad : 'proiectat vs. maxim admis' },
         { normativ: 'HG 1058/2006 (zone cu pericol de explozie — ATEX)', status: atexAplicabilUnele ? 'date_insuficiente' : 'neaplicabil', obs: atexAplicabilUnele ? 'zonă declarată — validare de specialist ATEX în curs' : 'nu au fost identificate substanțe cu potențial exploziv' },
         { normativ: 'P118/2-2013, art. 4.1/4.2 (hidranți interiori/exteriori)', status: (ac.hidranti_int_oblig || ac.hidranti_ext_oblig) ? 'date_insuficiente' : 'neaplicabil', obs: (ac.hidranti_int_oblig || ac.hidranti_ext_oblig) ? 'obligatoriu — dimensionare la faza de proiect tehnic' : 'sub pragul aplicabil destinației' },
         { normativ: 'P118/2-2013, cap. 7 (instalații automate de stingere)', status: ac.sprinklere_oblig ? 'date_insuficiente' : 'neaplicabil', obs: ac.sprinklere_oblig ? 'obligatoriu — dimensionare la faza de proiect tehnic' : 'sub pragul de arie/înălțime' },
@@ -1226,10 +1259,11 @@
         { normativ: 'Legea 10/1995 (cerința fundamentală „securitate la incendiu")', status: 'respectat', obs: 'sistem de verificare/asigurare a calității tratat la fazele D.T.A.C./PTh, conform legii' }
       ];
       var COL = { respectat: 0, nerespectat: 1, neaplicabil: 2, date_insuficiente: 3 };
+      // NU esc() — tbl()/_cell() escapeaza deja o singura data (vezi nota din _tblMotorConformitateDetaliat).
       return '<p>Tabel distinct de matricea tehnică de mai sus — orientat strict juridic, pentru un jurist/verificator care nu are nevoie de calcul, ci doar de starea de conformitate legală per act normativ.</p>' +
         tbl(randuri.map(function (r) {
-          var row = ['—', '—', '—', '—']; row[COL[r.status]] = '✔ ' + esc(r.obs);
-          return [esc(r.normativ)].concat(row);
+          var row = ['—', '—', '—', '—']; row[COL[r.status]] = '✔ ' + r.obs;
+          return [r.normativ].concat(row);
         }), ['Articol/Normă', 'Respectat', 'Nerespectat', 'Neaplicabil', 'Date insuficiente']);
     }
 
@@ -1256,9 +1290,9 @@
         '<p style="margin:4pt 0 0">Un Certificat de Urbanism (CU) este o etapă anterioară documentației tehnice (D.T.A.C.) — un scenariu de securitate la incendiu complet, conform Ord. MAI 180/2022, se elaborează la faza D.T.A.C., pe un proiect de arhitectură deja stabilizat, nu pe planul de CU. Acest document a fost totuși generat (faza proiect setată: ' + esc(D.faza || 'D.T.A.C.') + ') — verifică dacă planul de situație folosit e cel corect pentru faza curentă înainte de a-l folosi pentru avizare/autorizare.</p></div>' }] : []).concat([
       { h: '1.0. Tipul de lucrare (determină tabelele P118-1/2025 aplicabile)', html: '<p><b>' + esc(m0.label) + '.</b> Regim tabele: ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'construcție EXISTENTĂ (T144/T145/T146/T147/T148, Anexa A.10)' : 'construcție NOUĂ (T2/T4/T5/T41/T42)') + '.' + (m0.nota ? ' ' + esc(m0.nota) : '') + '</p><p style="font-size:9pt;color:#888">Temei: ' + esc(m0.temei_legal) + '</p>' },
       { h: '1.1. Datele de identificare', html: tbl([
-        ['Denumire', esc(D.nume || '—')], ['Amplasament', esc((D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : ''))],
-        ['Beneficiar', esc(D.beneficiar || '—')], ['Fază de proiectare', esc(D.faza || 'D.T.A.C.')],
-        ['Telefon/E-mail beneficiar', esc(D.contact_beneficiar || '[se completează]')]
+        ['Denumire', D.nume || '—'], ['Amplasament', (D.uat || '—') + (D.nrcad ? ', nr. cad. ' + D.nrcad : '')],
+        ['Beneficiar', D.beneficiar || '—'], ['Fază de proiectare', D.faza || 'D.T.A.C.'],
+        ['Telefon/E-mail beneficiar', D.contact_beneficiar || '[se completează]']
       ], ['Element', 'Valoare']) },
       { h: '1.2. Destinația', html: (function () {
         // Extindere multi-functiune (Florin, 12 iul): HG 571/2016 Anexa 1 NU trateaza toate destinatiile
@@ -1357,24 +1391,24 @@
           var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null && !isNaN(v.volum_total_mc); });
           var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
           var conformTxt = !g.verificare ? 'nedeterminat' : (g.verificare.conform === false ? 'NU' : 'DA');
-          return ['' + (idx + 1), esc(g.id_grup), esc(destinatieT42), (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
+          return ['' + (idx + 1), g.id_grup, destinatieT42, (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
         });
         var nrNeconforme = m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; }).length;
         return '<p><b>Total: ' + m5bGrupuri.length + ' compartimente de incendiu</b>, listate integral mai jos (' + m5bGrupuri.map(function (g) { return g.id_grup; }).join(', ') + '), rezultate din ' + cladiriPropuse.length + ' clădiri — grupurile cuplate fără perete antifoc declarat formează UN SINGUR compartiment fiecare, cu aria însumată; detaliul complet pe grup (ce clădiri conține fiecare) e la secțiunea „Compunerea compartimentelor" imediat de mai jos.</p>' +
           (nrNeconforme ? '<p style="color:#dc2626"><b>' + nrNeconforme + ' compartiment/compartimente depășesc aria maximă admisă</b> — vezi secțiunea 5 pentru măsurile compensatorii/corecțiile necesare.</p>' : '<p style="color:#16a34a">Toate cele ' + m5bGrupuri.length + ' compartimente respectă aria maximă admisă.</p>') +
           tbl(rows, ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
       })() : tbl([
-        ['1', 'CI-01', esc(destinatieT42), (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
+        ['1', 'CI-01', destinatieT42, (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
       ], ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
     ].concat(urbanismAnsamblu ? [{
       h: 'Sinteza clădirilor propuse (plan de situație — ' + urbanismAnsamblu.nrCladiriTotal + ' clădiri detectate)',
       html: '<p>Amprentele la sol au fost extrase automat din planul de situație (DXF) — fiecare clădire distinctă e o compartimentare separată de incendiu, dacă nu sunt alăturate/interconectate fără separare la foc. Suprafețele (Sc/Sd) și indicatorii (POT/CUT) de mai jos provin din adnotările proiectantului din desen, nu sunt recalculate.</p>' +
-        tbl(urbanismAnsamblu.tipuri.map(function (t) { return [esc(t.denumire), '' + t.n, t.sc_mp + ' m²', t.sd_mp != null ? t.sd_mp + ' m²' : '—']; }), ['Tip clădire', 'Nr. unități', 'Sc/unitate', 'Sd/unitate']) +
+        tbl(urbanismAnsamblu.tipuri.map(function (t) { return [t.denumire, '' + t.n, t.sc_mp + ' m²', t.sd_mp != null ? t.sd_mp + ' m²' : '—']; }), ['Tip clădire', 'Nr. unități', 'Sc/unitate', 'Sd/unitate']) +
         tbl([
           ['Nr. total clădiri', '' + urbanismAnsamblu.nrCladiriTotal],
           ['Suprafață construită totală (ΣSc)', urbanismAnsamblu.totalSc_mp.toLocaleString('ro-RO') + ' m²'],
           ['Suprafață desfășurată totală (ΣSd)', urbanismAnsamblu.totalSd_mp ? urbanismAnsamblu.totalSd_mp.toLocaleString('ro-RO') + ' m²' : '—'],
-          ['Suprafață teren (' + esc(urbanismAnsamblu.sursaArieTeren || 'sursă nedeterminată') + ')', urbanismAnsamblu.arieTeren_mp ? urbanismAnsamblu.arieTeren_mp.toLocaleString('ro-RO') + ' m²' : 'nedeterminată (mapează layerul LIMITĂ DE PROPRIETATE sau adaugă adnotări „S.parcelă" în plan)'],
+          ['Suprafață teren (' + (urbanismAnsamblu.sursaArieTeren || 'sursă nedeterminată') + ')', urbanismAnsamblu.arieTeren_mp ? urbanismAnsamblu.arieTeren_mp.toLocaleString('ro-RO') + ' m²' : 'nedeterminată (mapează layerul LIMITĂ DE PROPRIETATE sau adaugă adnotări „S.parcelă" în plan)'],
           ['POT ansamblu (ΣSc/Steren)', urbanismAnsamblu.pot_ansamblu_pct != null ? urbanismAnsamblu.pot_ansamblu_pct + '%' : '—'],
           ['CUT ansamblu (ΣSd/Steren)', urbanismAnsamblu.cut_ansamblu != null ? '' + urbanismAnsamblu.cut_ansamblu : '—']
         ], ['Indicator', 'Valoare'])
@@ -1382,7 +1416,7 @@
       h: 'Compunerea compartimentelor (cuplat/duplex/triplex vs. individual)',
       html: '<p>Fiecare compartiment din 1.4.f de mai sus provine dintr-o componentă conexă geometrică (clădiri ale căror contururi sunt practic alipite, &lt; 0,3 m) — tabelul arată DIN CE clădiri e compus și de ce (arie/volum/conform sunt deja la 1.4.f, nu se repetă aici).</p>' +
         tbl(m5bGrupuri.map(function (g) {
-          return [esc(g.id_grup), esc(g.tip.replace(/_/g, ' ')), g.cladiri_incluse.join(', '), esc((g.tratament || '').replace(/_/g, ' '))];
+          return [g.id_grup, g.tip.replace(/_/g, ' '), g.cladiri_incluse.join(', '), (g.tratament || '').replace(/_/g, ' ')];
         }), ['Compartiment', 'Tip', 'Clădiri incluse', 'Tratament']) +
         (m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC'; }) ? '<p style="font-size:9pt;color:#666">Grupurile „COMPARTIMENT UNIC" nu au un perete despărțitor cu rezistență la foc declarată în proiect (dacă există, se poate atașa în D._pereti_despartitori_cuplat pentru re-evaluare ca „COMPARTIMENTE DISTINCTE").</p>' : '') +
         (cladiriCuVolum.some(function (c) { return c.avertisment_releveu; }) ? '<p style="font-size:9pt;color:#b45309">ⓘ ' + cladiriCuVolum.filter(function (c) { return c.avertisment_releveu; }).length + ' clădire/clădiri fără releveu încărcat pentru tipul lor — volumul acelor unități rămâne necalculat (nu se presupune Sc×3m); completează releveul per tip în panoul SSI pentru volum real.</p>' : '')
@@ -1471,7 +1505,7 @@
           (camere.length
             ? tbl(camere.map(function (c, i) {
               var qi = (c.arie_mp && c.sarcina_termica_mj) ? Math.round(c.sarcina_termica_mj / c.arie_mp) : 0;
-              return ['' + (i + 1), esc(c.nume || '—'), (c.arie_mp || 0) + ' m²', Math.round(c.sarcina_termica_mj || 0) + ' MJ', qi + ' MJ/m²', incadrare(qi)];
+              return ['' + (i + 1), c.nume || '—', (c.arie_mp || 0) + ' m²', Math.round(c.sarcina_termica_mj || 0) + ' MJ', qi + ' MJ/m²', incadrare(qi)];
             }), ['Nr.', 'Încăpere', 'Arie', 'Σ(Gi·Hi·ψi)', 'qi = Σ/A', 'Nivel risc']) +
               '<p style="font-size:9pt;color:#666">Sarcina termică de mai sus reflectă materialul combustibil real declarat pe planul de arhitectură pentru fiecare încăpere (finisaj de pardoseală — parchet lemn: 18,40 MJ/kg conform Tabelul 137; pardoselile ceramice/gresie sunt incombustibile, contribuție 0). Destinația (' + esc(destinatieT42.toLowerCase()) + ') nu presupune, cu caracter permanent, depozitare de materiale periculoase peste mobilierul/finisajele uzuale — încadrarea rezultă atât din calculul de mai sus (' + Math.round(qMax) + ' MJ/m² maxim, sub pragul de ' + (risc === 'mic' ? '420' : risc === 'mijlociu' ? '840' : '1680') + ' MJ/m²), cât și din practica de proiectare pentru această destinație.</p>'
             : '<p>Destinația (' + esc(destinatieT42.toLowerCase()) + ') — mobilier și finisaje uzuale, fără depozitare de materiale periculoase — se încadrează în risc <b>' + esc(risc) + '</b>, conform practicii de proiectare pentru această destinație.</p>') +
@@ -1501,10 +1535,10 @@
         html: '<p>Gradul de stabilitate <b>adoptat (de proiectare)</b>: ' + esc(grad) + '. ' + m6.acoperire_partiala + ((D._materiale || []).length ? '' : ' Confirmarea definitivă a gradului (prin DoP-urile/certificatele materialelor efectiv puse în operă) se face la recepția lucrării — grad de proiectare, nu grad definitiv as-built.') + '</p>' },
       { h: '3.2. Corelare arie/niveluri (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelele 147/148' : 'Tabelele 41/42') + ')', html: tbl([
         ['Aria construită proiectată', (m5.arie_proiectata_mp || 0) + ' m²'],
-        ['Aria maximă admisă (' + esc(m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
+        ['Aria maximă admisă (' + (m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
         ['Conform arie', m5.conform === false ? 'NECONFORM' : (m5.conform ? 'DA' : 'nedeterminat')],
         ['Număr niveluri proiectat', (D.niv_supraterane || 1) + ''],
-        ['Număr niveluri maxim admis (' + esc(m9niv.norma || '—') + ')', m9niv.nelimitat ? 'nelimitat' : (m9niv.niveluri_max != null ? m9niv.niveluri_max + '' : '—')],
+        ['Număr niveluri maxim admis (' + (m9niv.norma || '—') + ')', m9niv.nelimitat ? 'nelimitat' : (m9niv.niveluri_max != null ? m9niv.niveluri_max + '' : '—')],
         ['Conform niveluri', m9niv.conform === false ? 'NECONFORM' : (m9niv.nelimitat || m9niv.conform ? 'DA' : 'nedeterminat')]
       ], ['Parametru', 'Valoare']) + verificariM14.filter(function (n) { return n.tip === 'ARIE_COMPARTIMENT_DEPASITA' || n.tip === 'NIVELURI_DEPASITE'; }).map(fmtSolutiiPtNeconformitate).join('') },
       { h: '3.3. Asigurarea limitării propagării incendiilor la vecinătăți (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 145' : 'Tabelul 4') + ')',
@@ -1625,7 +1659,7 @@
         tbl([
           ['Numărul și amplasarea acceselor', cladiriPropuse.length > 1 ? 'câte un acces carosabil la fiecare din cele ' + cladiriPropuse.length + ' unități, prin aleile carosabile ale ansamblului (vezi planul de situație)' : 'un acces carosabil, dinspre drumul public adiacent (vezi planul de situație)'],
           ['Dimensiuni/gabarite ale căilor de acces', D._latime_carosabil_incinta ? D._latime_carosabil_incinta + ' m lățime utilă (declarat de proiectant)' : 'proiectat pentru accesul autospecialelor de intervenție (lățime utilă normată P118-1/2025) — dimensiunea exactă rezultă din proiectul de sistematizare a incintei'],
-          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu ? esc(D._detasament_isu.nume || '—') + (D._detasament_isu.distanta_km != null ? ', ' + D._detasament_isu.distanta_km + ' km' : '') + (D._detasament_isu.timp_min != null ? ', ~' + D._detasament_isu.timp_min + ' min' : '') : 'se confirmă cu ISU județean la depunerea documentației (denumire detașament, distanță, timp estimat de intervenție) — pas administrativ standard, nu ține de proiectare'],
+          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu ? (D._detasament_isu.nume || '—') + (D._detasament_isu.distanta_km != null ? ', ' + D._detasament_isu.distanta_km + ' km' : '') + (D._detasament_isu.timp_min != null ? ', ~' + D._detasament_isu.timp_min + ' min' : '') : 'se confirmă cu ISU județean la depunerea documentației (denumire detașament, distanță, timp estimat de intervenție) — pas administrativ standard, nu ține de proiectare'],
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
@@ -2327,14 +2361,14 @@
         var materialeSursaFT = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata', tipuriAcoperisDecl);
         var infoFT = G.SSI_M4B.valideazaMateriale(materialeSursaFT);
         htmlMateriale = tbl(infoFT.materiale.map(function (m) {
-          return [esc(m.element || m.nume), esc(m.nume), esc(m.clasa || '—'), m.certitudine === 'implicit_acceptat' ? 'consacrat — clasificare implicită' : (m.DoP_atasat ? 'DoP atașat' : 'DoP/fișă tehnică de atașat la aprovizionare/execuție')];
+          return [m.element || m.nume, m.nume, m.clasa || '—', m.certitudine === 'implicit_acceptat' ? 'consacrat — clasificare implicită' : (m.DoP_atasat ? 'DoP atașat' : 'DoP/fișă tehnică de atașat la aprovizionare/execuție')];
         }), ['Element', 'Material', 'Clasă reacție la foc', 'Confirmare produs']);
       } else {
         htmlMateriale = '<p>Lista de materiale se completează din proiectul de arhitectură/structură — fiecare produs cu variabilitate reală (tâmplărie, termoizolație, hidroizolație, învelitoare) se însoțește la aprovizionare/execuție de declarația de performanță (DoP) sau fișa tehnică a producătorului; materialele consacrate (beton, oțel, zidărie, sticlă) nu necesită confirmare suplimentară.</p>';
       }
       var dotari = (D._echipamente && D._echipamente.length) ? D._echipamente : null;
       var htmlDotari = dotari
-        ? tbl(dotari.map(function (e) { return [esc(e.denumire || '—'), esc(e.tip || '—'), esc(e.caracteristici || '—'), esc(e.certificare || 'de precizat')]; }), ['Denumire', 'Tip/categorie', 'Caracteristici tehnice', 'Certificare/agrement'])
+        ? tbl(dotari.map(function (e) { return [e.denumire || '—', e.tip || '—', e.caracteristici || '—', e.certificare || 'de precizat']; }), ['Denumire', 'Tip/categorie', 'Caracteristici tehnice', 'Certificare/agrement'])
         : '<p>Echipamentele și dotările tehnice ale proiectului (obiecte sanitare, centrală/echipamente HVAC, tablouri și echipamente electrice, lift, echipamente PSI) nu sunt încă declarate individual pentru acest proiect (D._echipamente) — se completează la faza de proiect tehnic/aprovizionare, fiecare cu fișa tehnică a producătorului și, unde e cazul, agrementul tehnic/certificatul de conformitate.</p>';
       var secs = [
         { h: '1. Obiect', html: '<p>Prezentul document centralizează fișele tehnice ale principalelor materiale de construcție și ale dotărilor/echipamentelor tehnice prevăzute pentru obiectivul „' + esc(fnLabel) + '", ' + esc(D.uat || '—') + ' — necesar la recepție și pentru completarea Cărții tehnice a construcției (Legea 10/1995).</p>' },
