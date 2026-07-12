@@ -100,7 +100,7 @@
   // v4.2 (Florin): SINGURA blocare ramasa nu e la introducere, e la FINALIZARE — daca raman vecinatati
   // neconfirmate de proiectant (estimare automata/conservatoare, nu validata), scenariul NU poate fi
   // marcat/exportat ca FINAL pentru depunere (desi analiza DRAFT a mers inainte fara nicio blocare).
-  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate, confirmatDeProiectant, integritateCalcul) {
+  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate, confirmatDeProiectant, integritateCalcul, materialeInfo) {
     var neconfirmate = (vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
     var normativeNevalidate = statusNormativeNevalidate || [];
     // Simetrie cu vecinatatile (v4.2): sursele normative pot fi "validate" fie institutional (status
@@ -113,11 +113,20 @@
     // se putea marca FINAL doar pentru ca sursele normative erau asumate — integritatea calculului
     // NU e conditionata de statusul normativelor, e o verificare SEPARATA si obligatorie.
     var eroriCalcul = (integritateCalcul && integritateCalcul.erori) || [];
-    var poate = neconfirmate.length === 0 && !normativeBlocheaza && eroriCalcul.length === 0;
+    // Materialele cu variabilitate reala (Regula #13): in DRAFT/proiectare NU se mai afiseaza ca
+    // blocaj vizibil in document (Florin, 12 iul: "nu mai astepta ca utilizatorul sa mai adauge el
+    // ceva, cum e DoP" — in faza de proiectare e normal sa nu existe inca un DoP de produs concret,
+    // proiectul prescrie doar clasa minima necesara) — dar cerinta legala reala (DoP la depunerea la
+    // ISU) nu dispare, doar se muta EXCLUSIV la poarta de export FINAL, cu aceeasi bifa de asumare a
+    // raspunderii profesionale ca la normative/vecinatati (nu o bifa separata suplimentara).
+    var materialeNeconfirmate = (materialeInfo && materialeInfo.neconfirmate) || [];
+    var materialeBlocheaza = materialeNeconfirmate.length > 0 && !confirmatDeProiectant;
+    var poate = neconfirmate.length === 0 && !normativeBlocheaza && eroriCalcul.length === 0 && !materialeBlocheaza;
     var motive = [];
     if (eroriCalcul.length) motive.push('Erori de integritate a calculului: ' + eroriCalcul.join('; ') + '.');
     if (neconfirmate.length) motive.push(neconfirmate.length + ' vecinătate/vecinătăți au doar estimare automată, neconfirmată de proiectant (' + neconfirmate.map(function (v) { return v.id; }).join(', ') + ').');
     if (normativeNevalidate.length && !confirmatDeProiectant) motive.push(normativeNevalidate.length + ' sursă/surse normative fără validare de inginer/arhitect atestat (bifează confirmarea din panoul SSI pentru a asuma răspunderea profesională).');
+    if (materialeBlocheaza) motive.push(materialeNeconfirmate.length + ' material/materiale cu variabilitate reală nu au încă DoP/fișă tehnică de produs concret atașată (' + materialeNeconfirmate.map(function (m) { return m.nume; }).join(', ') + ') — bifează confirmarea din panoul SSI pentru a asuma răspunderea profesională dacă dorești export FINAL fără DoP-uri atașate.');
     return { poate: poate, motiv: motive.length ? motive.join(' ') : null, normativeAsumatePeRaspundere: !!(normativeNevalidate.length && confirmatDeProiectant) };
   }
 

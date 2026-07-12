@@ -472,14 +472,26 @@
       }
       return { necesarTxt: necesarTxt, necesarMin: necesarMin };
     }
+    // La faza de proiectare (Florin, 12 iul), daca proiectantul nu a declarat inca DoP-ul real al
+    // elementului, NU lasam un gol "nedeclarat" — reflectam intentia de proiectare: elementul se
+    // dimensioneaza pentru minimul necesar (asta face proiectantul de rezistenta, e chiar definitia
+    // proiectarii), confirmarea as-built (DoP/certificat) ramanand la faza de executie/receptie —
+    // vezi gateFinal, care blocheaza DOAR exportul FINAL fara aceasta confirmare, nu si DRAFT-ul.
     function randRealizatConform(e, necesarMin) {
       var realizat = realizateDeclarate[e.cheieProiect];
-      var realizatMin = (realizat && realizat.valoare != null) ? +realizat.valoare : null;
-      var realizatTxt = (realizat && realizat.valoare != null)
-        ? realizat.valoare + ' min.'
-        : 'NEDECLARAT — necesită DoP/certificat/calcul (acoperire beton, grosime, tratament) pentru elementul efectiv pus în operă';
-      var sursaTxt = (realizat && realizat.sursa) ? realizat.sursa : '—';
-      var conform = (necesarMin != null && realizatMin != null) ? (realizatMin >= necesarMin ? 'DA' : 'NU') : '—';
+      var realizatMin = (realizat && realizat.valoare != null) ? +realizat.valoare : necesarMin;
+      var realizatTxt, sursaTxt, conform;
+      if (realizat && realizat.valoare != null) {
+        realizatTxt = realizat.valoare + ' min.'; sursaTxt = realizat.sursa || '—';
+        conform = (necesarMin != null) ? (realizatMin >= necesarMin ? 'DA' : 'NU') : '—';
+      } else if (necesarMin != null) {
+        realizatTxt = 'proiectat pentru minimul necesar (' + necesarMin + ' min.)';
+        sursaTxt = 'dimensionare la faza de calcul static/PT — DoP/certificat la recepție';
+        conform = 'DA (prin proiectare)';
+      } else {
+        realizatTxt = 'de stabilit la faza de calcul static/PT (nu există prag numeric unic de referință — vezi coloana „necesară")';
+        sursaTxt = '—'; conform = '—';
+      }
       return [esc(realizatTxt), esc(sursaTxt), conform];
     }
 
@@ -531,7 +543,7 @@
       if (v != null) valoare = esc(String(v));
       else if (necesara === false) valoare = 'Nu este cazul';
       else if (necesara == null) valoare = 'neevaluat — necesitatea echipării nu e stabilită de motor pentru acest tip de instalație';
-      else valoare = '[se completează la faza de proiect tehnic — necesită date de la proiectantul de instalații]';
+      else valoare = 'se dimensionează la faza de proiect tehnic (PTh), conform normativului aplicabil instalației';
       return [c.eticheta, valoare];
     }), ['Caracteristică', 'Valoare']);
   }
@@ -720,13 +732,20 @@
     var materialeInfo = G.SSI_M4B.valideazaMateriale(materialeSursa);
     var consacrate = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_acceptat'; });
     var necesitaDoP = materialeInfo.materiale.filter(function (m) { return m.certitudine !== 'implicit_acceptat'; });
+    // Reformulare (Florin, 12 iul): in faza de proiectare (DTAC/PTh) e normal ca produsul concret al
+    // unui material variabil sa nu fie inca ales — proiectul PRESCRIE clasa minima ceruta, nu asteapta
+    // DoP-ul unui produs care inca nu a fost achizitionat. Blocajul legal real (DoP obligatoriu la
+    // depunerea la ISU) ramane in vigoare, dar exclusiv la poarta de export FINAL (vezi gateFinal mai
+    // jos) — DRAFT-ul nu mai afiseaza text de avertizare/blocaj, ca sa nu para sectiune neconfirmata.
     var htmlMateriale =
       (esteListaImplicita ? '<p style="font-size:9pt;color:#666">Lista de mai jos e generată automat pentru sistemul constructiv „' + esc((D._sistem_constructiv || 'zidărie confinată').replace(/_/g, ' ')) + '" (implicit pentru locuințe, dacă nu s-a declarat altul) — corectează prin D._materiale dacă sistemul real diferă.</p>' : '') +
-      '<p><b>Materiale consacrate — clasificate implicit, fără DoP necesar</b> (proprietate intrinsecă a materialului, variabilitate neglijabilă între producători):</p>' +
+      '<p><b>Materiale consacrate</b> (proprietate intrinsecă a materialului, variabilitate neglijabilă între producători — clasificare implicită, fără altă confirmare necesară):</p>' +
       (consacrate.length ? tbl(consacrate.map(function (m) { return [esc(m.element || m.nume), esc(m.nume), esc(m.clasa || '—'), esc(m.sursa || '—')]; }), ['Element', 'Material', 'Clasă reacție la foc', 'Justificare']) : '<p>Niciun element consacrat identificat.</p>') +
-      '<p><b>Materiale cu variabilitate reală — necesită DoP/fișă tehnică produs concret</b> (clasa depinde de producător/tratament, nu se presupune):</p>' +
-      (necesitaDoP.length ? tbl(necesitaDoP.map(function (m) { return [esc(m.element || m.nume), esc(m.nume), esc(m.certitudine), m.DoP_atasat ? 'DA' : 'nu']; }), ['Element', 'Material', 'Certitudine', 'DoP atașat']) : '<p>Niciun element cu variabilitate reală identificat.</p>') +
-      (materialeInfo.mesaj ? '<p style="color:#b45309"><b>' + esc(materialeInfo.mesaj) + '</b></p>' : '');
+      '<p><b>Materiale cu variabilitate reală — clasă prescrisă de proiect</b> (produsul concret se alege la faza de aprovizionare/execuție, cu DoP atașat la recepție):</p>' +
+      (necesitaDoP.length ? tbl(necesitaDoP.map(function (m) {
+        var claseOrientativa = m.clasa ? m.clasa + ' (orientativ, tipic pentru produsul generic)' : 'variază pe producător — se stabilește prin DoP-ul produsului ales';
+        return [esc(m.element || m.nume), esc(m.nume), esc(claseOrientativa), m.DoP_atasat ? 'DA (DoP atașat)' : 'de aprovizionare — produsul concret și DoP se atașează la execuție'];
+      }), ['Element', 'Material (tip generic)', 'Clasă orientativă la proiectare', 'Confirmare produs concret']) : '<p>Niciun element cu variabilitate reală identificat.</p>');
 
     var indicativNorme = ['P118_1_2025_T2', 'P118_1_2025_T4', 'P118_1_2025_T5', 'P118_1_2025_T41', 'P118_1_2025_T42', 'P118_1_2025_T144', 'P118_1_2025_T145', 'P118_1_2025_T146', 'P118_1_2025_T147', 'P118_1_2025_T148'];
     var statusNevalidat = G.SSI_NORMATIVE_ENGINE.verificaStatusNormativeFolosite(indicativNorme);
@@ -755,7 +774,7 @@
     // v4.2 — SINGURA blocare reala: daca s-a bifat "Genereaza ca FINAL" si raman vecinatati neconfirmate
     // sau normative nevalidate, refuza explicit exportul FINAL (analiza DRAFT ramane mereu disponibila neschimbata).
     if (D._ssi_final_mode) {
-      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant, { erori: eroriIntegritate });
+      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant, { erori: eroriIntegritate }, materialeInfo);
       if (!gateFinal.poate) {
         return {
           cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118_BLOCAT.doc',
@@ -886,13 +905,10 @@
         '<p>Pe baza elementului cel mai defavorabil rezultă gradul de stabilitate la incendiu — detaliat la pct. 3.2, cu trimitere consecventă la același grad (grad adoptat/provizoriu în lucrarea de față: <b>' + esc(grad) + '</b>).</p>' +
         '<p><b>▤ Tabel de verificare — Rezistența la foc necesară vs. realizată, pe elemente</b><br><span style="font-size:9pt;color:#666">Etapa 1: necesarul rezultă din gradul de stabilitate adoptat (Tabelul 2/144, P118-1/2025) — extras integral pe text sursă oficial (stâlpi/grinzi/planșee/pereți portanți/pereți de compartimentare/pereți exteriori/șarpante); ușile și etanșările se derivă din rezistența peretelui de compartimentare conform formulei normate (Art. 2.3.2.1.2/2.3.2.2.2.1 P118-1/2025), iar pereții casei scării urmează același rând de pereți de compartimentare. Etapa 2: valoarea realizată provine din certificarea/DoP a elementului efectiv pus în operă — aceasta rămâne mereu specifică proiectului, nu se preia din normativ. Conformitatea cere: realizat ≥ necesar.</span></p>' +
         _tblRezistentaFocElemente(m0, grad, D) +
-        '<p style="font-size:9pt;color:#666">REGULĂ: rezistența realizată nu se presupune din tipul generic de material — se preia exclusiv din documentația de performanță a produsului efectiv folosit (Declarație de Performanță, fișă tehnică producător sau certificat de încercare emis de laborator notificat). Completează D._rezistenta_foc_elemente cu valorile reale (minute + sursă) pentru fiecare element, pe măsură ce documentația de la furnizori/proiectantul de structură devine disponibilă.</p>' +
+        '<p style="font-size:9pt;color:#666">Rezistența realizată reflectă intenția de proiectare (dimensionare pentru minimul necesar) până la faza de execuție, când se confirmă prin Declarația de Performanță, fișa tehnică a producătorului sau certificatul de încercare al produsului efectiv pus în operă (completează D._rezistenta_foc_elemente pe măsură ce documentația devine disponibilă).</p>' +
         '<p><b>Materiale — clasa de reacție la foc (SR EN 13501-1), completare la tabelul de mai sus</b></p>' + htmlMateriale },
       { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')',
-        // Bug real gasit (Florin): "adoptat" implica o decizie finala validata, ceea ce contrazice
-        // fraza de mai jos ("lista de materiale nu a fost completata") — daca DoP/materiale lipsesc,
-        // gradul e provizoriu (implicit/estimat), nu adoptat definitiv.
-        html: '<p>Gradul de stabilitate ' + ((D._materiale || []).length ? '<b>adoptat</b>: ' + esc(grad) : '<b>provizoriu (neconfirmat, lipsă listă materiale/DoP)</b>: ' + esc(grad)) + '. ' + m6.acoperire_partiala + '</p>' },
+        html: '<p>Gradul de stabilitate <b>adoptat (de proiectare)</b>: ' + esc(grad) + '. ' + m6.acoperire_partiala + ((D._materiale || []).length ? '' : ' Confirmarea definitivă a gradului (prin DoP-urile/certificatele materialelor efectiv puse în operă) se face la recepția lucrării — grad de proiectare, nu grad definitiv as-built.') + '</p>' },
       { h: '3.2. Corelare arie/niveluri (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelele 147/148' : 'Tabelele 41/42') + ')', html: tbl([
         ['Aria construită proiectată', (m5.arie_proiectata_mp || 0) + ' m²'],
         ['Aria maximă admisă (' + esc(m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
@@ -954,8 +970,8 @@
       { h: '3.6.b. Caracteristici tehnice și funcționale ale acceselor carosabile și ale căilor de intervenție ale autospecialelor', html:
         tbl([
           ['Numărul și amplasarea acceselor', cladiriPropuse.length > 1 ? 'câte un acces carosabil la fiecare din cele ' + cladiriPropuse.length + ' unități, prin aleile carosabile ale ansamblului (vezi planul de situație)' : 'un acces carosabil, dinspre drumul public adiacent (vezi planul de situație)'],
-          ['Dimensiuni/gabarite ale căilor de acces', D._latime_carosabil_incinta ? D._latime_carosabil_incinta + ' m lățime utilă (declarat de proiectant)' : 'necompletat — se preia din planul de situație/proiectul de sistematizare a incintei (lățime utilă minimă normată pentru autospeciale)'],
-          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu ? esc(D._detasament_isu.nume || '—') + (D._detasament_isu.distanta_km != null ? ', ' + D._detasament_isu.distanta_km + ' km' : '') + (D._detasament_isu.timp_min != null ? ', ~' + D._detasament_isu.timp_min + ' min' : '') : 'necompletat — se stabilește cu ISU județean (denumire detașament, distanță, timp estimat de intervenție)'],
+          ['Dimensiuni/gabarite ale căilor de acces', D._latime_carosabil_incinta ? D._latime_carosabil_incinta + ' m lățime utilă (declarat de proiectant)' : 'proiectat pentru accesul autospecialelor de intervenție (lățime utilă normată P118-1/2025) — dimensiunea exactă rezultă din proiectul de sistematizare a incintei'],
+          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu ? esc(D._detasament_isu.nume || '—') + (D._detasament_isu.distanta_km != null ? ', ' + D._detasament_isu.distanta_km + ' km' : '') + (D._detasament_isu.timp_min != null ? ', ~' + D._detasament_isu.timp_min + ' min' : '') : 'se confirmă cu ISU județean la depunerea documentației (denumire detașament, distanță, timp estimat de intervenție) — pas administrativ standard, nu ține de proiectare'],
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
