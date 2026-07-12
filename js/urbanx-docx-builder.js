@@ -1948,6 +1948,35 @@
       ];
       return { cat: 'Memorii Tehnice', file: 'Cladire_mixta_separari.doc', html: docHtml(_meta(D, 'CLĂDIRE MIXTĂ — SEPARĂRI ÎNTRE FUNCȚIUNI', 'P118-1/2013 · separări la foc + accese'), secs) };
     },
+    // Sistematizare verticala — piesa scrisa distincta din Anexa 1 (Ord. 839/2009, Legea 50/1991):
+    // cote de nivel teren natural/proiectat, racordare cu vecinatatile/drumul, colectare-evacuare ape
+    // pluviale, lucrari de sustinere/rampe. Standard universal (nu optional ca DTAD) — vezi referinta
+    // Cresa Pogana: memoriu separat + planse ([[urbanx-master-backlog]] sectiunea A).
+    'Sistematizare verticală': function (D, v) {
+      var ac = v.calc || {};
+      var st = +D.Steren || null; var sc = +D.Sc || null;
+      var cotaTeren = D.cota_teren_natural_m;
+      var cota0 = D.cota_0_00_m;
+      var pantaTeren = D.panta_teren_pct;
+      var areSustinere = pantaTeren != null && +pantaTeren > 15;
+      var secs = [
+        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație stabilește soluția de sistematizare pe verticală a terenului aferent investiției „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", ' + esc(D.uat || '—') + ' — cotele de nivel proiectate, racordarea cu terenurile învecinate și cu drumul public, precum și modul de colectare și evacuare a apelor meteorice de pe amplasament, conform Legii 50/1991 (Anexa 1 la normele metodologice).</p>' },
+        { h: '2. Situația actuală a terenului', html: tbl([
+          ['Suprafață teren', st ? (st.toLocaleString('ro-RO') + ' mp') : 'de precizat din ridicarea topografică'],
+          ['Cotă teren natural (CTN), punct de referință', cotaTeren != null ? (cotaTeren + ' m (sistem de referință Marea Neagră 1975)') : 'de precizat din ridicarea topografică'],
+          ['Panta generală a terenului', pantaTeren != null ? (pantaTeren + ' %') : 'de precizat din ridicarea topografică (planul de situație cu curbe de nivel)'],
+          ['Scurgerea actuală a apelor pluviale', esc(D.scurgere_actuala_ape || 'natural, pe direcția pantei terenului, spre punctul cel mai jos al parcelei/domeniul public')]
+        ], ['Element', 'Situație']) },
+        { h: '3. Soluția de sistematizare propusă', html: '<p>Cota ±0,00 a construcției se stabilește la ' + (cota0 != null ? ('<b>' + cota0 + ' m</b>' + (cotaTeren != null ? (', cu ' + (cota0 - cotaTeren >= 0 ? '+' : '') + Math.round((cota0 - cotaTeren) * 100) / 100 + ' m față de CTN') : '')) : 'de precizat de proiectant, cu +0,15–0,45 m față de cota trotuarului/aleii de acces, pentru protecția la infiltrații și scurgerea gravitațională a apelor pluviale') + '. Terenul din jurul construcției se sistematizează cu pante de scurgere de minimum 2% pe primii 3 m de la fațadă (îndepărtând apa de la fundație), racordate lin cu cotele terenurilor învecinate și cu cota drumului/aleii de acces, fără a crea diferențe de nivel care să afecteze proprietățile vecine.</p>' },
+        { h: '4. Colectarea și evacuarea apelor pluviale', html: '<p>Apele meteorice de pe acoperiș și platforme se colectează prin ' + esc(D.sistem_colectare_pluvial || 'jgheaburi/burlane (acoperiș) și rigole/guri de scurgere (platforme, alei, parcări)') + ' și se evacuează ' + esc(D.evacuare_pluviala || 'gravitațional, spre rețeaua publică de canalizare pluvială/emisar natural, cu acordul operatorului de apă, sau, în lipsa rețelei publice, prin infiltrare în teren/bazin de retenție dimensionat pe amplasament') + '. Se interzice evacuarea necontrolată a apelor pluviale către proprietățile vecine.</p>' },
+        { h: '5. Lucrări de susținere și rampe de acces', html: '<p>' + (areSustinere
+          ? 'Panta terenului (' + pantaTeren + ' %) impune lucrări de susținere — ziduri de sprijin/gabioane dimensionate de proiectantul de structuri, funcție de diferența de nivel și natura terenului — și/sau rampe de acces auto cu pantă maximă conformă normativelor rutiere. Rampele/scările de acces pietonal pentru persoane cu dizabilități respectă NP 051/2012 (pantă maximă 8%, paliere de odihnă).'
+          : 'Panta terenului nu impune lucrări de susținere majore. Diferențele de nivel minore (denivelări la accese) se preiau prin trepte/rampă de acces pentru persoane cu dizabilități, conform NP 051/2012 (pantă maximă 8%).') + '</p>' },
+        { h: '6. Circulații și accese', html: '<p>Circulațiile carosabile și pietonale de pe amplasament se sistematizează la cotele stabilite mai sus, cu pante longitudinale/transversale conforme (max. 5% longitudinal pentru circulații pietonale uzuale, cu excepția rampelor dedicate), asigurând scurgerea apelor și accesul continuu din drumul public până la intrările construcției.</p>' },
+        { h: '7. Spații verzi și plantații', html: '<p>Spațiile verzi rămase după sistematizare se nivelează cu pante line (max. 1:2) spre zonele de colectare a apelor, cu pământ vegetal repus pe o grosime minimă de 20–30 cm pentru susținerea plantațiilor prevăzute în planul de situație/documentația de peisagistică, dacă există.</p>' }
+      ];
+      return { cat: 'Piese Administrative', file: 'Sistematizare_verticala.doc', html: docHtml(_meta(D, 'MEMORIU DE SISTEMATIZARE PE VERTICALĂ', 'Legea 50/1991, Anexa 1'), secs) };
+    },
     'Memoriu DTOE (organizare execuție)': function (D, v) {
       var sc = +D.Sc || 0;
       var deep = _lib(D, 'dtoe');
