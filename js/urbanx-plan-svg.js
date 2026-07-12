@@ -353,6 +353,96 @@
     return s;
   }
 
+  // ── TABLOU DE TÂMPLĂRIE — DETALII DE MONTAJ (T.02) ────────────────────────
+  // Sectiune verticala + orizontala prin toc, cu straturile REALE de montaj
+  // (perete/termoizolatie perimetrala/tocul tamplariei/glaf ext.-int.) — piesa
+  // desenata distincta de T.01 (care e doar inventar), ceruta separat de Florin.
+  function planDetaliuTamplarie(D, meta) {
+    var W = 900, H = 620;
+    var grosPerete = (+D.grosime_perete_m || 0.30) * 100; // cm, 30cm implicit (zidarie)
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="30" y="26" font-size="14" font-weight="bold" fill="#1F3864">TABLOU DE TÂMPLĂRIE — DETALII DE MONTAJ</text>';
+    s += '<text x="30" y="42" font-size="9" fill="#666">Secțiune verticală și orizontală tip prin tocul tâmplăriei — grosime perete adoptată: ' + (grosPerete / 100).toFixed(2) + ' m. Se confirmă/ajustează de proiectantul de arhitectură pe planul real.</text>';
+    // --- SECTIUNE VERTICALA (stanga) ---
+    var sx = 60, sy = 90, scl = 4; // px/cm
+    var pw = grosPerete * scl;
+    s += '<text x="' + sx + '" y="' + (sy - 14) + '" font-size="11" font-weight="bold" fill="#1F3864">Secțiune verticală (prag/glaf)</text>';
+    // perete (hasurat)
+    s += '<rect x="' + sx + '" y="' + (sy) + '" width="' + pw + '" height="260" fill="#e8e8e8" stroke="#111" stroke-width="1.2"/>';
+    for (var i = 0; i < 8; i++) { s += '<line x1="' + (sx + i * pw / 8) + '" y1="' + sy + '" x2="' + (sx + i * pw / 8 - 14) + '" y2="' + (sy + 260) + '" stroke="#999" stroke-width="0.5"/>'; }
+    // tencuiala exterioara/interioara (2cm fiecare)
+    s += '<rect x="' + (sx - 8) + '" y="' + sy + '" width="8" height="260" fill="#d0d0d0" stroke="#111" stroke-width="0.6"/>';
+    s += '<rect x="' + (sx + pw) + '" y="' + sy + '" width="8" height="260" fill="#d0d0d0" stroke="#111" stroke-width="0.6"/>';
+    // tocul tamplariei (in gol, centrat) — latime toc 6cm
+    var tocW = 6 * scl, tocX = sx + (pw - tocW) / 2;
+    s += '<rect x="' + tocX + '" y="' + (sy + 40) + '" width="' + tocW + '" height="180" fill="#8fb3d9" stroke="#1F3864" stroke-width="1.4"/>';
+    // banda de etansare perimetrala (PU expandat + banda difuzie vapori) — stanga si dreapta tocului
+    s += '<rect x="' + (tocX - 4) + '" y="' + (sy + 40) + '" width="4" height="180" fill="#f4d35e" stroke="#8a6d00" stroke-width="0.5"/>';
+    s += '<rect x="' + (tocX + tocW) + '" y="' + (sy + 40) + '" width="4" height="180" fill="#f4d35e" stroke="#8a6d00" stroke-width="0.5"/>';
+    // glaf exterior (cu panta de scurgere) — la baza, iesind din perete spre exterior (stanga)
+    s += '<polygon points="' + (sx - 20) + ',' + (sy + 220) + ' ' + (sx + pw / 2) + ',' + (sy + 220) + ' ' + (sx + pw / 2) + ',' + (sy + 226) + ' ' + (sx - 14) + ',' + (sy + 232) + '" fill="#b0b0b0" stroke="#111" stroke-width="0.8"/>';
+    s += '<text x="' + (sx - 18) + '" y="' + (sy + 246) + '" font-size="7.5" fill="#555">glaf exterior (pantă scurgere)</text>';
+    // glaf interior (dreapta)
+    s += '<rect x="' + (sx + pw / 2) + '" y="' + (sy + 218) + '" width="' + (pw / 2 + 16) + '" height="6" fill="#e0d5c0" stroke="#111" stroke-width="0.6"/>';
+    s += '<text x="' + (sx + pw / 2 + 4) + '" y="' + (sy + 240) + '" font-size="7.5" fill="#555">glaf interior</text>';
+    // etichete
+    s += '<text x="' + (sx - 8) + '" y="' + (sy - 4) + '" font-size="7" fill="#333">tencuială</text>';
+    s += '<text x="' + (tocX - 30) + '" y="' + (sy + 34) + '" font-size="7.5" fill="#8a6d00">bandă etanșare perimetrală (PU expandat + folie difuzie vapori)</text>';
+    s += '<text x="' + (tocX + 2) + '" y="' + (sy + 130) + '" font-size="8" font-weight="bold" fill="#1F3864" transform="rotate(-90 ' + (tocX + 10) + ' ' + (sy + 130) + ')">TOC TÂMPLĂRIE</text>';
+    // cota grosime perete
+    s += '<line x1="' + sx + '" y1="' + (sy + 280) + '" x2="' + (sx + pw) + '" y2="' + (sy + 280) + '" stroke="#111" stroke-width="0.6"/>';
+    s += '<text x="' + (sx + pw / 2 - 20) + '" y="' + (sy + 294) + '" font-size="9" fill="#111">' + (grosPerete / 100).toFixed(2) + ' m</text>';
+    // --- SECTIUNE ORIZONTALA (dreapta) ---
+    var sx2 = 480, sy2 = 90;
+    s += '<text x="' + sx2 + '" y="' + (sy2 - 14) + '" font-size="11" font-weight="bold" fill="#1F3864">Secțiune orizontală (montanți laterali)</text>';
+    s += '<rect x="' + sx2 + '" y="' + sy2 + '" width="' + pw + '" height="260" fill="#e8e8e8" stroke="#111" stroke-width="1.2"/>';
+    var tocW2 = 6 * scl, tocY = sy2 + (260 - tocW2) / 2;
+    s += '<rect x="' + (sx2 - 6) + '" y="' + tocY + '" width="' + (pw + 12) + '" height="' + tocW2 + '" fill="#8fb3d9" stroke="#1F3864" stroke-width="1.4"/>';
+    s += '<text x="' + (sx2 + pw / 2 - 40) + '" y="' + (tocY + tocW2 / 2 + 4) + '" font-size="8" font-weight="bold" fill="#1F3864">TOC TÂMPLĂRIE</text>';
+    s += '<text x="' + sx2 + '" y="' + (sy2 + 290) + '" font-size="8" fill="#333">Ancorarea tocului: dibluri chimice/mecanice la interax ≤70 cm, min. 2 buc./latură (conform fișei tehnice a producătorului).</text>';
+    s += '<text x="30" y="' + (sy + 320) + '" font-size="9" fill="#333">Etanșarea perimetrală (interior/exterior) respectă principiul „interior mai etanș decât exteriorul" (evitarea condensului în rostul de montaj) — folie vapobarieră la interior, folie difuzie vapori la exterior.</text>';
+    s += cartus(Object.assign({}, meta, { titlu: 'Tablou tâmplărie — detalii montaj', cod: 'T.02', scara: '1:5' }), W - 360, H - 90, 340);
+    s += '</svg>';
+    return s;
+  }
+
+  // ── TABLOU UȘI DE COMPARTIMENTARE / REZISTENȚĂ LA FOC (T.03) ──────────────
+  // Distinct de T.01 (tamplarie uzuala) — piesa dedicata usilor cu rol de
+  // compartimentare la incendiu (EI), cu clasa REALA ceruta (nu presupusa) si
+  // accesoriile obligatorii (bara antipanica/autoinchidere). Accepta date reale
+  // din motorul SSI (usiRezistentaFoc: [{cod,l,h,eiNecesar,autoinchidere,antipanica,obs}]) —
+  // daca nu sunt furnizate, genereaza un rand implicit onest (nu presupune clasa EI).
+  function planUsiRezistentaFoc(usiRezistentaFoc, meta) {
+    var items = (usiRezistentaFoc && usiRezistentaFoc.length) ? usiRezistentaFoc : [
+      { cod: 'UEI.01', l: 0.90, h: 2.10, eiNecesar: 'de stabilit din scenariul SSI (D._rezistenta_foc_elemente)', autoinchidere: true, antipanica: false, obs: 'ușă de compartimentare — clasa EI se preia din Scenariul de securitate la incendiu, secțiunea 3.1' }
+    ];
+    var rowH = 68, top = 58, W = 900, H = top + items.length * rowH + 130;
+    var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" font-family="Arial"><rect width="100%" height="100%" fill="#fff"/>';
+    s += '<text x="30" y="26" font-size="14" font-weight="bold" fill="#1F3864">TABLOU UȘI DE COMPARTIMENTARE / REZISTENȚĂ LA FOC</text>';
+    s += '<text x="30" y="42" font-size="9" fill="#666">Clasa de rezistență la foc (EI) e cea din Scenariul de securitate la incendiu (secțiunea 3.1) — nu se presupune independent aici.</text>';
+    s += '<g font-size="9" font-weight="bold" fill="#333"><text x="34" y="' + (top - 4) + '">Elevație</text><text x="150" y="' + (top - 4) + '">Cod</text><text x="230" y="' + (top - 4) + '">Dimensiuni</text><text x="360" y="' + (top - 4) + '">Clasă EI necesară</text><text x="620" y="' + (top - 4) + '">Accesorii</text><text x="800" y="' + (top - 4) + '">Buc.</text></g>';
+    s += '<line x1="30" y1="' + top + '" x2="' + (W - 20) + '" y2="' + top + '" stroke="#111" stroke-width="0.8"/>';
+    items.forEach(function (it, i) {
+      var y = top + i * rowH, pxScale = 22, tw = it.l * pxScale, th = it.h * pxScale;
+      var tx = 40, ty = y + (rowH - th) / 2 + 2;
+      s += '<rect x="' + tx + '" y="' + ty + '" width="' + tw + '" height="' + th + '" fill="#f5cccc" stroke="#a11" stroke-width="1.4"/>';
+      s += '<line x1="' + (tx + tw * 0.8) + '" y1="' + (ty + th / 2) + '" x2="' + (tx + tw * 0.8) + '" y2="' + (ty + th / 2 + 3) + '" stroke="#a11" stroke-width="1"/>';
+      s += '<text x="150" y="' + (y + rowH / 2 + 4) + '" font-size="11" font-weight="bold" fill="#1F3864">' + esc(it.cod) + '</text>';
+      s += '<text x="230" y="' + (y + rowH / 2 + 4) + '" font-size="10" fill="#222">' + it.l.toFixed(2) + ' × ' + it.h.toFixed(2) + ' m</text>';
+      s += '<text x="360" y="' + (y + rowH / 2 - 4) + '" font-size="9.5" font-weight="bold" fill="#a11">' + esc(it.eiNecesar) + '</text>';
+      s += '<text x="360" y="' + (y + rowH / 2 + 10) + '" font-size="7.5" fill="#666">' + esc(it.obs || '') + '</text>';
+      s += '<text x="620" y="' + (y + rowH / 2 - 4) + '" font-size="8.5" fill="#333">' + (it.autoinchidere ? '✔ autoînchidere (arc/electromagnet)' : '— fără autoînchidere') + '</text>';
+      s += '<text x="620" y="' + (y + rowH / 2 + 10) + '" font-size="8.5" fill="#333">' + (it.antipanica ? '✔ bară antipanică' : '— fără bară antipanică') + '</text>';
+      s += '<text x="808" y="' + (y + rowH / 2 + 4) + '" font-size="12" font-weight="bold" fill="#a11" text-anchor="middle">' + (it.n || 1) + '</text>';
+      s += '<line x1="30" y1="' + (y + rowH) + '" x2="' + (W - 20) + '" y2="' + (y + rowH) + '" stroke="#ccc" stroke-width="0.5"/>';
+    });
+    s += '<text x="30" y="' + (top + items.length * rowH + 20) + '" font-size="9" fill="#333">Ușile de compartimentare se livrează cu certificat de conformitate CE + raport de încercare la foc</text>';
+    s += '<text x="30" y="' + (top + items.length * rowH + 34) + '" font-size="9" fill="#333">(DoP atașat la recepție) — vezi Scenariul de securitate la incendiu, secțiunea 7 (trasabilitate documente).</text>';
+    s += cartus(Object.assign({}, meta, { titlu: 'Tablou uși compartimentare/EI', cod: 'T.03', scara: '1:20' }), W - 360, top + items.length * rowH + 50, 340);
+    s += '</svg>';
+    return s;
+  }
+
   // ── DXF (plan de nivel) ──────────────────────────────────────────────────
   // DXF R12 COMPLET (HEADER + TABLES/LAYER + ENTITIES + EOF) — acceptat de orice
   // vizualizator/CAD. Include anvelopă, coridor, nucleu, camere, uși, text.
@@ -460,6 +550,8 @@
     planse.push({ id: 'ie', nume: 'Instalații electrice', uxKind: 'IE', plansa: 'IE-01' });
     planse.push({ id: 'it', nume: 'Instalații termice', uxKind: 'IT', plansa: 'IT-01' });
     planse.push({ id: 'tamplarie', nume: 'Tablou tâmplărie', svg: planTamplarie(spatii, D, meta) });
+    planse.push({ id: 'tamplarie-detalii', nume: 'Tablou tâmplărie — detalii montaj', svg: planDetaliuTamplarie(D, meta) });
+    planse.push({ id: 'usi-ei', nume: 'Tablou uși compartimentare/EI', svg: planUsiRezistentaFoc(D._usi_rezistenta_foc, meta) });
     // generare leneșă svg+dxf pentru planșele UX_DRAW (nu la deschidere — la afișare/descărcare)
     function ensurePlan(pl) {
       if (pl.uxKind && (pl.svg == null || pl._doc == null)) { var doc = uxDoc(pl.uxKind, pl.plansa); pl._doc = doc; if (doc) { if (pl.svg == null) { try { pl.svg = doc.emitSVG(); } catch (e) { pl.svg = ''; } } if (!pl.dxf) pl.dxf = function () { try { return doc.emit(); } catch (e) { return ''; } }; } }
@@ -488,5 +580,5 @@
     ov.appendChild(wrap); document.body.appendChild(ov); show(0);
   }
 
-  G.UXPlanSVG = { layout: layout, planNivel: planNivel, planSituatie: planSituatie, sectiune: sectiune, fatada: fatada, tamplarie: tamplarie, planTamplarie: planTamplarie, toDXF: toDXF, open: open };
+  G.UXPlanSVG = { layout: layout, planNivel: planNivel, planSituatie: planSituatie, sectiune: sectiune, fatada: fatada, tamplarie: tamplarie, planTamplarie: planTamplarie, planDetaliuTamplarie: planDetaliuTamplarie, planUsiRezistentaFoc: planUsiRezistentaFoc, toDXF: toDXF, open: open };
 })(window);
