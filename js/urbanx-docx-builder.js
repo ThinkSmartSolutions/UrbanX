@@ -1137,7 +1137,20 @@
       { h: '4.7. Instalații de stingere cu gaze inerte', html: '<p>' + (D.functiune === 'locuinta-individuala'
         ? 'Nu este cazul — nu există spații tehnice cu echipamente electrice/electronice sensibile care să impună acest tip de stingere la o locuință unifamilială.'
         : 'Necesară doar pentru spații tehnice cu echipamente electrice/electronice sensibile (centre de date, tablouri electrice de importanță majoră) — de verificat conform configurației reale a proiectului; altfel, nu este cazul.') + '</p>' },
-      { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + (ac.idsi_oblig ? 'OBLIGATORIE (Sc&gt;2.500 m²)' : 'NU ESTE OBLIGATORIE') + '</b> pentru destinația și aria rezidențială unifamilială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.</p>' +
+      { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: (function () {
+        var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var concluzie, detaliu;
+        if (ac.idsi_oblig && FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune]) {
+          concluzie = 'OBLIGATORIE'; detaliu = 'destinație cu persoane vulnerabile — detectare timpurie necesară pentru evacuare asistată, indiferent de arie.';
+        } else if (ac.idsi_oblig) {
+          concluzie = 'OBLIGATORIE'; detaliu = 'pragul de arie (Sc&gt;2.500 m²) este depășit.';
+        } else if (D.functiune === 'locuinta-individuala') {
+          concluzie = 'NU ESTE OBLIGATORIE'; detaliu = 'pentru destinația și aria rezidențială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.';
+        } else {
+          concluzie = 'NU ESTE OBLIGATORIE'; detaliu = 'pentru destinația (' + esc(destinatieT42.toLowerCase()) + ') și aria reală ale proiectului.';
+        }
+        return '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + concluzie + '</b>, ' + detaliu + '</p>';
+      })() +
         _tblCampuriInstalatie(ac.idsi_oblig, 'idsai', [
           { cheie: 'grad_acoperire', eticheta: 'Gradul de acoperire (total/parțial, cu zonele acoperite)' }, { cheie: 'conditii_zona_detectare', eticheta: 'Condiții privind stabilirea zonei de detectare' },
           { cheie: 'conditii_ecs', eticheta: 'Condiții de amplasare a echipamentului de control și semnalizare (e.c.s.)' }, { cheie: 'dispozitive_comandate', eticheta: 'Alte dispozitive comandate sau supravegheate de e.c.s.' }

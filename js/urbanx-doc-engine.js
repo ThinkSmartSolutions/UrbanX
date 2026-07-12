@@ -146,7 +146,10 @@
     // verificări PSI automate (praguri)
     var H = +d.H || 0, niv = +d.niv_supraterane || 0;
     out.sprinklere_oblig = Sc > 3000 || H > 28;
-    out.idsi_oblig = Sc > 2500;
+    // IDSAI obligatorie si la destinatiile institutionale cu persoane vulnerabile (cresa/gradinita,
+    // centru social, unitati medicale), indiferent de arie — detectarea timpurie e critica cand
+    // evacuarea e asistata/lenta, acelasi principiu ca la hidranti_int_oblig (vezi lista de mai jos).
+    out.idsi_oblig = Sc > 2500 || ['gradinita', 'centru-social', 'medical'].indexOf(d.functiune) >= 0;
     out.lift_oblig = niv >= 5;
 
     // ── PARAMETRI TEHNICI DERIVAȚI COMPLEȚI (toți, nu doar categoria PSI) ──
