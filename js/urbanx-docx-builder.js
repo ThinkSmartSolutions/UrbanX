@@ -525,13 +525,28 @@
     var ORDINE = ['Stâlpi structură', 'Grinzi', 'Planșee', 'Pereți de compartimentare', 'Uși de compartimentare', 'Fațade/pereți exteriori', 'Scări/case de scări', 'Etanșări treceri instalații'];
     var cheiProiect = { 'Uși de compartimentare': 'usi_compartimentare', 'Scări/case de scări': 'scari', 'Etanșări treceri instalații': 'etansari' };
     var extra = { 'Uși de compartimentare': usi, 'Scări/case de scări': scari, 'Etanșări treceri instalații': etansari };
+    // Sectiunea 7 (audit v6.0): pt fiecare element "proiectat pentru minimul necesar", documentul
+    // justificativ REAL care va confirma valoarea la executie (nu doar "DoP" generic) — status
+    // de_atasat_la_executie pana cand documentul concret e incarcat in platforma (D._rezistenta_foc_elemente[cheie].document_atasat).
+    var DOCUMENT_JUSTIFICATIV = {
+      'Stâlpi structură': 'Certificat de conformitate (beton/oțel) + Raport de încercare la foc (dacă protecție suplimentară aplicată)',
+      'Grinzi': 'Certificat de conformitate (beton/oțel) + Raport de încercare la foc (dacă protecție suplimentară aplicată)',
+      'Planșee': 'Certificat de conformitate (beton/oțel) + Raport de încercare la foc (dacă protecție suplimentară aplicată)',
+      'Pereți de compartimentare': 'Agrement tehnic (sistem certificat, ex. zidărie ușoară/gips-carton) sau Raport de încercare la foc',
+      'Uși de compartimentare': 'Certificat de conformitate CE + Raport de încercare la foc (produs certificat EI)',
+      'Fațade/pereți exteriori': 'Agrement tehnic (sistem ETICS) sau Certificat de conformitate',
+      'Scări/case de scări': 'Certificat de conformitate (uși de acces certificate EI) + Raport de încercare',
+      'Etanșări treceri instalații': 'Agrement tehnic (sistem de etanșare certificat, ex. mansoane/vopsele intumescente)'
+    };
     var rows = ORDINE.map(function (label) {
       var e = _ELEMENTE_REZISTENTA_FOC.filter(function (x) { return x.label === label; })[0];
       var n = e ? byLabel[label] : extra[label];
       var cheieProiect = e ? e.cheieProiect : cheiProiect[label];
-      return [label, esc(n.necesarTxt)].concat(randRealizatConform({ cheieProiect: cheieProiect }, n.necesarMin));
+      var docInfo = realizateDeclarate[cheieProiect] && realizateDeclarate[cheieProiect].document_atasat;
+      return [label, esc(n.necesarTxt)].concat(randRealizatConform({ cheieProiect: cheieProiect }, n.necesarMin))
+        .concat([esc(DOCUMENT_JUSTIFICATIV[label] || 'Fișă tehnică'), docInfo ? 'atașat' : 'de_atasat_la_executie']);
     });
-    return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']);
+    return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform', 'Document justificativ necesar', 'Stadiu']);
   }
 
   // Model Florin (pct. 4.1-4.11): fiecare instalatie are o lista FIXA de campuri tehnice proprii
