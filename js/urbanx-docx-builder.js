@@ -811,10 +811,18 @@
       });
     }
 
+    // Sectiunea 14 (audit v6.0): checklist Ord. 180/2022 Anexa 5 capitol cu capitol — calculat AICI
+    // (inainte de poarta FINAL), pt ca un capitol incomplet pe un element blocant (nu o limitare
+    // cunoscuta a platformei, gen planuri retele netrackuite) trebuie sa blocheze si el exportul FINAL,
+    // nu doar sa fie afisat mai jos in document (functiile sunt hoisted, apelabile inainte de definitie).
+    var _checklistPlanseObj = _checklistPlanse(D);
+    var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
+    var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
+
     // v4.2 — SINGURA blocare reala: daca s-a bifat "Genereaza ca FINAL" si raman vecinatati neconfirmate
     // sau normative nevalidate, refuza explicit exportul FINAL (analiza DRAFT ramane mereu disponibila neschimbata).
     if (D._ssi_final_mode) {
-      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant, { erori: eroriIntegritate }, materialeInfo);
+      var gateFinal = G.SSI_M14_VERDICT.poateFiExportatFinal(m6b.vecinatati, statusNevalidat, !!D._normative_confirmate_de_proiectant, { erori: eroriIntegritate }, materialeInfo, capitoleBlocante);
       if (!gateFinal.poate) {
         return {
           cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118_BLOCAT.doc',
@@ -849,8 +857,40 @@
         { nume: 'Relevee (H cornișă/coamă, materiale)', prezent: toateFisierele.length > 0 }
       ];
       var nrLipsa = itemi.filter(function (i) { return !i.prezent; }).length;
-      return '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' element(e) încă neîncărcate</b> — concluziile care depind de ele rămân marcate onest ca atare în secțiunile corespunzătoare (nu se presupune existența lor).' : 'Toate categoriile de planșe urmărite au cel puțin un fișier încărcat.') + '</p>' +
-        tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare']);
+      return {
+        itemi: itemi,
+        html: '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' element(e) încă neîncărcate</b> — concluziile care depind de ele rămân marcate onest ca atare în secțiunile corespunzătoare (nu se presupune existența lor).' : 'Toate categoriile de planșe urmărite au cel puțin un fișier încărcat.') + '</p>' +
+          tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare'])
+      };
+    }
+
+    // Sectiunea 14 (audit v6.0): checklist Ord. 180/2022 Anexa 5, capitol cu capitol — inainte de
+    // verdictul general (afisat imediat sub el, ca parte a aceluiasi tablou de bord de la inceputul
+    // documentului). Legat de planse EFECTIV incarcate (itemiPlanse), nu presupus complet.
+    function _checklistCapitole(itemiPlanse) {
+      function prezent(nume) { var it = itemiPlanse.filter(function (i) { return i.nume === nume; })[0]; return it ? it.prezent : false; }
+      // Fiecare lipsa e { text, blocant } — "blocant:false" marcheaza o limitare CUNOSCUTA a platformei
+      // (ex. planuri de retele, netrackuite inca drept upload distinct), nu o lipsa imputabila
+      // proiectului; nu trebuie sa blocheze exportul FINAL, doar sa fie afisata onest.
+      var cap1Lipsa = []; if (!prezent('Plan de situație')) cap1Lipsa.push({ text: 'plan de situație', blocant: true });
+      if (!(D.categorie_importanta || ac.categorie_importanta)) cap1Lipsa.push({ text: 'categorie de importanță confirmată', blocant: true });
+      var cap2Lipsa = []; if (!(D._camere && D._camere.length) && !prezent('Relevee (H cornișă/coamă, materiale)')) cap2Lipsa.push({ text: 'relevee/inventar de încăperi pentru calculul real al sarcinii termice', blocant: true });
+      var cap3Lipsa = [];
+      ['Plan parter/nivel(uri)', 'Secțiuni', 'Fațade', 'Plan acoperiș/învelitoare', 'Detalii (REI, etanșări)'].forEach(function (n) { if (!prezent(n)) cap3Lipsa.push({ text: n.toLowerCase(), blocant: true }); });
+      var cap4Lipsa = []; if (!prezent('Planuri rețele (instalații)')) cap4Lipsa.push({ text: 'planuri rețele (instalații) — nu este încă urmărit ca upload distinct în platformă', blocant: false });
+      var cap5Lipsa = []; if (verdict.verdict === 'NEAPT_PENTRU_AVIZARE') cap5Lipsa.push({ text: 'rezolvarea corecțiilor obligatorii de proiect (vezi secțiunea 5)', blocant: true });
+      var capitole = [
+        { nr: 1, titlu: 'Caracteristicile construcției', lipsa: cap1Lipsa },
+        { nr: 2, titlu: 'Nivelul riscului de incendiu', lipsa: cap2Lipsa },
+        { nr: 3, titlu: 'Criterii de performanță', lipsa: cap3Lipsa },
+        { nr: 4, titlu: 'Instalații', lipsa: cap4Lipsa },
+        { nr: 5, titlu: 'Măsuri compensatorii', lipsa: cap5Lipsa }
+      ];
+      var html = tbl(capitole.map(function (c) {
+        return ['Capitol ' + c.nr + ' (' + esc(c.titlu) + ')', c.lipsa.length ? '✘ incomplet' : '✔ complet', c.lipsa.length ? 'lipsește: ' + c.lipsa.map(function (l) { return esc(l.text); }).join(', ') : '—'];
+      }), ['Capitol Ord. 180/2022, Anexa 5', 'Stare', 'Observații']) +
+        (capitole.some(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); }) ? '<p style="font-size:9pt;color:#666">Documentul nu poate fi exportat ca FINAL cât timp orice capitol de mai sus arată „✘ incomplet" pe un element blocant — vezi și gărzile de export FINAL de mai jos.</p>' : '<p style="font-size:9pt;color:#666">Toate cele 5 capitole ale Anexei 5 sunt complete pe baza datelor efectiv încărcate în proiect (limitările platformei încă netrackuite, dacă apar mai sus, nu blochează exportul).</p>');
+      return { html: html, capitole: capitole };
     }
 
     // Sectiunea 2 (audit v6.0): matricea completa de conformitate — capitol final obligatoriu,
@@ -915,7 +955,8 @@
         // compensatorie/document lipsa), elementul vizat si actiunea concreta de urmat.
         (verdict.conditii && verdict.conditii.length ? '<p style="margin:6pt 0 2pt;font-weight:bold">Condiții de îndeplinit:</p><ul style="margin:0">' + verdict.conditii.map(function (c) { return '<li><b>' + esc(c.tip) + '</b> — ' + esc(c.element || '') + ': ' + esc(c.actiune) + '</li>'; }).join('') + '</ul>' : '') +
         '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
-      { h: 'Verificarea completitudinii planșelor', html: _checklistPlanse(D) }
+      { h: 'Checklist Ord. MAI 180/2022, Anexa 5 — completitudine capitol cu capitol', html: _checklistCapitoleObj.html },
+      { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +

@@ -117,7 +117,7 @@
   // v4.2 (Florin): SINGURA blocare ramasa nu e la introducere, e la FINALIZARE — daca raman vecinatati
   // neconfirmate de proiectant (estimare automata/conservatoare, nu validata), scenariul NU poate fi
   // marcat/exportat ca FINAL pentru depunere (desi analiza DRAFT a mers inainte fara nicio blocare).
-  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate, confirmatDeProiectant, integritateCalcul, materialeInfo) {
+  function poateFiExportatFinal(vecinatati, statusNormativeNevalidate, confirmatDeProiectant, integritateCalcul, materialeInfo, capitoleIncomplete) {
     var neconfirmate = (vecinatati || []).filter(function (v) { return v.estimat_implicit && !v.confirmat; });
     var normativeNevalidate = statusNormativeNevalidate || [];
     // Simetrie cu vecinatatile (v4.2): sursele normative pot fi "validate" fie institutional (status
@@ -138,12 +138,17 @@
     // raspunderii profesionale ca la normative/vecinatati (nu o bifa separata suplimentara).
     var materialeNeconfirmate = (materialeInfo && materialeInfo.neconfirmate) || [];
     var materialeBlocheaza = materialeNeconfirmate.length > 0 && !confirmatDeProiectant;
-    var poate = neconfirmate.length === 0 && !normativeBlocheaza && eroriCalcul.length === 0 && !materialeBlocheaza;
+    // Sectiunea 14 (audit v6.0): un capitol din Ord. 180/2022 Anexa 5 cu un element BLOCANT lipsa
+    // (nu o limitare cunoscuta a platformei, cum e "planuri retele" netrackuit inca) refuza si el
+    // exportul FINAL — vezi urbanx-docx-builder.js _checklistCapitole (blocant:true/false per lipsa).
+    var capitoleIncompleteLista = capitoleIncomplete || [];
+    var poate = neconfirmate.length === 0 && !normativeBlocheaza && eroriCalcul.length === 0 && !materialeBlocheaza && capitoleIncompleteLista.length === 0;
     var motive = [];
     if (eroriCalcul.length) motive.push('Erori de integritate a calculului: ' + eroriCalcul.join('; ') + '.');
     if (neconfirmate.length) motive.push(neconfirmate.length + ' vecinătate/vecinătăți au doar estimare automată, neconfirmată de proiectant (' + neconfirmate.map(function (v) { return v.id; }).join(', ') + ').');
     if (normativeNevalidate.length && !confirmatDeProiectant) motive.push(normativeNevalidate.length + ' sursă/surse normative fără validare de inginer/arhitect atestat (bifează confirmarea din panoul SSI pentru a asuma răspunderea profesională).');
     if (materialeBlocheaza) motive.push(materialeNeconfirmate.length + ' material/materiale cu variabilitate reală nu au încă DoP/fișă tehnică de produs concret atașată (' + materialeNeconfirmate.map(function (m) { return m.nume; }).join(', ') + ') — bifează confirmarea din panoul SSI pentru a asuma răspunderea profesională dacă dorești export FINAL fără DoP-uri atașate.');
+    if (capitoleIncompleteLista.length) motive.push(capitoleIncompleteLista.length + ' capitol(e) din Ord. 180/2022 Anexa 5 incomplet(e): ' + capitoleIncompleteLista.map(function (c) { return 'Capitol ' + c.nr + ' (' + c.titlu + ')'; }).join(', ') + '.');
     return { poate: poate, motiv: motive.length ? motive.join(' ') : null, normativeAsumatePeRaspundere: !!(normativeNevalidate.length && confirmatDeProiectant) };
   }
 
