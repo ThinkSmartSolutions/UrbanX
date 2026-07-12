@@ -866,6 +866,33 @@
         }), ['Cerință', 'Normativ A', 'Normativ B', 'Acțiune']);
     }
 
+    // Sectiunea 8 (audit v6.0): nivel de certitudine pe fiecare valoare-cheie a scenariului — nu doar
+    // vecinatatile (v4.2), ci sursele principale de date care alimenteaza cascada M0-M17. Afisat intr-o
+    // sectiune dedicata, vizibila (nu ascunsa in metadate), cu procentul si eticheta exacte din audit.
+    var CERTITUDINE_LABEL = {
+      extras_automat_DWG: '100% — extras automat, geometrie/cartuș citit direct din fișierul de proiect',
+      extras_automat_normativ_validat: '100% — din normative.json, status validat de inginer atestat',
+      extras_automat_normativ_nevalidat: '70% — extras automat, în așteptarea validării umane',
+      introdus_manual_utilizator: '90% — declarat de proiectant, nu verificat independent',
+      presupus_conservator: '50% — valoare implicită conservatoare, lipsă informație reală',
+      lipsa: '0% — informație absentă, blocant pentru export FINAL'
+    };
+    function _tabelCertitudine() {
+      var vecEstimate = (m6b.vecinatati || []).some(function (v) { return v.estimat_implicit; });
+      var randuri = [
+        ['Categorie de importanță', D.categorie_importanta ? 'introdus_manual_utilizator' : (ac.categorie_importanta ? 'presupus_conservator' : 'lipsa')],
+        ['Grad de stabilitate la incendiu', D.grad_stabilitate ? 'introdus_manual_utilizator' : 'presupus_conservator'],
+        ['Geometria clădirilor / plan de situație', (D.geometrie_teren && D.geometrie_teren.cladiri_propuse) ? 'extras_automat_DWG' : 'lipsa'],
+        ['Distanțe față de vecinătăți', (m6b.vecinatati || []).length ? (vecEstimate ? 'presupus_conservator' : 'extras_automat_DWG') : 'lipsa'],
+        ['Sarcina termică / nivelul de risc de incendiu', (D._camere && D._camere.length) ? 'extras_automat_DWG' : 'presupus_conservator'],
+        ['Materiale de construcție (clasă reacție la foc)', (D._materiale && D._materiale.length) ? 'introdus_manual_utilizator' : 'presupus_conservator'],
+        ['Surse normative (tabele P118-1/2025 folosite)', statusNevalidat.length ? 'extras_automat_normativ_nevalidat' : 'extras_automat_normativ_validat'],
+        ['Capacitatea de utilizatori/persoane', (D.capacitate_persoane || D.capacitate_declarata) ? 'introdus_manual_utilizator' : 'presupus_conservator']
+      ];
+      return '<p>Fiecare valoare-cheie de mai jos poartă un indicator de proveniență, cu procentul de certitudine asociat (0–100%) — nu doar clasificarea vecinătăților, ca în versiunile anterioare ale motorului.</p>' +
+        tbl(randuri.map(function (r) { return [esc(r[0]), esc(CERTITUDINE_LABEL[r[1]])]; }), ['Valoare', 'Nivel de certitudine']);
+    }
+
     var _checklistPlanseObj = _checklistPlanse(D);
     var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
     var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
@@ -1046,7 +1073,8 @@
       { h: 'Checklist Ord. MAI 180/2022, Anexa 5 — completitudine capitol cu capitol', html: _checklistCapitoleObj.html },
       { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html },
       { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() },
-      { h: 'Detectarea incompatibilităților între normative aplicabile', html: _detecteazaConflicteNormative() }
+      { h: 'Detectarea incompatibilităților între normative aplicabile', html: _detecteazaConflicteNormative() },
+      { h: 'Nivelul de certitudine al datelor-cheie ale scenariului', html: _tabelCertitudine() }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
