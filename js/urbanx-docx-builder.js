@@ -907,20 +907,39 @@
         (cladiriCuVolum.some(function (c) { return c.avertisment_releveu; }) ? '<p style="font-size:9pt;color:#b45309">ⓘ ' + cladiriCuVolum.filter(function (c) { return c.avertisment_releveu; }).length + ' clădire/clădiri fără releveu încărcat pentru tipul lor — volumul acelor unități rămâne necalculat (nu se presupune Sc×3m); completează releveul per tip în panoul SSI pentru volum real.</p>' : '')
     }] : []) : []).concat([
       { h: '1.4.g. Numărul utilizatorilor, programul și capacitatea de autoevacuare', html: (function () {
-        // Pentru locuinta unifamiliala, "nr. utilizatori" e cel al familiei (nu se normeaza o densitate
-        // de persoane ca la functiunile publice) — P118-1/2025 normeaza densitati de persoane pt
-        // destinatii cu public (comert/sanatate/invatamant), NU pt rezidential unifamilial, unde
-        // capacitatea reala e data de programul locativ (numarul de dormitoare), nu de o formula.
-        var nrUnitati = cladiriPropuse.length || 1;
-        var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
-        var persPeUnitate = nrDormitoare ? nrDormitoare * 2 : 4;
-        var persEstimate = nrUnitati * persPeUnitate;
-        var sursaEstimare = nrDormitoare
-          ? nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură) × 2 persoane/dormitor'
-          : '4 persoane/unitate (familie medie, program locativ tipic)';
-        return '<p>Pentru destinația rezidențială unifamilială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
-          '<p>' + sursaEstimare + ': ' + nrUnitati + ' unități × ' + persPeUnitate + ' persoane = <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ' + persPeUnitate + ' persoane pe unitate individuală.</p>' +
-          '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare, pentru o unitate P+1E cu o singură scară interioară, rezultă din raportarea lungimii traseului (parter/etaj) la viteza medie de deplasare (0,4 m/s orizontal) — sub 1 minut pentru configurația uzuală a unei locuințe unifamiliale.</p>';
+        var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var esteResidential = D.functiune === 'locuinta-individuala' || D.functiune === 'bloc-locuinte';
+        var esteVulnerabil = !!FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune];
+        if (esteResidential) {
+          // Pentru rezidential, "nr. utilizatori" e cel al familiei (nu se normeaza o densitate de
+          // persoane ca la functiunile publice) — P118-1/2025 normeaza densitati de persoane pt
+          // destinatii cu public (comert/sanatate/invatamant), NU pt rezidential, unde capacitatea
+          // reala e data de programul locativ (numarul de dormitoare), nu de o formula pe suprafata.
+          var nrUnitati = cladiriPropuse.length || 1;
+          var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
+          var persPeUnitate = nrDormitoare ? nrDormitoare * 2 : 4;
+          var persEstimate = nrUnitati * persPeUnitate;
+          var sursaEstimare = nrDormitoare
+            ? nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură) × 2 persoane/dormitor'
+            : '4 persoane/unitate (familie medie, program locativ tipic)';
+          return '<p>Pentru destinația rezidențială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
+            '<p>' + sursaEstimare + ': ' + nrUnitati + ' unități × ' + persPeUnitate + ' persoane = <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ' + persPeUnitate + ' persoane pe unitate individuală.</p>' +
+            '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare rezultă din raportarea lungimii traseului la viteza medie de deplasare (0,4 m/s orizontal).</p>';
+        }
+        // Alte destinatii (institutionale/publice) — capacitatea reala e fie DECLARATA (autorizatie de
+        // functionare/aviz sanitar — cazul uzual pt cresa/centru social), fie normata prin densitati de
+        // persoane pe m² specifice destinatiei (P118-1/2025 pct. A.10.2.5.71/A.10.3.10.42) — acestea NU
+        // sunt inca extrase in acest motor; nu se presupune formula rezidentiala de 4 pers/unitate, care
+        // ar subestima grav capacitatea unei institutii (regula #13 — nu se inventeaza o valoare).
+        var capacitateDeclarata = D.capacitate_persoane || D.capacitate_declarata;
+        if (capacitateDeclarata) {
+          return '<p>Capacitatea maximă simultană declarată pentru proiect (autorizație de funcționare/aviz specific destinației): <b>' + esc(capacitateDeclarata) + ' persoane</b>.</p>' +
+            '<p>Program: ' + esc(D.program_functionare || 'de completat conform regulamentului de organizare/funcționare al instituției') + '.</p>' +
+            (esteVulnerabil ? '<p>Capacitatea de autoevacuare: parțial/integral redusă (vezi 3.5) — evacuarea se face asistat de personal, cu timpi și fluxuri recalculate pentru acest mod de evacuare, nu pentru evacuare independentă.</p>' : '<p>Capacitatea de autoevacuare: utilizatorii evacuează singuri, cu excepția eventualelor persoane vulnerabile declarate (vezi 3.5).</p>');
+        }
+        return '<p>Pentru destinația ' + esc(destinatieT42.toLowerCase()) + ', P118-1/2025 normează densități de persoane specifice (pct. A.10.2.5.71/A.10.3.10.42, funcție de destinație) — aceste tabele nu sunt încă extrase în acest motor, nu se presupune formula rezidențială (4 persoane/unitate), care ar subestima capacitatea reală a unei destinații cu public.</p>' +
+          '<p><b>Capacitatea maximă simultană de persoane nu este încă completată pentru acest proiect</b> — se preia din autorizația de funcționare/avizul specific destinației (' + (esteVulnerabil ? 'obligatorie la creșe/grădinițe/centre sociale/unități medicale' : 'dacă există o astfel de autorizație') + '), sau se calculează din densitatea normată P118 aplicată ariei utile pe zonă, la faza de proiect tehnic.</p>' +
+          (esteVulnerabil ? '<p>Capacitatea de autoevacuare: parțial/integral redusă (vezi 3.5) — evacuarea se face asistat de personal.</p>' : '');
       })() },
       { h: '1.4.h. Capacități de depozitare', html: '<p>Nu este cazul — destinația rezidențială unifamilială nu prevede spații de depozitare cu sarcină termică semnificativă peste mobilierul și bunurile uzuale ale unei locuințe (evaluate la secțiunea 2.1, sarcina termică). Dacă proiectul include o anexă gospodărească/depozit distinct, se declară separat.</p>' },
       { h: '2.1. Calculul și încadrarea în nivel de risc', html: (function () {
@@ -982,8 +1001,26 @@
       { h: '3.4.a. Măsuri pentru asigurarea controlului fumului', html: '<p>' + (ac.desfumare_oblig
         ? 'Configurația/destinația proiectului impune desfumare mecanică (spații fără fațadă exterioară directă, subsoluri, arii mari) — nu se acceptă tirajul natural ca soluție suficientă; vezi secțiunea 4.9 pentru instalația de desfumare.'
         : 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), fiecare încăpere are fereastră spre exterior — controlul fumului se asigură prin <b>tiraj natural</b> (ferestre/uși practicabile), suficient conform configurației proiectului. Nu este necesară desfumare mecanică.') + '</p>' },
-      { h: '3.4.b. Tipul scărilor, forma și modul de dispunere a treptelor', html: '<p>Scară interioară' + (cladiriPropuse.length > 1 ? ' (per unitate)' : '') + ', cu rampă dreaptă sau în două rampe cu podest intermediar, conform proiectului de arhitectură — verificare Blondel (2h+l între 62–64 cm) și lățime utilă minimă pentru evacuare, aplicată la faza de proiect de arhitectură (releveu/plan). Pentru o locuință unifamilială P+1E, o singură scară interioară e suficientă și admisă normativ (nu se cere scară de evacuare exterioară separată).</p>' },
-      { h: '3.4.c. Geometria căilor de evacuare', html: '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025. Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + (m5bGrupuri ? 'vezi ariile per compartiment la 1.4.f' : ((m5.arie_proiectata_mp || D.Sc || '—') + ' m²')) + '). Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).</p>' },
+      { h: '3.4.b. Tipul scărilor, forma și modul de dispunere a treptelor', html: (function () {
+        var esteResidentialIndivRedus = D.functiune === 'locuinta-individuala' && (+D.niv_supraterane || 1) <= 2;
+        var baza = 'Scară interioară' + (cladiriPropuse.length > 1 ? ' (per unitate)' : '') + ', cu rampă dreaptă sau în două rampe cu podest intermediar, conform proiectului de arhitectură — verificare Blondel (2h+l între 62–64 cm) și lățime utilă minimă pentru evacuare, aplicată la faza de proiect de arhitectură (releveu/plan). ';
+        return '<p>' + baza + (esteResidentialIndivRedus
+          ? 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), o singură scară interioară e suficientă și admisă normativ (nu se cere scară de evacuare exterioară separată).'
+          : 'Numărul de căi de evacuare distincte (una sau mai multe scări) se stabilește funcție de regimul de înălțime, aria/ocupanța compartimentului și, dacă e cazul, prezența persoanelor cu capacitate de autoevacuare redusă (vezi 3.5) — nu se presupune o singură scară suficientă fără verificarea explicită a acestor praguri la faza de proiect tehnic.') + '</p>';
+      })() },
+      { h: '3.4.c. Geometria căilor de evacuare', html: (function () {
+        var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var areVulnerabili = !!FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune] || (D._persoane_vulnerabile && D._persoane_vulnerabile.length);
+        var esteResidentialIndiv = D.functiune === 'locuinta-individuala';
+        var arieRef = m5bGrupuri ? 'vezi ariile per compartiment la 1.4.f' : ((m5.arie_proiectata_mp || D.Sc || '—') + ' m²');
+        var refugii = areVulnerabili
+          ? '<b>Sunt necesare refugii per nivel</b> — proiectul are/poate avea persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5); amplasarea și dimensionarea refugiilor se stabilesc la faza de proiect tehnic, conform normativelor specifice categoriei (NP 051/2012, OMS 1955/1995 etc.).'
+          : 'Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).';
+        return '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025.</p>' +
+          '<p>' + (esteResidentialIndiv
+            ? 'Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + arieRef + ').'
+            : 'Traseul real de evacuare (de la punctul cel mai defavorabil până la ieșirea din compartiment) se verifică față de pragurile de mai sus, pe baza ariei/configurației compartimentului (' + arieRef + ').') + ' ' + refugii + '</p>';
+      })() },
       { h: '3.4.d. Numărul fluxurilor de evacuare', html: (function () {
         var modul = ac.flux_evacuare_m || 0.60;
         var nrUnitatiFlux = cladiriPropuse.length || 1;

@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {} };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -175,6 +175,13 @@
       '<select class="ssiui-sel" onchange="SSI_UI._setTip(this.value)"><option value="">— selectează —</option>' + _optTip() + '</select>' +
       '<div class="ssiui-lbl" style="margin-top:18px">Import geometrie din DXF (opțional — export din CAD, format ASCII)</div>' +
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
+      (STATE.planSituatieInfo
+        ? '<div style="display:flex;gap:6px;align-items:flex-start;font-size:10px;background:#0f1a2e;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:5px 8px;margin-top:6px">' +
+          '<span>📐</span><span style="flex:1"><b style="color:#e6edf7">' + esc(STATE.planSituatieInfo.nume) + '</b> <span style="color:#64748b">(' + STATE.planSituatieInfo.marime + ')</span><br>' +
+          '<span style="color:#6ee7b7">' + esc(STATE.planSituatieInfo.stare) + '</span></span>' +
+          '<span style="cursor:pointer;color:#f87171" title="Uită acest fișier (nu retrage datele deja aplicate)" onclick="SSI_UI._uitaPlanSituatie()">✕</span>' +
+          '</div>'
+        : '<div style="font-size:10px;color:#64748b;margin-top:4px">Niciun fișier încărcat încă.</div>') +
       '<div class="ssiui-note">⚠ DXF-ul dă DOAR geometrie (poligoane, distanțe măsurate) — destinația și gradul de rezistență al fiecărei vecinătăți rămân input uman validat de proiectant. Layere așteptate: LIMITA_PROPRIETATE, VECINATATI, CONSTRUCTIE_PROPUSA (sau echivalente).</div>' +
       renderMapareManuala() +
       renderCladiriDetectate() +
@@ -242,8 +249,9 @@
       STATE.tipuriCladiri[g.cheie] = 'Tip ' + String.fromCharCode(65 + idx) + ' (Sc=' + g.sc_mp + ' mp)';
     });
     STATE.pendingDxf = null;
-    render();
     var msgCladiri = STATE.cladiriPropuse.length > 1 ? (' · ' + STATE.cladiriPropuse.length + ' clădiri proprii detectate în plan (denumește tipurile mai jos)') : '';
+    if (STATE.planSituatieInfo) STATE.planSituatieInfo.stare = 'confirmat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice' + msgCladiri;
+    render();
     if (G.ss) G.ss('DXF importat: ' + parsed.nrEntitati + ' entități, ' + (geo.vecinatati_geometrie || []).length + ' vecinătăți geometrice detectate' + msgCladiri + ' — completează clasificarea manual unde e cazul.');
   }
 
@@ -315,10 +323,13 @@
 
   async function onFile(file) {
     if (!file) return;
+    STATE.planSituatieInfo = { nume: file.name, marime: _fmtKB(file.size), stare: 'se citește…' };
+    render();
     var fmt = G.SSI_DWG_IMPORT.detectFormat(file);
-    if (!fmt.ok) { if (G.ss) G.ss(fmt.mesaj); return; }
+    if (!fmt.ok) { STATE.planSituatieInfo.stare = 'eroare: ' + fmt.mesaj; render(); if (G.ss) G.ss(fmt.mesaj); return; }
     try {
       var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
+      STATE.planSituatieInfo.stare = parsed.nrEntitati + ' entități, ' + parsed.layers.length + ' layere citite';
       var mapare = G.SSI_DWG_IMPORT.mapLayers(parsed);
       if (mapare.automata_completa) { _aplicaGeometrie(parsed, mapare); return; }
       var stats = G.SSI_DWG_IMPORT.analizeazaLayerePoligoane(parsed);
@@ -329,7 +340,7 @@
       STATE.pendingDxf = { parsed: parsed, mapareCurenta: mapare.mapare, statsLayere: stats };
       render();
       if (G.ss) G.ss('DXF citit (' + parsed.nrEntitati + ' entități, ' + parsed.layers.length + ' layere) — confirmă manual maparea layerelor mai jos.');
-    } catch (e) { if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
+    } catch (e) { STATE.planSituatieInfo.stare = 'eroare la citire: ' + e.message; render(); if (G.ss) G.ss('Eroare la citirea DXF: ' + e.message); }
   }
 
   // Cauta in textele unui releveu DXF (de regula fisierul de SECTIUNE) cotele de nivel — verificat
@@ -462,7 +473,7 @@
         categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
       } : null;
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {} }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
@@ -472,6 +483,7 @@
     // deja acumulate in STATE.materialeExtrase/camereExtrase — acelea raman validate pana la re-generare;
     // scopul e doar sa curete lista vizuala de un fisier incarcat gresit/duplicat).
     _eliminaFisierRelevee: function (cheie, idx) { if (STATE.relevee[cheie] && STATE.relevee[cheie].fisiere) { STATE.relevee[cheie].fisiere.splice(idx, 1); render(); } },
+    _uitaPlanSituatie: function () { STATE.planSituatieInfo = null; render(); },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
