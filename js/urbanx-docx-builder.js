@@ -21,6 +21,15 @@
     'tr:nth-child(even) td{background:#F2F2F2}' +
     '.cover{text-align:center;margin-top:120pt}.cover .t{font-size:22pt;font-weight:bold;color:#1F3864}.cover .m{font-size:13pt;margin-top:18pt}' +
     '.foot{color:#888;font-size:9pt;border-top:0.5pt solid #ccc;margin-top:24pt;padding-top:4pt}' +
+    // Mod „tabelar" (SSI, la cererea explicită a modelului transmis: fiecare secţiune e un rând de
+    // tabel 2 coloane — eticheta | conţinut — nu titlu+paragraf separat). Randurile consecutive au
+    // margine 0 şi acelaşi chenar, ca să citească vizual ca UN SINGUR tabel continuu, nu tabele mici
+    // izolate; conţinutul poate include la rândul lui un tbl() propriu — tabel în tabel, cum s-a cerut.
+    '.sec-tbl{border-collapse:collapse;width:100%;margin:0;table-layout:fixed}' +
+    '.sec-tbl td{border:0.75pt solid #000;padding:6pt 8pt;vertical-align:top;font-size:12pt}' +
+    '.sec-tbl .sec-label{width:20%;font-weight:bold;background:#F2F2F2}' +
+    '.sec-tbl .sec-content p:first-child{margin-top:0}.sec-tbl .sec-content p:last-child{margin-bottom:0}' +
+    '.sec-tbl table{margin:4pt 0}' +
     '</style>';
 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -79,7 +88,11 @@
 
   // meta: {titlu, subtitlu, proiect, beneficiar, amplasament, faza}
   // sections: [{h, html}]
-  function docHtml(meta, sections) {
+  // opts.tabelar: randeaza fiecare sectiune ca rand de tabel 2 coloane (eticheta|continut), in loc de
+  // titlu+paragraf — format cerut explicit de model pentru scenariul SSI (nu se aplica global, doar
+  // documentelor unde a fost cerut, ca sa nu schimbe formatul celorlalte livrabile care functioneaza deja).
+  function docHtml(meta, sections, opts) {
+    var tabelar = opts && opts.tabelar;
     var cover = '<div class="cover"><div class="t">' + esc(meta.titlu) + '</div>' +
       (meta.subtitlu ? '<div class="m">' + esc(meta.subtitlu) + '</div>' : '') +
       '<div class="m">Proiect: ' + esc(meta.proiect || '—') + '</div>' +
@@ -87,7 +100,11 @@
       '<div class="m">Amplasament: ' + esc(meta.amplasament || '—') + '</div>' +
       '<div class="m">Faza: ' + esc(meta.faza || 'DTAC') + '</div></div>' +
       '<br style="page-break-after:always">';
-    var body = sections.map(function (s) { return (s.h ? '<h2>' + esc(s.h) + '</h2>' : '') + (s.html || ''); }).join('');
+    var body = sections.map(function (s) {
+      if (!s.h) return s.html || '';
+      if (tabelar) return '<table class="sec-tbl"><tr><td class="sec-label">' + esc(s.h) + '</td><td class="sec-content">' + (s.html || '') + '</td></tr></table>';
+      return '<h2>' + esc(s.h) + '</h2>' + (s.html || '');
+    }).join('');
     var semn = '<div class="semn">' + _semnaturaBlock(meta) + '</div>';
     var foot = '<div class="foot">Document generat de UrbanX (ThinkSmart Solutions) — orientativ, se verifică și se semnează de proiectanții atestați.</div>';
     // Antet „Word HTML" (MSO): Word îl tratează ca document nativ → se poate edita ȘI SALVA fără pierderea formatului.
@@ -997,7 +1014,7 @@
         (vecinatatiNeconfirmate.length ? '<p><b>Vecinătăți:</b> ' + vecinatatiNeconfirmate.length + ' vecinătate/vecinătăți (' + vecinatatiNeconfirmate.map(function (v) { return esc(v.id); }).join(', ') + ') au clasificare estimată conservator (grad V, risc mare), neconfirmată de proiectant.</p>' : '<p>Toate vecinătățile au clasificarea confirmată de proiectant.</p>') +
         ((vecinatatiNeconfirmate.length || (statusNevalidat.length && !D._normative_confirmate_de_proiectant)) ? '<p><b>Document DRAFT</b> — complet utilizabil pentru analiza de proiect chiar acum; necesită confirmarea/validarea de mai sus înainte de a fi exportat ca FINAL pentru depunerea la ISU (analiza nu așteaptă această confirmare ca să funcționeze, doar depunerea oficială o cere — aceeași responsabilitate profesională pe care ai avea-o și fără platformă).</p>' : '<p><b>Document FINAL</b> — toate vecinătățile sunt confirmate' + (statusNevalidat.length ? ' și sursele normative sunt asumate pe răspunderea profesională a proiectantului' : ' și sursele normative au status validat') + '.</p>') }
     ])));
-    return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs) };
+    return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5 · ' + m0.label), secs, { tabelar: true }) };
   }
 
   var DOC_BUILDERS = {
