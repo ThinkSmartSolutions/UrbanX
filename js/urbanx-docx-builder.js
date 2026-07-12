@@ -837,6 +837,35 @@
         '<ul>' + declansate.map(function (r) { return '<li>⚠ ' + esc(r.mesaj) + '</li>'; }).join('') + '</ul>';
     }
 
+    // Sectiunea 6 (audit v6.0): detectarea incompatibilitatilor intre normative aplicabile ACELEIASI
+    // cerinte — cand doua normative dau raspunsuri diferite pt acelasi element, motorul semnaleaza
+    // explicit conflictul (nu alege tacit unul din ele). Conflictele de mai jos sunt cazuri REALE,
+    // cunoscute in proiectare, nu ipoteze — declansate doar daca proiectul chiar are elementul in cauza.
+    function _detecteazaConflicteNormative() {
+      var conflicte = [];
+      if (D.are_gaze_naturale === true) {
+        conflicte.push({
+          cerinta: 'Spațiul centralei termice/consumatorului de gaz — ventilație vs. compartimentare',
+          normativ_A: { sursa: 'NP 127', pozitie: 'ventilație naturală permanentă (orificii neetanșate) a spațiului cu consumator de gaz' },
+          normativ_B: { sursa: 'P118-1/2025', pozitie: 'compartimentare la incendiu (pereți/planșee REI/EI etanșe, fără goluri netratate)' },
+          actiune: 'Se coordonează soluția între proiectantul de instalații termice/gaze și proiectantul de rezistență la foc (ex. clapetă antifoc pe orificiul de ventilație, sau amplasarea centralei într-un spațiu exterior compartimentului protejat) — decizia finală rămâne a proiectanților de specialitate, nu se rezolvă implicit de acest motor.'
+        });
+      }
+      if (ac.hidranti_int_oblig) {
+        conflicte.push({
+          cerinta: 'Presiunea de alimentare a hidranților interiori',
+          normativ_A: { sursa: 'P118/2-2013', pozitie: 'presiune minimă la robinetul de hidrant, garantată pe toată durata de funcționare' },
+          normativ_B: { sursa: 'rețeaua publică de alimentare cu apă (aviz operator)', pozitie: 'presiunea reală disponibilă la branșament poate fi sub minimul necesar' },
+          actiune: 'Se aplică norma mai restrictivă (necesarul P118/2), completat, dacă e cazul, cu stație de pompare/hidrofor dedicată instalației de hidranți — de confirmat prin avizul operatorului de apă, decizie a proiectantului de instalații sanitare/SSI, nu presupusă implicit de acest motor.'
+        });
+      }
+      if (!conflicte.length) return '<p>Nu a fost identificat niciun conflict între normativele aplicabile acestui proiect.</p>';
+      return '<p><b>' + conflicte.length + ' conflict/conflicte între normative identificat/identificate</b> — semnalate explicit, fără rezolvare tacită (decizia finală rămâne a proiectanților de specialitate):</p>' +
+        tbl(conflicte.map(function (c) {
+          return [esc(c.cerinta), esc(c.normativ_A.sursa) + ' — ' + esc(c.normativ_A.pozitie), esc(c.normativ_B.sursa) + ' — ' + esc(c.normativ_B.pozitie), esc(c.actiune)];
+        }), ['Cerință', 'Normativ A', 'Normativ B', 'Acțiune']);
+    }
+
     var _checklistPlanseObj = _checklistPlanse(D);
     var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
     var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
@@ -1016,7 +1045,8 @@
         '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
       { h: 'Checklist Ord. MAI 180/2022, Anexa 5 — completitudine capitol cu capitol', html: _checklistCapitoleObj.html },
       { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html },
-      { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() }
+      { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() },
+      { h: 'Detectarea incompatibilităților între normative aplicabile', html: _detecteazaConflicteNormative() }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
