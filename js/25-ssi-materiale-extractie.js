@@ -67,8 +67,24 @@
     return null;
   }
 
+  // Bug real semnalat de Florin (12 iul, capturi ecran din sesiune reala): "nu s-a putut citi textul
+  // PDF: pdf.js nu este incarcat" a aparut pt TOATE fisierele incarcate, desi scriptul e in index.html.
+  // Cauza plauzibila: CDN-ul (jsdelivr) incarca sincron, dar pe o retea reala/lenta, utilizatorul poate
+  // incepe upload-ul inainte ca scriptul sa termine efectiv de executat (fisier mare, 320KB minificat +
+  // parsare) — verificarea anterioara arunca eroare INSTANT, fara sa astepte deloc. Fix: asteapta pana
+  // la ~8s (polling) inainte de a declara esec, ca sa acopere exact acest caz de incarcare intarziata.
+  async function _asteaptaPdfjs(timeoutMs) {
+    var pas = 200, trecut = 0;
+    while (!window.pdfjsLib && trecut < (timeoutMs || 8000)) {
+      await new Promise(function (r) { setTimeout(r, pas); });
+      trecut += pas;
+    }
+    return !!window.pdfjsLib;
+  }
+
   async function _liniiDinPDF(arrayBuffer) {
-    if (!window.pdfjsLib) throw new Error('pdf.js nu este încărcat — verifică conexiunea la CDN');
+    if (!window.pdfjsLib) await _asteaptaPdfjs();
+    if (!window.pdfjsLib) throw new Error('pdf.js nu s-a încărcat de pe CDN (jsdelivr) după 8 secunde de așteptare — verifică conexiunea la internet sau dacă un blocker de reclame/extensie de browser blochează cdn.jsdelivr.net; poți completa manual câmpurile H cornișă/H coamă/tip acoperiș, restul platformei funcționează fără această extragere automată.');
     var doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     var linii = [];
     for (var p = 1; p <= doc.numPages; p++) {

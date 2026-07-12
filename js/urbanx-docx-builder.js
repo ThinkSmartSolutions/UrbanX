@@ -634,6 +634,22 @@
       '</div>';
   }
 
+  // Bug real gasit (Florin, 12 iul, capturi ecran sesiune reala): un ansamblu de case P+1E aparea cu
+  // concluzia "DATE INSUFICIENTE PENTRU CONCLUZIE" la 1.2 in loc de un "NU" ferm, pentru ca D.regim
+  // era completat ("P+1E") dar D.niv_supraterane (campul numeric separat, folosit STRICT de verificarea
+  // P+4) ramasese necompletat — o neconcordanta intre 2 campuri care descriu ACELASI lucru. Fix: cand
+  // niv_supraterane lipseste, se deriva din regim (P=1 nivel, +NE adauga N etaje; S nu se numara).
+  function _niveluriSuprateraneEfectiv(D) {
+    if (D.niv_supraterane != null && D.niv_supraterane !== '') return +D.niv_supraterane;
+    var s = String(D.regim || '').toUpperCase();
+    if (!s) return null;
+    var hasParter = /\bP\b/.test(s);
+    var m = s.match(/\+\s*(\d+)\s*E?\b/);
+    var etaje = m ? +m[1] : 0;
+    if (!hasParter && !etaje) return null;
+    return (hasParter ? 1 : 0) + etaje;
+  }
+
   function _buildScenariuSSICascada(D, v) {
     var ac = v.calc;
     var m0 = G.SSI_ENGINE.m0_tipLucrare({ tip_lucrare: D.tip_lucrare });
@@ -1319,12 +1335,12 @@
           htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>.</p>' +
             '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru destinații care adăpostesc persoane incapabile să se evacueze singure (creșe/grădinițe, centre pentru vârstnici/persoane cu dizabilități, unități medicale), Anexa 1 impune avizare/autorizare obligatorie indiferent de regimul de înălțime, aria desfășurată sau capacitate — pragul nu este dimensional, e funcțional.</p>';
         } else if (esteBloc) {
-          seSupune = D.niv_supraterane && +D.niv_supraterane >= 5;
+          seSupune = _niveluriSuprateraneEfectiv(D) != null ? _niveluriSuprateraneEfectiv(D) >= 5 : null;
           motivSupune = seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât regimul de înălțime declarat (' + esc(D.regim || '—') + ') nu atinge pragul P+4 stabilit de Anexa 1 pentru clădirile de locuit colective.';
           htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + ' (clădire de locuit colectivă)</b>.</p>' +
             '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială colectivă, Anexa 1 vizează explicit clădirile de locuit cu regim de înălțime P+4 și peste (cu mansardă amenajată).</p>';
         } else if (esteLocuintaUnifamiliala) {
-          seSupune = D.niv_supraterane && +D.niv_supraterane >= 5;
+          seSupune = _niveluriSuprateraneEfectiv(D) != null ? _niveluriSuprateraneEfectiv(D) >= 5 : null;
           motivSupune = seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât destinația reală (locuință unifamilială, regim redus) nu se regăsește printre criteriile Anexei 1 — prezentul document rămâne totuși util ca memoriu tehnic de fundamentare pentru D.T.A.C./D.T.A.D. (Legea 50/1991) și pentru identificarea corectă a cerințelor tehnice aplicabile P118-1/2025, chiar dacă nu necesită avizare ISU explicită.';
           htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>' + (cladiriPropuse.length > 1 ? ' (ansamblu de ' + cladiriPropuse.length + ' unități unifamiliale independente, nu o clădire colectivă unică)' : '') + '.</p>' +
             '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială, Anexa 1 vizează explicit clădirile de locuit <b>colective</b> cu regim de înălțime P+4 și peste (cu mansardă amenajată) — o locuință unifamilială (individuală sau cuplată/duplex) cu regim ' + esc(D.regim || 'P+1E') + ', chiar repetată identic pe mai multe loturi ale aceluiași ansamblu, nu este o clădire colectivă unică și nu atinge acest prag.</p>';
