@@ -689,7 +689,14 @@
 
     var fiseNeconformitate = verificariM14.map(function (n) { return G.SSI_M14_VERDICT.genereazaFisaNeconformitate(n, D.geometrie_teren); });
     var fiseById = {}; fiseNeconformitate.forEach(function (f) { fiseById[f.id_neconformitate] = f; });
-    var verdict = G.SSI_M14_VERDICT.genereazaVerdictGeneral(verificariM14);
+    // materialeInfo calculat aici (duplicat cu cel de mai jos, care ramane pt afisarea sectiunii 3.1) —
+    // verdictul general (Sectiunea 17, audit v6.0) are nevoie de "documente justificative lipsa" INAINTE
+    // de a fi computat, dar restructurarea integrala a ordinii sectiunilor ar fi riscanta; recalcularea
+    // e ieftina (functii pure, aceleasi intrari din D) si sigura.
+    var _tipuriAcoperisPtVerdict = D._relevee ? Object.keys(D._relevee).map(function (k) { return D._relevee[k].tip_acoperis; }).filter(Boolean) : [];
+    var _materialeSursaPtVerdict = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata', _tipuriAcoperisPtVerdict);
+    var _materialeInfoPtVerdict = G.SSI_M4B.valideazaMateriale(_materialeSursaPtVerdict);
+    var verdict = G.SSI_M14_VERDICT.genereazaVerdictGeneral(verificariM14, _materialeInfoPtVerdict);
     // verdict.lista contine obiectele M14 brute (folosite pt filtrare pe status) — pt afisare, mapam la fisa completa (element+actiune)
     if (verdict.lista) verdict.lista = verdict.lista.map(function (n) { return fiseById[n.id] || n; });
 
@@ -811,9 +818,12 @@
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
       { h: null, html: '<div style="border:2px solid ' + (CULOARE_VERDICT[verdict.culoare] || '#888') + ';border-radius:6pt;padding:10pt;margin-bottom:8pt;background:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '11">' +
-        '<p style="margin:0;font-size:13pt;font-weight:bold;color:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '">CONCLUZIE GENERALĂ / VERDICT: ' + esc(verdict.verdict) + '</p>' +
+        '<p style="margin:0;font-size:13pt;font-weight:bold;color:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '">CONCLUZIE GENERALĂ / VERDICT: ' + esc(verdict.verdict_label || verdict.verdict) + '</p>' +
         (verdict.motiv ? '<p style="margin:4pt 0 0">' + esc(verdict.motiv) + '</p>' : '') +
-        (verdict.lista && verdict.lista.length ? '<ul style="margin:4pt 0 0">' + verdict.lista.map(function (f) { return '<li>' + esc(f.element ? f.element.identificare_in_plan : (f.id || '')) + ': ' + esc(f.actiune || f.mesaj || '') + '</li>'; }).join('') + '</ul>' : '') +
+        // Lista EXHAUSTIVA de conditii (audit v6.0, Sectiunea 17) — obligatorie la APT_CONDITIONAT/NEAPT,
+        // nu doar un text generic; fiecare conditie identifica explicit TIPUL (corectie directa/masura
+        // compensatorie/document lipsa), elementul vizat si actiunea concreta de urmat.
+        (verdict.conditii && verdict.conditii.length ? '<p style="margin:6pt 0 2pt;font-weight:bold">Condiții de îndeplinit:</p><ul style="margin:0">' + verdict.conditii.map(function (c) { return '<li><b>' + esc(c.tip) + '</b> — ' + esc(c.element || '') + ': ' + esc(c.actiune) + '</li>'; }).join('') + '</ul>' : '') +
         '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
@@ -862,7 +872,23 @@
           htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>.</p>' +
             '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1, pe baza criteriului specific acestei destinații (prag propriu de arie/capacitate/categorie de pericol, distinct de cel rezidențial) — de verificat punctual de proiectantul atestat, litera exactă din Anexa 1 aplicabilă acestei funcțiuni nefiind încă validată în acest motor.</p>';
         }
-        return htmlSpecific + '<p><b>Concluzie: ' + (seSupune == null ? 'DE STABILIT — verificare de specialitate necesară' : (seSupune ? 'SE SUPUNE' : 'NU SE SUPUNE')) + ' avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1</b>' + esc(motivSupune) + '</p>';
+        // Format exact cerut (audit v6.0, Florin 12 iul, Secțiunea 13): verdict DA/NU separat pt AVIZ
+        // și AUTORIZAȚIE + Temei + Motiv, NU o formulare ambiguă "de stabilit" urmată de un argument
+        // care practic răspunde deja. Litera exactă din Anexa 1 se cere aici (nu doar "Anexa 1" generic)
+        // — daca nu a fost verificată pe text sursă oficial HG 571/2016 (nu disponibil în acest motor),
+        // se marchează explicit "DE COMPLETAT", nu se inventează o literă.
+        var raspuns = seSupune == null ? 'DATE INSUFICIENTE PENTRU CONCLUZIE' : (seSupune ? 'DA' : 'NU');
+        var temei = esteFunctiunePersoaneVulnerabile
+          ? 'H.G. 571/2016, Anexa 1 — litera exactă: DE COMPLETAT (textul sursă oficial HG 571/2016 nu e ingerat în acest motor; categoria „clădiri care adăpostesc persoane ce nu se pot evacua singure" e identificată din structura Anexei 1, fără citarea literei exacte)'
+          : (esteBloc || esteLocuintaUnifamiliala)
+            ? 'H.G. 571/2016, Anexa 1 — criteriul clădirilor de locuit colective/regim P+4 (litera exactă: DE COMPLETAT, text sursă neingerat)'
+            : 'H.G. 571/2016, Anexa 1 — DE COMPLETAT (criteriul specific acestei destinații nu a fost încă identificat/verificat în acest motor)';
+        var motivFinal = motivSupune ? motivSupune.replace(/^,\s*/, '') : 'destinația reală (' + esc(destinatieT42.toLowerCase()) + ') nu a fost încă încadrată punctual în criteriile Anexei 1 — necesită verificare de specialitate.';
+        return htmlSpecific +
+          '<p><b>Necesită AVIZ de securitate la incendiu?</b> ' + raspuns + '<br>' +
+          '<b>Necesită AUTORIZAȚIE de securitate la incendiu?</b> ' + raspuns + '<br>' +
+          '<b>Temei:</b> ' + temei + '<br>' +
+          '<b>Motiv:</b> ' + esc(motivFinal) + '</p>';
       })() },
       { h: '1.3. Categoria de importanță', html: (function () {
         var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };

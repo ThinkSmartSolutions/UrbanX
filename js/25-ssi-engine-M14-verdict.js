@@ -71,29 +71,46 @@
   }
 
   // Verdict general — trebuie afisat PRIMUL (regula #18), banner rosu/galben/verde
-  function genereazaVerdictGeneral(toateNeconformitatile) {
+  //
+  // v6.0 (Florin, 12 iul — audit "12_urbanx_ssi_v6.0_MASTER_FINAL"): terminologie EXACTA ceruta,
+  // fara stare improvizata: APT_PENTRU_AVIZARE / APT_CONDITIONAT / NEAPT_PENTRU_AVIZARE, cu lista
+  // EXHAUSTIVA de conditii la variantele intermediare — nu doar un text generic "in asteptare".
+  // materialeInfo (optional): rezultatul SSI_M4B.valideazaMateriale() — "documente justificative
+  // lipsa" (Sectiunea 7/17 a auditului) e al doilea motiv posibil de APT_CONDITIONAT, alaturi de
+  // masurile compensatorii neasumate; o lista NEDECLARATA (materialeInfo omis) nu blocheaza nimic
+  // (backward-compatibil cu apelurile existente care nu-l furnizeaza inca).
+  function genereazaVerdictGeneral(toateNeconformitatile, materialeInfo) {
     var lista = toateNeconformitatile || [];
     var corectiiNecesare = lista.filter(function (n) { return n.status === 'NECONFORM_CORECTIE_PROIECT' && n.status_rezolvare !== 'REZOLVAT'; });
     var masuriPendinte = lista.filter(function (n) { return n.status === 'NECONFORM_MASURA_COMPENSATORIE_POSIBILA' && !n.solutie_aleasa; });
     var masuriAplicate = lista.filter(function (n) { return n.status === 'NECONFORM_MASURA_COMPENSATORIE_POSIBILA' && n.solutie_aleasa; });
+    var documenteLipsa = (materialeInfo && materialeInfo.neconfirmate) || [];
 
     if (corectiiNecesare.length) {
       return {
-        verdict: 'NECONFORM — PROIECTUL NU POATE FI AUTORIZAT ÎN FORMA ACTUALĂ', culoare: 'rosu',
-        motiv: corectiiNecesare.length + ' element(e) din proiect nu respectă cerințele minime și necesită corectare directă înainte de reluarea analizei.',
+        verdict: 'NEAPT_PENTRU_AVIZARE', verdict_label: 'NEAPT PENTRU AVIZARE', culoare: 'rosu',
+        motiv: corectiiNecesare.length + ' element(e) din proiect nu respectă cerințele minime și necesită corectare directă (nerezolvată) — proiectul nu poate fi autorizat în forma actuală.',
+        conditii: corectiiNecesare.map(function (n) { return { tip: 'CORECȚIE DIRECTĂ OBLIGATORIE', element: n.element_id || n.id, actiune: (n.corectie_necesara && n.corectie_necesara.ce) || n.mesaj || 'de corectat' }; }),
         lista: corectiiNecesare
       };
     }
-    if (masuriPendinte.length) {
+    if (masuriPendinte.length || documenteLipsa.length) {
+      var conditii = masuriPendinte.map(function (n) { return { tip: 'MĂSURĂ COMPENSATORIE DE ALES', element: n.element_id || n.id, actiune: 'Selectează soluția compensatorie din tabelul de soluții candidate (secțiunea vizată).' }; })
+        .concat(documenteLipsa.map(function (m) { return { tip: 'DOCUMENT JUSTIFICATIV LIPSĂ', element: m.nume, actiune: 'Atașează DoP/certificat/fișă tehnică pentru materialul „' + m.nume + '" înainte de export FINAL.' }; }));
       return {
-        verdict: 'ÎN AȘTEPTARE — DECIZIE PROIECTANT NECESARĂ', culoare: 'galben',
-        motiv: masuriPendinte.length + ' cerință/cerințe pot fi rezolvate prin măsură compensatorie — proiectantul trebuie să aleagă soluția înainte de finalizarea scenariului.',
+        verdict: 'APT_CONDITIONAT', verdict_label: 'APT CONDIȚIONAT', culoare: 'galben',
+        motiv: (masuriPendinte.length ? masuriPendinte.length + ' cerință/cerințe rezolvabile prin măsură compensatorie încă neasumată' : '') +
+          (masuriPendinte.length && documenteLipsa.length ? '; ' : '') +
+          (documenteLipsa.length ? documenteLipsa.length + ' document/documente justificative (DoP/certificat) lipsă' : '') +
+          ' — vezi lista exhaustivă de condiții de îndeplinit înainte de export FINAL.',
+        conditii: conditii,
         lista: masuriPendinte
       };
     }
     return {
-      verdict: masuriAplicate.length ? 'CONFORM — CU MĂSURI COMPENSATORII DOCUMENTATE' : 'CONFORM — PROIECTUL RESPECTĂ INTEGRAL CERINȚELE APLICABILE',
-      culoare: masuriAplicate.length ? 'galben' : 'verde', lista: masuriAplicate
+      verdict: 'APT_PENTRU_AVIZARE', verdict_label: 'APT PENTRU AVIZARE', culoare: 'verde',
+      motiv: masuriAplicate.length ? 'Toate cerințele sunt CONFORM sau CONFORM prin măsură compensatorie cu soluție aleasă; toate documentele justificative disponibile sunt atașate.' : 'Proiectul respectă integral cerințele aplicabile analizate.',
+      conditii: [], lista: masuriAplicate
     };
   }
 
