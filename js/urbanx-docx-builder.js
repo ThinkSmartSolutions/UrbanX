@@ -585,6 +585,18 @@
     }), ['Tip', 'Localizare în proiect (DWG)', 'Acțiune necesară', 'Sursă normativă']);
   }
 
+  // Sectiunea 3 (audit v6.0): bloc de concluzie AUTOMAT la finalul fiecarui capitol (1-5), generat din
+  // rezultatele deja calculate ale capitolului respectiv, nu scris separat. puncte = [{stare: true|
+  // false|null, text}] — true='✔', false='❌', null='➖' (neaplicabil/nedeterminat, nu se forteaza
+  // un DA/NU cand nu exista temei).
+  function _concluzieCapitol(nr, titlu, puncte) {
+    var simbol = { true: '✔', false: '❌', null: '➖' };
+    return '<div style="border-left:3px solid #1F3864;padding:6pt 10pt;margin:8pt 0;background:#F2F2F2">' +
+      '<p style="margin:0 0 4pt;font-weight:bold">CONCLUZIE CAPITOL ' + nr + ' (' + esc(titlu) + ')</p>' +
+      puncte.map(function (p) { return '<p style="margin:0">' + simbol[p.stare] + ' ' + esc(p.text) + '</p>'; }).join('') +
+      '</div>';
+  }
+
   function _buildScenariuSSICascada(D, v) {
     var ac = v.calc;
     var m0 = G.SSI_ENGINE.m0_tipLucrare({ tip_lucrare: D.tip_lucrare });
@@ -1053,6 +1065,16 @@
       { h: '1.4.h. Capacități de depozitare', html: '<p>' + (D.functiune === 'locuinta-individuala'
         ? 'Nu este cazul — destinația rezidențială nu prevede spații de depozitare cu sarcină termică semnificativă peste mobilierul și bunurile uzuale ale unei locuințe (evaluate la secțiunea 2.1, sarcina termică). Dacă proiectul include o anexă gospodărească/depozit distinct, se declară separat.'
         : 'Dacă destinația (' + esc(destinatieT42.toLowerCase()) + ') include spații de depozitare declarate (materiale/produse specifice activității), se precizează: tipul materialelor, cantitățile, modul de depozitare și clasa de periculozitate. Fără o astfel de declarație explicită în proiect, nu se presupune existența unor astfel de spații.') + '</p>' },
+      { h: null, html: (function () {
+        var FUNCTIUNI_PERSOANE_VULNERABILE_C1 = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var seSupuneC1 = FUNCTIUNI_PERSOANE_VULNERABILE_C1[D.functiune] ? true : (D.niv_supraterane ? (+D.niv_supraterane >= 5) : null);
+        var compartimentareConform = m5bGrupuri ? !m5bGrupuri.some(function (g) { return g.verificare && g.verificare.conform === false; }) : (m5.conform === false ? false : (m5.conform ? true : null));
+        return _concluzieCapitol(1, 'Caracteristicile construcției', [
+          { stare: seSupuneC1, text: 'Se supune avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1 — vezi 1.2 pentru temei/motiv complet.' },
+          { stare: !!(D.categorie_importanta || ac.categorie_importanta), text: 'Categorie de importanță stabilită: ' + esc(D.categorie_importanta || ac.categorie_importanta || 'nedeterminată') + '.' },
+          { stare: compartimentareConform, text: compartimentareConform === null ? 'Compartimentarea nu a putut fi verificată (date insuficiente).' : (compartimentareConform ? 'Toate compartimentele respectă aria maximă admisă.' : 'Cel puțin un compartiment depășește aria maximă admisă — vezi secțiunea 5.') }
+        ]);
+      })() },
       { h: '2.1. Calculul și încadrarea în nivel de risc', html: (function () {
         function incadrare(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
         var camere = D._camere || [];
@@ -1070,6 +1092,16 @@
           '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (camere.length ? ' — calculat din inventarul real de încăperi/finisaje declarate în proiect (' + camere.length + ' încăperi).' : ', conform destinației ' + esc(destinatieT42.toLowerCase()) + '.') + '</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
+      { h: null, html: (function () {
+        function incadrareC2(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
+        var camereC2 = D._camere || [];
+        var qMaxC2 = camereC2.length ? Math.max.apply(null, camereC2.map(function (c) { return (c.arie_mp && c.sarcina_termica_mj) ? c.sarcina_termica_mj / c.arie_mp : 0; })) : 0;
+        var riscC2 = camereC2.length ? incadrareC2(qMaxC2) : (ac.risc_incendiu || 'mic').replace('_', ' ');
+        return _concluzieCapitol(2, 'Nivelul riscului de incendiu', [
+          { stare: riscC2 === 'foarte mare' || riscC2 === 'mare' ? false : true, text: 'Încadrare în nivel de risc de incendiu: ' + esc(riscC2) + (camereC2.length ? ' (calculat din inventarul real de încăperi, ' + camereC2.length + ' încăperi).' : ', conform destinației.') },
+          { stare: atexAplicabilUnele ? null : true, text: atexAplicabilUnele ? 'Există cel puțin o zonă cu pericol de explozie (ATEX) declarată — vezi 2.2 pentru măsurile specifice.' : 'Nu sunt declarate zone cu pericol de explozie (ATEX).' }
+        ]);
+      })() },
       { h: '3.1. Rezistența și clasa de reacție la foc a celor mai defavorabile elemente de construcție', html:
         '<p>Materialele și produsele pentru construcții se clasifică din punct de vedere al reacției la foc conform SR EN 13501-1, iar elementele de construcție din punct de vedere al rezistenței la foc conform SR EN 13501-2.</p>' +
         '<p>Clasa de reacție la foc (A1–F, cu indicii s/d) nu se calculează și nu este o valoare dată de P118 pentru un material anume — P118 stabilește doar clasa minimă necesară pe tip de element/aplicație. Valoarea reală e o proprietate declarată a produsului, preluată din Declarația de Performanță (DoP), fișa tehnică a producătorului sau certificatul de încercare. Pentru materiale cu variabilitate mare între produse (lemn, PVC, spume, membrane, compozite, pardoseli) nu se presupune o clasă implicită — se atașează DoP-ul produsului concret; scenariul FINAL nu poate fi emis fără această confirmare.</p>' +
@@ -1211,6 +1243,14 @@
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
+      { h: null, html: (function () {
+        var vecNeconforme = verificariM14.filter(function (n) { return /^M6b-|^M6c-/.test(n.id); });
+        return _concluzieCapitol(3, 'Măsuri de siguranță la foc constructive', [
+          { stare: true, text: 'Elementele de rezistență la foc sunt proiectate pentru minimul necesar conform gradului de stabilitate declarat (grad ' + esc(grad) + ') — vezi 3.1/3.2.' },
+          { stare: vecNeconforme.length ? false : true, text: vecNeconforme.length ? 'Cel puțin o vecinătate/distanță între clădirile proprii nu respectă distanța minimă necesară — vezi secțiunea 5.' : 'Toate vecinătățile și distanțele dintre clădirile proprii ale ansamblului respectă distanța minimă necesară.' },
+          { stare: null, text: 'Verificarea fluxurilor de evacuare (F=N/C) și tipul scărilor sunt detaliate la 3.4.b/3.4.d, pe baza capacității reale de utilizatori (1.4.g).' }
+        ]);
+      })() },
       { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (ac.hidranti_int_oblig ? ', motivat prin depășirea pragului aplicabil destinației (' + esc(destinatieT42.toLowerCase()) + ').' : (D.functiune === 'locuinta-individuala' ? ' — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.' : ', valoarea reală a proiectului (volum/arie desfășurată) nu atinge pragul de echipare obligatorie prevăzut pentru destinația ' + esc(destinatieT42.toLowerCase()) + '.')) + '</p>' +
         _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
           { cheie: 'tip', eticheta: 'Tipul instalației (apă-apă, aer-aer)' }, { cheie: 'volum_mc', eticheta: 'Volumul construcției/compartimentului de incendiu (m³)' },
@@ -1274,10 +1314,19 @@
       { h: '▤ Tabel de verificare — praguri instalații PSI (P118/2-2013, P118-3/2015)', html:
         '<p>Pragurile provin din pragurile deja aplicate de motorul de calcul al platformei (aceleași valori care produc concluziile DA/NU de la 4.1–4.11 de mai sus) — se compară explicit cu valoarea reală a proiectului pentru fiecare instalație, nu doar concluzia finală.</p>' +
         _tblPraguriInstalatii(D, ac, m5) },
+      { h: null, html: _concluzieCapitol(4, 'Instalații de protecție împotriva incendiilor', [
+        { stare: null, text: 'Hidranți interiori: ' + (ac.hidranti_int_oblig ? 'necesari' : 'nu este cazul') + '. Hidranți exteriori: ' + (ac.hidranti_ext_oblig ? 'necesari' : 'nu este cazul') + '.' },
+        { stare: null, text: 'Sprinklere: ' + (ac.sprinklere_oblig ? 'obligatorii' : 'nu este cazul') + '. Instalație de desfumare: ' + (ac.desfumare_oblig ? 'necesară' : 'nu este cazul') + '.' },
+        { stare: null, text: 'Detectare/semnalizare/alarmare (IDSAI): ' + (ac.idsi_oblig ? 'obligatorie' : 'nu este cazul') + '. Protecție împotriva trăsnetului: ' + (ac.paratraznet_oblig ? 'necesară' : 'de evaluat la faza de proiect tehnic') + '.' }
+      ]) },
       { h: '5. Măsuri compensatorii / corecții de proiect', html:
         '<p>Tabelul de mai jos distinge explicit între cerințe care necesită <b>corectare directă</b> a proiectului (nu au alternativă legală documentată) și cele pentru care există o <b>măsură compensatorie posibilă</b> (selecția rămâne a proiectantului atestat, nu se aplică automat).</p>' +
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
         (fiseNeconformitate.length ? '<p style="font-size:9pt;color:#666">Trasabilitate: fiecare soluție compensatorie aleasă se înregistrează cu nume + nr. atestat proiectant + dată (Ord. MAI 180/2022, Anexa 5, pct. 5). Orice corecție de proiect necesită reimport DWG + recalculul integral al cascadei M0-M17 (o modificare geometrică poate afecta și alte verificări).</p>' : '') },
+      { h: null, html: _concluzieCapitol(5, 'Măsuri compensatorii / corecții de proiect', [
+        { stare: verdict.verdict === 'NEAPT_PENTRU_AVIZARE' ? false : (verdict.verdict === 'APT_CONDITIONAT' ? null : true), text: 'Verdict general (Capitolul 6): ' + esc(verdict.verdict_label) + '.' },
+        { stare: fiseNeconformitate.length ? false : true, text: fiseNeconformitate.length ? fiseNeconformitate.length + ' neconformitate(ăți) identificate — tratate mai sus, prin corecție directă de proiect sau măsură compensatorie.' : 'Nu au fost identificate neconformități.' }
+      ]) },
       { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
         (statusNevalidat.length
           ? (D._normative_confirmate_de_proiectant
