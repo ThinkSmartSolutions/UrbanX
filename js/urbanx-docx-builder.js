@@ -945,16 +945,42 @@
           // persoane ca la functiunile publice) — P118-1/2025 normeaza densitati de persoane pt
           // destinatii cu public (comert/sanatate/invatamant), NU pt rezidential, unde capacitatea
           // reala e data de programul locativ (numarul de dormitoare), nu de o formula pe suprafata.
-          var nrUnitati = cladiriPropuse.length || 1;
+          //
+          // Bug real gasit facand "bloc de locuinte" complet, nu schematic (Florin, 12 iul): la casa
+          // individuala, "unitate locativa" = "cladire" = 1 (coincid din intamplare) — dar la BLOC,
+          // acestea NU coincid: un bloc e O SINGURA cladire (cladiriPropuse.length=1) care contine
+          // MULTIPLE apartamente. Formula veche folosea cladiriPropuse.length ca "nr. unitati" pt
+          // AMBELE cazuri, ceea ce la un bloc producea texte absurde ("1 unitati x 96 persoane" — un
+          // singur numar de dormitoare, agregat pe tot blocul, inmultit gresit cu 1 "unitate" = cladirea
+          // intreaga, nu apartamentul). Acum: la bloc, unitatea reala e APARTAMENTUL (D.nr_apartamente),
+          // nu cladirea.
+          var esteBlocReal = D.functiune === 'bloc-locuinte';
           var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
-          var persPeUnitate = nrDormitoare ? nrDormitoare * 2 : 4;
-          var persEstimate = nrUnitati * persPeUnitate;
-          var sursaEstimare = nrDormitoare
-            ? nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură) × 2 persoane/dormitor'
-            : '4 persoane/unitate (familie medie, program locativ tipic)';
+          var html;
+          if (esteBlocReal) {
+            var nrApartamente = D.nr_apartamente || D.nr_unitati_locative;
+            if (nrApartamente && nrDormitoare) {
+              var persTotalBloc = nrDormitoare * 2;
+              var mediePeApartament = Math.round((persTotalBloc / nrApartamente) * 10) / 10;
+              html = '<p>' + nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură, toate nivelurile) × 2 persoane/dormitor = <b>' + persTotalBloc + ' persoane</b> (capacitatea totală a blocului, ' + nrApartamente + ' apartamente, medie ' + mediePeApartament + ' persoane/apartament).</p>';
+            } else if (nrApartamente) {
+              var persEstBloc = nrApartamente * 3;
+              html = '<p>Numărul de apartamente declarat: <b>' + nrApartamente + '</b>. Fără inventarul real de dormitoare pe apartament (planul de arhitectură), se aplică o medie orientativă de 3 persoane/apartament (compoziție tipică a gospodăriei, conform statisticilor de recensământ pentru locuințe colective) — de corectat cu numărul real de dormitoare de îndată ce planurile sunt încărcate: <b>' + persEstBloc + ' persoane</b> (capacitatea totală estimată a blocului).</p>';
+            } else {
+              html = '<p><b>Numărul de apartamente al blocului nu este încă declarat pentru acest proiect</b> (D.nr_apartamente) — capacitatea totală de utilizatori nu poate fi calculată fără acest număr; se completează din proiectul de arhitectură.</p>';
+            }
+          } else {
+            var nrUnitati = cladiriPropuse.length || 1;
+            var persPeUnitate = nrDormitoare ? nrDormitoare * 2 : 4;
+            var persEstimate = nrUnitati * persPeUnitate;
+            var sursaEstimare = nrDormitoare
+              ? nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură) × 2 persoane/dormitor'
+              : '4 persoane/unitate (familie medie, program locativ tipic)';
+            html = '<p>' + sursaEstimare + ': ' + nrUnitati + ' unități × ' + persPeUnitate + ' persoane = <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ' + persPeUnitate + ' persoane pe unitate individuală.</p>';
+          }
           return '<p>Pentru destinația rezidențială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
-            '<p>' + sursaEstimare + ': ' + nrUnitati + ' unități × ' + persPeUnitate + ' persoane = <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ' + persPeUnitate + ' persoane pe unitate individuală.</p>' +
-            '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare rezultă din raportarea lungimii traseului la viteza medie de deplasare (0,4 m/s orizontal).</p>';
+            html +
+            '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare rezultă din raportarea lungimii traseului la viteza medie de deplasare (0,4 m/s orizontal' + (esteBlocReal ? ', cu recalcul pe verticală pentru numărul de niveluri (0,4-0,7 m/s pe scări, conform normativ)' : '') + ').</p>';
         }
         // Alte destinatii (institutionale/publice) — capacitatea reala e fie DECLARATA (autorizatie de
         // functionare/aviz sanitar — cazul uzual pt cresa/centru social), fie normata prin densitati de
@@ -1057,15 +1083,24 @@
       })() },
       { h: '3.4.d. Numărul fluxurilor de evacuare', html: (function () {
         var modul = ac.flux_evacuare_m || 0.60;
-        var esteResidential = D.functiune === 'locuinta-individuala' || D.functiune === 'bloc-locuinte';
+        var esteBlocReal = D.functiune === 'bloc-locuinte';
+        var esteResidential = D.functiune === 'locuinta-individuala' || esteBlocReal;
         var nrUnitatiFlux = cladiriPropuse.length || 1;
-        var rowLabel, Nper, sursaN;
-        if (esteResidential) {
-          var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
-          Nper = nrDormitoare ? nrDormitoare * 2 : 4;
-          rowLabel = 'Locuință (per unitate)';
-          sursaN = (nrDormitoare ? nrDormitoare + ' dormitoare × 2 pers.' : 'ipoteză 4 pers./unitate') + ' — vezi 1.4.g';
-        } else {
+        var rowLabel, Nper, sursaN, notaBloc = '';
+        if (esteBlocReal) {
+          // Bloc real, nu schematic (Florin, 12 iul): evacuarea unui bloc se verifica PE NIVEL (fluxul
+          // necesar rezulta din ocupantii nivelului cel mai încărcat, care evacuează simultan prin casa
+          // de scări proprie), NU pe totalul cladirii dintr-o data — un ansamblu de case independente
+          // (unde fiecare unitate evacueaza pe cont propriu) e un model DIFERIT de un bloc cu casa de
+          // scari comuna pe mai multe niveluri. D._camere (agregat, fara nivel asociat) nu permite inca
+          // aceasta defalcare — se marcheaza onest, nu se aproximeaza cu totalul cladirii.
+          var nrDormitoareBloc = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
+          var nrApartamente = D.nr_apartamente || D.nr_unitati_locative;
+          rowLabel = 'Bloc de locuințe — verificare pe nivel';
+          Nper = null;
+          sursaN = 'necesită defalcare pe nivel (persoane/nivel), nu totalul clădirii';
+          notaBloc = '<p style="font-size:9pt;color:#666">Verificarea F=N/C la un bloc se face <b>pe nivelul cel mai încărcat</b> (ocupanții unui singur nivel evacuează simultan prin casa de scări proprie) — capacitatea totală a blocului (' + (nrDormitoareBloc ? (nrDormitoareBloc * 2) + ' persoane, din ' + nrDormitoareBloc + ' dormitoare declarate' : (nrApartamente ? Math.round(nrApartamente * 3) + ' persoane estimat (' + nrApartamente + ' apartamente × 3 pers.)' : 'nedeterminată')) + ') nu se împarte corect la numărul de niveluri fără planul etajului tip — se stabilește la faza de proiect tehnic, pe baza numărului real de apartamente/dormitoare per nivel și a numărului de case de scări.</p>';
+        } else if (esteResidential) {
           var capacitateDeclarata = D.capacitate_persoane || D.capacitate_declarata;
           Nper = capacitateDeclarata || null;
           rowLabel = destinatieT42;
@@ -1083,11 +1118,15 @@
         } else {
           out += tbl([[rowLabel, NperTxt, cap.aplicabil ? 'nu se aplică (' + cap.motiv + ')' : 'nu se aplică (' + cap.motiv + ')', 'nedeterminat', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', '—']],
             ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
-          out += '<p style="font-size:9pt;color:#666">' + cap.motiv + (esteResidential
-            ? ' Verificarea aplicată aici: lățimea utilă a căilor/ușilor de evacuare din proiect comparată cu modulul de trecere normat — pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.'
-            : ' Verificarea F=N/C rămâne incompletă până la confirmarea capacității reale de utilizatori (1.4.g); comparația pe lățime utilă a căilor rămâne disponibilă ca verificare intermediară.') + '</p>';
+          if (esteBlocReal) {
+            out += notaBloc;
+          } else {
+            out += '<p style="font-size:9pt;color:#666">' + cap.motiv + (D.functiune === 'locuinta-individuala'
+              ? ' Verificarea aplicată aici: lățimea utilă a căilor/ușilor de evacuare din proiect comparată cu modulul de trecere normat — pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.'
+              : ' Verificarea F=N/C rămâne incompletă până la confirmarea capacității reale de utilizatori (1.4.g); comparația pe lățime utilă a căilor rămâne disponibilă ca verificare intermediară.') + '</p>';
+          }
         }
-        out += (cladiriPropuse.length > 1 && esteResidential ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
+        out += (cladiriPropuse.length > 1 && D.functiune === 'locuinta-individuala' ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
         return out;
       })() },
       { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: (function () {
