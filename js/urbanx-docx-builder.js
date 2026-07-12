@@ -853,6 +853,58 @@
         tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare']);
     }
 
+    // Sectiunea 2 (audit v6.0): matricea completa de conformitate — capitol final obligatoriu,
+    // generat automat din verificarile deja calculate mai sus (nu o lista fixa scrisa manual per
+    // functiune) — randurile aplicabile difera cu functiunea/tipul de lucrare (ex. randul "distante
+    // intre cladirile proprii" apare doar la ansamblu, "persoane vulnerabile" doar la cresa/centru
+    // social/medical), dar formatul tabelului e identic pt orice proiect.
+    function _tblMatriceConformitate() {
+      function incadrareMx(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
+      var camereMx = D._camere || [];
+      var qMaxMx = camereMx.length ? Math.max.apply(null, camereMx.map(function (c) { return (c.arie_mp && c.sarcina_termica_mj) ? c.sarcina_termica_mj / c.arie_mp : 0; })) : 0;
+      var riscMx = camereMx.length ? incadrareMx(qMaxMx) : (ac.risc_incendiu || 'mic').replace('_', ' ');
+      var vecNeconformeMx = (m6b.vecinatati || []).some(function (v) { return v.conforma === false; });
+      var FUNCTIUNI_VULNERABIL_MX = { gradinita: 1, 'centru-social': 1, medical: 1 };
+      var esteVulnerabilMx = !!FUNCTIUNI_VULNERABIL_MX[D.functiune];
+      var randuri = [
+        ['Compartimentarea la incendiu (arie compartiment)', esc(m5.norma || '—'), 'P118-1/2025',
+          m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'DATE INSUFICIENTE'),
+          (m5.arie_proiectata_mp != null && m5.arie_maxima_admisa_mp != null) ? ('real ' + m5.arie_proiectata_mp + ' m² / max. ' + m5.arie_maxima_admisa_mp + ' m²') : 'arie necalculată'],
+        ['Numărul de niveluri supraterane', esc(m9niv.norma || '—'), 'P118-1/2025',
+          m9niv.nelimitat ? 'NEAPLICABIL (nelimitat pt. gradul ' + esc(grad) + ')' : (m9niv.eroare ? 'DATE INSUFICIENTE' : (m9niv.conform ? 'DA' : 'NU')),
+          m9niv.nelimitat ? '—' : (m9niv.niveluri_max != null ? ('proiectat ' + (D.niv_supraterane != null ? D.niv_supraterane : '—') + ' / max. ' + m9niv.niveluri_max) : (m9niv.eroare || '—'))],
+        ['Distanțe de siguranță față de vecinătăți', 'Tabelul 4/145', 'P118-1/2025',
+          vecNeconformeMx ? 'NU' : 'DA', (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate'],
+        ['Nivelul riscului de incendiu', 'art. A.10.2.1.2/A.10.2.1.3', 'P118-1/2025',
+          (riscMx === 'mare' || riscMx === 'foarte mare') ? 'NU' : 'DA',
+          'încadrare: ' + riscMx + (camereMx.length ? ' (' + camereMx.length + ' încăperi calculate)' : ', conform destinației')],
+        ['Rezistența la foc a elementelor de construcție', esc((m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2')), 'P118-1/2025',
+          'DA (prin proiectare)', 'proiectat pentru minimul necesar, grad declarat ' + esc(grad)],
+        ['Zone cu pericol de explozie (ATEX)', 'HG 1058/2006', 'HG 1058/2006',
+          atexAplicabilUnele ? 'DA (măsuri specifice — vezi 2.2)' : 'NEAPLICABIL', atexAplicabilUnele ? 'zonă declarată cu substanțe cu potențial exploziv' : 'nu au fost identificate substanțe cu potențial exploziv'],
+        ['Hidranți de incendiu interiori', 'art. 4.1', 'P118/2-2013', ac.hidranti_int_oblig ? 'DA (obligatoriu — se dimensionează la PTh)' : 'NEAPLICABIL', ac.hidranti_int_oblig ? 'peste pragul aplicabil destinației' : 'sub pragul aplicabil destinației'],
+        ['Hidranți de incendiu exteriori', 'art. 4.2', 'P118/2-2013', ac.hidranti_ext_oblig ? 'DA (obligatoriu — se dimensionează la PTh)' : 'NEAPLICABIL', ac.hidranti_ext_oblig ? 'peste pragul aplicabil destinației' : 'sub pragul aplicabil destinației'],
+        ['Instalații automate de stingere (sprinklere)', 'cap. 7', 'P118/2-2013', ac.sprinklere_oblig ? 'DA (obligatoriu — Sc>3.000 m²/H>28m)' : 'NEAPLICABIL', ac.sprinklere_oblig ? 'peste pragul de arie/înălțime' : 'sub pragul de arie/înălțime'],
+        ['Instalație de desfumare/evacuare fum', '—', 'P118-3/2015', ac.desfumare_oblig ? 'DA (obligatoriu)' : 'NEAPLICABIL', ac.desfumare_oblig ? 'configurație care necesită control activ al fumului' : 'control fum prin tiraj natural, suficient'],
+        ['Instalații de detectare, semnalizare, alarmare (IDSAI)', '—', 'P118-3/2015', ac.idsi_oblig ? 'DA (obligatoriu)' : 'NEAPLICABIL', ac.idsi_oblig ? 'destinație/arie care impune IDSAI' : 'sub pragul aplicabil / destinație fără impunere'],
+        ['Instalație electrică cu rol SSI (iluminat de siguranță, DDR)', 'cap. relevant', 'I7', 'DA (obligatoriu — se detaliază la proiectul electric)', 'DDR ≤300mA obligatoriu la tabloul general; iluminat de siguranță funcție de configurație'],
+        ['Protecție împotriva trăsnetului (IPT/SPT)', '—', 'Normativ specific IPT/SPT', ac.paratraznet_oblig ? 'DA (obligatoriu)' : 'DATE INSUFICIENTE (evaluare de risc la proiectul electric)', 'necesitatea rezultă din evaluarea de risc, responsabilitatea proiectantului de instalații electrice'],
+        ['Materiale de construcție — clasă de reacție la foc', '—', 'P118-1/2025', necesitaDoP.length ? 'DATE INSUFICIENTE (DoP la execuție)' : 'DA', necesitaDoP.length + ' element(e) cu variabilitate reală (DoP la aprovizionare/execuție), ' + consacrate.length + ' element(e) consacrate']
+      ];
+      if (cladiriPropuse.length > 1 && m5bGrupuri) {
+        var grupNeconform = m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC' && g.verificare && g.verificare.conform === false; });
+        randuri.splice(1, 0, ['Compartimentarea grupurilor constructive alipite (ansamblu)', 'Tabelul 146/147', 'P118-1/2025', grupNeconform ? 'NU' : 'DA', m5bGrupuri.length + ' grup(uri) constructiv(e) verificat(e)']);
+      }
+      if (cladiriPropuse.length > 1 && m6c) {
+        randuri.splice(cladiriPropuse.length > 1 && m5bGrupuri ? 5 : 4, 0, ['Distanțe între clădirile proprii ale ansamblului', 'Tabelul 4/145', 'P118-1/2025', m6c.neconforme.length ? 'NU' : 'DA', m6c.perechi.length + ' pereche/perechi verificată/verificate']);
+      }
+      if (esteVulnerabilMx) {
+        randuri.push(['Măsuri pentru persoane fără capacitate de autoevacuare', 'Legea 448/2006, OMS 1955/1995', 'normativ specific destinației', 'DA (măsuri tratate la 3.5)', 'evacuare asistată de personal, categorie cu caracter instituțional permanent']);
+      }
+      return '<p>Tabel generat automat din verificările efectuate la secțiunile de mai sus (nu o listă fixă) — randurile aplicabile depind de destinația și tipul de lucrare ale acestui proiect.</p>' +
+        tbl(randuri, ['Cerință legală', 'Articol/Tabel', 'Normativ', 'Conform', 'Observații']);
+    }
+
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
       { h: null, html: '<div style="border:2px solid ' + (CULOARE_VERDICT[verdict.culoare] || '#888') + ';border-radius:6pt;padding:10pt;margin-bottom:8pt;background:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '11">' +
@@ -1324,9 +1376,10 @@
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
         (fiseNeconformitate.length ? '<p style="font-size:9pt;color:#666">Trasabilitate: fiecare soluție compensatorie aleasă se înregistrează cu nume + nr. atestat proiectant + dată (Ord. MAI 180/2022, Anexa 5, pct. 5). Orice corecție de proiect necesită reimport DWG + recalculul integral al cascadei M0-M17 (o modificare geometrică poate afecta și alte verificări).</p>' : '') },
       { h: null, html: _concluzieCapitol(5, 'Măsuri compensatorii / corecții de proiect', [
-        { stare: verdict.verdict === 'NEAPT_PENTRU_AVIZARE' ? false : (verdict.verdict === 'APT_CONDITIONAT' ? null : true), text: 'Verdict general (Capitolul 6): ' + esc(verdict.verdict_label) + '.' },
+        { stare: verdict.verdict === 'NEAPT_PENTRU_AVIZARE' ? false : (verdict.verdict === 'APT_CONDITIONAT' ? null : true), text: 'Verdict general (la începutul documentului): ' + esc(verdict.verdict_label) + '.' },
         { stare: fiseNeconformitate.length ? false : true, text: fiseNeconformitate.length ? fiseNeconformitate.length + ' neconformitate(ăți) identificate — tratate mai sus, prin corecție directă de proiect sau măsură compensatorie.' : 'Nu au fost identificate neconformități.' }
       ]) },
+      { h: 'Matricea completă de conformitate (sinteză finală)', html: _tblMatriceConformitate() },
       { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
         (statusNevalidat.length
           ? (D._normative_confirmate_de_proiectant
