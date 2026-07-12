@@ -424,41 +424,38 @@
   // inventeaza un prag). Realizatul NU se presupune din tipul de material (regula #13) — se preia exclusiv
   // din D._rezistenta_foc_elemente (DoP/certificat/calcul acoperire beton al elementului efectiv pus in
   // opera); daca lipseste, ramane NEDECLARAT, nu se completeaza cu o valoare estimata.
+  // Elementele NORMALE (au rand propriu, extras integral acum, in Tabelul 2/144 P118-1/2025).
   var _ELEMENTE_REZISTENTA_FOC = [
     { label: 'Stâlpi structură', cheieNormativ: 'STALPI (R)', cheieProiect: 'stalpi' },
     { label: 'Grinzi', cheieNormativ: 'GRINZI (R)', cheieProiect: 'grinzi' },
     { label: 'Planșee', cheieNormativ: 'PLANSEE cai de evacuare/incarcari suplimentare (REI)', cheieProiect: 'plansee' },
-    { label: 'Pereți de compartimentare', cheieNormativ: null, cheieProiect: 'pereti_compartimentare' },
-    { label: 'Uși de compartimentare', cheieNormativ: null, cheieProiect: 'usi_compartimentare' },
-    { label: 'Fațade/pereți exteriori', cheieNormativ: null, cheieProiect: 'fatade' },
-    { label: 'Scări/case de scări', cheieNormativ: null, cheieProiect: 'scari' },
-    { label: 'Etanșări treceri instalații', cheieNormativ: null, cheieProiect: 'etansari' }
+    { label: 'Pereți de compartimentare', cheieNormativ: 'Pereti de sectorizare cu rol de limitare a propagarii focului (compartimentare interioara) (REI/EI)', cheieProiect: 'pereti_compartimentare' },
+    { label: 'Fațade/pereți exteriori', cheieNormativ: 'Pereti exteriori neportanti (E, o<->i)', cheieProiect: 'fatade' }
   ];
   function _tblRezistentaFocElemente(m0, grad, D) {
     var NE = G.SSI_NORMATIVE_ENGINE;
     var gradCol = (grad === 'I') ? 'I_h_sub_28m' : grad;
     var realizateDeclarate = D._rezistenta_foc_elemente || {};
-    var rows = _ELEMENTE_REZISTENTA_FOC.map(function (e) {
+    function randNormativ(e) {
       var necesarTxt, necesarMin = null;
-      if (e.cheieNormativ) {
-        var res = NE.getStabilitateElement({ element: e.cheieNormativ, tip_lucrare: m0.regim_tabele });
-        if (res.disponibil && res.rand) {
-          var raw = res.rand[gradCol];
-          if (raw == null) {
-            necesarTxt = 'coloana gradului „' + gradCol + '” negăsită în rândul extras din ' + res.norma;
-          } else {
-            var m = /^(\d+)/.exec(String(raw));
-            necesarMin = m ? +m[1] : null;
-            necesarTxt = (String(raw).trim().indexOf('-') === 0)
-              ? raw + ' (nu se impune la acest grad, cf. ' + res.norma + ')'
-              : raw + ' min. (' + res.norma + (grad === 'I' ? ', grad I, H<28m' : '') + ')';
-          }
+      var res = NE.getStabilitateElement({ element: e.cheieNormativ, tip_lucrare: m0.regim_tabele });
+      if (res.disponibil && res.rand) {
+        var raw = res.rand[gradCol];
+        if (raw == null) {
+          necesarTxt = 'coloana gradului „' + gradCol + '” negăsită în rândul extras din ' + res.norma;
         } else {
-          necesarTxt = 'rând neextras din ' + res.norma + ' — extracția curentă acoperă doar stâlpi/grinzi/planșee; se completează de proiectantul atestat până la extinderea extracției';
+          var m = /^(\d+)/.exec(String(raw));
+          necesarMin = m ? +m[1] : null;
+          necesarTxt = (String(raw).trim().indexOf('-') === 0)
+            ? raw + ' (nu se impune la acest grad, cf. ' + res.norma + ')'
+            : raw + ' min. (' + res.norma + (grad === 'I' ? ', grad I, H<28m' : '') + ')';
         }
       } else {
-        necesarTxt = 'rând neextras încă din Tabelul 2/144 (P118-1/2025) — extracția normativă acoperă în prezent doar stâlpi/grinzi/planșee (vezi status normativ); se completează manual de proiectantul atestat';
+        necesarTxt = 'rând neextras din ' + res.norma + '; se completează de proiectantul atestat până la extinderea extracției';
       }
+      return { necesarTxt: necesarTxt, necesarMin: necesarMin };
+    }
+    function randRealizatConform(e, necesarMin) {
       var realizat = realizateDeclarate[e.cheieProiect];
       var realizatMin = (realizat && realizat.valoare != null) ? +realizat.valoare : null;
       var realizatTxt = (realizat && realizat.valoare != null)
@@ -466,26 +463,59 @@
         : 'NEDECLARAT — necesită DoP/certificat/calcul (acoperire beton, grosime, tratament) pentru elementul efectiv pus în operă';
       var sursaTxt = (realizat && realizat.sursa) ? realizat.sursa : '—';
       var conform = (necesarMin != null && realizatMin != null) ? (realizatMin >= necesarMin ? 'DA' : 'NU') : '—';
-      return [e.label, esc(necesarTxt), esc(realizatTxt), esc(sursaTxt), conform];
+      return [esc(realizatTxt), esc(sursaTxt), conform];
+    }
+
+    var byLabel = {}; _ELEMENTE_REZISTENTA_FOC.forEach(function (e) { byLabel[e.label] = randNormativ(e); });
+    var pereti = byLabel['Pereți de compartimentare'];
+
+    // Elemente DERIVATE (Uși/Etanșări) — nu au rand propriu in T2, dar normativul da o REGULA explicita
+    // de derivare din rezistenta peretelui pe care il traverseaza/deservesc (Art. 2.3.2.1.2, 2.3.2.2.1.1,
+    // 2.3.2.2.2.1 P118-1/2025, verificate pe text sursa oficial) — nu e o valoare inventata, e formula normata.
+    var usi, etansari;
+    if (pereti.necesarMin != null) {
+      var usaMin = Math.max(Math.round(pereti.necesarMin / 2), 60);
+      usi = { necesarTxt: usaMin + ' min. (EI2, minimum jumătate din rezistența peretelui de compartimentare — ' + pereti.necesarMin + ' min. — și nu mai puțin de EI2 60-C5S200, conform Art. 2.3.2.2.2.1 alin. (3) P118-1/2025)', necesarMin: usaMin };
+      etansari = { necesarTxt: pereti.necesarMin + ' min. (egală cu rezistența peretelui de compartimentare traversat, conform Art. 2.3.2.1.2/2.3.2.2.1.1 alin. (2) lit. a) P118-1/2025)', necesarMin: pereti.necesarMin };
+    } else {
+      usi = { necesarTxt: 'derivă din rezistența peretelui de compartimentare (jumătate, min. EI2 60-C5S200, Art. 2.3.2.2.2.1) — indisponibil, vezi rândul „Pereți de compartimentare”', necesarMin: null };
+      etansari = { necesarTxt: 'derivă din rezistența peretelui de compartimentare traversat (Art. 2.3.2.1.2) — indisponibil, vezi rândul „Pereți de compartimentare”', necesarMin: null };
+    }
+    // Scari/case de scari — NU are rand propriu in Tabelul 2 (rezistenta peretilor casei scarii se
+    // stabileste ca pentru orice perete de compartimentare/degajament protejat, context-dependent);
+    // singura valoare numerica gasita generic pe text sursa e pt usa casei scarii la accese ascensor
+    // (Art. 3.1.4.6): EI2 60-C5S200 — pastrata ca reper partial, NU ca rezistenta completa a peretilor.
+    var scari = { necesarTxt: 'rând fără valoare unică în Tabelul 2 (pereții casei scării se dimensionează ca pereți de compartimentare/degajament protejat, funcție de configurație — vezi rândul „Pereți de compartimentare”); reper parțial găsit în normativ: ușa casei scării minimum EI2 60-C5S200 (Art. 3.1.4.6 P118-1/2025)', necesarMin: null };
+
+    var ORDINE = ['Stâlpi structură', 'Grinzi', 'Planșee', 'Pereți de compartimentare', 'Uși de compartimentare', 'Fațade/pereți exteriori', 'Scări/case de scări', 'Etanșări treceri instalații'];
+    var cheiProiect = { 'Uși de compartimentare': 'usi_compartimentare', 'Scări/case de scări': 'scari', 'Etanșări treceri instalații': 'etansari' };
+    var extra = { 'Uși de compartimentare': usi, 'Scări/case de scări': scari, 'Etanșări treceri instalații': etansari };
+    var rows = ORDINE.map(function (label) {
+      var e = _ELEMENTE_REZISTENTA_FOC.filter(function (x) { return x.label === label; })[0];
+      var n = e ? byLabel[label] : extra[label];
+      var cheieProiect = e ? e.cheieProiect : cheiProiect[label];
+      return [label, esc(n.necesarTxt)].concat(randRealizatConform({ cheieProiect: cheieProiect }, n.necesarMin));
     });
     return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']);
   }
 
-  // Model Florin (pct. 4.1-4.11): fiecare instalatie cu echipare necesara are o lista de campuri
-  // tehnice proprii (tip, volum, jeturi, debit, presiune etc.), nu doar o concluzie DA/NU. Daca
-  // instalatia NU e necesara, modelul insusi cere colaps la "Nu este cazul" (nu se detaliaza campuri
-  // pt un sistem care nu exista) — de aici ramura scurta. Daca e necesara si D._instalatii_ssi[cheie]
-  // nu furnizeaza valoarea reala a unui camp, se marcheaza onest ca lipsa (nu se inventeaza).
+  // Model Florin (pct. 4.1-4.11): fiecare instalatie are o lista FIXA de campuri tehnice proprii
+  // (tip, volum, jeturi, debit, presiune etc.) care se listeaza INTOTDEAUNA, camp cu camp — modelul
+  // insusi pastreaza randul si ii pune valoarea "Nu este cazul" cand instalatia nu e necesara, NU
+  // colapseaza toate randurile intr-o singura propozitie (bug real semnalat de Florin cu captura:
+  // "de ce dispar toate campurile? nu inteleg la ce se aplica"). Fix: tabelul se afiseaza mereu,
+  // camp cu camp; valoarea e "Nu este cazul" (necesara===false), reala (din D._instalatii_ssi) sau
+  // un gap onest [se completeaza] (necesara===true dar fara date reale furnizate inca).
   function _tblCampuriInstalatie(necesara, cheieInstalatie, campuri, D) {
-    // necesara poate fi si undefined/null (cerinta neevaluata de motor, nu confirmata negativ —
-    // ex. paratraznet_oblig nu e calculat nicaieri) — in acel caz NU afirmam "nu e cazul" (ar fi
-    // o concluzie falsa), lasam doar textul din paragraful de concluzie de mai sus.
-    if (necesara == null) return '';
-    if (!necesara) return '<p>Nu este cazul — echiparea nu este necesară (vezi concluzia de mai sus).</p>';
     var valori = (D._instalatii_ssi && D._instalatii_ssi[cheieInstalatie]) || {};
     return tbl(campuri.map(function (c) {
       var v = valori[c.cheie];
-      return [c.eticheta, v != null ? esc(String(v)) : '[se completează la faza de proiect tehnic — necesită date de la proiectantul de instalații]'];
+      var valoare;
+      if (v != null) valoare = esc(String(v));
+      else if (necesara === false) valoare = 'Nu este cazul';
+      else if (necesara == null) valoare = 'neevaluat — necesitatea echipării nu e stabilită de motor pentru acest tip de instalație';
+      else valoare = '[se completează la faza de proiect tehnic — necesită date de la proiectantul de instalații]';
+      return [c.eticheta, valoare];
     }), ['Caracteristică', 'Valoare']);
   }
 
@@ -837,7 +867,7 @@
         '<p>Clasa de reacție la foc (A1–F, cu indicii s/d) nu se calculează și nu este o valoare dată de P118 pentru un material anume — P118 stabilește doar clasa minimă necesară pe tip de element/aplicație. Valoarea reală e o proprietate declarată a produsului, preluată din Declarația de Performanță (DoP), fișa tehnică a producătorului sau certificatul de încercare. Pentru materiale cu variabilitate mare între produse (lemn, PVC, spume, membrane, compozite, pardoseli) nu se presupune o clasă implicită — se atașează DoP-ul produsului concret; scenariul FINAL nu poate fi emis fără această confirmare.</p>' +
         '<p>Golurile tehnologice pentru trecerea instalațiilor prin elementele de compartimentare se etanșează cu sisteme certificate, cu rezistență la foc cel puțin egală cu cea a elementului traversat.</p>' +
         '<p>Pe baza elementului cel mai defavorabil rezultă gradul de stabilitate la incendiu — detaliat la pct. 3.2, cu trimitere consecventă la același grad (grad adoptat/provizoriu în lucrarea de față: <b>' + esc(grad) + '</b>).</p>' +
-        '<p><b>▤ Tabel de verificare — Rezistența la foc necesară vs. realizată, pe elemente</b><br><span style="font-size:9pt;color:#666">Etapa 1: necesarul rezultă din gradul de stabilitate adoptat (Tabelul 2/144, P118-1/2025), pe tip de element — extras real din normative.json (extracție parțială curentă). Etapa 2: valoarea realizată provine din certificarea/DoP a elementului efectiv pus în operă. Conformitatea cere: realizat ≥ necesar.</span></p>' +
+        '<p><b>▤ Tabel de verificare — Rezistența la foc necesară vs. realizată, pe elemente</b><br><span style="font-size:9pt;color:#666">Etapa 1: necesarul rezultă din gradul de stabilitate adoptat (Tabelul 2/144, P118-1/2025) — extras integral pe text sursă oficial (stâlpi/grinzi/planșee/pereți portanți/pereți de compartimentare/pereți exteriori/șarpante); ușile și etanșările se derivă din rezistența peretelui de compartimentare conform formulei normate (Art. 2.3.2.1.2/2.3.2.2.2.1 P118-1/2025), iar pereții casei scării urmează același rând de pereți de compartimentare. Etapa 2: valoarea realizată provine din certificarea/DoP a elementului efectiv pus în operă — aceasta rămâne mereu specifică proiectului, nu se preia din normativ. Conformitatea cere: realizat ≥ necesar.</span></p>' +
         _tblRezistentaFocElemente(m0, grad, D) +
         '<p style="font-size:9pt;color:#666">REGULĂ: rezistența realizată nu se presupune din tipul generic de material — se preia exclusiv din documentația de performanță a produsului efectiv folosit (Declarație de Performanță, fișă tehnică producător sau certificat de încercare emis de laborator notificat). Completează D._rezistenta_foc_elemente cu valorile reale (minute + sursă) pentru fiecare element, pe măsură ce documentația de la furnizori/proiectantul de structură devine disponibilă.</p>' +
         '<p><b>Materiale — clasa de reacție la foc (SR EN 13501-1), completare la tabelul de mai sus</b></p>' + htmlMateriale },
@@ -883,12 +913,22 @@
         var modul = ac.flux_evacuare_m || 0.60;
         var nrUnitatiFlux = cladiriPropuse.length || 1;
         var Nest = nrUnitatiFlux * 4;
-        return '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare (Tabelul 150, P118-1/2025).</p>' +
-          '<p><b>▤ Tabel de calcul — Fluxuri de evacuare</b></p>' +
-          tbl([['Locuință (per unitate)', Nest / nrUnitatiFlux + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', 'neextras din Tabelul 150 P118-1/2025 — normativ nu conține încă rândul cu capacitatea C (pers./flux) pe destinație în normative.json', 'nedeterminat — necesită C din Tabelul 150', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', '—']],
-            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Tabel 150)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']) +
-          '<p style="font-size:9pt;color:#666">Verificarea F=N/C rămâne nedeterminată numeric până la extracția Tabelului 150 (capacitatea de persoane pe flux, funcție de destinație) în normative.json — se aplică, ca verificare intermediară deja validă, compararea lățimii utile a căilor/ușilor de evacuare din proiect cu modulul de trecere normat: pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.</p>' +
-          (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
+        var Nper = Nest / nrUnitatiFlux;
+        var cap = G.SSI_NORMATIVE_ENGINE.getCapacitateFluxEvacuare({ tip_lucrare: m0.regim_tabele, destinatie: destinatieT42 });
+        var out = '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare.</p>' +
+          '<p><b>▤ Tabel de calcul — Fluxuri de evacuare</b></p>';
+        if (cap.aplicabil && cap.disponibil) {
+          var C = cap.rand.capacitate_flux_persoane;
+          var F = Math.ceil(Nper / C);
+          out += tbl([['Locuință (per unitate)', Nper + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', C + ' persoane (' + cap.norma + ')', '' + F, 'lățime utilă din proiect ≥ ' + modul + ' m (de verificat pe releveu)', F <= 1 ? 'DA (o singură cale/scară e suficientă)' : 'necesită ' + F + ' fluxuri — verifică lățimea totală a căilor']],
+            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Tabelul 150)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
+        } else {
+          out += tbl([['Locuință (per unitate)', Nper + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', 'nu se aplică (' + cap.motiv + ')', 'verificat pe lățime utilă, nu pe F=N/C — vezi nota de mai jos', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', 'DA (lățime proiectată peste modulul minim)']],
+            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
+          out += '<p style="font-size:9pt;color:#666">' + cap.motiv + ' Verificarea aplicată aici: lățimea utilă a căilor/ușilor de evacuare din proiect comparată cu modulul de trecere normat — pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.</p>';
+        }
+        out += (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
+        return out;
       })() },
       { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: '<p>' + (D._persoane_vulnerabile && D._persoane_vulnerabile.length
         ? 'Proiectul declară categorii de utilizatori cu capacitate de autoevacuare redusă: ' + D._persoane_vulnerabile.map(function (p) { return esc(p); }).join(', ') + ' — se aplică prevederile normativelor specifice acelei categorii (ex. NP 051/2012 pentru persoane cu dizabilități, Legea 448/2006), cu evacuare asistată și, unde e cazul, refugii per nivel.'

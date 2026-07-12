@@ -170,6 +170,32 @@
       };
     },
 
+    // Capacitatea unui flux de evacuare (C, persoane) — Tabelul 150, EXCLUSIV pt constructii EXISTENTE
+    // (Anexa A.10). Pentru CONSTRUCTIE_NOUA normativul nu foloseste capacitate in persoane/flux, ci
+    // latimea utila/modulul de trecere (Cap. 2.5) — se raporteaza explicit, nu se aplica gresit T150.
+    getCapacitateFluxEvacuare: function (opt) {
+      opt = opt || {};
+      if (opt.tip_lucrare !== 'EXISTENTA_NEMODIFICATA') {
+        return { aplicabil: false, motiv: 'Tabelul 150 e specific construcțiilor EXISTENTE (Anexa A.10, Art. A.10.2.5.58) — pentru CONSTRUCȚIE NOUĂ, verificarea fluxurilor de evacuare folosește lățimea utilă/modulul de trecere al căilor (Cap. 2.5, Art. 2.5.5 și urm.), nu o capacitate exprimată în persoane/flux.' };
+      }
+      var entry = this.getMetaNormativ('P118_1_2025_T150');
+      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_T150' };
+      // Potrivire pe cuvinte-cheie, nu pe egalitate exacta — destinatieT42 (ex. "Cladiri de locuit") nu
+      // coincide literal cu descrierea lunga din randul T150 ("Cladiri de locuit, administrative,
+      // hoteluri, camine, cabane etc. (...)"), dar identifica fara ambiguitate categoria corecta.
+      var dest = String(opt.destinatie || '').toLowerCase();
+      var randuri = entry.valoare.randuri || [];
+      var rand = null;
+      if (/nu se pot evacua|persoane ce nu se pot evacua/.test(dest)) rand = randuri[0];
+      else if (/locuit|cazare/.test(dest)) rand = randuri[2];
+      else rand = randuri[1];
+      return {
+        aplicabil: true, rand: rand || null, disponibil: !!rand,
+        norma: entry.titlu + ' (T150)', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status,
+        destinatii_disponibile: (entry.valoare.randuri || []).map(function (r) { return r.destinatie; })
+      };
+    },
+
     // Verifica daca vreun normativ dintr-o lista de id-uri folosite in proiectul curent nu are status 'validat_sursa'/'validat'
     verificaStatusNormativeFolosite: function (listaIndicative) {
       var self = this;

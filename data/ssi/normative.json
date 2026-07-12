@@ -16,7 +16,6 @@
       "nota": "Referentat in documentele primite (addendum v2.1) ca temei suplimentar pentru distante intre constructii. Cautare pe surse oficiale (legislatie.just.ro, mdlpa.ro) NU a confirmat existenta/continutul acestui indicativ in legatura cu subiectul. NU se citeaza in documente oficiale (scenarii SSI) pana la verificare directa pe sursa oficiala (Monitorul Oficial/MDLPA) de catre un specialist."
     }
   },
-
   "P118_1_2025_T2": {
     "id": "P118_1_2025_T2",
     "titlu": "Conditii minime pentru incadrarea constructiei sau a compartimentului de incendiu in niveluri de stabilitate la incendiu pentru constructii CIVILE NOI",
@@ -26,18 +25,159 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial (verificat pagina cu pagina)",
     "status": "extras_verificat_partial",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Extragere confirmata pe text sursa; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere completa (10/10 randuri) confirmata pe text sursa; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
     "valoare": {
       "articol": "Art. 2.1.3.2.",
       "randuri_extrase": [
-        { "element": "STALPI (R)", "I_h_peste_125m": "240 (A1)", "I_75_125m": "180 (A1)", "I_45_75m": "180 (A1)", "I_28_45m": "120 (A1)", "I_h_sub_28m": "120 (A1)", "II": "120", "II_plus": "90", "III": "60", "III_plus": "45", "IV": "30", "V": "- (15**)" },
-        { "element": "GRINZI (R)", "I_h_peste_125m": "180 (A1)", "I_75_125m": "120 (A1)", "I_45_75m": "120 (A1)", "I_28_45m": "90 (A1)", "I_h_sub_28m": "90 (A1)", "II": "90", "II_plus": "90", "III": "60", "III_plus": "45", "IV": "30", "V": "- (15**)" },
-        { "element": "PLANSEE cai de evacuare/incarcari suplimentare (REI)", "I_h_peste_125m": "120 (A1)", "I_75_125m": "120 (A1)", "I_45_75m": "120 (A1)", "I_28_45m": "90 (A1)", "I_h_sub_28m": "90 (A1)", "II": "90", "II_plus": "90", "III": "60", "III_plus": "45", "IV": "30", "V": "- (15**)" }
+        {
+          "element": "STALPI (R)",
+          "I_h_peste_125m": "240 (A1)",
+          "I_75_125m": "180 (A1)",
+          "I_45_75m": "180 (A1)",
+          "I_28_45m": "120 (A1)",
+          "I_h_sub_28m": "120 (A1)",
+          "II": "120 (A1)",
+          "II_plus": "90",
+          "III": "60",
+          "III_plus": "45",
+          "IV": "30",
+          "V": "- (15**)"
+        },
+        {
+          "element": "GRINZI (R)",
+          "I_h_peste_125m": "180 (A1)",
+          "I_75_125m": "120 (A1)",
+          "I_45_75m": "120 (A1)",
+          "I_28_45m": "90 (A1)",
+          "I_h_sub_28m": "90 (A1)",
+          "II": "90 (A1)",
+          "II_plus": "90",
+          "III": "60",
+          "III_plus": "45",
+          "IV": "30",
+          "V": "- (15**)"
+        },
+        {
+          "element": "PLANSEE cai de evacuare/incarcari suplimentare (REI)",
+          "I_h_peste_125m": "120 (A1)",
+          "I_75_125m": "120 (A1)",
+          "I_45_75m": "120 (A1)",
+          "I_28_45m": "90 (A1)",
+          "I_h_sub_28m": "90 (A1)",
+          "II": "90 (A1)",
+          "II_plus": "90",
+          "III": "60",
+          "III_plus": "45",
+          "IV": "30",
+          "V": "- (15**)"
+        },
+        {
+          "element": "PLANSEE terasa fara cai de evacuare / incarcari doar din zapada (RE)",
+          "I_h_peste_125m": "120 (A1)",
+          "I_75_125m": "90 (A1)",
+          "I_45_75m": "90 (A1)",
+          "I_28_45m": "60 (A1)",
+          "I_h_sub_28m": "60 (A1)",
+          "II": "60 (A1)",
+          "II_plus": "45",
+          "III": "45",
+          "III_plus": "30",
+          "IV": "15",
+          "V": "-"
+        },
+        {
+          "element": "PERETI PORTANTI (STRUCTURALI) cu rol de limitare a propagarii focului (REI)",
+          "I_h_peste_125m": "240 (A1)",
+          "I_75_125m": "180 (A1)",
+          "I_45_75m": "180 (A1)",
+          "I_28_45m": "120 (A1)",
+          "I_h_sub_28m": "120 (A1)",
+          "II": "120 (A1)",
+          "II_plus": "90",
+          "III": "60",
+          "III_plus": "45",
+          "IV": "30",
+          "V": "- (15**)"
+        },
+        {
+          "element": "Pereti de sectorizare cu rol de limitare a propagarii focului (compartimentare interioara) (REI/EI)",
+          "I_h_peste_125m": "180 (A1 sau A2-s1,d0)",
+          "I_75_125m": "180 (A1 sau A2-s1,d0)",
+          "I_45_75m": "120 (A1 sau A2-s1,d0)",
+          "I_28_45m": "120 (A1 sau A2-s1,d0)",
+          "I_h_sub_28m": "120 (A1 sau A2-s1,d0)",
+          "II": "90 (A1 sau A2-s1,d0)",
+          "II_plus": "90",
+          "III": "60",
+          "III_plus": "45",
+          "IV": "30",
+          "V": "- (15**)"
+        },
+        {
+          "element": "Pereti neportanti despartitori interiori cu rol de limitare a propagarii focului (EI)",
+          "I_h_peste_125m": "90 (A1 sau A2-s1,d0)",
+          "I_75_125m": "60 (A1 sau A2-s1,d0)",
+          "I_45_75m": "60 (A1 sau A2-s1,d0)",
+          "I_28_45m": "60 (A1 sau A2-s1,d0)",
+          "I_h_sub_28m": "60 (A1 sau A2-s1,d0)",
+          "II": "45 (A1 sau A2-s1,d0)",
+          "II_plus": "45",
+          "III": "30",
+          "III_plus": "15",
+          "IV": "15",
+          "V": "-"
+        },
+        {
+          "element": "Pereti exteriori neportanti (E, o<->i)",
+          "I_h_peste_125m": "60 (A1 sau A2-s1,d0)",
+          "I_75_125m": "45 (A1 sau A2-s1,d0)",
+          "I_45_75m": "30 (A1 sau A2-s1,d0)",
+          "I_28_45m": "30 (A1 sau A2-s1,d0)",
+          "I_h_sub_28m": "15 (A1 sau A2-s1,d0)",
+          "II": "15 (A1 sau A2-s1,d0)",
+          "II_plus": "15 (A1 sau A2-s1,d0)",
+          "III": "15",
+          "III_plus": "15",
+          "IV": "-",
+          "V": "-"
+        },
+        {
+          "element": "Sarpante ale acoperisurilor, acoperisuri autoportante (R)",
+          "I_h_peste_125m": "120 (A1)",
+          "I_75_125m": "90 (A1)",
+          "I_45_75m": "90 (A1)",
+          "I_28_45m": "60 (A1)",
+          "I_h_sub_28m": "60 (A1)",
+          "II": "60 (A1)",
+          "II_plus": "45",
+          "III": "45",
+          "III_plus": "30",
+          "IV": "15",
+          "V": "-"
+        },
+        {
+          "element": "Panouri/sisteme de invelitoare acoperisuri in panta, cu incarcari din vant si zapada (E)",
+          "I_h_peste_125m": "60 (A1 sau A2-s1,d0)",
+          "I_75_125m": "45 (A1 sau A2-s1,d0)",
+          "I_45_75m": "45 (A1 sau A2-s1,d0)",
+          "I_28_45m": "30 (A1 sau A2-s1,d0)",
+          "I_h_sub_28m": "30 (A1 sau A2-s1,d0)",
+          "II": "30 (min B-s2,d0)",
+          "II_plus": "30 (min B-s2,d0)",
+          "III": "15 (min C-s3,d0)",
+          "III_plus": "15 (min C-s3,d0)",
+          "IV": "(min D-s3,d0)",
+          "V": "(min D-s3,d1)"
+        }
       ],
-      "nota": "Tabel partial extras (randurile 1-3 din 8+); restul randurilor (pereti portanti, pereti neportanti, pereti exteriori, sarpante, panouri invelitoare) NECESITA extractie suplimentara inainte de a fi folosite in motor. Vezi status."
+      "nota": "Tabel extras integral (10 randuri din 10 — stalpi/grinzi/plansee(x2)/pereti portanti/pereti sectorizare/pereti despartitori/pereti exteriori/sarpante/panouri invelitoare), verificat pe text sursa oficial (pag. 68-70 PDF Monitorul Oficial). Randul 10 (panouri/invelitoare) simplificat la sub-cazul a) 'incarcari din vant si zapada' — sub-cazurile b) 'incarcari din panouri fotovoltaice' si c) 'alte incarcari' au valori proprii, neextrase inca, verifica manual la proiecte cu aceste incarcari speciale."
     }
   },
-
   "P118_1_2025_T4": {
     "id": "P118_1_2025_T4",
     "titlu": "Distante minime de siguranta intre constructii sau compartimente de incendiu supraterane (civile, de productie si/sau depozitare) NOI",
@@ -47,19 +187,60 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras si confirmat (tabel + note); ramane necesara semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras si confirmat (tabel + note); ramane necesara semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "Art. 2.2.1.2.",
       "matrice": [
-        { "grad_propriu": "I-II", "grad_vecin": "I-II", "distanta_m": 6 },
-        { "grad_propriu": "I-II", "grad_vecin": "III", "distanta_m": 8 },
-        { "grad_propriu": "I-II", "grad_vecin": "IV-V", "distanta_m": 10 },
-        { "grad_propriu": "III", "grad_vecin": "I-II", "distanta_m": 8 },
-        { "grad_propriu": "III", "grad_vecin": "III", "distanta_m": 10 },
-        { "grad_propriu": "III", "grad_vecin": "IV-V", "distanta_m": 12 },
-        { "grad_propriu": "IV-V", "grad_vecin": "I-II", "distanta_m": 10 },
-        { "grad_propriu": "IV-V", "grad_vecin": "III", "distanta_m": 12 },
-        { "grad_propriu": "IV-V", "grad_vecin": "IV-V", "distanta_m": 15 }
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "I-II",
+          "distanta_m": 6
+        },
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "III",
+          "distanta_m": 8
+        },
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "IV-V",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "I-II",
+          "distanta_m": 8
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "III",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "IV-V",
+          "distanta_m": 12
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "I-II",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "III",
+          "distanta_m": 12
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "IV-V",
+          "distanta_m": 15
+        }
       ],
       "note": [
         "(a) Constructii cu risc foarte mare de incendiu: distantele se majoreaza conform normativului, dar nu vor fi mai mici de 12 m; daca risc de explozie volumetrica, nu mai mici de 15 m.",
@@ -68,7 +249,6 @@
       ]
     }
   },
-
   "P118_1_2025_T5": {
     "id": "P118_1_2025_T5",
     "titlu": "Rezistenta la foc normata a peretilor (EI/REI) si planseelor (REI) in functie de densitatea sarcinii termice (q) — constructii NOI",
@@ -78,22 +258,83 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "Art. 2.3.1.2.",
       "praguri_q_MJ_mp": [
-        { "q_max": 105, "perete_EI_REI_min": null, "nota": "nicio cerinta" },
-        { "q_min": 105, "q_max": 210, "perete_neechipat": 30, "perete_echipat_sprinklere": 15, "planseu_civil_neechipat": 30, "planseu_civil_echipat": 15, "planseu_prod_dep_neechipat": 30, "planseu_prod_dep_echipat": 15 },
-        { "q_min": 210, "q_max": 420, "perete_neechipat": 60, "perete_echipat_sprinklere": 30, "planseu_civil_neechipat": 45, "planseu_civil_echipat": 30, "planseu_prod_dep_neechipat": 60, "planseu_prod_dep_echipat": 30 },
-        { "q_min": 420, "q_max": 630, "perete_neechipat": 90, "perete_echipat_sprinklere": 60, "planseu_civil_neechipat": 60, "planseu_civil_echipat": 45, "planseu_prod_dep_neechipat": 90, "planseu_prod_dep_echipat": 60 },
-        { "q_min": 630, "q_max": 840, "perete_neechipat": 120, "perete_echipat_sprinklere": 90, "planseu_civil_neechipat": 90, "planseu_civil_echipat": 60, "planseu_prod_dep_neechipat": 120, "planseu_prod_dep_echipat": 90 },
-        { "q_min": 840, "q_max": 1680, "perete_neechipat": 180, "perete_echipat_sprinklere": 120, "planseu_civil_neechipat": 120, "planseu_civil_echipat": 90, "planseu_prod_dep_neechipat": 180, "planseu_prod_dep_echipat": 120 },
-        { "q_min": 1680, "perete_neechipat": 240, "perete_echipat_sprinklere": 180, "planseu_civil_neechipat": 180, "planseu_civil_echipat": 120, "planseu_prod_dep_neechipat": 180, "planseu_prod_dep_echipat": 120 }
+        {
+          "q_max": 105,
+          "perete_EI_REI_min": null,
+          "nota": "nicio cerinta"
+        },
+        {
+          "q_min": 105,
+          "q_max": 210,
+          "perete_neechipat": 30,
+          "perete_echipat_sprinklere": 15,
+          "planseu_civil_neechipat": 30,
+          "planseu_civil_echipat": 15,
+          "planseu_prod_dep_neechipat": 30,
+          "planseu_prod_dep_echipat": 15
+        },
+        {
+          "q_min": 210,
+          "q_max": 420,
+          "perete_neechipat": 60,
+          "perete_echipat_sprinklere": 30,
+          "planseu_civil_neechipat": 45,
+          "planseu_civil_echipat": 30,
+          "planseu_prod_dep_neechipat": 60,
+          "planseu_prod_dep_echipat": 30
+        },
+        {
+          "q_min": 420,
+          "q_max": 630,
+          "perete_neechipat": 90,
+          "perete_echipat_sprinklere": 60,
+          "planseu_civil_neechipat": 60,
+          "planseu_civil_echipat": 45,
+          "planseu_prod_dep_neechipat": 90,
+          "planseu_prod_dep_echipat": 60
+        },
+        {
+          "q_min": 630,
+          "q_max": 840,
+          "perete_neechipat": 120,
+          "perete_echipat_sprinklere": 90,
+          "planseu_civil_neechipat": 90,
+          "planseu_civil_echipat": 60,
+          "planseu_prod_dep_neechipat": 120,
+          "planseu_prod_dep_echipat": 90
+        },
+        {
+          "q_min": 840,
+          "q_max": 1680,
+          "perete_neechipat": 180,
+          "perete_echipat_sprinklere": 120,
+          "planseu_civil_neechipat": 120,
+          "planseu_civil_echipat": 90,
+          "planseu_prod_dep_neechipat": 180,
+          "planseu_prod_dep_echipat": 120
+        },
+        {
+          "q_min": 1680,
+          "perete_neechipat": 240,
+          "perete_echipat_sprinklere": 180,
+          "planseu_civil_neechipat": 180,
+          "planseu_civil_echipat": 120,
+          "planseu_prod_dep_neechipat": 180,
+          "planseu_prod_dep_echipat": 120
+        }
       ],
       "unitate": "minute rezistenta la foc (EI/REI)"
     }
   },
-
   "P118_1_2025_T41": {
     "id": "P118_1_2025_T41",
     "titlu": "Conditii de corelare a ariilor construite (Ac) ale cladirilor si compartimentelor de incendiu supraterane CIVILE NOI cu nivelul de stabilitate la incendiu",
@@ -103,14 +344,35 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "Art. 3.1.2.6.",
       "arii_maxime_mp": [
-        { "grad": "I-II", "un_nivel": 3500, "mai_multe_niveluri": 3500 },
-        { "grad": "III", "un_nivel": 2500, "mai_multe_niveluri": 2500 },
-        { "grad": "IV", "un_nivel": 2000, "mai_multe_niveluri": 1500 },
-        { "grad": "V", "un_nivel": 1000, "mai_multe_niveluri": 800 }
+        {
+          "grad": "I-II",
+          "un_nivel": 3500,
+          "mai_multe_niveluri": 3500
+        },
+        {
+          "grad": "III",
+          "un_nivel": 2500,
+          "mai_multe_niveluri": 2500
+        },
+        {
+          "grad": "IV",
+          "un_nivel": 2000,
+          "mai_multe_niveluri": 1500
+        },
+        {
+          "grad": "V",
+          "un_nivel": 1000,
+          "mai_multe_niveluri": 800
+        }
       ],
       "note": [
         "(a) Instalatie de detectare/semnalizare/alarmare cu acoperire totala -> +25% (exceptie cladiri inalte/f.inalte).",
@@ -121,7 +383,6 @@
       ]
     }
   },
-
   "P118_1_2025_T42": {
     "id": "P118_1_2025_T42",
     "titlu": "Conditii de corelare intre destinatie, capacitatea maxima simultana si numarul de niveluri supraterane ale cladirilor civile NOI, cu nivel de stabilitate III, IV sau V",
@@ -131,17 +392,64 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final. La grad I: niveluri nelimitate indiferent de destinatie/capacitate (Art. 3.1.2.7 lit. a). La grad II: nu trebuie sa determine incadrarea in cladiri inalte/f.inalte (lit. b)." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final. La grad I: niveluri nelimitate indiferent de destinatie/capacitate (Art. 3.1.2.7 lit. a). La grad II: nu trebuie sa determine incadrarea in cladiri inalte/f.inalte (lit. b)."
+    },
     "valoare": {
       "articol": "Art. 3.1.2.7. lit. c) + Tabelul 42",
       "randuri": [
-        { "destinatie": "Cladiri pentru persoane care nu se pot evacua singure", "capacitate_max": 150, "niv_III": 2, "niv_IV": 1, "niv_V": 1 },
-        { "destinatie": "Muzee/expozitii fara valori deosebite (nu sali aglomerate)", "capacitate_max": 300, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri pentru cazare temporara", "capacitate_max": 200, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri pentru invatamant primar", "capacitate_max": 480, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri pentru invatamant secundar/tertiar nonuniversitar", "capacitate_max": null, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri de locuit", "capacitate_max": 200, "niv_III": 5, "niv_IV": 3, "niv_V": 2 },
-        { "destinatie": "Cladiri cu alta destinatie (fara sali aglomerate)", "capacitate_max": 300, "niv_III": 5, "niv_IV": 2, "niv_V": 1 }
+        {
+          "destinatie": "Cladiri pentru persoane care nu se pot evacua singure",
+          "capacitate_max": 150,
+          "niv_III": 2,
+          "niv_IV": 1,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Muzee/expozitii fara valori deosebite (nu sali aglomerate)",
+          "capacitate_max": 300,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri pentru cazare temporara",
+          "capacitate_max": 200,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri pentru invatamant primar",
+          "capacitate_max": 480,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri pentru invatamant secundar/tertiar nonuniversitar",
+          "capacitate_max": null,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri de locuit",
+          "capacitate_max": 200,
+          "niv_III": 5,
+          "niv_IV": 3,
+          "niv_V": 2
+        },
+        {
+          "destinatie": "Cladiri cu alta destinatie (fara sali aglomerate)",
+          "capacitate_max": 300,
+          "niv_III": 5,
+          "niv_IV": 2,
+          "niv_V": 1
+        }
       ],
       "note": [
         "(a) Cazuri justificate tehnic (expertiza SSI, specialist atestat) pentru nr.crt. 2a/2b/2d/3/4: +1 nivel daca echipat cu sprinklere/ceata apa testata.",
@@ -149,7 +457,6 @@
       ]
     }
   },
-
   "P118_1_2025_T144": {
     "id": "P118_1_2025_T144",
     "titlu": "Conditii minime pentru incadrarea constructiilor EXISTENTE in nivel de stabilitate la incendiu",
@@ -159,22 +466,75 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "extras_verificat_partial",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text extras (randuri 1-8, note complete); acopera cerinta principala. Necesita semnatura de raspundere profesionala inainte de FINAL." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text extras (randuri 1-8, note complete); acopera cerinta principala. Necesita semnatura de raspundere profesionala inainte de FINAL."
+    },
     "valoare": {
       "articol": "A.10.2.1.8.",
       "randuri_extrase": [
-        { "element": "STALPI (R)", "I": "180 (A1 sau A2-s1,d0)", "II": "120 (A1 sau A2-s1,d0)", "III": "60 min (A2/B-s1÷s3,d0÷d1)", "IV": "30 min (C-s1÷s3,d0÷d1)", "V": "- min (A2÷E-s1÷s3,d2)" },
-        { "element": "GRINZI (R)", "I": "60 (A1 sau A2-s1,d0)", "II": "45(30)*** (A1 sau A2-s1,d0)", "III": "45(30)*** min (A2/B-s1÷s3,d0÷d1)", "IV": "15 min (C-s1÷s3,d0÷d1)", "V": "- min" },
-        { "element": "PLANSEE (nervuri, acoperis terasa) (REI)", "I": "60 (A1 sau A2-s1,d0)", "II": "45(30)***", "III": "45(30)*** min", "IV": "15 min", "V": "- min" },
-        { "element": "PERETI PORTANTI (STRUCTURALI) rol limitare propagare (REI)", "I": "180 (A1)", "II": "120 (A1)", "III": "60 min", "IV": "30 min", "V": "- min" },
-        { "element": "Pereti neportanti despartitori interiori (EI)", "I": "30 (A1)", "II": "30 min", "III": "15 min", "IV": "15 min", "V": "- min" },
-        { "element": "Pereti exteriori neportanti (E)", "I": "15 (A1)", "II": "15 min", "III": "15 min", "IV": "- min", "V": "- min" },
-        { "element": "Sarpante/acoperisuri autoportante/plansee-terasa fara evacuare (R)", "I": "45(30)", "II": "30(15)*** min", "III": "15 min", "IV": "- min", "V": "- min" }
+        {
+          "element": "STALPI (R)",
+          "I": "180 (A1 sau A2-s1,d0)",
+          "II": "120 (A1 sau A2-s1,d0)",
+          "III": "60 min (A2/B-s1÷s3,d0÷d1)",
+          "IV": "30 min (C-s1÷s3,d0÷d1)",
+          "V": "- min (A2÷E-s1÷s3,d2)"
+        },
+        {
+          "element": "GRINZI (R)",
+          "I": "60 (A1 sau A2-s1,d0)",
+          "II": "45(30)*** (A1 sau A2-s1,d0)",
+          "III": "45(30)*** min (A2/B-s1÷s3,d0÷d1)",
+          "IV": "15 min (C-s1÷s3,d0÷d1)",
+          "V": "- min"
+        },
+        {
+          "element": "PLANSEE (nervuri, acoperis terasa) (REI)",
+          "I": "60 (A1 sau A2-s1,d0)",
+          "II": "45(30)***",
+          "III": "45(30)*** min",
+          "IV": "15 min",
+          "V": "- min"
+        },
+        {
+          "element": "PERETI PORTANTI (STRUCTURALI) rol limitare propagare (REI)",
+          "I": "180 (A1)",
+          "II": "120 (A1)",
+          "III": "60 min",
+          "IV": "30 min",
+          "V": "- min"
+        },
+        {
+          "element": "Pereti neportanti despartitori interiori (EI)",
+          "I": "30 (A1)",
+          "II": "30 min",
+          "III": "15 min",
+          "IV": "15 min",
+          "V": "- min"
+        },
+        {
+          "element": "Pereti exteriori neportanti (E)",
+          "I": "15 (A1)",
+          "II": "15 min",
+          "III": "15 min",
+          "IV": "- min",
+          "V": "- min"
+        },
+        {
+          "element": "Sarpante/acoperisuri autoportante/plansee-terasa fara evacuare (R)",
+          "I": "45(30)",
+          "II": "30(15)*** min",
+          "III": "15 min",
+          "IV": "- min",
+          "V": "- min"
+        }
       ],
       "nota_grad": "Gradul de stabilitate al constructiei/compartimentului existent = determinat de elementul cel mai defavorabil (A.10.2.1.10)."
     }
   },
-
   "P118_1_2025_T145": {
     "id": "P118_1_2025_T145",
     "titlu": "Distante de siguranta la constructii EXISTENTE",
@@ -184,19 +544,60 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras (tabel + note); necesita semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras (tabel + note); necesita semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "A.10.2.2.2.",
       "matrice": [
-        { "grad_propriu": "I-II", "grad_vecin": "I-II", "distanta_m": 6 },
-        { "grad_propriu": "I-II", "grad_vecin": "III", "distanta_m": 8 },
-        { "grad_propriu": "I-II", "grad_vecin": "IV-V", "distanta_m": 10 },
-        { "grad_propriu": "III", "grad_vecin": "I-II", "distanta_m": 8 },
-        { "grad_propriu": "III", "grad_vecin": "III", "distanta_m": 10 },
-        { "grad_propriu": "III", "grad_vecin": "IV-V", "distanta_m": 12 },
-        { "grad_propriu": "IV-V", "grad_vecin": "I-II", "distanta_m": 10 },
-        { "grad_propriu": "IV-V", "grad_vecin": "III", "distanta_m": 12 },
-        { "grad_propriu": "IV-V", "grad_vecin": "IV-V", "distanta_m": 15 }
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "I-II",
+          "distanta_m": 6
+        },
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "III",
+          "distanta_m": 8
+        },
+        {
+          "grad_propriu": "I-II",
+          "grad_vecin": "IV-V",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "I-II",
+          "distanta_m": 8
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "III",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "III",
+          "grad_vecin": "IV-V",
+          "distanta_m": 12
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "I-II",
+          "distanta_m": 10
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "III",
+          "distanta_m": 12
+        },
+        {
+          "grad_propriu": "IV-V",
+          "grad_vecin": "IV-V",
+          "distanta_m": 15
+        }
       ],
       "note": [
         "(a) Constructii existente de productie/depozitare cu risc mare/f.mare (incl. explozie volumetrica): distantele fata de vecini cu alte riscuri se majoreaza cu 50%, minimum 15 m.",
@@ -204,7 +605,6 @@
       ]
     }
   },
-
   "P118_1_2025_T146": {
     "id": "P118_1_2025_T146",
     "titlu": "Rezistenta la foc a peretilor la constructiile EXISTENTE (functie de densitatea sarcinii termice q)",
@@ -214,22 +614,56 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "A.10.2.3.2.",
       "praguri_q_MJ_mp": [
-        { "q_max": 210, "rezistenta_min": "EI/REI 30" },
-        { "q_min": 210, "q_max": 420, "rezistenta_min": "EI/REI 60" },
-        { "q_min": 421, "q_max": 630, "rezistenta_min": "EI/REI 120" },
-        { "q_min": 631, "q_max": 840, "rezistenta_min": "EI/REI 180" },
-        { "q_min": 841, "q_max": 1260, "rezistenta_min": "EI/REI 240 (180 daca sprinklerizat)" },
-        { "q_min": 1261, "q_max": 1680, "rezistenta_min": "EI/REI 180 (daca sprinklerizat)" },
-        { "q_min": 1681, "q_max": 2940, "rezistenta_min": "EI/REI 180 (daca sprinklerizat)" },
-        { "q_min": 2941, "rezistenta_min": "EI/REI 180 (daca sprinklerizat)" }
+        {
+          "q_max": 210,
+          "rezistenta_min": "EI/REI 30"
+        },
+        {
+          "q_min": 210,
+          "q_max": 420,
+          "rezistenta_min": "EI/REI 60"
+        },
+        {
+          "q_min": 421,
+          "q_max": 630,
+          "rezistenta_min": "EI/REI 120"
+        },
+        {
+          "q_min": 631,
+          "q_max": 840,
+          "rezistenta_min": "EI/REI 180"
+        },
+        {
+          "q_min": 841,
+          "q_max": 1260,
+          "rezistenta_min": "EI/REI 240 (180 daca sprinklerizat)"
+        },
+        {
+          "q_min": 1261,
+          "q_max": 1680,
+          "rezistenta_min": "EI/REI 180 (daca sprinklerizat)"
+        },
+        {
+          "q_min": 1681,
+          "q_max": 2940,
+          "rezistenta_min": "EI/REI 180 (daca sprinklerizat)"
+        },
+        {
+          "q_min": 2941,
+          "rezistenta_min": "EI/REI 180 (daca sprinklerizat)"
+        }
       ]
     }
   },
-
   "P118_1_2025_T147": {
     "id": "P118_1_2025_T147",
     "titlu": "Arii construite admise pentru compartimente de incendiu ale cladirilor civile EXISTENTE (publice) supraterane",
@@ -239,14 +673,35 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final."
+    },
     "valoare": {
       "articol": "A.10.3.2.4.",
       "arii_maxime_mp": [
-        { "grad": "I-II", "un_nivel": 2500, "mai_multe_niveluri": 2500 },
-        { "grad": "III", "un_nivel": 1800, "mai_multe_niveluri": 1800 },
-        { "grad": "IV", "un_nivel": 1400, "mai_multe_niveluri": 1000 },
-        { "grad": "V", "un_nivel": 1000, "mai_multe_niveluri": 800 }
+        {
+          "grad": "I-II",
+          "un_nivel": 2500,
+          "mai_multe_niveluri": 2500
+        },
+        {
+          "grad": "III",
+          "un_nivel": 1800,
+          "mai_multe_niveluri": 1800
+        },
+        {
+          "grad": "IV",
+          "un_nivel": 1400,
+          "mai_multe_niveluri": 1000
+        },
+        {
+          "grad": "V",
+          "un_nivel": 1000,
+          "mai_multe_niveluri": 800
+        }
       ],
       "note": [
         "(a) Instalatii automate de stingere -> +100%; instalatii automate de semnalizare -> +25%. Nu se cumuleaza.",
@@ -254,7 +709,6 @@
       ]
     }
   },
-
   "P118_1_2025_T148": {
     "id": "P118_1_2025_T148",
     "titlu": "Numar de niveluri supraterane maxim admis si capacitatea cladirilor civile EXISTENTE cu nivelul de stabilitate III, IV si V",
@@ -264,69 +718,241 @@
     "data_extractie": "2026-07-10",
     "metoda_extractie": "extragere manuala din PDF oficial",
     "status": "validat_sursa",
-    "validat_de": { "nume": null, "nr_atestat_Is": null, "data_validare": null, "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final. La grad I-II: niveluri nelimitate (exceptie sali aglomerate grad II) — A.10.3.2.5 lit.a)." },
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Text complet extras; necesita semnatura de raspundere profesionala pe documentul final. La grad I-II: niveluri nelimitate (exceptie sali aglomerate grad II) — A.10.3.2.5 lit.a)."
+    },
     "valoare": {
       "articol": "A.10.3.2.5. lit. b) + Tabelul 148",
       "randuri": [
-        { "destinatie": "Cladiri care adapostesc persoane ce nu se pot evacua singure", "capacitate_max": 150, "niv_III": 2, "niv_IV": 1, "niv_V": 1 },
-        { "destinatie": "Muzee/expozitii fara valori deosebite", "capacitate_max": 300, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri pentru cazare temporara", "capacitate_max": 200, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri pentru invatamant de cultura generala si licee", "capacitate_max": 480, "niv_III": 3, "niv_IV": 2, "niv_V": 1 },
-        { "destinatie": "Cladiri de locuit", "capacitate_max": 200, "niv_III": 5, "niv_IV": 3, "niv_V": 2 },
-        { "destinatie": "Cladiri cu alte destinatii, fara sali aglomerate", "capacitate_max": 300, "niv_III": 5, "niv_IV": 2, "niv_V": 1 }
+        {
+          "destinatie": "Cladiri care adapostesc persoane ce nu se pot evacua singure",
+          "capacitate_max": 150,
+          "niv_III": 2,
+          "niv_IV": 1,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Muzee/expozitii fara valori deosebite",
+          "capacitate_max": 300,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri pentru cazare temporara",
+          "capacitate_max": 200,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri pentru invatamant de cultura generala si licee",
+          "capacitate_max": 480,
+          "niv_III": 3,
+          "niv_IV": 2,
+          "niv_V": 1
+        },
+        {
+          "destinatie": "Cladiri de locuit",
+          "capacitate_max": 200,
+          "niv_III": 5,
+          "niv_IV": 3,
+          "niv_V": 2
+        },
+        {
+          "destinatie": "Cladiri cu alte destinatii, fara sali aglomerate",
+          "capacitate_max": 300,
+          "niv_III": 5,
+          "niv_IV": 2,
+          "niv_V": 1
+        }
       ],
       "note": "In cazuri justificate tehnic (expertiza SSI): +1 nivel fata de cele admise, prin hotarare scrisa a consiliului de conducere."
     }
   },
-
   "tabele_evacuare_pe_destinatie": {
     "_meta": {
       "status": "index_gasit_nu_valori",
       "nota": "P118-1/2025 NU are un singur tabel generic de lungimi de evacuare / capacitate de flux — are tabele DISTINCTE per destinatie (locuit/administrativ/comert/sanatate/cultura/invatamant/turism/cult/sport/productie-depozitare/sali aglomerate/parcaje/subterane/inalte/f.inalte), atat pentru NOU cat si pentru EXISTENT. Indexul de mai jos are numarul real de tabel + pagina (verificate din cuprinsul documentului), dar valorile numerice NU au fost inca extrase — necesita o trecere dedicata de extractie (recomandat: motor de ingestie v3.0, extractie automata pe tabel, cu validare)."
     },
     "noi": {
-      "flux_evacuare_general_T51": { "pagina": 207, "status": "necesita_extractie" },
-      "lungime_locuit_T56": { "pagina": 212, "status": "necesita_extractie" },
-      "lungime_administrativ_T60": { "pagina": 217, "status": "necesita_extractie" },
-      "lungime_comert_T64": { "pagina": 222, "status": "necesita_extractie" },
-      "lungime_sanatate_T67_T68": { "pagina": "226-227", "status": "necesita_extractie" },
-      "lungime_cultura_T72": { "pagina": 231, "status": "necesita_extractie" },
-      "lungime_invatamant_T77": { "pagina": 236, "status": "necesita_extractie" },
-      "lungime_turism_T80": { "pagina": 238, "status": "necesita_extractie" },
-      "lungime_cult_T81": { "pagina": 239, "status": "necesita_extractie" },
-      "lungime_sport_T84": { "pagina": 241, "status": "necesita_extractie" },
-      "lungime_inalte_T93": { "pagina": 270, "status": "necesita_extractie" },
-      "lungime_f_inalte_T97": { "pagina": 285, "status": "necesita_extractie" },
-      "flux_sali_aglomerate_T109": { "pagina": 297, "status": "necesita_extractie" },
-      "lungime_sali_aglomerate_T110": { "pagina": 298, "status": "necesita_extractie" },
-      "lungime_subterane_T113": { "pagina": 304, "status": "necesita_extractie" },
-      "arii_niveluri_productie_depozitare_T114": { "pagina": 307, "status": "necesita_extractie" },
-      "flux_productie_depozitare_T115": { "pagina": 314, "status": "necesita_extractie" },
-      "lungime_productie_depozitare_T116": { "pagina": 314, "status": "necesita_extractie" },
-      "lungime_parcaje_T88": { "pagina": 247, "status": "necesita_extractie" }
+      "flux_evacuare_general_T51": {
+        "pagina": 207,
+        "status": "necesita_extractie"
+      },
+      "lungime_locuit_T56": {
+        "pagina": 212,
+        "status": "necesita_extractie"
+      },
+      "lungime_administrativ_T60": {
+        "pagina": 217,
+        "status": "necesita_extractie"
+      },
+      "lungime_comert_T64": {
+        "pagina": 222,
+        "status": "necesita_extractie"
+      },
+      "lungime_sanatate_T67_T68": {
+        "pagina": "226-227",
+        "status": "necesita_extractie"
+      },
+      "lungime_cultura_T72": {
+        "pagina": 231,
+        "status": "necesita_extractie"
+      },
+      "lungime_invatamant_T77": {
+        "pagina": 236,
+        "status": "necesita_extractie"
+      },
+      "lungime_turism_T80": {
+        "pagina": 238,
+        "status": "necesita_extractie"
+      },
+      "lungime_cult_T81": {
+        "pagina": 239,
+        "status": "necesita_extractie"
+      },
+      "lungime_sport_T84": {
+        "pagina": 241,
+        "status": "necesita_extractie"
+      },
+      "lungime_inalte_T93": {
+        "pagina": 270,
+        "status": "necesita_extractie"
+      },
+      "lungime_f_inalte_T97": {
+        "pagina": 285,
+        "status": "necesita_extractie"
+      },
+      "flux_sali_aglomerate_T109": {
+        "pagina": 297,
+        "status": "necesita_extractie"
+      },
+      "lungime_sali_aglomerate_T110": {
+        "pagina": 298,
+        "status": "necesita_extractie"
+      },
+      "lungime_subterane_T113": {
+        "pagina": 304,
+        "status": "necesita_extractie"
+      },
+      "arii_niveluri_productie_depozitare_T114": {
+        "pagina": 307,
+        "status": "necesita_extractie"
+      },
+      "flux_productie_depozitare_T115": {
+        "pagina": 314,
+        "status": "necesita_extractie"
+      },
+      "lungime_productie_depozitare_T116": {
+        "pagina": 314,
+        "status": "necesita_extractie"
+      },
+      "lungime_parcaje_T88": {
+        "pagina": 247,
+        "status": "necesita_extractie"
+      }
     },
     "existente": {
-      "capacitate_evacuare_T150": { "pagina": 592, "status": "necesita_extractie" },
-      "conditii_elemente_T151": { "pagina": 595, "status": "necesita_extractie" },
-      "separare_locuit_T152": { "pagina": null, "status": "necesita_extractie" },
-      "separare_administrativ_T153": { "pagina": null, "status": "necesita_extractie" },
-      "separare_comert_T154": { "pagina": null, "status": "necesita_extractie" },
-      "separare_sanatate_T155": { "pagina": null, "status": "necesita_extractie" },
-      "separare_cultura_T156": { "pagina": null, "status": "necesita_extractie" },
-      "separare_invatamant_T157": { "pagina": null, "status": "necesita_extractie" },
-      "separare_turism_T158": { "pagina": null, "status": "necesita_extractie" },
-      "separare_inalte_f_inalte_T159": { "pagina": null, "status": "necesita_extractie" },
-      "lungime_inalte_f_inalte_T160": { "pagina": null, "status": "necesita_extractie" },
-      "arii_niveluri_productie_depozitare_T168": { "pagina": null, "status": "necesita_extractie" },
-      "flux_productie_depozitare_T169": { "pagina": null, "status": "necesita_extractie" },
-      "lungime_productie_depozitare_T170": { "pagina": null, "status": "necesita_extractie" }
+      "capacitate_evacuare_T150": {
+        "pagina": 592,
+        "status": "necesita_extractie"
+      },
+      "conditii_elemente_T151": {
+        "pagina": 595,
+        "status": "necesita_extractie"
+      },
+      "separare_locuit_T152": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_administrativ_T153": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_comert_T154": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_sanatate_T155": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_cultura_T156": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_invatamant_T157": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_turism_T158": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "separare_inalte_f_inalte_T159": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "lungime_inalte_f_inalte_T160": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "arii_niveluri_productie_depozitare_T168": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "flux_productie_depozitare_T169": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      },
+      "lungime_productie_depozitare_T170": {
+        "pagina": null,
+        "status": "necesita_extractie"
+      }
     }
   },
-
   "distante_minime_intre_cladiri": {
     "_meta": {
       "status": "vezi P118_1_2025_T4 (nou) si P118_1_2025_T145 (existent)",
       "nota_deprecated": "Structura initiala propusa in addendum v2.1 (o singura matrice cu 4 variabile: grad_propriu x grad_vecin x risc_vecin x perete_CF) NU corespunde structurii reale a normativului — tabelele oficiale T4/T145 sunt matrici 3x3 (doar grad_propriu x grad_vecin), cu majorari/reduceri tratate separat prin note (risc mare +50%/min 15m; sprinklere -25%; perete antifoc/expertiza tehnica pentru derogare). Accesorul getDistantaMinimaIntreCladiri() implementeaza logica reala (matrice 3x3 + note), nu schema veche cu 4 chei."
+    }
+  },
+  "P118_1_2025_T150": {
+    "id": "P118_1_2025_T150",
+    "titlu": "Capacitati de evacuare la constructii existente",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025, Anexa A.10, Art. A.10.2.5.58)",
+    "pagina": "591-592",
+    "data_extractie": "2026-07-12",
+    "metoda_extractie": "extragere manuala din PDF oficial (verificat pagina cu pagina)",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "A.10.2.5.58, formula F = N/C (A.10.2.5.56)",
+      "randuri": [
+        {
+          "destinatie": "Cladiri care adapostesc persoane incapabile de a se evacua singure (maternitati, stationare medicale, cladiri pt copii de varsta prescolara, ospicii, camine pt batrani si infirmi, persoane cu handicap etc.)",
+          "capacitate_flux_persoane": 50
+        },
+        {
+          "destinatie": "Cladiri pt invatamant de toate nivelurile, administrative, sociale, laboratoare, studiouri, sali de adunari, auditorii, magazine, expozitii, alimentatie publica, lectura, sport, asteptare etc. (fara sali aglomerate/cladiri inalte-foarte inalte)",
+          "capacitate_flux_persoane": 70
+        },
+        {
+          "destinatie": "Cladiri de locuit, administrative, hoteluri, camine, cabane etc. (fara cladiri inalte/foarte inalte)",
+          "capacitate_flux_persoane": 80
+        }
+      ],
+      "nota": "Tabel valabil EXCLUSIV pentru constructii EXISTENTE nemodificate (Anexa A.10 a normativului) — pentru CONSTRUCTII NOI, normativul (Cap. 2.5, Art. 2.5.5 si urm.) NU foloseste o capacitate in persoane/flux, ci un calcul pe latimea utila/modulul de trecere al cailor de evacuare; nu se aplica Tabelul 150 la o constructie noua."
     }
   }
 }
