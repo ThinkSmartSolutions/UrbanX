@@ -805,21 +805,56 @@
         ['Telefon/E-mail beneficiar', esc(D.contact_beneficiar || '[se completează]')]
       ], ['Element', 'Valoare']) },
       { h: '1.2. Destinația', html: (function () {
-        // HG 571/2016 Anexa 1: locuintele UNIFAMILIALE (individuale/cuplate/duplex) nu apar in lista
-        // criteriilor care impun avizare/autorizare de securitate la incendiu — acolo sunt vizate
-        // explicit doar cladirile de locuit COLECTIVE cu P+4 si peste + mansarda amenajata sau
-        // ansambluri cu functiuni mixte peste anumite praguri. O locuinta unifamiliala P+1E, chiar
-        // in cadrul unui ansamblu de mai multe unitati IDENTICE si INDEPENDENTE (nu un bloc unic),
-        // nu se incadreaza la niciuna din literele a)-t) ale Anexei 1 pt functiunea rezidentiala.
-        var esteLocuinta = /locuint/i.test(destinatieT42) || D.functiune === 'locuinta-individuala';
-        var seSupune = !esteLocuinta || (D.niv_supraterane && +D.niv_supraterane >= 5);
-        return '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>' + (cladiriPropuse.length > 1 ? ' (ansamblu de ' + cladiriPropuse.length + ' unități unifamiliale independente, nu o clădire colectivă unică)' : '') + '.</p>' +
-          '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială, Anexa 1 vizează explicit clădirile de locuit <b>colective</b> cu regim de înălțime P+4 și peste (cu mansardă amenajată) — o locuință unifamilială (individuală sau cuplată/duplex) cu regim ' + esc(D.regim || 'P+1E') + ', chiar repetată identic pe mai multe loturi ale aceluiași ansamblu, nu este o clădire colectivă unică și nu atinge acest prag.</p>' +
-          '<p><b>Concluzie: ' + (seSupune ? 'SE SUPUNE' : 'NU SE SUPUNE') + ' avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1</b>' + (seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât destinația reală (locuință unifamilială, regim redus) nu se regăsește printre criteriile Anexei 1 — prezentul document rămâne totuși util ca memoriu tehnic de fundamentare pentru D.T.A.C./D.T.A.D. (Legea 50/1991) și pentru identificarea corectă a cerințelor tehnice aplicabile P118-1/2025, chiar dacă nu necesită avizare ISU explicită.') + '</p>';
+        // Extindere multi-functiune (Florin, 12 iul): HG 571/2016 Anexa 1 NU trateaza toate destinatiile
+        // identic — categoriile care adapostesc persoane ce nu se pot evacua singure (cresa/gradinita,
+        // centru social/varstnici, unitati medicale) SE SUPUN avizarii INTOTDEAUNA, indiferent de regim
+        // de inaltime/arie (criteriu de vulnerabilitate a utilizatorilor, nu de marime a cladirii) —
+        // nu se aplica pragul P+4 folosit la rezidential. Blocurile de locuinte COLECTIVE folosesc
+        // acelasi prag P+4 ca inainte, dar cu text propriu (nu "locuinta unifamiliala").
+        var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var esteFunctiunePersoaneVulnerabile = !!FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune];
+        var esteBloc = D.functiune === 'bloc-locuinte';
+        var esteLocuintaUnifamiliala = D.functiune === 'locuinta-individuala' || (!esteBloc && /locuint/i.test(destinatieT42));
+        var htmlSpecific, seSupune, motivSupune;
+        if (esteFunctiunePersoaneVulnerabile) {
+          seSupune = true;
+          motivSupune = ', întrucât destinația reală (' + esc(destinatieT42.toLowerCase()) + ') se regăsește explicit în H.G. 571/2016, Anexa 1, la categoria clădirilor care adăpostesc persoane ce nu se pot evacua singure — încadrarea este dată de vulnerabilitatea utilizatorilor, nu de regimul de înălțime sau arie, deci se aplică indiferent de dimensiunile construcției.';
+          htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>.</p>' +
+            '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru destinații care adăpostesc persoane incapabile să se evacueze singure (creșe/grădinițe, centre pentru vârstnici/persoane cu dizabilități, unități medicale), Anexa 1 impune avizare/autorizare obligatorie indiferent de regimul de înălțime, aria desfășurată sau capacitate — pragul nu este dimensional, e funcțional.</p>';
+        } else if (esteBloc) {
+          seSupune = D.niv_supraterane && +D.niv_supraterane >= 5;
+          motivSupune = seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât regimul de înălțime declarat (' + esc(D.regim || '—') + ') nu atinge pragul P+4 stabilit de Anexa 1 pentru clădirile de locuit colective.';
+          htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + ' (clădire de locuit colectivă)</b>.</p>' +
+            '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială colectivă, Anexa 1 vizează explicit clădirile de locuit cu regim de înălțime P+4 și peste (cu mansardă amenajată).</p>';
+        } else if (esteLocuintaUnifamiliala) {
+          seSupune = D.niv_supraterane && +D.niv_supraterane >= 5;
+          motivSupune = seSupune ? ', motivat de regimul de înălțime declarat (≥P+4).' : ', întrucât destinația reală (locuință unifamilială, regim redus) nu se regăsește printre criteriile Anexei 1 — prezentul document rămâne totuși util ca memoriu tehnic de fundamentare pentru D.T.A.C./D.T.A.D. (Legea 50/1991) și pentru identificarea corectă a cerințelor tehnice aplicabile P118-1/2025, chiar dacă nu necesită avizare ISU explicită.';
+          htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>' + (cladiriPropuse.length > 1 ? ' (ansamblu de ' + cladiriPropuse.length + ' unități unifamiliale independente, nu o clădire colectivă unică)' : '') + '.</p>' +
+            '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1. Pentru funcțiunea rezidențială, Anexa 1 vizează explicit clădirile de locuit <b>colective</b> cu regim de înălțime P+4 și peste (cu mansardă amenajată) — o locuință unifamilială (individuală sau cuplată/duplex) cu regim ' + esc(D.regim || 'P+1E') + ', chiar repetată identic pe mai multe loturi ale aceluiași ansamblu, nu este o clădire colectivă unică și nu atinge acest prag.</p>';
+        } else {
+          // Alte destinatii (comert/birouri/hale/energie/ATEX etc.) — pragurile Anexei 1 sunt proprii
+          // fiecarei categorii si NU au fost inca verificate punctual pe text sursa in acest motor
+          // (regula #13 a modelului: nu se citeaza un criteriu apropiat, dar neverificat pt categoria
+          // reala) — se marcheaza onest ca necesitand verificare de specialitate, nu se presupune.
+          seSupune = null;
+          motivSupune = '';
+          htmlSpecific = '<p>Destinația reală, așa cum rezultă din proiectul de arhitectură: <b>' + esc(destinatieT42) + '</b>.</p>' +
+            '<p>Încadrarea în categoriile care se supun avizării/autorizării de securitate la incendiu se stabilește conform H.G. nr. 571/2016, Anexa nr. 1, pe baza criteriului specific acestei destinații (prag propriu de arie/capacitate/categorie de pericol, distinct de cel rezidențial) — de verificat punctual de proiectantul atestat, litera exactă din Anexa 1 aplicabilă acestei funcțiuni nefiind încă validată în acest motor.</p>';
+        }
+        return htmlSpecific + '<p><b>Concluzie: ' + (seSupune == null ? 'DE STABILIT — verificare de specialitate necesară' : (seSupune ? 'SE SUPUNE' : 'NU SE SUPUNE')) + ' avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1</b>' + esc(motivSupune) + '</p>';
       })() },
       { h: '1.3. Categoria de importanță', html: '<p>Se stabilește conform Regulamentului privind stabilirea categoriei de importanță a construcțiilor, aprobat prin H.G.R. nr. 766/1997, Anexa 3, cap. II, art. 6, coroborat cu metodologia M.L.P.A.T. — pe baza destinației (rezidențială, fără funcțiuni speciale), regimului de înălțime redus (' + esc(D.regim || 'P+1E') + ') și ariei desfășurate mici, construcția se încadrează în categoria de importanță <b>' + esc(D.categorie_importanta || ac.categorie_importanta || 'C') + ' — redusă/normală</b>, nu necesitând o justificare suplimentară de categorie superioară.</p>' },
-      { h: '1.4.a. Tipul clădirii', html: '<p>Funcțiunea principală: <b>' + esc(destinatieT42) + '</b>. Funcțiuni secundare: —. Funcțiuni conexe: grupuri sanitare, spații tehnice aferente locuinței. ' + (cladiriPropuse.length > 1 ? 'Ansamblul cuprinde ' + cladiriPropuse.length + ' unități, grupate geometric în ' + (m5bGrupuri ? m5bGrupuri.length : cladiriPropuse.length) + ' compartimente (individuale și cuplate/duplex) — vezi 1.4.f/1.4.g pentru sinteza completă.' : 'Clădire unifamilială independentă.') + '</p>' },
-      { h: '1.4.b. Tipul parcajului', html: '<p>' + (D._tip_parcaj ? esc(D._tip_parcaj) : 'Nu este cazul un parcaj colectiv distinct — parcarea se asigură pe fiecare parcelă individuală (garaj integrat și/sau platformă exterioară), conform proiectului de arhitectură al fiecărei unități.') + '</p>' },
+      { h: '1.4.a. Tipul clădirii', html: (function () {
+        var esteResidentialIndiv = D.functiune === 'locuinta-individuala';
+        var functiuneConexa = esteResidentialIndiv ? 'grupuri sanitare, spații tehnice aferente locuinței' : 'grupuri sanitare, spații tehnice aferente destinației principale (de detaliat conform proiectului de arhitectură)';
+        var descriereMultipla = esteResidentialIndiv
+          ? 'Ansamblul cuprinde ' + cladiriPropuse.length + ' unități, grupate geometric în ' + (m5bGrupuri ? m5bGrupuri.length : cladiriPropuse.length) + ' compartimente (individuale și cuplate/duplex) — vezi 1.4.f/1.4.g pentru sinteza completă.'
+          : 'Ansamblul cuprinde ' + cladiriPropuse.length + ' clădiri/unități — vezi 1.4.f/1.4.g pentru sinteza completă.';
+        return '<p>Funcțiunea principală: <b>' + esc(destinatieT42) + '</b>. Funcțiuni secundare: —. Funcțiuni conexe: ' + functiuneConexa + '. ' + (cladiriPropuse.length > 1 ? descriereMultipla : (esteResidentialIndiv ? 'Clădire unifamilială independentă.' : 'Clădire independentă.')) + '</p>';
+      })() },
+      { h: '1.4.b. Tipul parcajului', html: '<p>' + (D._tip_parcaj ? esc(D._tip_parcaj) : (D.functiune === 'locuinta-individuala'
+        ? 'Nu este cazul un parcaj colectiv distinct — parcarea se asigură pe fiecare parcelă individuală (garaj integrat și/sau platformă exterioară), conform proiectului de arhitectură al fiecărei unități.'
+        : 'Tipul de parcaj (exterior deschis / subteran / suprateran închis) nu a fost declarat pentru acest proiect — se completează conform proiectului de arhitectură; regimul normativ diferă semnificativ între cele trei variante (parcaj subteran/închis impune compartimentare proprie și desfumare mecanică obligatorie, spre deosebire de parcajul exterior deschis).')) + '</p>' },
       { h: '1.4.c. Regimul de înălțime și volumul construcției', html: '<p>Regim de înălțime: <b>' + esc(D.regim || ('P+' + Math.max(0, (+D.niv_supraterane || 1) - 1))) + '</b>' + (cladiriPropuse.length > 1 ? ' (uniform pe toate tipurile detectate din plan — vezi 1.4.g pentru variații reale de Sc/Sd pe tip)' : '') + '. Înălțimea se măsoară de la nivelul carosabilului adiacent accesibil autospecialelor de intervenție până la pardoseala ultimului nivel folosibil.</p>' +
         (cladiriPropuse.length > 1
           ? '<p>Volumul total al ansamblului: ' + (function () {
@@ -970,9 +1005,26 @@
         out += (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
         return out;
       })() },
-      { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: '<p>' + (D._persoane_vulnerabile && D._persoane_vulnerabile.length
-        ? 'Proiectul declară categorii de utilizatori cu capacitate de autoevacuare redusă: ' + D._persoane_vulnerabile.map(function (p) { return esc(p); }).join(', ') + ' — se aplică prevederile normativelor specifice acelei categorii (ex. NP 051/2012 pentru persoane cu dizabilități, Legea 448/2006), cu evacuare asistată și, unde e cazul, refugii per nivel.'
-        : 'Destinația proiectului (locuință unifamilială) nu presupune, cu caracter permanent/instituțional, prezența unor categorii vulnerabile (creșă, cămin de bătrâni etc.). Capacitatea de autoevacuare a utilizatorilor e generală (familia locuiește și evacuează independent) — dacă la un moment dat locuința găzduiește membri cu mobilitate redusă (vârstnici, persoane cu dizabilități temporare), regulile uzuale de proiectare (fără praguri, lățimi de trecere adecvate) rămân aplicabile, fără a constitui o cerință normativă suplimentară de refugii.') + '</p>' },
+      { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: (function () {
+        // Extindere multi-functiune (Florin, 12 iul): pt destinatiile care AU institutional persoane
+        // vulnerabile (cresa/gradinita, centru social, medical), nu se mai asteapta ca utilizatorul sa
+        // declare manual D._persoane_vulnerabile — categoria rezulta direct din functiune, prezenta lor
+        // fiind permanenta si structurala, nu optionala.
+        var AUTO_VULNERABIL = {
+          gradinita: 'copii de vârstă preșcolară/școlară mică (creșă/grădiniță) — categorie cu caracter instituțional permanent',
+          'centru-social': 'persoane vârstnice și/sau cu dizabilități (centru social) — categorie cu caracter instituțional permanent',
+          medical: 'bolnavi/pacienți cu mobilitate redusă (unitate medicală) — categorie cu caracter instituțional permanent'
+        };
+        var declarate = (D._persoane_vulnerabile || []).slice();
+        if (AUTO_VULNERABIL[D.functiune] && declarate.indexOf(AUTO_VULNERABIL[D.functiune]) < 0) declarate.push(AUTO_VULNERABIL[D.functiune]);
+        if (declarate.length) {
+          return '<p>Proiectul are categorii de utilizatori cu capacitate de autoevacuare redusă: ' + declarate.map(function (p) { return esc(p); }).join(', ') + ' — se aplică prevederile normativelor specifice acelei categorii (ex. NP 051/2012 pentru persoane cu dizabilități, Legea 448/2006, OMS 1955/1995 pentru creșe/grădinițe), cu evacuare asistată și, unde e cazul, refugii per nivel. Capacitatea de autoevacuare, timpii și fluxurile de evacuare (pct. 3.4) trebuie recalculate pentru evacuare <b>asistată</b> (personal însoțitor), nu independentă.</p>';
+        }
+        var esteResidential = D.functiune === 'locuinta-individuala' || D.functiune === 'bloc-locuinte';
+        return '<p>' + (esteResidential
+          ? 'Destinația proiectului (locuință) nu presupune, cu caracter permanent/instituțional, prezența unor categorii vulnerabile (creșă, cămin de bătrâni etc.). Capacitatea de autoevacuare a utilizatorilor e generală (locatarii evacuează independent) — dacă la un moment dat locuința găzduiește membri cu mobilitate redusă (vârstnici, persoane cu dizabilități temporare), regulile uzuale de proiectare (fără praguri, lățimi de trecere adecvate) rămân aplicabile, fără a constitui o cerință normativă suplimentară de refugii.'
+          : 'Destinația proiectului (' + esc(destinatieT42.toLowerCase()) + ') nu are, cu caracter permanent/instituțional, categorii de utilizatori incapabili să se evacueze singuri — dacă proiectul prevede totuși spații/activități cu asemenea utilizatori (declarate în D._persoane_vulnerabile), se aplică prevederile normativelor specifice acelei categorii.') + '</p>';
+      })() },
       { h: '3.6.a. Amenajări pentru accesul forțelor de intervenție', html: '<p>Acces carosabil pentru autospeciale conform pct. A.10.3.7.2 P118-1/2025 — min. o fațadă a fiecărei clădiri/unități accesibilă direct din drumul public sau din aleile carosabile ale ansamblului. Ascensoare de incendiu: nu este cazul (regim de înălțime ' + esc(D.regim || 'P+1E') + ', sub pragul care le-ar impune — de regulă clădiri înalte/foarte înalte).</p>' },
       { h: '3.6.b. Caracteristici tehnice și funcționale ale acceselor carosabile și ale căilor de intervenție ale autospecialelor', html:
         tbl([
