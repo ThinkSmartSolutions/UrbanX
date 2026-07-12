@@ -37,6 +37,8 @@
     { re: /\btabl[aă]\b/i, cheie: 'tabla' },
     { re: /t[aâ]mpl[aă]rie[\s\S]{0,20}pvc/i, cheie: 'pvc' },
     { re: /\bpvc\b/i, cheie: 'pvc' },
+    { re: /placaj[\s\S]{0,25}lemn/i, cheie: 'lemn_masiv' },
+    { re: /lemn\s+de\s+(frasin|stejar|brad|fag|molid)/i, cheie: 'lemn_masiv' },
     { re: /astereal[aă]/i, cheie: 'lemn_masiv' },
     { re: /\bs[iî]pc[aă]\b/i, cheie: 'lemn_masiv' },
     { re: /contrasipc[aă]/i, cheie: 'lemn_masiv' },
