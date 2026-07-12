@@ -110,6 +110,31 @@
       '<p style="text-indent:0;font-size:9pt;color:#888">Valorile subcapitolelor neevaluate (utilaje, dotări, teren) se completează de proiectant/beneficiar; coeficienții (proiectare, diverse, organizare șantier, cote ISC/CSC) sunt orientativi și editabili din baza de prețuri UrbanX.</p>';
   }
 
-  G.UXDevize = { computeDeviz: computeDeviz, devizGeneralHtml: devizGeneralHtml, loadPreturi: loadPreturi, savePreturi: savePreturi, get PRETURI() { return P; }, set PRETURI(x) { P = x; } };
+  // Modul 17 (backlog): export CSV deviz, compatibil import in Devize Expert/BNL/Excel — aceeasi
+  // structura HG 907 Anexa 7 (STRUCT) folosita la randarea HTML de mai sus, nu o lista separata.
+  function _csvCell(s) { s = String(s == null ? '' : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function devizToCSV(D) {
+    var dz = computeDeviz(D); var val = dz.v, tva = dz.tva;
+    var linii = ['Cod;Denumire;Valoare fara TVA (lei);TVA (lei);Valoare cu TVA (lei)'];
+    STRUCT.forEach(function (r) {
+      var cod = r[0], den = r[1], key = r[2];
+      var fara = key != null ? val[key] : null;
+      if (fara == null) return; // randurile-titlu de capitol (fara valoare proprie) nu apar ca linie CSV
+      var t = Math.round(fara * tva), cu = fara + t;
+      linii.push([_csvCell(cod), _csvCell(den), fara, t, cu].join(';'));
+    });
+    var totalCu = val.total + Math.round(val.total * tva);
+    linii.push(['', 'TOTAL GENERAL cu TVA', val.total, Math.round(val.total * tva), totalCu].join(';'));
+    return '﻿' + linii.join('\r\n');
+  }
+  function exportDevizCSV(D) {
+    try {
+      var blob = new Blob([devizToCSV(D)], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Deviz_general_HG907.csv';
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    } catch (e) {}
+  }
+
+  G.UXDevize = { computeDeviz: computeDeviz, devizGeneralHtml: devizGeneralHtml, loadPreturi: loadPreturi, savePreturi: savePreturi, devizToCSV: devizToCSV, exportDevizCSV: exportDevizCSV, get PRETURI() { return P; }, set PRETURI(x) { P = x; } };
   console.log('[UXDevize] deviz general HG 907/2016 (standardizat, Cap.1–7) încărcat');
 })(window);

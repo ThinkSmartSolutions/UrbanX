@@ -349,6 +349,11 @@
       var gen = el('button', { style: 'width:100%;margin-top:12px;background:' + (v.ok ? '#8b5cf6' : 'rgba(139,92,246,.5)') + ';color:#fff;border:none;border-radius:9px;padding:12px;font-size:13px;font-weight:700;cursor:pointer' }, '📦 Generează ' + nDocs + ' documente (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconf.' : ''));
       gen.onclick = function () { genereaza(v); }; side.appendChild(gen);
       side.appendChild(el('div', { style: 'font-size:9.5px;color:#64748b;margin-top:8px;line-height:1.4' }, 'DOCX + PDF. Datele din câmpurile verzi se calculează automat; neconformitățile se corectează înainte de depunere. Reutilizează studiile platformei (PSI/geotehnic/amplasament) fără duplicare.'));
+      if (G.UXDevize && G.UXDevize.exportDevizCSV) {
+        var csvBtn = el('button', { style: 'width:100%;margin-top:8px;background:transparent;color:#c4b5fd;border:1px solid rgba(139,92,246,.5);border-radius:9px;padding:9px;font-size:12px;font-weight:600;cursor:pointer' }, '📊 Export CSV deviz (Devize Expert/BNL/Excel)');
+        csvBtn.onclick = function () { G.UXDevize.exportDevizCSV(D); if (G.ss) G.ss('✅ Deviz_general_HG907.csv exportat.'); };
+        side.appendChild(csvBtn);
+      }
     }
 
     bAedis.onclick = function () {
