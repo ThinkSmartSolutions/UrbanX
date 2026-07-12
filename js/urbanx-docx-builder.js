@@ -1047,8 +1047,14 @@
         { nume: 'Secțiuni', prezent: are(/sec[țt]iune/) },
         { nume: 'Fațade', prezent: are(/fa[țt]ad/) },
         { nume: 'Plan acoperiș/învelitoare', prezent: are(/[îi]nveli|acoperi[șs]/) },
-        { nume: 'Detalii (REI, etanșări)', prezent: !!(D._rezistenta_foc_elemente && Object.keys(D._rezistenta_foc_elemente).length) },
-        { nume: 'Planuri rețele (instalații)', prezent: false },
+        // Bug real gasit (Florin, 13 iul: "au fost incarcate toate planurile, de ce arata incomplet?"):
+        // D._rezistenta_foc_elemente nu e scris NICAIERI in platforma (nicio functie de upload/extractie
+        // il populeaza) — verificarea era IMPOSIBIL de satisfacut, indiferent ce incarca utilizatorul.
+        // Fix: la fel ca "Plan parter" mai sus, recunoaste si un fisier de detalii REI/etansari incarcat
+        // (nume fisier), nu doar campul de date manuale (inca neconectat la nicio sursa reala).
+        { nume: 'Detalii (REI, etanșări)', prezent: are(/detali|\brei\b|etansar/) || !!(D._rezistenta_foc_elemente && Object.keys(D._rezistenta_foc_elemente).length) },
+        // Acelasi fix: recunoaste un fisier de retele/instalatii incarcat (nume), nu doar "niciodata".
+        { nume: 'Planuri rețele (instalații)', prezent: are(/re[țt]e(a|le)|instala[țt]i|electric|sanitar|termic/) },
         { nume: 'Relevee (H cornișă/coamă, materiale)', prezent: toateFisierele.length > 0 }
       ];
       var nrLipsa = itemi.filter(function (i) { return !i.prezent; }).length;
@@ -1072,7 +1078,8 @@
       var cap2Lipsa = []; if (!(D._camere && D._camere.length) && !prezent('Relevee (H cornișă/coamă, materiale)')) cap2Lipsa.push({ text: 'relevee/inventar de încăperi pentru calculul real al sarcinii termice', blocant: true });
       var cap3Lipsa = [];
       ['Plan parter/nivel(uri)', 'Secțiuni', 'Fațade', 'Plan acoperiș/învelitoare', 'Detalii (REI, etanșări)'].forEach(function (n) { if (!prezent(n)) cap3Lipsa.push({ text: n.toLowerCase(), blocant: true }); });
-      var cap4Lipsa = []; if (!prezent('Planuri rețele (instalații)')) cap4Lipsa.push({ text: 'planuri rețele (instalații) — nu este încă urmărit ca upload distinct în platformă', blocant: false });
+      // Acum verificabil real (nume fisier incarcat) — vezi fix _checklistPlanse mai sus; ramane blocant.
+      var cap4Lipsa = []; if (!prezent('Planuri rețele (instalații)')) cap4Lipsa.push({ text: 'planuri rețele (instalații)', blocant: true });
       var cap5Lipsa = []; if (verdict.verdict === 'NEAPT_PENTRU_AVIZARE') cap5Lipsa.push({ text: 'rezolvarea corecțiilor obligatorii de proiect (vezi secțiunea 5)', blocant: true });
       var capitole = [
         { nr: 1, titlu: 'Caracteristicile construcției', lipsa: cap1Lipsa },
