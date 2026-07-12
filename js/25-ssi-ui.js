@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {} };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [] };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -381,8 +381,23 @@
           if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am găsit cote de nivel scrise ca text în DXF; completează H cornișă/H coamă manual mai jos.');
         }
       } catch (e) { if (G.ss) G.ss('Fișier atașat ca referință (nu s-a putut citi geometria: ' + e.message + ') — completează H manual.'); }
-    } else {
-      if (G.ss) G.ss('📎 ' + file.name + ' atașat ca referință (PDF-urile nu se parsează automat) — completează H cornișă/H coamă/tip acoperiș manual, din desen.');
+    } else if (/\.pdf$/i.test(file.name)) {
+      // Fix real (Florin, 12 iul): sectiunile PDF contin stratigrafia reala a peretilor/planseului/
+      // acoperisului (grosime + material, scrise de proiectant pe desen) — se citesc automat, nu se
+      // mai presupune un sistem constructiv generic cand datele reale exista deja in fisier.
+      try {
+        var buf = await file.arrayBuffer();
+        var materiale = await G.SSI_MATERIALE_EXTRACTIE.extrageMaterialeDinPDF(buf);
+        if (materiale.length) {
+          materiale.forEach(function (m) {
+            if (!STATE.materialeExtrase.some(function (x) { return x.nume === m.nume; })) STATE.materialeExtrase.push(m);
+          });
+          STATE.relevee[cheie].materiale_extrase = materiale.map(function (m) { return m.nume; });
+          if (G.ss) G.ss('📎 ' + file.name + ': materiale reale identificate pe secțiune — ' + materiale.map(function (m) { return m.nume; }).join(', ') + ' (' + materiale.length + ' total, se aplică în locul listei implicite generice).');
+        } else {
+          if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am recunoscut denumiri de materiale pe text în PDF (poate fi scanat/imagine); completează H cornișă/H coamă/tip acoperiș manual.');
+        }
+      } catch (e) { if (G.ss) G.ss('📎 ' + file.name + ' atașat ca referință (nu s-a putut citi textul PDF: ' + e.message + ') — completează manual.'); }
     }
     render();
   }
@@ -393,10 +408,11 @@
         tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
         _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
         _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
-        _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee
+        _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee,
+        _materiale: STATE.materialeExtrase.length ? STATE.materialeExtrase : undefined
       } : null;
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {} }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [] }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
@@ -438,6 +454,10 @@
         // UI, Dproj.geometrie_teren era mereu undefined, ceea ce facea ca verificarea de distante intre
         // cladiri sa ruleze pe 0 perechi si compartimentarea sa cada pe fallback "toate individuale".
         Dproj.geometrie_teren = Dproj.geometrie_teren || pending.geometrie_teren;
+        // Materiale REALE extrase din PDF-urile de secțiune (stratigrafie perete/planșeu/acoperiș,
+        // scrisă de proiectant pe desen — Florin, 12 iul: "ai toate datele pentru DoP, nu mai spune
+        // nedeclarat") — au prioritate față de lista implicită generică, la fel ca restul câmpurilor.
+        Dproj._materiale = Dproj._materiale || pending._materiale;
       }
       return orig(Dproj, v);
     };

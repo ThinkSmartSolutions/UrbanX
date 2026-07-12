@@ -34,7 +34,9 @@
     // Materiale cu variabilitate mare intre producatori/formulari — implicit e DOAR orientativ,
     // blocant la generare FINALA fara DoP (clasa reala depinde de aditivi, tratament, densitate).
     polistiren_eps: { clasa: 'E', certitudine: 'ORIENTATIV — verifică DoP produsului concret' },
+    polistiren_extrudat: { clasa: 'E', certitudine: 'ORIENTATIV — verifică DoP produsului concret (XPS)' },
     poliuretan_xps: { clasa: 'E', certitudine: 'ORIENTATIV — verifică DoP produsului concret' },
+    membrana_impotriva_radacinilor: { clasa: null, certitudine: 'NECUNOSCUT — membrană anti-rădăcini (de regulă HDPE/PP), plajă variabilă, obligatoriu DoP produs concret' },
     lemn_masiv: { clasa: 'D-s2,d0', certitudine: 'ORIENTATIV — depinde de esență, grosime, densitate, tratament ignifug — verifică DoP' },
     lemn_stratificat: { clasa: 'D-s2,d0', certitudine: 'ORIENTATIV — depinde de adeziv/tratament ignifug — verifică DoP' },
     pvc: { clasa: null, certitudine: 'NECUNOSCUT — plajă B-E, obligatoriu DoP produs concret' },
