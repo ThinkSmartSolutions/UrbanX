@@ -705,13 +705,28 @@
       return '<p><b>Pentru: ' + cui + cifre + '</b> — soluții candidate (selecția rămâne a proiectantului atestat, nu se aplică automat):</p>' +
         tbl(sol.map(function (x) { return [esc(x.solutie), esc(x.efect_calculat || '—'), (x.recalcul_necesar || []).join(', ')]; }), ['Soluție compensatorie', 'Efect', 'Recalcul necesar']);
     }
-    // 2.2 ATEX — declarativ; daca D._spatii_atex nu e furnizat, se confirma explicit absenta substantelor (nu se presupune)
-    var spatiiAtex = D._spatii_atex || [{ nume: 'Ansamblul construcției', substante_declarate: { gaze: [], vapori: [], pulberi: [] } }];
-    var rezultateAtex = spatiiAtex.map(function (sp) { return { nume: sp.nume, rezultat: G.SSI_M13.analizaATEX(sp) }; });
+    // 2.2 ATEX — declarativ; daca D._spatii_atex nu e furnizat, implicitul e "fara substante" DOAR pt
+    // destinatii unde asta chiar reflecta realitatea. Pt "skid" (SKID GPL/hidrogen/gaze — functiune al
+    // carei NUME insusi declara prezenta unui gaz combustibil), implicitul "nu este cazul" ar fi fals —
+    // se declara implicit un gaz combustibil generic (de confirmat exact de proiectant: GPL/hidrogen/
+    // alt gaz), cu frecventa conservatoare "ocazionala" (nu "continua" - nefundamentat fara date reale
+    // de exploatare: nici "improbabila" - prea optimist pt o instalatie proiectata cu risc inerent).
+    var spatiiAtexImplicit = (D.functiune === 'skid')
+      ? [{ nume: 'Instalație SKID (gaz combustibil)', substante_declarate: { gaze: ['gaz combustibil — de confirmat exact: GPL/hidrogen/alt gaz, conform proiectului'], vapori: [], pulberi: [] }, date_exploatare: { frecventa_scurgere: 'ocazionala' } }]
+      : [{ nume: 'Ansamblul construcției', substante_declarate: { gaze: [], vapori: [], pulberi: [] } }];
+    var spatiiAtex = D._spatii_atex || spatiiAtexImplicit;
+    var rezultateAtex = spatiiAtex.map(function (sp) {
+      var s = sp.substante_declarate || {};
+      var substanteText = [].concat(s.gaze || [], s.vapori || [], s.pulberi || []).join('; ') || '—';
+      return { nume: sp.nume, substante: substanteText, rezultat: G.SSI_M13.analizaATEX(sp) };
+    });
     var atexAplicabilUnele = rezultateAtex.some(function (r) { return r.rezultat.ATEX_aplicabil; });
+    // Bug real gasit (verificare piesa cu piesa a sectiunii ATEX): coloana "Substanta" arata de fapt
+    // r.rezultat.tip_zona (categoria "gaze_vapori"/"pulberi"), nu substanta REALA declarata — corectat
+    // sa arate substanta efectiv scrisa in sp.substante_declarate.
     var htmlAtex = atexAplicabilUnele
       ? tbl(rezultateAtex.filter(function (r) { return r.rezultat.ATEX_aplicabil; }).map(function (r) {
-        return [esc(r.nume), esc(r.rezultat.tip_zona || '—'), 'Zona ' + r.rezultat.zona_propusa, esc(r.rezultat.echipamente_necesare), 'DE VALIDAT de proiectant ATEX'];
+        return [esc(r.nume), esc(r.substante), 'Zona ' + r.rezultat.zona_propusa, esc(r.rezultat.echipamente_necesare), 'DE VALIDAT de proiectant ATEX'];
       }), ['Încăpere/Zonă', 'Substanță', 'Tip zonă', 'Echipamente Ex necesare', 'Validat de specialist'])
       : '<p>Nu este cazul – nu au fost identificate substanțe cu potențial exploziv (verificat pe toate încăperile/zonele declarate ale proiectului).</p>';
 
@@ -1000,7 +1015,9 @@
     }] : []).concat([
       { h: '3.4.a. Măsuri pentru asigurarea controlului fumului', html: '<p>' + (ac.desfumare_oblig
         ? 'Configurația/destinația proiectului impune desfumare mecanică (spații fără fațadă exterioară directă, subsoluri, arii mari) — nu se acceptă tirajul natural ca soluție suficientă; vezi secțiunea 4.9 pentru instalația de desfumare.'
-        : 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), fiecare încăpere are fereastră spre exterior — controlul fumului se asigură prin <b>tiraj natural</b> (ferestre/uși practicabile), suficient conform configurației proiectului. Nu este necesară desfumare mecanică.') + '</p>' },
+        : (D.functiune === 'locuinta-individuala'
+          ? 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), fiecare încăpere are fereastră spre exterior — controlul fumului se asigură prin <b>tiraj natural</b> (ferestre/uși practicabile), suficient conform configurației proiectului. Nu este necesară desfumare mecanică.'
+          : 'Configurația/destinația proiectului nu impune desfumare mecanică (fiecare încăpere/circulație comună are fațadă exterioară directă) — controlul fumului se asigură prin <b>tiraj natural</b> (ferestre/uși practicabile), de confirmat conform configurației reale a proiectului.')) + '</p>' },
       { h: '3.4.b. Tipul scărilor, forma și modul de dispunere a treptelor', html: (function () {
         var esteResidentialIndivRedus = D.functiune === 'locuinta-individuala' && (+D.niv_supraterane || 1) <= 2;
         var baza = 'Scară interioară' + (cladiriPropuse.length > 1 ? ' (per unitate)' : '') + ', cu rampă dreaptă sau în două rampe cu podest intermediar, conform proiectului de arhitectură — verificare Blondel (2h+l între 62–64 cm) și lățime utilă minimă pentru evacuare, aplicată la faza de proiect de arhitectură (releveu/plan). ';
@@ -1023,23 +1040,37 @@
       })() },
       { h: '3.4.d. Numărul fluxurilor de evacuare', html: (function () {
         var modul = ac.flux_evacuare_m || 0.60;
+        var esteResidential = D.functiune === 'locuinta-individuala' || D.functiune === 'bloc-locuinte';
         var nrUnitatiFlux = cladiriPropuse.length || 1;
-        var Nest = nrUnitatiFlux * 4;
-        var Nper = Nest / nrUnitatiFlux;
+        var rowLabel, Nper, sursaN;
+        if (esteResidential) {
+          var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
+          Nper = nrDormitoare ? nrDormitoare * 2 : 4;
+          rowLabel = 'Locuință (per unitate)';
+          sursaN = (nrDormitoare ? nrDormitoare + ' dormitoare × 2 pers.' : 'ipoteză 4 pers./unitate') + ' — vezi 1.4.g';
+        } else {
+          var capacitateDeclarata = D.capacitate_persoane || D.capacitate_declarata;
+          Nper = capacitateDeclarata || null;
+          rowLabel = destinatieT42;
+          sursaN = capacitateDeclarata ? 'capacitate declarată — vezi 1.4.g' : 'nedeterminat — vezi 1.4.g (capacitate neconfirmată)';
+        }
         var cap = G.SSI_NORMATIVE_ENGINE.getCapacitateFluxEvacuare({ tip_lucrare: m0.regim_tabele, destinatie: destinatieT42 });
         var out = '<p>Formula: <b>F = N / C</b>, rotunjit la numărul întreg superior — N = numărul de persoane care evacuează prin calea respectivă (vezi 1.4.g), C = capacitatea unui flux de evacuare.</p>' +
           '<p><b>▤ Tabel de calcul — Fluxuri de evacuare</b></p>';
-        if (cap.aplicabil && cap.disponibil) {
+        var NperTxt = Nper != null ? Nper + ' (' + sursaN + ')' : sursaN;
+        if (cap.aplicabil && cap.disponibil && Nper != null) {
           var C = cap.rand.capacitate_flux_persoane;
           var F = Math.ceil(Nper / C);
-          out += tbl([['Locuință (per unitate)', Nper + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', C + ' persoane (' + cap.norma + ')', '' + F, 'lățime utilă din proiect ≥ ' + modul + ' m (de verificat pe releveu)', F <= 1 ? 'DA (o singură cale/scară e suficientă)' : 'necesită ' + F + ' fluxuri — verifică lățimea totală a căilor']],
+          out += tbl([[rowLabel, NperTxt, C + ' persoane (' + cap.norma + ')', '' + F, 'lățime utilă din proiect ≥ ' + modul + ' m (de verificat pe releveu)', F <= 1 ? 'DA (o singură cale/scară e suficientă)' : 'necesită ' + F + ' fluxuri — verifică lățimea totală a căilor']],
             ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Tabelul 150)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
         } else {
-          out += tbl([['Locuință (per unitate)', Nper + ' (ipoteză 4 pers./unitate — vezi 1.4.g)', 'nu se aplică (' + cap.motiv + ')', 'verificat pe lățime utilă, nu pe F=N/C — vezi nota de mai jos', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', 'DA (lățime proiectată peste modulul minim)']],
+          out += tbl([[rowLabel, NperTxt, cap.aplicabil ? 'nu se aplică (' + cap.motiv + ')' : 'nu se aplică (' + cap.motiv + ')', 'nedeterminat', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', '—']],
             ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
-          out += '<p style="font-size:9pt;color:#666">' + cap.motiv + ' Verificarea aplicată aici: lățimea utilă a căilor/ușilor de evacuare din proiect comparată cu modulul de trecere normat — pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.</p>';
+          out += '<p style="font-size:9pt;color:#666">' + cap.motiv + (esteResidential
+            ? ' Verificarea aplicată aici: lățimea utilă a căilor/ușilor de evacuare din proiect comparată cu modulul de trecere normat — pentru o locuință unifamilială cu ~4 persoane/unitate, o ușă/scară cu lățime utilă ≥ 0,90–1,00 m (peste modulul de ' + modul + ' m) este suficientă pentru un singur flux, ceea ce corespunde ocupanței reduse tipice rezidențiale.'
+            : ' Verificarea F=N/C rămâne incompletă până la confirmarea capacității reale de utilizatori (1.4.g); comparația pe lățime utilă a căilor rămâne disponibilă ca verificare intermediară.') + '</p>';
         }
-        out += (cladiriPropuse.length > 1 ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
+        out += (cladiriPropuse.length > 1 && esteResidential ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
         return out;
       })() },
       { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: (function () {
@@ -1071,7 +1102,7 @@
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
-      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b> — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.</p>' +
+      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (ac.hidranti_int_oblig ? ', motivat prin depășirea pragului aplicabil destinației (' + esc(destinatieT42.toLowerCase()) + ').' : (D.functiune === 'locuinta-individuala' ? ' — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.' : ', valoarea reală a proiectului (volum/arie desfășurată) nu atinge pragul de echipare obligatorie prevăzut pentru destinația ' + esc(destinatieT42.toLowerCase()) + '.')) + '</p>' +
         _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
           { cheie: 'tip', eticheta: 'Tipul instalației (apă-apă, aer-aer)' }, { cheie: 'volum_mc', eticheta: 'Volumul construcției/compartimentului de incendiu (m³)' },
           { cheie: 'jeturi_simultane', eticheta: 'Număr de jeturi în funcțiune simultană' }, { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' },
@@ -1094,17 +1125,25 @@
           { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă a instalației' },
           { cheie: 'volum_rezerva', eticheta: 'Volumul rezervei de apă (m³)' }, { cheie: 'racorduri_exterioare', eticheta: 'Numărul de racorduri exterioare' }
         ], D) },
-      { h: '4.4. Instalații de limitare/stingere cu sprinklere deschise', html: '<p>Nu este cazul — nu există goluri mari (cortine de apă) în configurația unei locuințe unifamiliale.</p>' },
-      { h: '4.5. Instalații de stingere cu apă pulverizată', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
-      { h: '4.6. Instalații de stingere cu ceață de apă', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
-      { h: '4.7. Instalații de stingere cu gaze inerte', html: '<p>Nu este cazul — nu există spații tehnice cu echipamente electrice/electronice sensibile care să impună acest tip de stingere la o locuință unifamilială.</p>' },
+      { h: '4.4. Instalații de limitare/stingere cu sprinklere deschise', html: '<p>' + (D.functiune === 'locuinta-individuala'
+        ? 'Nu este cazul — nu există goluri mari (cortine de apă) în configurația unei locuințe unifamiliale.'
+        : 'Necesară doar dacă proiectul prevede goluri mari protejate prin cortine de apă (atriumuri, comunicări mari între compartimente) — de verificat conform configurației reale a proiectului; altfel, nu este cazul.') + '</p>' },
+      { h: '4.5. Instalații de stingere cu apă pulverizată', html: '<p>' + (D.functiune === 'locuinta-individuala'
+        ? 'Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.'
+        : 'Necesară doar pentru echipamente/instalații tehnologice specifice cu risc de incendiu ridicat (transformatoare, rezervoare de combustibil/gaz) — de verificat conform configurației reale a proiectului; altfel, nu este cazul.') + '</p>' },
+      { h: '4.6. Instalații de stingere cu ceață de apă', html: '<p>' + (D.functiune === 'locuinta-individuala'
+        ? 'Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.'
+        : 'Necesară doar pentru spații tehnice/echipamente unde apa pulverizată clasică nu e adecvată (săli de cabluri, arhive, spații cu echipamente sensibile) — de verificat conform configurației reale a proiectului; altfel, nu este cazul.') + '</p>' },
+      { h: '4.7. Instalații de stingere cu gaze inerte', html: '<p>' + (D.functiune === 'locuinta-individuala'
+        ? 'Nu este cazul — nu există spații tehnice cu echipamente electrice/electronice sensibile care să impună acest tip de stingere la o locuință unifamilială.'
+        : 'Necesară doar pentru spații tehnice cu echipamente electrice/electronice sensibile (centre de date, tablouri electrice de importanță majoră) — de verificat conform configurației reale a proiectului; altfel, nu este cazul.') + '</p>' },
       { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + (ac.idsi_oblig ? 'OBLIGATORIE (Sc&gt;2.500 m²)' : 'NU ESTE OBLIGATORIE') + '</b> pentru destinația și aria rezidențială unifamilială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.</p>' +
         _tblCampuriInstalatie(ac.idsi_oblig, 'idsai', [
           { cheie: 'grad_acoperire', eticheta: 'Gradul de acoperire (total/parțial, cu zonele acoperite)' }, { cheie: 'conditii_zona_detectare', eticheta: 'Condiții privind stabilirea zonei de detectare' },
           { cheie: 'conditii_ecs', eticheta: 'Condiții de amplasare a echipamentului de control și semnalizare (e.c.s.)' }, { cheie: 'dispozitive_comandate', eticheta: 'Alte dispozitive comandate sau supravegheate de e.c.s.' }
         ], D) },
       { h: '4.9. Instalație de desfumare/evacuare fum și gaze fierbinți', html: '<p>' + (ac.desfumare_oblig ? 'Necesară conform configurației declarate la 3.4.a — metodă, spații desfumate și debite se stabilesc la faza de proiect tehnic.' : 'Nu este cazul, motivat la pct. 3.4.a — control fum prin tiraj natural, suficient pentru configurația proiectului.') + '</p>' },
-      { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
+      { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare' + (D.functiune === 'locuinta-individuala' ? ' — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric' : ' — de verificat conform configurației reale a căilor de evacuare ale proiectului') + '). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
       { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru un regim de înălțime redus, într-un ansamblu rezidențial, evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' +
         _tblCampuriInstalatie(ac.paratraznet_oblig, 'ipt', [
           { cheie: 'clasa_ipt_spt', eticheta: 'Clasa IPT și SPT (din evaluarea de risc)' }, { cheie: 'nivel_protectie', eticheta: 'Nivel de protecție (I–IV)' },
