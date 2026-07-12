@@ -13,9 +13,13 @@
   function _saveDraft() { try { localStorage.setItem(_DKEY, JSON.stringify(D)); } catch (e) {} }
   function _restoreDraft() { try { var s = localStorage.getItem(_DKEY); if (s) { var o = JSON.parse(s); if (o && typeof o === 'object') { for (var k in o) if (o.hasOwnProperty(k)) D[k] = o[k]; return true; } } } catch (e) {} return false; }
   var AVIZATORI = ['ISU', 'DSP', 'APM', 'Apele Române', 'ANIF', 'Distribuitor gaze', 'Distribuitor electric', 'Transelectrica', 'Operator apă-canal', 'CFR', 'CNAIR', 'Consiliul Județean', 'Primăria (PUG/PUZ)', 'Patrimoniu/Cultură', 'ROMATSA', 'SRI', 'MApN', 'Orange', 'Vodafone', 'Digi/RCS-RDS', 'Telekom'];
-  var DOCUMENTE = ['Borderou piese scrise și desenate', 'Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Memoriu DTOE (organizare execuție)', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Cartea tehnică a construcției', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)'];
+  var DOCUMENTE = ['Borderou piese scrise și desenate', 'Program funcțional (breviar spații)', 'Memoriu general DTAC', 'Memoriu arhitectură', 'Memoriu rezistență', 'Memorii instalații (IT/IS/IE/IG/HVAC/ICT)', 'Scenariu securitate incendiu (P118)', 'Deviz general HG 907', 'Devize pe obiect', 'Opis + Listă proiectanți', 'Memoriu DTOE (organizare execuție)', 'Referate verificatori', 'PCCVI + faze determinante', 'Recepție (HG 273/1994)', 'Cartea tehnică a construcției', 'Gantt + grafic finanțare', 'Caiet de sarcini arhitectură (PTh)', 'Caiet de sarcini rezistență (PTh)', 'Caiet de sarcini instalații (PTh)', 'Liste de cantități / antemăsurători (PTh)', 'Documentație tehnică pentru autorizarea desființării (D.T.A.D.)'];
   // Documente CONDIȚIONATE de funcțiune (apar doar când sunt relevante) — nu în lista generică.
   var DOC_FUNCTIUNE = { 'Clădire mixtă — separări funcțiuni (P118)': ['cladire-mixta'], 'Studiu de fezabilitate energetică (SF)': ['parc-fotovoltaic', 'bess', 'statie-transformare'] };
+  // Documente OPȚIONALE, neaplicabile majorității proiectelor — apar bifabile, dar NEBIFATE implicit
+  // (D.T.A.D. se aplică doar cand proiectul include desfiintarea unei constructii existente, nu la
+  // orice proiect nou) — spre deosebire de restul DOCUMENTE, care sunt bifate implicit.
+  var DOC_OPTIONAL_OFF = { 'Documentație tehnică pentru autorizarea desființării (D.T.A.D.)': 1 };
   // Documente pe AVIZATOR — memoriul specific pt fiecare aviz din CU. Se generează din capitolul Avizatori,
   // când bifezi operatorul (Memorii avizatori = dosarul comun; cele de mai jos = memorii/documente specifice).
   var AVIZ_DOCS = [
@@ -240,7 +244,14 @@
       // lista efectivă = documente de bază + cele condiționate de funcțiunea curentă
       var docList = DOCUMENTE.slice();
       Object.keys(DOC_FUNCTIUNE).forEach(function (k) { if (DOC_FUNCTIUNE[k].indexOf(D.functiune) >= 0) docList.push(k); else D._docs[k] = false; });
-      docList.forEach(function (dc) { if (pthOnly[dc] && !isPth) { D._docs[dc] = false; return; } var lab = el('label', { style: 'font-size:11px;color:' + (pthOnly[dc] ? '#a78bfa' : '#cbd5e1') + ';display:flex;gap:5px;align-items:center;cursor:pointer' }); var cb = el('input', { type: 'checkbox' }); if (D._docs[dc] !== false) { cb.setAttribute('checked', 'checked'); D._docs[dc] = true; } cb.onchange = function () { D._docs[dc] = cb.checked; }; lab.appendChild(cb); lab.appendChild(el('span', null, dc)); gd.appendChild(lab); }); sd.appendChild(gd); form.appendChild(sd);
+      docList.forEach(function (dc) {
+        if (pthOnly[dc] && !isPth) { D._docs[dc] = false; return; }
+        if (DOC_OPTIONAL_OFF[dc] && D._docs[dc] === undefined) D._docs[dc] = false;
+        var lab = el('label', { style: 'font-size:11px;color:' + (pthOnly[dc] ? '#a78bfa' : (DOC_OPTIONAL_OFF[dc] ? '#fca5a5' : '#cbd5e1')) + ';display:flex;gap:5px;align-items:center;cursor:pointer' });
+        var cb = el('input', { type: 'checkbox' }); if (D._docs[dc] !== false) { cb.setAttribute('checked', 'checked'); D._docs[dc] = true; } cb.onchange = function () { D._docs[dc] = cb.checked; };
+        lab.appendChild(cb); lab.appendChild(el('span', null, dc + (DOC_OPTIONAL_OFF[dc] ? ' <span style="color:#64748b">— doar dacă e cazul</span>' : '')));
+        gd.appendChild(lab);
+      }); sd.appendChild(gd); form.appendChild(sd);
       recalc();
     }
 

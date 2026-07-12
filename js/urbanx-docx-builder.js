@@ -1962,6 +1962,40 @@
       ];
       return { cat: 'Piese Administrative', file: 'Memoriu_DTOE.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI (D.T.O.E.)', 'Legea 50/1991, Anexa 1'), secs) };
     },
+    // D.T.A.D. — sora lui D.T.A.C. (Legea 50/1991, art. 3 alin. (1) lit. b): autorizatie DISTINCTA
+    // pt desfiintarea (demolarea/dezmembrarea/dezafectarea) unei constructii existente. Optional
+    // (D._docs, DOC_OPTIONAL_OFF in urbanx-doc-ui.js) — nu se aplica majoritatii proiectelor noi.
+    'Documentație tehnică pentru autorizarea desființării (D.T.A.D.)': function (D, v) {
+      var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
+      var scExist = D.Sc_existent || D.Sc || null;
+      var anConstructie = D.an_constructie_existenta || null;
+      var azbestRisc = anConstructie ? (+anConstructie < 2007) : null;
+      var secs = [
+        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație tehnică pentru autorizarea executării lucrărilor de desființare (D.T.A.D.) are ca obiect demolarea/dezafectarea construcției existente de pe amplasamentul „' + esc(fn) + '", ' + esc(D.uat || '—') + esc(D.nrcad ? (', nr. cadastral ' + D.nrcad) : '') + ', în temeiul art. 3 alin. (1) lit. b) din Legea 50/1991 republicată (autorizarea executării lucrărilor de desființare este distinctă de cea de construire, chiar dacă terenul urmează a fi ulterior reconstruit).</p>' +
+          '<p>Motivul desființării: ' + esc(D.motiv_desfiintare || 'construcție cu stare tehnică necorespunzătoare / neconformă cu destinația propusă a terenului — de detaliat de proiectant conform expertizei tehnice, dacă există') + '.</p>' },
+        { h: '2. Descrierea construcției existente supuse desființării', html: tbl([
+          ['Suprafață construită (Sc)', scExist ? (scExist + ' m²') : 'de precizat din releveul construcției existente'],
+          ['An construcție (dacă cunoscut)', anConstructie ? String(anConstructie) : 'necunoscut — de stabilit din cartea tehnică/arhiva primăriei, dacă există'],
+          ['Regim de înălțime existent', esc(D.regim_existent || D.regim || 'de precizat')],
+          ['Sistem constructiv existent', esc(D.sistem_constructiv_existent || 'de precizat din expertiza tehnică/releveu (zidărie, cadre beton, structură metalică etc.)')],
+          ['Stare tehnică', esc(D.stare_tehnica_existenta || 'de evaluat — expertiză tehnică recomandată dacă demolarea implică risc pentru vecinătăți sau structuri adiacente')]
+        ], ['Caracteristică', 'Valoare']) },
+        { h: '3. Descrierea lucrărilor de desființare', html: '<p>Desființarea se execută ' + esc(D.metoda_desfiintare || 'mecanizat (utilaje de demolare — excavator cu echipament de spart/pensa hidraulică), cu demontare manuală prealabilă a elementelor recuperabile/periculoase (tâmplărie, instalații, eventuale materiale cu conținut de azbest)') + ', în următoarea succesiune tipică: (1) debranșare utilități și predare la operatori; (2) demontare manuală elemente interioare/tâmplărie/instalații; (3) demolarea structurii de rezistență, de sus în jos, pe niveluri; (4) demolarea fundațiilor; (5) sortarea și evacuarea molozului; (6) nivelarea și curățarea terenului. Etapizarea exactă și utilajele se detaliază de constructorul atestat la faza de execuție, funcție de sistemul constructiv real constatat.</p>' },
+        { h: '4. Verificarea prezenței materialelor periculoase (azbest)', html: '<p>' + (azbestRisc === true
+          ? '<b>Risc de prezență a azbestului</b> — construcția a fost edificată înainte de interzicerea utilizării azbestului (Legea 349/2007, HG 124/2003) — este obligatorie efectuarea unui inventar/expertiză de identificare a materialelor cu conținut de azbest (plăci ondulate, izolații, dale) ÎNAINTE de începerea lucrărilor de desființare, cu decontaminare de către operator autorizat dacă se confirmă prezența.'
+          : (azbestRisc === false
+            ? 'Construcția a fost edificată după interzicerea utilizării azbestului (Legea 349/2007) — risc redus, dar se recomandă totuși o verificare vizuală a eventualelor materiale de reparație/înlocuire mai vechi.'
+            : '<b>Anul construcției nu este precizat</b> (D.an_constructie_existenta) — nu se presupune implicit absența azbestului; se recomandă un inventar/expertiză de identificare a materialelor cu conținut de azbest înainte de începerea lucrărilor, conform Legii 349/2007 și HG 124/2003.')) + '</p>' },
+        { h: '5. Gestionarea deșeurilor din construcții și demolări', html: '<p>Deșeurile rezultate din desființare se clasifică și se gestionează conform Legii 211/2011 (regimul deșeurilor) și HG 856/2002 (evidența gestiunii deșeurilor), cu încadrare în codurile de deșeuri din categoria 17 (deșeuri din construcții și demolări — Lista europeană a deșeurilor). Peste pragurile prevăzute de legislația în vigoare, se întocmește un Plan de gestionare a deșeurilor din construcții și demolări (PGD), cu obiective de valorificare/reciclare a molozului inert. Transportul și eliminarea/valorificarea se fac exclusiv prin operatori autorizați de mediu, cu documente justificative (formulare de transport deșeuri) păstrate la Cartea tehnică.</p>' },
+        { h: '6. Măsuri de protecție a vecinătăților și rețelelor edilitare', html: '<p>Înaintea începerii lucrărilor se obțin confirmările de debranșare/dezafectare a racordurilor (energie electrică, gaze, apă-canal, telecomunicații) de la operatorii de rețea. Pe durata execuției se limitează vibrațiile, praful (stropire cu apă) și zgomotul (respectarea programului de liniște), se protejează construcțiile/arborii/rețelele vecine care se mențin, iar accesul auto/pietonal în zonă se semnalizează corespunzător.</p>' },
+        { h: '7. Securitate și sănătate în muncă (SSM)', html: '<p>Se respectă Legea 319/2006 și HG 300/2006 (cerințe minime SSM pe șantiere temporare/mobile) — plan de securitate și sănătate, coordonator SSM desemnat, echipament individual de protecție, delimitarea și semnalizarea zonei de lucru; lucrările de demolare prezintă risc ridicat de accidentare (cădere de la înălțime, prăbușire necontrolată), motiv pentru care etapizarea demolării și distanțele de siguranță se stabilesc explicit în planul SSM al executantului.</p>' },
+        { h: '8. Program de execuție a lucrărilor de desființare', html: '<p>Durata estimată a lucrărilor de desființare: ' + esc(D.durata_desfiintare_zile ? (D.durata_desfiintare_zile + ' zile lucrătoare') : 'de precizat de constructorul atestat, funcție de volumul construit și metoda de demolare adoptată') + '. Programul detaliat (zi cu zi/săptămână cu săptămână) se anexează la faza de execuție, corelat cu graficul general al investiției dacă desființarea precede o construcție nouă pe același amplasament.</p>' },
+        { h: '9. Situația terenului după desființare', html: '<p>' + (D.tip_lucrare === 'CONSTRUCTIE_NOUA' || D._are_constructie_noua_dupa_desfiintare
+          ? 'Terenul rezultat după desființare și nivelare urmează a fi utilizat pentru construcția nouă descrisă în documentația D.T.A.C./P.Th. a acestui proiect — desființarea și construirea se corelează ca etape succesive ale aceleiași investiții, cu autorizații distincte conform art. 3 din Legea 50/1991.'
+          : 'Terenul rezultat după desființare, nivelare și curățare rămâne liber de construcții, urmând regimul de utilizare stabilit prin certificatul de urbanism (verde/agricol/rezervă pentru investiție viitoare, după caz).') + '</p>' }
+      ];
+      return { cat: 'Piese Administrative', file: 'Documentatie_desfiintare_DTAD.doc', html: docHtml(_meta(D, 'DOCUMENTAȚIE TEHNICĂ PENTRU AUTORIZAREA DESFIINȚĂRII (D.T.A.D.)', 'Legea 50/1991, art. 3 alin. (1) lit. b) + Anexa 1'), secs) };
+    },
     'Borderou piese scrise și desenate': function (D, v) {
       var niv = Math.max(1, +D.niv_supraterane || 1);
       var hasSub = (+D.niv_subterane || 0) > 0 || /subsol|demisol|s\s*\+\s*p|d\s*\+\s*p/i.test(D.regim || '');
