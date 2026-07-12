@@ -945,6 +945,37 @@
         tbl(randuri, ['Cerință legală', 'Articol/Tabel', 'Normativ', 'Conform', 'Observații']);
     }
 
+    // Sectiunea 16 (audit v6.0): raport juridic final — anexa DISTINCTA de matricea tehnica (Sectiunea 2):
+    // acolo cerinta e in centru (o functiune tehnica poate necesita mai multe norme), aici NORMA e in
+    // centru (un jurist/verificator citeste starea de conformitate legala per act normativ, fara calcul),
+    // cu 4 coloane EXCLUSIVE (Respectat/Nerespectat/Neaplicabil/Date insuficiente), nu o singura coloana.
+    function _tblRaportJuridic() {
+      var FUNCTIUNI_VULNERABIL_RJ = { gradinita: 1, 'centru-social': 1, medical: 1 };
+      var seSupuneRJ = FUNCTIUNI_VULNERABIL_RJ[D.functiune] ? true : (D.niv_supraterane ? (+D.niv_supraterane >= 5) : null);
+      var vecNeconformeRJ = (m6b.vecinatati || []).some(function (v) { return v.conforma === false; });
+      var randuri = [
+        { normativ: 'Legea 307/2006, art. 30 (obligativitatea scenariului de securitate la incendiu)', status: 'respectat', obs: 'scenariul a fost elaborat pentru acest proiect' },
+        { normativ: 'H.G. 571/2016, Anexa 1 (obligativitate aviz/autorizare de securitate la incendiu)', status: seSupuneRJ == null ? 'date_insuficiente' : (seSupuneRJ ? 'respectat' : 'neaplicabil'), obs: 'vezi secțiunea 1.2 pentru temei și motiv complet' },
+        { normativ: 'Ord. MAI 180/2022, Anexa 5 (structura scenariului, capitol cu capitol)', status: capitoleBlocante.length ? 'nerespectat' : 'respectat', obs: capitoleBlocante.length ? capitoleBlocante.length + ' capitol(e) incomplet(e) — vezi checklist-ul de mai sus' : 'toate cele 5 capitole complete' },
+        { normativ: 'P118-1/2025, ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ' (rezistența la foc a elementelor)', status: 'respectat', obs: 'proiectat pentru minimul necesar, grad declarat ' + esc(grad) },
+        { normativ: 'P118-1/2025, ' + esc(m5.norma || 'Tabelul 41/42') + ' (compartimentarea la incendiu)', status: m5.conform === false ? 'nerespectat' : (m5.conform ? 'respectat' : 'date_insuficiente'), obs: 'arie compartiment vs. maxim admis' },
+        { normativ: 'P118-1/2025, Tabelul 4/145 (distanțe de siguranță față de vecinătăți)', status: vecNeconformeRJ ? 'nerespectat' : 'respectat', obs: (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate' },
+        { normativ: 'P118-1/2025, ' + esc(m9niv.norma || 'Tabelul 148') + ' (numărul maxim de niveluri)', status: m9niv.nelimitat ? 'neaplicabil' : (m9niv.eroare ? 'date_insuficiente' : (m9niv.conform ? 'respectat' : 'nerespectat')), obs: m9niv.nelimitat ? 'nelimitat pentru gradul ' + esc(grad) : 'proiectat vs. maxim admis' },
+        { normativ: 'HG 1058/2006 (zone cu pericol de explozie — ATEX)', status: atexAplicabilUnele ? 'date_insuficiente' : 'neaplicabil', obs: atexAplicabilUnele ? 'zonă declarată — validare de specialist ATEX în curs' : 'nu au fost identificate substanțe cu potențial exploziv' },
+        { normativ: 'P118/2-2013, art. 4.1/4.2 (hidranți interiori/exteriori)', status: (ac.hidranti_int_oblig || ac.hidranti_ext_oblig) ? 'date_insuficiente' : 'neaplicabil', obs: (ac.hidranti_int_oblig || ac.hidranti_ext_oblig) ? 'obligatoriu — dimensionare la faza de proiect tehnic' : 'sub pragul aplicabil destinației' },
+        { normativ: 'P118/2-2013, cap. 7 (instalații automate de stingere)', status: ac.sprinklere_oblig ? 'date_insuficiente' : 'neaplicabil', obs: ac.sprinklere_oblig ? 'obligatoriu — dimensionare la faza de proiect tehnic' : 'sub pragul de arie/înălțime' },
+        { normativ: 'P118-3/2015 (IDSAI, desfumare)', status: (ac.idsi_oblig || ac.desfumare_oblig) ? 'date_insuficiente' : 'neaplicabil', obs: (ac.idsi_oblig || ac.desfumare_oblig) ? 'obligatoriu — dimensionare la faza de proiect tehnic' : 'sub pragul aplicabil / fără impunere' },
+        { normativ: 'P118-1/2025 (clasa de reacție la foc a materialelor de construcție)', status: necesitaDoP.length ? 'date_insuficiente' : 'respectat', obs: necesitaDoP.length ? necesitaDoP.length + ' element(e) cu DoP de atașat la execuție' : 'toate materialele consacrate, clasificare implicită' },
+        { normativ: 'Legea 10/1995 (cerința fundamentală „securitate la incendiu")', status: 'respectat', obs: 'sistem de verificare/asigurare a calității tratat la fazele D.T.A.C./PTh, conform legii' }
+      ];
+      var COL = { respectat: 0, nerespectat: 1, neaplicabil: 2, date_insuficiente: 3 };
+      return '<p>Tabel distinct de matricea tehnică de mai sus — orientat strict juridic, pentru un jurist/verificator care nu are nevoie de calcul, ci doar de starea de conformitate legală per act normativ.</p>' +
+        tbl(randuri.map(function (r) {
+          var row = ['—', '—', '—', '—']; row[COL[r.status]] = '✔ ' + esc(r.obs);
+          return [esc(r.normativ)].concat(row);
+        }), ['Articol/Normă', 'Respectat', 'Nerespectat', 'Neaplicabil', 'Date insuficiente']);
+    }
+
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
       { h: null, html: '<div style="border:2px solid ' + (CULOARE_VERDICT[verdict.culoare] || '#888') + ';border-radius:6pt;padding:10pt;margin-bottom:8pt;background:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '11">' +
@@ -1421,6 +1452,7 @@
         { stare: fiseNeconformitate.length ? false : true, text: fiseNeconformitate.length ? fiseNeconformitate.length + ' neconformitate(ăți) identificate — tratate mai sus, prin corecție directă de proiect sau măsură compensatorie.' : 'Nu au fost identificate neconformități.' }
       ]) },
       { h: 'Matricea completă de conformitate (sinteză finală)', html: _tblMatriceConformitate() },
+      { h: 'Anexă — Raport juridic de conformitate', html: _tblRaportJuridic() },
       { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
         (statusNevalidat.length
           ? (D._normative_confirmate_de_proiectant
