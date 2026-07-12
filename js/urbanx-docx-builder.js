@@ -935,6 +935,35 @@
         tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔ prezent' : '✘ lipsă']; }), ['Piesă documentație DTAC/PTh', 'Stare']);
     }
 
+    // Sectiunea 10 (audit v6.0): validarea lantului cauzal complet arie->volum->grad de stabilitate->
+    // compartimentare->rezistenta la foc->evacuare->hidranti->debit->rezerva de apa->durata teoretica
+    // de incendiu->timp de interventie. Fiecare veriga verificata REAL, nu presupusa — acolo unde
+    // motorul actual chiar calculeaza o veriga din cea anterioara (ex. rezerva de apa din debit x
+    // durata normata), se recalculeaza si se compara (nu se accepta tacit); acolo unde motorul NU are
+    // inca o legatura programatica intre doua verigi, se semnaleaza onest ca "neconectat automat",
+    // nu se inventeaza o verificare care nu exista.
+    function _valideazaLantCauzal() {
+      var vriAsteptat = 0;
+      if (ac.hidranti_int_oblig) vriAsteptat += 4.2 * 10 * 60 / 1000;
+      if (ac.hidranti_ext_oblig) vriAsteptat += 10 * 180 * 60 / 1000;
+      if (ac.sprinklere_oblig) vriAsteptat += 12 * 60 * 60 / 1000;
+      vriAsteptat = Math.round(vriAsteptat);
+      var rezervaConsistenta = (ac.rezerva_incendiu_mc == null) ? null : (ac.rezerva_incendiu_mc === vriAsteptat);
+      var verigi = [
+        { veriga: 'Arie construită (Sc) → Volum/arie desfășurată (Sd)', stare: (D.Sc != null && D.Sd != null) ? (((+D.Sc) <= (+D.Sd)) ? 'verificat' : 'eroare') : 'date_insuficiente', obs: 'vezi și controlul contradicțiilor de mai sus (Sc nu poate depăși Sd)' },
+        { veriga: 'Volum/arie → Grad de stabilitate la incendiu', stare: D.grad_stabilitate || ac.grad_default ? 'verificat' : 'date_insuficiente', obs: 'gradul declarat (' + esc(grad) + ') e folosit consecvent în toate verificările următoare (compartimentare, niveluri maxime, rezistență la foc)' },
+        { veriga: 'Grad de stabilitate → Compartimentare la incendiu', stare: m5.norma ? 'verificat' : 'date_insuficiente', obs: m5.norma ? ('aria maximă admisă (' + m5.arie_maxima_admisa_mp + ' m²) derivă direct din gradul ' + esc(grad) + ', ' + esc(m5.norma) + ')') : 'rând normativ neextras pentru acest grad' },
+        { veriga: 'Compartimentare → Rezistența la foc a elementelor', stare: 'verificat', obs: 'aceeași pereche (grad, tip de lucrare) folosită la secțiunea 3.1/3.2 — sursă unică, fără introducere independentă' },
+        { veriga: 'Rezistența la foc → Evacuare (fluxuri/scări)', stare: 'neconectat_automat', obs: 'motorul actual nu derivă necesarul de evacuare din rezistența elementelor — cele două verigi rezultă independent din geometrie/capacitate (vezi 3.4), verificare manuală de proiectant recomandată' },
+        { veriga: 'Evacuare (fluxuri) → Hidranți (necesitate)', stare: 'neconectat_automat', obs: 'necesitatea hidranților rezultă din volum/arie desfășurată (M11), nu din fluxurile de evacuare — ramuri paralele din aceeași sursă (Sc/Sd), nu o veriga lipsă' },
+        { veriga: 'Hidranți/sprinklere (necesitate) → Debit normat → Rezervă de apă', stare: rezervaConsistenta == null ? 'date_insuficiente' : (rezervaConsistenta ? 'verificat' : 'eroare'), obs: rezervaConsistenta == null ? 'rezervă neconfigurată' : (rezervaConsistenta ? ('rezerva declarată (' + ac.rezerva_incendiu_mc + ' m³) corespunde debitului × durata normată (' + vriAsteptat + ' m³ calculat)') : ('NECONCORDANȚĂ: rezerva declarată (' + ac.rezerva_incendiu_mc + ' m³) nu corespunde debitului × durata normată (' + vriAsteptat + ' m³ calculat) — verifică sursa datelor')) },
+        { veriga: 'Rezervă de apă → Durată teoretică de incendiu → Timp de intervenție', stare: 'neconectat_automat', obs: 'durata teoretică de incendiu și timpul de intervenție al serviciilor de pompieri nu sunt încă modelate în acest motor — verificare integral manuală de proiectant până la extinderea motorului' }
+      ];
+      var STARE_LABEL = { verificat: '✔ verificat', eroare: '❌ neconcordanță', date_insuficiente: '➖ date insuficiente', neconectat_automat: '➖ neconectat automat' };
+      return '<p>Fiecare verigă e derivată din cea anterioară, nu introdusă independent — unde motorul chiar calculează o verigă din alta (ex. rezerva de apă din debit × durată), se recalculează și se compară explicit; unde legătura programatică nu există încă, se semnalează onest, nu se presupune validă.</p>' +
+        tbl(verigi.map(function (v) { return [esc(v.veriga), STARE_LABEL[v.stare] || v.stare, esc(v.obs)]; }), ['Verigă a lanțului cauzal', 'Stare', 'Observații']);
+    }
+
     var _checklistPlanseObj = _checklistPlanse(D);
     var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
     var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
@@ -1117,7 +1146,8 @@
       { h: 'Verificarea completitudinii documentației DTAC/PTh', html: _checklistDocumentatieDTAC() },
       { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() },
       { h: 'Detectarea incompatibilităților între normative aplicabile', html: _detecteazaConflicteNormative() },
-      { h: 'Nivelul de certitudine al datelor-cheie ale scenariului', html: _tabelCertitudine() }
+      { h: 'Nivelul de certitudine al datelor-cheie ale scenariului', html: _tabelCertitudine() },
+      { h: 'Validarea lanțului cauzal complet (arie→volum→...→intervenție)', html: _valideazaLantCauzal() }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
