@@ -180,6 +180,9 @@
     out.dist_evacuare_fundsac = 15;
     // Desfumare (P118-2): H>8 (industrial) / SC mare / subteran
     out.desfumare_oblig = (d.functiune === 'hala-industriala' && (H > 8 || Sc > 1000)) || d.functiune === 'parcare' || Sc > 2500 || H > 28;
+    // Presurizare case de scari (P118-2): clădiri înalte (H>28m), unde evacuarea fumului prin mijloace
+    // naturale nu mai e suficientă pe casa de scări interioară — acelasi prag ca desfumarea mecanica.
+    out.presurizare_scari_oblig = H > 28;
     // Hidranți interiori (P118-2): volum > 5000 mc sau Sd > 2000; exteriori: Sc mare
     var vol = Sd * 3; // estimare volum (H nivel ~3 m)
     out.hidranti_int_oblig = vol > 5000 || Sd > 2000 || ['mall', 'sport', 'medical', 'parcare', 'hala-industriala'].indexOf(d.functiune) >= 0;
