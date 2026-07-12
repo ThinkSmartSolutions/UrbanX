@@ -419,7 +419,17 @@
     // rezultat: eticheta destinatiei afisata in tot documentul cadea pe genericul "alte destinatii, fara
     // sali aglomerate", inconsistent cu concluzia reala (SE SUPUNE, persoane care nu se pot evacua singure).
     'centru-social': 'Cladiri care adapostesc persoane ce nu se pot evacua singure',
-    'medical': 'Cladiri care adapostesc persoane ce nu se pot evacua singure'
+    'medical': 'Cladiri care adapostesc persoane ce nu se pot evacua singure',
+    // Extindere multi-functiune (Florin, 13 iul: "verifica daca toate functiunile au aceeasi calitate")
+    // — restul functiunilor cadeau toate pe genericul "alte destinatii, fara sali aglomerate", desi au
+    // categorii T42 proprii cu praguri diferite. Mapate acum la eticheta reala.
+    'mall': 'Cladiri comerciale (sali aglomerate)', 'spatiu-comercial': 'Cladiri comerciale',
+    'scoala': 'Cladiri de invatamant', 'sport': 'Sali de sport / sali aglomerate',
+    'hala-industriala': 'Cladiri de productie si/sau depozitare', 'skid': 'Constructii tehnologice (categorie de pericol de incendiu)',
+    'parcare': 'Parcaje pentru autoturisme', 'cladire-mixta': 'Cladiri cu functiuni mixte (comercial+locuire)',
+    'bess': 'Constructii tehnologice (stocare energie)', 'statie-transformare': 'Constructii tehnologice (statie electrica)',
+    'birouri': 'Cladiri administrative (birouri)', 'parc-fotovoltaic': 'Constructii tehnologice (parc fotovoltaic)',
+    'agricol': 'Cladiri agrozootehnice'
   };
   function _destinatieT42(functiune) { return _DESTINATIE_T42[functiune] || 'Cladiri cu alte destinatii, fara sali aglomerate'; }
 
@@ -617,6 +627,30 @@
     var m0 = G.SSI_ENGINE.m0_tipLucrare({ tip_lucrare: D.tip_lucrare });
     if (m0.eroare) {
       return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU', 'Ord. MAI 180/2022, Anexa 5'), [{ h: null, html: '<p><b>' + esc(m0.mesaj) + '</b></p>' }]) };
+    }
+    // Extindere multi-functiune (13 iul): infrastructura rutiera (drum/pod) NU e o "constructie" in
+    // sensul P118/Legea 307/2006 — nu adaposteste persoane, nu are compartimente de incendiu, risc
+    // structural la incendiu nesemnificativ. A rula cascada M0-M17 (compartimentare/evacuare/hidranti
+    // per cladire) pe un drum/pod ar produce concluzii false ("SE SUPUNE avizarii" pe o structura care
+    // nu intra sub incidenta normativului). Onest: cascada NU se aplica direct, dar se semnaleaza ce
+    // ANEXE ale investitiei (tuneluri, cabine tehnice) intra totusi sub P118, ca si constructii distincte.
+    if (D.functiune === 'infrastructura-drum' || D.functiune === 'pod') {
+      var esteTunelLung = D.functiune === 'infrastructura-drum' && (+D.lungime_tunel_m || 0) > 100;
+      var fnLabelInfra = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
+      var secsInfra = [
+        { h: null, html: '<div style="border:2px solid #d97706;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#d9770611">' +
+          '<p style="margin:0;font-size:13pt;font-weight:bold;color:#d97706">CONCLUZIE GENERALĂ: P118 NU SE APLICĂ DIRECT INVESTIȚIEI DE BAZĂ</p>' +
+          '<p style="margin:4pt 0 0">Investiția „' + esc(fnLabelInfra) + '" este o lucrare de infrastructură rutieră, nu o construcție (clădire) în sensul Legii 307/2006 și P118-1/2025 — nu adăpostește persoane cu caracter permanent, nu se compartimentează la incendiu și nu intră sub incidența cascadei de verificare M0-M17 din acest motor.</p></div>' },
+        { h: '1. Temeiul excluderii din P118', html: '<p>Ordinul MAI 180/2022 (Anexa 5) și P118-1/2025 reglementează securitatea la incendiu a <b>construcțiilor</b> — clădiri civile, industriale, agrozootehnice — definite prin existența unor compartimente de incendiu, căi de evacuare a persoanelor și elemente de construcție cu funcție de rezistență/limitare a propagării focului. Un drum sau un pod, ca structură, nu întrunește aceste criterii: nu are ocupanți permanenți, nu se compartimentează, iar riscul structural la incendiu (afectarea capacității portante prin ardere) este nesemnificativ comparativ cu o clădire.</p>' },
+        { h: '2. Ce PĂSTREAZĂ totuși cerințe de securitate la incendiu', html: '<p>' + (D.functiune === 'infrastructura-drum'
+          ? (esteTunelLung
+            ? '<b>Tunel rutier declarat cu lungime ' + D.lungime_tunel_m + ' m (&gt;100 m)</b> — intră sub incidența <b>HG 1043/2003</b> (cerințe minime de securitate pentru tunelurile din rețeaua rutieră trans-europeană/națională): ventilație de desfumare, hidranți/nișe SOS la interval normat, iluminat de siguranță, sisteme de detectare/alarmare, refugii, plan de intervenție dedicat — se tratează ca document tehnic SEPARAT, specific tunelului, nu ca extensie a acestui scenariu.'
+            : 'Dacă traseul include tuneluri cu lungime peste 100 m, acestea intră sub incidența HG 1043/2003 (cerințe de securitate tuneluri rutiere) — se declară lungimea tunelului (D.lungime_tunel_m) pentru o evaluare punctuală. Fără tunel declarat, nu se aplică cerințe SSI suplimentare drumului propriu-zis.')
+          : 'Podurile/pasarelele/viaductele nu au, de regulă, cerințe P118 proprii — riscul relevant este cel de incendiu al vehiculelor care tranzitează (mărfuri periculoase ADR), tratat prin planurile de intervenție ale autorităților rutiere/ISU, nu printr-un scenariu de construcție.') + '</p>' },
+        { h: '3. Construcții anexe ale investiției (tratare separată, dacă există)', html: '<p>Dacă proiectul include construcții anexe cu persoane/echipamente (cabine post, ghene/camere tehnice, stații de pompare, clădiri de exploatare) — <b>acestea intră sub incidența P118</b> ca și construcții de sine stătătoare. Se recomandă generarea unui scenariu de securitate la incendiu SEPARAT pentru fiecare astfel de construcție anexă, cu funcțiunea sa reală declarată (nu „' + esc(fnLabelInfra) + '"), nu se extinde acest document asupra lor.</p>' },
+        { h: '4. Măsuri generale de prevenire pe durata execuției și exploatării', html: '<p>Independent de neaplicabilitatea P118, se mențin cerințele generale de prevenire a incendiilor pe durata execuției (Legea 307/2006, permis de lucru cu foc pentru lucrări cu sudură/tăiere termică) și, pentru exploatare, planurile de intervenție ale administratorului drumului/podului pentru incidente cu vehicule (inclusiv transport mărfuri periculoase ADR).</p>' }
+      ];
+      return { cat: 'Memorii Tehnice', file: 'Scenariu_securitate_incendiu_P118.doc', html: docHtml(_meta(D, 'SCENARIU DE SECURITATE LA INCENDIU — EVALUARE APLICABILITATE', 'Ord. MAI 180/2022, Anexa 5'), secsInfra) };
     }
     var grad = D.grad_stabilitate || ac.grad_default || 'II';
     var destinatieT42 = _destinatieT42(D.functiune);
