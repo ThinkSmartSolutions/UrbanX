@@ -2282,6 +2282,35 @@
       ];
       return { cat: 'Recepție & Urmărire', file: 'Grafic_executie_finantare.doc', html: docHtml(_meta(D, 'GRAFIC DE EXECUȚIE ȘI FINANȚARE', 'eșalonare Gantt + grafic de finanțare C+M'), secs) };
     },
+    // Fise tehnice dotari + materiale — reutilizeaza biblioteca reala de materiale M4B (SSI) daca e
+    // incarcata, in loc sa dubleze lista ([[urbanx-no-content-duplication]]); adauga sectiune dotari/
+    // echipamente generala + tamplarie (trimitere la Tabloul T.01 din planse, nu redesenat aici).
+    'Fișe tehnice dotări și materiale': function (D, v) {
+      var fnLabel = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție';
+      var htmlMateriale;
+      if (G.SSI_M4B) {
+        var tipuriAcoperisDecl = D._relevee ? Object.keys(D._relevee).map(function (k) { return D._relevee[k].tip_acoperis; }).filter(Boolean) : [];
+        var materialeSursaFT = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata', tipuriAcoperisDecl);
+        var infoFT = G.SSI_M4B.valideazaMateriale(materialeSursaFT);
+        htmlMateriale = tbl(infoFT.materiale.map(function (m) {
+          return [esc(m.element || m.nume), esc(m.nume), esc(m.clasa || '—'), m.certitudine === 'implicit_acceptat' ? 'consacrat — clasificare implicită' : (m.DoP_atasat ? 'DoP atașat' : 'DoP/fișă tehnică de atașat la aprovizionare/execuție')];
+        }), ['Element', 'Material', 'Clasă reacție la foc', 'Confirmare produs']);
+      } else {
+        htmlMateriale = '<p>Lista de materiale se completează din proiectul de arhitectură/structură — fiecare produs cu variabilitate reală (tâmplărie, termoizolație, hidroizolație, învelitoare) se însoțește la aprovizionare/execuție de declarația de performanță (DoP) sau fișa tehnică a producătorului; materialele consacrate (beton, oțel, zidărie, sticlă) nu necesită confirmare suplimentară.</p>';
+      }
+      var dotari = (D._echipamente && D._echipamente.length) ? D._echipamente : null;
+      var htmlDotari = dotari
+        ? tbl(dotari.map(function (e) { return [esc(e.denumire || '—'), esc(e.tip || '—'), esc(e.caracteristici || '—'), esc(e.certificare || 'de precizat')]; }), ['Denumire', 'Tip/categorie', 'Caracteristici tehnice', 'Certificare/agrement'])
+        : '<p>Echipamentele și dotările tehnice ale proiectului (obiecte sanitare, centrală/echipamente HVAC, tablouri și echipamente electrice, lift, echipamente PSI) nu sunt încă declarate individual pentru acest proiect (D._echipamente) — se completează la faza de proiect tehnic/aprovizionare, fiecare cu fișa tehnică a producătorului și, unde e cazul, agrementul tehnic/certificatul de conformitate.</p>';
+      var secs = [
+        { h: '1. Obiect', html: '<p>Prezentul document centralizează fișele tehnice ale principalelor materiale de construcție și ale dotărilor/echipamentelor tehnice prevăzute pentru obiectivul „' + esc(fnLabel) + '", ' + esc(D.uat || '—') + ' — necesar la recepție și pentru completarea Cărții tehnice a construcției (Legea 10/1995).</p>' },
+        { h: '2. Materiale de construcție', html: htmlMateriale },
+        { h: '3. Dotări și echipamente tehnice', html: htmlDotari },
+        { h: '4. Tâmplărie', html: '<p>Tabloul de tâmplărie (uși/ferestre, dimensiuni, tip, cantități) se generează ca planșă separată T.01 din setul de planșe al proiectului — vezi „Planșe" în panoul de generare.</p>' },
+        { h: '5. Trasabilitate la execuție', html: '<p>Pentru fiecare element cu variabilitate reală (marcat mai sus „DoP/fișă tehnică de atașat"), documentul justificativ concret (DoP, agrement tehnic, certificat de conformitate) se atașează la Cartea tehnică a construcției la momentul aprovizionării/punerii în operă, cu numele produsului și al producătorului ales.</p>' }
+      ];
+      return { cat: 'Piese Administrative', file: 'Fise_tehnice_dotari_materiale.doc', html: docHtml(_meta(D, 'FIȘE TEHNICE — DOTĂRI ȘI MATERIALE', 'Legea 10/1995'), secs) };
+    },
     'Cartea tehnică a construcției': function (D, v) {
       var ac = v.calc || {}; var isPth = (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT');
       var fnLabel = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune || 'construcție';
