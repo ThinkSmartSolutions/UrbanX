@@ -471,6 +471,24 @@
     return tbl(rows, ['Element constructiv', 'Rezistență necesară (Tabelul 2)', 'Rezistență realizată (sursă: DoP/certificat)', 'Sursa valorii realizate', 'Conform']);
   }
 
+  // Model Florin (pct. 4.1-4.11): fiecare instalatie cu echipare necesara are o lista de campuri
+  // tehnice proprii (tip, volum, jeturi, debit, presiune etc.), nu doar o concluzie DA/NU. Daca
+  // instalatia NU e necesara, modelul insusi cere colaps la "Nu este cazul" (nu se detaliaza campuri
+  // pt un sistem care nu exista) — de aici ramura scurta. Daca e necesara si D._instalatii_ssi[cheie]
+  // nu furnizeaza valoarea reala a unui camp, se marcheaza onest ca lipsa (nu se inventeaza).
+  function _tblCampuriInstalatie(necesara, cheieInstalatie, campuri, D) {
+    // necesara poate fi si undefined/null (cerinta neevaluata de motor, nu confirmata negativ —
+    // ex. paratraznet_oblig nu e calculat nicaieri) — in acel caz NU afirmam "nu e cazul" (ar fi
+    // o concluzie falsa), lasam doar textul din paragraful de concluzie de mai sus.
+    if (necesara == null) return '';
+    if (!necesara) return '<p>Nu este cazul — echiparea nu este necesară (vezi concluzia de mai sus).</p>';
+    var valori = (D._instalatii_ssi && D._instalatii_ssi[cheieInstalatie]) || {};
+    return tbl(campuri.map(function (c) {
+      var v = valori[c.cheie];
+      return [c.eticheta, v != null ? esc(String(v)) : '[se completează la faza de proiect tehnic — necesită date de la proiectantul de instalații]'];
+    }), ['Caracteristică', 'Valoare']);
+  }
+
   // Model Florin (pct. 4, tabel de sinteza): "Tabel de verificare - praguri instalatii PSI". Pragurile NU
   // sunt inventate pt acest tabel — sunt EXACT cele deja folosite de motorul de calcul (urbanx-doc-engine.js,
   // functia care seteaza ac.sprinklere_oblig/idsi_oblig/hidranti_int_oblig/hidranti_ext_oblig/desfumare_oblig),
@@ -884,17 +902,45 @@
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
-      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b> — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.</p>' },
-      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației rezidențiale unifamiliale.</p>' },
-      { h: '4.3. Instalații automate de stingere cu sprinklere', html: '<p>Necesitatea echipării se stabilește conform cap. 7 din P118/2-2013, funcție de destinație, categorie de importanță, arie desfășurată, volum și regim de înălțime reale. Concluzie: <b>' + (ac.sprinklere_oblig ? 'OBLIGATORII (Sc&gt;3.000 m² / H&gt;28m)' : 'NU ESTE NECESARĂ') + '</b>.</p>' },
+      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b> — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.</p>' +
+        _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
+          { cheie: 'tip', eticheta: 'Tipul instalației (apă-apă, aer-aer)' }, { cheie: 'volum_mc', eticheta: 'Volumul construcției/compartimentului de incendiu (m³)' },
+          { cheie: 'jeturi_simultane', eticheta: 'Număr de jeturi în funcțiune simultană' }, { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' },
+          { cheie: 'jeturi_pe_punct', eticheta: 'Număr de jeturi pe punct' }, { cheie: 'debit_calcul', eticheta: 'Debit de calcul (l/s)' },
+          { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'racorduri_exterioare', eticheta: 'Număr de racorduri exterioare' },
+          { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' }, { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
+        ], D) },
+      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației rezidențiale unifamiliale.</p>' +
+        _tblCampuriInstalatie(ac.hidranti_ext_oblig, 'hidranti_ext', [
+          { cheie: 'distante', eticheta: 'Distanțele față de construcție' }, { cheie: 'volum_mc', eticheta: 'Volumul compartimentului de incendiu (m³)' },
+          { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' }, { cheie: 'debit_calcul', eticheta: 'Debit de calcul (l/s)' },
+          { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' },
+          { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
+        ], D) },
+      { h: '4.3. Instalații automate de stingere cu sprinklere', html: '<p>Necesitatea echipării se stabilește conform cap. 7 din P118/2-2013, funcție de destinație, categorie de importanță, arie desfășurată, volum și regim de înălțime reale. Concluzie: <b>' + (ac.sprinklere_oblig ? 'OBLIGATORII (Sc&gt;3.000 m² / H&gt;28m)' : 'NU ESTE NECESARĂ') + '</b>.</p>' +
+        _tblCampuriInstalatie(ac.sprinklere_oblig, 'sprinklere', [
+          { cheie: 'solutie_tehnica', eticheta: 'Soluția tehnică de realizare (umedă/uscată/preacționată, SR EN 12845)' }, { cheie: 'clasa_pericol', eticheta: 'Clasa de pericol de incendiu (LH/OH1/OH2/HHP)' },
+          { cheie: 'categorie_depozitare', eticheta: 'Categoria de depozitare și modul de depozitare' }, { cheie: 'arie_max_sprinkler', eticheta: 'Aria maximă acoperită de un sprinkler (m²)' },
+          { cheie: 'densitate_calcul', eticheta: 'Densitatea de calcul (l/min/m²)' }, { cheie: 'arie_declansare', eticheta: 'Aria de declanșare simultană (m²)' },
+          { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă a instalației' },
+          { cheie: 'volum_rezerva', eticheta: 'Volumul rezervei de apă (m³)' }, { cheie: 'racorduri_exterioare', eticheta: 'Numărul de racorduri exterioare' }
+        ], D) },
       { h: '4.4. Instalații de limitare/stingere cu sprinklere deschise', html: '<p>Nu este cazul — nu există goluri mari (cortine de apă) în configurația unei locuințe unifamiliale.</p>' },
       { h: '4.5. Instalații de stingere cu apă pulverizată', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
       { h: '4.6. Instalații de stingere cu ceață de apă', html: '<p>Nu este cazul — nu aplicabil configurației unei locuințe unifamiliale.</p>' },
       { h: '4.7. Instalații de stingere cu gaze inerte', html: '<p>Nu este cazul — nu există spații tehnice cu echipamente electrice/electronice sensibile care să impună acest tip de stingere la o locuință unifamilială.</p>' },
-      { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + (ac.idsi_oblig ? 'OBLIGATORIE (Sc&gt;2.500 m²)' : 'NU ESTE OBLIGATORIE') + '</b> pentru destinația și aria rezidențială unifamilială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.</p>' },
+      { h: '4.8. Instalații de detectare, semnalizare și alarmare (IDSAI)', html: '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + (ac.idsi_oblig ? 'OBLIGATORIE (Sc&gt;2.500 m²)' : 'NU ESTE OBLIGATORIE') + '</b> pentru destinația și aria rezidențială unifamilială a proiectului. Recomandare (nu obligație normativă): detectoare autonome de fum (SR EN 14604) pe holuri/dormitoare, uzuale la orice locuință modernă.</p>' +
+        _tblCampuriInstalatie(ac.idsi_oblig, 'idsai', [
+          { cheie: 'grad_acoperire', eticheta: 'Gradul de acoperire (total/parțial, cu zonele acoperite)' }, { cheie: 'conditii_zona_detectare', eticheta: 'Condiții privind stabilirea zonei de detectare' },
+          { cheie: 'conditii_ecs', eticheta: 'Condiții de amplasare a echipamentului de control și semnalizare (e.c.s.)' }, { cheie: 'dispozitive_comandate', eticheta: 'Alte dispozitive comandate sau supravegheate de e.c.s.' }
+        ], D) },
       { h: '4.9. Instalație de desfumare/evacuare fum și gaze fierbinți', html: '<p>' + (ac.desfumare_oblig ? 'Necesară conform configurației declarate la 3.4.a — metodă, spații desfumate și debite se stabilesc la faza de proiect tehnic.' : 'Nu este cazul, motivat la pct. 3.4.a — control fum prin tiraj natural, suficient pentru configurația proiectului.') + '</p>' },
       { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
-      { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru un regim de înălțime redus, într-un ansamblu rezidențial, evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' },
+      { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru un regim de înălțime redus, într-un ansamblu rezidențial, evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' +
+        _tblCampuriInstalatie(ac.paratraznet_oblig, 'ipt', [
+          { cheie: 'clasa_ipt_spt', eticheta: 'Clasa IPT și SPT (din evaluarea de risc)' }, { cheie: 'nivel_protectie', eticheta: 'Nivel de protecție (I–IV)' },
+          { cheie: 'metoda_protectie', eticheta: 'Metoda de protecție (tijă/plasă/conductoare captare)' }
+        ], D) },
       { h: '▤ Tabel de verificare — praguri instalații PSI (P118/2-2013, P118-3/2015)', html:
         '<p>Pragurile provin din pragurile deja aplicate de motorul de calcul al platformei (aceleași valori care produc concluziile DA/NU de la 4.1–4.11 de mai sus) — se compară explicit cu valoarea reală a proiectului pentru fiecare instalație, nu doar concluzia finală.</p>' +
         _tblPraguriInstalatii(D, ac, m5) },
