@@ -815,6 +815,32 @@
       }
     }
 
+    // Sectiunea 11 (audit v6.0): checklist automat de completitudine a planselor, generat din ce a
+    // fost EFECTIV incarcat in platforma (D._relevee[*].fisiere, populat de panoul SSI la fiecare
+    // upload), nu presupus existent. Un ✘ nu e doar informativ — verdictul final (Sectiunea 17/15)
+    // ar trebui sa reflecte lipsa unei planse critice, nu doar sa o afiseze in mijlocul documentului.
+    function _checklistPlanse(D) {
+      var toateFisierele = [];
+      Object.keys(D._relevee || {}).forEach(function (cheie) {
+        ((D._relevee[cheie] || {}).fisiere || []).forEach(function (f) { toateFisierele.push(f.nume || ''); });
+      });
+      var numeJoined = toateFisierele.join(' | ').toLowerCase();
+      function are(re) { return re.test(numeJoined); }
+      var itemi = [
+        { nume: 'Plan de situație', prezent: !!(D.geometrie_teren && D.geometrie_teren.cladiri_propuse) },
+        { nume: 'Plan parter/nivel(uri)', prezent: are(/parter|etaj|nivel/) || !!(D._camere && D._camere.length) },
+        { nume: 'Secțiuni', prezent: are(/sec[țt]iune/) },
+        { nume: 'Fațade', prezent: are(/fa[țt]ad/) },
+        { nume: 'Plan acoperiș/învelitoare', prezent: are(/[îi]nveli|acoperi[șs]/) },
+        { nume: 'Detalii (REI, etanșări)', prezent: !!(D._rezistenta_foc_elemente && Object.keys(D._rezistenta_foc_elemente).length) },
+        { nume: 'Planuri rețele (instalații)', prezent: false },
+        { nume: 'Relevee (H cornișă/coamă, materiale)', prezent: toateFisierele.length > 0 }
+      ];
+      var nrLipsa = itemi.filter(function (i) { return !i.prezent; }).length;
+      return '<p>' + (nrLipsa ? '<b>' + nrLipsa + ' element(e) încă neîncărcate</b> — concluziile care depind de ele rămân marcate onest ca atare în secțiunile corespunzătoare (nu se presupune existența lor).' : 'Toate categoriile de planșe urmărite au cel puțin un fișier încărcat.') + '</p>' +
+        tbl(itemi.map(function (i) { return [esc(i.nume), i.prezent ? '✔' : '✘']; }), ['Planșă/Document', 'Stare']);
+    }
+
     var CULOARE_VERDICT = { rosu: '#dc2626', galben: '#d97706', verde: '#16a34a' };
     var secs = [
       { h: null, html: '<div style="border:2px solid ' + (CULOARE_VERDICT[verdict.culoare] || '#888') + ';border-radius:6pt;padding:10pt;margin-bottom:8pt;background:' + (CULOARE_VERDICT[verdict.culoare] || '#888') + '11">' +
@@ -824,7 +850,8 @@
         // nu doar un text generic; fiecare conditie identifica explicit TIPUL (corectie directa/masura
         // compensatorie/document lipsa), elementul vizat si actiunea concreta de urmat.
         (verdict.conditii && verdict.conditii.length ? '<p style="margin:6pt 0 2pt;font-weight:bold">Condiții de îndeplinit:</p><ul style="margin:0">' + verdict.conditii.map(function (c) { return '<li><b>' + esc(c.tip) + '</b> — ' + esc(c.element || '') + ': ' + esc(c.actiune) + '</li>'; }).join('') + '</ul>' : '') +
-        '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' }
+        '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
+      { h: 'Verificarea completitudinii planșelor', html: _checklistPlanse(D) }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
