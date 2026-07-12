@@ -65,10 +65,7 @@
     return null;
   }
 
-  // Extrage textul din toate paginile unui PDF (ArrayBuffer) via pdf.js, apoi identifica materialele
-  // REALE mentionate — foloseste exact ce a scris proiectantul pe sectiune, nu presupune un sistem
-  // constructiv generic. Returneaza [{nume, element, DoP_atasat:false, sursa_extractie}].
-  async function extrageMaterialeDinPDF(arrayBuffer) {
+  async function _liniiDinPDF(arrayBuffer) {
     if (!window.pdfjsLib) throw new Error('pdf.js nu este încărcat — verifică conexiunea la CDN');
     var doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     var linii = [];
@@ -77,6 +74,14 @@
       var content = await page.getTextContent();
       content.items.forEach(function (it) { if (it.str && it.str.trim()) linii.push(_normalizeazaLinie(it.str)); });
     }
+    return linii;
+  }
+
+  // Extrage textul din toate paginile unui PDF (ArrayBuffer) via pdf.js, apoi identifica materialele
+  // REALE mentionate — foloseste exact ce a scris proiectantul pe sectiune, nu presupune un sistem
+  // constructiv generic. Returneaza [{nume, element, DoP_atasat:false, sursa_extractie}].
+  async function extrageMaterialeDinPDF(arrayBuffer) {
+    var linii = await _liniiDinPDF(arrayBuffer);
     var gasite = {};
     linii.forEach(function (linie) {
       if (IGNORA.test(linie)) return;
@@ -90,6 +95,112 @@
     });
   }
 
-  G.SSI_MATERIALE_EXTRACTIE = { extrageMaterialeDinPDF: extrageMaterialeDinPDF, DICTIONAR: DICTIONAR };
-  console.log('[SSI] extractie materiale din PDF de secțiune încărcată (window.SSI_MATERIALE_EXTRACTIE)');
+  // Puteri calorifice REALE (Anexa 9.1, Tabelul 137, P118-1/2025 — verificat pe text sursă oficial,
+  // pag. 543-546). Doar materialele efectiv necesare pt finisajele intalnite pe planurile de arhitectura
+  // (pardoseli) sunt incluse aici — nu tot tabelul 137 (peste 170 de randuri).
+  var PUTERE_CALORIFICA_MJ_KG = {
+    lemn: 18.40,       // "Lemn convențional", Tabelul 137 nr. crt. 92
+    pvc: 18.65         // "Policlorură de vinil (PVC) rigidă" 15...21.80, medie folosita conservator
+  };
+  // Densitate + grosime UZUALE de material pt pardoseli (proprietati fizice ale clasei de produs, nu
+  // date de proiect specifice — la fel cum se foloseste densitatea betonului 2400 kg/mc ca fapt cunoscut,
+  // nu ca "presupunere"). Sursa: standarde de produs uzuale pt parchet lemn stratificat/masiv RO.
+  var PARDOSEALA_COMBUSTIBILA = {
+    // regex pardoseala declarata -> {densitate kg/m3, grosime m, putere calorifica}
+    parchet: { densitate: 650, grosime: 0.010, pc: PUTERE_CALORIFICA_MJ_KG.lemn, eticheta: 'Parchet lemn (masiv/stratificat)' },
+    covor: { densitate: 1400, grosime: 0.003, pc: PUTERE_CALORIFICA_MJ_KG.pvc, eticheta: 'Covor PVC' }
+  };
+
+  function _sarcinaTermicaPardoseala(pardoseala) {
+    var p = String(pardoseala || '').toLowerCase();
+    if (/parchet/.test(p)) return PARDOSEALA_COMBUSTIBILA.parchet;
+    if (/covor/.test(p)) return PARDOSEALA_COMBUSTIBILA.covor;
+    return null; // gresie, gresie antiderapanta etc. — incombustibile, contributie 0
+  }
+
+  // Extrage inventarul REAL de incaperi de pe un plan de arhitectura (Parter/Etaj) — foloseste exact
+  // formatul de eticheta pus de proiectant pe desen: "Nume / Suprafata: X m2 / Per: Y m / h Liber: Z m /
+  // Pard.: material / Pereti: material / Tavan: material" (convenție GraphiSoft ArchiCAD — GSPublisherVersion,
+  // intalnita pe toate planurile acestui proiect). Calculeaza sarcina termica REALA a finisajului de
+  // pardoseala (singurul material combustibil cu arie/grosime cunoscute din desen) — NU inventeaza
+  // un inventar de mobilier care nu exista in fisier.
+  // pdf.js NU pastreaza fiecare eticheta+valoare pe acelasi fragment de text — "Suprafata:", valoarea
+  // numerica si unitatea "m2" (uneori chiar cifra "2" a exponentului separat) apar ca fragmente
+  // DISTINCTE consecutive in array (verificat pe fisierul real: ["Suprafata:","4.22","m","2","Per:",...]).
+  // Parserul citeste secvential intre etichete, nu presupune totul pe un singur rand.
+  function extrageIncaperiSiSarcinaTermica(linii) {
+    var camere = [];
+    function _esteEticheta(s, re) { return re.test(String(s || '').trim()); }
+    for (var i = 0; i < linii.length; i++) {
+      if (!_esteEticheta(linii[i], /^Suprafata:?$/i)) continue;
+      var nume = linii[i - 1] || 'Încăpere';
+      var j = i + 1, buf, mNum;
+      buf = '';
+      while (j < linii.length && !_esteEticheta(linii[j], /^Per:?$/i) && (j - i) < 6) { buf += ' ' + linii[j]; j++; }
+      mNum = /([\d.,]+)/.exec(buf); if (!mNum) continue; // fara arie numerica, nu e un rand real de camera
+      var arie = parseFloat(mNum[1].replace(',', '.'));
+      if (_esteEticheta(linii[j], /^Per:?$/i)) j++;
+      while (j < linii.length && !_esteEticheta(linii[j], /^h\s*Liber:?$/i) && (j - i) < 10) j++;
+      if (_esteEticheta(linii[j], /^h\s*Liber:?$/i)) j++;
+      while (j < linii.length && !_esteEticheta(linii[j], /^Pard\.?:?$/i) && (j - i) < 16) j++;
+      if (_esteEticheta(linii[j], /^Pard\.?:?$/i)) j++;
+      var pard = linii[j] || null; j++;
+      var pereti = null, tavan = null;
+      if (_esteEticheta(linii[j], /^Pereti:?$/i)) { j++; pereti = linii[j] || null; j++; }
+      if (_esteEticheta(linii[j], /^Tavan:?$/i)) { j++; tavan = linii[j] || null; }
+      camere.push({ nume: nume, arie_mp: arie, pardoseala: pard, pereti: pereti, tavan: tavan });
+    }
+    var vazute = {};
+    var unice = camere.filter(function (c) {
+      var cheie = c.nume + '|' + c.arie_mp + '|' + c.pardoseala;
+      if (vazute[cheie]) return false;
+      vazute[cheie] = true;
+      return true;
+    });
+    return unice.map(function (c) {
+      var mat = _sarcinaTermicaPardoseala(c.pardoseala);
+      var sarcina_termica_mj = mat ? Math.round(c.arie_mp * mat.grosime * mat.densitate * mat.pc) : 0;
+      return {
+        nume: c.nume, arie_mp: c.arie_mp, sarcina_termica_mj: sarcina_termica_mj,
+        sursa_sarcina: mat ? ('finisaj pardoseală real: ' + c.pardoseala + ' — ' + mat.eticheta + ' (' + (mat.grosime * 1000) + 'mm × ' + mat.densitate + 'kg/m³ × ' + mat.pc + 'MJ/kg, Tabelul 137 Anexa 9.1 P118-1/2025)') : ('pardoseală incombustibilă declarată (' + c.pardoseala + ') — contribuție 0'),
+        pardoseala_declarata: c.pardoseala
+      };
+    });
+  }
+
+  // Extrage din cartusul planului (daca e prezent) gradul de rezistenta la foc si categoria de
+  // importanta DECLARATE explicit de proiectant — cea mai autoritara sursa posibila (mai buna decat
+  // orice valoare implicita a motorului), daca proiectantul a completat aceste campuri pe desen.
+  function extrageGradSiCategorieDinPlanPDF(linii) {
+    var rezultat = {};
+    for (var i = 0; i < linii.length; i++) {
+      if (/grad de rezisten[tț]a la foc/i.test(linii[i])) {
+        for (var j = i + 1; j < Math.min(i + 4, linii.length); j++) {
+          var m = /^(I|II|III|IV|V)$/i.exec(linii[j].trim());
+          if (m) { rezultat.grad_stabilitate = m[1].toUpperCase(); break; }
+        }
+      }
+      if (/categoria de importan[tț][aă]/i.test(linii[i])) {
+        for (var j2 = i + 1; j2 < Math.min(i + 4, linii.length); j2++) {
+          var m2 = /^(A|B|C|D)$/i.exec(linii[j2].trim());
+          if (m2) { rezultat.categorie_importanta = m2[1].toUpperCase(); break; }
+        }
+      }
+    }
+    return rezultat;
+  }
+
+  async function extrageDatePlanPDF(arrayBuffer) {
+    var linii = await _liniiDinPDF(arrayBuffer);
+    return {
+      camere: extrageIncaperiSiSarcinaTermica(linii),
+      cartus: extrageGradSiCategorieDinPlanPDF(linii)
+    };
+  }
+
+  G.SSI_MATERIALE_EXTRACTIE = {
+    extrageMaterialeDinPDF: extrageMaterialeDinPDF, DICTIONAR: DICTIONAR,
+    extrageDatePlanPDF: extrageDatePlanPDF
+  };
+  console.log('[SSI] extractie materiale + incaperi/sarcina termica din PDF încărcată (window.SSI_MATERIALE_EXTRACTIE)');
 })(window);

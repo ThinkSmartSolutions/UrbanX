@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [] };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {} };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -382,21 +382,37 @@
         }
       } catch (e) { if (G.ss) G.ss('Fișier atașat ca referință (nu s-a putut citi geometria: ' + e.message + ') — completează H manual.'); }
     } else if (/\.pdf$/i.test(file.name)) {
-      // Fix real (Florin, 12 iul): sectiunile PDF contin stratigrafia reala a peretilor/planseului/
-      // acoperisului (grosime + material, scrise de proiectant pe desen) — se citesc automat, nu se
-      // mai presupune un sistem constructiv generic cand datele reale exista deja in fisier.
+      // Fix real (Florin, 12 iul): planurile/sectiunile PDF contin date reale — stratigrafia peretilor
+      // (materiale), inventarul de incaperi cu arie + finisaj pardoseala (deci sarcina termica REALA
+      // a finisajului), si uneori gradul de stabilitate/categoria de importanta declarate in cartus —
+      // se citesc automat pe orice PDF incarcat, nu se mai presupune ceva generic cand fisierul chiar
+      // contine datele.
       try {
         var buf = await file.arrayBuffer();
+        var bufDatePlan = buf.slice(0); // pdf.js poate detasa bufferul original — clonat INAINTE de prima citire
         var materiale = await G.SSI_MATERIALE_EXTRACTIE.extrageMaterialeDinPDF(buf);
+        var datePlan = await G.SSI_MATERIALE_EXTRACTIE.extrageDatePlanPDF(bufDatePlan);
+        var mesaje = [];
         if (materiale.length) {
           materiale.forEach(function (m) {
             if (!STATE.materialeExtrase.some(function (x) { return x.nume === m.nume; })) STATE.materialeExtrase.push(m);
           });
           STATE.relevee[cheie].materiale_extrase = materiale.map(function (m) { return m.nume; });
-          if (G.ss) G.ss('📎 ' + file.name + ': materiale reale identificate pe secțiune — ' + materiale.map(function (m) { return m.nume; }).join(', ') + ' (' + materiale.length + ' total, se aplică în locul listei implicite generice).');
-        } else {
-          if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am recunoscut denumiri de materiale pe text în PDF (poate fi scanat/imagine); completează H cornișă/H coamă/tip acoperiș manual.');
+          mesaje.push('materiale reale: ' + materiale.map(function (m) { return m.nume; }).join(', '));
         }
+        if (datePlan.camere && datePlan.camere.length) {
+          datePlan.camere.forEach(function (c) {
+            if (!STATE.camereExtrase) STATE.camereExtrase = [];
+            if (!STATE.camereExtrase.some(function (x) { return x.nume === c.nume && x.arie_mp === c.arie_mp; })) STATE.camereExtrase.push(c);
+          });
+          mesaje.push(datePlan.camere.length + ' încăperi cu arie + sarcină termică reală a pardoselii (' + datePlan.camere.filter(function (c) { return c.sarcina_termica_mj > 0; }).length + ' cu pardoseală combustibilă)');
+        }
+        if (datePlan.cartus && (datePlan.cartus.grad_stabilitate || datePlan.cartus.categorie_importanta)) {
+          STATE.cartusExtras = Object.assign({}, STATE.cartusExtras, datePlan.cartus);
+          mesaje.push('cartuș: ' + (datePlan.cartus.grad_stabilitate ? 'grad ' + datePlan.cartus.grad_stabilitate : '') + (datePlan.cartus.categorie_importanta ? ', categorie ' + datePlan.cartus.categorie_importanta : ''));
+        }
+        if (mesaje.length) { if (G.ss) G.ss('📎 ' + file.name + ': ' + mesaje.join(' · ') + '.'); }
+        else { if (G.ss) G.ss('📎 ' + file.name + ' atașat — nu am recunoscut date structurate pe text în PDF (poate fi scanat/imagine); completează manual.'); }
       } catch (e) { if (G.ss) G.ss('📎 ' + file.name + ' atașat ca referință (nu s-a putut citi textul PDF: ' + e.message + ') — completează manual.'); }
     }
     render();
@@ -409,10 +425,13 @@
         _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
         _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
         _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee,
-        _materiale: STATE.materialeExtrase.length ? STATE.materialeExtrase : undefined
+        _materiale: STATE.materialeExtrase.length ? STATE.materialeExtrase : undefined,
+        _camere: (STATE.camereExtrase && STATE.camereExtrase.length) ? STATE.camereExtrase : undefined,
+        grad_stabilitate: STATE.cartusExtras && STATE.cartusExtras.grad_stabilitate,
+        categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
       } : null;
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [] }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {} }; },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
@@ -458,6 +477,13 @@
         // scrisă de proiectant pe desen — Florin, 12 iul: "ai toate datele pentru DoP, nu mai spune
         // nedeclarat") — au prioritate față de lista implicită generică, la fel ca restul câmpurilor.
         Dproj._materiale = Dproj._materiale || pending._materiale;
+        // Incaperi cu arie + sarcina termica REALA a pardoselii (din planurile Parter/Etaj — Florin,
+        // 12 iul: "ai plansele pe fiecare nivel, ce lipseste?") + grad de stabilitate/categorie de
+        // importanta DECLARATE de proiectant in cartus (sursa cea mai autoritara — desenul lui,
+        // nu un implicit al motorului).
+        Dproj._camere = Dproj._camere || pending._camere;
+        Dproj.grad_stabilitate = Dproj.grad_stabilitate || pending.grad_stabilitate;
+        Dproj.categorie_importanta = Dproj.categorie_importanta || pending.categorie_importanta;
       }
       return orig(Dproj, v);
     };

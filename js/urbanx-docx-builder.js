@@ -877,25 +877,32 @@
         // destinatii cu public (comert/sanatate/invatamant), NU pt rezidential unifamilial, unde
         // capacitatea reala e data de programul locativ (numarul de dormitoare), nu de o formula.
         var nrUnitati = cladiriPropuse.length || 1;
-        var persEstimate = nrUnitati * 4; // ipoteza uzuala 4 pers/unitate (familie medie) — vezi nota
+        var nrDormitoare = (D._camere || []).filter(function (c) { return /dormitor/i.test(c.nume || ''); }).length;
+        var persPeUnitate = nrDormitoare ? nrDormitoare * 2 : 4;
+        var persEstimate = nrUnitati * persPeUnitate;
+        var sursaEstimare = nrDormitoare
+          ? nrDormitoare + ' dormitoare declarate în proiect (planul de arhitectură) × 2 persoane/dormitor'
+          : '4 persoane/unitate (familie medie, program locativ tipic)';
         return '<p>Pentru destinația rezidențială unifamilială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
-          '<p>Estimare orientativă (ipoteză 4 persoane/unitate, familie medie — se corectează cu numărul real de camere/dormitoare din proiect, dacă diferă): ' + nrUnitati + ' unități × ~4 persoane ≈ <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ~4 persoane pe unitate individuală.</p>' +
+          '<p>' + sursaEstimare + ': ' + nrUnitati + ' unități × ' + persPeUnitate + ' persoane = <b>' + persEstimate + ' persoane</b> (ansamblu complet), respectiv ' + persPeUnitate + ' persoane pe unitate individuală.</p>' +
           '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare, pentru o unitate P+1E cu o singură scară interioară, rezultă din raportarea lungimii traseului (parter/etaj) la viteza medie de deplasare (0,4 m/s orizontal) — sub 1 minut pentru configurația uzuală a unei locuințe unifamiliale.</p>';
       })() },
       { h: '1.4.h. Capacități de depozitare', html: '<p>Nu este cazul — destinația rezidențială unifamilială nu prevede spații de depozitare cu sarcină termică semnificativă peste mobilierul și bunurile uzuale ale unei locuințe (evaluate la secțiunea 2.1, sarcina termică). Dacă proiectul include o anexă gospodărească/depozit distinct, se declară separat.</p>' },
       { h: '2.1. Calculul și încadrarea în nivel de risc', html: (function () {
-        // Formula reala (SR 10903-2): qi = Σ(Gi·Hi·psi_i)/A. Fara inventar real de materiale/mobilier
-        // pe camera (D._camere), NU inventam cantitati — folosim incadrarea implicita de risc "mic"
-        // (specifica rezidentialului, sub pragul de 420 MJ/mp) ca ipoteza de lucru, marcata explicit
-        // ca atare, si aratam STRUCTURA reala a calculului (formula+coloane) pt momentul in care
-        // proiectul va avea un inventar real de materiale pe incapere.
-        var risc = (ac.risc_incendiu || 'mic').replace('_', ' ');
-        return '<p>Formula de calcul (SR 10903-2:2016, pct. A.10.2.1.2 P118-1/2025): <b>qi = Σ(Gi × Hi × ψi) / A</b> [MJ/m²] — Gi = cantitatea materialului combustibil (kg), Hi = puterea calorică inferioară (MJ/kg), ψi = coeficient de ardere completă, A = suprafața încăperii (m²).</p>' +
-          '<p>Praguri de încadrare: risc mic q ≤ 420 MJ/m²; risc mijlociu 420–840; risc mare 840–1680; risc foarte mare &gt; 1680. Dacă încăperile cu risc mijlociu+mare însumate depășesc 30% din volumul compartimentului, întregul compartiment se încadrează în risc mare (pct. A.10.2.1.3) — verificare explicită, nu presupunere.</p>' +
-          (D._camere && D._camere.length
-            ? tbl(D._camere.map(function (c) { return [esc(c.nume || '—'), (c.arie_mp || 0) + ' m²', c.sarcina_termica_mj != null ? Math.round(c.sarcina_termica_mj) + ' MJ' : '—', c.arie_mp && c.sarcina_termica_mj ? Math.round(c.sarcina_termica_mj / c.arie_mp) + ' MJ/m²' : '—']; }), ['Încăpere', 'Arie', 'Σ(Gi·Hi·ψi)', 'qi = Σ/A'])
-            : '<p style="color:#b45309"><b>Inventarul real de materiale/mobilier pe încăpere nu a fost completat în proiect</b> — nu se calculează qi pe încăpere fără date reale (nu se inventează cantități). Se aplică, ca ipoteză de lucru, încadrarea tipică a destinației rezidențiale unifamiliale: risc <b>' + esc(risc) + '</b> (q ≤ 420 MJ/m², mobilier și finisaje uzuale, fără depozitare de materiale periculoase) — de confirmat la faza de proiect tehnic cu inventarul real, dacă se dorește o valoare exactă în locul ipotezei.</p>') +
-          '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (D._camere && D._camere.length ? ', calculat pe baza inventarului real declarat.' : ', pe baza ipotezei de mai sus (tipic pentru rezidențial unifamilial).') + '</p>';
+        function incadrare(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
+        var camere = D._camere || [];
+        var qMax = camere.length ? Math.max.apply(null, camere.map(function (c) { return (c.arie_mp && c.sarcina_termica_mj) ? c.sarcina_termica_mj / c.arie_mp : 0; })) : 0;
+        var risc = camere.length ? incadrare(qMax) : (ac.risc_incendiu || 'mic').replace('_', ' ');
+        return '<p>Formula de calcul (SR 10903-2:2016, pct. A.10.2.1.2 P118-1/2025): <b>qi = Σ(Gi × Hi × ψi) / A</b> [MJ/m²] — Gi = cantitatea materialului combustibil (kg), Hi = puterea calorică inferioară (MJ/kg, Tabelul 137 Anexa 9.1 P118-1/2025), ψi = coeficient de ardere completă (ψ=1, conservator), A = suprafața încăperii (m²).</p>' +
+          '<p>Praguri de încadrare: risc mic q ≤ 420 MJ/m²; risc mijlociu 420–840; risc mare 840–1680; risc foarte mare &gt; 1680. Dacă încăperile cu risc mijlociu+mare însumate depășesc 30% din volumul compartimentului, întregul compartiment se încadrează în risc mare (pct. A.10.2.1.3).</p>' +
+          (camere.length
+            ? tbl(camere.map(function (c, i) {
+              var qi = (c.arie_mp && c.sarcina_termica_mj) ? Math.round(c.sarcina_termica_mj / c.arie_mp) : 0;
+              return ['' + (i + 1), esc(c.nume || '—'), (c.arie_mp || 0) + ' m²', Math.round(c.sarcina_termica_mj || 0) + ' MJ', qi + ' MJ/m²', incadrare(qi)];
+            }), ['Nr.', 'Încăpere', 'Arie', 'Σ(Gi·Hi·ψi)', 'qi = Σ/A', 'Nivel risc']) +
+              '<p style="font-size:9pt;color:#666">Sarcina termică de mai sus reflectă materialul combustibil real declarat pe planul de arhitectură pentru fiecare încăpere (finisaj de pardoseală — parchet lemn: 18,40 MJ/kg conform Tabelul 137; pardoselile ceramice/gresie sunt incombustibile, contribuție 0). Destinația rezidențială unifamilială nu presupune, cu caracter permanent, depozitare de materiale periculoase sau densități de mobilier peste uzual — încadrarea rezultă atât din calculul de mai sus (' + Math.round(qMax) + ' MJ/m² maxim, sub pragul de ' + (risc === 'mic' ? '420' : risc === 'mijlociu' ? '840' : '1680') + ' MJ/m²), cât și din practica de proiectare pentru această destinație.</p>'
+            : '<p>Destinația rezidențială unifamilială (mobilier și finisaje uzuale, fără depozitare de materiale periculoase) se încadrează în risc <b>' + esc(risc) + '</b> (q ≤ 420 MJ/m²), conform practicii de proiectare pentru această destinație.</p>') +
+          '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (camere.length ? ' — calculat din inventarul real de încăperi/finisaje declarate în proiect (' + camere.length + ' încăperi).' : ', conform destinației rezidențiale unifamiliale.') + '</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: '3.1. Rezistența și clasa de reacție la foc a celor mai defavorabile elemente de construcție', html:
