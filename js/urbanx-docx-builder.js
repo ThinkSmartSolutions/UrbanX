@@ -2419,7 +2419,16 @@
     // Caietele de sarcini + antemăsurătorile aparțin fazei PTh (Legea 50 Anexa 1: DTAC nu le conține)
     if (!isPth) selected = selected.filter(function (k) { return PTH_ONLY.indexOf(k) < 0; });
     var docs = []; // un builder poate întoarce un document SAU un array de documente (ex. câte un referat/cerință)
-    selected.forEach(function (k) { try { var r = DOC_BUILDERS[k](D, v); if (Array.isArray(r)) docs = docs.concat(r.filter(Boolean)); else if (r) docs.push(r); } catch (e) {} });
+    // Fiecare document isi retine cheia builder-ului sursa (_srcKey) — necesara mai jos pt a distinge
+    // subsetul DTAC (extras autorizare) de restul pieselor specifice PTh (caiete/antemasuratori), la
+    // faza PTh, fara sa regenereze continutul (PTh ⊇ DTAC — [[urbanx-master-backlog]] sectiunea A).
+    selected.forEach(function (k) {
+      try {
+        var r = DOC_BUILDERS[k](D, v);
+        if (Array.isArray(r)) r.filter(Boolean).forEach(function (dc) { dc._srcKey = k; docs.push(dc); });
+        else if (r) { r._srcKey = k; docs.push(r); }
+      } catch (e) {}
+    });
     var base = 'Documentatie_' + (D.nrcad || (D.uat || 'proiect').replace(/\s+/g, '_'));
     // Numele de foldere în ZIP: FĂRĂ diacritice (altfel unzip pe macOS/Windows dă „Illegal byte sequence").
     function _folderAscii(s) {
@@ -2430,9 +2439,29 @@
     }
     if (G.JSZip) {
       var zip = new G.JSZip();
-      // Format STANDARD UrbanX (Word HTML .doc): Times New Roman, justify, titluri bleumarin — se deschide și se salvează în Word.
-      docs.forEach(function (dc) { zip.folder(_folderAscii(dc.cat)).file(dc.file, docBlob(dc.html)); });
-      zip.file('OPIS.txt', 'Dosar documentații UrbanX\n' + docs.length + ' documente\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n'));
+      var opis;
+      if (isPth) {
+        // PTh ⊇ DTAC (corectie conceptuala, 4 iul — [[urbanx-master-backlog]]): DTAC nu e o faza
+        // paralela, e un SUBSET de autorizare extras din PTh. La faza PTh livram ZIP cu 2 foldere de
+        // varf, ca la proiectul de referinta Cresa Pogana: "1_DTAC (extras autorizare)" (doar piesele
+        // care s-ar genera si la faza DTAC, fara caietele/antemasuratori PTh) + "3_PTh (executie)"
+        // (setul complet). Acelasi document (acelasi blob, generat o singura data) apare in ambele
+        // foldere cand apartine ambelor faze — duplicare de FILARE convenabila pt depunere, nu
+        // recalculare de continut.
+        var dtacDocs = docs.filter(function (dc) { return PTH_ONLY.indexOf(dc._srcKey) < 0; });
+        var f1 = zip.folder('1_DTAC (extras autorizare)'), f3 = zip.folder('3_PTh (executie)');
+        dtacDocs.forEach(function (dc) { f1.folder(_folderAscii(dc.cat)).file(dc.file, docBlob(dc.html)); });
+        docs.forEach(function (dc) { f3.folder(_folderAscii(dc.cat)).file(dc.file, docBlob(dc.html)); });
+        opis = 'Dosar documentații UrbanX — faza PTh (PTh ⊇ DTAC)\n' +
+          dtacDocs.length + ' documente în „1_DTAC (extras autorizare)" + ' + docs.length + ' documente în „3_PTh (execuție)"\n\n' +
+          '1_DTAC (extras autorizare):\n' + dtacDocs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n') +
+          '\n\n3_PTh (execuție):\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n');
+      } else {
+        // Format STANDARD UrbanX (Word HTML .doc): Times New Roman, justify, titluri bleumarin — se deschide și se salvează în Word.
+        docs.forEach(function (dc) { zip.folder(_folderAscii(dc.cat)).file(dc.file, docBlob(dc.html)); });
+        opis = 'Dosar documentații UrbanX\n' + docs.length + ' documente\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n');
+      }
+      zip.file('OPIS.txt', opis);
       zip.generateAsync({ type: 'blob' }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
     } else {
       docs.forEach(function (dc) { _save(docBlob(dc.html), dc.file); });
