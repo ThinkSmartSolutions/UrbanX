@@ -1042,61 +1042,129 @@
       return { html: html, capitole: capitole };
     }
 
-    // Sectiunea 2 (audit v6.0): matricea completa de conformitate — capitol final obligatoriu,
-    // generat automat din verificarile deja calculate mai sus (nu o lista fixa scrisa manual per
-    // functiune) — randurile aplicabile difera cu functiunea/tipul de lucrare (ex. randul "distante
-    // intre cladirile proprii" apare doar la ansamblu, "persoane vulnerabile" doar la cresa/centru
-    // social/medical), dar formatul tabelului e identic pt orice proiect.
-    function _tblMatriceConformitate() {
+    // Sectiunea 1 (audit v6.0): motorul de conformitate legislativa — pt FIECARE cerinta aplicabila,
+    // un obiect cu schema completa ceruta de audit (cerinta/articol_exact/normativ/status/valoare_ceruta/
+    // valoare_proiect/masura_daca_neconform/document_justificativ_necesar/nivel_certitudine). Aceasta e
+    // sursa UNICA de adevar — Sectiunea 2 (matricea, pt orice cititor) si Sectiunea 16 (raportul juridic,
+    // pt jurist) proiecteaza DIN acest array, nu recalculeaza independent (zero duplicare de logica).
+    // articol_exact = 'DE_COMPLETAT — normativ neingerat' cand nu avem inca textul articolului exact
+    // extras din normativ (Sectiunea 4 a auditului) — nu se lasa gol, nici generic "conform P118".
+    function _obiecteConformitateLegislativa() {
       function incadrareMx(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
       var camereMx = D._camere || [];
       var qMaxMx = camereMx.length ? Math.max.apply(null, camereMx.map(function (c) { return (c.arie_mp && c.sarcina_termica_mj) ? c.sarcina_termica_mj / c.arie_mp : 0; })) : 0;
       var riscMx = camereMx.length ? incadrareMx(qMaxMx) : (ac.risc_incendiu || 'mic').replace('_', ' ');
       var vecNeconformeMx = (m6b.vecinatati || []).some(function (v) { return v.conforma === false; });
-      var FUNCTIUNI_VULNERABIL_MX = { gradinita: 1, 'centru-social': 1, medical: 1 };
-      var esteVulnerabilMx = !!FUNCTIUNI_VULNERABIL_MX[D.functiune];
-      var randuri = [
-        ['Compartimentarea la incendiu (arie compartiment)', esc(m5.norma || '—'), 'P118-1/2025',
-          m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'DATE INSUFICIENTE'),
-          (m5.arie_proiectata_mp != null && m5.arie_maxima_admisa_mp != null) ? ('real ' + m5.arie_proiectata_mp + ' m² / max. ' + m5.arie_maxima_admisa_mp + ' m²') : 'arie necalculată'],
-        ['Numărul de niveluri supraterane', esc(m9niv.norma || '—'), 'P118-1/2025',
-          m9niv.nelimitat ? 'NEAPLICABIL (nelimitat pt. gradul ' + esc(grad) + ')' : (m9niv.eroare ? 'DATE INSUFICIENTE' : (m9niv.conform ? 'DA' : 'NU')),
-          m9niv.nelimitat ? '—' : (m9niv.niveluri_max != null ? ('proiectat ' + (D.niv_supraterane != null ? D.niv_supraterane : '—') + ' / max. ' + m9niv.niveluri_max) : (m9niv.eroare || '—'))],
-        ['Distanțe de siguranță față de vecinătăți', 'Tabelul 4/145', 'P118-1/2025',
-          vecNeconformeMx ? 'NU' : 'DA', (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate'],
-        ['Nivelul riscului de incendiu', 'art. A.10.2.1.2/A.10.2.1.3', 'P118-1/2025',
-          (riscMx === 'mare' || riscMx === 'foarte mare') ? 'NU' : 'DA',
-          'încadrare: ' + riscMx + (camereMx.length ? ' (' + camereMx.length + ' încăperi calculate)' : ', conform destinației')],
-        ['Rezistența la foc a elementelor de construcție', esc((m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2')), 'P118-1/2025',
-          'DA (prin proiectare)', 'proiectat pentru minimul necesar, grad declarat ' + esc(grad)],
-        ['Zone cu pericol de explozie (ATEX)', 'HG 1058/2006', 'HG 1058/2006',
-          atexAplicabilUnele ? 'DA (măsuri specifice — vezi 2.2)' : 'NEAPLICABIL', atexAplicabilUnele ? 'zonă declarată cu substanțe cu potențial exploziv' : 'nu au fost identificate substanțe cu potențial exploziv'],
-        ['Hidranți de incendiu interiori', 'art. 4.1', 'P118/2-2013', ac.hidranti_int_oblig ? 'DA (obligatoriu — se dimensionează la PTh)' : 'NEAPLICABIL', ac.hidranti_int_oblig ? 'peste pragul aplicabil destinației' : 'sub pragul aplicabil destinației'],
-        ['Hidranți de incendiu exteriori', 'art. 4.2', 'P118/2-2013', ac.hidranti_ext_oblig ? 'DA (obligatoriu — se dimensionează la PTh)' : 'NEAPLICABIL', ac.hidranti_ext_oblig ? 'peste pragul aplicabil destinației' : 'sub pragul aplicabil destinației'],
-        ['Instalații automate de stingere (sprinklere)', 'cap. 7', 'P118/2-2013', ac.sprinklere_oblig ? 'DA (obligatoriu — Sc>3.000 m²/H>28m)' : 'NEAPLICABIL', ac.sprinklere_oblig ? 'peste pragul de arie/înălțime' : 'sub pragul de arie/înălțime'],
-        ['Instalație de desfumare/evacuare fum', '—', 'P118-3/2015', ac.desfumare_oblig ? 'DA (obligatoriu)' : 'NEAPLICABIL', ac.desfumare_oblig ? 'configurație care necesită control activ al fumului' : 'control fum prin tiraj natural, suficient'],
-        ['Instalații de detectare, semnalizare, alarmare (IDSAI)', '—', 'P118-3/2015', ac.idsi_oblig ? 'DA (obligatoriu)' : 'NEAPLICABIL', ac.idsi_oblig ? 'destinație/arie care impune IDSAI' : 'sub pragul aplicabil / destinație fără impunere'],
-        ['Instalație electrică cu rol SSI (iluminat de siguranță, DDR)', 'cap. relevant', 'I7', 'DA (obligatoriu — se detaliază la proiectul electric)', 'DDR ≤300mA obligatoriu la tabloul general; iluminat de siguranță funcție de configurație'],
-        ['Protecție împotriva trăsnetului (IPT/SPT)', '—', 'Normativ specific IPT/SPT', ac.paratraznet_oblig ? 'DA (obligatoriu)' : 'DATE INSUFICIENTE (evaluare de risc la proiectul electric)', 'necesitatea rezultă din evaluarea de risc, responsabilitatea proiectantului de instalații electrice'],
-        ['Instalație de gaze naturale', '—', 'NP 127', D.are_gaze_naturale === true ? 'DA (obligatoriu, dacă declarată)' : (D.are_gaze_naturale === false ? 'NEAPLICABIL' : 'DATE INSUFICIENTE (nedeclarat)'), D.are_gaze_naturale === true ? 'interacțiune cu SSI la robinetul de siguranță' : (D.are_gaze_naturale === false ? 'nu este declarată' : 'de precizat de proiectant la PTh')],
-        ['Presurizare case de scări', '—', 'P118/2-2013', ac.presurizare_scari_oblig ? 'DA (obligatoriu)' : 'NEAPLICABIL', ac.presurizare_scari_oblig ? 'regim de înălțime care impune presurizare' : 'evacuare naturală a fumului suficientă'],
-        ['Ventilație mecanică generală (interacțiune SSI)', '—', 'P118-3/2015', D.are_ventilatie_mecanica === true ? 'DA (obligatoriu, dacă declarată)' : (D.are_ventilatie_mecanica === false ? 'NEAPLICABIL' : 'DATE INSUFICIENTE (nedeclarat)'), D.are_ventilatie_mecanica === true ? 'oprire automată la incendiu, comandă de la centrala de semnalizare' : (D.are_ventilatie_mecanica === false ? 'nu este declarată' : 'de precizat de proiectant la PTh')],
-        ['Surse de apă pentru incendiu (rezervă/bazin)', '—', 'P118/2-2013', (ac.hidranti_ext_oblig || ac.sprinklere_oblig) ? 'DA (obligatoriu — ' + (ac.rezerva_incendiu_mc || 0) + ' m³ estimat)' : 'NEAPLICABIL', (ac.hidranti_ext_oblig || ac.sprinklere_oblig) ? 'dimensionare exactă la PTh' : 'niciun consumator care să impună rezervă dedicată'],
-        ['Sursă electrică de rezervă (generator)', '—', 'I7', (ac.sprinklere_oblig || ac.hidranti_int_oblig || ac.idsi_oblig || ac.desfumare_oblig) ? 'DA (obligatoriu)' : 'NEAPLICABIL', (ac.sprinklere_oblig || ac.hidranti_int_oblig || ac.idsi_oblig || ac.desfumare_oblig) ? 'cel puțin o instalație activă SSI obligatorie' : 'nicio instalație activă SSI obligatorie'],
-        ['Alimentare electrică de rezervă a căilor de evacuare', '—', 'I7 / SR EN 1838', 'DA (obligatoriu — se detaliază la proiectul electric)', 'sursă independentă pentru iluminatul de siguranță, vezi 4.10/4.17'],
-        ['Materiale de construcție — clasă de reacție la foc', '—', 'P118-1/2025', necesitaDoP.length ? 'DATE INSUFICIENTE (DoP la execuție)' : 'DA', necesitaDoP.length + ' element(e) cu variabilitate reală (DoP la aprovizionare/execuție), ' + consacrate.length + ' element(e) consacrate']
+      var geoDinDWG = !!(D.geometrie_teren && D.geometrie_teren.cladiri_propuse);
+      var CONFORM = 'CONFORM', NECONFORM = 'NECONFORM', NEAPLICABIL = 'NEAPLICABIL', DATE_INSUF = 'DATE_INSUFICIENTE';
+      var obiecte = [
+        { cerinta: 'Compartimentarea la incendiu (arie compartiment)', articol_exact: m5.norma || 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-1/2025',
+          status: m5.conform === false ? NECONFORM : (m5.conform ? CONFORM : DATE_INSUF),
+          valoare_ceruta: m5.arie_maxima_admisa_mp != null ? (m5.arie_maxima_admisa_mp + ' m²') : null, valoare_proiect: m5.arie_proiectata_mp != null ? (m5.arie_proiectata_mp + ' m²') : null,
+          masura_daca_neconform: m5.conform === false ? 'vezi secțiunea 5 (corecție directă/măsură compensatorie posibilă)' : null, document_justificativ_necesar: null,
+          nivel_certitudine: geoDinDWG ? 'extras_automat_DWG' : 'introdus_manual_utilizator' },
+        { cerinta: 'Numărul de niveluri supraterane', articol_exact: m9niv.norma || 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-1/2025',
+          status: m9niv.nelimitat ? NEAPLICABIL : (m9niv.eroare ? DATE_INSUF : (m9niv.conform ? CONFORM : NECONFORM)),
+          valoare_ceruta: m9niv.nelimitat ? 'nelimitat pt. gradul ' + grad : (m9niv.niveluri_max != null ? ('max. ' + m9niv.niveluri_max) : null), valoare_proiect: D.niv_supraterane != null ? String(D.niv_supraterane) : null,
+          masura_daca_neconform: (!m9niv.nelimitat && m9niv.conform === false) ? 'vezi secțiunea 5' : null, document_justificativ_necesar: null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Distanțe de siguranță față de vecinătăți', articol_exact: 'Tabelul 4/145', normativ: 'P118-1/2025',
+          status: (m6b.vecinatati || []).length ? (vecNeconformeMx ? NECONFORM : CONFORM) : DATE_INSUF,
+          valoare_ceruta: 'distanță minimă normată per pereche', valoare_proiect: (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate',
+          masura_daca_neconform: vecNeconformeMx ? 'vezi secțiunea 5' : null, document_justificativ_necesar: null,
+          nivel_certitudine: (m6b.vecinatati || []).some(function (v) { return v.estimat_implicit; }) ? 'presupus_conservator' : (geoDinDWG ? 'extras_automat_DWG' : 'introdus_manual_utilizator') },
+        { cerinta: 'Nivelul riscului de incendiu', articol_exact: 'art. A.10.2.1.2/A.10.2.1.3', normativ: 'P118-1/2025',
+          status: (riscMx === 'mare' || riscMx === 'foarte mare') ? NECONFORM : CONFORM,
+          valoare_ceruta: '≤ 840 MJ/m² (risc mic/mijlociu)', valoare_proiect: 'încadrare: ' + riscMx,
+          masura_daca_neconform: (riscMx === 'mare' || riscMx === 'foarte mare') ? 'măsuri suplimentare de protecție conform capitolului 4' : null, document_justificativ_necesar: null,
+          nivel_certitudine: camereMx.length ? 'extras_automat_DWG' : 'presupus_conservator' },
+        { cerinta: 'Rezistența la foc a elementelor de construcție', articol_exact: (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2'), normativ: 'P118-1/2025',
+          status: CONFORM, valoare_ceruta: 'minim necesar conform grad ' + grad, valoare_proiect: 'proiectat pentru minimul necesar', masura_daca_neconform: null,
+          document_justificativ_necesar: 'Certificat', nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Zone cu pericol de explozie (ATEX)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'HG 1058/2006',
+          status: atexAplicabilUnele ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: null, valoare_proiect: atexAplicabilUnele ? 'zonă declarată cu substanțe cu potențial exploziv' : 'nicio substanță declarată',
+          masura_daca_neconform: atexAplicabilUnele ? 'validare de specialist ATEX — vezi 2.2' : null, document_justificativ_necesar: atexAplicabilUnele ? 'Aviz' : null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Hidranți de incendiu interiori', articol_exact: 'art. 4.1', normativ: 'P118/2-2013',
+          status: ac.hidranti_int_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: 'peste pragul aplicabil destinației', valoare_proiect: ac.hidranti_int_oblig ? 'obligatoriu, de dimensionat la PTh' : 'sub prag',
+          masura_daca_neconform: null, document_justificativ_necesar: ac.hidranti_int_oblig ? 'Fisa tehnica' : null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Hidranți de incendiu exteriori', articol_exact: 'art. 4.2', normativ: 'P118/2-2013',
+          status: ac.hidranti_ext_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: 'peste pragul aplicabil destinației', valoare_proiect: ac.hidranti_ext_oblig ? 'obligatoriu, de dimensionat la PTh' : 'sub prag',
+          masura_daca_neconform: null, document_justificativ_necesar: ac.hidranti_ext_oblig ? 'Fisa tehnica' : null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Instalații automate de stingere (sprinklere)', articol_exact: 'cap. 7', normativ: 'P118/2-2013',
+          status: ac.sprinklere_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: 'Sc>3.000 m² / H>28m', valoare_proiect: ac.sprinklere_oblig ? 'obligatoriu, de dimensionat la PTh' : 'sub prag',
+          masura_daca_neconform: null, document_justificativ_necesar: ac.sprinklere_oblig ? 'Fisa tehnica' : null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Instalație de desfumare/evacuare fum', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-3/2015',
+          status: ac.desfumare_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: null, valoare_proiect: ac.desfumare_oblig ? 'necesară' : 'tiraj natural suficient',
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Instalații de detectare, semnalizare, alarmare (IDSAI)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-3/2015',
+          status: ac.idsi_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: null, valoare_proiect: ac.idsi_oblig ? 'obligatorie' : 'fără impunere',
+          masura_daca_neconform: null, document_justificativ_necesar: ac.idsi_oblig ? 'Fisa tehnica' : null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Instalație electrică cu rol SSI (iluminat de siguranță, DDR)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'I7',
+          status: DATE_INSUF, valoare_ceruta: 'DDR ≤300mA', valoare_proiect: 'de detaliat la proiectul electric', masura_daca_neconform: null, document_justificativ_necesar: 'Certificat', nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Protecție împotriva trăsnetului (IPT/SPT)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'Normativ specific IPT/SPT',
+          status: ac.paratraznet_oblig ? DATE_INSUF : DATE_INSUF, valoare_ceruta: null, valoare_proiect: ac.paratraznet_oblig ? 'necesară' : 'de evaluat la proiectul electric',
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Instalație de gaze naturale', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'NP 127',
+          status: D.are_gaze_naturale === true ? DATE_INSUF : (D.are_gaze_naturale === false ? NEAPLICABIL : DATE_INSUF), valoare_ceruta: null,
+          valoare_proiect: D.are_gaze_naturale === true ? 'declarată' : (D.are_gaze_naturale === false ? 'nu este declarată' : 'nedeclarat'),
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: D.are_gaze_naturale != null ? 'introdus_manual_utilizator' : 'lipsa' },
+        { cerinta: 'Presurizare case de scări', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118/2-2013',
+          status: ac.presurizare_scari_oblig ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: null, valoare_proiect: ac.presurizare_scari_oblig ? 'obligatorie' : 'evacuare naturală suficientă',
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'introdus_manual_utilizator' },
+        { cerinta: 'Ventilație mecanică generală (interacțiune SSI)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-3/2015',
+          status: D.are_ventilatie_mecanica === true ? DATE_INSUF : (D.are_ventilatie_mecanica === false ? NEAPLICABIL : DATE_INSUF), valoare_ceruta: null,
+          valoare_proiect: D.are_ventilatie_mecanica === true ? 'declarată' : (D.are_ventilatie_mecanica === false ? 'nu este declarată' : 'nedeclarat'),
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: D.are_ventilatie_mecanica != null ? 'introdus_manual_utilizator' : 'lipsa' },
+        { cerinta: 'Surse de apă pentru incendiu (rezervă/bazin)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118/2-2013',
+          status: (ac.hidranti_ext_oblig || ac.sprinklere_oblig) ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: (ac.rezerva_incendiu_mc || 0) + ' m³ estimat', valoare_proiect: 'de dimensionat exact la PTh',
+          masura_daca_neconform: null, document_justificativ_necesar: (ac.hidranti_ext_oblig || ac.sprinklere_oblig) ? 'Aviz' : null, nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Sursă electrică de rezervă (generator)', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'I7',
+          status: (ac.sprinklere_oblig || ac.hidranti_int_oblig || ac.idsi_oblig || ac.desfumare_oblig) ? DATE_INSUF : NEAPLICABIL, valoare_ceruta: null, valoare_proiect: 'de dimensionat la PTh',
+          masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Alimentare electrică de rezervă a căilor de evacuare', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'I7 / SR EN 1838',
+          status: DATE_INSUF, valoare_ceruta: null, valoare_proiect: 'de detaliat la proiectul electric', masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'presupus_conservator' },
+        { cerinta: 'Materiale de construcție — clasă de reacție la foc', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-1/2025',
+          status: necesitaDoP.length ? DATE_INSUF : CONFORM, valoare_ceruta: null, valoare_proiect: necesitaDoP.length + ' element(e) cu variabilitate reală, ' + consacrate.length + ' consacrate',
+          masura_daca_neconform: null, document_justificativ_necesar: necesitaDoP.length ? 'DoP' : null, nivel_certitudine: (D._materiale && D._materiale.length) ? 'introdus_manual_utilizator' : 'presupus_conservator' }
       ];
       if (cladiriPropuse.length > 1 && m5bGrupuri) {
         var grupNeconform = m5bGrupuri.some(function (g) { return g.tratament === 'COMPARTIMENT_UNIC' && g.verificare && g.verificare.conform === false; });
-        randuri.splice(1, 0, ['Compartimentarea grupurilor constructive alipite (ansamblu)', 'Tabelul 146/147', 'P118-1/2025', grupNeconform ? 'NU' : 'DA', m5bGrupuri.length + ' grup(uri) constructiv(e) verificat(e)']);
+        obiecte.splice(1, 0, { cerinta: 'Compartimentarea grupurilor constructive alipite (ansamblu)', articol_exact: 'Tabelul 146/147', normativ: 'P118-1/2025',
+          status: grupNeconform ? NECONFORM : CONFORM, valoare_ceruta: null, valoare_proiect: m5bGrupuri.length + ' grup(uri) verificat(e)',
+          masura_daca_neconform: grupNeconform ? 'vezi secțiunea 5' : null, document_justificativ_necesar: null, nivel_certitudine: 'extras_automat_DWG' });
       }
       if (cladiriPropuse.length > 1 && m6c) {
-        randuri.splice(cladiriPropuse.length > 1 && m5bGrupuri ? 5 : 4, 0, ['Distanțe între clădirile proprii ale ansamblului', 'Tabelul 4/145', 'P118-1/2025', m6c.neconforme.length ? 'NU' : 'DA', m6c.perechi.length + ' pereche/perechi verificată/verificate']);
+        obiecte.splice(cladiriPropuse.length > 1 && m5bGrupuri ? 5 : 4, 0, { cerinta: 'Distanțe între clădirile proprii ale ansamblului', articol_exact: 'Tabelul 4/145', normativ: 'P118-1/2025',
+          status: m6c.neconforme.length ? NECONFORM : CONFORM, valoare_ceruta: null, valoare_proiect: m6c.perechi.length + ' pereche/perechi verificată/verificate',
+          masura_daca_neconform: m6c.neconforme.length ? 'vezi secțiunea 5' : null, document_justificativ_necesar: null, nivel_certitudine: 'extras_automat_DWG' });
       }
-      if (esteVulnerabilMx) {
-        randuri.push(['Măsuri pentru persoane fără capacitate de autoevacuare', 'Legea 448/2006, OMS 1955/1995', 'normativ specific destinației', 'DA (măsuri tratate la 3.5)', 'evacuare asistată de personal, categorie cu caracter instituțional permanent']);
+      var FUNCTIUNI_VULNERABIL_MX = { gradinita: 1, 'centru-social': 1, medical: 1 };
+      if (FUNCTIUNI_VULNERABIL_MX[D.functiune]) {
+        obiecte.push({ cerinta: 'Măsuri pentru persoane fără capacitate de autoevacuare', articol_exact: 'DE_COMPLETAT — normativ neingerat', normativ: 'Legea 448/2006, OMS 1955/1995',
+          status: CONFORM, valoare_ceruta: null, valoare_proiect: 'evacuare asistată de personal, tratat la 3.5', masura_daca_neconform: null, document_justificativ_necesar: null, nivel_certitudine: 'introdus_manual_utilizator' });
       }
-      return '<p>Tabel generat automat din verificările efectuate la secțiunile de mai sus (nu o listă fixă) — randurile aplicabile depind de destinația și tipul de lucrare ale acestui proiect.</p>' +
+      return obiecte;
+    }
+
+    // Sectiunea 1 (audit v6.0) — randare tehnica detaliata, schema completa per cerinta (audienta:
+    // proiectant/verificator ISU care vrea TOT — status enum, valori exacte, masura, document, certitudine).
+    function _tblMotorConformitateDetaliat() {
+      var obiecte = _obiecteConformitateLegislativa();
+      return '<p>Pentru fiecare cerință aplicabilă, motorul emite un verdict explicit cu schema completă (nu doar un calcul izolat) — sursa unică din care derivă atât matricea de sinteză (mai jos), cât și raportul juridic (anexă).</p>' +
+        tbl(obiecte.map(function (o) {
+          return [esc(o.cerinta), esc(o.articol_exact), esc(o.normativ), o.status, esc(o.valoare_ceruta || '—'), esc(o.valoare_proiect || '—'), esc(o.masura_daca_neconform || '—'), esc(o.document_justificativ_necesar || '—'), esc(CERTITUDINE_LABEL[o.nivel_certitudine] || o.nivel_certitudine)];
+        }), ['Cerință', 'Articol exact', 'Normativ', 'Status', 'Valoare cerută', 'Valoare proiect', 'Măsură dacă neconform', 'Document justificativ', 'Nivel de certitudine']);
+    }
+
+    // Sectiunea 2 (audit v6.0): matricea completa de conformitate — capitol final obligatoriu, PROIECTAT
+    // din obiectele Sectiunii 1 (nu recalculat independent) — randurile aplicabile difera cu functiunea/
+    // tipul de lucrare, dar formatul tabelului e identic pt orice proiect.
+    function _tblMatriceConformitate() {
+      var STATUS_DISPLAY = { CONFORM: 'DA', NECONFORM: 'NU', NEAPLICABIL: 'NEAPLICABIL', DATE_INSUFICIENTE: 'DATE INSUFICIENTE' };
+      var randuri = _obiecteConformitateLegislativa().map(function (o) {
+        var obs = [o.valoare_proiect, o.masura_daca_neconform].filter(Boolean).join(' — ') || '—';
+        return [o.cerinta, esc(o.articol_exact), o.normativ, STATUS_DISPLAY[o.status] || o.status, obs];
+      });
+      return '<p>Tabel generat automat din obiectele de conformitate ale Secțiunii 1 (nu o listă fixă scrisă manual per funcțiune) — rândurile aplicabile depind de destinația și tipul de lucrare ale acestui proiect.</p>' +
         tbl(randuri, ['Cerință legală', 'Articol/Tabel', 'Normativ', 'Conform', 'Observații']);
     }
 
@@ -1329,7 +1397,7 @@
           }
           return '<p>Pentru destinația rezidențială, P118-1/2025 nu normează o densitate de persoane (specifică funcțiunilor cu public — comerț, sănătate, învățământ); numărul de utilizatori rezultă din programul locativ al fiecărei unități (numărul de dormitoare), nu dintr-o formulă de densitate pe suprafață.</p>' +
             html +
-            '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare rezultă din raportarea lungimii traseului la viteza medie de deplasare (0,4 m/s orizontal' + (esteBlocReal ? ', cu recalcul pe verticală pentru numărul de niveluri (0,4-0,7 m/s pe scări, conform normativ)' : '') + ').</p>';
+            '<p>Program: locuire permanentă (fără program de lucru/schimburi). Capacitatea de autoevacuare: utilizatorii pot evacua singuri, integral — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi și 3.5). Timpul teoretic de evacuare rezultă din raportarea lungimii traseului la viteza medie de deplasare (0,4 m/s orizontal' + (esteBlocReal ? ', cu recalcul pe verticală pentru numărul de niveluri (0,4-0,7 m/s pe scări — P118-1/2025, DE_COMPLETAT — articolul exact al coeficientului de viteză pe verticală nu a fost încă identificat pe textul sursă oficial)' : '') + ').</p>';
         }
         // Alte destinatii (institutionale/publice) — capacitatea reala e fie DECLARATA (autorizatie de
         // functionare/aviz sanitar — cazul uzual pt cresa/centru social), fie normata prin densitati de
@@ -1445,7 +1513,7 @@
         var refugii = areVulnerabili
           ? '<b>Sunt necesare refugii per nivel</b> — proiectul are/poate avea persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5); amplasarea și dimensionarea refugiilor se stabilesc la faza de proiect tehnic, conform normativelor specifice categoriei (NP 051/2012, OMS 1955/1995 etc.).'
           : 'Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).';
-        return '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025.</p>' +
+        return '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025 (DE_COMPLETAT — articolul/tabelul exact neingerat pe textul sursă oficial).</p>' +
           '<p>' + (esteResidentialIndiv
             ? 'Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + arieRef + ').'
             : 'Traseul real de evacuare (de la punctul cel mai defavorabil până la ieșirea din compartiment) se verifică față de pragurile de mai sus, pe baza ariei/configurației compartimentului (' + arieRef + ').') + ' ' + refugii + '</p>';
@@ -1543,7 +1611,7 @@
           { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'racorduri_exterioare', eticheta: 'Număr de racorduri exterioare' },
           { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' }, { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
         ], D) },
-      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației ' + esc(destinatieT42.toLowerCase()) + '.</p>' +
+      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform art. 4.2 din P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației ' + esc(destinatieT42.toLowerCase()) + '.</p>' +
         _tblCampuriInstalatie(ac.hidranti_ext_oblig, 'hidranti_ext', [
           { cheie: 'distante', eticheta: 'Distanțele față de construcție' }, { cheie: 'volum_mc', eticheta: 'Volumul compartimentului de incendiu (m³)' },
           { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' }, { cheie: 'debit_calcul', eticheta: 'Debit de calcul (l/s)' },
@@ -1582,15 +1650,15 @@
         } else {
           concluzie = 'NU ESTE OBLIGATORIE'; detaliu = 'pentru destinația (' + esc(destinatieT42.toLowerCase()) + ') și aria reală ale proiectului.';
         }
-        return '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018), funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + concluzie + '</b>, ' + detaliu + '</p>';
+        return '<p>Necesitatea echipării se stabilește conform P118-3/2015 (cu modificările Ord. 6025/2018) — DE_COMPLETAT — articolul exact neingerat pe textul sursă oficial, funcție de destinație/capacitate/arie reale — pragurile diferă semnificativ pe destinații. Concluzie: <b>' + concluzie + '</b>, ' + detaliu + '</p>';
       })() +
         _tblCampuriInstalatie(ac.idsi_oblig, 'idsai', [
           { cheie: 'grad_acoperire', eticheta: 'Gradul de acoperire (total/parțial, cu zonele acoperite)' }, { cheie: 'conditii_zona_detectare', eticheta: 'Condiții privind stabilirea zonei de detectare' },
           { cheie: 'conditii_ecs', eticheta: 'Condiții de amplasare a echipamentului de control și semnalizare (e.c.s.)' }, { cheie: 'dispozitive_comandate', eticheta: 'Alte dispozitive comandate sau supravegheate de e.c.s.' }
         ], D) },
       { h: '4.9. Instalație de desfumare/evacuare fum și gaze fierbinți', html: '<p>' + (ac.desfumare_oblig ? 'Necesară conform configurației declarate la 3.4.a — metodă, spații desfumate și debite se stabilesc la faza de proiect tehnic.' : 'Nu este cazul, motivat la pct. 3.4.a — control fum prin tiraj natural, suficient pentru configurația proiectului.') + '</p>' },
-      { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare' + (D.functiune === 'locuinta-individuala' ? ' — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric' : ' — de verificat conform configurației reale a căilor de evacuare ale proiectului') + '). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7.</p>' },
-      { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform normativului specific, funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru destinația și regimul de înălțime ale acestui proiect (' + esc(destinatieT42.toLowerCase()) + ', ' + esc(D.regim || '—') + '), evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' +
+      { h: '4.10. Instalație electrică cu rol în securitatea la incendiu', html: '<p>Sursă de bază: branșament electric. Iluminat de siguranță (evacuare/antipanic): se proiectează conform I7 (DE_COMPLETAT — capitolul exact neingerat pe textul sursă) și SR EN 1838/SR EN 50172 dacă configurația/aria o impune (de regulă necesar la spații fără lumină naturală suficientă pe traseul de evacuare' + (D.functiune === 'locuinta-individuala' ? ' — la o locuință unifamilială cu ferestre pe tot traseul, poate fi „nu este cazul", de confirmat la proiectul electric' : ' — de verificat conform configurației reale a căilor de evacuare ale proiectului') + '). Dispozitiv de protecție cu curent diferențial rezidual (DDR/RCD ≤300mA) — obligatoriu la tabloul general, conform I7 (DE_COMPLETAT — capitolul exact neingerat).</p>' },
+      { h: '4.11. Instalație de protecție împotriva trăsnetului', html: '<p>Necesitatea IPT/SPT se stabilește pe baza evaluării de risc conform I 20-2000 (Normativ privind protecția construcțiilor împotriva trăsnetului, DE_COMPLETAT — articolul exact neingerat pe textul sursă), funcție de amplasament, regim de înălțime și destinație. Concluzie: <b>' + (ac.paratraznet_oblig ? 'NECESARĂ' : 'de evaluat la faza de proiect tehnic') + '</b> — pentru destinația și regimul de înălțime ale acestui proiect (' + esc(destinatieT42.toLowerCase()) + ', ' + esc(D.regim || '—') + '), evaluarea de risc rămâne responsabilitatea proiectantului de instalații electrice; nu se presupune implicit nici necesară, nici inexistentă.</p>' +
         _tblCampuriInstalatie(ac.paratraznet_oblig, 'ipt', [
           { cheie: 'clasa_ipt_spt', eticheta: 'Clasa IPT și SPT (din evaluarea de risc)' }, { cheie: 'nivel_protectie', eticheta: 'Nivel de protecție (I–IV)' },
           { cheie: 'metoda_protectie', eticheta: 'Metoda de protecție (tijă/plasă/conductoare captare)' }
@@ -1627,6 +1695,7 @@
         { stare: verdict.verdict === 'NEAPT_PENTRU_AVIZARE' ? false : (verdict.verdict === 'APT_CONDITIONAT' ? null : true), text: 'Verdict general (la începutul documentului): ' + esc(verdict.verdict_label) + '.' },
         { stare: fiseNeconformitate.length ? false : true, text: fiseNeconformitate.length ? fiseNeconformitate.length + ' neconformitate(ăți) identificate — tratate mai sus, prin corecție directă de proiect sau măsură compensatorie.' : 'Nu au fost identificate neconformități.' }
       ]) },
+      { h: 'Motorul de conformitate legislativă — detaliu complet per cerință', html: _tblMotorConformitateDetaliat() },
       { h: 'Matricea completă de conformitate (sinteză finală)', html: _tblMatriceConformitate() },
       { h: 'Anexă — Raport juridic de conformitate', html: _tblRaportJuridic() },
       { h: 'Anexă — stadiul documentului (DRAFT vs. FINAL pentru depunere)', html:
