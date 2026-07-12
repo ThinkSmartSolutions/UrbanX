@@ -815,6 +815,28 @@
     // (inainte de poarta FINAL), pt ca un capitol incomplet pe un element blocant (nu o limitare
     // cunoscuta a platformei, gen planuri retele netrackuite) trebuie sa blocheze si el exportul FINAL,
     // nu doar sa fie afisat mai jos in document (functiile sunt hoisted, apelabile inainte de definitie).
+    // Sectiunea 9 (audit v6.0): motor de detectare a contradictiilor — perechi de valori improbabile
+    // impreuna, semnalate explicit (nu corectate silentios). Regulile testeaza date REALE ale
+    // proiectului (D.Sc/D.Sd/D.Steren/D.grad_stabilitate/D.niv_supraterane/capacitate declarata),
+    // nu presupuneri — se extinde cu orice pereche normativ improbabila, fara sa blocheze DRAFT-ul.
+    function _detecteazaContradictii() {
+      var capacitatePersoaneCtr = D.capacitate_persoane || D.capacitate_declarata || null;
+      var REGULI = [
+        { test: function () { return (D.niv_supraterane === 0 || /^P(\+0)?$/i.test(D.regim || '')) && capacitatePersoaneCtr > 50; },
+          mesaj: 'Regim de înălțime parter (P/P+0) cu peste 50 de persoane declarate (' + capacitatePersoaneCtr + ') — verifică dacă densitatea/aria de calcul a capacității e corectă.' },
+        { test: function () { return D.Sc != null && D.Sd != null && (+D.Sc) > (+D.Sd); },
+          mesaj: 'Aria construită (Sc=' + D.Sc + ' m²) nu poate depăși aria desfășurată totală (Sd=' + D.Sd + ' m²) — verifică sursa datelor.' },
+        { test: function () { return D.grad_stabilitate === 'V' && (+D.niv_supraterane || 0) > 4; },
+          mesaj: 'Grad de stabilitate V cu regim de înălțime ridicat (' + D.niv_supraterane + ' niveluri supraterane) — verifică încadrarea (Tabelul 144/148), gradul V e tipic limitat la construcții joase.' },
+        { test: function () { return D.Sc != null && D.Steren != null && (+D.Sc) > (+D.Steren); },
+          mesaj: 'Aria construită (Sc=' + D.Sc + ' m²) nu poate depăși suprafața terenului (Steren=' + D.Steren + ' m²) — verifică sursa datelor.' }
+      ];
+      var declansate = REGULI.filter(function (r) { try { return r.test(); } catch (e) { return false; } });
+      if (!declansate.length) return '<p>Nu a fost detectată nicio contradicție între valorile declarate ale proiectului.</p>';
+      return '<p><b>' + declansate.length + ' contradicție/contradicții detectată/detectate</b> — semnalate explicit, nu corectate automat (verificarea rămâne a proiectantului):</p>' +
+        '<ul>' + declansate.map(function (r) { return '<li>⚠ ' + esc(r.mesaj) + '</li>'; }).join('') + '</ul>';
+    }
+
     var _checklistPlanseObj = _checklistPlanse(D);
     var _checklistCapitoleObj = _checklistCapitole(_checklistPlanseObj.itemi);
     var capitoleBlocante = _checklistCapitoleObj.capitole.filter(function (c) { return c.lipsa.some(function (l) { return l.blocant; }); });
@@ -993,7 +1015,8 @@
         (verdict.conditii && verdict.conditii.length ? '<p style="margin:6pt 0 2pt;font-weight:bold">Condiții de îndeplinit:</p><ul style="margin:0">' + verdict.conditii.map(function (c) { return '<li><b>' + esc(c.tip) + '</b> — ' + esc(c.element || '') + ': ' + esc(c.actiune) + '</li>'; }).join('') + '</ul>' : '') +
         '<p style="margin:6pt 0 0;font-size:9pt;color:#666">Acest verdict se recalculează integral după orice modificare a proiectului (nouă versiune DWG) — o corecție punctuală poate afecta alte verificări.</p></div>' },
       { h: 'Checklist Ord. MAI 180/2022, Anexa 5 — completitudine capitol cu capitol', html: _checklistCapitoleObj.html },
-      { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html }
+      { h: 'Verificarea completitudinii planșelor', html: _checklistPlanseObj.html },
+      { h: 'Controlul contradicțiilor între valorile declarate ale proiectului', html: _detecteazaContradictii() }
     ].concat(fazaPrematura ? [{
       h: null, html: '<div style="border:2px solid #dc2626;border-radius:6pt;padding:10pt;margin-bottom:8pt;background:#dc262611">' +
         '<p style="margin:0;font-size:12pt;font-weight:bold;color:#dc2626">⚠ NECONCORDANȚĂ DE FAZĂ — planul importat (DXF) este marcat „faza: ' + esc(fazaDwg) + '"</p>' +
