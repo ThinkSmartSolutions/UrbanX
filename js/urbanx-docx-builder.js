@@ -703,6 +703,12 @@
     var grupuriConstructive = (D.geometrie_teren && D.geometrie_teren.grupuri_constructive) || (cladiriPropuse.length ? cladiriPropuse.map(function (c) { return { id_grup: c.id, cladiri_incluse: [c.id], tip: 'INDIVIDUAL', volum_continuu: false }; }) : []);
     var m6c = (cladiriPropuse.length > 1) ? G.SSI_ENGINE.m6c_distanteIntreCladiriProprii(m0, { grad_stabilitate: grad }, distanteIntreCladiri, 'mic', grupuriConstructive) : null;
     var m5bGrupuri = cladiriPropuse.length ? G.SSI_ENGINE.m5b_compartimentareGrupuri(m0, grad, grupuriConstructive, cladiriPropuse, D._pereti_despartitori_cuplat || []) : null;
+    // Verdictul REAL de compartimentare: pentru ansamblu (m5bGrupuri populat), fiecare grup e verificat
+    // pe aria lui proprie — folosește ÎNTOTDEAUNA acest verdict, NU m5.conform de mai sus (m5 primește
+    // arie_construita_mp: D.Sc, care la un ansamblu e adesea null → sc=0 în motor → conform mereu TRUE,
+    // fals pozitiv). Un singur loc de adevăr, refolosit în orice tabel/concluzie care afișează conformitatea.
+    var nrCompartimenteNeconforme = m5bGrupuri ? m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; }).length : (m5.conform === false ? 1 : 0);
+    var compartimentareConformReal = m5bGrupuri ? !m5bGrupuri.some(function (g) { return g.verificare && g.verificare.conform === false; }) : (m5.conform === false ? false : (m5.conform ? true : null));
     // POT/CUT ansamblu au nevoie de aria terenului. Daca layerul LIMITA_PROPRIETATE nu a fost mapat
     // (frecvent la ansambluri, unde nu exista un contur unic ci loturi individuale), folosim SUMA
     // adnotarilor reale "S.parcela" deja scrise de proiectant in desen (nu recalculam, doar insumam
@@ -717,6 +723,14 @@
     var arieTerenFinala = arieTerenDinLimita || arieTerenDinLoturi;
     var urbanismAnsamblu = cladiriPropuse.length ? G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, arieTerenFinala) : null;
     if (urbanismAnsamblu) urbanismAnsamblu.sursaArieTeren = arieTerenDinLimita ? 'layer LIMITĂ DE PROPRIETATE' : sursaArieTeren;
+    // Sc/Sd/Steren EFECTIVE folosite in controalele de contradictii si lantul cauzal (Sectiunile 9/10
+    // ale auditului v6.0): proiect unic -> D.Sc/D.Sd/D.Steren (cu fallback ac.*_total din autoCalc);
+    // ansamblu de mai multe cladiri extrase din DXF -> totalurile REALE SIGMA-Sc/SIGMA-Sd/aria de teren
+    // deja calculate mai sus in urbanismAnsamblu — fara acest fallback, orice ansamblu (unde D.Sc/D.Sd
+    // individuale nu sunt completate manual) arata fals "date insuficiente" desi totalurile EXISTA deja.
+    var ScEfectiv = (+D.Sc || ac.Sc_total || (urbanismAnsamblu && urbanismAnsamblu.totalSc_mp) || null);
+    var SdEfectiv = (+D.Sd || ac.Sd_total || (urbanismAnsamblu && urbanismAnsamblu.totalSd_mp) || null);
+    var SterenEfectiv = (+D.Steren || arieTerenFinala || (urbanismAnsamblu && urbanismAnsamblu.arieTeren_mp) || null);
 
     // v5.0 — Motor relevee: volum REAL per clădire (planul de situație nu dă panta/forma acoperișului
     // sau dacă podul e amenajabil) — daca nu exista releveu incarcat pt un tip, volumul ramane null +
@@ -727,10 +741,13 @@
     // v4.1 — M14: fiecare neconformitate trece prin taxonomia cu 3 stari (CORECTIE_PROIECT vs MASURA_COMPENSATORIE_POSIBILA),
     // NU se mai decide manual "compensabil" — se deriva din existenta solutiilor in catalogul M15.
     var verificariM14 = [];
-    if (m5.conform === false) {
+    if (compartimentareConformReal === false) {
+      var grupNeconformM14 = m5bGrupuri && m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; });
+      var valProiectataM14 = (grupNeconformM14 && grupNeconformM14.length) ? grupNeconformM14[0].verificare.arie_proiectata_mp : m5.arie_proiectata_mp;
+      var valNecesaraM14 = (grupNeconformM14 && grupNeconformM14.length) ? grupNeconformM14[0].verificare.arie_maxima_admisa_mp : m5.arie_maxima_admisa_mp;
       verificariM14.push(G.SSI_M14.verificaConformitate({
         id: 'M5-arie', tip: 'ARIE_COMPARTIMENT_DEPASITA', sens: 'max', unitate: 'm²',
-        descriere_element: 'Aria compartimentului de incendiu', valoare_proiectata: m5.arie_proiectata_mp, valoare_necesara: m5.arie_maxima_admisa_mp,
+        descriere_element: 'Aria compartimentului de incendiu' + (grupNeconformM14 && grupNeconformM14.length > 1 ? ' (' + grupNeconformM14.length + ' compartimente depășesc limita — primul: ' + grupNeconformM14[0].id_grup + ')' : (grupNeconformM14 && grupNeconformM14.length === 1 ? ' (compartiment ' + grupNeconformM14[0].id_grup + ')' : '')), valoare_proiectata: valProiectataM14, valoare_necesara: valNecesaraM14,
         sursa_normativa: m5.norma
       }));
     }
@@ -790,7 +807,11 @@
     if (verdict.lista) verdict.lista = verdict.lista.map(function (n) { return fiseById[n.id] || n; });
 
     function ctxSolutii(v14) {
-      if (v14.tip === 'ARIE_COMPARTIMENT_DEPASITA') return { arie_proiectata: m5.arie_proiectata_mp, arie_maxima_admisa: m5.arie_maxima_admisa_mp };
+      if (v14.tip === 'ARIE_COMPARTIMENT_DEPASITA') {
+        var gN = m5bGrupuri && m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; });
+        if (gN && gN.length) return { arie_proiectata: gN[0].verificare.arie_proiectata_mp, arie_maxima_admisa: gN[0].verificare.arie_maxima_admisa_mp };
+        return { arie_proiectata: m5.arie_proiectata_mp, arie_maxima_admisa: m5.arie_maxima_admisa_mp };
+      }
       return {};
     }
     function fmtSolutiiPtNeconformitate(v14) {
@@ -898,15 +919,16 @@
     // nu presupuneri — se extinde cu orice pereche normativ improbabila, fara sa blocheze DRAFT-ul.
     function _detecteazaContradictii() {
       var capacitatePersoaneCtr = D.capacitate_persoane || D.capacitate_declarata || null;
+      var scCtr = ScEfectiv, sdCtr = SdEfectiv, sterenCtr = SterenEfectiv;
       var REGULI = [
         { test: function () { return (D.niv_supraterane === 0 || /^P(\+0)?$/i.test(D.regim || '')) && capacitatePersoaneCtr > 50; },
           mesaj: 'Regim de înălțime parter (P/P+0) cu peste 50 de persoane declarate (' + capacitatePersoaneCtr + ') — verifică dacă densitatea/aria de calcul a capacității e corectă.' },
-        { test: function () { return D.Sc != null && D.Sd != null && (+D.Sc) > (+D.Sd); },
-          mesaj: 'Aria construită (Sc=' + D.Sc + ' m²) nu poate depăși aria desfășurată totală (Sd=' + D.Sd + ' m²) — verifică sursa datelor.' },
+        { test: function () { return scCtr != null && sdCtr != null && scCtr > sdCtr; },
+          mesaj: 'Aria construită (Sc=' + scCtr + ' m²) nu poate depăși aria desfășurată totală (Sd=' + sdCtr + ' m²) — verifică sursa datelor.' },
         { test: function () { return D.grad_stabilitate === 'V' && (+D.niv_supraterane || 0) > 4; },
           mesaj: 'Grad de stabilitate V cu regim de înălțime ridicat (' + D.niv_supraterane + ' niveluri supraterane) — verifică încadrarea (Tabelul 144/148), gradul V e tipic limitat la construcții joase.' },
-        { test: function () { return D.Sc != null && D.Steren != null && (+D.Sc) > (+D.Steren); },
-          mesaj: 'Aria construită (Sc=' + D.Sc + ' m²) nu poate depăși suprafața terenului (Steren=' + D.Steren + ' m²) — verifică sursa datelor.' }
+        { test: function () { return scCtr != null && sterenCtr != null && scCtr > sterenCtr; },
+          mesaj: 'Aria construită (Sc=' + scCtr + ' m²) nu poate depăși suprafața terenului (Steren=' + sterenCtr + ' m²) — verifică sursa datelor.' }
       ];
       var declansate = REGULI.filter(function (r) { try { return r.test(); } catch (e) { return false; } });
       if (!declansate.length) return '<p>Nu a fost detectată nicio contradicție între valorile declarate ale proiectului.</p>';
@@ -1012,7 +1034,7 @@
       vriAsteptat = Math.round(vriAsteptat);
       var rezervaConsistenta = (ac.rezerva_incendiu_mc == null) ? null : (ac.rezerva_incendiu_mc === vriAsteptat);
       var verigi = [
-        { veriga: 'Arie construită (Sc) → Volum/arie desfășurată (Sd)', stare: (D.Sc != null && D.Sd != null) ? (((+D.Sc) <= (+D.Sd)) ? 'verificat' : 'eroare') : 'date_insuficiente', obs: 'vezi și controlul contradicțiilor de mai sus (Sc nu poate depăși Sd)' },
+        { veriga: 'Arie construită (Sc) → Volum/arie desfășurată (Sd)', stare: (ScEfectiv && SdEfectiv) ? ((ScEfectiv <= SdEfectiv) ? 'verificat' : 'eroare') : 'date_insuficiente', obs: (ScEfectiv && SdEfectiv) ? ('Sc=' + ScEfectiv + ' m², Sd=' + SdEfectiv + ' m² — ' + (cladiriPropuse.length > 1 ? 'totaluri de ansamblu (ΣSc/ΣSd)' : 'proiect unic') + ', vezi și controlul contradicțiilor de mai sus') : 'vezi și controlul contradicțiilor de mai sus (Sc nu poate depăși Sd)' },
         { veriga: 'Volum/arie → Grad de stabilitate la incendiu', stare: D.grad_stabilitate || ac.grad_default ? 'verificat' : 'date_insuficiente', obs: 'gradul declarat (' + grad + ') e folosit consecvent în toate verificările următoare (compartimentare, niveluri maxime, rezistență la foc)' },
         { veriga: 'Grad de stabilitate → Compartimentare la incendiu', stare: m5.norma ? 'verificat' : 'date_insuficiente', obs: m5.norma ? ('aria maximă admisă (' + m5.arie_maxima_admisa_mp + ' m²) derivă direct din gradul ' + grad + ', ' + m5.norma + ')') : 'rând normativ neextras pentru acest grad' },
         { veriga: 'Compartimentare → Rezistența la foc a elementelor', stare: 'verificat', obs: 'aceeași pereche (grad, tip de lucrare) folosită la secțiunea 3.1/3.2 — sursă unică, fără introducere independentă' },
@@ -1128,9 +1150,9 @@
       var CONFORM = 'CONFORM', NECONFORM = 'NECONFORM', NEAPLICABIL = 'NEAPLICABIL', DATE_INSUF = 'DATE_INSUFICIENTE';
       var obiecte = [
         { cerinta: 'Compartimentarea la incendiu (arie compartiment)', articol_exact: m5.norma || 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-1/2025',
-          status: m5.conform === false ? NECONFORM : (m5.conform ? CONFORM : DATE_INSUF),
-          valoare_ceruta: m5.arie_maxima_admisa_mp != null ? (m5.arie_maxima_admisa_mp + ' m²') : null, valoare_proiect: m5.arie_proiectata_mp != null ? (m5.arie_proiectata_mp + ' m²') : null,
-          masura_daca_neconform: m5.conform === false ? 'vezi secțiunea 5 (corecție directă/măsură compensatorie posibilă)' : null, document_justificativ_necesar: null,
+          status: compartimentareConformReal === false ? NECONFORM : (compartimentareConformReal ? CONFORM : DATE_INSUF),
+          valoare_ceruta: m5.arie_maxima_admisa_mp != null ? (m5.arie_maxima_admisa_mp + ' m²') : (m5bGrupuri ? 'vezi 1.4.f (per compartiment)' : null), valoare_proiect: m5bGrupuri ? (m5bGrupuri.length + ' compartimente — vezi 1.4.f') : (m5.arie_proiectata_mp != null ? (m5.arie_proiectata_mp + ' m²') : null),
+          masura_daca_neconform: compartimentareConformReal === false ? 'vezi secțiunea 5 (corecție directă/măsură compensatorie posibilă)' : null, document_justificativ_necesar: null,
           nivel_certitudine: geoDinDWG ? 'extras_automat_DWG' : 'introdus_manual_utilizator' },
         { cerinta: 'Numărul de niveluri supraterane', articol_exact: m9niv.norma || 'DE_COMPLETAT — normativ neingerat', normativ: 'P118-1/2025',
           status: m9niv.nelimitat ? NEAPLICABIL : (m9niv.eroare ? DATE_INSUF : (m9niv.conform ? CONFORM : NECONFORM)),
@@ -1284,7 +1306,7 @@
         { normativ: 'H.G. 571/2016, Anexa 1 (obligativitate aviz/autorizare de securitate la incendiu)', status: seSupuneRJ == null ? 'date_insuficiente' : (seSupuneRJ ? 'respectat' : 'neaplicabil'), obs: 'vezi secțiunea 1.2 pentru temei și motiv complet' },
         { normativ: 'Ord. MAI 180/2022, Anexa 5 (structura scenariului, capitol cu capitol)', status: capitoleBlocante.length ? 'nerespectat' : 'respectat', obs: capitoleBlocante.length ? capitoleBlocante.length + ' capitol(e) incomplet(e) — vezi checklist-ul de mai sus' : 'toate cele 5 capitole complete' },
         { normativ: 'P118-1/2025, ' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ' (rezistența la foc a elementelor)', status: 'respectat', obs: 'proiectat pentru minimul necesar, grad declarat ' + grad },
-        { normativ: 'P118-1/2025, ' + (m5.norma || 'Tabelul 41/42') + ' (compartimentarea la incendiu)', status: m5.conform === false ? 'nerespectat' : (m5.conform ? 'respectat' : 'date_insuficiente'), obs: 'arie compartiment vs. maxim admis' },
+        { normativ: 'P118-1/2025, ' + (m5.norma || 'Tabelul 41/42') + ' (compartimentarea la incendiu)', status: compartimentareConformReal === false ? 'nerespectat' : (compartimentareConformReal ? 'respectat' : 'date_insuficiente'), obs: m5bGrupuri ? ('arie per compartiment — ' + m5bGrupuri.length + ' verificate, vezi 1.4.f') : 'arie compartiment vs. maxim admis' },
         { normativ: 'P118-1/2025, Tabelul 4/145 (distanțe de siguranță față de vecinătăți)', status: vecNeconformeRJ ? 'nerespectat' : 'respectat', obs: (m6b.vecinatati || []).length + ' vecinătate/vecinătăți verificate' },
         { normativ: 'P118-1/2025, ' + (m9niv.norma || 'Tabelul 148') + ' (numărul maxim de niveluri)', status: m9niv.nelimitat ? 'neaplicabil' : (m9niv.eroare ? 'date_insuficiente' : (m9niv.conform ? 'respectat' : 'nerespectat')), obs: m9niv.nelimitat ? 'nelimitat pentru gradul ' + grad : 'proiectat vs. maxim admis' },
         { normativ: 'HG 1058/2006 (zone cu pericol de explozie — ATEX)', status: atexAplicabilUnele ? 'date_insuficiente' : 'neaplicabil', obs: atexAplicabilUnele ? 'zonă declarată — validare de specialist ATEX în curs' : 'nu au fost identificate substanțe cu potențial exploziv' },
@@ -1524,11 +1546,10 @@
       { h: null, html: (function () {
         var FUNCTIUNI_PERSOANE_VULNERABILE_C1 = { gradinita: 1, 'centru-social': 1, medical: 1 };
         var seSupuneC1 = FUNCTIUNI_PERSOANE_VULNERABILE_C1[D.functiune] ? true : (D.niv_supraterane ? (+D.niv_supraterane >= 5) : null);
-        var compartimentareConform = m5bGrupuri ? !m5bGrupuri.some(function (g) { return g.verificare && g.verificare.conform === false; }) : (m5.conform === false ? false : (m5.conform ? true : null));
         return _concluzieCapitol(1, 'Caracteristicile construcției', [
           { stare: seSupuneC1, text: 'Se supune avizării/autorizării de securitate la incendiu conform H.G. 571/2016, Anexa 1 — vezi 1.2 pentru temei/motiv complet.' },
           { stare: !!(D.categorie_importanta || ac.categorie_importanta), text: 'Categorie de importanță stabilită: ' + esc(D.categorie_importanta || ac.categorie_importanta || 'nedeterminată') + '.' },
-          { stare: compartimentareConform, text: compartimentareConform === null ? 'Compartimentarea nu a putut fi verificată (date insuficiente).' : (compartimentareConform ? 'Toate compartimentele respectă aria maximă admisă.' : 'Cel puțin un compartiment depășește aria maximă admisă — vezi secțiunea 5.') }
+          { stare: compartimentareConformReal, text: compartimentareConformReal === null ? 'Compartimentarea nu a putut fi verificată (date insuficiente).' : (compartimentareConformReal ? 'Toate compartimentele respectă aria maximă admisă.' : 'Cel puțin un compartiment depășește aria maximă admisă — vezi secțiunea 5.') }
         ]);
       })() },
       { h: '2.1. Calculul și încadrarea în nivel de risc', html: (function () {
@@ -1570,9 +1591,9 @@
       { h: '3.2. Gradul de stabilitate la incendiu (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelul 144' : 'Tabelul 2') + ')',
         html: '<p>Gradul de stabilitate <b>adoptat (de proiectare)</b>: ' + esc(grad) + '. ' + m6.acoperire_partiala + ((D._materiale || []).length ? '' : ' Confirmarea definitivă a gradului (prin DoP-urile/certificatele materialelor efectiv puse în operă) se face la recepția lucrării — grad de proiectare, nu grad definitiv as-built.') + '</p>' },
       { h: '3.2. Corelare arie/niveluri (' + (m0.regim_tabele === 'EXISTENTA_NEMODIFICATA' ? 'Tabelele 147/148' : 'Tabelele 41/42') + ')', html: tbl([
-        ['Aria construită proiectată', (m5.arie_proiectata_mp || 0) + ' m²'],
+        ['Aria construită proiectată', m5bGrupuri ? (m5bGrupuri.length + ' compartimente — vezi 1.4.f') : ((m5.arie_proiectata_mp || 0) + ' m²')],
         ['Aria maximă admisă (' + (m5.norma || '—') + ')', m5.arie_maxima_admisa_mp != null ? m5.arie_maxima_admisa_mp + ' m²' : '—'],
-        ['Conform arie', m5.conform === false ? 'NECONFORM' : (m5.conform ? 'DA' : 'nedeterminat')],
+        ['Conform arie', compartimentareConformReal === false ? 'NECONFORM' : (compartimentareConformReal ? 'DA' : 'nedeterminat')],
         ['Număr niveluri proiectat', (D.niv_supraterane || 1) + ''],
         ['Număr niveluri maxim admis (' + (m9niv.norma || '—') + ')', m9niv.nelimitat ? 'nelimitat' : (m9niv.niveluri_max != null ? m9niv.niveluri_max + '' : '—')],
         ['Conform niveluri', m9niv.conform === false ? 'NECONFORM' : (m9niv.nelimitat || m9niv.conform ? 'DA' : 'nedeterminat')]
