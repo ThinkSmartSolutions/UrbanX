@@ -687,6 +687,19 @@
     var m9niv = G.SSI_ENGINE.m9_niveluriMaxime(m0, { grad: grad, destinatie: destinatieT42, niveluri_proiectate: D.niv_supraterane });
     var m6b = G.SSI_ENGINE.m6b_clasificareVecinatati(m0, { grad_stabilitate: grad }, D._vecinatati || []);
 
+    // Timpi de intervenție ISU (T1-T14, cascadă) — tiparul de calcul cerut de Florin (16 iul), replicat
+    // după metodologia reală (Excel "Sarcina termică Fruntișeni"): se calculează ÎNTOTDEAUNA (auto-
+    // estimează, nu bloacă), cu T3 (deplasare) derivat din distanța reală la ISU dacă a fost declarată
+    // (3.4 din panoul SSI), altfel dintr-o estimare conservatoare marcată explicit ca atare.
+    var _camereTI = D._camere || [];
+    var _qMaxTI = _camereTI.length ? Math.max.apply(null, _camereTI.map(function (c) { return (c.arie_mp && c.sarcina_termica_mj) ? c.sarcina_termica_mj / c.arie_mp : 0; })) : 0;
+    var _riscTI = _camereTI.length ? (function (q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; })(_qMaxTI) : (ac.risc_incendiu || 'mic').replace('_', ' ');
+    var timpiInterventie = G.SSI_SARCINA_TERMICA ? G.SSI_SARCINA_TERMICA.calculeazaTimpiInterventie({
+      distanta_isu_km: D._detasament_isu && D._detasament_isu.distanta_km,
+      risc: _riscTI, arie_compartiment_mp: D.Sc || 0,
+      persoane_needeplasabile: !!{ gradinita: 1, 'centru-social': 1, medical: 1 }[D.functiune]
+    }) : null;
+
     // Faza citita din titlul DWG-ului importat vs. faza declarata a proiectului — NU se presupune
     // implicit D.T.A.C.; un plan de faza CU (Certificat de Urbanism) e o etapa anterioara oricarui
     // scenariu SSI propriu-zis (care se elaboreaza la D.T.A.C.) — neconcordanta e eroare de flux.
@@ -1041,7 +1054,7 @@
         { veriga: 'Rezistența la foc → Evacuare (fluxuri/scări)', stare: 'neconectat_automat', obs: 'motorul actual nu derivă necesarul de evacuare din rezistența elementelor — cele două verigi rezultă independent din geometrie/capacitate (vezi 3.4), verificare manuală de proiectant recomandată' },
         { veriga: 'Evacuare (fluxuri) → Hidranți (necesitate)', stare: 'neconectat_automat', obs: 'necesitatea hidranților rezultă din volum/arie desfășurată (M11), nu din fluxurile de evacuare — ramuri paralele din aceeași sursă (Sc/Sd), nu o veriga lipsă' },
         { veriga: 'Hidranți/sprinklere (necesitate) → Debit normat → Rezervă de apă', stare: rezervaConsistenta == null ? 'date_insuficiente' : (rezervaConsistenta ? 'verificat' : 'eroare'), obs: rezervaConsistenta == null ? 'rezervă neconfigurată' : (rezervaConsistenta ? ('rezerva declarată (' + ac.rezerva_incendiu_mc + ' m³) corespunde debitului × durata normată (' + vriAsteptat + ' m³ calculat)') : ('NECONCORDANȚĂ: rezerva declarată (' + ac.rezerva_incendiu_mc + ' m³) nu corespunde debitului × durata normată (' + vriAsteptat + ' m³ calculat) — verifică sursa datelor')) },
-        { veriga: 'Rezervă de apă → Durată teoretică de incendiu → Timp de intervenție', stare: 'neconectat_automat', obs: 'durata teoretică de incendiu și timpul de intervenție al serviciilor de pompieri nu sunt încă modelate în acest motor — verificare integral manuală de proiectant până la extinderea motorului' }
+        { veriga: 'Rezervă de apă → Durată teoretică de incendiu → Timp de intervenție', stare: timpiInterventie ? 'verificat' : 'neconectat_automat', obs: timpiInterventie ? ('cascadă T1-T14 calculată (vezi 3.6.b.1) — timp total de dislocare a forțelor T14=' + timpiInterventie.T14_total_min + ' min' + (timpiInterventie.estimat_T3 ? ', cu T3 (deplasare) estimat implicit (fără distanță ISU declarată)' : ', cu T3 (deplasare) din distanța reală la ISU')) : 'motorul SSI_SARCINA_TERMICA nu este încărcat' }
       ];
       var STARE_LABEL = { verificat: '✔ verificat', eroare: '❌ neconcordanță', date_insuficiente: '➖ date insuficiente', neconectat_automat: '➖ neconectat automat' };
       return '<p>Fiecare verigă e derivată din cea anterioară, nu introdusă independent — unde motorul chiar calculează o verigă din alta (ex. rezerva de apă din debit × durată), se recalculează și se compară explicit; unde legătura programatică nu există încă, se semnalează onest, nu se presupune validă.</p>' +
@@ -1564,9 +1577,22 @@
               var qi = (c.arie_mp && c.sarcina_termica_mj) ? Math.round(c.sarcina_termica_mj / c.arie_mp) : 0;
               return ['' + (i + 1), c.nume || '—', (c.arie_mp || 0) + ' m²', Math.round(c.sarcina_termica_mj || 0) + ' MJ', qi + ' MJ/m²', incadrare(qi)];
             }), ['Nr.', 'Încăpere', 'Arie', 'Σ(Gi·Hi·ψi)', 'qi = Σ/A', 'Nivel risc']) +
-              '<p style="font-size:9pt;color:#666">Sarcina termică de mai sus reflectă materialul combustibil real declarat pe planul de arhitectură pentru fiecare încăpere (finisaj de pardoseală — parchet lemn: 18,40 MJ/kg conform Tabelul 137; pardoselile ceramice/gresie sunt incombustibile, contribuție 0). Destinația (' + esc(destinatieT42.toLowerCase()) + ') nu presupune, cu caracter permanent, depozitare de materiale periculoase peste mobilierul/finisajele uzuale — încadrarea rezultă atât din calculul de mai sus (' + Math.round(qMax) + ' MJ/m² maxim, sub pragul de ' + (risc === 'mic' ? '420' : risc === 'mijlociu' ? '840' : '1680') + ' MJ/m²), cât și din practica de proiectare pentru această destinație.</p>'
+              '<p style="font-size:9pt;color:#666">Sarcina termică de mai sus însumează TOATE materialele combustibile reale ale fiecărei încăperi — nu doar finisajul de pardoseală: mobilier, textile, materiale plastice, cabluri/echipamente electrice, plus pardoseala (parchet/covor/mochetă, unde e cazul; pardoselile ceramice/gresie sunt incombustibile, contribuție 0) — vezi detaliul material cu material la 2.1.a. Destinația (' + esc(destinatieT42.toLowerCase()) + ') nu presupune, cu caracter permanent, depozitare de materiale periculoase peste mobilierul/finisajele uzuale — încadrarea rezultă atât din calculul de mai sus (' + Math.round(qMax) + ' MJ/m² maxim, sub pragul de ' + (risc === 'mic' ? '420' : risc === 'mijlociu' ? '840' : '1680') + ' MJ/m²), cât și din practica de proiectare pentru această destinație.</p>' + (camere.some(function (c) { return c.estimat; }) ? '<p style="font-size:9pt;color:#666">Inventarul de încăperi de mai sus e o <b>estimare</b> din programul funcțional standard al destinației (nicio planșă/relevee încărcată încă) — se calibrează cu inventarul REAL de mobilier/echipamente pe măsură ce proiectul avansează.</p>' : '')
             : '<p>Destinația (' + esc(destinatieT42.toLowerCase()) + ') — mobilier și finisaje uzuale, fără depozitare de materiale periculoase — se încadrează în risc <b>' + esc(risc) + '</b>, conform practicii de proiectare pentru această destinație.</p>') +
           '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (camere.length ? ' — calculat din inventarul real de încăperi/finisaje declarate în proiect (' + camere.length + ' încăperi).' : ', conform destinației ' + esc(destinatieT42.toLowerCase()) + '.') + '</p>';
+      })() },
+      { h: '2.1.a. Detaliu de calcul — inventar de materiale combustibile per încăpere', html: (function () {
+        var camere = (D._camere || []).filter(function (c) { return c.detaliu_materiale && c.detaliu_materiale.length; });
+        if (!camere.length) return '<p>Fără detaliul material-cu-material (inventarul de încăperi nu conține o descompunere pe materiale) — vezi tabelul sintetic de la 2.1.</p>';
+        var randuri = [];
+        camere.forEach(function (c, i) {
+          c.detaliu_materiale.forEach(function (m, j) {
+            randuri.push([j === 0 ? '' + (i + 1) : '', j === 0 ? (c.nume || '—') : '', m.nume, m.cantitate + ' ' + m.unitate, m.greutate_kg + ' kg', m.total_kg + ' kg', m.putere_calorica_mj_kg + ' MJ/kg', m.sarcina_termica_mj + ' MJ', j === 0 ? ((c.arie_mp || 0) + ' m²') : '', j === 0 ? (c.densitate_mj_mp + ' MJ/m²') : '', j === 0 ? (c.risc_incadrare || '—') : '']);
+          });
+        });
+        return '<p>Descompunere pe fiecare material combustibil, replicând exact formula de calcul (Gi = Cantitate × Greutate unitară; Ii = Gi × Puterea calorică; qi = ΣIi / Arie):</p>' +
+          tbl(randuri, ['Nr.', 'Încăpere', 'Material', 'Cantitate', 'Greutate unit.', 'Total (Gi)', 'Putere calorică (Hi)', 'Sarcină termică (Ii)', 'Suprafață', 'Densitate (qi)', 'Risc']) +
+          '<p style="font-size:9pt;color:#666">' + camere.length + ' încăpere/încăperi cu detaliu complet. Sursa fiecărui rând (pardoseală reală de pe plan vs. inventar standard de mobilier/echipamente per tip de încăpere) e disponibilă în câmpul „sursă" al fiecărei încăperi.</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
       { h: null, html: (function () {
@@ -1716,9 +1742,15 @@
         tbl([
           ['Numărul și amplasarea acceselor', cladiriPropuse.length > 1 ? 'câte un acces carosabil la fiecare din cele ' + cladiriPropuse.length + ' unități, prin aleile carosabile ale ansamblului (vezi planul de situație)' : 'un acces carosabil, dinspre drumul public adiacent (vezi planul de situație)'],
           ['Dimensiuni/gabarite ale căilor de acces', D._latime_carosabil_incinta ? D._latime_carosabil_incinta + ' m lățime utilă (declarat de proiectant)' : 'proiectat pentru accesul autospecialelor de intervenție (lățime utilă normată P118-1/2025) — dimensiunea exactă rezultă din proiectul de sistematizare a incintei'],
-          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu ? (D._detasament_isu.nume || '—') + (D._detasament_isu.distanta_km != null ? ', ' + D._detasament_isu.distanta_km + ' km' : '') + (D._detasament_isu.timp_min != null ? ', ~' + D._detasament_isu.timp_min + ' min' : '') : 'se confirmă cu ISU județean la depunerea documentației (denumire detașament, distanță, timp estimat de intervenție) — pas administrativ standard, nu ține de proiectare'],
+          ['Trasee de alertare/deplasare a autospecialelor de la cel mai apropiat detașament ISU', D._detasament_isu && D._detasament_isu.distanta_km != null ? (D._detasament_isu.nume || 'detașament ISU') + ', ' + D._detasament_isu.distanta_km + ' km → timp de deplasare calculat T3=' + esc(timpiInterventie ? timpiInterventie.randuri[2].min : '—') + ' min (vezi 3.6.b.1)' : 'distanță reală neconfirmată încă cu ISU județean — timp de deplasare estimat conservator (vezi 3.6.b.1); completează distanța exactă (panoul SSI, secțiunea 3.4) pentru un calcul precis'],
           ['Marcaje și indicatoare de circulație', 'conform reglementărilor aplicabile (STAS 1848, semnalizare rutieră) — se detaliază la faza de proiect de sistematizare a incintei']
         ], ['Caracteristică', 'Valoare']) },
+      { h: '3.6.b.1. Timpi de intervenție ISU (cascadă T1-T14)', html: (function () {
+        if (!timpiInterventie) return '<p>Motorul de calcul al timpilor de intervenție (SSI_SARCINA_TERMICA) nu este încărcat — secțiune indisponibilă.</p>';
+        return '<p>Cascada timpilor de intervenție ai serviciilor pentru situații de urgență, de la momentul izbucnirii incendiului până la retragerea completă a forțelor — fiecare timp derivă din cele anterioare, nu se introduce independent:</p>' +
+          tbl(timpiInterventie.randuri.map(function (r) { return [r.id, r.eticheta, r.min + ' min', r.formula || (r.id === 'T3' && timpiInterventie.estimat_T3 ? 'estimare implicită' : '—')]; }), ['Simbol', 'Semnificație', 'Durată', 'Formulă/derivare']) +
+          '<p><b>T14 = ' + timpiInterventie.T14_total_min + ' min — timpul total de dislocare a forțelor și mijloacelor de intervenție</b>, de la alarmare până la retragerea completă din intervenție.' + (timpiInterventie.estimat_T3 ? ' Timpul de deplasare (T3) e o estimare implicită conservatoare (15 min) — completează distanța reală la subunitatea ISU (panoul SSI, secțiunea 3.4) pentru un calcul exact.' : ' Timpul de deplasare (T3) rezultă din distanța reală declarată la subunitatea ISU.') + '</p>';
+      })() },
       { h: '3.6.c. Ascensoare de pompieri', html: '<p>Nu este cazul — regimul de înălțime redus (' + esc(D.regim || 'P+1E') + ') nu impune ascensor de intervenție (cerință specifică clădirilor înalte/foarte înalte, H≥28/45m).</p>' },
       { h: null, html: (function () {
         var vecNeconforme = verificariM14.filter(function (n) { return /^M6b-|^M6c-/.test(n.id); });

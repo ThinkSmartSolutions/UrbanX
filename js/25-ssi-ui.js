@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -190,6 +190,9 @@
       '<button class="ssiui-btn pri" onclick="SSI_UI._autoDetecteaza()" style="margin-bottom:10px">📍 Auto-detectează vecinătățile din hartă</button>' +
       STATE.vecinatati.map(function (v, i) { return _rowVecinatate(v, i); }).join('') +
       '<button class="ssiui-btn sec" onclick="SSI_UI._addVecinatate()">+ Adaugă vecinătate manual</button>' +
+      '<div class="ssiui-lbl" style="margin-top:14px">3.4 — Timpi de intervenție ISU (distanța la cea mai apropiată subunitate)</div>' +
+      '<div class="ssiui-note">Fără această valoare, timpul de deplasare (T3) se estimează conservator (15 min) — completează distanța reală (confirmată cu ISU județean) pentru un calcul precis al cascadei T1–T14.</div>' +
+      '<div><div class="ssiui-lbl">Distanță la subunitatea ISU (km)</div><input class="ssiui-inp" type="number" step="0.1" min="0" value="' + (STATE.distantaIsuKm != null ? STATE.distantaIsuKm : '') + '" onchange="SSI_UI._setDistantaIsu(parseFloat(this.value)||null)"></div>' +
       '<div style="margin-top:16px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">' +
       '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#e6edf7;cursor:pointer">' +
       '<input type="checkbox"' + (STATE.modFinal ? ' checked' : '') + ' onchange="SSI_UI._setModFinal(this.checked)"> ' +
@@ -469,11 +472,13 @@
         _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee,
         _materiale: STATE.materialeExtrase.length ? STATE.materialeExtrase : undefined,
         _camere: (STATE.camereExtrase && STATE.camereExtrase.length) ? STATE.camereExtrase : undefined,
+        _detasament_isu: STATE.distantaIsuKm != null ? { distanta_km: STATE.distantaIsuKm } : undefined,
         grad_stabilitate: STATE.cartusExtras && STATE.cartusExtras.grad_stabilitate,
         categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
       } : null;
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null }; },
+    _setDistantaIsu: function (v) { STATE.distantaIsuKm = v; render(); },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
     _setTipCladire: function (cheie, denumire) { STATE.tipuriCladiri[cheie] = denumire; },
@@ -531,6 +536,17 @@
         Dproj._camere = Dproj._camere || pending._camere;
         Dproj.grad_stabilitate = Dproj.grad_stabilitate || pending.grad_stabilitate;
         Dproj.categorie_importanta = Dproj.categorie_importanta || pending.categorie_importanta;
+        Dproj._detasament_isu = Dproj._detasament_isu || pending._detasament_isu;
+      }
+      // Fallback (16 iul, Florin: "acest tipar de calcul, exact acesta, pe fiecare tip de functiuni"):
+      // daca nu exista NICIUN plan/relevee incarcat (deci nicio camera reala extrasa), sarcina termica
+      // nu mai ramane un text vag "conform destinatiei" — se estimeaza DIRECT din programul functional
+      // standard al functiunii (js/urbanx-space-program.js TIPOLOGII+SPACES), la fel cum vecinatatile
+      // se auto-detecteaza conservator din harta. Auto-estimeaza, nu bloca: draftul are mereu cifre
+      // reale calculate; utilizatorul confirma/corecteaza cu inventarul REAL cand il are.
+      if ((!Dproj._camere || !Dproj._camere.length) && G.SSI_SARCINA_TERMICA && Dproj.functiune) {
+        var estimateCamere = G.SSI_SARCINA_TERMICA.genereazaCamereStandard(Dproj.functiune, Dproj);
+        if (estimateCamere && estimateCamere.length) Dproj._camere = estimateCamere;
       }
       return orig(Dproj, v);
     };

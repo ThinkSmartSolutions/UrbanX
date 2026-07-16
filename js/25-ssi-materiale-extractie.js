@@ -177,10 +177,30 @@
     });
     return unice.map(function (c) {
       var mat = _sarcinaTermicaPardoseala(c.pardoseala);
-      var sarcina_termica_mj = mat ? Math.round(c.arie_mp * mat.grosime * mat.densitate * mat.pc) : 0;
+      var sarcina_pardoseala_mj = mat ? Math.round(c.arie_mp * mat.grosime * mat.densitate * mat.pc) : 0;
+      var sursaPardoseala = mat ? ('finisaj pardoseală real: ' + c.pardoseala + ' — ' + mat.eticheta + ' (' + (mat.grosime * 1000) + 'mm × ' + mat.densitate + 'kg/m³ × ' + mat.pc + 'MJ/kg, Tabelul 137 Anexa 9.1 P118-1/2025)') : ('pardoseală incombustibilă declarată (' + c.pardoseala + ') — contribuție 0');
+      // Aditiv (16 iul, Florin: "tiparul de calcul exact, pe fiecare tip de functiuni"): pardoseala
+      // reala de mai sus ramane sursa autoritara (declarata pe plan), dar planul NU contine un
+      // inventar de mobilier/echipamente/cabluri — daca motorul SSI_SARCINA_TERMICA e incarcat si
+      // reuseste sa identifice tipul incaperii din denumire, se ADAUGA acel inventar STANDARD peste
+      // pardoseala reala (nu o inlocuieste), la fel ca in metodologia reala (Excel Fruntiseni): rand
+      // "pardoseala" + randuri "mobilier/textile/plastice/cabluri" insumate per incapere.
+      if (G.SSI_SARCINA_TERMICA) {
+        var enriched = G.SSI_SARCINA_TERMICA.calculeazaCamera({ nume: c.nume, arie_mp: c.arie_mp, pardoseala: null });
+        if (enriched.detaliu_materiale.length) {
+          var total = sarcina_pardoseala_mj + enriched.sarcina_termica_mj;
+          return {
+            nume: c.nume, arie_mp: c.arie_mp, sarcina_termica_mj: Math.round(total),
+            densitate_mj_mp: c.arie_mp ? Math.round((total / c.arie_mp) * 10) / 10 : 0,
+            detaliu_materiale: [{ nume: 'pardoseală — ' + (mat ? mat.eticheta : c.pardoseala || 'nedeclarată'), cantitate: c.arie_mp, unitate: 'mp', greutate_kg: mat ? Math.round(mat.grosime * mat.densitate * 100) / 100 : 0, total_kg: mat ? Math.round(c.arie_mp * mat.grosime * mat.densitate * 100) / 100 : 0, putere_calorica_mj_kg: mat ? mat.pc : 0, sarcina_termica_mj: sarcina_pardoseala_mj }].concat(enriched.detaliu_materiale),
+            sursa_sarcina: sursaPardoseala + ' + ' + enriched.sursa_sarcina,
+            pardoseala_declarata: c.pardoseala
+          };
+        }
+      }
       return {
-        nume: c.nume, arie_mp: c.arie_mp, sarcina_termica_mj: sarcina_termica_mj,
-        sursa_sarcina: mat ? ('finisaj pardoseală real: ' + c.pardoseala + ' — ' + mat.eticheta + ' (' + (mat.grosime * 1000) + 'mm × ' + mat.densitate + 'kg/m³ × ' + mat.pc + 'MJ/kg, Tabelul 137 Anexa 9.1 P118-1/2025)') : ('pardoseală incombustibilă declarată (' + c.pardoseala + ') — contribuție 0'),
+        nume: c.nume, arie_mp: c.arie_mp, sarcina_termica_mj: sarcina_pardoseala_mj,
+        sursa_sarcina: sursaPardoseala,
         pardoseala_declarata: c.pardoseala
       };
     });
