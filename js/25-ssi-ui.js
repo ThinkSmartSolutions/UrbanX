@@ -172,7 +172,8 @@
     var el = D.getElementById('ssi-ui-body'); if (!el) return;
     el.innerHTML =
       '<div class="ssiui-lbl">1.0 — Tip de lucrare (obligatoriu, decide tabelele P118-1/2025 aplicabile)</div>' +
-      '<select class="ssiui-sel" onchange="SSI_UI._setTip(this.value)"><option value="">— selectează —</option>' + _optTip() + '</select>' +
+      '<select class="ssiui-sel"' + (STATE.tip_lucrare ? '' : ' style="border:1px solid #f87171"') + ' onchange="SSI_UI._setTip(this.value)"><option value="">— selectează —</option>' + _optTip() + '</select>' +
+      (STATE.tip_lucrare ? '' : '<div class="ssiui-note" style="border-color:#f87171;background:rgba(248,113,113,.1);color:#fca5a5">⚠ Fără această selecție, scenariul de securitate la incendiu se generează ca document GENERIC (3 paragrafe, fără cascada M0-M17, fără sarcina termică pe încăperi, fără timpii de intervenție) — indiferent câte alte câmpuri completezi mai jos (vecinătăți, relevee, distanță ISU etc.). Selectează tipul de lucrare ÎNAINTE de a genera documentele finale.</div>') +
       '<div class="ssiui-lbl" style="margin-top:18px">Import geometrie din DXF (opțional — export din CAD, format ASCII)</div>' +
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
       (STATE.planSituatieInfo
@@ -465,7 +466,19 @@
 
   G.SSI_UI = {
     open: open, getPending: function () {
-      return STATE.tip_lucrare ? {
+      // FIX BUG REAL (Florin, 17 iul — proiect Catamarasti/154452): daca proiectantul completeaza tot
+      // panoul (DXF, relevee, vecinatati, distanta ISU, bifele FINAL) dar UITA sa selecteze "1.0 Tip de
+      // lucrare", acest getter intorcea INTREG obiectul ca null (gate pe STATE.tip_lucrare) → TOATE
+      // datele introduse manual erau aruncate silentios, nu doar cascada M0-M17 (care oricum verifica
+      // D.tip_lucrare separat in _buildScenariuSSICascada). Rezultatul: un "SSI" de 3 paragrafe generic,
+      // fara nicio urma a muncii depuse in panou, fara nicio eroare vizibila. FIX: se intoarce intotdeauna
+      // obiectul cu tot ce exista (vecinatati/relevee/camere/distanta ISU raman aplicate chiar daca tipul
+      // de lucrare lipseste inca) — doar cascada completa ramane conditionata de tip_lucrare, nu restul.
+      var nimicCompletat = !STATE.tip_lucrare && !STATE.vecinatati.length && !STATE.materialeExtrase.length &&
+        !(STATE.camereExtrase && STATE.camereExtrase.length) && !Object.keys(STATE.relevee).length &&
+        !STATE.cladiriPropuse.length && STATE.distantaIsuKm == null;
+      if (nimicCompletat) return null; // panoul e complet neatins — comportament neschimbat
+      return {
         tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
         _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
         _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
@@ -475,7 +488,7 @@
         _detasament_isu: STATE.distantaIsuKm != null ? { distanta_km: STATE.distantaIsuKm } : undefined,
         grad_stabilitate: STATE.cartusExtras && STATE.cartusExtras.grad_stabilitate,
         categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
-      } : null;
+      };
     },
     clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null }; },
     _setDistantaIsu: function (v) { STATE.distantaIsuKm = v; render(); },
