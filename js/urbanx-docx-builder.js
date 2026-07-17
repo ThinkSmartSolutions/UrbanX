@@ -1816,6 +1816,37 @@
           { stare: null, text: 'Verificarea fluxurilor de evacuare (F=N/C) și tipul scărilor sunt detaliate la 3.4.b/3.4.d, pe baza capacității reale de utilizatori (1.4.g).' }
         ]);
       })() },
+      { h: '4.0. Stingătoare portabile/transportabile', html: (function () {
+        // FIX BUG REAL (Florin, 17 iul: "In ssi nu vad dimensionarea stingatoarelor: numar, tip,
+        // normative pe functiuni. Nu avem nevoie?") — motorul principal (cascada M0-M17) avea
+        // hidranti/sprinklere/IDSAI dimensionate, dar NICIO sectiune de stingatoare portabile —
+        // gap real, nu presupunere. Reutilizeaza tabelul deja existent SSI_NORMATIVE.stingatoare
+        // (js/25-ssi.js, folosit pana acum doar in motorul separat Hala/SKID) — o singura sursa
+        // de adevar pt densitatea mp/stingator, nu recalculat independent.
+        var MAP_RISC_KEY = { mic: 'mic', mijlociu: 'mediu', mare: 'mare', 'foarte mare': 'foarte_mare' };
+        var riscKey = MAP_RISC_KEY[_riscTI] || 'mediu';
+        var densitate = (G.SSI_NORMATIVE && G.SSI_NORMATIVE.stingatoare && G.SSI_NORMATIVE.stingatoare[riscKey]) || 150;
+        var ariaCalcul = ScEfectiv || D.Sc || 0;
+        var nr = ariaCalcul ? Math.max(1, Math.ceil(ariaCalcul / densitate)) : null;
+        var FN_CU_BLOC_ALIMENTAR = { hotelier: 1, 'centru-social': 1, scoala: 1, gradinita: 1, medical: 1, mall: 1, 'spatiu-comercial': 1, sport: 1 };
+        var areBucatarie = !!FN_CU_BLOC_ALIMENTAR[D.functiune];
+        return '<p>Dimensionarea numărului și tipului de stingătoare portabile/transportabile se face conform art. 4 din P118/2-2013 și Dispozițiilor generale de apărare împotriva incendiilor (Ord. MAI), corelat cu clasa de risc de incendiu stabilită la 2.1 (nu independent de ea — o densitate normată de suprafață pe unitate de stingător, diferențiată pe nivel de risc) și cu claselor de foc (SR EN 2) ale materialelor combustibile efectiv prezente în proiect.</p>' +
+          tbl([
+            ['Nivelul de risc de incendiu determinant (vezi 2.1)', esc(_riscTI)],
+            ['Densitate normată', '1 stingător la ' + densitate + ' m² (P118/2-2013, risc ' + esc(_riscTI) + ')'],
+            ['Suprafață de calcul', ariaCalcul ? (ariaCalcul.toLocaleString ? ariaCalcul.toLocaleString('ro-RO') : ariaCalcul) + ' m²' : 'nedeclarată — se completează Sc pentru calculul automat'],
+            ['Număr minim de stingătoare', nr != null ? ('<b>' + nr + ' buc.</b> (rotunjit în plus la m² întreg din formulă)') : 'nedeterminat — completează suprafața construită']
+          ], ['Parametru de calcul', 'Valoare']) +
+          '<p><b>Tipul stingătorului</b> se stabilește pe clasa de foc a materialelor combustibile prezente (SR EN 2, SR EN 3-7), nu generic:</p>' +
+          tbl([
+            ['Standard, spații curente (clasa A — materiale solide: mobilier, hârtie, textile, lemn)', 'pulbere ABC 6 kg, capacitate de stingere minimă 21A/113B'],
+            ['Tablouri electrice generale, camere server/echipamente (curent electric prezent — apa/pulberea ABC nu se folosesc pe instalații sub tensiune fără deconectare)', 'CO₂ 2-5 kg (neconductiv, nu lasă reziduu pe echipamente sensibile)']
+          ].concat(areBucatarie ? [['Blocul alimentar/bucătăria profesională (clasa F — uleiuri/grăsimi de gătit la temperatură ridicată; apa sau pulberea ABC pot provoca proiectarea uleiului aprins/explozie de vapori)', 'stingător special clasa F (spumă specifică saponificare/wet chemical) OBLIGATORIU lângă echipamentele de gătit']] : []),
+          ['Zonă/risc', 'Tip stingător recomandat']) +
+          '<p><b>Amplasare</b> (P118/2-2013 + Dispoziții generale PSI): pe căile de acces/evacuare, la loc vizibil și liber accesibil, cu distanța de parcurs de la orice punct al încăperii la cel mai apropiat stingător de <b>maximum 20 m</b>; montare la înălțime 1,0-1,4 m de la pardoseală (mâner); inscripționare vizibilă a numărului de identificare și a instrucțiunilor de utilizare; verificare/recartușare periodică (anual, conform fișei tehnice a producătorului și registrului de evidență PSI) de firmă autorizată.</p>' +
+          (areBucatarie ? '<p><b>Destinația proiectului (' + esc(destinatieT42.toLowerCase()) + ') include bloc alimentar/bucătărie</b> — stingătorul de clasă F de lângă echipamentele de gătit se adaugă la numărul minim calculat mai sus, nu îl înlocuiește.</p>' : '') +
+          '<p style="font-size:9pt;color:#666">Numărul de stingătoare de mai sus e un minim de calcul (faza DTAC) — distribuția exactă pe planul de nivel (poziții, tip pe fiecare poziție) se stabilește la faza P.Th./D.E., pe planul de securitate la incendiu, cu verificarea distanței de parcurs reale (nu doar aria totală).</p>';
+      })() },
       { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (ac.hidranti_int_oblig ? ', motivat prin depășirea pragului aplicabil destinației (' + esc(destinatieT42.toLowerCase()) + ').' : (D.functiune === 'locuinta-individuala' ? ' — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.' : ', valoarea reală a proiectului (volum/arie desfășurată) nu atinge pragul de echipare obligatorie prevăzut pentru destinația ' + esc(destinatieT42.toLowerCase()) + '.')) + '</p>' +
         _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
           { cheie: 'tip', eticheta: 'Tipul instalației (apă-apă, aer-aer)' }, { cheie: 'volum_mc', eticheta: 'Volumul construcției/compartimentului de incendiu (m³)' },
