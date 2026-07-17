@@ -206,10 +206,17 @@
       gradinita: 'P118_1_2025_T77', scoala: 'P118_1_2025_T77',
       medical: 'P118_1_2025_T67', 'centru-social': 'P118_1_2025_T68',
       mall: 'P118_1_2025_T64', 'spatiu-comercial': 'P118_1_2025_T64',
-      birouri: 'P118_1_2025_T60', 'cladire-mixta': 'P118_1_2025_T60'
+      birouri: 'P118_1_2025_T60', 'cladire-mixta': 'P118_1_2025_T60',
+      // Adaugate 17 iul (runda 2 extractie P118): sport (Tabelul 84) si parcare (Tabelul 88)
+      // au tabele proprii, cu potrivire pe grad identica celorlalte (vezi mai jos).
+      sport: 'P118_1_2025_T84', parcare: 'P118_1_2025_T88'
     },
+    // Functiuni de productie/depozitare — Tabelul 116 NU se potriveste pe grad ca celelalte, ci pe
+    // RISC de incendiu (mic/mijlociu/mare/foarte mare) x grad x parter/etaje (17 iul, runda 2).
+    MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE: { 'hala-industriala': 1, skid: 1, agricol: 1 },
     getLungimeEvacuare: function (opt) {
       opt = opt || {};
+      if (this.MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE[opt.functiune]) return this._lungimeProductieDepozitare(opt);
       var idTabel = this.MAP_FUNCTIUNE_TABEL_LUNGIME[opt.functiune];
       if (!idTabel) return { aplicabil: false, motiv: 'Tabelul de lungimi de evacuare pentru funcțiunea „' + (opt.functiune || '—') + '" nu a fost încă extras din textul oficial P118-1/2025 — se folosește o valoare implicită conservatoare (35 m / 15 m) până la extindere.' };
       var entry = this.getMetaNormativ(idTabel);
@@ -225,6 +232,39 @@
         aplicabil: true, disponibil: !!rand, rand: rand || null,
         norma: entry.titlu + ' (' + idTabel.replace('P118_1_2025_', '') + ', ' + entry.pagina + ')',
         sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status, nota_majorare: entry.valoare.nota
+      };
+    },
+    // Lungimi de evacuare pentru constructii de productie/depozitare (hala-industriala/skid/agricol) —
+    // Tabelul 116, keiat pe risc de incendiu (nu doar pe grad) + parter vs etaje (17 iul, runda 2).
+    _lungimeProductieDepozitare: function (opt) {
+      var idTabel = 'P118_1_2025_T116';
+      var entry = this.getMetaNormativ(idTabel);
+      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: idTabel };
+      // Normalizare sinonime: platforma foloseste in paralel 'mediu' (js/urbanx-doc-engine.js,
+      // implicit ac.risc_incendiu) si 'mijlociu' (incadrarea reala pe qi din docx-builder) pt
+      // ACEEASI categorie de risc — T116 (textul oficial) foloseste 'mijlociu'.
+      var risc = String(opt.risc || 'mic').toLowerCase().replace('_', ' ').replace(/^mediu$/, 'mijlociu');
+      var grad = String(opt.grad || 'II').toUpperCase();
+      var parter = !(+opt.niveluri > 1);
+      var randuri = entry.valoare.randuri || [];
+      var candidati = randuri.filter(function (r) { return String(r.risc || '').toLowerCase() === risc; });
+      var rand = candidati.filter(function (r) {
+        var niv = String(r.nivel_stabilitate || '');
+        return niv.indexOf(grad) >= 0 || niv.replace(/\s|si\/sau|și\/sau|-/gi, '').indexOf(grad) >= 0;
+      })[0] || candidati[0] || null;
+      if (!rand) return { aplicabil: true, disponibil: false, norma: entry.titlu + ' (T116, ' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status };
+      if (rand.observatii === 'Nu se normeaza') {
+        return {
+          aplicabil: true, disponibil: true,
+          rand: { lungime_doua_directii_m: null, lungime_fund_de_sac_m: null, observatii: 'Nu se normează lungimea de evacuare pentru risc ' + risc + '/grad ' + grad + ' — se aplică regula generală (art. 6.1.5.16 lit. a): admis dacă la fiecare nivel activează simultan maximum 10 utilizatori.' },
+          norma: entry.titlu + ' (T116, ' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status, nota_majorare: entry.valoare.nota
+        };
+      }
+      var doua = parter ? rand.doua_directii_parter_m : rand.doua_directii_etaje_m;
+      return {
+        aplicabil: true, disponibil: true,
+        rand: { lungime_doua_directii_m: doua, lungime_fund_de_sac_m: rand.fund_de_sac_m, observatii: 'Risc de incendiu: ' + risc + (parter ? ' (parter)' : ' (etaje)') },
+        norma: entry.titlu + ' (T116, ' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status, nota_majorare: entry.valoare.nota
       };
     },
 

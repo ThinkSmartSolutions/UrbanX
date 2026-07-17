@@ -17,6 +17,9 @@
     },
     "evacuare_update_17iul": {
       "nota": "Adaugate 9 intrari reale extrase direct din PDF-ul oficial P118-1/2025 (surse: a2t.ro/mdlpa.ro, 702 pagini, descarcat si citit text-layer pagina cu pagina): T51 (Uf constructii noi), T50 (atrium), T56 (locuit), T60 (administrativ), T64 (comert), T67/T68 (sanatate cu/fara targa), T77 (invatamant), T80 (turism), plus Art 3.1.7.1 (stingatoare - corectie fata de densitatea aproximativa folosita anterior in js/25-ssi.js). RAMASE de extras (index deja cunoscut in tabele_evacuare_pe_destinatie, doar pagina, nu valorile): cultura T72, cult T81, sport T84, parcaje T88, sali aglomerate T109/T110, subterane T113, productie-depozitare T114-116, cladiri inalte/f.inalte T93/T97, plus tabelele pt constructii EXISTENTE (T151-T170)."
+    },
+    "evacuare_update_17iul_runda2": {
+      "nota": "A doua runda de extractie (17 iul, acelasi PDF oficial): T72 (cultura), T81 (cult), T84 (sport), T88 (parcaje), T93 (cladiri inalte), T109/T110 (sali aglomerate S1/S2 - Uf + lungimi), T113 (subterane independente, + Uf=60), T114 (arii/niveluri productie-depozitare), T115/T116 (Uf + lungimi productie-depozitare pe risc). T97 (cladiri foarte inalte) cautat dar valorile tabelului nu au fost gasite in text-layer (posibil imagine/tabel neconvertibil text) - ramane necesita_extractie. Total acum: 19 tabele reale extrase din cele ~33 identificate initial in index (tabele_evacuare_pe_destinatie)."
     }
   },
   "P118_1_2025_T2": {
@@ -1406,6 +1409,563 @@
       "densitate_mp_per_stingator": 250,
       "minim_pe_nivel": 2,
       "performanta_minima": "21A / 113B"
+    }
+  },
+  "P118_1_2025_T72": {
+    "id": "P118_1_2025_T72",
+    "titlu": "Lungimi de evacuare in cladiri pentru cultura supraterane cu inaltimi obisnuite",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "230-231",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 72 - atenee, teatre, auditorii, sali de conferinte, cinematografe, biblioteci etc.",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I si/sau II",
+          "lungime_doua_directii_m": 40,
+          "lungime_fund_de_sac_m": 20,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "III",
+          "lungime_doua_directii_m": 30,
+          "lungime_fund_de_sac_m": 16,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "lungime_doua_directii_m": 15,
+          "lungime_fund_de_sac_m": 10,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "V",
+          "lungime_doua_directii_m": 10,
+          "lungime_fund_de_sac_m": 6,
+          "observatii": ""
+        }
+      ],
+      "nota": "Cu IDSAI acoperire totala + stingere automata + control fum/gaze fierbinti, lungimile se pot majora cu 25%."
+    }
+  },
+  "P118_1_2025_T81": {
+    "id": "P118_1_2025_T81",
+    "titlu": "Lungimi de evacuare in cladiri de cult supraterane cu inaltimi obisnuite",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "238",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 81 - catedrale, biserici, moschei, case de rugaciuni, pagode, temple etc.",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I si/sau II",
+          "lungime_doua_directii_m": 50,
+          "lungime_fund_de_sac_m": 25,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "III",
+          "lungime_doua_directii_m": 30,
+          "lungime_fund_de_sac_m": 15,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "lungime_doua_directii_m": 25,
+          "lungime_fund_de_sac_m": 12,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "V",
+          "lungime_doua_directii_m": 15,
+          "lungime_fund_de_sac_m": 10,
+          "observatii": ""
+        }
+      ],
+      "nota": "Cu IDSAI acoperire totala + stingere automata + control fum/gaze fierbinti, lungimile se pot majora cu 25%."
+    }
+  },
+  "P118_1_2025_T84": {
+    "id": "P118_1_2025_T84",
+    "titlu": "Lungimi de evacuare in cladiri pentru sport supraterane inchise, cu inaltimi obisnuite",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "240-241",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 84 - cladiri inchise obisnuite pentru sport",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I si/sau II",
+          "lungime_doua_directii_m": 100,
+          "lungime_fund_de_sac_m": 50,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "III",
+          "lungime_doua_directii_m": 75,
+          "lungime_fund_de_sac_m": 30,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "lungime_doua_directii_m": 50,
+          "lungime_fund_de_sac_m": 25,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "V",
+          "lungime_doua_directii_m": 25,
+          "lungime_fund_de_sac_m": 15,
+          "observatii": ""
+        }
+      ],
+      "nota": "Cu IDSAI acoperire totala + stingere automata + control fum/gaze fierbinti, lungimile se pot majora cu 25%."
+    }
+  },
+  "P118_1_2025_T88": {
+    "id": "P118_1_2025_T88",
+    "titlu": "Lungimi de evacuare in parcaje pentru autoturisme",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "246-247",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 88",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I si/sau II",
+          "lungime_doua_directii_m": 40,
+          "lungime_doua_directii_m_deschis": 50,
+          "lungime_fund_de_sac_m": 25,
+          "lungime_fund_de_sac_m_deschis": 30,
+          "observatii": "Valorile din paranteza = parcaj SUPRATERAN DESCHIS"
+        },
+        {
+          "nivel_stabilitate": "III",
+          "lungime_doua_directii_m": 30,
+          "lungime_fund_de_sac_m": 20,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "IV si/sau V",
+          "lungime_doua_directii_m": 16,
+          "lungime_fund_de_sac_m": 12,
+          "observatii": ""
+        }
+      ],
+      "nota": "Un coridor infundat mai scurt decat lungimea maxima admisa, masurat de la o cale de evacuare cu acces la doua scari/incaperi tampon/iesiri in exterior in directii diferite, e considerat cale de evacuare admisa."
+    }
+  },
+  "P118_1_2025_T93": {
+    "id": "P118_1_2025_T93",
+    "titlu": "Lungimi de evacuare in cladiri supraterane inalte",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "268-269",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 93 - administrativa/invatamant/turism/sanatate/comert/cult/locuinte colective etc. (valoare unica, indiferent de grad - cladirile inalte sunt intotdeauna grad I)",
+      "randuri": [
+        {
+          "nivel_stabilitate": "orice (cladire inalta)",
+          "lungime_doua_directii_m": 35,
+          "lungime_fund_de_sac_m": 20,
+          "observatii": "Lungimea intr-o directie se refera si la interiorul incaperilor/apartamentelor."
+        }
+      ],
+      "nota": "Cladire inalta = P118-1/2025 (h intre 28-45m tipic). Sali aglomerate din cladiri inalte respecta prevederi proprii."
+    }
+  },
+  "P118_1_2025_T109": {
+    "id": "P118_1_2025_T109",
+    "titlu": "Uf la sali aglomerate (S1/S2)",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "296-297",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 109",
+      "randuri": [
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "I",
+          "Uf": 60,
+          "Uf_interior_sala": 80
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "II",
+          "Uf": 50,
+          "Uf_interior_sala": 70
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "III",
+          "Uf": 35,
+          "Uf_interior_sala": 50
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "IV si/sau V",
+          "Uf": 25
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "I",
+          "Uf": 75,
+          "Uf_interior_sala": 110
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "II",
+          "Uf": 70,
+          "Uf_interior_sala": 100
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "III",
+          "Uf": 50,
+          "Uf_interior_sala": 75
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "IV",
+          "Uf": 35
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "V",
+          "Uf": 25
+        }
+      ],
+      "nota": "Uf_interior_sala = unitati de trecere pe traseul DIN INTERIORUL salii pana la cea mai apropiata usa de evacuare a salii; Uf simplu = restul traseului (dupa iesirea din sala)."
+    }
+  },
+  "P118_1_2025_T110": {
+    "id": "P118_1_2025_T110",
+    "titlu": "Lungimi de evacuare maxime la sali aglomerate",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "297",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 110",
+      "randuri": [
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "I",
+          "pana_la_usa_sala_m": 48,
+          "de_la_usa_2directii_m": 40,
+          "de_la_usa_funddesac_m": 25
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "II",
+          "pana_la_usa_sala_m": 40,
+          "de_la_usa_2directii_m": 35,
+          "de_la_usa_funddesac_m": 20
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "III",
+          "pana_la_usa_sala_m": 32,
+          "de_la_usa_2directii_m": 25,
+          "de_la_usa_funddesac_m": 15
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "IV",
+          "pana_la_usa_sala_m": 24,
+          "de_la_usa_2directii_m": 16,
+          "de_la_usa_funddesac_m": 12
+        },
+        {
+          "tip_sala": "S1",
+          "nivel_stabilitate": "V",
+          "pana_la_usa_sala_m": 16,
+          "de_la_usa_2directii_m": 10,
+          "de_la_usa_funddesac_m": 10
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "I",
+          "pana_la_usa_sala_m": 60,
+          "de_la_usa_2directii_m": 40,
+          "de_la_usa_funddesac_m": 25
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "II",
+          "pana_la_usa_sala_m": 50,
+          "de_la_usa_2directii_m": 35,
+          "de_la_usa_funddesac_m": 20
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "III",
+          "pana_la_usa_sala_m": 40,
+          "de_la_usa_2directii_m": 25,
+          "de_la_usa_funddesac_m": 15
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "IV",
+          "pana_la_usa_sala_m": 30,
+          "de_la_usa_2directii_m": 16,
+          "de_la_usa_funddesac_m": 12
+        },
+        {
+          "tip_sala": "S2",
+          "nivel_stabilitate": "V",
+          "pana_la_usa_sala_m": 20,
+          "de_la_usa_2directii_m": 10,
+          "de_la_usa_funddesac_m": 10
+        }
+      ],
+      "nota": "3 lungimi distincte: (1) de la cel mai indepartat loc pana la usa salii, (2)/(3) de la usa salii pana la scara/degajament/exterior, in 2 directii / 1 directie."
+    }
+  },
+  "P118_1_2025_T113": {
+    "id": "P118_1_2025_T113",
+    "titlu": "Lungimi de evacuare in cladiri civile subterane independente",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "303",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 113 + Art 5.5.6 (Uf=60)",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "lungime_doua_directii_m": 35,
+          "lungime_fund_de_sac_m": 20,
+          "observatii": ""
+        },
+        {
+          "nivel_stabilitate": "II",
+          "lungime_doua_directii_m": 25,
+          "lungime_fund_de_sac_m": 15,
+          "observatii": ""
+        }
+      ],
+      "Uf_subterane": 60,
+      "nota": "Lungime masurata de la usa incaperii pana la cea mai apropiata usa de intrare in incaperea tampon protejata ventilata in suprapresiune a scarii inchise. In interiorul incaperilor: doar lungime intr-o directie (coridor infundat)."
+    }
+  },
+  "P118_1_2025_T114": {
+    "id": "P118_1_2025_T114",
+    "titlu": "Corelare arii construite (Ac) si niveluri - constructii productie/depozitare supraterane",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "305-306",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 114 (pe risc de incendiu: foarte mare+explozie / foarte mare / mare / mijlociu / mic, x grad de stabilitate I-V)",
+      "nota": "Tabel de arii maxime (nu evacuare) - util pt compartimentare hale industriale. Ariile se pot majora 100% cu instalatii automate de stingere, 25% cu IDSAI. Vezi text sursa complet la pagina 305-306 pt valorile exacte pe fiecare combinatie risc x grad x nr niveluri (14 combinatii)."
+    }
+  },
+  "P118_1_2025_T115": {
+    "id": "P118_1_2025_T115",
+    "titlu": "Uf constructii de productie si/sau depozitare",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "313",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 115",
+      "randuri": [
+        {
+          "risc": "mic",
+          "Uf": 90
+        },
+        {
+          "risc": "mijlociu",
+          "Uf": 75
+        },
+        {
+          "risc": "mare sau foarte mare",
+          "Uf": 65
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T116": {
+    "id": "P118_1_2025_T116",
+    "titlu": "Lungimi de evacuare in constructii de productie si/sau depozitare",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "313-314",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 116",
+      "randuri": [
+        {
+          "risc": "mic",
+          "nivel_stabilitate": "I-II",
+          "doua_directii_parter_m": null,
+          "doua_directii_etaje_m": null,
+          "fund_de_sac_m": null,
+          "observatii": "Nu se normeaza"
+        },
+        {
+          "risc": "mic",
+          "nivel_stabilitate": "III",
+          "observatii": "Nu se normeaza"
+        },
+        {
+          "risc": "mic",
+          "nivel_stabilitate": "IV",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "mic",
+          "nivel_stabilitate": "V",
+          "doua_directii_parter_m": 60,
+          "doua_directii_etaje_m": 50,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "mijlociu",
+          "nivel_stabilitate": "I-II",
+          "observatii": "Nu se normeaza"
+        },
+        {
+          "risc": "mijlociu",
+          "nivel_stabilitate": "III",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "mijlociu",
+          "nivel_stabilitate": "IV",
+          "doua_directii_parter_m": 60,
+          "doua_directii_etaje_m": 50,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "mijlociu",
+          "nivel_stabilitate": "V",
+          "doua_directii_parter_m": 50,
+          "doua_directii_etaje_m": 40,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "mare",
+          "nivel_stabilitate": "I-II",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "foarte mare",
+          "nivel_stabilitate": "I-II",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "risc": "foarte mare si explozie volumetrica",
+          "nivel_stabilitate": "I-II",
+          "doua_directii_parter_m": 30,
+          "doua_directii_etaje_m": 25,
+          "fund_de_sac_m": 20
+        }
+      ],
+      "nota": "(a) Nu se normeaza daca la fiecare nivel sunt simultan max. 10 utilizatori, indiferent de risc/grad. (b)-(d): circulatiile prin spatii cu risc egal/mai mic pot fi cai de evacuare; anexele tehnico-sociale se pot evacua prin spatiile de productie/depozitare pe care le deservesc."
     }
   }
 }

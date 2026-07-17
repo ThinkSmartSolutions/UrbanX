@@ -1751,12 +1751,14 @@
         var refugii = areVulnerabili
           ? '<b>Sunt necesare refugii per nivel</b> — proiectul are/poate avea persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5); amplasarea și dimensionarea refugiilor se stabilesc la faza de proiect tehnic, conform normativelor specifice categoriei (NP 051/2012, OMS 1955/1995 etc.).'
           : 'Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).';
-        var lungime = G.SSI_NORMATIVE_ENGINE.getLungimeEvacuare({ functiune: D.functiune, grad: grad });
+        var lungime = G.SSI_NORMATIVE_ENGINE.getLungimeEvacuare({ functiune: D.functiune, grad: grad, risc: _riscTI, niveluri: D.niv_supraterane });
         var lungimeHtml;
         if (lungime.aplicabil && lungime.disponibil) {
           var r = lungime.rand;
           var doua = r.lungime_doua_directii_m, fund = r.lungime_fund_de_sac_m;
-          lungimeHtml = '<p>Distanța maximă de evacuare admisă (' + esc(lungime.norma) + ', grad ' + esc(grad) + '): <b>' + doua + ' m</b> (traseu cu 2 direcții diferite) / <b>' + fund + ' m</b> (traseu fund de sac)' + (r.observatii ? ' — ' + esc(r.observatii) : '') + '.' + (lungime.nota_majorare ? ' <span style="font-size:9pt;color:#666">' + esc(lungime.nota_majorare) + '</span>' : '') + '</p>';
+          lungimeHtml = (doua == null && fund == null)
+            ? '<p>' + esc(lungime.norma) + ', grad ' + esc(grad) + ': ' + esc(r.observatii || 'lungimea de evacuare nu este normată pentru această combinație risc/grad.') + (lungime.nota_majorare ? ' <span style="font-size:9pt;color:#666">' + esc(lungime.nota_majorare) + '</span>' : '') + '</p>'
+            : '<p>Distanța maximă de evacuare admisă (' + esc(lungime.norma) + ', grad ' + esc(grad) + '): <b>' + doua + ' m</b> (traseu cu 2 direcții diferite) / <b>' + fund + ' m</b> (traseu fund de sac)' + (r.observatii ? ' — ' + esc(r.observatii) : '') + '.' + (lungime.nota_majorare ? ' <span style="font-size:9pt;color:#666">' + esc(lungime.nota_majorare) + '</span>' : '') + '</p>';
         } else {
           lungimeHtml = '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac) — valoare implicită conservatoare. ' + esc(lungime.motiv || '') + '</p>';
         }

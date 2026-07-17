@@ -2913,6 +2913,7 @@ setInterval(()=>{
   <script src="js/tci-zone-engine.js?v=20260522z"></script>
   <script src="js/urbanx-compare-pro.js?v=20260703alluats"></script><!-- Compare Pro + Planning Score + Presentation Mode -->
   <script src="js/urbanx-science-layer.js?v=20260625flood"></script><!-- SpaceSyntax+Noise+Sunlight+Economic+Swipe+ZoneLabels -->
+  <script src="js/urbanx-risc-seismic-cladiri.js?v=20260717a"></script><!-- Cladiri risc seismic reale (AMCCRS/DupaCutremur.ro, azi doar Bucuresti) -->
   <script src="js/urbanx-eu-benchmark.js?v=20260520c"></script><!-- European Benchmarking Pro — 17 orase EU · 12 indicatori · Eurostat Urban Audit 2021 -->
   <script src="js/urbanx-ai-narrative.js?v=20260617tpl"></script><!-- AI Narrative Generator — Claude API · Memoriu justificativ urbanistic automat -->
 <script>
@@ -3783,8 +3784,30 @@ setTimeout(()=>{ addBilantExportBtn(); _bilantObs.disconnect(); }, 3000);
     onmouseover="this.style.background='rgba(59,130,246,.2)'"
     onmouseout="this.style.background='rgba(59,130,246,.08)'">
     🌊 Hărți Inundații ANAR
-    
+
     <div style="font-size:10px;color:rgba(125,211,252,.6);font-weight:400">RCP10 / RCP100 / RCP500 · date oficiale ANAR WMS</div>
+  </button>
+
+  <button onclick="(function(){
+  const map=window.map;
+  if(!map){ss?.('Harta nu e disponibilă');return;}
+  if(window._RiscSeismicCladiri){
+    window._RiscSeismicCladiri.add(map).then(function(ok){
+      if(ok){ window._RiscSeismicCladiri.addZoneColaps(map); window._RiscSeismicCladiri.addStrazi(map); }
+    });
+  } else {
+    ss?.('Modulul se inițializează — mai încearcă în 3 secunde');
+  }
+  _closeAllMenusAndOverlay();
+})()"
+    style="display:block;width:100%;text-align:left;background:rgba(127,29,29,.10);
+      border:none;color:#fca5a5;padding:10px 12px;cursor:pointer;border-radius:8px;
+      font-size:13px;font-weight:700;min-height:44px;font-family:inherit;margin-bottom:2px"
+    onmouseover="this.style.background='rgba(127,29,29,.22)'"
+    onmouseout="this.style.background='rgba(127,29,29,.10)'">
+    🏚 Clădiri Risc Seismic (AMCCRS)
+
+    <div style="font-size:10px;color:rgba(252,165,165,.6);font-weight:400">Rs1-Rs4/U1-U3 · azi doar București · date DupăCutremur.ro</div>
   </button>
 
   <!-- Buton close mobile -->
