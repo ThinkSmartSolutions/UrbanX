@@ -1582,16 +1582,28 @@
           '<p><b>Concluzie: încadrare risc ' + esc(risc) + '</b>' + (camere.length ? ' — calculat din inventarul real de încăperi/finisaje declarate în proiect (' + camere.length + ' încăperi).' : ', conform destinației ' + esc(destinatieT42.toLowerCase()) + '.') + '</p>';
       })() },
       { h: '2.1.a. Detaliu de calcul — inventar de materiale combustibile per încăpere', html: (function () {
+        // FIX (Florin, 17 iul — proiect Catamarasti: "nu vad tot tabelul, unde sunt totalurile/
+        // suprafetele"): un tabel de 11 coloane cu text lung pe coloana "Material" iese din pagina la
+        // randare Word/PDF (continutul cel real vizibil se opreste la a 8-a coloana, exact ca bug-ul
+        // deja documentat mai sus in fisier la _tblMotorConformitateDetaliat/_tblMatriceConformitate:
+        // "un tabel de 6 coloane cu text lung tot trunchia" — aici erau 11). Fix: acelasi tipar deja
+        // stabilit in acest fisier (max. 3-4 coloane pt tabele cu text lung) — Incapere/Arie/Total/
+        // Densitate/Risc NU mai sunt coloane (usor de pierdut la trunchiere), ci RANDURI proprii,
+        // pe toata latimea, inainte si dupa fiecare grup de materiale — imposibil de ratat.
         var camere = (D._camere || []).filter(function (c) { return c.detaliu_materiale && c.detaliu_materiale.length; });
         if (!camere.length) return '<p>Fără detaliul material-cu-material (inventarul de încăperi nu conține o descompunere pe materiale) — vezi tabelul sintetic de la 2.1.</p>';
-        var randuri = [];
+        var head = ['Material', 'Cantitate', 'Putere calorică (Hi)', 'Sarcină termică (Ii)'];
+        var htmlTbl = '<table><tr>' + head.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>';
         camere.forEach(function (c, i) {
-          c.detaliu_materiale.forEach(function (m, j) {
-            randuri.push([j === 0 ? '' + (i + 1) : '', j === 0 ? (c.nume || '—') : '', m.nume, m.cantitate + ' ' + m.unitate, m.greutate_kg + ' kg', m.total_kg + ' kg', m.putere_calorica_mj_kg + ' MJ/kg', m.sarcina_termica_mj + ' MJ', j === 0 ? ((c.arie_mp || 0) + ' m²') : '', j === 0 ? (c.densitate_mj_mp + ' MJ/m²') : '', j === 0 ? (c.risc_incadrare || '—') : '']);
+          htmlTbl += '<tr><td colspan="4" style="background:#dbe4f0;font-weight:bold">' + (i + 1) + '. ' + esc(c.nume || '—') + ' — arie ' + (c.arie_mp || 0) + ' m²</td></tr>';
+          c.detaliu_materiale.forEach(function (m) {
+            htmlTbl += '<tr><td>' + esc(m.nume) + ' <span style="color:#666;font-size:9pt">(' + m.cantitate + ' ' + esc(m.unitate) + ' × ' + m.greutate_kg + ' kg = ' + m.total_kg + ' kg)</span></td><td>' + m.cantitate + ' ' + esc(m.unitate) + '</td><td>' + m.putere_calorica_mj_kg + ' MJ/kg</td><td>' + m.sarcina_termica_mj + ' MJ</td></tr>';
           });
+          htmlTbl += '<tr><td colspan="4" style="background:#eef2f7;font-weight:bold">TOTAL ' + esc(c.nume || 'încăpere') + ': ' + c.sarcina_termica_mj + ' MJ / ' + (c.arie_mp || 0) + ' m² → densitate ' + c.densitate_mj_mp + ' MJ/m² → risc ' + esc(c.risc_incadrare || '—') + '</td></tr>';
         });
-        return '<p>Descompunere pe fiecare material combustibil, replicând exact formula de calcul (Gi = Cantitate × Greutate unitară; Ii = Gi × Puterea calorică; qi = ΣIi / Arie):</p>' +
-          tbl(randuri, ['Nr.', 'Încăpere', 'Material', 'Cantitate', 'Greutate unit.', 'Total (Gi)', 'Putere calorică (Hi)', 'Sarcină termică (Ii)', 'Suprafață', 'Densitate (qi)', 'Risc']) +
+        htmlTbl += '</table>';
+        return '<p>Descompunere pe fiecare material combustibil, replicând exact formula de calcul (Gi = Cantitate × Greutate unitară; Ii = Gi × Puterea calorică; qi = ΣIi / Arie). Fiecare încăpere are un rând de antet (cu aria) și un rând de total (cu sarcina termică însumată, densitatea și încadrarea de risc):</p>' +
+          htmlTbl +
           '<p style="font-size:9pt;color:#666">' + camere.length + ' încăpere/încăperi cu detaliu complet. Sursa fiecărui rând (pardoseală reală de pe plan vs. inventar standard de mobilier/echipamente per tip de încăpere) e disponibilă în câmpul „sursă" al fiecărei încăperi.</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
