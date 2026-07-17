@@ -238,6 +238,22 @@
   }
   function _indicatoriTbl(D, v) {
     var ac = v.calc || {}; var e = ac.energie; var nf = function (x) { return (+x || 0).toLocaleString('ro-RO'); };
+    // Ansamblu (vezi _ansambluSec): daca exista mai multe cladiri detectate din plan, Sc/Sd/POT/CUT
+    // ale ANSAMBLULUI (insumate) sunt cele corecte de afisat aici, nu D.Sc/D.Sd ale unei singure unitati.
+    var cladiriPropuse = D._cladiri_propuse || [];
+    if (cladiriPropuse.length > 1 && G.SSI_ENGINE && G.SSI_ENGINE.m_urbanismAnsamblu) {
+      var ua = G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.Steren);
+      return tbl([
+        ['Suprafață teren (ansamblu)', (D.Steren || '—') + ' mp'],
+        ['Suprafață construită totală (ΣSC, ' + ua.nrCladiriTotal + ' unități)', nf(ua.totalSc_mp) + ' mp'],
+        ['Suprafață desfășurată totală (ΣSD)', ua.totalSd_mp ? nf(ua.totalSd_mp) + ' mp' : '—'],
+        ['POT ansamblu propus / max', (ua.pot_ansamblu_pct != null ? ua.pot_ansamblu_pct : '—') + '% / ' + (D.POT_max != null ? D.POT_max + '%' : '—')],
+        ['CUT ansamblu propus / max', (ua.cut_ansamblu != null ? ua.cut_ansamblu : '—') + ' / ' + (D.CUT_max != null ? D.CUT_max : '—')],
+        ['Regim de înălțime (unitate-tip)', (ac.regim_complet || ('P+' + Math.max(0, (D.niv_supraterane || 1) - 1))) + ' (H ' + (D.H || '—') + ' m)'],
+        ['Parcaje propuse / necesare', (D.parcaje_propuse || 0) + ' / ' + ac.parcaje_necesare],
+        ['Spații verzi minime', ac.sv_min_pct + '% (' + (ac.sv_min_mp || 0) + ' mp)']
+      ], ['Indicator urbanistic (ansamblu)', 'Valoare']);
+    }
     // Parc fotovoltaic / energie: indicatori ENERGETICI, NU POT/CUT/regim de clădire (ar fi eronat).
     if (e && e.putere_dc_kwp) {
       return tbl([
@@ -406,7 +422,35 @@
     }
     return null;
   }
-  function _withProgram(secs, D, v) { var out = secs.slice(); var cap = _capacitateSec(D, v); if (cap) out.splice(1, 0, cap); var e = _energieSec(D, v); if (e) out.splice(1, 0, e); var s = _programAplicatSec(D); if (s) out.splice(1, 0, s); return out; }
+  // FIX BUG REAL (Florin, 17 iul — proiect Catamarasti/154452, 65 unitati detectate din plan): cele 4
+  // memorii de baza (general/arhitectura/rezistenta/instalatii) foloseau DOAR continutul static din
+  // biblioteca per-functiune (js/urbanx-library/functiuni/{fn}/*.md) — acel continut descrie O SINGURA
+  // constructie generica ("o locuinta unifamiliala pe 500-700mp"), fara nicio legatura cu D._cladiri_propuse
+  // (amprentele REALE detectate din DXF-ul de situatie, deja folosite de Scenariul SSI pt distante intre
+  // cladiri). Rezultat: un ansamblu real de 65 case (2 tipuri) genera memorii care vorbeau despre "o
+  // locuinta", fara nicio mentiune ca sunt 65. Fix: sectiune noua, comuna la toate cele 4 memorii (prin
+  // _withProgram), care detecteaza ansamblul si arata explicit cate unitati/tipuri sunt + indicatorii
+  // REALI de ansamblu (Sc/Sd/POT/CUT insumate pe tot terenul) — reutilizeaza G.SSI_ENGINE.m_urbanismAnsamblu
+  // (aceeasi sursa de adevar ca in Scenariul SSI, nu recalculeaza independent).
+  function _ansambluSec(D) {
+    var cladiriPropuse = D._cladiri_propuse || [];
+    if (cladiriPropuse.length <= 1 || !G.SSI_ENGINE || !G.SSI_ENGINE.m_urbanismAnsamblu) return null;
+    var ua = G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.Steren);
+    var rows = ua.tipuri.map(function (t) {
+      return [esc(t.denumire), t.sc_mp + ' mp', (t.sd_mp != null ? t.sd_mp + ' mp' : '—'), '' + t.n, Math.round(t.n * t.sc_mp) + ' mp', (t.sd_mp != null ? Math.round(t.n * t.sd_mp) + ' mp' : '—')];
+    });
+    rows.push(['TOTAL ansamblu', '—', '—', '' + ua.nrCladiriTotal, Math.round(ua.totalSc_mp) + ' mp', (ua.totalSd_mp ? Math.round(ua.totalSd_mp) + ' mp' : '—')]);
+    return {
+      h: 'Notă — proiectul este un ansamblu de unități repetitive, nu o construcție unică', html:
+        '<p>Din planul de situație/geometria încărcată în proiect rezultă că acest obiectiv NU este o construcție izolată, ci un <b>ansamblu de ' + ua.nrCladiriTotal + ' unități</b>' + (ua.tipuri.length > 1 ? (', grupate în ' + ua.tipuri.length + ' tipuri constructive distincte') : ', de același tip constructiv') + ', detectate automat din amprentele planului de situație (DXF). <b>Conținutul memoriului de mai jos descrie soluția-tip aplicată identic fiecărei unități a ansamblului</b> (tipologie repetitivă — aceeași concepție de arhitectură/rezistență/instalații se regăsește la fiecare unitate în parte); indicatorii geometrici citați în corpul memoriului (suprafață, regim de înălțime) sunt cei ai <b>unei singure unități-tip</b>, nu ai întregului ansamblu. Indicatorii <b>de ansamblu</b> — cei relevanți pentru autorizare pe întregul obiectiv — sunt sintetizați mai jos:</p>' +
+        tbl(rows, ['Tip unitate', 'Sc unitar', 'Sd unitar', 'Nr. unități', 'Sc total tip', 'Sd total tip']) +
+        (ua.arieTeren_mp
+          ? '<p>Raportat la suprafața totală de teren a ansamblului (' + Math.round(ua.arieTeren_mp).toLocaleString('ro-RO') + ' mp): <b>POT ansamblu ≈ ' + (ua.pot_ansamblu_pct != null ? ua.pot_ansamblu_pct : '—') + '%</b>, <b>CUT ansamblu ≈ ' + (ua.cut_ansamblu != null ? ua.cut_ansamblu : '—') + '</b> — aceștia, nu indicatorii unei singure unități, sunt cei verificați față de PUG/PUZ/RLU pentru întregul ansamblu.</p>'
+          : '<p>Suprafața totală de teren a ansamblului nu a fost încă declarată — completeaz-o (D.Steren) pentru calculul automat al POT/CUT de ansamblu.</p>') +
+        '<p style="font-size:9pt;color:#666">Sursă: ' + ua.nrCladiriTotal + ' amprente identificate automat din planul de situație (DXF) încărcat în panoul SSI, aceeași sursă de date ca la verificarea distanțelor între clădirile proprii din Scenariul de securitate la incendiu — nu o listă introdusă separat.</p>'
+    };
+  }
+  function _withProgram(secs, D, v) { var out = secs.slice(); var cap = _capacitateSec(D, v); if (cap) out.splice(1, 0, cap); var e = _energieSec(D, v); if (e) out.splice(1, 0, e); var s = _programAplicatSec(D); if (s) out.splice(1, 0, s); var a = _ansambluSec(D); if (a) out.splice(1, 0, a); return out; }
 
   // ── Scenariu SSI — cascada M0-M17 (aditiv, js/25-ssi-engine*.js) ──────────
   // Mapare functiune -> destinatie exacta folosita in T42/T148 (normative.json). Fallback conservator
