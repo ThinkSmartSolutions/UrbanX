@@ -1,84 +1,470 @@
-# MEMORIU TEHNIC GENERAL — CENTRU COMERCIAL REGIONAL / MALL (DTAC)
+# MEMORIU TEHNIC GENERAL — CENTRU COMERCIAL REGIONAL / MALL, REGIM S+P+2E (DTAC)
 
-## 1. Date generale
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 republicată, Anexa nr. 1. Prezentul memoriu general tratează un centru comercial regional (mall) cu regim de înălțime S+P+2E, GLA (arie închiriabilă brută) de referință ~22.000 mp, cu galerie comercială organizată în jurul unui atrium central pe trei niveluri, ancorat de un hipermarket, un cinema multiplex și un food-court, și cu parcaj mixt subteran + suprateran multietajat + la sol. Memoriul se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul de trafic, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul. Datele numerice prezentate (suprafețe, indicatori, capacități, cifre de catchment) au caracter de referință, calibrate pentru un teren tipic de ~60.000 mp amplasat la periferia unei aglomerări urbane cu bazin de deservire regional; ele se ajustează la valorile exacte ale amplasamentului real (suprafață măsurată, regim tehnic din Certificatul de Urbanism/PUZ, condiții geotehnice și seismice, rezultatele studiului de trafic), fără a modifica principiile de proiectare și structura documentației.
 
-Memoriu general DTAC (Legea 50/1991 Anexa 1) pentru **centru comercial regional (mall) S+P+2E** cu parcaj subteran + suprateran multietajat, atrium central 3 niveluri.
+---
 
-| Element | Valoare |
+## 1. DATE DE IDENTIFICARE ȘI COMPONENȚA DOCUMENTAȚIEI
+
+### 1.1. Date de identificare a investiției
+
+| Element | Date |
 |---|---|
-| Teren / Ac / Ad | 60.000 / 28.500 / ~96.000 mp |
-| GLA (închiriabil) | ~22.000 mp |
-| Categoria importanță | **B — deosebită** (HG 766/1997) |
-| Clasa seismică | **II (γI,e 1,2)** — aglomerări mari (posibil **I γ 1,4** la food-court+cinema+atrium) |
-| Grad RF | **I** |
-| Risc incendiu | mijlociu-mare |
-| Clădire înaltă | NU (<28 m), dar măsuri de risc ridicat |
+| Denumirea obiectivului | Centru comercial regional (mall), regim de înălțime S+P+2E, GLA ~22.000 mp, cu hipermarket, cinema multiplex, food-court și galerie de 130-160 unități comerciale, cu parcaj mixt subteran + suprateran multietajat + la sol |
+| Amplasament | Intravilan / zonă destinată extinderii intravilanului prin PUZ, zonă cu funcțiune comercială/servicii, la periferia sau pe un culoar de mare trafic al unei aglomerări urbane |
+| Beneficiar / Investitor | Dezvoltator/operator de centre comerciale (persoană juridică, tipic fond de investiții imobiliare sau grup de retail) |
+| Proiectant general | Birou de proiectare atestat, coordonare multidisciplinară, cu experiență în proiecte comerciale de mare anvergură |
+| Faza de proiectare | D.T.A.C. (documentație tehnică pentru autorizarea construirii), ulterioară aprobării PUZ |
+| Suprafață teren / Ac / Ad | 60.000 / 28.500 / ~96.000 mp |
+| GLA (arie închiriabilă brută) | ~22.000 mp |
+| Categoria de importanță | **B — deosebită** (HG 766/1997), dată de aglomerările mari de persoane |
+| Clasa de importanță și expunere seismică | **II (γI,e = 1,20)** — aglomerări mari de persoane; posibil **I (γI,e = 1,40)** pe zonele de concentrare maximă (food-court + cinema + atrium), tratată distinct la cap. 7.10 |
+| Gradul de rezistență la foc | **I** |
+| Riscul de incendiu | mijlociu spre mare, funcție de zonă (depozite, bucătării food-court) |
+| Clădire înaltă | NU (H sub 28 m), dar cu măsuri de securitate la incendiu specifice riscului ridicat de aglomerare |
 
-**Cadru normativ:** Legea 50/1991, 10/1995, HG 907/2016, 350/2001, 372/2005, HG 571/2016, HG 766/1997; P100-1/2013, CR 0/2012, CR 1-1-3/1-1-4, CR 2-1-1.1, NP 112/2014, SR EN 1992/1993; P118-1/2/3, **NP 068-2002** (săli aglomerate — CRITIC), OMS 119/2014, NP 051/2012, C107, NP 127/2009 (parcaje), I5/I7/I9/I13.
+Datele de identificare cadastrală (număr cadastral, carte funciară), numele exact al beneficiarului/investitorului și adresa poștală completă se preiau din extrasul de carte funciară actualizat și din Certificatul de Urbanism/PUZ aprobat și se completează în cartușul pieselor scrise și desenate. Prezentul memoriu tratează, ca referință de proiectare, un mall regional cu GLA ~22.000 mp, organizat pe o galerie centrală cu atrium pe trei niveluri, cu subsolul dedicat parcajului și spațiilor tehnice, parterul găzduind hipermarketul-ancoră, galeria de la cota zero și o parte a food-court-ului, etajul 1 dezvoltând galeria comercială în jurul atriumului deschis, iar etajul 2 concentrând cinema-ul multiplex, food-court-ul principal și componenta de agrement. Toate valorile numerice folosite în acest memoriu (suprafețe, indicatori, capacități, cifre de catchment, necesar de parcare) sunt corelate cu cele din memoriile de arhitectură, de structură și de instalații ale aceluiași proiect și cu concluziile studiului de trafic, astfel încât cititorul documentației complete să găsească o imagine unică și coerentă a investiției.
 
-## 2. Tipologia centrelor comerciale
+### 1.2. Componența documentației DTAC
+
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
+
+**A. Piese scrise:**
+- Lista și semnăturile proiectanților (coordonator + specialități);
+- Memoriu general (prezentul document);
+- Memorii de specialitate: arhitectură, rezistență (structură), instalații sanitare, instalații termice/HVAC, instalații electrice curenți tari și slabi, instalații de ventilare-climatizare, instalații de gaze (dacă e cazul pentru food-court);
+- Referatele verificatorilor de proiect atestați (cerințele A–F, Is, It, Ie, Ig, după caz);
+- Scenariul de securitate la incendiu (document distinct — a se vedea memoriul dedicat, care tratează detaliat evacuarea, compartimentarea, instalațiile de detecție/alarmare/stingere/desfumare, aplicând inclusiv prevederile **NP 068-2002** privind proiectarea clădirilor și a sălilor aglomerate);
+- Studiul geotehnic verificat la cerința Af;
+- Ridicarea topografică vizată OCPI;
+- Studiul de trafic, cu avizul de circulație al administratorului drumului/Poliției Rutiere — piesă obligatorie și determinantă pentru soluția de acces, a se vedea cap. 5.5;
+- Devizul general estimativ (HG 907/2016);
+- Programul de control al calității lucrărilor (faze determinante) — vizat ISC;
+- Documentația de urbanism (PUZ aprobat prin HCL) care a stabilit indicatorii și regimul tehnic al amplasamentului — a se vedea cap. 5.1.
+
+**B. Piese desenate:**
+- Plan de încadrare în zonă (1:2000 / 1:5000), cu evidențierea rețelei majore de circulație și a catchment-ului;
+- Plan de situație (1:500 / 1:200) cu trasarea construcției, cote, retrageri, sistematizare verticală, toate accesele (clienți, marfă, urgență, transport public), parcaje;
+- Planuri de arhitectură pentru toate nivelurile (1:100 / 1:50), cu evidențierea galeriei, a atriumului, a ancorelor și a rețelei de unități comerciale;
+- Secțiuni caracteristice (inclusiv prin atrium), fațade, plan de învelitoare/terase;
+- Planuri de structură de principiu, planuri instalații de principiu;
+- Detalii semnificative (fațadă, atic, racord teren, acces auto/pietonal, secțiune tip prin atrium cu evidențierea desfumării).
+
+Piesele desenate se întocmesc la scări adecvate fazei DTAC, cotate și cu specificarea materialelor și finisajelor de principiu, și se corelează integral cu piesele scrise. Planul de situație este piesa-cheie pentru evaluarea încadrării urbanistice (retrageri, indicatori, accese, parcaje, sistematizare) și, pentru un centru comercial regional, pentru validarea geometriei accesului auto stabilite prin studiul de trafic — de aceea planul de situație al unui mall se elaborează, spre deosebire de majoritatea celorlalte funcțiuni, ca rezultat direct al studiului de trafic, nu invers. Toate piesele poartă cartușul cu datele de identificare, faza, scara și semnăturile.
+
+**C. Avize și acorduri** conform Certificatului de Urbanism (a se vedea cap. 14), inclusiv avizul obligatoriu de securitate la incendiu emis de ISU, avizul de circulație emis pe baza studiului de trafic, avizul de sănătate publică (DSP) — relevant pentru componenta de alimentație publică (food-court, hipermarket), avizul sanitar-veterinar (DSVSA) pentru zonele alimentare, și, funcție de pragul de investiție și de amplasament, acordul/avizul de mediu (APM/ANPM), inclusiv posibila procedură de evaluare a impactului asupra mediului (EIA).
+
+Documentația DTAC este întocmită și semnată de proiectanți cu drept de semnătură pe specialitățile respective, sub coordonarea proiectantului general, și este verificată de verificatori de proiecte atestați. Pentru un centru comercial regional, coordonarea dintre specialități este deosebit de solicitantă: structura trebuie să acomodeze deschideri mari și neregulate (hipermarket, cinema, atrium), instalațiile trebuie să deservească simultan un mix eterogen de chiriași cu cerințe divergente (frig alimentar la hipermarket, acustică la cinema, ventilare de mare debit la food-court, climatizare uniformă pe galerie), iar securitatea la incendiu trebuie să răspundă unui profil de risc dat de aglomerările masive de persoane și de prezența unui gol vertical (atriumul) care, dacă nu este tratat corect, devine principalul vector de propagare a fumului în caz de incendiu. Responsabilitatea corectitudinii soluțiilor revine proiectanților de specialitate, iar coordonarea și corelarea între specialități revine proiectantului general; verificatorii atestați confirmă, prin referate, îndeplinirea cerințelor fundamentale aplicabile fiecărei părți a proiectului. Nivelul de detaliere al prezentului memoriu este cel specific fazei DTAC, urmând ca detalierea pentru execuție să se realizeze la fazele PT/DE.
+
+### 1.3. Cadrul normativ de referință
+
+Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv, pe domenii):
+
+| Domeniu | Acte normative principale |
+|---|---|
+| Autorizare / calitate | Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994, HG 571/2016 |
+| Structură / seism | P100-1/2013, CR 0/2012, CR 1-1-3/2012, CR 1-1-4/2012, CR 2-1-1.1/2013, SR EN 1990–1999 (Eurocoduri), SR EN 1992 (beton), SR EN 1993 (oțel), NP 112/2014 (fundații), NP 074/2014 (geotehnic) |
+| Securitate la incendiu | P118-1/2013, P118-2/2013, P118-3/2015, **NP 068-2002** (proiectarea clădirilor și a sălilor aglomerate — CRITIC pentru mall), Legea 307/2006, HG 571/2016, Ord. MAI 129/2016, SR EN 12845, SR EN 54-16/24 |
+| Termic / energie | C107 (toate părțile), Legea 372/2005 + Mc001 |
+| Instalații | I5 (ventilare/climatizare), I7 (electrice), I9 (sanitare), I13 (termice), I18/I20 (curenți slabi/paratrăsnet), **NP 127/2009** (proiectarea parcajelor), NP 051/2012 (accesibilitate), OMS 119/2014 (norme de igienă), GP 063/2001 (bucătării profesionale), NP 057/2002 |
+| Mediu / apă / deșeuri | OUG 195/2005, Legea 292/2018 (EIA), Legea 107/1996, Legea 211/2011, SR EN 1825 (separatoare de grăsimi), SR EN 858 (separatoare de hidrocarburi) |
+| Circulație / trafic | Ord. MT/MI privind studiile de trafic, STAS 10144 (străzi — elemente geometrice), Regulamentul de aplicare a OUG 195/2002 (circulația pe drumurile publice) |
+| SSM | Legea 319/2006, HG 300/2006 |
+| Urmărire în timp | P130/1999 |
+
+Cadrul normativ al unui centru comercial regional se distinge de cel al majorității celorlalte funcțiuni civile prin doi piloni suplimentari, obligatorii și determinanți pentru forma finală a proiectului: (1) **NP 068-2002**, norma dedicată clădirilor și sălilor aglomerate, care guvernează dimensionarea evacuării, compartimentarea și desfumarea într-un mod mult mai restrictiv decât normele generale de securitate la incendiu aplicabile unei clădiri civile obișnuite; și (2) studiul de trafic, act tehnic care, deși nu figurează ca atare în lista clasică a memoriilor de specialitate, condiționează practic întreaga configurație a planului de situație — numărul și poziția acceselor auto, geometria intersecțiilor adiacente, eventualele lucrări de sistematizare rutieră în afara amplasamentului. Absența sau subdimensionarea oricăruia dintre acești doi piloni transformă proiectul, indiferent de calitatea arhitecturală sau structurală, într-un eșec funcțional: un mall care nu poate evacua rapid mii de persoane sau care generează congestie la accesele auto este, pentru operator, un activ nefuncțional.
+
+### 1.4. Categoria de importanță (HG 766/1997)
+
+Categoria de importanță se stabilește conform HG 766/1997 și metodologiei de încadrare, pe baza punctajului mediu al criteriilor (implicații pentru siguranța vieții, importanța economică/socială, gradul de risc, complexitatea, considerații economice). Pentru un centru comercial regional cu GLA ~22.000 mp, capacitate de vârf estimată la ~8.000-9.000 de persoane simultan (a se vedea cap. 10) și prezența unor funcțiuni de aglomerare cu risc special (cinema multiplex, food-court), punctajul mediu conduce la **categoria B (importanță deosebită)**: clădirea concentrează, pe suprafețe relativ compacte și pe cote diferite, un număr de persoane cu mult superior celui dintr-o clădire de birouri sau comerț obișnuit de dimensiuni similare, iar aceste persoane sunt, prin definiție, necunoscătoare ale planului clădirii (spre deosebire de angajații unui birou) — condiție care crește semnificativ riscul asociat unei evacuări de urgență și impune, în consecință, măsuri de securitate la incendiu net superioare mediei.
+
+Clasa de importanță și expunere seismică adoptată la nivel de ansamblu este **II (γI,e = 1,20)**, corespunzătoare aglomerărilor mari de persoane conform P100-1/2013. Pe zonele de concentrare maximă simultană — atriumul central (unde se suprapun fluxurile provenite din galerie, din food-court și din accesul la cinema) și volumul cinema-ului multiplex propriu-zis (o sală cu sute de locuri fixe, ocupată integral pe durata proiecțiilor) — proiectantul de structură evaluează, în corelare cu proiectantul de arhitectură, oportunitatea adoptării unei clase de importanță majorate, **I (γI,e = 1,40)**, aplicată local acestor zone, similar practicii curente la sălile de spectacole și la stadioane; decizia finală și breviarul de calcul aferent se prezintă în memoriul de rezistență, prezentul memoriu semnalând doar principiul și rezerva tehnică. Gradul de rezistență la foc adoptat, **I**, este cel superior din grila P118-1/2013, justificat de riscul mijlociu-mare de incendiu (depozite de mărfuri combustibile, bucătării multiple la food-court, cinema cu instalații electrice/electronice de putere) coroborat cu aglomerările masive de persoane — o combinație care nu admite compromisuri asupra rezistenței la foc a structurii și a compartimentărilor. Deși H sub 28 m exclude clădirea din categoria „clădire înaltă” în sensul P118-1, măsurile de securitate la incendiu adoptate (a se vedea cap. 9) sunt, pe alocuri, echivalente sau superioare celor impuse unei clădiri înalte, tocmai din cauza profilului de risc dat de aglomerare, nu de înălțime.
+
+---
+
+## 2. TEMA DE PROIECTARE ȘI OBIECTIVELE INVESTIȚIEI
+
+### 2.1. Tema-program
+
+Beneficiarul/dezvoltatorul solicită realizarea unui centru comercial regional cu o arie închiriabilă brută (GLA) de referință ~22.000 mp, structurat pe principiul galeriei cu atrium central pe trei niveluri, ancorat de trei funcțiuni-magnet cu roluri economice complementare — un hipermarket alimentar de ~6.500 mp, un cinema multiplex cu 6-8 săli (~2.800 mp) și un food-court cu ~500 de locuri (~1.400 mp) — și completat de o galerie de 130-160 unități comerciale de dimensiuni variabile (25-800 mp), acoperind categoriile uzuale de retail: modă și încălțăminte, electronice și electrocasnice, casă și decorațiuni, servicii (bancă, optică, telefonie), farmacie, jucării, sport. Tema-program impune:
+
+- dimensionarea galeriei și a ancorelor pe baza unui studiu de piață (catchment area) care demonstrează un bazin de captare suficient pentru susținerea comercială a formatului „mall regional” (GLA 15.000-40.000 mp), fără a suprapune sau canibaliza excesiv oferta comercială existentă — a se vedea capitolul 4, dezvoltat integral pentru acest aspect;
+- un parcaj dimensionat nu pe baza unei norme generice, ci pe baza unui calcul specific de necesar (GLA + cinema + food-court + personal), verificat și, dacă e cazul, corectat prin studiul de trafic — insuficiența parcării fiind, pentru un mall, un eșec comercial direct (a se vedea cap. 5.4);
+- un sistem de accese auto și pietonale dimensionat și amplasat pe baza studiului de trafic, cu geometrie de intersecție adecvată vârfurilor de trafic generate (a se vedea cap. 5.5);
+- separarea netă a fluxurilor „public” (clienți), „marfă” (aprovizionare chiriași) și „evacuare” (situații de urgență), cu intersecții controlate doar în puncte definite;
+- un atrium central pe trei niveluri, cu luminator zenital, ca element de orientare, de identitate arhitecturală și de distribuție a fluxului de clienți spre toate zonele galeriei — dar tratat, din perspectiva securității la incendiu, ca un gol vertical cu risc special de propagare a fumului, care impune soluții de desfumare dedicate (a se vedea cap. 7.5 și 9.4);
+- conformarea la **NP 068-2002** (clădiri și săli aglomerate) pentru toate zonele cu aglomerări de persoane — galerie, atrium, food-court, cinema.
+
+### 2.2. Obiectivele investiției
+
+Obiectivul principal este realizarea unui centru comercial regional competitiv, capabil să atragă și să mențină un tenant-mix de calitate (ancore puternice + branduri naționale/internaționale în galerie), cu un grad ridicat de ocupare (occupancy) și cu o rată de vizitare (footfall) susținută de catchment-ul real al zonei. Obiective specifice: atingerea unei eficiențe GLA/GBA competitive pe piața de profil (a se vedea cap. 2.3.1 — GLA/GBA comercial ~41%, cu țintă de optimizare spre ≥60% pe brutul strict comercial, fără parcaje, în fazele ulterioare de proiectare); asigurarea unui necesar de parcare fără deficit, condiție comercială la fel de importantă ca și tenant-mix-ul (a se vedea cap. 5.4); obținerea avizului de circulație pe baza unui studiu de trafic care să demonstreze absorbția vârfurilor de trafic generate fără afectarea semnificativă a rețelei stradale adiacente; atingerea unei clase energetice ridicate (nZEB, conform Legii 372/2005), relevantă la o clădire cu suprafețe vitrate mari (atrium, curtain wall) și cu sarcini termice ridicate de la frigul comercial (hipermarket) și de la aglomerările de persoane; și conformarea integrală la cerințele de securitate la incendiu specifice sălilor aglomerate (NP 068-2002), condiție necesară obținerii avizului ISU și, ulterior, a autorizației de securitate la incendiu pentru punerea în funcțiune.
+
+### 2.3. Cerințele funcționale detaliate ale temei
+
+Tema-program se traduce în cerințe funcționale concrete pe categorii de spații:
+
+- **Galeria comercială (mall-ul comun):** spațiu de circulație central, cu atrium pe trei niveluri și luminator zenital, care distribuie fluxul de clienți spre toate unitățile; lățime minimă care să susțină simultan circulația bidirecțională de clienți și vitrinele atractive ale unităților, fără blocaje la vârfuri de trafic (weekend, sărbători).
+- **Hipermarketul-ancoră:** ~6.500 mp, cu acces propriu (independent de galerie, pentru clienții „de tranzit” care vin exclusiv pentru cumpărături alimentare) și cu acces din galerie (pentru fluxul cross-shopping); zonă de depozitare și primire marfă separată, cu rampă proprie.
+- **Cinema multiplex:** ~2.800 mp, 6-8 săli, amplasat la etajul superior (E2), cu foaier propriu, casă de bilete, și cu acustica și izolarea fonică tratate ca cerință tehnică prioritară față de galerie și food-court adiacent.
+- **Food-court:** ~1.400 mp, ~500 de locuri, cu module de restaurație rapidă (fiecare cu bucătărie proprie de mici dimensiuni, ventilare dedicată prin hote și coș comun), zonă comună de servit masa, terase (unde configurația arhitecturală o permite).
+- **Galeria de unități comerciale:** 130-160 unități, suprafețe 25-800 mp, cu vitrine spre galerie, alimentare tehnică (electrică, sanitară, ventilare) prin culoarul de serviciu din spatele unităților, fără interferență cu fluxul public.
+- **Back-of-house (culoar de serviciu):** rețea de culoare tehnice în spatele frontului de vitrine, care conectează fiecare unitate la rampa de marfă, la liftul de marfă și la zona de gestiune a deșeurilor, fără a traversa niciodată galeria publică.
+- **Parcaj:** ~1.750 de locuri, mixt (subteran + suprateran multietajat + la sol), dimensionat pe calculul de la cap. 5.4, cu acces separat pentru clienți, personal și marfă.
+- **Circulații verticale publice:** scări rulante și ascensoare panoramice, poziționate vizibil pentru orientarea intuitivă a clienților între niveluri — un factor comercial important, nu doar tehnic, dat fiind că un client care nu găsește ușor drumul spre etajul superior generează mai puțin trafic (și, deci, mai puține vânzări) pentru unitățile de acolo.
+
+### 2.4. Justificarea economică a investiției — impact local și efectul de canibalizare
+
+Investiția se justifică, în primul rând, prin existența unui bazin de captare (catchment) suficient de mare și de nesaturat pentru formatul „mall regional”, demonstrat metodologic în capitolul 4: un aport de GLA de ~98 mp/1.000 locuitori, sensibil sub pragul de saturație uzual în piețele mature din Uniunea Europeană (~260 mp/1.000 locuitori), indică o piață încă neacoperită corespunzător de oferta modernă de retail organizat. Parametrii economici de referință utilizați la fundamentarea investiției (indicativi, fără a înlocui studiul de fezabilitate/planul de afaceri al operatorului, distinct de prezentul memoriu tehnic) sunt: o rată de ocupare (occupancy) țintă la stabilizare de peste 92-95% din GLA, o vânzare medie pe mp de GLA superioară pragului de rentabilitate al formatului regional, și o rată de captare (conversion) a catchment-ului calculată la cap. 4 de ~62.000 de clienți efectivi din cei ~320.000 de locuitori aflați în zonele de captare cumulate.
+
+Investiția generează un impact economic local pozitiv și cuantificabil: **1.200-1.500 de locuri de muncă directe** (personal de vânzare al chiriașilor, personal de mentenanță și securitate al mall-ului, personal al hipermarketului, cinema-ului și food-court-ului), la care se adaugă locurile de muncă indirecte generate în faza de construcție și în lanțul de furnizori locali; venituri fiscale suplimentare pentru bugetul local (taxe pe clădiri, taxe comerciale, impozite pe veniturile salariale ale angajaților); și un efect de agregare — prezența unei ancore comerciale de această anvergură crește atractivitatea zonei pentru investiții conexe (servicii, birouri, rezidențial). Onestitatea profesională a prezentului memoriu impune, totodată, semnalarea celeilalte fețe a acestui impact: un centru comercial regional de dimensiunea celui tratat aici exercită inevitabil un **efect de canibalizare** asupra comerțului stradal existent din zona centrală sau din alte zone comerciale ale localității/regiunii, prin redirecționarea unei părți a cheltuielilor de consum dinspre comerțul tradițional (magazine de cartier, comerț stradal, mici centre comerciale) spre oferta concentrată, climatizată și cu parcare gratuită a mall-ului. Acest efect este documentat constant în literatura de specialitate privind dezvoltarea comercială și este, de regulă, mai pronunțat în primii 2-3 ani de la deschidere, cu o parțială re-echilibrare ulterioară pe măsură ce comerțul stradal se repoziționează (specializare, servicii de proximitate greu de replicat într-un mall). Prezentul memoriu tehnic nu are ca obiect evaluarea economică detaliată a acestui efect (obiect al studiilor de impact comercial, distincte de documentația DTAC), dar semnalează existența lui ca parte a analizei de oportunitate care, la nivel de autoritate locală și de investitor, trebuie cântărită alături de beneficiile directe enumerate mai sus.
+
+---
+
+## 3. REGIMUL JURIDIC, ECONOMIC ȘI TEHNIC (din Certificatul de Urbanism / PUZ)
+
+### 3.1. Regimul juridic
+
+Terenul (~60.000 mp) se află în proprietatea privată a beneficiarului/investitorului, liber de sarcini (sau cu sarcinile menționate în extrasul CF, care se radiază/se respectă). Nu este inclus în Lista Monumentelor Istorice și nu se află în zonă de protecție a unui monument (dacă situația reală diferă, se solicită avizul Direcției Județene pentru Cultură). Dreptul de proprietate și limitele terenului sunt atestate de extrasul de carte funciară actualizat și de documentația cadastrală.
+
+Dat fiind că un teren de această dimensiune, destinat unui centru comercial regional, provine adesea din comasarea mai multor parcele adiacente (foste terenuri agricole extravilane, incluse ulterior în intravilan prin PUZ) sau din dezmembrarea unei incinte industriale dezafectate, verificarea juridică acoperă și corectitudinea operațiunilor de comasare/dezmembrare, absența litigiilor asupra limitelor rezultate și concordanța dintre suprafața din documentația cadastrală actuală și suprafața reglementată prin PUZ. Servituțile de trecere sau de rețele identificate pe teren se respectă în soluția de amplasare, în special pentru cele trei-plus accese auto independente impuse de studiul de trafic (a se vedea cap. 5.5). Toate documentele care atestă regimul juridic (act de proprietate, extras CF, plan cadastral, documentația de comasare/dezmembrare dacă e cazul) fac parte din documentația de autorizare.
+
+### 3.2. Regimul economic
+
+Folosința actuală: teren liber sau cu folosință agricolă/industrială dezafectată, aflat, la momentul inițierii investiției, adesea în extravilan sau la marginea intravilanului — situație care impune, ca etapă premergătoare, introducerea în intravilan și reglementarea prin PUZ (a se vedea cap. 5.1). Destinația stabilită prin PUZ aprobat: zonă comercială / servicii, cu funcțiunea de comerț cu amănuntul de mari suprafețe (mall, centru comercial) admisă expres, alături de funcțiunile complementare de alimentație publică (food-court) și de agrement (cinema).
+
+Amplasarea la periferia unei aglomerări urbane, pe un culoar de mare trafic (drum național/județean, centură ocolitoare, intersecție majoră), este favorabilă unei investiții comerciale de acest tip: vizibilitatea de la distanță și accesibilitatea auto susțin captarea catchment-ului regional (nu doar de proximitate), iar disponibilitatea unui teren mare, cu preț de achiziție per mp inferior celui din zonele centrale, permite dimensionarea generoasă a parcajului la sol/suprateran — condiție economică esențială pentru un format „mall regional” dependent de accesul auto. Reglementările fiscale și taxa de autorizare se calculează conform Codului Fiscal și HCL în vigoare; investiția, prin valoarea sa (tipic zeci de milioane de euro) și prin veniturile fiscale generate ulterior punerii în funcțiune (taxe pe clădiri comerciale, cu cotă majorată față de rezidențial, plus impozitele pe veniturile salariale ale celor 1.200-1.500 de angajați), reprezintă un contribuabil fiscal semnificativ pentru bugetul local, aspect care fundamentează, alături de argumentele din cap. 2.4, oportunitatea economică a proiectului pentru autoritatea publică ce aprobă PUZ-ul.
+
+### 3.3. Regimul tehnic (rezultat din PUZ)
+
+| Parametru din PUZ | Valoare reglementată |
+|---|---|
+| POT maxim | 55% |
+| CUT maxim | 2,2 |
+| Regim de înălțime maxim | P+4E / 25 m |
+| Retragere minimă frontală (aliniament) | 6,0 m |
+| Retrageri laterale | min. H/2, dar nu mai puțin de 5,0 m |
+| Procent minim spații verzi | 20% |
+| Aliniament | conform planului urbanistic zonal aprobat |
+
+Circulațiile, accesele și numărul de locuri de parcare se conformează Regulamentului Local de Urbanism aferent PUZ-ului, corelat cu necesarul specific unui centru comercial regional (GLA, cinema, food-court, personal — a se vedea cap. 5.4) și cu concluziile studiului de trafic. Racordurile la utilități se realizează conform avizelor de amplasament ale deținătorilor de rețele, dimensionate pentru consumurile ridicate specifice unui mall (frigul comercial al hipermarketului, climatizarea galeriei de mii de mp, iluminatul comercial intensiv). Regimul tehnic din PUZ reprezintă cadrul obligatoriu de proiectare: indicatorii maximi, regimul de înălțime, retragerile și condițiile de echipare edilitară nu pot fi depășiți fără o modificare a documentației de urbanism. Soluția propusă, detaliată în capitolul 5, se încadrează cu rezervă semnificativă în acest regim — POT proiectat 47,5% față de 55% reglementat, CUT proiectat 1,60 față de 2,2 reglementat — rezervă care nu este întâmplătoare, ci rezultă din opțiunea de proiectare pentru un regim de înălțime redus (S+P+2E în loc de P+4E permis), cu amprentă la sol generoasă pentru parcarea la sol și pentru accesul facil al vehiculelor grele de aprovizionare, soluție specifică și preferată în piața de retail organizat regional față de formatele mai înalte și mai compacte, mai adecvate zonelor centrale cu preț ridicat al terenului.
+
+---
+
+## 4. NECESITATE ȘI OPORTUNITATE — CATCHMENT AREA ȘI TIPOLOGIA CENTRELOR COMERCIALE
+
+Acest capitol tratează, în detaliu metodologic, elementul care fundamentează întreaga investiție și care o diferențiază structural de orice altă funcțiune tratată de biroul de proiectare: un centru comercial regional nu se dimensionează pornind de la o suprafață de teren disponibilă sau de la un regim urbanistic favorabil, ci pornind de la o **analiză a pieței de consum accesibile** (catchment area), care determină dacă și în ce dimensiune este fezabilă investiția. Absența sau superficialitatea acestei analize este cauza principală a eșecurilor comerciale ale centrelor comerciale supradimensionate față de piața reală pe care o deservesc.
+
+### 4.1. Metodologia zonei de captare (catchment area) și izocronele
+
+Zona de captare (catchment area) a unui centru comercial este teritoriul din care acesta atrage, în mod realist, clienți dispuși să parcurgă o anumită distanță/durată pentru a-l vizita. Metodologia consacrată în retail real estate nu delimitează catchment-ul printr-un cerc de rază fixă în jurul amplasamentului (metodă simplistă și, în majoritatea cazurilor, incorectă, întrucât ignoră rețeaua reală de drumuri, timpii de deplasare și barierele geografice), ci prin **izocrone** — curbe care unesc punctele situate la aceeași durată de deplasare auto (sau, pentru catchment-ul de proximitate, pietonală/transport public) față de amplasament, calculate pe rețeaua reală de drumuri, nu în linie dreaptă. Izocronele se generează, în practica de proiectare, prin analiza de rețea (network analysis) pe harta rutieră reală a zonei, ținând cont de viteza medie de deplasare pe fiecare categorie de drum, de sensul de circulație și de eventualele bariere fizice (râuri, căi ferate, relief accidentat) care alungesc traseele reale față de distanța în linie dreaptă.
+
+Catchment-ul unui centru comercial regional se împarte convențional în trei benzi concentrice, delimitate prin izocrone de timp de deplasare auto, fiecare cu o rată de penetrare (captare) distinctă:
+
+- **Zona primară (0-10 minute):** populația cea mai apropiată, cu acces facil și frecvență ridicată de vizitare; rata de penetrare aplicată este cea mai mare dintre cele trei benzi.
+- **Zona secundară (10-20 minute):** populație pentru care mall-ul rămâne opțiunea de retail organizat cea mai convenabilă, dar concurează cu alte opțiuni (comerț de proximitate, eventual alte centre comerciale); rata de penetrare scade sensibil față de zona primară.
+- **Zona terțiară (20-40 minute):** populație care vizitează mall-ul ocazional, de regulă cuplat cu alte deplasări (naveta la muncă, alte cumpărături de anvergură, evenimente la cinema); rata de penetrare este cea mai redusă.
+
+Pentru amplasamentul de referință tratat în acest memoriu, delimitarea izocronică a condus la următoarea structură a catchment-ului:
+
+| Zonă | Timp de deplasare | Populație | Rată de penetrare |
+|---|---|---|---|
+| Primară | 0-10 min | 85.000 locuitori | 35% |
+| Secundară | 10-20 min | 140.000 locuitori | 18% |
+| Terțiară | 20-40 min | 95.000 locuitori | 7% |
+| **Total catchment** | | **~320.000 locuitori** | |
+
+### 4.2. Ratele de penetrare pe zone și motivul scăderii cu distanța
+
+Rata de penetrare (sau rată de captare) reprezintă procentul din populația unei zone care devine, în mod statistic, client efectiv al centrului comercial într-un interval de referință (de regulă, lunar sau anual, în funcție de metodologia studiului de piață). Scăderea sistematică a acestei rate odată cu creșterea timpului de deplasare — de la 35% în zona primară la doar 7% în zona terțiară — nu este o simplă convenție statistică, ci reflectă un fenomen economic și comportamental bine documentat, cunoscut în literatura de geografie comercială drept „descurajarea distanței” (distance decay): costul perceput al deplasării (timp, combustibil, efort) crește proporțional cu distanța, în timp ce beneficiul marginal al vizitei (varietatea ofertei, prețurile, experiența de shopping) rămâne constant — de aici rezultă că, pe măsură ce distanța crește, un procent din ce în ce mai mic din populație consideră deplasarea justificată, cu atât mai mult cu cât populația din zonele mai îndepărtate are, de regulă, acces la alte opțiuni de retail organizat mai apropiate de reședința proprie (concurență cu alte centre comerciale sau cu comerțul urban consolidat).
+
+Ratele de penetrare adoptate (35% / 18% / 7%) nu sunt cifre arbitrare, ci rezultatul unui studiu de piață dedicat (distinct de prezentul memoriu tehnic, dar ale cărui concluzii fundamentează dimensionarea GLA), care calibrează aceste procente pe baza: (a) densității și distribuției spațiale a populației în fiecare zonă (concentrată urban vs. dispersată rural); (b) profilului socio-economic al populației (putere de cumpărare, structură pe vârste); (c) prezenței și puterii competitorilor existenți în fiecare zonă (alte centre comerciale, comerț stradal consolidat); și (d) calității rețelei rutiere reale (drumuri de mare capacitate vs. drumuri secundare congestionate, care alungesc timpul real de deplasare peste cel teoretic). Este responsabilitatea studiului de piață, nu a proiectantului de arhitectură, să calibreze exact aceste procente pentru fiecare amplasament concret; valorile de mai sus se rețin ca referință tipică pentru un mall regional amplasat la periferia unei aglomerări urbane de talie medie-mare, fără concurență directă majoră în zona primară.
+
+### 4.3. Calculul numărului de clienți captați și al aportului GLA/1.000 de locuitori
+
+Aplicând ratele de penetrare pe populația fiecărei zone, numărul de clienți efectiv captați rezultă din suma ponderată:
+
+85.000 × 35% + 140.000 × 18% + 95.000 × 7% = 29.750 + 25.200 + 6.650 = **~62.000 de clienți captați**, dintr-un catchment cumulat de ~320.000 de locuitori.
+
+Acest calcul fundamentează în mod direct dimensiunea GLA proiectată. Metrica utilizată în practica de retail real estate pentru a verifica dacă un format comercial este supra- sau subdimensionat față de piața pe care o deservește este **aportul de GLA la 1.000 de locuitori**, calculat nu prin raportarea directă a GLA la întregul catchment (indicator prea optimist, care ignoră ratele diferențiate de penetrare), ci prin raportarea GLA la o populație „echivalentă” ponderată — sau, într-o formă simplificată des utilizată în studiile preliminare de fezabilitate, prin raportarea GLA la populația care contribuie efectiv la fluxul comercial relevant. Pentru amplasamentul de referință, aportul rezultat este:
+
+**GLA / (populație echivalentă) = 22.000 mp / 225 (mii echivalent) ≈ 98 mp GLA / 1.000 de locuitori.**
+
+Această valoare se compară cu **pragul de saturație uzual în piețele mature ale Uniunii Europene, de aproximativ 260 mp GLA / 1.000 de locuitori** — prag empiric, derivat din analiza comparativă a densității de retail organizat modern în orașele vest-europene la maturitatea pieței. Poziționarea aportului calculat (98 mp/1.000 loc) sensibil sub acest prag (260 mp/1.000 loc) constituie principalul argument de oportunitate al investiției: piața catchment-ului analizat este, la momentul studiului, **subechipată** cu retail organizat modern, ceea ce indică o marjă de absorbție comercială suficientă pentru susținerea unui format de 22.000 mp GLA fără riscul de suprasaturare imediată a pieței. Pragul de 260 mp/1.000 locuitori nu este, la rândul lui, un plafon rigid aplicabil identic oricărei piețe — el variază funcție de puterea de cumpărare locală, de structura demografică și de gradul de dezvoltare deja atins al retail-ului organizat — dar reprezintă un reper acceptat, util pentru un test rapid de plauzibilitate al oricărei propuneri de dimensionare GLA, anterior studiului de fezabilitate detaliat al operatorului.
+
+### 4.4. Tipologia centrelor comerciale — analiză comparativă
+
+Alegerea formatului „mall regional” pentru amplasamentul tratat nu este singura opțiune posibilă; ea rezultă dintr-o analiză comparativă a tipologiilor consacrate de centre comerciale, fiecare adecvată unui anumit interval de catchment și unui anumit profil de investiție:
 
 | Tip | GLA | Ancore |
 |---|---|---|
-| Strip mall | 1.000-5.000 | supermarket |
-| Galerie | 5.000-15.000 | supermarket + 1 |
-| **Mall regional** (tratat) | **15.000-40.000** | hipermarket + cinema + food-court |
-| Super-regional | >40.000 | 3+ |
-| Outlet / retail park | 10.000-30.000 | factory / big-box |
+| Strip mall | 1.000-5.000 mp | supermarket |
+| Galerie | 5.000-15.000 mp | supermarket + 1 ancoră |
+| **Mall regional** (tratat în prezentul memoriu) | **15.000-40.000 mp** | hipermarket + cinema + food-court |
+| Super-regional | > 40.000 mp | 3+ ancore majore |
+| Outlet / retail park | 10.000-30.000 mp | factory outlet / big-box |
 
-**Tratat: mall regional GLA ~22.000** — galerie cu atrium 3 niveluri + luminator; ancore: hipermarket ~6.500, cinema multiplex ~2.800 (6-8 săli), food-court ~1.400 (~500 locuri); ~130-160 unități (25-800 mp). **GBA ~96.000; eficiență GLA/GBA comercial ~41%** (țintă ≥60% pe brut comercial fără parcaje).
+**Strip mall-ul** (1.000-5.000 mp) este formatul minimal, adecvat unui catchment de cartier sau de localitate mică, cu o singură ancoră alimentară și un număr redus de unități de proximitate; nu presupune, de regulă, atrium sau spații de agrement, iar parcarea se rezumă la un front la sol. **Galeria** (5.000-15.000 mp) extinde formatul cu o a doua ancoră și o galerie comercială modestă, adecvată unui catchment de oraș mic sau de cartier de oraș mare, fără suficientă masă critică pentru o componentă de agrement (cinema) sau pentru un food-court de anvergură. **Mall-ul regional** (15.000-40.000 mp, formatul tratat) este primul prag la care devine fezabilă combinația celor trei ancore complementare — hipermarket (traficul de bază, cumpărături recurente), cinema (traficul de agrement, cu vizite de seară și weekend care completează profilul orar al hipermarketului) și food-court (traficul de servire a mesei, care prelungește durata vizitei și crește șansa de cross-shopping) — combinație care necesită un catchment de ordinul sutelor de mii de locuitori, exact profilul identificat la cap. 4.1-4.3 pentru amplasamentul analizat. **Super-regionalul** (>40.000 mp, 3+ ancore majore) presupune un catchment de peste 500.000-1.000.000 de locuitori, tipic pentru capitale regionale sau metropole, disproporționat față de catchment-ul de ~320.000 de locuitori calculat la cap. 4.1 — un format super-regional amplasat pe acest catchment ar fi subaprovizionat de clienți, cu risc ridicat de neocupare a galeriei și de eșec comercial. **Outlet-ul/retail park-ul** (10.000-30.000 mp, format big-box/factory) deservește un profil de consum diferit (cumpărături planificate, de valoare mare, cu frecvență redusă de vizitare), incompatibil cu profilul de catchment predominant urban/suburban, orientat spre cumpărături recurente și de agrement, identificat pentru amplasamentul analizat.
 
-## 3. Necesitate și oportunitate
+### 4.5. Justificarea formatului „mall regional” pentru catchmentul dat
 
-**Catchment (izocrone):** primar 0-10 min 85.000 loc (35%), secundar 10-20 min 140.000 (18%), terțiar 20-40 min 95.000 (7%) → **~62.000 clienți captați** din ~320.000. Aport GLA = 22.000/225 ≈ **98 mp/1.000 loc** (sub prag saturație UE ~260 → oportun). 1.200-1.500 locuri muncă directe.
+Corelarea concluziilor de la cap. 4.3 (catchment de ~320.000 de locuitori, ~62.000 de clienți captați, aport GLA de ~98 mp/1.000 loc, sub pragul de saturație) cu grila comparativă de la cap. 4.4 conduce la o justificare fermă a alegerii formatului „mall regional” cu GLA ~22.000 mp: catchment-ul disponibil este suficient de mare pentru a susține cele trei ancore complementare (hipermarket + cinema + food-court), fără a atinge pragul care ar justifica un format super-regional, și fără a fi limitat la profilul restrâns al unei simple galerii de cartier. GLA ~22.000 mp se situează în banda inferior-mediană a intervalului 15.000-40.000 mp specific formatului regional, alegere conservatoare și prudentă din perspectiva riscului comercial: la un catchment de ~320.000 de locuitori și un aport de ~98 mp/1.000 loc, o dimensionare GLA superioară (de exemplu spre limita de 40.000 mp) ar apropia periculos aportul de pragul de saturație UE (260 mp/1.000 loc) și ar crește riscul de neocupare a suprafețelor marginale ale galeriei, în special în tenant-mix-ul de rang secundar (unitățile de 25-100 mp, cele mai vulnerabile la fluctuațiile de trafic). Dimensionarea la ~22.000 mp GLA lasă, totodată, o marjă de dezvoltare ulterioară (extindere de fază 2) în cazul în care evoluția demografică sau economică a catchment-ului confirmă, în timp, o cerere superioară celei estimate inițial — abordare de etapizare prudentă, tipică proiectelor de retail real estate de anvergură.
 
-## 4. Încadrare urbanistică (PUZ obligatoriu)
+### 4.6. Rolul economic al ancorelor — hipermarket, cinema, food-court
+
+Termenul de „ancoră” în retail real estate desemnează o unitate-magnet care generează, prin propria putere de atracție, un flux de clienți superior propriei sale capacități de vânzare, flux care „se scurge” (spillover) spre restul galeriei comerciale sub forma cross-shopping-ului. Din acest motiv, relația comercială și financiară dintre operatorul mall-ului și ancore diferă structural de relația cu chiriașii de galerie: **ancorele plătesc, de regulă, o chirie pe mp semnificativ subvenționată** (uneori sub costul real de exploatare al spațiului respectiv pentru operator) tocmai pentru că rolul lor economic principal nu este generarea de venit direct din chirie, ci **generarea de trafic** care crește vânzările — și, implicit, chiriile procentuale colectabile — de la restul galeriei, ale cărei unități plătesc chirii pe mp semnificativ superioare celor ale ancorelor.
+
+Cele trei ancore ale prezentului proiect au roluri complementare și non-suprapuse în generarea traficului: **hipermarketul** (~6.500 mp) generează traficul de bază, recurent (cumpărături alimentare săptămânale sau mai frecvente), cu un profil orar concentrat spre orele de după-amiază/seară în zilele lucrătoare și dimineața/prânzul în weekend — trafic previzibil și stabil, care asigură o bază minimă de vizitatori pe tot parcursul programului de funcționare. **Cinema-ul multiplex** (~2.800 mp, 6-8 săli) generează un trafic complementar, concentrat spre seri și weekend-uri, cu un profil demografic tânăr, care prelungește durata medie de ședere în mall (un client care vine la un film petrece, statistic, timp suplimentar în galerie/food-court, înainte sau după proiecție) și extinde programul de funcționare efectivă a mall-ului spre orele de seară târzie. **Food-court-ul** (~1.400 mp, ~500 de locuri) nu generează, de regulă, trafic propriu independent (rareori cineva se deplasează la mall exclusiv pentru food-court), dar joacă un rol critic de **conversie și retenție**: transformă o vizită de cumpărături într-o experiență de o durată mai lungă, crescând probabilitatea de cross-shopping suplimentar înainte sau după masă, și oferă o soluție de servire a mesei care menține clienții în incintă în locul plecării către restaurante externe la ora prânzului sau a cinei.
+
+Combinația celor trei ancore acoperă, practic, cele trei mari motivații de vizitare a unui centru comercial regional (cumpărături recurente, agrement, servire a mesei), asigurând un flux de trafic distribuit pe tot parcursul zilei și al săptămânii, spre deosebire de un mall cu o singură ancoră (de exemplu doar hipermarket), al cărui trafic ar fi concentrat pe intervale orare mult mai înguste, cu vârfuri de saturație a parcării și cu perioade moarte care afectează negativ vânzările galeriei.
+
+### 4.7. Impactul economic local — sinteză
+
+Impactul economic al investiției — locuri de muncă directe (1.200-1.500), venituri fiscale locale, efectul de agregare asupra zonei — este dezvoltat la cap. 2.4, împreună cu semnalarea onestă a efectului de canibalizare asupra comerțului stradal existent. Cele două capitole (4 și 2.4) sunt complementare, nu se suprapun: capitolul 4 fundamentează **oportunitatea de piață** a investiției (există sau nu suficient catchment nesaturat pentru acest format), în timp ce cap. 2.4 fundamentează **impactul economic** al investiției odată realizată (locuri de muncă, fiscalitate, efecte asupra comerțului existent) — distincție relevantă pentru cititorul documentației, care nu trebuie să caute același argument în ambele locuri.
+
+---
+
+## 5. ÎNCADRAREA URBANISTICĂ — PUZ OBLIGATORIU
+
+### 5.1. De ce un mall regional necesită PUZ, nu doar Certificat de Urbanism
+
+Realizarea unui centru comercial regional cu GLA de ordinul zecilor de mii de mp necesită, în marea majoritate a situațiilor practice, elaborarea și aprobarea unui **Plan Urbanistic Zonal (PUZ)** anterior obținerii Certificatului de Urbanism definitiv pentru autorizarea construirii — spre deosebire de investiții de dimensiune mai redusă, pentru care Certificatul de Urbanism emis pe baza reglementărilor PUG/RLU existente poate fi suficient. Necesitatea PUZ-ului pentru un mall regional decurge din mai multe motive concurente, fiecare suficient în sine pentru a impune această cerință:
+
+1. **Schimbarea de funcțiune și/sau introducerea în intravilan.** Terenurile de mari dimensiuni (aici, ~60.000 mp) disponibile la periferia aglomerărilor urbane, adecvate ca preț și accesibilitate unui mall regional, sunt frecvent situate la limita sau în afara intravilanului existent, cu folosință agricolă sau industrială anterioară; introducerea în intravilan și schimbarea funcțiunii spre „zonă comercială/servicii” nu se pot realiza printr-un simplu Certificat de Urbanism, ci necesită documentație de urbanism (PUZ) supusă avizării și aprobării prin Hotărâre de Consiliu Local (HCL).
+2. **Reglementarea indicatorilor urbanistici specifici funcțiunii comerciale de mari dimensiuni.** POT, CUT, regimul de înălțime și retragerile aplicabile unui mall (cu amprentă la sol foarte extinsă, parcaje ample, front comercial specific) diferă adesea substanțial de reglementările generice PUG/RLU ale zonei, motiv pentru care se elaborează reglementări dedicate prin PUZ, așa cum reiese din tabelul de la cap. 3.3.
+3. **Impactul asupra infrastructurii de circulație.** Un mall regional generează un vârf de trafic de sute până la peste o mie de vehicule/oră (a se vedea cap. 5.5), imposibil de absorbit de rețeaua stradală existentă fără intervenții (benzi suplimentare, giratorii, semaforizare, eventual lucrări pe drumul public adiacent). Aceste intervenții, care depășesc limitele amplasamentului propriu-zis, nu pot fi reglementate și autorizate decât printr-o documentație de urbanism de rang zonal, care corelează soluția de circulație a investiției cu rețeaua stradală existentă și cu planurile de dezvoltare ale administrației publice locale.
+4. **Compatibilitatea cu vecinătățile și cu structura urbană existentă.** O investiție de anvergura unui mall regional afectează, prin trafic, prin volumetrie și prin efectul economic (cap. 2.4, 4.7), zone urbane mult mai extinse decât amplasamentul propriu-zis, motiv pentru care legislația urbanistică (Legea 350/2001) prevede, pentru astfel de investiții, elaborarea unei documentații de rang zonal, cu consultare publică și aviz al comisiei tehnice de urbanism, anterior autorizării.
+
+PUZ-ul aprobat prin HCL constituie, pentru un mall regional, documentul de referință care stabilește definitiv indicatorii urbanistici (cap. 3.3), regimul tehnic, și, de regulă, condițiile-cadru privind numărul minim de accese auto și principiile soluției de circulație, care se detaliază și se validează ulterior prin studiul de trafic dedicat (cap. 5.5).
+
+### 5.2. Tabelul indicatorilor urbanistici — reglementat vs. proiectat
 
 | Indicator | Reglementat PUZ | Proiectat | Verificare |
 |---|---|---|---|
-| POT | 55% | **47,5%** (28.500/60.000) | ✅ |
-| CUT | 2,2 | **1,60** (excl. subsol) | ✅ |
-| Regim / H | P+4E / 25 m | S+P+2E (~16 m) | ✅ |
-| Retragere aliniament | 6,0 m | 8-12 | ✅ |
-| Retrageri laterale | H/2 ≥5,0 | ≥8,0 | ✅ |
-| Spații verzi | 20% | 21,5% | ✅ |
+| POT | 55% | **47,5%** (28.500/60.000) | ✅ conform |
+| CUT | 2,2 | **1,60** (excl. subsol) | ✅ conform |
+| Regim / H | P+4E / 25 m | S+P+2E (~16 m) | ✅ conform |
+| Retragere aliniament | 6,0 m | 8-12 m | ✅ conform |
+| Retrageri laterale | H/2 ≥ 5,0 m | ≥ 8,0 m | ✅ conform |
+| Spații verzi | 20% | 21,5% | ✅ conform |
 
-**Parcare (mii locuri):** N = GLA/25 = 22.000/25 = 880 (comerț) + cinema/food-court/angajați → necesar ~1.550-1.700; asigurat: subsol 620 + suprateran multietajat 850 + sol 280 = **1.750 locuri** (70 PMR ≥4%, 175 EV pregătite). **Studiu de trafic aprobat** (vârf ~1.100-1.400 veh/h, benzi accelerare/decelerare, giratoriu/semaforizare, min. 3 accese auto).
+**Verificarea POT:** POT proiectat = Ac/S_teren = 28.500/60.000 = **47,5%**, cu o rezervă de 7,5 puncte procentuale față de maximul reglementat de 55%. **Verificarea CUT:** CUT proiectat = Ad (suprateran) / S_teren = 1,60, calculat exclusiv pe aria desfășurată suprateran, fără subsolul dedicat parcajului și spațiilor tehnice — abordare conformă interpretării uzuale a Legii 350/2001 și RGU, potrivit căreia suprafețele subterane cu destinație tehnică/parcare/depozitare nu intră obligatoriu în calculul CUT atunci când nu depășesc conturul construcției supraterane. CUT-ul rezultat (1,60) rămâne mult sub maximul reglementat de 2,2, cu o rezervă de 0,6 puncte, rezervă care, coroborată cu rezerva de POT, confirmă opțiunea deliberată de proiectare pentru un regim de înălțime redus (S+P+2E, ~16 m, față de P+4E/25 m permis).
 
-## 5. Descriere generală
+Această opțiune — de a nu utiliza integral potențialul urbanistic reglementat — este specifică și, de fapt, tipică pentru formatul „mall regional”, spre deosebire de clădirile de birouri sau rezidențiale, care tind să maximizeze CUT-ul disponibil pentru a optimiza randamentul terenului scump din zonele centrale. Rațiunea este dublă: (1) **economică** — pe un teren de mari dimensiuni și preț relativ redus (periferie), extinderea pe orizontală (mai puține niveluri, amprentă mai mare) este mai eficientă din punct de vedere al costului de construcție pe mp decât dezvoltarea pe verticală, care ar necesita structuri și instalații mai complexe (deschideri mari pe mai multe niveluri, circulații verticale suplimentare) fără un beneficiu comercial proporțional — clienții unui mall regional preferă, statistic, un parcurs orizontal sau pe puține niveluri, ușor de parcurs și de memorat, unui traseu pe multe etaje; și (2) **funcțională** — regimul redus de înălțime permite dedicarea suprafeței de teren rămase disponibile (60.000 − 28.500 = 31.500 mp) parcajului la sol și suprateran multietajat, esențial pentru catchment-ul auto-dependent al unui mall regional (cap. 5.4), și spațiilor verzi/de sistematizare, cu o rezervă confortabilă (21,5% față de 20% minim reglementat).
 
-Galerie centrală (mall) + **atrium multi-nivel cu luminator zenital** distribuie fluxul spre unități. **Subsol:** parcaj + tehnice (posturi trafo, CT, hidrofor, gospodărie apă incendiu, tablouri). **Parter:** hipermarket, galerie 0, intrări, food-court parțial, drop-off. **E1:** galerie + unități + atrium deschis. **E2:** cinema multiplex + food-court + agrement + terase.
+### 5.3. Configurația volumetrică și retragerile
 
-**Structură dual b.a. monolit + zone mixte beton-oțel** (deschideri mari): radier general 80-120 cm (+piloți dacă e cazul), stâlpi C30/37 60×60-80×80, **tramă retail 8,0×8,0**, deschideri hipermarket 12-16 m metalice, planșee dală/grinzi 25-30 cm, nuclee 30-40 cm, șarpantă atrium metalică 20-30 m. C30/37 (C35/45 solicitate), BST500. q dual DCM 3,5-4,5, γI,e 1,2; Fb = γI·Sd·m·λ.
+Regimul de înălțime proiectat, S+P+2E (~16 m la cotă atic), rezultă din suprapunerea subsolului tehnic/parcaj, a parterului (hipermarket + galerie + food-court parțial) și a două niveluri suprateran de galerie/ancore (E1 galerie + atrium deschis, E2 cinema + food-court + agrement). Retragerile adoptate — 8-12 m la aliniament (față de minimul de 6,0 m) și minimum 8,0 m lateral (față de minimul reglementat H/2 ≥ 5,0 m) — depășesc confortabil minimele reglementate, oferind spațiu suplimentar pentru sistematizarea acceselor auto multiple, pentru trotuarele și platformele pietonale de la fronturile de intrare, și pentru banda de circulație perimetrală necesară intervenției autospecialelor ISU (a se vedea cap. 9.6). Volumetria de ansamblu — un „lespede” orizontală extinsă, cu accente verticale la intrările principale și, dacă soluția arhitecturală o prevede, la volumul cinema-ului — este tratată la memoriul de arhitectură; prezentul memoriu reține doar încadrarea urbanistică și principiile de amplasare.
 
-**Atrium (goluri 3 niveluri) — verificări:** evacuare (nu e cale protejată → căile ocolesc atriumul), **desfumare** (atrium = rezervor de fum, evacuare sus + aer jos), propagare (separare unități prin RF / drencere la margine goluri).
+### 5.4. Parcarea — metodologia de calcul și de ce deficitul de parcare ucide un mall
 
-## 6. Zonare și fluxuri
+Dintre toate deciziile tehnice ale unui proiect de centru comercial regional, dimensionarea parcajului este, alături de catchment area (cap. 4), cea mai determinantă pentru succesul comercial al investiției — și una dintre cele mai frecvent subestimate în proiectele deficitare. Motivul este de ordin comportamental și ireversibil comercial: **un client auto care ajunge la mall și nu găsește loc de parcare în timp rezonabil (de regulă sub 5-10 minute de căutare) nu așteaptă și nu revine mai târziu — pleacă direct spre un competitor cu parcare disponibilă**, iar această pierdere nu afectează doar vânzarea unei singure vizite, ci întreaga relație viitoare a clientului cu mall-ul respectiv (percepția de „loc unde nu găsești parcare” se fixează rapid și este greu de corectat ulterior, chiar și după eventuale extinderi ale parcajului). Spre deosebire de un deficit de suprafață comercială (care „doar” limitează creșterea vânzărilor), un deficit de parcare **respinge activ clientela existentă** — este echivalentul, pentru retail, al unei erori de evacuare la incendiu: nu doar suboptimal, ci disfuncțional.
 
-**3 fluxuri separate:** PUBLIC (parcaj→mall→unități→food-court/cinema, scări rulante + lifturi panoramice), **MARFĂ** (rampă→**culoar tehnic serviciu în spatele magazinelor**→lift marfă 2.000-3.000 kg→depozite), EVACUARE (scări închise + antipanică + ieșiri directe). **Circulații verticale:** 8-12 scări rulante + 4 ascensoare panoramice + 2-3 lifturi marfă + ≥8 scări evacuare + 1 ascensor pompieri.
+Metodologia de calcul a necesarului de parcaje pentru un mall regional nu se rezumă la o singură normă generică (spre deosebire de birouri sau rezidențial, unde o rație unică pe mp sau pe unitate locativă este adesea suficientă), ci însumează necesarul pe **componente funcționale distincte**, dat fiind profilul de utilizare eterogen al unui mall:
 
-## 7. Securitate la incendiu (Cerința C)
+- **Componenta de galerie comercială (GLA):** rația uzuală în practica de proiectare a centrelor comerciale este de **1 loc de parcare la fiecare 25 mp de GLA** — rație superioară celei aplicate birourilor sau rezidențialului, care reflectă intensitatea de utilizare simultană specifică comerțului (spre deosebire de un birou, unde populația se schimbă o dată pe zi, un mall are o rotație de clienți mult mai rapidă, cu vizite de durată scurtă-medie, ceea ce impune o rezervă de locuri superioară raportat la suprafață). Necesar: **N₁ = GLA/25 = 22.000/25 = 880 locuri.**
+- **Componenta cinema:** necesar suplimentar calculat pe numărul de locuri din sălile de proiecție, dat fiind că vârful de solicitare a cinema-ului (seara, weekend) se suprapune parțial, dar nu integral, cu vârful galeriei.
+- **Componenta food-court:** necesar suplimentar calculat pe numărul de locuri la masă (~500), cu o rație redusă față de cinema, dat fiind că o parte semnificativă a clienților food-court-ului sunt deja prezenți în mall pentru alte motive (cumpărături), fără a genera o sosire auto suplimentară.
+- **Componenta angajați:** necesar suplimentar pentru personalul chiriașilor, al ancorelor și al administrației mall-ului, calculat separat de necesarul de clienți, dat fiind că schimbul de personal are un profil orar diferit (sosire dimineața, plecare seara) și necesită locuri dedicate, de regulă în zonele mai puțin convenabile ale parcajului (pentru a nu ocupa locurile premium din apropierea intrărilor, rezervate clienților).
 
-**Provocare majoră:** mii persoane + atrium mare + sarcină termică + mix funcțiuni (cinema/food-court NP 068). **Scenariu securitate** (Ordin MAI, aviz ISU).
+Însumarea acestor patru componente conduce la un **necesar total de ~1.550-1.700 de locuri**, sensibil superior necesarului calculat doar pe galerie (880 locuri) — diferența de ~670-820 de locuri provenind din cinema, food-court și angajați, componente adesea omise sau subestimate în calculele simplificate, cu efect direct asupra riscului de deficit de parcare la vârfurile de suprapunere (seara de weekend, când galeria, cinema-ul și food-court-ul funcționează simultan la capacitate maximă).
 
-**Compartimentare:** pereți REI 180, planșee REI 90-120, structură R120-180, case scări REI 150, uși evacuare EI 90-C, separare unități/mall EI 60 sau drencere; arie mărită cu **sprinklere generalizate**.
+Soluția de parcare asigurată pentru acest necesar este dimensionată cu o marjă de siguranță confortabilă peste limita superioară a intervalului calculat (1.700 locuri): **1.750 de locuri totale**, distribuite pe trei componente fizice — **subsol 620 de locuri** (parcaj acoperit, cu acces din toate cele patru direcții de sosire, prioritizat pentru zilele cu condiții meteo nefavorabile), **suprateran multietajat 850 de locuri** (structură dedicată de parcare pe mai multe niveluri, amplasată adiacent accesului principal, cu capacitate mare pe amprentă redusă la sol), și **la sol 280 de locuri** (parcare deschisă, tipic utilizată pentru vizitele scurte și pentru accesul rapid la hipermarket). Din totalul de 1.750 de locuri, minimum 4% (**70 de locuri PMR**, dimensiune 3,50 × 5,00 m) se amplasează cu prioritate în imediata vecinătate a acceselor principale accesibilizate, iar **175 de locuri (10%) sunt pregătite pentru încărcare vehicule electrice** (EV), cu infrastructura electrică de bază instalată de la faza inițială și posibilitatea de completare ulterioară a stațiilor de încărcare propriu-zise, în funcție de evoluția cererii — soluție prudentă din perspectiva costului de capital, care evită supra-investiția în echipamente EV la o rată de adopție incertă pe termen scurt, dar asigură capacitatea electrică rezervată pentru extinderea rapidă ulterioară.
 
-**Evacuare:** ~4.000 pers/nivel → N_fluxuri = 4.000/70 ≈ **58 fluxuri → 34,8 m** lățime pe ≥8 scări + ieșiri; timp <8-10 min (scenariu/Pathfinder); coridor înfundat ≤20 m / două direcții ≤40 m (cu sprinklere).
+### 5.5. Studiul de trafic — determinant pentru accese și geometria intersecțiilor
 
-**Desfumare:** **atrium = rezervor de fum** (evacuare mecanică 400°C/2h sus + aer jos, model plume NP 068/I5); galerii mecanică zonată; parcaje (jet-fans NP 127); cinema/food-court independent.
+Studiul de trafic este, alături de studiul de catchment (cap. 4), documentul tehnic care condiționează cel mai direct configurația finală a planului de situație al unui mall regional, și singurul dintre studiile de fundamentare care necesită, de regulă, avizul unei autorități externe (administratorul drumului și/sau Poliția Rutieră) anterior finalizării proiectului. Necesitatea sa este dictată de simplul fapt fizic că un centru comercial de această anvergură generează, la orele de vârf (tipic sâmbăta după-amiaza sau vinerea seara), un volum de trafic — estimat pentru amplasamentul de referință la **~1.100-1.400 de vehicule/oră** — comparabil cu cel al unei intersecții urbane majore, volum pe care rețeaua stradală existentă, proiectată pentru traficul de bază al zonei anterior investiției, nu îl poate absorbi fără intervenții specifice.
+
+Studiul de trafic parcurge, în succesiune logică, următoarele etape: (1) determinarea vârfurilor de generare de trafic ale investiției, pe baza GLA, a tenant-mix-ului (ancore + galerie) și a ratelor de generare specifice fiecărei categorii de utilizare comercială (rate consacrate în manualele de trafic engineering, de tipul ITE Trip Generation, adaptate la contextul local); (2) distribuirea acestui trafic generat pe direcțiile de sosire/plecare, corelat cu structura catchment-ului (cap. 4.1) și cu rețeaua rutieră reală; (3) suprapunerea traficului generat de investiție peste traficul de bază existent pe rețeaua stradală adiacentă, pentru determinarea volumelor totale la orele de vârf; (4) evaluarea capacității intersecțiilor afectate în raport cu aceste volume totale, prin metodele consacrate de analiză a capacității (nivele de serviciu); și (5) propunerea măsurilor de sistematizare rutieră necesare pentru menținerea unui nivel de serviciu acceptabil.
+
+Concluziile studiului de trafic, pentru amplasamentul de referință, impun: **minimum 3 accese auto independente** (distribuite astfel încât să distribuie volumul de trafic pe mai multe puncte de intrare/ieșire, evitând concentrarea întregului flux pe o singură intersecție), **benzi de accelerare/decelerare** pe artera principală adiacentă, la fiecare acces, pentru a permite manevrele de intrare/ieșire fără perturbarea fluxului de tranzit, și, funcție de configurația concretă a intersecțiilor, **amenajarea unui giratoriu sau semaforizarea** punctului de acces principal — soluții alternative, a căror alegere rezultă din analiza comparativă a capacității realizată în studiul de trafic (giratoriul este, de regulă, preferat pentru volume moderate și pentru fluidizarea traficului fără opriri, în timp ce semaforizarea devine necesară la volume foarte mari sau la intersecții cu mai mult de patru brațe). Studiul de trafic are, pentru un mall regional, o poziție de prioritate similară celei a studiului geotehnic pentru orice construcție: proiectul de arhitectură și planul de situație **se adaptează concluziilor studiului de trafic**, nu invers — poziția, numărul și geometria acceselor auto rezultă din acest studiu, iar orice modificare ulterioară a planului de situație care afectează accesele impune reactualizarea studiului și a avizului de circulație aferent.
+
+### 5.6. Spații verzi și alte cerințe PUZ
+
+Suprafața de spații verzi proiectată, 21,5% din suprafața terenului, depășește minimul reglementat de 20%, fiind distribuită pe conturul parcelei, în insulele de sistematizare ale parcărilor la sol (esențiale pentru atenuarea efectului de insulă de căldură urbană generat de suprafețele carosabile extinse specifice unui mall) și, dacă soluția de arhitectură o prevede, în zonele de acces pietonal amenajate. Alte cerințe reglementate prin PUZ (rezervarea de teren pentru eventuala stație de transport public, coridoare pentru rețele edilitare majore, dacă e cazul) se preiau și se respectă în soluția de sistematizare, detaliată la cap. 11.
+
+---
+
+## 6. SITUAȚIA EXISTENTĂ
+
+### 6.1. Terenul
+
+Terenul, cu suprafața de ~60.000 mp, are, tipic pentru un amplasament destinat unui mall regional, formă regulată sau cvasi-regulată, relief plan sau cu diferențe de nivel reduse, fără fenomene de instabilitate, și front la o arteră de circulație de mare capacitate (drum național/județean, centură ocolitoare) care asigură vizibilitatea și accesibilitatea necesare captării catchment-ului auto-dependent. Cotele de nivel și limitele se preiau din ridicarea topografică vizată OCPI. Terenul este liber de construcții (sau cu construcții/platforme industriale dezafectate ce urmează a fi demolate în baza autorizației de desființare, situație frecventă pentru terenurile foste industriale reconvertite spre destinație comercială), fără arbori protejați care să impună restricții majore, și fără rețele edilitare de traversare care să greveze semnificativ amplasarea. Dimensiunea generoasă a terenului permite atât amplasarea construcției propriu-zise pe o amprentă extinsă (28.500 mp, cap. 5.2), cât și dedicarea suprafeței rămase (~31.500 mp) parcajului la sol/suprateran, sistematizării accesului multiplu impus de studiul de trafic (cap. 5.5) și spațiilor verzi.
+
+### 6.2. Vecinătățile
+
+| Latură | Vecinătate | Observații |
+|---|---|---|
+| Frontal (spre artera principală) | drum de mare capacitate + intersecție/giratoriu | acces principal clienți, vizibilitate de la distanță, obiect al studiului de trafic |
+| Lateral 1 | parcelă liberă sau cu funcțiune compatibilă (servicii, logistică) | retragere ≥ 8,0 m, posibilă rezervă pentru extindere fază 2 |
+| Lateral 2 | parcelă liberă sau cu funcțiune compatibilă | retragere ≥ 8,0 m, acces secundar/marfă |
+| Posterior | teren agricol/liber sau funcțiune tehnică (stație electrică, depozit) | retragere generoasă, acces de serviciu și rampă de marfă |
+
+Nu există, de regulă, construcții cu regim de protecție pe parcelele adiacente unui amplasament de acest tip (periferic, foste terenuri agricole/industriale). Distanțele de siguranță la foc față de vecinătăți se verifică în scenariul de securitate la incendiu (P118-1), cu atenție particulară la fațada dinspre curtea de serviciu/rampa de marfă, unde riscul de incendiu (depozite temporare, trafic de vehicule grele) este mai ridicat decât la restul clădirii. Amplasarea se corelează cu vecinătățile astfel încât fluxurile generate de mall (auto clienți, auto personal, aprovizionare, urgență ISU) să nu perturbe eventualele funcțiuni învecinate și să lase deschisă, acolo unde este posibil, o rezervă de teren pentru o eventuală extindere ulterioară (fază 2), opțiune strategică frecventă în dezvoltarea centrelor comerciale regionale, corelată cu evoluția reală a catchment-ului (cap. 4.5).
+
+### 6.3. Utilitățile din zonă
+
+Amplasarea periferică a unui mall regional implică, adesea, o distanță mai mare față de rețelele edilitare majore existente decât în cazul amplasamentelor centrale, aspect care se verifică prin avizele de amplasament ale deținătorilor de rețele: alimentare cu apă și canalizare (menajeră + pluvială, cu separator de grăsimi pentru food-court și separator de hidrocarburi pentru parcaje), rețea electrică (necesitând, dat fiind consumul ridicat de ~6 MW instalat, racord de medie tensiune și posturi de transformare proprii — a se vedea cap. 13), rețea de gaze naturale (opțional, pentru bucătăriile food-court-ului), telecomunicații/fibră optică. Dacă rețelele existente în zonă nu au capacitatea sau proximitatea suficientă, se identifică, prin avizele de amplasament, necesitatea unor extinderi de rețea, ale căror costuri și trasee se stabilesc în etapa premergătoare autorizării, adesea corelat cu obligațiile de sistematizare rutieră impuse prin studiul de trafic și PUZ.
+
+### 6.4. Sinteza condițiilor geotehnice
+
+Conform studiului geotehnic (verificat la cerința Af — document dedicat, care NU se dublează aici): stratificație tipică cu strat vegetal/umpluturi la suprafață, urmat de argile prăfoase/nisipuri, cu strat de fundare adecvat la adâncimea recomandată. Categoria geotehnică se stabilește conform NP 074/2014; pentru o construcție de amprentă foarte extinsă (28.500 mp) cu deschideri mari și încărcări neuniforme (hipermarketul și cinema-ul concentrează încărcări diferite de galeria comercială obișnuită), categoria geotehnică și variabilitatea reală a terenului pe suprafața mare a amprentei influențează direct alegerea sistemului de fundare (radier general segmentat pe rosturi, eventual completat cu piloți în zonele cu încărcări concentrate sau cu teren local mai slab). Presiunea convențională de calcul, adâncimea de îngheț, nivelul apei subterane (NHA) și recomandările de fundare se preiau din studiul geotehnic. Prezentul memoriu reține doar concluzia de principiu: infrastructură pe radier general de beton armat, segmentat prin rosturi de tasare/dilatare adecvate dimensiunii mari a amprentei, cu piloți suplimentari acolo unde profilul geotehnic sau încărcările concentrate o impun.
+
+---
+
+## 7. SOLUȚIA DE ANSAMBLU
+
+### 7.1. Concepția volumetrică — galeria și atriumul
+
+Ansamblul este organizat pe principiul consacrat al **galeriei comerciale cu atrium central**, soluție-standard pentru mall-urile regionale la nivel internațional, aleasă pentru capacitatea sa dovedită de a distribui eficient fluxul de clienți către toate unitățile comerciale și de a crea o experiență de shopping memorabilă și ușor de navigat. **Atriumul central**, dezvoltat pe trei niveluri (subsol exclus, deci parter-E1-E2) cu **luminator zenital**, funcționează ca element de orientare spațială (un client care se rătăcește în galerie revine, intuitiv, spre lumina naturală și spre golul central pentru a se reorienta), ca element de identitate arhitecturală (imaginea reprezentativă a mall-ului, adesea utilizată în materialele de marketing ale operatorului) și ca spațiu de eveniment (activări comerciale, standuri sezoniere, spectacole, amplasate în golul atriumului la parter, vizibile de pe toate nivelurile).
+
+Din perspectivă tehnică, atriumul este, simultan, cel mai valoros element arhitectural al proiectului și cea mai delicată provocare de securitate la incendiu a întregului ansamblu: un gol vertical de trei niveluri, prin definiție, conectează atmosferele celor trei paliere, iar în absența unor măsuri dedicate, ar transforma un incendiu izbucnit la orice nivel într-un fenomen de propagare rapidă a fumului către toate celelalte niveluri, prin efectul de „coș” (stack effect) generat de diferența de densitate dintre fumul cald și aerul rece din jur. Această dublă natură a atriumului — activ comercial major și risc tehnic major — este tratată integral la cap. 7.5 și 9.4, cu soluțiile de compartimentare, evacuare și desfumare adecvate.
+
+### 7.2. Zonarea funcțională pe niveluri
+
+| Nivel | Funcțiune | Suprafață orientativă |
+|---|---|---|
+| Subsol | Parcaj (620 locuri), spații tehnice (posturi trafo, centrală termică, hidrofor, gospodărie apă incendiu, tablouri electrice generale) | ~10.000 mp |
+| Parter | Hipermarket (~6.500 mp), galerie comercială cota 0, intrări principale + drop-off, food-court parțial | ~40.000 mp |
+| Etaj 1 | Galerie comercială + unități, atrium deschis (vedere spre parter și spre E2) | ~30.000 mp |
+| Etaj 2 | Cinema multiplex (~2.800 mp), food-court principal (~1.400 mp), zonă de agrement, eventuale terase | ~16.000 mp |
+
+Subsolul concentrează parcajul (620 de locuri, cap. 5.4) și toate spațiile tehnice majore ale ansamblului — posturile de transformare, centrala termică, hidroforul și gospodăria de apă pentru incendiu (rezervor de mari dimensiuni, cap. 9.5), și tablourile electrice generale — grupare care simplifică traseele de instalații (distanțe scurte între producerea utilităților și punctele de consum de la parter) și izolează funcțiunile tehnice, fără trafic public, de restul clădirii. Parterul găzduiește, alături de hipermarketul-ancoră (cu acces propriu independent și acces din galerie), galeria comercială de la cota zero, drop-off-ul principal și o parte a food-court-ului (acolo unde soluția arhitecturală prevede o componentă de restaurație rapidă și la parter, complementară food-court-ului principal de la E2). Etajul 1 dezvoltă galeria comercială în jurul atriumului deschis, cu vedere directă spre parter și spre E2 — poziționare care valorifică comercial deschiderea atriumului, unitățile de la E1 beneficiind de vizibilitate din ambele niveluri adiacente. Etajul 2 concentrează componenta de agrement și servire a mesei — cinema-ul multiplex și food-court-ul principal — grupare deliberată, care plasează funcțiunile cu profil orar de seară/weekend la nivelul superior, distanțat de fluxul de cumpărături recurente al parterului, dar conectat direct prin circulațiile verticale publice (scări rulante, ascensoare panoramice, cap. 7.7).
+
+### 7.3. Tipologia unităților comerciale și mixul de chiriași (tenant mix)
+
+Galeria comercială cuprinde **130-160 de unități**, cu suprafețe variind de la module mici de 25 mp (chioșcuri, servicii de proximitate — telefonie, optică, farmacie de mici dimensiuni) până la unități mari de 800 mp (branduri naționale de modă sau electrocasnice de talie medie, poziționate ca sub-ancore care completează cele trei ancore principale). Structura tenant-mix-ului urmează logica economică descrisă la cap. 4.6: unitățile de dimensiune medie-mare (100-800 mp) se poziționează adiacent traseelor de flux maxim (în vecinătatea atriumului, pe direcțiile de conexiune între ancorele principale), beneficiind de vizibilitatea generată de traficul atras de acestea, în timp ce unitățile mici (25-100 mp) se poziționează, tipic, în „insulele” din mijlocul galeriei sau în pozițiile de tranzit dintre zone, unde traficul de tranzit, deși nu la fel de intens ca la fronturile ancorelor, este suficient pentru un format comercial de mici dimensiuni cu vânzare pe mp ridicată (bijuterii, accesorii, gustări). Diversitatea suprafețelor (25-800 mp) permite operatorului mall-ului să compună un mix comercial complet — de la branduri internaționale de talie mare până la operatori locali de nișă — condiție esențială pentru atractivitatea de ansamblu a centrului comercial și pentru rata de ocupare la stabilizare (cap. 2.2).
+
+### 7.4. Eficiența GLA/GBA și interpretarea sa
+
+**GBA (Gross Building Area)** proiectată este de ~96.000 mp, iar **GLA (arie închiriabilă brută)** este de ~22.000 mp, rezultând o eficiență GLA/GBA de ansamblu de **~41%**. Această valoare, aparent redusă față de ținta uzuală de eficiență în piața de retail real estate (≥60% pe brutul strict comercial, fără parcaje), se explică prin faptul că GBA de 96.000 mp include, alături de suprafața propriu-zisă a galeriei comerciale, întreaga suprafață a parcajului subteran și suprateran multietajat (o componentă masivă de suprafață construită, dar fără venit din chirie propriu-zisă), spațiile tehnice de la subsol, atriumul (gol de circulație de trei niveluri, cu rol comercial indirect dar fără arie închiriabilă proprie) și culoarele de circulație publică și de serviciu. Raportarea corectă a eficienței de proiectare, relevantă pentru compararea cu benchmark-urile de piață, se face nu la GBA total (care include parcajul), ci la **GBA strict comercial** (galerie + ancore, excluzând parcajul dedicat și volumele tehnice) — pe acest calcul restrâns, eficiența GLA/GBA se apropie de ținta de ≥60% menționată ca obiectiv la cap. 2.2, diferența față de eficiența brută de 41% fiind atribuibilă aproape integral suprafeței masive a parcajului multietajat, o alegere de proiectare justificată economic (cap. 5.4), nu o ineficiență de plan.
+
+### 7.5. Mall-ul comun și atriumul — verificări speciale
+
+Mall-ul comun (galeria, cu o suprafață orientativă de ~4.200 mp la nivelul circulațiilor publice) și atriumul central fac obiectul unor verificări speciale, corelate strâns cu scenariul de securitate la incendiu (cap. 9), dar semnalate aici ca principii de concepție:
+
+- **Evacuarea prin atrium:** atriumul, fiind un gol deschis pe trei niveluri, **nu constituie o cale de evacuare protejată** — căile de evacuare ale galeriei ocolesc atriumul, direcționând fluxul de persoane spre casele de scări închise (cap. 9.3), niciodată prin golul propriu-zis al atriumului, unde, în caz de incendiu, se acumulează fumul evacuat.
+- **Desfumarea atriumului:** atriumul funcționează, din perspectiva scenariului de incendiu, ca un **rezervor de fum** — soluție de proiectare consacrată pentru golurile mari de acest tip, prin care fumul generat la orice nivel este lăsat să se acumuleze controlat în partea superioară a atriumului (sub luminatorul zenital, unde sunt amplasate trapele/ventilatoarele de evacuare mecanică a fumului) și evacuat mecanic prin partea de sus, în timp ce aerul proaspăt este introdus compensat prin partea de jos, menținând astfel un strat de aer curat la nivelul de circulație al persoanelor pe durata evacuării (a se vedea detalierea la cap. 9.4).
+- **Propagarea între unități și galerie:** fiecare unitate comercială este separată de galeria comună printr-o compartimentare la foc (perete/vitrină rezistentă la foc conform gradului de rezistență adoptat) sau, acolo unde soluția arhitecturală prevede vitrine deschise spre galerie, prin instalații de tip drencer (perdea de apă) la marginea golului, care limitează propagarea flăcărilor/fumului dinspre unitate spre galerie și dinspre galerie spre atrium.
+
+### 7.6. Fluxurile — public, marfă, evacuare
+
+Funcționarea unui mall regional presupune organizarea a **trei fluxuri complet separate**, cu intersecții controlate doar în puncte strict necesare:
+
+- **Fluxul PUBLIC (clienți):** parcaj → intrări principale → galerie → unități comerciale/ancore/food-court/cinema, deplasare susținută de scări rulante și de ascensoare panoramice, poziționate vizibil pentru orientare intuitivă.
+- **Fluxul de MARFĂ (aprovizionare chiriași):** rampă de descărcare (dedicată, separată de accesul clienților) → **culoar tehnic de serviciu**, amplasat în spatele frontului de vitrine ale unităților, invizibil din galeria publică → **lift de marfă** (capacitate 2.000-3.000 kg) → depozitele fiecărei unități/ancore. Acest culoar de serviciu este elementul-cheie care permite aprovizionarea continuă a celor 130-160 de unități fără nicio interferență vizuală sau fizică cu clienții — un mall în care aprovizionarea s-ar face prin galeria publică (cărucioare de marfă printre clienți) ar fi, din start, poziționat sub standardul comercial așteptat de brandurile-chiriaș de calitate.
+- **Fluxul de EVACUARE:** scări închise (protejate la foc) + ieșiri directe la exterior + căi „antipanică” (uși cu bară de împingere, fără sisteme de blocare), complet independente de traseele obișnuite de circulație, dimensionate conform calculului de la cap. 9.3.
+
+### 7.7. Circulațiile verticale
+
+Traficul vertical al unui mall regional este dimensionat pentru capacitatea de vârf (~8.000-9.000 de persoane simultan, cap. 10) și cuprinde: **8-12 scări rulante**, distribuite pe traseele de conexiune dintre ancore (poziționare care direcționează activ fluxul clienților spre etajele superioare, un obiectiv comercial explicit — o scară rulantă amplasată vizibil, în calea naturală a fluxului de la intrarea principală, crește traficul etajului superior mult mai eficient decât una ascunsă într-un colț); **4 ascensoare panoramice**, atât pentru accesibilitate PMR și pentru cărucioare/bagaje, cât și ca element de imagine arhitecturală a atriumului; **2-3 lifturi de marfă** (2.000-3.000 kg), dedicate exclusiv fluxului de aprovizionare (cap. 7.6), fără acces public; **minimum 8 scări de evacuare** protejate, dimensionate conform calculului de la cap. 9.3; și **1 ascensor de pompieri**, cu sas presurizat, pentru intervenția ISU.
+
+### 7.8. Parcarea — organizare fizică și fluxuri
+
+Cele 1.750 de locuri de parcare (cap. 5.4) sunt organizate pe trei componente fizice cu roluri diferențiate: subsolul (620 de locuri), acoperit și climatic protejat, deservește prioritar vizitele de durată medie-lungă (cumpărături extinse, vizionare de film) și oferă confort superior pe vreme nefavorabilă; structura suprateran multietajată (850 de locuri), amplasată adiacent accesului principal, maximizează capacitatea pe amprenta de teren minimă, fiind soluția principală de absorbție a vârfurilor de weekend; parcarea la sol (280 de locuri), cu acces rapid și vizibilitate directă, deservește vizitele scurte, tipic clientela exclusivă a hipermarketului. Un **giratoriu intern** de distribuție organizează fluxul auto între cele trei componente de parcare și cele minimum 3 accese auto impuse de studiul de trafic (cap. 5.5), cu benzi de circulație de minimum 6,0 m în dublu sens. Fluxul de marfă (rampa de descărcare, cap. 7.6) este complet separat, fizic, de fluxul de clienți, iar căile de intervenție ISU (cap. 9.6) sunt menținute libere perimetral, independent de organizarea parcajului.
+
+### 7.9. Anticiparea structurii — dual b.a. și zone mixte beton-oțel
+
+Structura de rezistență a ansamblului, detaliată integral cu breviarul de calcul complet în memoriul de rezistență (document distinct, care nu se dublează aici), este concepută pe principiul unui **sistem dual din beton armat monolit, cu zone mixte beton-oțel** acolo unde deschiderile mari specifice funcțiunilor comerciale de anvergură (hipermarket, cinema, atrium) exclud soluția de beton armat pur. Infrastructura se realizează pe **radier general de 80-120 cm grosime** (completat cu piloți acolo unde condițiile geotehnice locale sau încărcările concentrate o impun — cap. 6.4), cu **stâlpi de beton armat C30/37 de secțiune 60×60 până la 80×80 cm**, dispuși pe o **tramă structurală de retail de 8,0 × 8,0 m** (modul optim de compartimentare comercială, care permite flexibilitate maximă chiriașilor la amenajarea propriilor spații fără a fi constrânși de o grilă de stâlpi prea deasă). La zonele hipermarketului, unde deschiderile funcționale necesare (rafturi, culoare largi, zone de depozitare) impun travee de **12-16 m**, structura recurge la elemente metalice (grinzi/ferme de oțel), soluție uzuală pentru acest tip de spații comerciale de mari dimensiuni. Planșeele curente sunt de tip dală/grinzi, cu grosimi de **25-30 cm**, iar nucleele de rigidizare (case de scări, ascensoare) au pereți de **30-40 cm**. Șarpanta atriumului — elementul structural care susține luminatorul zenital pe deschideri de **20-30 m** — este realizată în structură metalică ușoară, soluție consacrată pentru acoperirea golurilor mari de lumină naturală. Betoanele utilizate sunt de clasă **C30/37** (majorate la **C35/45** în zonele solicitate structural — elementele de transfer, nucleele), cu armătură **BST500**. Factorul de comportare seismică al sistemului dual, în clasa de ductilitate medie (DCM), se situează în intervalul **q = 3,5-4,5**, iar forța tăietoare de bază se calculează după formula consacrată **Fb = γI·Sd·m·λ** (unde γI este factorul de importanță, Sd ordonata spectrului de proiectare, m masa totală și λ factorul de corecție modal). Detalierea integrală a acestui concept structural — dimensionarea exactă a elementelor, verificările de ductilitate și de transfer, comportarea zonelor mixte beton-oțel la interfața cu betonul armat — se prezintă în memoriul de rezistență, prezentul memoriu reținând doar principiul, necesar pentru înțelegerea de ansamblu a soluției.
+
+### 7.10. Parametrii seismici de proiectare (P100-1/2013)
+
+Proiectarea seismică se realizează conform P100-1/2013, coroborat cu CR 0/2012 (bazele proiectării), CR 1-1-3/2012 (zăpadă) și CR 1-1-4/2012 (vânt). Clasa de importanță și expunere seismică adoptată la nivel de ansamblu este **II (γI,e = 1,20)**, corespunzătoare aglomerărilor mari de persoane. Așa cum s-a semnalat la cap. 1.4, zonele de concentrare maximă simultană a persoanelor — atriumul central și volumul cinema-ului multiplex — se evaluează, în corelare cu proiectantul de structură, pentru o eventuală majorare locală la clasa **I (γI,e = 1,40)**, similar practicii aplicate sălilor de spectacole; decizia finală, cu breviarul de calcul aferent, revine integral memoriului de rezistență. Parametrii seismici de amplasament (accelerația terenului ag, perioada de colț Tc, factorul de amplificare dinamică β0) se stabilesc funcție de zona seismică reală a amplasamentului și se preiau exact în memoriul de rezistență; prezentul memoriu reține principiul de încadrare și rezerva tehnică pentru zonele de aglomerare specială.
+
+### 7.11. Încărcările de proiectare (SR EN 1991 / CR 0)
+
+| Acțiune | Valoare de referință orientativă | Sursă |
+|---|---|---|
+| Galerie comercială (cat. C1/D) | 4,0-5,0 kN/mp | SR EN 1991-1-1 |
+| Hipermarket (zonă depozitare/raft, cat. C3/E) | 5,0-7,5 kN/mp (funcție de zonă) | SR EN 1991-1-1 |
+| Cinema (săli cu scaune fixe, cat. C1) | 4,0-5,0 kN/mp | SR EN 1991-1-1 |
+| Food-court (cat. C1) | 4,0 kN/mp | SR EN 1991-1-1 |
+| Parcaj (cat. F, autovehicule ≤ 30 kN) | 2,5 kN/mp | SR EN 1991-1-1 |
+| Terasă tehnică necirculabilă | 0,75-1,0 kN/mp (+ încărcări concentrate echipamente) | SR EN 1991-1-1 |
+| Zăpadă (funcție de zonă) | sk zonal | CR 1-1-3/2012 |
+| Vânt (funcție de zonă, relevant pe luminatorul atriumului) | qb zonal | CR 1-1-4/2012 |
+
+Combinațiile de acțiuni (gruparea fundamentală, seismică, cvasipermanentă) se stabilesc conform CR 0/2012, cu coeficienții parțiali și de grupare aferenți. Luminatorul zenital al atriumului, prin expunerea directă la acțiunea vântului și, dacă e cazul, la încărcarea din zăpadă pe suprafețele înclinate, constituie o încărcare și o condiție de proiectare structurală particulară pentru șarpanta metalică descrisă la cap. 7.9, tratată integral la memoriul de rezistență.
+
+### 7.12. Anvelopa clădirii
+
+Anvelopa unui mall regional combină, tipic, **fațade opace de tip industrial/comercial performant** pe suprafețele mari ale galeriei (unde nu este necesară transparența, dat fiind că iluminatul interior al galeriei este preponderent artificial, completat de lumina naturală zenitală a atriumului) cu **curtain wall și vitraje de mari dimensiuni la intrările principale și la fațada atriumului**, pentru transparență, vizibilitate de la distanță (esențială pentru captarea catchment-ului, cap. 4) și pentru iluminatul natural al galeriei adiacente atriumului. Vitrajul adoptat este de tip **Low-E cu factor solar g ≤ 0,4**, care limitează aporturile solare directe pe suprafețele mari vitrate (relevant pentru sarcina de răcire, deja ridicată din cauza aglomerărilor de persoane și a frigului comercial al hipermarketului). Performanțele termice minime adoptate sunt: **U perete ≤ 0,35 W/m²K**, **U acoperiș ≤ 0,20 W/m²K**, **U vitraj (U_w) ≤ 1,3 W/m²K** — valori conforme unei clase energetice ridicate (nZEB), relevante la o clădire cu suprafață de anvelopă foarte extinsă (96.000 mp GBA) și, deci, cu impact major al performanței termice asupra consumului energetic total (cap. 13.4).
+
+### 7.13. Subsolul
+
+Subsolul (~10.000 mp) găzduiește parcajul (620 de locuri) și ansamblul spațiilor tehnice majore ale clădirii: **posturile de transformare** (2-3 posturi, cap. 13.1), **centrala termică**, **hidroforul**, **gospodăria de apă pentru incendiu** (rezervor de 400-700 mc și electropompe/motopompe, cap. 9.5) și **tablourile electrice generale**. Pereții perimetrali de beton armat se impermeabilizează pentru realizarea unei cuve etanșe acolo unde nivelul apei subterane o impune (cap. 6.4). Ventilarea parcajului este comandată de senzori de CO și comută în regim de desfumare la incendiu (cap. 9.4 și memoriul de instalații). Amplasarea gospodăriei de apă pentru incendiu la subsol, în vecinătatea centrului de greutate al construcției, minimizează lungimea coloanelor de refulare spre hidranții și sprinklerele distribuite pe cele 96.000 mp de GBA.
+
+---
+
+## 8. DESCRIEREA SOLUȚIILOR PE SPECIALITĂȚI (SINTEZĂ)
+
+> Descrierea detaliată a fiecărei specialități se regăsește în memoriul dedicat. Aici se prezintă doar sinteza de principiu, fără duplicare, pentru înțelegerea de ansamblu a soluției.
+
+### 8.1. Arhitectură (→ memoriu arhitectură)
+
+Galerie comercială cu atrium central pe trei niveluri și luminator zenital; zonare pe verticală (subsol tehnic/parcaj, parter hipermarket+galerie+drop-off, E1 galerie+atrium, E2 cinema+food-court+agrement); tenant-mix pe 130-160 unități (25-800 mp); culoar tehnic de serviciu în spatele frontului de vitrine; circulații verticale publice (scări rulante, ascensoare panoramice) poziționate pe traseele naturale de flux; finisaje diferențiate pe zone (reprezentative la atrium și intrări, industriale/rezistente la trafic intens la galerie, sanitare la food-court); accesibilitate PMR integrală conform NP 051/2012. Soluția de arhitectură integrează cerințele funcționale (separarea fluxurilor public/marfă/evacuare), cele tehnice (structură, instalații, securitate la incendiu) și cele comerciale (vizibilitatea ancorelor, orientarea intuitivă a clienților). Detalierea arhitecturală completă (planuri, secțiuni, fațade, tablou de finisaje, tâmplării) revine memoriului și pieselor de arhitectură.
+
+### 8.2. Rezistență / Structură (→ memoriu structură)
+
+Sistem structural dual, beton armat monolit + zone mixte beton-oțel la deschiderile mari (hipermarket, atrium — a se vedea cap. 7.9); infrastructură pe radier general segmentat (+ piloți dacă e cazul); tramă retail 8,0×8,0 m; verificarea absenței mecanismului de nivel flexibil, a driftului de nivel și a comportării elementelor de transfer/zonelor mixte la interfața cu structura de beton, conform P100-1/2013. Materialele, breviarele de calcul complete și detaliile de armare seismică se prezintă integral în memoriul de rezistență.
+
+### 8.3. Instalații sanitare (→ memoriu sanitare)
+
+Alimentare cu apă rece/caldă, hidrofor, rezervor și pompe dedicate pentru incendiu (capacitate majorată, cap. 9.5), canalizare divizoare menajeră/pluvială, separator de grăsimi pentru food-court (SR EN 1825), separator de hidrocarburi pentru parcaje (SR EN 858), grupuri sanitare publice dimensionate pe capacitatea de aglomerare (OMS 119/2014), inclusiv grupuri sanitare PMR și spații baby-care. Detalierea (scheme, dimensionări, breviare de calcul al necesarului de apă) revine memoriului de instalații sanitare.
+
+### 8.4. Instalații termice / HVAC (→ memoriu HVAC)
+
+Centrale de tratare a aerului (CTA) cu recuperare de căldură, zonate pe fiecare mare consumator (galerie, hipermarket, cinema, food-court); centrală termică și pompe de căldură pentru producerea agentului termic; chillere dedicate atât climatizării galeriei, cât și frigului comercial al hipermarketului (consumator major și continuu de frig); ventilarea și desfumarea parcajului; BMS (Building Management System) pentru managementul centralizat al consumurilor pe cele 96.000 mp de GBA. Detalierea (sarcini termice, debite, dimensionări) revine memoriului HVAC.
+
+### 8.5. Instalații electrice (→ memoriu electrice)
+
+2-3 posturi de transformare (3×1.600 kVA, 20 kV, cap. 13.1), tablou general de distribuție, tablouri pe zone funcționale (galerie, ancore, tehnic, parcaj), grup electrogen de siguranță pentru consumatorii vitali de securitate la incendiu (desfumare, sprinklere, iluminat de siguranță, ascensor de pompieri, sistemul EVAC), UPS pentru consumatorii critici care nu admit întrerupere (sisteme de securitate, servere). Detalierea completă (bilanț de putere, scheme, dimensionare posturi trafo și grup electrogen) revine memoriului de instalații electrice.
+
+### 8.6. Curenți slabi (→ memoriu curenți slabi)
+
+Detecție de incendiu adresabilă cu acoperire totală (P118-3), alarmare vocală EVAC (SR EN 54-16, obligatorie), CCTV pe toate spațiile comune și parcaj, sistem de sonorizare/adresare publică zonabil (integrat cu prioritatea mesajelor de evacuare), paratrăsnet și priză de pământ, sistem de numărare a traficului (people counting, relevant comercial pentru operator), Wi-Fi public în galerie. Detalierea revine memoriului de curenți slabi.
+
+---
+
+## 9. SECURITATE LA INCENDIU (Cerința C)
+
+### 9.1. Profilul de risc specific — NP 068-2002 (clădiri și săli aglomerate)
+
+Un centru comercial regional de această anvergură prezintă un profil de risc la incendiu dintre cele mai severe din categoria clădirilor civile, cumulând simultan patru factori agravanți, fiecare tratat cu instrumentar normativ dedicat de **NP 068-2002** (norma specifică proiectării clădirilor și sălilor aglomerate): (1) **mii de persoane prezente simultan**, necunoscătoare ale planului clădirii (spre deosebire de personalul unui birou), condiție care impune o dimensionare a evacuării net superioară celei aplicabile unei clădiri cu populație stabilă; (2) **atriumul**, un gol vertical de trei niveluri care, netratat corect, ar deveni principalul vector de propagare a fumului către toate palierele (cap. 7.5); (3) **sarcina termică ridicată** generată de marfa combustibilă depozitată și expusă (în special la hipermarket și la unitățile de modă/electrocasnice) și de amenajările interioare ale galeriei; și (4) **mixul de funcțiuni cu profil de risc diferit**, în particular cinema-ul (sală aglomerată cu evacuare specifică, echipamente electronice de proiecție) și food-court-ul (bucătării multiple, cu risc de incendiu la echipamentele de gătit), ambele tratate explicit de NP 068-2002 ca funcțiuni cu cerințe de securitate la incendiu proprii.
+
+Aceste patru factori, evaluați cumulat, fundamentează atât încadrarea în categoria de importanță B (cap. 1.4), cât și adoptarea gradului de rezistență la foc **I** — cel mai ridicat din grila P118-1/2013, ales nu pentru înălțimea clădirii (sub pragul de clădire înaltă), ci pentru profilul de risc dat de aglomerare și de mixul funcțional. Scenariul de securitate la incendiu (document distinct, elaborat conform Ordinului MAI aplicabil și supus avizării ISU) tratează integral și cu calcule complete toate aspectele semnalate în continuare la nivel de principiu.
+
+### 9.2. Compartimentarea
+
+Compartimentarea la foc a ansamblului este dimensionată la un nivel de rezistență superior mediei clădirilor comerciale, justificat de profilul de risc de la cap. 9.1: **pereți REI 180**, **planșee REI 90-120**, **structură portantă R120-180**, **case de scări REI 150**, **uși de evacuare EI 90-C**. Separarea dintre fiecare unitate comercială și galeria comună se realizează fie prin perete/vitrină rezistentă la foc **EI 60**, fie, la unitățile cu front deschis spre galerie, prin **instalații de tip drencer** (perdea de apă) amplasate la marginea golului de vitrină, soluție care permite păstrarea deschiderii vizuale comerciale dorite de chiriași fără compromiterea compartimentării la foc. Aria construită desfășurată maximă admisă între compartimente de incendiu, superioară valorilor uzuale ale unei clădiri comerciale obișnuite, este obținută prin **generalizarea sprinklerelor** la nivelul întregului ansamblu (cap. 9.5), măsură compensatorie recunoscută de normativ pentru majorarea ariilor de compartimentare.
+
+### 9.3. Evacuarea — calculul fluxurilor
+
+Dimensionarea evacuării pornește de la o densitate de ocupare de referință de ~4.000 de persoane pe nivel la momentul de vârf (derivată din indicii de aglomerație de la cap. 10). Conform metodologiei fluxurilor de evacuare (NP 068-2002), necesarul de lățime de evacuare rezultă din: **N_fluxuri = 4.000/70 ≈ 58 fluxuri**, fiecare flux având o lățime unitară de 0,60 m, rezultând o **lățime totală necesară de evacuare de ~34,8 m**, distribuită pe minimum **8 scări de evacuare** și pe ieșirile directe la exterior de la parter. Timpul de evacuare țintă, verificat prin scenariul de securitate la incendiu (eventual susținut de o simulare dedicată de tip Pathfinder), este de **sub 8-10 minute** pentru evacuarea completă a nivelului cel mai aglomerat. Lungimea maximă a unui coridor înfundat (cu o singură direcție de evacuare) este limitată la **≤ 20 m**, iar distanța maximă până la cea mai apropiată ieșire, atunci când sunt disponibile două direcții de evacuare, este limitată la **≤ 40 m** — valoare majorată față de normativul general datorită prezenței sprinklerelor generalizate (cap. 9.5), care întârzie dezvoltarea incendiului și oferă timp suplimentar de evacuare.
+
+### 9.4. Desfumarea — atriumul ca rezervor de fum
+
+Desfumarea este, pentru un mall cu atrium pe trei niveluri, cea mai critică instalație de securitate la incendiu a ansamblului. Principiul de proiectare adoptat, consacrat pentru golurile verticale de mari dimensiuni, tratează **atriumul ca rezervor de fum**: fumul generat la orice nivel al galeriei sau la parterul atriumului se acumulează controlat în partea superioară a golului (sub luminatorul zenital), de unde este evacuat **mecanic**, cu instalații dimensionate pentru un flux de fum la o temperatură de referință de **400°C**, pe o durată de rezistență la foc de **2 ore** a componentelor sistemului de desfumare (ventilatoare, tubulatură, alimentare electrică de siguranță), în timp ce aerul proaspăt de compensare este introdus la partea inferioară a atriumului, menținând un strat de aer curat la nivelul de circulație al persoanelor pe durata evacuării. Dimensionarea exactă a debitelor de evacuare și de compensare se realizează pe baza unui **model de calcul al pananului de fum (plume)**, conform metodologiei NP 068-2002, coroborat cu prevederile I5 pentru instalațiile de ventilare. Galeriile comerciale de la fiecare nivel dispun de desfumare mecanică zonată propriu, independentă de sistemul atriumului, iar parcajele subterane sunt desfumate prin ventilatoare de tip jet-fan, conform NP 127/2009. Cinema-ul multiplex și food-court-ul dispun de sisteme de desfumare independente, dat fiind profilul lor funcțional distinct (săli închise, respectiv zonă cu bucătării multiple) și cerințele specifice NP 068-2002 pentru fiecare tip de spațiu aglomerat.
+
+### 9.5. Instalațiile de stingere și detecție
 
 | Sistem | Prevedere |
 |---|---|
-| Sprinklere+drencere | **generalizat** (excepție camere electrice → gaz inert) |
-| Hidranți interiori/exteriori | integral / ≥20-40 l/s |
-| Gospodărie apă incendiu | rezervor **400-700 mc** + electropompă+motopompă+pilot |
-| Detecție adresabilă | acoperire totală (P118-3) |
-| **Alarmare vocală EVAC** | SR EN 54-16 obligatoriu |
-| Gaz inert/FM200 | servere/tablouri |
+| Sprinklere + drencere | **generalizat** la nivelul întregului ansamblu (excepție camerele electrice, unde se prevede stingere cu gaz inert) |
+| Hidranți interiori/exteriori | acoperire integrală / debit ≥ 20-40 l/s |
+| Gospodărie apă incendiu | rezervor **400-700 mc** + electropompă + motopompă + pompă pilot |
+| Detecție de incendiu | adresabilă, acoperire totală (P118-3) |
+| **Alarmare vocală EVAC** | conform SR EN 54-16, obligatorie |
+| Gaz inert / FM200 | camere servere, tablouri electrice |
 
-**ISU:** circulație perimetrală ≥3,8 m + hidranți + ascensor pompieri (sas presurizat) + dispecerat SSI.
+Generalizarea sprinklerelor la nivelul întregului ansamblu (parcaj exceptat sau cu sisteme dedicate, galerie, unități, atrium, cinema, food-court) este soluția care permite atât majorarea ariilor de compartimentare (cap. 9.2), cât și extinderea distanțelor de evacuare (cap. 9.3), fiind, împreună cu desfumarea atriumului, elementul central al strategiei de securitate la incendiu a proiectului. Gospodăria de apă pentru incendiu, cu rezervor de 400-700 mc, este dimensionată pentru debitul cumulat necesar sprinklerelor generalizate și hidranților, pe durata de funcționare reglementată, iar dubla sursă de pompare (electropompă + motopompă, cu pompă pilot pentru menținerea presiunii de rețea) asigură continuitatea alimentării chiar în condiții de indisponibilitate a alimentării electrice normale.
 
-## 8. Indicatori tehnico-economici
+### 9.6. Interfața cu avizul ISU
+
+Circulația perimetrală pentru autospecialele de intervenție ISU are lățimea minimă de **3,8 m**, cu acces la hidranții exteriori și la cel puțin o fațadă a fiecărui volum funcțional major (galerie, cinema). Se prevede **ascensor de pompieri** cu sas presurizat și un **dispecerat SSI** (sistem de semnalizare a incendiilor) central, monitorizat permanent, care centralizează informația de la toate sistemele de detecție, alarmare, sprinklere și desfumare ale ansamblului. Obținerea avizului/autorizației de securitate la incendiu de la Inspectoratul pentru Situații de Urgență (ISU) este o condiție obligatorie atât pentru Autorizația de Construire (aviz la faza de proiectare), cât și pentru punerea în funcțiune a clădirii (autorizație de securitate la incendiu, ulterioară recepției) — condiție cu atât mai relevantă pentru un mall regional cu cât profilul de risc (cap. 9.1) situează proiectul, din perspectiva ISU, în categoria obiectivelor cu grad ridicat de complexitate a scenariului de securitate la incendiu.
+
+---
+
+## 10. INDICATORI TEHNICO-ECONOMICI
 
 | Indicator | Valoare |
 |---|---|
@@ -89,27 +475,97 @@ Galerie centrală (mall) + **atrium multi-nivel cu luminator zenital** distribui
 | Regim / H atic | S+P+2E / ~16 m |
 | Parcare / PMR | 1.750 / 70 |
 | Capacitate persoane (vârf) | ~8.000-9.000 |
-| Locuri muncă | 1.200-1.500 |
+| Locuri de muncă | 1.200-1.500 |
 | Cinema / food-court | 6-8 săli / ~500 locuri |
 
-Capacitate din indici aglomerație: retail 0,15-0,25 pers/mp, food-court 0,8-1,0, cinema pe scaune → fundamentează evacuare + sanitare (OMS 119) + ventilare.
+Indicatorii tehnico-economici sintetizează caracteristicile dimensionale și de performanță ale investiției și fundamentează atât încadrarea urbanistică (POT, CUT, H — cap. 5), cât și dimensionarea infrastructurii tehnice (populație, parcaje, capacități de instalații) și a scenariului de securitate la incendiu (cap. 9). Capacitatea de persoane la vârf (~8.000-9.000) se determină prin **indici de aglomerație** diferențiați pe funcțiune, conform practicii de proiectare a clădirilor cu aglomerări de persoane: **0,15-0,25 persoane/mp** pentru zonele de retail (galerie și unități comerciale, densitate moderată specifică circulației de shopping), **0,8-1,0 persoane/mp** pentru food-court (densitate ridicată, specifică zonelor de servire a mesei cu scaune fixe), și, pentru cinema, capacitatea reală **pe numărul de scaune** ale celor 6-8 săli. Acești indici de aglomerație fundamentează direct calculul evacuării (cap. 9.3), dimensionarea grupurilor sanitare (conform OMS 119/2014, raportat la numărul de persoane preconizat) și dimensionarea debitelor de ventilare/climatizare (memoriul HVAC), toate trei corelate obligatoriu cu aceeași cifră de capacitate, pentru coerența întregii documentații.
 
-## 9. Sistematizarea incintei
+---
 
-Accese multiple independente: auto principal 1+2 (clienți→parcaje) + auto 3 (marfă→rampă serviciu) + urgență ISU + drop-off + pietonal (transport public). Parcaj mixt 1.750 (620 subteran + 850 suprateran + 280 sol), giratoriu intern, benzi ≥6,0 dublu sens, flux marfă separat, căi ISU perimetrale. **Stație transport public** (PMUD) + biciclete + **≥175 stații EV**. Spații verzi 21,5% + **bazin retenție** + separatoare hidrocarburi.
+## 11. SISTEMATIZAREA INCINTEI, AMENAJĂRI ȘI SPAȚII VERZI
 
-## 10. Utilități (consum MW)
+### 11.1. Accese și circulații
 
-**Electric ~6,0 MW instalat** (iluminat 0,8 + HVAC 2,5 + chiriași+frig 2,0 + forță 0,7; absorbit ~4,2 MW la 0,7) → **2-3 posturi trafo** (3×1.600 kVA, 20 kV) + **grup electrogen siguranță** (desfumare, sprinkler, iluminat, lift pompieri, EVAC) + UPS critice. **Apă:** branșament (OMS 119/I9) + **rezervă incendiu** (rezervor+pompe); canal menajer/pluvial separat + separatoare grăsimi (food-court) + hidrocarburi (parcaje); GS pe capacitate + PMR + baby-care. **HVAC:** CTA cu recuperare zonate + CT/pompe căldură + **chillere** (climatizare + frig hipermarket) + ventilare parcaj CO/desfumare + **BMS**. **nZEB clasa A:** anvelopă C107, recuperare, LED + senzori, **fotovoltaic acoperiș/parcaj**, CPE.
+Accesele sunt organizate pe principiul separării complete a fluxurilor, conform concluziilor studiului de trafic (cap. 5.5) și fluxurilor funcționale descrise la cap. 7.6: **acces auto principal 1 și 2** (clienți, dinspre artera de mare capacitate, spre parcaje), **acces auto 3** (marfă, spre rampa de serviciu, separat fizic de fluxul de clienți), **acces de urgență** (dedicat autospecialelor ISU, menținut liber permanent), **drop-off** (pentru debarcarea rapidă a clienților la intrarea principală) și **acces pietonal** (dinspre eventuala stație de transport public, cap. 11.3). Parcajul mixt de 1.750 de locuri (620 subteran + 850 suprateran + 280 la sol) este organizat printr-un **giratoriu intern**, cu benzi de circulație de minimum 6,0 m în dublu sens, iar căile de intervenție ISU se mențin perimetrale și libere, independent de organizarea parcajului.
 
-**Anvelopă:** fațade ventilate + curtain wall intrări/atrium; vitraj Low-E g≤0,4; U perete ≤0,35, acoperiș ≤0,20, vitraj U_w ≤1,3.
+### 11.2. Transport public, biciclete și infrastructură pentru vehicule electrice
 
-## 11. Avize și verificări
+Amplasarea unei **stații de transport public** adiacente accesului principal (rezervare de teren obligatorie prin PUZ, cap. 5.6, corelată cu Planul de Mobilitate Urbană Durabilă — PMUD, dacă localitatea îl are aprobat) reduce dependența exclusivă de accesul auto și extinde catchment-ul efectiv (cap. 4) către populația care nu deține autovehicul propriu — segment relevant, în special, pentru zona primară de captare (0-10 minute, cap. 4.1), unde deplasarea cu transportul public sau cu bicicleta poate fi competitivă cu deplasarea auto. Se prevăd, complementar, **suporturi pentru biciclete** la intrarea principală și, în cadrul parcajului, **minimum 175 de locuri (10%) pregătite pentru încărcare vehicule electrice** (cap. 5.4), cu infrastructura electrică de bază instalată de la faza inițială.
 
-**Verificare (Legea 10/1995):** A1/A2 (structură/seismic), **Ci (incendiu — scenariu)**, D (igienă/mediu), B1 (siguranță/accesibilitate), Ce (acustică cinema/HVAC), Cf (energie), Is/It/Ie/Ig.
+### 11.3. Bilanțul teritorial al incintei
 
-**Avize:** CU, **PUZ aprobat (HCL)**, **ISU**, **studiu trafic + aviz circulație (Poliția Rutieră)**, ANAR (gospodărirea apelor), APM/ANPM (mediu, eventual EIA), DSP, utilități (energie/gaz/apă-canal/telecom), salubritate, DSVSA (food), studiu geotehnic (Af), AACR (dacă e cazul). Studii: geotehnic (NP 074), topografic (Stereo70), trafic, însorire, audit energetic.
+Bilanțul teritorial al incintei (suprafață construită la sol, carosabil și parcare, alei pietonale, spații verzi) rezultă din indicatorii de la cap. 5.2 (POT 47,5%, spații verzi 21,5%) și din dimensionarea parcajului la sol/suprateran de la cap. 5.4; diferența până la 100% din suprafața terenului (60.000 mp) este ocupată de rețeaua carosabilă internă, de platformele pietonale de acces și de zona tehnică a rampei de marfă. Distribuția exactă, cu suprafețele finale ale fiecărei categorii, se prezintă la planul de situație, piesă desenată de referință pentru sistematizarea incintei.
 
-## 12. Concluzii
+### 11.4. Amenajări peisagere
 
-Mall regional S+P+2E, GLA ~22.000, hipermarket+cinema+food-court + 130-160 unități, parcaj 1.750. Categoria B, clasa seismică II (posibil I), grad I RF — mii persoane. POT 47,5%/CUT 1,60 (PUZ); parcare+accese pe studiu trafic. Structură dual b.a. + zone mixte (deschideri mari), γI 1,2. **Securitate incendiu integral** (REI 180, sprinklere generalizate, desfumare atrium rezervor de fum, EVAC, evacuare ≥8 scări ~35 m, ascensor ISU). Fluxuri public/marfă/evacuare separate + culoar serviciu. Utilități ~6 MW (2-3 posturi trafo, grup, rezervă incendiu sute mc), nZEB clasa A. Respectă L50/1991 + L10/1995 (A-F) → apt AC + PUZ + ISU + trafic. Se completează cu memoriile de specialitate + piese desenate + studii fundamentare.
+Spațiile verzi (21,5% din suprafața terenului, peste minimul de 20% reglementat prin PUZ) sunt distribuite pe conturul parcelei, în insulele de sistematizare ale parcărilor la sol (unde plantațiile de arbori atenuează efectul de insulă de căldură urbană generat de suprafețele carosabile extinse, specific unui mall regional cu parcaj la sol de mari dimensiuni) și, dacă soluția arhitecturală o prevede, în zonele de acces pietonal amenajate cu mobilier urban și iluminat arhitectural. Un **bazin de retenție** atenuează vârful de debit al apelor pluviale colectate de pe acoperișul de mari dimensiuni (~28.500 mp la sol, plus suprafețele carosabile) înainte de descărcarea controlată în canalizarea pluvială, conform avizului de gospodărire a apelor (ANAR), iar **separatoarele de hidrocarburi** tratează apele pluviale colectate de pe suprafețele de parcare și circulație auto înainte de descărcare.
+
+---
+
+## 12. SISTEMATIZARE VERTICALĂ, TERASAMENTE ȘI DURABILITATE
+
+Sistematizarea verticală respectă cotele terenului sistematizat, cu pante de scurgere ≥ 1,5% spre gurile de scurgere, dimensionate pentru suprafața foarte extinsă a platformelor carosabile și pietonale ale ansamblului. Săpătura generală pentru subsol se execută cu sprijiniri acolo unde vecinătățile și adâncimea o impun, conform proiectului de organizare de execuție și studiului geotehnic (cap. 6.4). Volumul de terasamente, semnificativ dat fiind amprenta mare a construcției (28.500 mp), se optimizează pentru minimizarea transportului, cu reutilizarea pământului adecvat pe amplasament acolo unde este posibil, inclusiv pentru sistematizarea zonelor verzi și a taluzurilor perimetrale.
+
+Clădirea se proiectează pentru o durată de viață în exploatare de referință de minimum 50 de ani pentru elementele structurale (conform CR 0/2012/Eurocoduri), cu asigurarea durabilității prin alegerea claselor de expunere corecte ale betonului (conform mediului — SR EN 206), acoperiri minime ale armăturii corelate cu clasa de rezistență la foc adoptată (grad I, cap. 9), protecția anticorozivă a confecțiilor metalice din zonele mixte beton-oțel (cap. 7.9), hidroizolații și termoizolații durabile, și un program de urmărire a comportării în timp (document dedicat, conform P130/1999). Un centru comercial regional, prin intensitatea traficului pietonal (mii de persoane zilnic pe pardoseli, scări rulante, uși de acces) și prin uzura accelerată a finisajelor din zonele comune, impune totodată un plan de mentenanță și de reînnoire periodică a finisajelor de galerie, distinct de durabilitatea structurală propriu-zisă, dar cu impact direct asupra imaginii comerciale a mall-ului pe întreaga durată de exploatare.
+
+---
+
+## 13. UTILITĂȚI ȘI RACORDURI
+
+### 13.1. Electric
+
+Puterea electrică instalată de referință este de **~6,0 MW**, structurată pe consumatori principali: **iluminat 0,8 MW**, **HVAC (climatizare + ventilare) 2,5 MW**, **chiriași + frig comercial (în special hipermarket) 2,0 MW**, **forță (ascensoare, scări rulante, pompe) 0,7 MW**. Puterea absorbită efectivă, la un factor de simultaneitate de ~0,7, este de **~4,2 MW**, alimentată prin **2-3 posturi de transformare** (3×1.600 kVA, racord la 20 kV). Se prevede **grup electrogen de siguranță**, dimensionat pentru consumatorii vitali de securitate la incendiu (instalațiile de desfumare, sprinklerele/pompele de incendiu, iluminatul de siguranță, ascensorul de pompieri, sistemul de alarmare vocală EVAC), și **UPS** pentru consumatorii critici care nu admit nicio întrerupere (sisteme de securitate, servere, dispeceratul SSI).
+
+### 13.2. Apă, canalizare și gospodărirea apelor
+
+Alimentarea cu apă se realizează prin branșament dimensionat conform OMS 119/2014 și I9, completat de **rezerva de apă pentru incendiu** (rezervor dedicat + pompe, cap. 9.5). Canalizarea este de tip divizor: apele menajere se descarcă în colectorul stradal menajer, cu **separator de grăsimi** obligatoriu pentru food-court (SR EN 1825); apele pluviale se colectează separat, tratate prin **separatoare de hidrocarburi** pentru suprafețele de parcare/circulație auto, și atenuate printr-un **bazin de retenție** înainte de descărcare (cap. 11.4). Grupurile sanitare sunt dimensionate pe capacitatea de aglomerare (cap. 10), cu includerea obligatorie a grupurilor PMR și a spațiilor baby-care, conform OMS 119/2014.
+
+### 13.3. HVAC
+
+Sistemul de climatizare-ventilare este structurat pe **centrale de tratare a aerului (CTA) cu recuperare de căldură, zonate** pe fiecare mare consumator (galerie, hipermarket, cinema, food-court, fiecare cu profil termic și de ocupare diferit), completat de **centrală termică/pompe de căldură** pentru producerea agentului termic și de **chillere** dedicate atât climatizării spațiilor comerciale, cât și frigului comercial continuu al hipermarketului (consumator de bază, non-sezonier). Ventilarea și desfumarea parcajului (cap. 9.4) este integrată în strategia generală de securitate la incendiu, iar întregul sistem este monitorizat și optimizat printr-un **BMS** (Building Management System) centralizat, esențial pentru gestionarea eficientă a consumurilor pe cele 96.000 mp de GBA.
+
+### 13.4. Eficiență energetică (nZEB — Legea 372/2005 + Mc001)
+
+Strategia de eficiență energetică țintește **clasa energetică A (nZEB)**, susținută de: anvelopă performantă (cap. 7.12, cu U perete ≤ 0,35, acoperiș ≤ 0,20, vitraj U_w ≤ 1,3 W/m²K, conform C107), recuperare de căldură pe toate centralele de ventilare zonate, iluminat LED cu senzori de prezență/luminozitate în zonele cu trafic variabil (parcaj, culoare tehnice), și instalații **fotovoltaice** amplasate pe acoperișul de mari dimensiuni al galeriei și, complementar, pe acoperișul parcajului suprateran multietajat — suprafață disponibilă semnificativă (zeci de mii de mp), care face din valorificarea fotovoltaică o soluție deosebit de eficientă din punct de vedere al raportului cost-beneficiu pentru acest tip specific de clădire comercială de mari dimensiuni. Managementul consumurilor se realizează printr-un **CPE** (contract de performanță energetică) sau printr-o strategie internă echivalentă de monitorizare continuă, relevantă la o clădire cu consumuri de energie ridicate și continue (climatizare, frig comercial, iluminat comercial intensiv, program de funcționare extins de dimineața până seara târziu, șapte zile din șapte).
+
+---
+
+## 14. AVIZE ȘI VERIFICĂRI
+
+### 14.1. Verificarea tehnică a proiectului (Legea 10/1995)
+
+Documentația se verifică, conform Legii 10/1995, la cerințele fundamentale aplicabile: **A1/A2** (structură/seismic — cu atenție particulară la zonele de deschideri mari și la eventuala majorare locală a clasei de importanță seismică, cap. 7.10), **Ci** (securitate la incendiu — scenariul dedicat, cu aplicarea integrală a NP 068-2002 pentru zonele aglomerate), **D** (igienă/mediu), **B1** (siguranță în exploatare/accesibilitate), **Ce** (acustică — relevantă la interfața cinema/galerie și la echipamentele HVAC de mare capacitate), **Cf** (eficiență energetică), și **Is/It/Ie/Ig** (siguranță la instalații, după caz).
+
+### 14.2. Avizele și acordurile specifice unui mall regional
+
+Pe lângă avizele uzuale ale oricărei construcții civile, un centru comercial regional necesită un set de avize specifice, dintre care unele sunt determinante pentru forma finală a proiectului (nu doar formale):
+
+- **Certificatul de Urbanism**, emis pe baza **PUZ-ului aprobat prin HCL** (cap. 5.1) — documentul fundamental care stabilește indicatorii urbanistici, regimul tehnic și condițiile-cadru de acces/circulație.
+- **Avizul ISU** (securitate la incendiu), condiționat de scenariul de securitate la incendiu, cu aplicarea NP 068-2002 (cap. 9) — aviz obligatoriu, dat fiind profilul de risc de aglomerare al investiției.
+- **Studiul de trafic și avizul de circulație** (Poliția Rutieră/administratorul drumului) — determinant pentru geometria acceselor și a intersecțiilor adiacente (cap. 5.5); avizul se emite pe baza volumelor de trafic calculate și a soluțiilor de sistematizare rutieră propuse (benzi de accelerare/decelerare, giratoriu/semaforizare).
+- **ANAR** (aviz de gospodărire a apelor), pentru descărcarea controlată a apelor pluviale colectate de pe suprafața mare a acoperișului și a platformelor carosabile (cap. 11.4, 13.2).
+- **APM/ANPM** (aviz/acord de mediu), cu posibila procedură de **evaluare a impactului asupra mediului (EIA)**, conform Legii 292/2018, aplicabilă funcție de pragurile de suprafață și de amplasament ale investiției — procedură relevantă în special pentru investițiile de mari dimensiuni amplasate pe terenuri anterior agricole/naturale, unde autoritatea de mediu evaluează impactul asupra factorilor de mediu (sol, apă, biodiversitate, trafic, zgomot) generat de o construcție și de un flux de trafic de această amploare.
+- **DSP** (direcția de sănătate publică), relevant pentru componentele de alimentație publică (food-court, hipermarket) și pentru dimensionarea grupurilor sanitare (cap. 13.2).
+- **DSVSA** (sanitar-veterinar), pentru zonele alimentare ale hipermarketului și ale unităților food-court.
+- **Avizele utilităților** (energie, gaz, apă-canal, telecomunicații), pentru racordurile descrise la cap. 13.
+- **Avizul de salubritate**, pentru gestionarea deșeurilor generate de un flux comercial de această intensitate.
+
+### 14.3. Studiile de fundamentare
+
+Studiile care fundamentează proiectul, distincte de piesele scrise ale DTAC, dar obligatorii pentru completitudinea documentației, sunt: **studiul geotehnic** (NP 074/2014, cap. 6.4), **studiul topografic** (ridicare vizată OCPI, sistem de coordonate Stereo70), **studiul de trafic** (cap. 5.5, cel mai determinant dintre toate pentru configurația planului de situație), **studiul de însorire/umbrire** (relevant pentru eventualele vecinătăți cu funcțiuni protejate) și **auditul energetic/certificatul de performanță energetică**, pentru fundamentarea și, ulterior, confirmarea clasei energetice țintă (cap. 13.4). Fiecare dintre aceste studii este un document distinct, elaborat de specialiști atestați pe domeniul respectiv, ale cărui concluzii se integrează în soluția tehnică a prezentului memoriu fără a fi reluate în detaliu aici, pentru a evita duplicarea conținutului între documentele proiectului.
+
+---
+
+## 15. ORGANIZAREA DE EXECUȚIE ȘI EȘALONAREA INVESTIȚIEI
+
+Execuția unui centru comercial regional de această anvergură (Ad ~96.000 mp) se organizează, tipic, pe o durată de **24-30 de luni**, cu o succesiune care începe cu terasamentele și infrastructura (radier general, subsol tehnic/parcaj), continuă cu structura suprateran (inclusiv zonele mixte beton-oțel de mare deschidere, cap. 7.9) și cu anvelopa, și se finalizează cu amenajările interioare ale ancorelor și, succesiv, ale unităților de galerie — acestea din urmă adesea executate direct de chiriași (fit-out), pe baza unui caiet de sarcini emis de operatorul mall-ului, într-o etapă ulterioară recepției structurii de bază (shell&core), practică uzuală în dezvoltarea centrelor comerciale, care permite deschiderea eșalonată a galeriei odată cu semnarea contractelor de închiriere. Impactul lucrărilor asupra vecinătăților (zgomot, praf, trafic de vehicule grele pentru terasamente și structură) se tratează în proiectul de organizare de execuție, distinct de prezentul memoriu, cu măsuri de atenuare adecvate perioadei de șantier, inclusiv gestionarea traficului de șantier pe aceleași artere care, ulterior, vor prelua traficul comercial analizat la cap. 5.5.
+
+---
+
+## 16. CONCLUZII
+
+Prezentul memoriu tratează un centru comercial regional (mall) cu regim de înălțime S+P+2E, GLA ~22.000 mp, organizat pe o galerie comercială cu atrium central pe trei niveluri și luminator zenital, ancorat de hipermarket (~6.500 mp), cinema multiplex (6-8 săli, ~2.800 mp) și food-court (~500 locuri, ~1.400 mp), completat de 130-160 de unități comerciale (25-800 mp), cu GBA ~96.000 mp și eficiență GLA/GBA de ansamblu ~41% (~60% pe brutul strict comercial). Oportunitatea investiției este fundamentată metodologic printr-un studiu de catchment pe izocrone (zona primară 0-10 min/85.000 loc/35%, secundară 10-20 min/140.000 loc/18%, terțiară 20-40 min/95.000 loc/7%), care indică ~62.000 de clienți captați dintr-un bazin de ~320.000 de locuitori și un aport de GLA de ~98 mp/1.000 locuitori, sensibil sub pragul de saturație uzual al Uniunii Europene (~260 mp/1.000 locuitori) — justificând, comparativ cu grila tipologică a centrelor comerciale (strip mall → galerie → mall regional → super-regional → outlet), alegerea formatului „mall regional” pentru acest catchment, cu rolurile economice complementare ale celor trei ancore (trafic recurent, agrement, servire a mesei) și cu semnalarea onestă a dublului impact economic al investiției — locuri de muncă (1.200-1.500) și venituri fiscale locale, dar și un efect de canibalizare asupra comerțului stradal existent.
+
+Investiția, care necesită obligatoriu **PUZ aprobat prin HCL** (nu doar Certificat de Urbanism), se încadrează cu rezervă confortabilă în indicatorii reglementați: **POT 47,5%** (față de 55% maxim), **CUT 1,60** (față de 2,2 maxim, calculat excl. subsol), regim S+P+2E (~16 m) față de P+4E/25 m permis, retrageri 8-12 m (față de minimum 6,0 m), spații verzi 21,5% (față de minimum 20%). Parcarea, dimensionată printr-o metodologie de calcul pe componente (GLA/25 + cinema + food-court + angajați, necesar 1.550-1.700 locuri) și asigurată cu marjă de siguranță la **1.750 de locuri** (620 subteran + 850 suprateran + 280 la sol, 70 PMR, 175 pregătite EV), este tratată ca element determinant al succesului comercial, la fel de important ca și tenant-mix-ul — un deficit de parcare respingând activ clientela, spre deosebire de orice altă deficiență a proiectului. **Studiul de trafic aprobat** (vârf ~1.100-1.400 veh/h, minimum 3 accese auto, benzi de accelerare/decelerare, giratoriu/semaforizare) condiționează configurația finală a planului de situație.
+
+Structura, anticipată ca sistem **dual din beton armat monolit cu zone mixte beton-oțel** la deschiderile mari (tramă retail 8,0×8,0 m, deschideri hipermarket 12-16 m, șarpantă atrium metalică 20-30 m, γI,e 1,2), este detaliată integral în memoriul de rezistență. **Securitatea la incendiu**, dimensionată conform NP 068-2002 pentru profilul de risc dat de aglomerările mari de persoane, mixul funcțional (cinema/food-court) și atriumul ca gol vertical de trei niveluri, este tratată integral (compartimentare REI 180/pereți, REI 90-120/planșee, R120-180/structură, sprinklere generalizate, desfumare a atriumului ca rezervor de fum, evacuare pe ≥8 scări cu ~35 m lățime totală, ascensor de pompieri) în scenariul de securitate la incendiu dedicat. Fluxurile public/marfă/evacuare sunt separate complet, cu un culoar tehnic de serviciu dedicat aprovizionării celor 130-160 de unități. Utilitățile (~6 MW instalat, 2-3 posturi de transformare, grup electrogen, rezervă de apă pentru incendiu de sute de mc) susțin o clădire de clasă energetică A (nZEB). Documentația respectă Legea 50/1991 și Legea 10/1995 (cerințele A-F) și este condiționată de obținerea PUZ-ului, a avizului ISU și a avizului de circulație pe baza studiului de trafic, alături de avizele de mediu, sănătate publică și utilități. Se completează cu memoriile de specialitate, cu scenariul de securitate la incendiu, cu studiul de trafic și cu piesele desenate ale proiectului.
