@@ -177,11 +177,18 @@
       '<div class="ssiui-lbl" style="margin-top:18px">Import geometrie din DXF (opțional — export din CAD, format ASCII)</div>' +
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
       (STATE.planSituatieInfo
-        ? '<div style="display:flex;gap:6px;align-items:flex-start;font-size:10px;background:#0f1a2e;border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:5px 8px;margin-top:6px">' +
-          '<span>📐</span><span style="flex:1"><b style="color:#e6edf7">' + esc(STATE.planSituatieInfo.nume) + '</b> <span style="color:#64748b">(' + STATE.planSituatieInfo.marime + ')</span><br>' +
-          '<span style="color:#6ee7b7">' + esc(STATE.planSituatieInfo.stare) + '</span></span>' +
-          '<span style="cursor:pointer;color:#f87171" title="Uită acest fișier (nu retrage datele deja aplicate)" onclick="SSI_UI._uitaPlanSituatie()">✕</span>' +
-          '</div>'
+        ? (function () {
+          // FIX BUG REAL (Florin, 17 iul — a incarcat .dwg, motorul l-a respins CORECT cu mesaj clar,
+          // dar starea se afisa mereu in verde #6ee7b7 (culoare de succes), inclusiv pt un mesaj de
+          // eroare de forma "eroare: fisier .dwg detectat...") — utilizatorul a citit rapid o linie
+          // verde si a presupus ca planul a fost preluat, cand de fapt fusese respins integral.
+          var eEroare = /^eroare/i.test(STATE.planSituatieInfo.stare || '');
+          return '<div style="display:flex;gap:6px;align-items:flex-start;font-size:10px;background:' + (eEroare ? 'rgba(248,113,113,.08)' : '#0f1a2e') + ';border:1px solid ' + (eEroare ? '#f87171' : 'rgba(255,255,255,.08)') + ';border-radius:6px;padding:5px 8px;margin-top:6px">' +
+            '<span>' + (eEroare ? '⚠️' : '📐') + '</span><span style="flex:1"><b style="color:#e6edf7">' + esc(STATE.planSituatieInfo.nume) + '</b> <span style="color:#64748b">(' + STATE.planSituatieInfo.marime + ')</span><br>' +
+            '<span style="color:' + (eEroare ? '#fca5a5;font-weight:600' : '#6ee7b7') + '">' + esc(STATE.planSituatieInfo.stare) + '</span></span>' +
+            '<span style="cursor:pointer;color:#f87171" title="Uită acest fișier (nu retrage datele deja aplicate)" onclick="SSI_UI._uitaPlanSituatie()">✕</span>' +
+            '</div>';
+        })()
         : '<div style="font-size:10px;color:#64748b;margin-top:4px">Niciun fișier încărcat încă.</div>') +
       '<div class="ssiui-note">⚠ DXF-ul dă DOAR geometrie (poligoane, distanțe măsurate) — destinația și gradul de rezistență al fiecărei vecinătăți rămân input uman validat de proiectant. Layere așteptate: LIMITA_PROPRIETATE, VECINATATI, CONSTRUCTIE_PROPUSA (sau echivalente).</div>' +
       renderMapareManuala() +
