@@ -926,7 +926,13 @@
     var esteListaImplicita = !(D._materiale && D._materiale.length);
     var materialeInfo = G.SSI_M4B.valideazaMateriale(materialeSursa);
     var consacrate = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_acceptat'; });
-    var necesitaDoP = materialeInfo.materiale.filter(function (m) { return m.certitudine !== 'implicit_acceptat'; });
+    // FIX (Florin, 17 iul: "DoP doar la putine scenarii, nu la orice") — 3 categorii distincte, nu 2:
+    // consacrate (A1, fara actiune), orientativ (clasa tipica cunoscuta, NEBLOCANT — doar recomandare
+    // de confirmare daca materialul e pe o cale de evacuare), neexpus (strat ascuns in alcatuire, fara
+    // relevanta de reactie la foc), si DOAR restul (variabilitate mare + expunere reala) cer DoP.
+    var orientativNeblocant = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_orientativ'; });
+    var neexpuse = materialeInfo.materiale.filter(function (m) { return m.certitudine === 'implicit_neexpus'; });
+    var necesitaDoP = materialeInfo.materiale.filter(function (m) { return m.certitudine !== 'implicit_acceptat' && m.certitudine !== 'implicit_orientativ' && m.certitudine !== 'implicit_neexpus'; });
     // Reformulare (Florin, 12 iul): in faza de proiectare (DTAC/PTh) e normal ca produsul concret al
     // unui material variabil sa nu fie inca ales — proiectul PRESCRIE clasa minima ceruta, nu asteapta
     // DoP-ul unui produs care inca nu a fost achizitionat. Blocajul legal real (DoP obligatoriu la
@@ -936,6 +942,10 @@
       (esteListaImplicita ? '<p style="font-size:9pt;color:#666">Lista de mai jos e generată automat pentru sistemul constructiv „' + esc((D._sistem_constructiv || 'zidărie confinată').replace(/_/g, ' ')) + '" (implicit pentru clădiri joase, dacă nu s-a declarat altul) — corectează prin D._materiale dacă sistemul real diferă.</p>' : '') +
       '<p><b>Materiale consacrate</b> (proprietate intrinsecă a materialului, variabilitate neglijabilă între producători — clasificare implicită, fără altă confirmare necesară):</p>' +
       (consacrate.length ? tbl(consacrate.map(function (m) { return [m.element || m.nume, m.nume, m.clasa || '—', m.sursa || '—']; }), ['Element', 'Material', 'Clasă reacție la foc', 'Justificare']) : '<p>Niciun element consacrat identificat.</p>') +
+      (orientativNeblocant.length ? '<p><b>Materiale expuse cu clasă tipică cunoscută</b> (implicit orientativ, NU necesită DoP pentru documentul curent — se confirmă cu DoP-ul produsului ales doar dacă materialul e folosit pe o cale de evacuare/casă de scări cu cerință proprie, Tabelele 48/49 P118-1/2025):</p>' +
+        tbl(orientativNeblocant.map(function (m) { return [m.element || m.nume, m.nume, m.clasa || '—', m.sursa || '—']; }), ['Element', 'Material', 'Clasă tipică', 'Justificare']) : '') +
+      (neexpuse.length ? '<p><b>Straturi ascunse în alcătuire</b> (neexpuse pe o suprafață/cale de evacuare — fără relevanță normativă de reacție la foc, informativ):</p>' +
+        tbl(neexpuse.map(function (m) { return [m.element || m.nume, m.nume, m.sursa || '—']; }), ['Element', 'Material', 'Justificare']) : '') +
       '<p><b>Materiale cu variabilitate reală — clasă prescrisă de proiect</b> (produsul concret se alege la faza de aprovizionare/execuție, cu DoP atașat la recepție):</p>' +
       (necesitaDoP.length ? tbl(necesitaDoP.map(function (m) {
         var claseOrientativa = m.clasa ? m.clasa + ' (orientativ, tipic pentru produsul generic)' : 'variază pe producător — se stabilește prin DoP-ul produsului ales';
@@ -2553,8 +2563,9 @@
         var tipuriAcoperisDecl = D._relevee ? Object.keys(D._relevee).map(function (k) { return D._relevee[k].tip_acoperis; }).filter(Boolean) : [];
         var materialeSursaFT = (D._materiale && D._materiale.length) ? D._materiale : G.SSI_M4B.genereazaListaImplicita(D._sistem_constructiv || 'zidarie_confinata', tipuriAcoperisDecl);
         var infoFT = G.SSI_M4B.valideazaMateriale(materialeSursaFT);
+        var CERTITUDINE_NEBLOCANTA_FT = { implicit_acceptat: 'consacrat — clasificare implicită', implicit_orientativ: 'clasă tipică cunoscută — neblocant', implicit_neexpus: 'strat ascuns — fără relevanță de reacție la foc' };
         htmlMateriale = tbl(infoFT.materiale.map(function (m) {
-          return [m.element || m.nume, m.nume, m.clasa || '—', m.certitudine === 'implicit_acceptat' ? 'consacrat — clasificare implicită' : (m.DoP_atasat ? 'DoP atașat' : 'DoP/fișă tehnică de atașat la aprovizionare/execuție')];
+          return [m.element || m.nume, m.nume, m.clasa || '—', CERTITUDINE_NEBLOCANTA_FT[m.certitudine] || (m.DoP_atasat ? 'DoP atașat' : 'DoP/fișă tehnică de atașat la aprovizionare/execuție')];
         }), ['Element', 'Material', 'Clasă reacție la foc', 'Confirmare produs']);
       } else {
         htmlMateriale = '<p>Lista de materiale se completează din proiectul de arhitectură/structură — fiecare produs cu variabilitate reală (tâmplărie, termoizolație, hidroizolație, învelitoare) se însoțește la aprovizionare/execuție de declarația de performanță (DoP) sau fișa tehnică a producătorului; materialele consacrate (beton, oțel, zidărie, sticlă) nu necesită confirmare suplimentară.</p>';
