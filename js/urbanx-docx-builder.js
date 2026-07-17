@@ -436,17 +436,33 @@
     var cladiriPropuse = D._cladiri_propuse || [];
     if (cladiriPropuse.length <= 1 || !G.SSI_ENGINE || !G.SSI_ENGINE.m_urbanismAnsamblu) return null;
     var ua = G.SSI_ENGINE.m_urbanismAnsamblu(cladiriPropuse, D._tipuri_cladiri || {}, D.Steren);
+    // FIX (Florin, 17 iul: "asigura-te ca se calculeaza... inaltimi maxime, inaltimi minime, tipuri
+    // etc."): H cornișă/coamă per TIP vin din panoul de relevee (D._relevee[cheie]) — aceeași cheie
+    // de cluster ("Sc_"+sc) folosită și de m_urbanismAnsamblu/STATE.tipuriCladiri (25-ssi-ui.js
+    // _cheieCluster) — nu eram folosite deloc aici, deși erau deja completate de proiectant.
+    var relevee = D._relevee || {};
+    var inaltimi = ua.tipuri.map(function (t) { return (relevee[t.cheie] || {}).inaltime_cornisa; }).filter(function (h) { return h != null; });
+    var Hmin = inaltimi.length ? Math.min.apply(null, inaltimi) : null;
+    var Hmax = inaltimi.length ? Math.max.apply(null, inaltimi) : null;
     var rows = ua.tipuri.map(function (t) {
-      return [esc(t.denumire), t.sc_mp + ' mp', (t.sd_mp != null ? t.sd_mp + ' mp' : '—'), '' + t.n, Math.round(t.n * t.sc_mp) + ' mp', (t.sd_mp != null ? Math.round(t.n * t.sd_mp) + ' mp' : '—')];
+      var r = relevee[t.cheie] || {};
+      var suUnitar = Math.round(t.sc_mp * 0.82 * 10) / 10; // Su estimat conservator (coeficient uzual Su/Sc ~0,82, vezi _ariiStandardTbl) — se confirma cu releveul real per tip
+      return [esc(t.denumire), t.sc_mp + ' mp', suUnitar + ' mp (est.)', (t.sd_mp != null ? t.sd_mp + ' mp' : '—'), '' + t.n,
+        (r.inaltime_cornisa != null ? r.inaltime_cornisa + ' m' : '—') + (r.inaltime_coama != null ? ' / ' + r.inaltime_coama + ' m coamă' : ''),
+        Math.round(t.n * t.sc_mp) + ' mp', (t.sd_mp != null ? Math.round(t.n * t.sd_mp) + ' mp' : '—')];
     });
-    rows.push(['TOTAL ansamblu', '—', '—', '' + ua.nrCladiriTotal, Math.round(ua.totalSc_mp) + ' mp', (ua.totalSd_mp ? Math.round(ua.totalSd_mp) + ' mp' : '—')]);
+    rows.push(['TOTAL ansamblu', '—', Math.round(ua.tipuri.reduce(function (s, t) { return s + t.n * t.sc_mp * 0.82; }, 0)) + ' mp (est.)', '—', '' + ua.nrCladiriTotal,
+      (Hmin != null ? (Hmin === Hmax ? Hmin + ' m' : Hmin + '–' + Hmax + ' m') : '—'),
+      Math.round(ua.totalSc_mp) + ' mp', (ua.totalSd_mp ? Math.round(ua.totalSd_mp) + ' mp' : '—')]);
     return {
       h: 'Notă — proiectul este un ansamblu de unități repetitive, nu o construcție unică', html:
-        '<p>Din planul de situație/geometria încărcată în proiect rezultă că acest obiectiv NU este o construcție izolată, ci un <b>ansamblu de ' + ua.nrCladiriTotal + ' unități</b>' + (ua.tipuri.length > 1 ? (', grupate în ' + ua.tipuri.length + ' tipuri constructive distincte') : ', de același tip constructiv') + ', detectate automat din amprentele planului de situație (DXF). <b>Conținutul memoriului de mai jos descrie soluția-tip aplicată identic fiecărei unități a ansamblului</b> (tipologie repetitivă — aceeași concepție de arhitectură/rezistență/instalații se regăsește la fiecare unitate în parte); indicatorii geometrici citați în corpul memoriului (suprafață, regim de înălțime) sunt cei ai <b>unei singure unități-tip</b>, nu ai întregului ansamblu. Indicatorii <b>de ansamblu</b> — cei relevanți pentru autorizare pe întregul obiectiv — sunt sintetizați mai jos:</p>' +
-        tbl(rows, ['Tip unitate', 'Sc unitar', 'Sd unitar', 'Nr. unități', 'Sc total tip', 'Sd total tip']) +
+        '<p>Din planul de situație/geometria încărcată în proiect rezultă că acest obiectiv NU este o construcție izolată, ci un <b>ansamblu de ' + ua.nrCladiriTotal + ' unități</b>' + (ua.tipuri.length > 1 ? (', grupate în ' + ua.tipuri.length + ' tipuri constructive distincte') : ', de același tip constructiv') + ', detectate automat din amprentele planului de situație (DXF). <b>Conținutul memoriului de mai jos descrie soluția-tip aplicată identic fiecărei unități a ansamblului</b> (tipologie repetitivă — aceeași concepție de arhitectură/rezistență/instalații se regăsește la fiecare unitate în parte); indicatorii geometrici citați în corpul memoriului (suprafață, regim de înălțime) sunt cei ai <b>unei singure unități-tip</b>, nu ai întregului ansamblu. Indicatorii <b>de ansamblu</b> — cei relevanți pentru autorizare pe întregul obiectiv — sunt sintetizați mai jos (H cornișă/coamă preluate din releveul declarat per tip, dacă a fost completat):</p>' +
+        tbl(rows, ['Tip unitate', 'Sc unitar', 'Su unitar', 'Sd unitar', 'Nr. unități', 'H cornișă/coamă', 'Sc total tip', 'Sd total tip']) +
         (ua.arieTeren_mp
           ? '<p>Raportat la suprafața totală de teren a ansamblului (' + Math.round(ua.arieTeren_mp).toLocaleString('ro-RO') + ' mp): <b>POT ansamblu ≈ ' + (ua.pot_ansamblu_pct != null ? ua.pot_ansamblu_pct : '—') + '%</b>, <b>CUT ansamblu ≈ ' + (ua.cut_ansamblu != null ? ua.cut_ansamblu : '—') + '</b> — aceștia, nu indicatorii unei singure unități, sunt cei verificați față de PUG/PUZ/RLU pentru întregul ansamblu.</p>'
           : '<p>Suprafața totală de teren a ansamblului nu a fost încă declarată — completeaz-o (D.Steren) pentru calculul automat al POT/CUT de ansamblu.</p>') +
+        (inaltimi.length < ua.tipuri.length ? '<p style="font-size:9pt;color:#666">Înălțimile (H cornișă/coamă) lipsesc încă pentru ' + (ua.tipuri.length - inaltimi.length) + ' din cele ' + ua.tipuri.length + ' tipuri — completează-le în panoul SSI, secțiunea „Relevee per tip de clădire", pentru sinteza completă H min/max de ansamblu.</p>' : '') +
+        '<p style="font-size:9pt;color:#666">Suprafața utilă (Su) e estimată conservator (Su≈0,82×Sc, coeficient uzual) — se confirmă cu releveul real per tip. Aliniamentele (retragerile față de limitele de proprietate) sunt verificate individual per unitate în planul de situație — nu se pot sintetiza într-un singur număr de ansamblu fără poziția fiecărei amprente față de limită (disponibilă vizual în planul DXF, nu ca atribut per-clădire în geometria extrasă).</p>' +
         '<p style="font-size:9pt;color:#666">Sursă: ' + ua.nrCladiriTotal + ' amprente identificate automat din planul de situație (DXF) încărcat în panoul SSI, aceeași sursă de date ca la verificarea distanțelor între clădirile proprii din Scenariul de securitate la incendiu — nu o listă introdusă separat.</p>'
     };
   }
