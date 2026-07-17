@@ -20,6 +20,9 @@
     },
     "evacuare_update_17iul_runda2": {
       "nota": "A doua runda de extractie (17 iul, acelasi PDF oficial): T72 (cultura), T81 (cult), T84 (sport), T88 (parcaje), T93 (cladiri inalte), T109/T110 (sali aglomerate S1/S2 - Uf + lungimi), T113 (subterane independente, + Uf=60), T114 (arii/niveluri productie-depozitare), T115/T116 (Uf + lungimi productie-depozitare pe risc). T97 (cladiri foarte inalte) cautat dar valorile tabelului nu au fost gasite in text-layer (posibil imagine/tabel neconvertibil text) - ramane necesita_extractie. Total acum: 19 tabele reale extrase din cele ~33 identificate initial in index (tabele_evacuare_pe_destinatie)."
+    },
+    "hidranti_update_17iul": {
+      "nota": "Extractie live din P118/2-2013 (Instalatii de stingere), PDF oficial cu text-layer nativ (304 pagini): Art 4.1 (16 cazuri obligativitate hidranti interiori), Art 6.1 (19 cazuri obligativitate hidranti exteriori), Anexa 3 (jeturi/debit hidranti interiori pe destinatie), Anexa 6 (debit incendiu exterior pe localitate), Anexa 7 (debit hidranti exteriori cladiri civile pe grad/volum), Art 6.8-6.10/6.25/6.30 (distante/presiune). Inlocuieste euristicile anterioare (vol>5000mc/Sd>2000/lista scurta de functiuni) cu criteriile REALE pe functiune+prag din normativ."
     }
   },
   "P118_1_2025_T2": {
@@ -1966,6 +1969,472 @@
         }
       ],
       "nota": "(a) Nu se normeaza daca la fiecare nivel sunt simultan max. 10 utilizatori, indiferent de risc/grad. (b)-(d): circulatiile prin spatii cu risc egal/mai mic pot fi cai de evacuare; anexele tehnico-sociale se pot evacua prin spatiile de productie/depozitare pe care le deservesc."
+    }
+  },
+  "P118_2_2013_Art_4_1_hidranti_int_oblig": {
+    "id": "P118_2_2013_Art_4_1_hidranti_int_oblig",
+    "titlu": "Echiparea tehnica a cladirilor cu hidranti de incendiu interiori - cazuri obligatorii",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "15-16",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "cazuri": [
+        {
+          "lit": "a",
+          "text": "Cladiri inchise categorii de importanta exceptionala/deosebita (A si B), indiferent de arie/niveluri"
+        },
+        {
+          "lit": "b",
+          "text": "Cladiri inalte si foarte inalte, precum si cladiri cu sali aglomerate, indiferent de destinatie/arie/niveluri"
+        },
+        {
+          "lit": "c",
+          "text": "Cladiri de invatamant cu peste 200 utilizatori SAU Ac>600mp si peste 3 niveluri supraterane"
+        },
+        {
+          "lit": "d",
+          "text": "Cazare elevi/studenti/sportivi, turism cu peste 100 paturi SAU Ac>600mp si peste 3 niveluri"
+        },
+        {
+          "lit": "e",
+          "text": "Cladiri montane cu capacitati peste 100 paturi"
+        },
+        {
+          "lit": "f",
+          "text": "Sanatate/ingrijire copii prescolari/varstnici/dizabilitati cu peste 100 persoane SAU Ac>600mp si peste 3 niveluri"
+        },
+        {
+          "lit": "g",
+          "text": "Comert cu peste 2 niveluri SAU Ac>600mp"
+        },
+        {
+          "lit": "h",
+          "text": "Cultura cu peste 200 persoane SAU peste 3 niveluri si Ac>600mp"
+        },
+        {
+          "lit": "i",
+          "text": "Cult cu peste 3 niveluri si Ac>600mp"
+        },
+        {
+          "lit": "j",
+          "text": "Administrative cu Ac>600mp SAU peste 4 niveluri supraterane"
+        },
+        {
+          "lit": "k",
+          "text": "Sport inchis cu capacitate simultana peste 300 utilizatori"
+        },
+        {
+          "lit": "l",
+          "text": "Productie/depozitare cu materiale combustibile, Ad>600mp"
+        },
+        {
+          "lit": "m",
+          "text": "Depozite cu stive inalte (peste 6m), indiferent de arie"
+        },
+        {
+          "lit": "n",
+          "text": "Spatii subterane publice/productie-depozitare subterane, Ad>600mp"
+        },
+        {
+          "lit": "o",
+          "text": "Parcaje subterane, conform reglementarii specifice"
+        },
+        {
+          "lit": "p",
+          "text": "Parcaje supraterane peste 2 niveluri SAU Ad>600mp"
+        }
+      ],
+      "nota_4_2": "Enumerarea nu e limitativa - investitorii pot cere echipare si pentru alte tipuri.",
+      "nota_4_4": "Nu se prevad hidranti interiori cand stingerea se face cu alte substante (gaze inerte/spuma/abur/pulberi) sau la constructii parter productie/depozitare cu stingere asigurata din hidranti exteriori (furtun max 40m)."
+    }
+  },
+  "P118_2_2013_Art_6_1_hidranti_ext_oblig": {
+    "id": "P118_2_2013_Art_6_1_hidranti_ext_oblig",
+    "titlu": "Echiparea tehnica cu hidranti de incendiu exteriori - cazuri obligatorii",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "24-25",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "cazuri": [
+        {
+          "lit": "a",
+          "text": "Cladiri inchise categorii de importanta exceptionala/deosebita (A si B)"
+        },
+        {
+          "lit": "b",
+          "text": "Cladiri inalte, foarte inalte sau cu sali aglomerate"
+        },
+        {
+          "lit": "c",
+          "text": "Cladiri de locuit colective cu peste 5 niveluri supraterane"
+        },
+        {
+          "lit": "d",
+          "text": "Comert cu peste 2 niveluri SAU Ac>600mp"
+        },
+        {
+          "lit": "e",
+          "text": "Administrative cu Ac>600mp SAU peste 4 niveluri supraterane"
+        },
+        {
+          "lit": "f",
+          "text": "Sanatate/ingrijire copii-varstnici-dizabilitati cu peste 2 niveluri supraterane"
+        },
+        {
+          "lit": "g",
+          "text": "Cultura cu peste 100 persoane SAU Ac>600mp SAU peste 2 niveluri"
+        },
+        {
+          "lit": "h",
+          "text": "Invatamant cu peste 200 persoane SAU Ac>600mp SAU peste 2 niveluri"
+        },
+        {
+          "lit": "i",
+          "text": "Sport inchis cu capacitate peste 300 persoane"
+        },
+        {
+          "lit": "j",
+          "text": "Cult cu peste 3 niveluri si Ac>600mp SAU peste 200 persoane"
+        },
+        {
+          "lit": "k",
+          "text": "Turism cu peste 50 paturi SAU Ac>600mp si peste 3 niveluri"
+        },
+        {
+          "lit": "l",
+          "text": "Cladiri montane/Delta Dunarii cu peste 150 paturi si peste 4 niveluri"
+        },
+        {
+          "lit": "m",
+          "text": "Cazare elevi/studenti/sportivi cu peste 100 paturi SAU Ac>600mp si peste 3 niveluri"
+        },
+        {
+          "lit": "n",
+          "text": "Productie/depozitare cu risc mare/foarte mare, Ad>600mp SI volum>3000mc"
+        },
+        {
+          "lit": "o",
+          "text": "Depozite cu stive inalte (peste 6m)"
+        },
+        {
+          "lit": "p",
+          "text": "Depozite deschise materiale combustibile, Ac>800mp"
+        },
+        {
+          "lit": "q",
+          "text": "Parcaje subterane cu peste 10 autoturisme"
+        },
+        {
+          "lit": "r",
+          "text": "Parcaje supraterane deschise peste 2 niveluri si Ac>600mp"
+        },
+        {
+          "lit": "s",
+          "text": "Cladiri civile subterane Ac>600mp si 2+ niveluri subterane"
+        }
+      ],
+      "nota_6_1_2": "Cand reteaua publica nu asigura debit/presiune (aviz scris al furnizorului), se prevede rezerva proprie de apa (art. 13.31).",
+      "nota_6_1_4_izolate": "Hidrantii exteriori NU sunt obligatorii pt constructii izolate (peste 500m de zone construite) fara alimentare cu apa, sau constructii izolate productie/depozitare cu Ac<2000mp si maxim 2 niveluri - se asigura alimentare pompe mobile din surse naturale/rezervoare."
+    }
+  },
+  "P118_2_2013_Anexa3_jeturi_hidranti_int": {
+    "id": "P118_2_2013_Anexa3_jeturi_hidranti_int",
+    "titlu": "Numarul jeturilor in functiune simultana pentru instalatii cu hidranti de incendiu interiori",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "247",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "randuri": [
+        {
+          "nr": 1,
+          "destinatie": "Cladiri administrative, turism, cult, invatamant, financiar-bancare, sport; gari/autogari/aerogari; spatii publice metrou; sali aglomerate (exceptie sala); constructii civile Ac>600mp si peste 3 niveluri supraterane (exceptie locuinte)",
+          "sub": [
+            {
+              "caz": "volum <25.000 mc",
+              "jeturi": 1,
+              "debit_l_s": 2.1
+            },
+            {
+              "caz": "volum >=25.000 mc",
+              "jeturi": 2,
+              "debit_l_s": 4.2
+            }
+          ]
+        },
+        {
+          "nr": 2,
+          "destinatie": "Comert/cultura/sanatate/invatamant prescolar; productie si/sau depozitare; functiuni mixte; garaje/parcaje subterane sau supraterane inchise; depozite cu stive inalte >6m",
+          "sub": [
+            {
+              "caz": "volum <5.000 mc",
+              "jeturi": 1,
+              "debit_l_s": 2.1
+            },
+            {
+              "caz": "volum >=5.000 mc",
+              "jeturi": 2,
+              "debit_l_s": 4.2
+            }
+          ]
+        },
+        {
+          "nr": 3,
+          "destinatie": "Sali aglomerate si sali de competitii sportive cu peste 600 locuri",
+          "sub": [
+            {
+              "caz": "grad stabilitate I-II",
+              "jeturi": 2,
+              "debit_l_s": 4.2
+            },
+            {
+              "caz": "grad stabilitate III-IV",
+              "jeturi": 3,
+              "debit_l_s": 6.3
+            }
+          ]
+        },
+        {
+          "nr": 4,
+          "destinatie": "Cladiri inalte",
+          "sub": [
+            {
+              "caz": "-",
+              "jeturi": 2,
+              "debit_l_s": 4.2
+            }
+          ]
+        },
+        {
+          "nr": 5,
+          "destinatie": "Teatre, cluburi, case de cultura cu scena amenajata",
+          "sub": [
+            {
+              "caz": "sub 1000 locuri",
+              "jeturi": 3,
+              "debit_l_s": 6.3
+            },
+            {
+              "caz": "1000+ locuri",
+              "jeturi": 4,
+              "debit_l_s": 8.4
+            }
+          ]
+        },
+        {
+          "nr": 6,
+          "destinatie": "Cladiri foarte inalte",
+          "sub": [
+            {
+              "caz": "volum pana la 50.000mc",
+              "jeturi": 3,
+              "debit_l_s": 6.3
+            },
+            {
+              "caz": "volum peste 50.000mc",
+              "jeturi": 4,
+              "debit_l_s": 8.4
+            }
+          ]
+        }
+      ],
+      "nota1": "Bataia eficace a jetului la presiune 2 bar: minim 10m (jet compact), 6m (jet pulverizat perdea), 3m (jet pulverizat conic).",
+      "nota2": "Debitele din coloana 4 reprezinta valoarea cumulata a jeturilor in functiune simultana."
+    }
+  },
+  "P118_2_2013_Anexa6_debit_incendiu_exterior_localitate": {
+    "id": "P118_2_2013_Anexa6_debit_incendiu_exterior_localitate",
+    "titlu": "Debitul pentru un incendiu exterior qie si numarul de incendii simultane pentru centre populate",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "251",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "randuri": [
+        {
+          "locuitori": "pana la 5.000",
+          "nr_incendii_simultane": 1,
+          "qie_1_4niv": 5,
+          "qie_peste4niv": 10
+        },
+        {
+          "locuitori": "5.001-10.000",
+          "nr_incendii_simultane": 1,
+          "qie_1_4niv": 10,
+          "qie_peste4niv": 15
+        },
+        {
+          "locuitori": "10.001-25.000",
+          "nr_incendii_simultane": 2,
+          "qie_1_4niv": 10,
+          "qie_peste4niv": 15
+        },
+        {
+          "locuitori": "25.001-50.000",
+          "nr_incendii_simultane": 2,
+          "qie_1_4niv": 20,
+          "qie_peste4niv": 25
+        },
+        {
+          "locuitori": "50.001-100.000",
+          "nr_incendii_simultane": 2,
+          "qie_1_4niv": 25,
+          "qie_peste4niv": 75
+        },
+        {
+          "locuitori": "100.001-200.000",
+          "nr_incendii_simultane": 2,
+          "qie_1_4niv": 30,
+          "qie_peste4niv": 40
+        },
+        {
+          "locuitori": "200.001-300.000",
+          "nr_incendii_simultane": 3,
+          "qie_1_4niv": 40,
+          "qie_peste4niv": 55
+        },
+        {
+          "locuitori": "300.001-1.000.000",
+          "nr_incendii_simultane": 3,
+          "qie_1_4niv": null,
+          "qie_peste4niv": "70-100 (vezi tabel complet pe trepte)"
+        }
+      ],
+      "unitate": "l/s",
+      "nota": "Peste 1.000.000 locuitori: studii speciale. Se aplica si cartierelor izolate separate >300m de centrul populat."
+    }
+  },
+  "P118_2_2013_Anexa7_debit_hidranti_ext_cladiri_civile": {
+    "id": "P118_2_2013_Anexa7_debit_hidranti_ext_cladiri_civile",
+    "titlu": "Debitul de apa pentru stingerea din exterior a incendiilor qie la cladiri civile (exceptie locuinte)",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "252",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "randuri": [
+        {
+          "grad": "I-II",
+          "vol_pana_2000": 5,
+          "vol_2001_3000": 5,
+          "vol_3001_5000": 5,
+          "vol_5001_10000": "10 (5)",
+          "vol_10001_15000": "10 (5)",
+          "vol_15001_30000": "15 (10)",
+          "vol_30001_50000": "20 (15)",
+          "vol_peste_50000": "25 (20)"
+        },
+        {
+          "grad": "III",
+          "vol_pana_2000": 5,
+          "vol_2001_3000": 5,
+          "vol_3001_5000": 10,
+          "vol_5001_10000": 10,
+          "vol_10001_15000": "15 (10)",
+          "vol_15001_30000": "20 (15)",
+          "vol_30001_50000": null,
+          "vol_peste_50000": null
+        },
+        {
+          "grad": "IV",
+          "vol_pana_2000": 5,
+          "vol_2001_3000": 10,
+          "vol_3001_5000": 10,
+          "vol_5001_10000": "15 (10)",
+          "vol_10001_15000": null,
+          "vol_15001_30000": null,
+          "vol_30001_50000": null,
+          "vol_peste_50000": null
+        },
+        {
+          "grad": "V",
+          "vol_pana_2000": 5,
+          "vol_2001_3000": 10,
+          "vol_3001_5000": "15 (10)",
+          "vol_5001_10000": "20 (15)",
+          "vol_10001_15000": null,
+          "vol_15001_30000": null,
+          "vol_30001_50000": null,
+          "vol_peste_50000": null
+        }
+      ],
+      "unitate": "l/s raportat la volumul compartimentului de incendiu (mc)",
+      "nota": "Valorile din paranteza se aplica la constructii echipate cu instalatii de stingere cu sprinklere. Pentru cladiri cu mai multe compartimente, debitul se alege pt compartimentul cu volumul cel mai mare."
+    }
+  },
+  "P118_2_2013_Art_6_8_9_10_distante_hidranti_ext": {
+    "id": "P118_2_2013_Art_6_8_9_10_distante_hidranti_ext",
+    "titlu": "Raza de actiune, distante minime/maxime hidranti de incendiu exteriori",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "26-27",
+    "data_extractie": "2026-07-17",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), pagina cu pagina, verificat",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "raza_actiune_furtun_m": {
+        "retea_presiune_directa": 120,
+        "motopompe": 150,
+        "autopompe": 200
+      },
+      "distanta_min_fata_pereti_exteriori_m": 5,
+      "distanta_max_de_marginea_cailor_circulatie_m": {
+        "reteaua_cu_pompe_mobile": 2,
+        "spatii_verzi_ansambluri_locuinte": 6
+      },
+      "distanta_max_intre_hidranti_m": {
+        "general_art_6_25": 200,
+        "rural_500_10000_locuitori_art_6_25": 500
+      },
+      "presiune_minima_bar_art_6_30": 0.7
     }
   }
 }

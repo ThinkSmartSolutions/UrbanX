@@ -379,25 +379,51 @@
   // (restul cheilor coincid deja 1:1 intre cele doua fisiere).
   var ALIAS_FUNCTIUNE = { 'hala-industriala': 'hala-logistica', 'hotelier': 'hotel', 'skid': 'skid-gpl' };
   function genereazaCamereStandard(functiune, params) {
-    if (!G.UXSpace || !G.UXSpace.TIPOLOGII || !G.UXSpace.SPACES) return null;
-    var tip = G.UXSpace.TIPOLOGII[functiune] || G.UXSpace.TIPOLOGII[ALIAS_FUNCTIUNE[functiune]];
-    if (!tip || typeof tip.baza !== 'function') return null;
-    var lista;
-    try { lista = tip.baza(params || {}) || []; } catch (e) { return null; }
-    var vazute = {};
-    var camere = [];
-    lista.forEach(function (s) {
-      if (vazute[s.id]) return; // un singur rând reprezentativ per tip unic de spațiu (nu explodăm qty în N rânduri identice)
-      vazute[s.id] = true;
-      var sp = G.UXSpace.SPACES[s.id];
-      var arie = +s.mp || (sp ? (sp.mp_rec || sp.mp_min) : null);
-      if (!arie) return;
-      var familie = OVERRIDE_ID[s.id] || (sp && MAP_CATEGORIE[sp.cat]) || null;
-      var nume = (sp ? sp.label : s.id) + (s.qty > 1 ? (' (tipic, ×' + s.qty + ' unități)') : '');
-      var c = calculeazaCamera({ nume: nume, arie_mp: arie, familie: familie }, {});
-      c.estimat = true; c.nivel_certitudine = 'presupus_conservator';
-      camere.push(c);
-    });
+    if (!G.UXSpace) return null;
+    var camere = null;
+    // Sursa 1: UXSpace.TIPOLOGII+SPACES (catalog simplu, id-based).
+    if (G.UXSpace.TIPOLOGII && G.UXSpace.SPACES) {
+      var tip = G.UXSpace.TIPOLOGII[functiune] || G.UXSpace.TIPOLOGII[ALIAS_FUNCTIUNE[functiune]];
+      if (tip && typeof tip.baza === 'function') {
+        try {
+          var lista = tip.baza(params || {}) || [];
+          var vazute = {}; camere = [];
+          lista.forEach(function (s) {
+            if (vazute[s.id]) return; // un singur rând reprezentativ per tip unic de spațiu (nu explodăm qty în N rânduri identice)
+            vazute[s.id] = true;
+            var sp = G.UXSpace.SPACES[s.id];
+            var arie = +s.mp || (sp ? (sp.mp_rec || sp.mp_min) : null);
+            if (!arie) return;
+            var familie = OVERRIDE_ID[s.id] || (sp && MAP_CATEGORIE[sp.cat]) || null;
+            var nume = (sp ? sp.label : s.id) + (s.qty > 1 ? (' (tipic, ×' + s.qty + ' unități)') : '');
+            var c = calculeazaCamera({ nume: nume, arie_mp: arie, familie: familie }, {});
+            c.estimat = true; c.nivel_certitudine = 'presupus_conservator';
+            camere.push(c);
+          });
+        } catch (e) { camere = null; }
+      }
+    }
+    // Sursa 2 (fallback, 17 iul — bug real gasit: TIPOLOGII nu are 'centru-social', genereazaCamereStandard
+    // returna gol/null pt aceasta functiune): UXSpace.TEMPLATES/propune() — catalogul mai bogat al
+    // programului funcțional (norme reale citate per spațiu, ex. Ord. MMJS 29/2019, sub-variante pe
+    // categorie de beneficiari) — folosește ACELAȘI motor ca panoul de program funcțional al platformei.
+    if ((!camere || !camere.length) && G.UXSpace.hasTemplate) {
+      var functiuneTpl = ALIAS_FUNCTIUNE[functiune] || functiune;
+      if (G.UXSpace.hasTemplate(functiuneTpl)) {
+        try {
+          var spatii = G.UXSpace.propune(functiuneTpl, params || {}) || [];
+          var vazuteNume = {}; var camere2 = [];
+          spatii.forEach(function (s) {
+            if (vazuteNume[s.nume]) return; vazuteNume[s.nume] = true;
+            if (!s.mp_unit) return;
+            var c = calculeazaCamera({ nume: s.nume, arie_mp: s.mp_unit }, {});
+            c.estimat = true; c.nivel_certitudine = 'presupus_conservator';
+            camere2.push(c);
+          });
+          if (camere2.length) camere = camere2;
+        } catch (e) { /* pastreaza camere din sursa 1 (poate fi null) */ }
+      }
+    }
     return camere;
   }
 

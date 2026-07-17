@@ -162,9 +162,28 @@
     else { out.clasa_importanta = 'III'; out.gamma_I = 1.0; }
     if (d.functiune === 'pod') { out.clasa_importanta = 'III (SR EN 1998-2)'; out.gamma_I = 1.3; }
     if (d.functiune === 'medical' || d.functiune === 'skid') { out.gamma_I = 1.4; out.clasa_importanta = (d.functiune === 'skid' ? 'II-III' : 'I-II'); }
-    // Categoria de importanță (HG 766/1997)
-    out.categorie_importanta = (critice.indexOf(d.functiune) >= 0 || d.functiune === 'mall' || d.functiune === 'parcare') ? 'B — deosebită'
-      : (d.functiune === 'infrastructura-drum') ? 'C — normală (D anexe)' : 'C — normală';
+    // Categoria de importanță (HG 766/1997, Anexa 3, art. 5-6 + Metodologia MLPAT de stabilire a
+    // categoriei de importanță) — CLASIFICARE CALITATIVĂ pe baza exemplificărilor explicite din
+    // normativ/metodologie (17 iul, cercetat live): sursa oficială a metodologiei (tabelul de
+    // punctaj pe 6 factori determinanți × 3 criterii, formula P(n)=[p(i)+p(ii)+p(iii)]×k(n)/3, cu
+    // p(i)∈{0,1,2,4,6}) e disponibilă DOAR ca document scanat (fără strat de text OCR) — valorile
+    // exacte de prag ale Tabelului 3 nu au putut fi verificate cu certitudine deplină, deci NU se
+    // calculează formula de punctaj (ar însemna cifre neverificate). În schimb se aplică direct
+    // exemplificările calitative consacrate ale categoriilor A/B (confirmate din normativ/practică):
+    // A = spitale cu urgențe, sedii ISU, stații producție/distribuție energie electrică, clădiri cu
+    //     materiale radioactive, adăposturi protecție civilă, turnuri telecomunicații;
+    // B = spitale fără urgențe, școli/licee, clădiri multietajate >300 persoane, clădiri parter
+    //     (inclusiv mall-uri) >1000 persoane, rezervoare materiale inflamabile;
+    // C = blocuri de locuințe, clădiri industriale obișnuite (implicit, fără alt criteriu aplicabil);
+    // D = locuințe unifamiliale P, structuri mici. Categoria FINALĂ rămâne mereu responsabilitatea
+    // proiectantului (art. 7) — clasificarea de mai jos e un PUNCT DE PORNIRE, nu o valoare definitivă.
+    var CATEG_A_ENERGIE = ['bess', 'skid', 'statie-transformare'];
+    var capOc = +d.capacitate_persoane || 0;
+    if (CATEG_A_ENERGIE.indexOf(d.functiune) >= 0) out.categorie_importanta = 'A — excepțională';
+    else if (d.functiune === 'medical' || d.functiune === 'pod' || d.functiune === 'scoala' || d.functiune === 'gradinita' || d.functiune === 'mall'
+      || (capOc > 300 && niv >= 2) || (capOc > 1000 && niv <= 1)) out.categorie_importanta = 'B — deosebită';
+    else if (d.functiune === 'locuinta-individuala' || d.functiune === 'infrastructura-drum') out.categorie_importanta = 'D — redusă';
+    else out.categorie_importanta = 'C — normală';
     // Factor de comportare q (funcție de sistemul structural)
     var qmap = { metalica: 4.0, beton: 3.0, prefabricat: 3.0, mixt: 3.0, zidarie: 2.5, lemn: 2.5, lsf: 2.0, usoara: 1.5 };
     out.factor_q = qmap[(d.struct || fn.struct)] || 3.0;
@@ -190,10 +209,23 @@
     // = cea mai apropiata functiune din platforma de "siloz"). Bug real gasit: acest camp nu era
     // NICIODATA calculat inainte (ramanea mereu undefined => sectiunea 4.11 nu se activa niciodata).
     out.paratraznet_oblig = fn.psi === 'A' || fn.psi === 'B' || H > 28 || (d.functiune === 'bloc-locuinte' && niv > 12) || (d.functiune === 'agricol' && H >= 10);
-    // Hidranți interiori (P118-2): volum > 5000 mc sau Sd > 2000; exteriori: Sc mare
-    var vol = Sd * 3; // estimare volum (H nivel ~3 m)
-    out.hidranti_int_oblig = vol > 5000 || Sd > 2000 || ['mall', 'sport', 'medical', 'parcare', 'hala-industriala'].indexOf(d.functiune) >= 0;
-    out.hidranti_ext_oblig = Sc > 600 || niv >= 3;
+    // Hidranți interiori/exteriori (P118/2-2013, Art. 4.1 / Art. 6.1) — FIX real (17 iul): inlocuit
+    // euristica vol>5000mc/Sd>2000/lista scurta (interior) si Sc>600/niv>=3 generic (exterior) cu
+    // cele 16+19 cazuri EXPLICITE ale normativului, pe functiune + prag real (arie/niveluri/
+    // capacitate/categorie importanta) — vezi js/25-ssi-normative.js _hidrantiCriterii(). Pastreaza
+    // fallback-ul vechi doar daca motorul normativ nu e incarcat (nu ar trebui sa se intample la
+    // runtime, dar autoCalc() se poate apela teoretic inainte de incarcarea completa a scripturilor).
+    var vol = Sd * 3; // estimare volum (H nivel ~3 m), folosita si ca fallback si ca input pt motorul normativ
+    if (G.SSI_NORMATIVE_ENGINE && G.SSI_NORMATIVE_ENGINE.getHidrantiInteriorObligativitate) {
+      var dHidr = { functiune: d.functiune, Sc: Sc, Sd: Sd, niv_supraterane: niv, capacitate_persoane: d.capacitate_persoane, nr_paturi: d.nr_paturi, H: H, volum_mc: vol };
+      var hInt = G.SSI_NORMATIVE_ENGINE.getHidrantiInteriorObligativitate(dHidr, out);
+      var hExt = G.SSI_NORMATIVE_ENGINE.getHidrantiExteriorObligativitate(dHidr, out);
+      out.hidranti_int_oblig = hInt.oblig; out.hidranti_int_detaliu = hInt;
+      out.hidranti_ext_oblig = hExt.oblig; out.hidranti_ext_detaliu = hExt;
+    } else {
+      out.hidranti_int_oblig = vol > 5000 || Sd > 2000 || ['mall', 'sport', 'medical', 'parcare', 'hala-industriala'].indexOf(d.functiune) >= 0;
+      out.hidranti_ext_oblig = Sc > 600 || niv >= 3;
+    }
     // Rezervă apă incendiu (mc) — estimare P118-2 (hidranți int 4,2 l/s×10min + ext 10 l/s×3h dacă)
     var vri = 0; if (out.hidranti_int_oblig) vri += 4.2 * 10 * 60 / 1000; if (out.hidranti_ext_oblig) vri += 10 * 180 * 60 / 1000; if (out.sprinklere_oblig) vri += 12 * 60 * 60 / 1000;
     out.rezerva_incendiu_mc = Math.round(vri);

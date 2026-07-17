@@ -400,7 +400,7 @@
       }
     },
     'skid-gpl': {
-      label: 'SKID GPL / stație carburanți', norma: 'NTPEE + ISCIR PT C8 + I 31/1999 + ATEX',
+      label: 'SKID GPL / stație carburanți', norma: 'NTPEE + ISCIR PT C8 + I 31-1999 (proiectare/execuție GPL) + I 33-1999 (exploatare GPL) + NP 037-99 (stații Skid distribuție auto, dacă destinația e distribuție auto) + ATEX',
       params: [
         { key: 'destinatie', label: 'Destinație', type: 'select', def: 'incalzire_cladiri', options: [['incalzire_cladiri', 'Încălzire clădiri'], ['distributie_auto', 'Stație distribuție auto'], ['industrial', 'Industrial (proces)']] },
         { key: 'nrRec', label: 'Nr. recipiente (1-3)', type: 'number', def: 1 },

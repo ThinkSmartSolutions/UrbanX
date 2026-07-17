@@ -280,6 +280,89 @@
       };
     },
 
+    // Obligativitatea echiparii cu hidranti interiori/exteriori (P118/2-2013, Art. 4.1 / Art. 6.1) —
+    // FIX real (17 iul, Florin: "nu estimezi... extragi date reale"): inlocuieste euristica anterioara
+    // (vol>5000mc/Sd>2000/lista scurta de 5 functiuni pt interior; Sc>600/niv>=3 generic pt exterior)
+    // cu cele 16 (interior) + 19 (exterior) cazuri EXPLICITE ale normativului, pe functiune + prag
+    // real (arie/niveluri/capacitate/categorie importanta) — pragurile DIFERA intre interior si
+    // exterior pt aceeasi functiune (ex. scoala: >3 niveluri la interior, >2 niveluri la exterior;
+    // hotelier: >100 paturi la interior, >50 paturi la exterior) — nu se aproximeaza cu o valoare unica.
+    _hidrantiCriterii: function (d, ac, tip) {
+      var Sc = +d.Sc || 0, Sd = +d.Sd || 0, niv = Math.max(1, +d.niv_supraterane || 1), cap = +d.capacitate_persoane || 0;
+      var H = +d.H || (niv > 1 ? niv * 3 : 0);
+      var categAB = /^A|^B/.test(String((ac && ac.categorie_importanta) || ''));
+      var idTabel = tip === 'int' ? 'P118_2_2013_Art_4_1_hidranti_int_oblig' : 'P118_2_2013_Art_6_1_hidranti_ext_oblig';
+      var entry = this.getMetaNormativ(idTabel);
+      var norma = entry ? (entry.titlu + ' (' + entry.pagina + ')') : idTabel;
+      function res(oblig, motiv, litera) {
+        return { oblig: oblig, motiv: motiv, articol: (tip === 'int' ? 'Art. 4.1' : 'Art. 6.1') + (litera ? ' lit. ' + litera : ''), norma: norma, sursa_url: entry && entry.sursa_url, pagina: entry && entry.pagina, status_validare: entry && entry.status };
+      }
+      if (categAB) return res(true, 'categorie de importanță excepțională/deosebită (A/B)', 'a');
+      if (H > 28 || cap >= 200) return res(true, H > 28 ? 'clădire înaltă/foarte înaltă' : 'sală aglomerată (capacitate declarată ≥200 persoane)', 'b');
+      var fn = d.functiune;
+      var risc = String((ac && ac.risc_incendiu) || '').replace('mediu', 'mijlociu');
+      var riscMareSauFMare = risc === 'mare' || risc === 'foarte mare' || risc === 'foarte_mare';
+      if (fn === 'scoala' || fn === 'gradinita') {
+        var nivS = tip === 'int' ? 3 : 2;
+        if (cap > 200 || (Sc > 600 && niv > nivS)) return res(true, 'învățământ, peste 200 persoane sau Ac>600m² și peste ' + nivS + ' niveluri', tip === 'int' ? 'c' : 'h');
+      } else if (fn === 'hotelier') {
+        var pragPaturi = tip === 'int' ? 100 : 50;
+        var paturi = +d.nr_paturi || cap || 0;
+        if (paturi > pragPaturi || (Sc > 600 && niv > 3)) return res(true, 'turism/cazare, peste ' + pragPaturi + ' paturi sau Ac>600m² și peste 3 niveluri', tip === 'int' ? 'd' : 'k');
+      } else if (fn === 'medical' || fn === 'centru-social') {
+        if (tip === 'int') { if (cap > 100 || (Sc > 600 && niv > 3)) return res(true, 'sănătate/îngrijire, peste 100 persoane sau Ac>600m² și peste 3 niveluri', 'f'); }
+        else { if (niv > 2) return res(true, 'sănătate/îngrijire, peste 2 niveluri supraterane', 'f'); }
+      } else if (fn === 'mall' || fn === 'spatiu-comercial') {
+        if (niv > 2 || Sc > 600) return res(true, 'comerț, peste 2 niveluri sau Ac>600m²', tip === 'int' ? 'g' : 'd');
+      } else if (fn === 'birouri' || fn === 'cladire-mixta') {
+        if (Sc > 600 || niv > 4) return res(true, 'administrativ, Ac>600m² sau peste 4 niveluri', tip === 'int' ? 'j' : 'e');
+      } else if (fn === 'sport') {
+        if (cap > 300) return res(true, 'sport închis, capacitate peste 300 persoane', tip === 'int' ? 'k' : 'i');
+      } else if (fn === 'hala-industriala' || fn === 'skid' || fn === 'agricol') {
+        if (tip === 'int') { if (Sd > 600) return res(true, 'producție/depozitare cu materiale combustibile, Ad>600m²', 'l'); }
+        else { var vol = +d.volum_mc || (Sd * 3); if (riscMareSauFMare && Sd > 600 && vol > 3000) return res(true, 'producție/depozitare risc mare/foarte mare, Ad>600m² și volum>3000m³', 'n'); }
+      } else if (fn === 'parcare') {
+        if (tip === 'int') { if (niv > 2 || Sd > 600) return res(true, 'parcaj, peste 2 niveluri sau Ad>600m²', 'p'); }
+        else { if (niv > 2 && Sc > 600) return res(true, 'parcaj deschis, peste 2 niveluri și Ac>600m²', 'r'); }
+      } else if (fn === 'bloc-locuinte' && tip === 'ext') {
+        if (niv > 5) return res(true, 'locuințe colective, peste 5 niveluri supraterane', 'c');
+      }
+      return res(false, 'nu se încadrează în niciunul din cazurile explicite ale ' + (tip === 'int' ? 'Art. 4.1' : 'Art. 6.1') + ' pentru configurația declarată a proiectului (funcțiune/arie/niveluri/capacitate)', null);
+    },
+    getHidrantiInteriorObligativitate: function (d, ac) { return this._hidrantiCriterii(d || {}, ac || {}, 'int'); },
+    getHidrantiExteriorObligativitate: function (d, ac) { return this._hidrantiCriterii(d || {}, ac || {}, 'ext'); },
+
+    // Numarul de jeturi in functiune simultana + debitul de calcul pt hidranti interiori (Anexa 3,
+    // P118/2-2013) — potrivire pe functiune + volum estimat (Sd × h_nivel), NU o valoare fixa DA/NU.
+    getJeturiHidrantiInteriori: function (opt) {
+      opt = opt || {};
+      var entry = this.getMetaNormativ('P118_2_2013_Anexa3_jeturi_hidranti_int');
+      if (!entry) return null;
+      var fn = opt.functiune;
+      var vol = +opt.volum_mc || ((+opt.Sd || 0) * 3);
+      var cap = +opt.capacitate_persoane || 0;
+      var randuri = entry.valoare.randuri;
+      var esteInalta = !!opt.esteInalta, esteFoarteInalta = !!opt.esteFoarteInalta;
+      var rand, sub;
+      if (esteFoarteInalta) { rand = randuri[5]; sub = vol > 50000 ? rand.sub[1] : rand.sub[0]; }
+      else if (esteInalta) { rand = randuri[3]; sub = rand.sub[0]; }
+      else if (cap > 600 && ['sport', 'mall', 'spatiu-comercial'].indexOf(fn) >= 0) { rand = randuri[2]; sub = (opt.grad === 'I' || opt.grad === 'II') ? rand.sub[0] : rand.sub[1]; }
+      else if (['hala-industriala', 'skid', 'agricol', 'mall', 'spatiu-comercial', 'medical', 'gradinita', 'parcare', 'cladire-mixta'].indexOf(fn) >= 0) { rand = randuri[1]; sub = vol >= 5000 ? rand.sub[1] : rand.sub[0]; }
+      else { rand = randuri[0]; sub = vol >= 25000 ? rand.sub[1] : rand.sub[0]; }
+      return {
+        jeturi_simultane: sub.jeturi, debit_calcul_l_s: sub.debit_l_s, caz: sub.caz, categorie: rand.destinatie,
+        norma: entry.titlu + ' (Anexa 3, ' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status,
+        nota: entry.valoare.nota1
+      };
+    },
+
+    // Distante/presiune hidranti exteriori (Art. 6.8-6.10, 6.25, 6.30) — valori fixe, nu variaza pe functiune.
+    getParametriHidrantiExteriori: function () {
+      var entry = this.getMetaNormativ('P118_2_2013_Art_6_8_9_10_distante_hidranti_ext');
+      if (!entry) return null;
+      return { valoare: entry.valoare, norma: entry.titlu + ' (' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status };
+    },
+
     // Verifica daca vreun normativ dintr-o lista de id-uri folosite in proiectul curent nu are status 'validat_sursa'/'validat'
     verificaStatusNormativeFolosite: function (listaIndicative) {
       var self = this;

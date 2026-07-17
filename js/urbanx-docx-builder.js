@@ -638,12 +638,13 @@
   // "de ce dispar toate campurile? nu inteleg la ce se aplica"). Fix: tabelul se afiseaza mereu,
   // camp cu camp; valoarea e "Nu este cazul" (necesara===false), reala (din D._instalatii_ssi) sau
   // un gap onest [se completeaza] (necesara===true dar fara date reale furnizate inca).
-  function _tblCampuriInstalatie(necesara, cheieInstalatie, campuri, D) {
+  function _tblCampuriInstalatie(necesara, cheieInstalatie, campuri, D, valPreset) {
     var valori = (D._instalatii_ssi && D._instalatii_ssi[cheieInstalatie]) || {};
     return tbl(campuri.map(function (c) {
       var v = valori[c.cheie];
       var valoare;
       if (v != null) valoare = String(v);
+      else if (valPreset && valPreset[c.cheie] != null) valoare = String(valPreset[c.cheie]) + ' (calculat conform normativului — vezi textul de mai sus)';
       else if (necesara === false) valoare = 'Nu este cazul';
       else if (necesara == null) valoare = 'neevaluat — necesitatea echipării nu e stabilită de motor pentru acest tip de instalație';
       else valoare = 'se dimensionează la faza de proiect tehnic (PTh), conform normativului aplicabil instalației';
@@ -662,8 +663,8 @@
     var H = +D.H || 0;
     function da(b) { return b ? 'DA' : 'nu'; }
     var rows = [
-      ['Hidranți interiori', 'volum > 5.000 m³ SAU Sd > 2.000 m² SAU destinație cu public (mall/sport/medical/parcaj/hală)', 'Sd = ' + Sd + ' m²', da(ac.hidranti_int_oblig), 'Sd proiect ' + Sd + ' m² vs. prag 2.000 m² — ' + (ac.hidranti_int_oblig ? 'pragul e depășit sau destinația e cu public' : 'sub prag, destinație fără public')],
-      ['Hidranți exteriori', 'Sc > 600 m² SAU niveluri ≥ 3', 'Sc = ' + Sc + ' m², niv = ' + niv, da(ac.hidranti_ext_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 600 m²; niv proiect ' + niv + ' vs. prag 3'],
+      ['Hidranți interiori', 'P118/2-2013, Art. 4.1 — 16 cazuri explicite pe funcțiune/arie/niveluri/capacitate/categorie (nu un prag unic)', 'Sc=' + Sc + ' m², Sd=' + Sd + ' m², niv=' + niv, da(ac.hidranti_int_oblig), (ac.hidranti_int_detaliu ? ac.hidranti_int_detaliu.articol + ': ' + ac.hidranti_int_detaliu.motiv : 'Sd proiect ' + Sd + ' m² vs. prag 2.000 m²')],
+      ['Hidranți exteriori', 'P118/2-2013, Art. 6.1 — 19 cazuri explicite pe funcțiune/arie/niveluri/capacitate/categorie (nu un prag unic)', 'Sc=' + Sc + ' m², niv=' + niv, da(ac.hidranti_ext_oblig), (ac.hidranti_ext_detaliu ? ac.hidranti_ext_detaliu.articol + ': ' + ac.hidranti_ext_detaliu.motiv : 'Sc proiect ' + Sc + ' m² vs. prag 600 m²')],
       ['Sprinklere', 'Sc > 3.000 m² SAU H > 28 m (cap. 7 P118/2-2013)', 'Sc = ' + Sc + ' m², H = ' + H + ' m', da(ac.sprinklere_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 3.000 m²; H proiect ' + H + ' m vs. prag 28 m'],
       ['IDSAI', 'Sc > 2.500 m² (P118-3/2015 + Ord. 6025/2018)', 'Sc = ' + Sc + ' m²', da(ac.idsi_oblig), 'Sc proiect ' + Sc + ' m² vs. prag 2.500 m²'],
       ['Desfumare', 'Sc > 2.500 m² SAU H > 28 m SAU parcaj SAU (hală industrială cu H>8m/Sc>1.000m²)', 'Sc = ' + Sc + ' m², H = ' + H + ' m, funcțiune = ' + (D.functiune || '—'), da(ac.desfumare_oblig), 'Sc/H proiect sub praguri și funcțiunea nu e parcaj/hală — verificare explicită, nu presupunere']
@@ -1491,14 +1492,19 @@
           '<b>Motiv:</b> ' + esc(motivFinal) + '</p>';
       })() },
       { h: '1.3. Categoria de importanță', html: (function () {
-        var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
+        var temei = 'H.G.R. nr. 766/1997, Anexa 3 (Regulament privind stabilirea categoriei de importanță a construcțiilor), art. 5-6, coroborat cu Metodologia M.L.P.A.T. de stabilire a categoriei de importanță (6 factori determinanți × 3 criterii, formulă de punctaj P(n)=[p(i)+p(ii)+p(iii)]×k(n)/3)';
         if (D.categorie_importanta) {
-          return '<p>Se stabilește conform Regulamentului privind stabilirea categoriei de importanță a construcțiilor, aprobat prin H.G.R. nr. 766/1997, Anexa 3, cap. II, art. 6, coroborat cu metodologia M.L.P.A.T. Categorie de importanță <b>' + esc(D.categorie_importanta) + '</b> (declarată de proiectant).</p>';
+          return '<p>Se stabilește conform ' + temei + '. Categorie de importanță <b>' + esc(D.categorie_importanta) + '</b> (declarată de proiectant).</p>';
         }
-        if (FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune]) {
-          return '<p>Se stabilește conform Regulamentului privind stabilirea categoriei de importanță a construcțiilor, aprobat prin H.G.R. nr. 766/1997, Anexa 3, cap. II, art. 6, coroborat cu metodologia M.L.P.A.T. — destinația reală (' + esc(destinatieT42.toLowerCase()) + ') adăpostește persoane care nu se pot evacua singure, criteriu care poate încadra construcția în categoria de importanță <b>B</b> (nu implicit C, ca la destinațiile fără persoane vulnerabile) — încadrarea exactă (B sau C, funcție de capacitate/configurație) <b>nu este încă validată în acest motor</b> și trebuie stabilită de proiectantul atestat pe baza criteriilor complete ale Anexei 3.</p>';
-        }
-        return '<p>Se stabilește conform Regulamentului privind stabilirea categoriei de importanță a construcțiilor, aprobat prin H.G.R. nr. 766/1997, Anexa 3, cap. II, art. 6, coroborat cu metodologia M.L.P.A.T. — pe baza destinației (' + esc(destinatieT42.toLowerCase()) + '), regimului de înălțime (' + esc(D.regim || '—') + ') și ariei desfășurate, construcția se încadrează în categoria de importanță <b>' + esc(ac.categorie_importanta || 'C') + '</b>' + (D.functiune === 'locuinta-individuala' ? ' — redusă/normală, nu necesitând o justificare suplimentară de categorie superioară.' : ' — de confirmat de proiectantul atestat pe baza criteriilor complete ale Anexei 3, specifice acestei destinații.') + '</p>';
+        var cat = ac.categorie_importanta || 'C — normală';
+        var motiv = /^A/.test(cat)
+          ? 'destinația (' + esc(destinatieT42.toLowerCase()) + ') se regăsește în exemplificarea explicită a categoriei A (construcții de importanță excepțională — producție/distribuție energie, materiale periculoase/radioactive etc.)'
+          : /^B/.test(cat)
+            ? 'destinația (' + esc(destinatieT42.toLowerCase()) + ') se regăsește în exemplificarea explicită a categoriei B (spitale, unități de învățământ, clădiri aglomerate, sau capacitatea declarată de utilizatori depășește pragul de exemplificare — vezi 1.4.g)'
+            : /^D/.test(cat)
+              ? 'destinația (' + esc(destinatieT42.toLowerCase()) + ') se regăsește în exemplificarea explicită a categoriei D (locuință unifamilială/structură de mici dimensiuni)'
+              : 'destinația (' + esc(destinatieT42.toLowerCase()) + ') nu se regăsește în exemplificările explicite ale categoriilor A/B/D, deci se aplică implicit categoria C (normală)';
+        return '<p>Se stabilește conform ' + temei + '. Formula de punctaj integrală (Tabelele 1-3 ale metodologiei) provine dintr-un document sursă disponibil azi doar în format scanat, fără strat de text verificabil cifră-cu-cifră — pragurile numerice exacte ale Tabelului 3 nu se preiau fără certitudine deplină. Se aplică în schimb exemplificările calitative consacrate ale normativului: ' + motiv + '. Categorie de importanță rezultată: <b>' + esc(cat) + '</b> — conform art. 7 al Regulamentului, încadrarea finală rămâne responsabilitatea proiectantului, la cererea investitorului, și se înscrie în toate documentele tehnice ale construcției.</p>';
       })() },
       { h: '1.4.a. Tipul clădirii', html: (function () {
         var esteResidentialIndiv = D.functiune === 'locuinta-individuala';
@@ -1893,21 +1899,38 @@
           (areBucatarie ? '<p><b>Destinația proiectului (' + esc(destinatieT42.toLowerCase()) + ') include bloc alimentar/bucătărie</b> — stingătorul de clasă F de lângă echipamentele de gătit se adaugă la numărul minim calculat mai sus, nu îl înlocuiește.</p>' : '') +
           '<p style="font-size:9pt;color:#666">Numărul de stingătoare de mai sus e un minim de calcul (faza DTAC) — distribuția exactă pe planul de nivel (poziții, tip pe fiecare poziție) se stabilește la faza P.Th./D.E., pe planul de securitate la incendiu, cu verificarea distanței de parcurs reale (nu doar aria totală).</p>';
       })() },
-      { h: '4.1. Hidranți de incendiu interiori', html: '<p>Necesitatea echipării se stabilește conform art. 4.1 din P118/2-2013, comparând destinația/aria/volumul real cu pragurile normativului. Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (ac.hidranti_int_oblig ? ', motivat prin depășirea pragului aplicabil destinației (' + esc(destinatieT42.toLowerCase()) + ').' : (D.functiune === 'locuinta-individuala' ? ' — pentru o locuință unifamilială cu arie/volum redus, valoarea reală a proiectului nu atinge pragul de echipare obligatorie prevăzut pentru destinația rezidențială.' : ', valoarea reală a proiectului (volum/arie desfășurată) nu atinge pragul de echipare obligatorie prevăzut pentru destinația ' + esc(destinatieT42.toLowerCase()) + '.')) + '</p>' +
-        _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
+      { h: '4.1. Hidranți de incendiu interiori', html: (function () {
+        var det = ac.hidranti_int_detaliu;
+        var text = '<p>Necesitatea echipării se stabilește conform <b>P118/2-2013, Art. 4.1</b> (16 cazuri explicite de echipare obligatorie, pe funcțiune + arie/niveluri/capacitate/categorie de importanță — nu un prag unic). Concluzie: <b>' + (ac.hidranti_int_oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (det ? ' — ' + esc(det.articol) + ': ' + esc(det.motiv) + '.' : '') + '</p>';
+        var jet = (ac.hidranti_int_oblig && G.SSI_NORMATIVE_ENGINE && G.SSI_NORMATIVE_ENGINE.getJeturiHidrantiInteriori)
+          ? G.SSI_NORMATIVE_ENGINE.getJeturiHidrantiInteriori({ functiune: D.functiune, Sd: D.Sd, capacitate_persoane: D.capacitate_persoane, grad: grad, esteInalta: ac.clasa_importanta === 'II' && (+D.H > 28), esteFoarteInalta: (+D.H > 45) })
+          : null;
+        if (jet) text += '<p>Conform <b>Anexa 3</b> (' + esc(jet.categorie) + '): <b>' + jet.jeturi_simultane + ' jet(uri) în funcțiune simultană</b>, debit de calcul <b>' + jet.debit_calcul_l_s + ' l/s</b> (' + esc(jet.caz) + '). <span style="font-size:9pt;color:#666">' + esc(jet.nota || '') + '</span></p>';
+        var valPreset = jet ? { jeturi_simultane: jet.jeturi_simultane, debit_calcul: jet.debit_calcul_l_s } : null;
+        return text + _tblCampuriInstalatie(ac.hidranti_int_oblig, 'hidranti_int', [
           { cheie: 'tip', eticheta: 'Tipul instalației (apă-apă, aer-aer)' }, { cheie: 'volum_mc', eticheta: 'Volumul construcției/compartimentului de incendiu (m³)' },
           { cheie: 'jeturi_simultane', eticheta: 'Număr de jeturi în funcțiune simultană' }, { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' },
           { cheie: 'jeturi_pe_punct', eticheta: 'Număr de jeturi pe punct' }, { cheie: 'debit_calcul', eticheta: 'Debit de calcul (l/s)' },
           { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'racorduri_exterioare', eticheta: 'Număr de racorduri exterioare' },
           { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' }, { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
-        ], D) },
-      { h: '4.2. Hidranți de incendiu exteriori', html: '<p>Necesitatea echipării se stabilește conform art. 4.2 din P118/2-2013, funcție de destinația/aria/volumul/categoria reale. Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>, motivat prin comparație cu pragul aplicabil destinației ' + esc(destinatieT42.toLowerCase()) + '.</p>' +
-        _tblCampuriInstalatie(ac.hidranti_ext_oblig, 'hidranti_ext', [
+        ], D, valPreset);
+      })() },
+      { h: '4.2. Hidranți de incendiu exteriori', html: (function () {
+        var det = ac.hidranti_ext_detaliu;
+        var par = G.SSI_NORMATIVE_ENGINE && G.SSI_NORMATIVE_ENGINE.getParametriHidrantiExteriori ? G.SSI_NORMATIVE_ENGINE.getParametriHidrantiExteriori() : null;
+        var text = '<p>Necesitatea echipării se stabilește conform <b>P118/2-2013, Art. 6.1</b> (19 cazuri explicite de echipare obligatorie, pe funcțiune + arie/niveluri/capacitate/categorie de importanță). Concluzie: <b>' + (ac.hidranti_ext_oblig ? 'NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (det ? ' — ' + esc(det.articol) + ': ' + esc(det.motiv) + '.' : '') + '</p>';
+        var valPreset = null;
+        if (ac.hidranti_ext_oblig && par) {
+          text += '<p>Parametri normați (Art. 6.8-6.10/6.25/6.30): rază de acțiune a jetului ' + par.valoare.raza_actiune_furtun_m.retea_presiune_directa + ' m (rețea cu presiune directă) / ' + par.valoare.raza_actiune_furtun_m.autopompe + ' m (autopompe); distanță minimă față de pereții exteriori <b>' + par.valoare.distanta_min_fata_pereti_exteriori_m + ' m</b>; distanță maximă între hidranți <b>' + par.valoare.distanta_max_intre_hidranti_m.general_art_6_25 + ' m</b> (' + par.valoare.distanta_max_intre_hidranti_m.rural_500_10000_locuitori_art_6_25 + ' m în mediul rural, localități 500-10.000 locuitori); presiune minimă <b>' + par.valoare.presiune_minima_bar_art_6_30 + ' bar</b>.</p>';
+          valPreset = { distante: 'minimum ' + par.valoare.distanta_min_fata_pereti_exteriori_m + ' m față de pereți exteriori, maximum ' + par.valoare.distanta_max_intre_hidranti_m.general_art_6_25 + ' m între hidranți', presiune: par.valoare.presiune_minima_bar_art_6_30 + ' bar (minim, Art. 6.30)' };
+        }
+        return text + _tblCampuriInstalatie(ac.hidranti_ext_oblig, 'hidranti_ext', [
           { cheie: 'distante', eticheta: 'Distanțele față de construcție' }, { cheie: 'volum_mc', eticheta: 'Volumul compartimentului de incendiu (m³)' },
           { cheie: 'timp_functionare', eticheta: 'Timp teoretic de funcționare' }, { cheie: 'debit_calcul', eticheta: 'Debit de calcul (l/s)' },
           { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' },
           { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
-        ], D) },
+        ], D, valPreset);
+      })() },
       { h: '4.3. Instalații automate de stingere cu sprinklere', html: '<p>Necesitatea echipării se stabilește conform cap. 7 din P118/2-2013, funcție de destinație, categorie de importanță, arie desfășurată, volum și regim de înălțime reale. Concluzie: <b>' + (ac.sprinklere_oblig ? 'OBLIGATORII (Sc&gt;3.000 m² / H&gt;28m)' : 'NU ESTE NECESARĂ') + '</b>.</p>' +
         _tblCampuriInstalatie(ac.sprinklere_oblig, 'sprinklere', [
           { cheie: 'solutie_tehnica', eticheta: 'Soluția tehnică de realizare (umedă/uscată/preacționată, SR EN 12845)' }, { cheie: 'clasa_pericol', eticheta: 'Clasa de pericol de incendiu (LH/OH1/OH2/HHP)' },
