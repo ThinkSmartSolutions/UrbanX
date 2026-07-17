@@ -170,29 +170,73 @@
       };
     },
 
-    // Capacitatea unui flux de evacuare (C, persoane) — Tabelul 150, EXCLUSIV pt constructii EXISTENTE
-    // (Anexa A.10). Pentru CONSTRUCTIE_NOUA normativul nu foloseste capacitate in persoane/flux, ci
-    // latimea utila/modulul de trecere (Cap. 2.5) — se raporteaza explicit, nu se aplica gresit T150.
+    // Capacitatea unui flux de evacuare (C=Uf, persoane) — FIX (17 iul, Florin: "modul evacuare SSI",
+    // prompt dedicat trimis): nota anterioara aici era GRESITA — afirma ca la CONSTRUCTIE_NOUA
+    // normativul "nu foloseste o capacitate in persoane/flux". Extras direct din PDF-ul oficial
+    // (Art. 3.1.5.6, Tabelul 51): Uf EXISTA si la constructii noi, valori IDENTICE cu Tabelul 150
+    // (existente): 50/70/80 persoane/flux, doar gruparea exacta a destinatiilor difera usor.
     getCapacitateFluxEvacuare: function (opt) {
       opt = opt || {};
-      if (opt.tip_lucrare !== 'EXISTENTA_NEMODIFICATA') {
-        return { aplicabil: false, motiv: 'Tabelul 150 e specific construcțiilor EXISTENTE (Anexa A.10, Art. A.10.2.5.58) — pentru CONSTRUCȚIE NOUĂ, verificarea fluxurilor de evacuare folosește lățimea utilă/modulul de trecere al căilor (Cap. 2.5, Art. 2.5.5 și urm.), nu o capacitate exprimată în persoane/flux.' };
-      }
-      var entry = this.getMetaNormativ('P118_1_2025_T150');
-      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_T150' };
+      var idTabel = (opt.tip_lucrare === 'EXISTENTA_NEMODIFICATA') ? 'P118_1_2025_T150' : 'P118_1_2025_T51';
+      var entry = this.getMetaNormativ(idTabel);
+      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: idTabel };
       // Potrivire pe cuvinte-cheie, nu pe egalitate exacta — destinatieT42 (ex. "Cladiri de locuit") nu
-      // coincide literal cu descrierea lunga din randul T150 ("Cladiri de locuit, administrative,
-      // hoteluri, camine, cabane etc. (...)"), dar identifica fara ambiguitate categoria corecta.
+      // coincide literal cu descrierea lunga din tabel, dar identifica fara ambiguitate categoria corecta.
       var dest = String(opt.destinatie || '').toLowerCase();
       var randuri = entry.valoare.randuri || [];
       var rand = null;
       if (/nu se pot evacua|persoane ce nu se pot evacua/.test(dest)) rand = randuri[0];
-      else if (/locuit|cazare/.test(dest)) rand = randuri[2];
+      else if (/locuit|cazare/.test(dest)) rand = randuri[randuri.length - 1];
       else rand = randuri[1];
+      var Uf = rand ? (rand.Uf != null ? rand.Uf : rand.capacitate_flux_persoane) : null;
       return {
-        aplicabil: true, rand: rand || null, disponibil: !!rand,
-        norma: entry.titlu + ' (T150)', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status,
-        destinatii_disponibile: (entry.valoare.randuri || []).map(function (r) { return r.destinatie; })
+        aplicabil: true, rand: rand ? { destinatie: rand.destinatie, capacitate_flux_persoane: Uf } : null, disponibil: !!rand,
+        norma: entry.titlu + ' (' + idTabel.replace('P118_1_2025_', '') + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status,
+        destinatii_disponibile: randuri.map(function (r) { return r.destinatie; })
+      };
+    },
+
+    // Lungimea maxima de evacuare (2 directii / fund de sac), pe functiune + grad de stabilitate —
+    // FIX gap real (Florin: "nu vad calculul lungimilor de flux" — cascada folosea 35/15m hardcodat,
+    // identic pt orice functiune, marcat onest "DE_COMPLETAT — articolul exact neingerat"). Extras
+    // direct din PDF-ul oficial P118-1/2025, 8 tabele pe destinatie (vezi data/ssi/normative.json).
+    MAP_FUNCTIUNE_TABEL_LUNGIME: {
+      'locuinta-individuala': 'P118_1_2025_T56', 'bloc-locuinte': 'P118_1_2025_T56',
+      hotelier: 'P118_1_2025_T80',
+      gradinita: 'P118_1_2025_T77', scoala: 'P118_1_2025_T77',
+      medical: 'P118_1_2025_T67', 'centru-social': 'P118_1_2025_T68',
+      mall: 'P118_1_2025_T64', 'spatiu-comercial': 'P118_1_2025_T64',
+      birouri: 'P118_1_2025_T60', 'cladire-mixta': 'P118_1_2025_T60'
+    },
+    getLungimeEvacuare: function (opt) {
+      opt = opt || {};
+      var idTabel = this.MAP_FUNCTIUNE_TABEL_LUNGIME[opt.functiune];
+      if (!idTabel) return { aplicabil: false, motiv: 'Tabelul de lungimi de evacuare pentru funcțiunea „' + (opt.functiune || '—') + '" nu a fost încă extras din textul oficial P118-1/2025 — se folosește o valoare implicită conservatoare (35 m / 15 m) până la extindere.' };
+      var entry = this.getMetaNormativ(idTabel);
+      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: idTabel };
+      var grad = String(opt.grad || 'II').toUpperCase();
+      var randuri = entry.valoare.randuri || [];
+      // Potrivire pe grad — randurile normativului grupeaza uneori 2 grade impreuna ("I si/sau II", "III si/sau IV")
+      var rand = randuri.filter(function (r) {
+        var niv = String(r.nivel_stabilitate || '');
+        return niv.indexOf(grad) >= 0 || niv.replace(/\s|si\/sau|și\/sau/gi, '').indexOf(grad) >= 0;
+      })[0] || randuri[randuri.length - 1];
+      return {
+        aplicabil: true, disponibil: !!rand, rand: rand || null,
+        norma: entry.titlu + ' (' + idTabel.replace('P118_1_2025_', '') + ', ' + entry.pagina + ')',
+        sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status, nota_majorare: entry.valoare.nota
+      };
+    },
+
+    // Dotarea cu stingatoare portative (Art. 3.1.7.1) — densitate FLATA (nu diferentiata pe risc,
+    // cum aproxima anterior js/25-ssi.js): 1 stingator/250mp, minim 2/nivel, 21A/113B.
+    getDensitateStingatoare: function () {
+      var entry = this.getMetaNormativ('Art_3_1_7_1_stingatoare');
+      if (!entry) return null;
+      return {
+        densitate_mp: entry.valoare.densitate_mp_per_stingator, minim_pe_nivel: entry.valoare.minim_pe_nivel,
+        performanta_minima: entry.valoare.performanta_minima, articol: entry.valoare.articol,
+        sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status
       };
     },
 

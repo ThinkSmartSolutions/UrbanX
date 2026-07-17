@@ -1739,6 +1739,11 @@
           : 'Numărul de căi de evacuare distincte (una sau mai multe scări) se stabilește funcție de regimul de înălțime, aria/ocupanța compartimentului și, dacă e cazul, prezența persoanelor cu capacitate de autoevacuare redusă (vezi 3.5) — nu se presupune o singură scară suficientă fără verificarea explicită a acestor praguri la faza de proiect tehnic.') + '</p>';
       })() },
       { h: '3.4.c. Geometria căilor de evacuare', html: (function () {
+        // FIX BUG REAL (Florin, 17 iul, prompt dedicat "modul evacuare SSI"): pana acum se folosea
+        // un fallback hardcodat 35/15m IDENTIC pt orice functiune, marcat onest "DE_COMPLETAT —
+        // articolul/tabelul exact neingerat". Extras acum direct din textul oficial P118-1/2025
+        // (8 tabele reale pe destinatie, vezi data/ssi/normative.json) — getLungimeEvacuare()
+        // (js/25-ssi-normative.js) alege tabelul corect pe D.functiune + gradul de stabilitate real.
         var FUNCTIUNI_PERSOANE_VULNERABILE = { gradinita: 1, 'centru-social': 1, medical: 1 };
         var areVulnerabili = !!FUNCTIUNI_PERSOANE_VULNERABILE[D.functiune] || (D._persoane_vulnerabile && D._persoane_vulnerabile.length);
         var esteResidentialIndiv = D.functiune === 'locuinta-individuala';
@@ -1746,7 +1751,16 @@
         var refugii = areVulnerabili
           ? '<b>Sunt necesare refugii per nivel</b> — proiectul are/poate avea persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5); amplasarea și dimensionarea refugiilor se stabilesc la faza de proiect tehnic, conform normativelor specifice categoriei (NP 051/2012, OMS 1955/1995 etc.).'
           : 'Nu sunt necesare refugii — nu sunt declarate persoane cu capacitate de autoevacuare redusă cu caracter permanent (vezi 3.5).';
-        return '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac), conform P118-1/2025 (DE_COMPLETAT — articolul/tabelul exact neingerat pe textul sursă oficial).</p>' +
+        var lungime = G.SSI_NORMATIVE_ENGINE.getLungimeEvacuare({ functiune: D.functiune, grad: grad });
+        var lungimeHtml;
+        if (lungime.aplicabil && lungime.disponibil) {
+          var r = lungime.rand;
+          var doua = r.lungime_doua_directii_m, fund = r.lungime_fund_de_sac_m;
+          lungimeHtml = '<p>Distanța maximă de evacuare admisă (' + esc(lungime.norma) + ', grad ' + esc(grad) + '): <b>' + doua + ' m</b> (traseu cu 2 direcții diferite) / <b>' + fund + ' m</b> (traseu fund de sac)' + (r.observatii ? ' — ' + esc(r.observatii) : '') + '.' + (lungime.nota_majorare ? ' <span style="font-size:9pt;color:#666">' + esc(lungime.nota_majorare) + '</span>' : '') + '</p>';
+        } else {
+          lungimeHtml = '<p>Distanța maximă de evacuare admisă: <b>' + (ac.dist_evacuare_2sensuri || 35) + ' m</b> (traseu cu 2 sensuri posibile) / <b>' + (ac.dist_evacuare_fundsac || 15) + ' m</b> (traseu fund de sac) — valoare implicită conservatoare. ' + esc(lungime.motiv || '') + '</p>';
+        }
+        return lungimeHtml +
           '<p>' + (esteResidentialIndiv
             ? 'Pentru o locuință unifamilială, traseul real (de la orice punct al unei camere până la ușa de ieșire din locuință) e cu mult sub aceste praguri, dat fiind aria redusă a compartimentului (' + arieRef + ').'
             : 'Traseul real de evacuare (de la punctul cel mai defavorabil până la ieșirea din compartiment) se verifică față de pragurile de mai sus, pe baza ariei/configurației compartimentului (' + arieRef + ').') + ' ' + refugii + '</p>';
@@ -1770,7 +1784,11 @@
           Nper = null;
           sursaN = 'necesită defalcare pe nivel (persoane/nivel), nu totalul clădirii';
           notaBloc = '<p style="font-size:9pt;color:#666">Verificarea F=N/C la un bloc se face <b>pe nivelul cel mai încărcat</b> (ocupanții unui singur nivel evacuează simultan prin casa de scări proprie) — capacitatea totală a blocului (' + (nrDormitoareBloc ? (nrDormitoareBloc * 2) + ' persoane, din ' + nrDormitoareBloc + ' dormitoare declarate' : (nrApartamente ? Math.round(nrApartamente * 3) + ' persoane estimat (' + nrApartamente + ' apartamente × 3 pers.)' : 'nedeterminată')) + ') nu se împarte corect la numărul de niveluri fără planul etajului tip — se stabilește la faza de proiect tehnic, pe baza numărului real de apartamente/dormitoare per nivel și a numărului de case de scări.</p>';
-        } else if (esteResidential) {
+        } else {
+          // FIX (17 iul): ramura lipsea pt orice functiune NEREZIDENTIALA (medical/birouri/mall/etc.)
+          // — Nper/rowLabel/sursaN ramaneau nedefinite, deci F=N/Uf nu se calcula NICIODATA in afara
+          // locuintei/blocului, chiar daca acum getCapacitateFluxEvacuare functioneaza si pt constructii
+          // noi (Tabelul 51). Acelasi fallback pe capacitatea declarata, generalizat la orice functiune.
           var capacitateDeclarata = D.capacitate_persoane || D.capacitate_declarata;
           Nper = capacitateDeclarata || null;
           rowLabel = destinatieT42;
@@ -1784,7 +1802,7 @@
           var C = cap.rand.capacitate_flux_persoane;
           var F = Math.ceil(Nper / C);
           out += tbl([[rowLabel, NperTxt, C + ' persoane (' + cap.norma + ')', '' + F, 'lățime utilă din proiect ≥ ' + modul + ' m (de verificat pe releveu)', F <= 1 ? 'DA (o singură cale/scară e suficientă)' : 'necesită ' + F + ' fluxuri — verifică lățimea totală a căilor']],
-            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Tabelul 150)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
+            ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C (Uf)', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
         } else {
           out += tbl([[rowLabel, NperTxt, cap.aplicabil ? 'nu se aplică (' + cap.motiv + ')' : 'nu se aplică (' + cap.motiv + ')', 'nedeterminat', 'modul de trecere ≥ ' + modul + ' m (uși/scară din proiect)', '—']],
             ['Nivel/Zonă evacuare', 'Nr. persoane N', 'Capacitate flux C', 'Fluxuri necesare F=N/C', 'Fluxuri asigurate (proiect)', 'Conform']);
