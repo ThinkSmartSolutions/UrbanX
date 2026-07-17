@@ -558,15 +558,24 @@
         Dproj.categorie_importanta = Dproj.categorie_importanta || pending.categorie_importanta;
         Dproj._detasament_isu = Dproj._detasament_isu || pending._detasament_isu;
       }
-      // Fallback (16 iul, Florin: "acest tipar de calcul, exact acesta, pe fiecare tip de functiuni"):
-      // daca nu exista NICIUN plan/relevee incarcat (deci nicio camera reala extrasa), sarcina termica
-      // nu mai ramane un text vag "conform destinatiei" — se estimeaza DIRECT din programul functional
-      // standard al functiunii (js/urbanx-space-program.js TIPOLOGII+SPACES), la fel cum vecinatatile
-      // se auto-detecteaza conservator din harta. Auto-estimeaza, nu bloca: draftul are mereu cifre
-      // reale calculate; utilizatorul confirma/corecteaza cu inventarul REAL cand il are.
-      if ((!Dproj._camere || !Dproj._camere.length) && G.SSI_SARCINA_TERMICA && Dproj.functiune) {
-        var estimateCamere = G.SSI_SARCINA_TERMICA.genereazaCamereStandard(Dproj.functiune, Dproj);
-        if (estimateCamere && estimateCamere.length) Dproj._camere = estimateCamere;
+      // Fallback in CASCADA (17 iul, Florin: "vreau sa calculeze automat in functie de relevee si
+      // planuri de mobilare: pe orice functiune"), de la sursa cea mai autoritara la cea mai generica:
+      // (1) camere reale extrase din PDF/DXF incarcat (deja aplicat mai sus, pending._camere);
+      // (2) geometria REALA din motorul de relevee (window._RV.floors — planul de nivel trasat/generat
+      //     in aplicatie pt acest proiect anume, w x h reale per camera, functioneaza pe orice functiune
+      //     fiindca releveul insusi e generic) — mai buna decat o estimare, fiindca e geometria proprie;
+      // (3) daca nici asta nu exista, estimare din programul functional standard al functiunii
+      //     (js/urbanx-space-program.js TIPOLOGII+SPACES), la fel cum vecinatatile se auto-detecteaza
+      //     conservator din harta. Auto-estimeaza, nu bloca: draftul are mereu cifre reale calculate;
+      //     utilizatorul confirma/corecteaza cu inventarul REAL cand il are.
+      if ((!Dproj._camere || !Dproj._camere.length) && G.SSI_SARCINA_TERMICA) {
+        var dinRelevee = G.SSI_SARCINA_TERMICA.dinRelevee && G.SSI_SARCINA_TERMICA.dinRelevee(G._RV && G._RV.floors);
+        if (dinRelevee && dinRelevee.length) {
+          Dproj._camere = dinRelevee;
+        } else if (Dproj.functiune) {
+          var estimateCamere = G.SSI_SARCINA_TERMICA.genereazaCamereStandard(Dproj.functiune, Dproj);
+          if (estimateCamere && estimateCamere.length) Dproj._camere = estimateCamere;
+        }
       }
       return orig(Dproj, v);
     };

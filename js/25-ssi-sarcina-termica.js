@@ -273,6 +273,36 @@
     return null;
   }
 
+  // Mapare tip camera din motorul de relevee (js/15-relevee.js, rects[].t) -> familie de continut
+  // combustibil. Sursa ASTA e mai buna decat genereazaCamereStandard() cand exista: geometria e cea
+  // REALA trasata de proiectant pentru acest proiect anume (w x h in metri per camera), nu o estimare
+  // generica din programul functional al tipului de cladire.
+  var MAP_TIP_RELEVEE = {
+    core: 'minim', hall: 'birou', reception: 'birou', office: 'birou', meeting: 'birou', commercial: 'depozitare',
+    bedroom: 'locuire', living: 'locuire', kitchen: 'alimentar', bath: 'sanitare', wc: 'sanitare',
+    storage: 'depozitare', balcon: 'minim'
+  };
+
+  // Genereaza camere din window._RV.floors (motorul de relevee — plan de nivel real trasat/generat in
+  // aplicatie, cu rects[]={t,x,y,w,h,lbl,apt}). Auto-estimeaza, nu blocheaza: functioneaza pe ORICE
+  // functiune, fiindca releveul insusi e generic (aceleasi chei t indiferent de tipul de cladire).
+  function dinRelevee(floors) {
+    if (!floors || !floors.length) return null;
+    var camere = [];
+    floors.forEach(function (floor, fi) {
+      (floor.rects || []).forEach(function (r) {
+        var arie = (+r.w || 0) * (+r.h || 0);
+        if (!arie || arie < 1) return; // exclude markere/dreptunghiuri degenerate (zIdx decorative etc.)
+        var familie = MAP_TIP_RELEVEE[r.t] || null;
+        var nume = String(r.lbl || r.t || 'Încăpere').replace(/\n/g, ' ').replace(/[🪜🛗]/g, '').trim() + ' — nivel ' + (fi + 1);
+        var c = calculeazaCamera({ nume: nume, arie_mp: Math.round(arie * 100) / 100, familie: familie }, {});
+        c.sursa_sarcina = 'relevee (plan de nivel real, geometrie trasată în platformă, nivel ' + (fi + 1) + ') — ' + c.sursa_sarcina;
+        camere.push(c);
+      });
+    });
+    return camere.length ? camere : null;
+  }
+
   // ---------------------------------------------------------------------------
   // 6. Calculul per încăpere — replică EXACTĂ a formulelor din Excel-ul sursă:
   //    G = Cantitate × Greutate;  I = G × Putere_calorică;  qi = ΣI / Arie
@@ -448,6 +478,7 @@
     incadreazaRisc: incadreazaRisc,
     calculeazaCamera: calculeazaCamera,
     genereazaCamereStandard: genereazaCamereStandard,
+    dinRelevee: dinRelevee,
     calculeazaTimpiInterventie: calculeazaTimpiInterventie
   };
   console.log('[SSI] motor sarcină termică (inventar complet încăpere) + timpi de intervenție ISU încărcat (window.SSI_SARCINA_TERMICA)');
