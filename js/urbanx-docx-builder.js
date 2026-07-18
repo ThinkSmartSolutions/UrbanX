@@ -1744,7 +1744,34 @@
           ? 'Pentru o locuință unifamilială cu regim redus (' + esc(D.regim || 'P+1E') + '), o singură scară interioară e suficientă și admisă normativ (nu se cere scară de evacuare exterioară separată).'
           : 'Numărul de căi de evacuare distincte (una sau mai multe scări) se stabilește funcție de regimul de înălțime, aria/ocupanța compartimentului și, dacă e cazul, prezența persoanelor cu capacitate de autoevacuare redusă (vezi 3.5) — nu se presupune o singură scară suficientă fără verificarea explicită a acestor praguri la faza de proiect tehnic.') + '</p>';
       })() },
-      { h: '3.4.c. Geometria căilor de evacuare', html: (function () {
+      { h: '3.4.c. Geometria căilor de evacuare: gabarite — lățimi, înălțimi, pante', html: (function () {
+        // ADAUGAT (Florin, 18 iul — a trimis un scenariu SSI real ca reper de completitudine, semnalat
+        // GOL REAL: sectiunea veche "3.4.c" trata doar LUNGIMILE de evacuare, nu si gabaritele
+        // (latimi/inaltimi/pante) — un subpunct DISTINCT si obligatoriu conform Ord. 180/2022 Anexa 4.
+        // Foloseste date REALE din releveu/DXF daca sunt declarate (D._usi/D._rampe, acelasi model de
+        // date ca js/15-ux-compliance-engine.js), cu fallback onest pe minimele normative P118-1/2025
+        // (fost P118-99, art. 2.6.68/2.6.18/3.6.8) cand nu exista inca un tablou de tamplarie declarat.
+        var usi = (D._usi || []).filter(function (u) { return u.evacuare !== false; });
+        var rampe = (D._rampe || []).filter(function (r) { return r.type === 'RAMPA' || r.slope != null; });
+        var modulFlux = ac.flux_evacuare_m || 0.60;
+        var latimeHtml;
+        if (usi.length) {
+          var subMin = usi.filter(function (u) { return (+u.width || 0) > 0 && (+u.width) < modulFlux; });
+          latimeHtml = '<p>Lățimea utilă a căilor de evacuare declarate (' + usi.length + ' uși pe trasee de evacuare, din releveu): minim <b>' + Math.min.apply(null, usi.map(function (u) { return +u.width || 99; })) + ' m</b>, maxim <b>' + Math.max.apply(null, usi.map(function (u) { return +u.width || 0; })) + ' m</b> — comparativ cu modulul de flux normat (' + modulFlux + ' m/flux, vezi 3.4.d pentru numărul de fluxuri necesar).' + (subMin.length ? ' <b style="color:#dc2626">' + subMin.length + ' ușă/uși sub modulul minim de flux — de verificat numărul de fluxuri alocat fiecăreia.</b>' : '') + '</p>';
+        } else {
+          latimeHtml = '<p>Lățimea utilă minimă a căilor de evacuare rezultă din numărul de fluxuri alocat fiecărei uși/culoar (modul ' + modulFlux + ' m/flux, vezi 3.4.d) — tabloul de tâmplărie (lățimi reale pe uși) nu este încă declarat pentru acest proiect (D._usi); se completează din planul de arhitectură/releveu la faza de proiect tehnic.</p>';
+        }
+        var inaltimeHtml = '<p>Înălțimea liberă (utilă) pe căile de evacuare: minimum <b>2,00 m</b> (P118-1/2025, fost art. 2.6.68 P118-99)' + (D.H_liber_evacuare ? ', valoare reală declarată: <b>' + D.H_liber_evacuare + ' m</b>' : ', de confirmat din secțiunile/planul de arhitectură la faza de proiect tehnic') + '. Pragurile de la uși nu vor depăși <b>2,5 cm</b> înălțime (P118-1/2025, fost art. 2.6.18 P118-99).</p>';
+        var panteHtml;
+        if (rampe.length) {
+          panteHtml = '<p>Pante rampe declarate (' + rampe.length + '): ' + rampe.map(function (r) { return (r.name || 'rampă') + ' — ' + ((+r.slope || 0) * 100).toFixed(1) + '%' + (r.width ? ', lățime ' + r.width + ' m' : ''); }).join('; ') + ' — pragul normativ este <b>maximum 8%</b> pentru rampele de acces persoane cu dizabilități (NP 051/2012, art. 4.5).' + (rampe.some(function (r) { return (+r.slope || 0) > 0.08; }) ? ' <b style="color:#dc2626">Cel puțin o rampă depășește pragul de 8%.</b>' : '') + '</p>';
+        } else {
+          panteHtml = '<p>Dacă proiectul prevede rampe pe traseele de evacuare/acces (inclusiv acces persoane cu dizabilități), panta acestora nu va depăși <b>8%</b> (NP 051/2012, art. 4.5) — nicio rampă declarată încă pentru acest proiect (D._rampe).</p>';
+        }
+        return latimeHtml + inaltimeHtml + panteHtml +
+          '<p>Ușile de pe traseele de evacuare se deschid în sensul deplasării spre exterior (P118-1/2025, fost art. 3.6.8 P118-99), cu dispozitive de autoînchidere pentru cele rezistente la foc — vezi 3.4.e. Iluminatul de securitate pentru identificarea traseului pe timpul întreruperii iluminatului normal — vezi 4.10.</p>';
+      })() },
+      { h: '3.4.c.1. Timpii/lungimile de evacuare', html: (function () {
         // FIX BUG REAL (Florin, 17 iul, prompt dedicat "modul evacuare SSI"): pana acum se folosea
         // un fallback hardcodat 35/15m IDENTIC pt orice functiune, marcat onest "DE_COMPLETAT —
         // articolul/tabelul exact neingerat". Extras acum direct din textul oficial P118-1/2025
@@ -1825,6 +1852,15 @@
         out += (cladiriPropuse.length > 1 && D.functiune === 'locuinta-individuala' ? '<p style="font-size:9pt;color:#666">Verificarea de mai sus se aplică identic fiecărei unități a ansamblului (fluxul de evacuare e per compartiment/unitate, nu însumat pe ansamblu) — fiecare unitate evacuează independent, prin propriile căi.</p>' : '');
         return out;
       })() },
+      { h: '3.4.e. Dispozitive de siguranță la uși', html: (function () {
+        var usiRF = (D._usi || []).filter(function (u) { return u.rezistentaFoc || u.rf; });
+        var areAglomerare = (+D.capacitate_persoane || 0) >= 200 || (ac.categorie_importanta && /^A|^B/.test(ac.categorie_importanta));
+        return '<p>Ușile rezistente la foc de pe traseele de evacuare' + (usiRF.length ? ' (' + usiRF.length + ' declarate)' : '') + ' se prevăd cu dispozitive de autoînchidere sau închidere automată în caz de incendiu, conform funcțiunii elementului de compartimentare pe care îl echipează (vezi 3.1).</p>' +
+          '<p>' + (areAglomerare
+            ? 'Dat fiind capacitatea/categoria de importanță a proiectului, ușile de evacuare de pe traseele principale se echipează cu <b>dispozitive de tip bară antipanică</b> (SR EN 1125), pentru deschidere rapidă fără manevre complexe, sub presiunea fluxului de evacuare.'
+            : 'Pentru configurația/capacitatea declarată a proiectului, dispozitivele de tip bară antipanică nu sunt impuse cu caracter obligatoriu de o normă generică — se recomandă totuși la ușile cu flux mare de persoane; decizia finală revine proiectului de arhitectură/tâmplărie.') + '</p>';
+      })() },
+      { h: '3.4.f. Marcarea căilor de evacuare', html: '<p>Căile de evacuare se marchează cu indicatoare de securitate conform <b>SR ISO 6309</b> (Protecția împotriva incendiilor — Indicatoare de securitate) și standardelor de referință STAS 297/1-88 și STAS 297/2-92, armonizate cu Directiva 92/58/CEE. Indicatoarele se amplasează astfel încât, din orice punct al traseului, cel puțin un indicator să fie vizibil, iar traseul spre ieșire să fie neambiguu. Pe timpul întreruperii iluminatului normal, identificarea căilor/indicatoarelor se asigură prin <b>iluminat de securitate pentru evacuare</b> (vezi 4.7).</p>' },
       { h: '3.5. Măsuri pentru accesul și evacuarea copiilor, persoanelor cu dizabilități, bolnavilor și altor categorii care nu se pot evacua singure', html: (function () {
         // Extindere multi-functiune (Florin, 12 iul): pt destinatiile care AU institutional persoane
         // vulnerabile (cresa/gradinita, centru social, medical), nu se mai asteapta ca utilizatorul sa
@@ -1930,6 +1966,15 @@
           { cheie: 'presiune', eticheta: 'Presiune (bar)' }, { cheie: 'sursa_apa', eticheta: 'Sursa de alimentare cu apă, cu volumul rezervei' },
           { cheie: 'grup_pompare', eticheta: 'Caracteristici funcționale ale grupului de pompare' }
         ], D, valPreset);
+      })() },
+      { h: '4.2.a. Coloane uscate', html: (function () {
+        var det = G.SSI_NORMATIVE_ENGINE && G.SSI_NORMATIVE_ENGINE.getColoaneUscateObligativitate ? G.SSI_NORMATIVE_ENGINE.getColoaneUscateObligativitate(D, ac) : null;
+        var text = '<p>Necesitatea echipării se stabilește conform <b>P118/2-2013, Art. 5.2</b> (4 cazuri explicite: clădiri înalte/foarte înalte/săli aglomerate >2 niveluri, parcaje >4 niveluri, subterane Ac>600m²+2 niveluri, producție/depozitare >5 niveluri). Concluzie: <b>' + (det && det.oblig ? 'ECHIPARE NECESARĂ' : 'NU ESTE NECESARĂ') + '</b>' + (det ? ' — ' + esc(det.articol) + ': ' + esc(det.motiv) + '.' : '') + '</p>';
+        if (det && det.oblig && det.valoare) text += '<p>Parametri normați (Art. 5.4-5.6): distanță maximă cale de acces → racord de alimentare <b>' + det.valoare.distanta_max_acces_racord_m + ' m</b>; racord Storz Dn' + det.valoare.diametru_cuplaj_storz_mm + 'mm, montat la maximum <b>' + det.valoare.inaltime_max_racord_m + ' m</b> înălțime, înclinare ' + det.valoare.inclinare_racord_grade + '° față de verticală; coloană independentă per compartiment de incendiu, montată în casa scării.</p>';
+        return text + _tblCampuriInstalatie(det ? det.oblig : null, 'coloane_uscate', [
+          { cheie: 'nr_coloane', eticheta: 'Număr de coloane uscate' }, { cheie: 'diametru', eticheta: 'Diametrul coloanei' },
+          { cheie: 'amplasare', eticheta: 'Amplasare (casă de scări/ghenă adiacentă)' }
+        ], D);
       })() },
       { h: '4.3. Instalații automate de stingere cu sprinklere', html: '<p>Necesitatea echipării se stabilește conform cap. 7 din P118/2-2013, funcție de destinație, categorie de importanță, arie desfășurată, volum și regim de înălțime reale. Concluzie: <b>' + (ac.sprinklere_oblig ? 'OBLIGATORII (Sc&gt;3.000 m² / H&gt;28m)' : 'NU ESTE NECESARĂ') + '</b>.</p>' +
         _tblCampuriInstalatie(ac.sprinklere_oblig, 'sprinklere', [

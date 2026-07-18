@@ -2436,5 +2436,45 @@
       },
       "presiune_minima_bar_art_6_30": 0.7
     }
+  },
+  "P118_2_2013_Art_5_2_coloane_uscate_oblig": {
+    "id": "P118_2_2013_Art_5_2_coloane_uscate_oblig",
+    "titlu": "Echiparea constructiilor cu coloane uscate - cazuri obligatorii",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 595 bis/24.IX.2013 (Normativ P118/2-2013, aprobat prin Ordinul viceprim-ministrului MDRAP nr. 2463/2013)",
+    "pagina": "22",
+    "data_extractie": "2026-07-18",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz)",
+    "status": "extras_verificat_partial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "cazuri": [
+        {
+          "lit": "a",
+          "text": "Cladiri civile inalte si foarte inalte, precum si cladiri cu sali aglomerate cu peste 2 niveluri supraterane"
+        },
+        {
+          "lit": "b",
+          "text": "Parcaje supraterane inchise sau deschise cu peste 4 niveluri, parcaje subterane conform reglementarii specifice"
+        },
+        {
+          "lit": "c",
+          "text": "Cladiri civile subterane cu Ac>600mp si 2+ niveluri subterane"
+        },
+        {
+          "lit": "d",
+          "text": "Constructii de productie si/sau depozitare cu peste 5 niveluri supraterane"
+        }
+      ],
+      "distanta_max_acces_racord_m": 40,
+      "inaltime_max_racord_m": 1.5,
+      "inclinare_racord_grade": 45,
+      "diametru_cuplaj_storz_mm": 65
+    }
   }
 }

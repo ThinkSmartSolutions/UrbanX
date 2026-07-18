@@ -332,6 +332,22 @@
     getHidrantiInteriorObligativitate: function (d, ac) { return this._hidrantiCriterii(d || {}, ac || {}, 'int'); },
     getHidrantiExteriorObligativitate: function (d, ac) { return this._hidrantiCriterii(d || {}, ac || {}, 'ext'); },
 
+    // Obligativitatea coloanelor uscate (P118/2-2013, Art. 5.2 — 4 cazuri explicite, 18 iul).
+    getColoaneUscateObligativitate: function (d, ac) {
+      d = d || {}; ac = ac || {};
+      var entry = this.getMetaNormativ('P118_2_2013_Art_5_2_coloane_uscate_oblig');
+      var norma = entry ? (entry.titlu + ' (' + entry.pagina + ')') : 'P118_2_2013_Art_5_2';
+      function res(oblig, motiv, litera) { return { oblig: oblig, motiv: motiv, articol: 'Art. 5.2' + (litera ? ' lit. ' + litera : ''), norma: norma, sursa_url: entry && entry.sursa_url, pagina: entry && entry.pagina, status_validare: entry && entry.status, valoare: entry && entry.valoare }; }
+      var niv = Math.max(1, +d.niv_supraterane || 1), nivSub = +d.niv_subterane || 0, Sc = +d.Sc || 0;
+      var H = +d.H || (niv > 1 ? niv * 3 : 0);
+      var cap = +d.capacitate_persoane || 0;
+      if ((H > 28 || cap >= 200) && niv > 2) return res(true, 'clădire înaltă/foarte înaltă sau sală aglomerată, peste 2 niveluri supraterane', 'a');
+      if (d.functiune === 'parcare' && niv > 4) return res(true, 'parcaj supraterane, peste 4 niveluri', 'b');
+      if (nivSub >= 2 && Sc > 600) return res(true, 'clădire civilă subterană, Ac>600m² și 2+ niveluri subterane', 'c');
+      if (['hala-industriala', 'skid', 'agricol'].indexOf(d.functiune) >= 0 && niv > 5) return res(true, 'producție/depozitare, peste 5 niveluri supraterane', 'd');
+      return res(false, 'nu se încadrează în niciunul din cazurile explicite ale Art. 5.2 pentru configurația declarată a proiectului', null);
+    },
+
     // Numarul de jeturi in functiune simultana + debitul de calcul pt hidranti interiori (Anexa 3,
     // P118/2-2013) — potrivire pe functiune + volum estimat (Sd × h_nivel), NU o valoare fixa DA/NU.
     getJeturiHidrantiInteriori: function (opt) {
