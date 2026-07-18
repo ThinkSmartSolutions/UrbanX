@@ -3566,5 +3566,58 @@
       "art_8_5_8_obligativitate_cladiri_inalte": "La cladirile inalte sau foarte inalte: casele de scari inchise si incaperile tampon SE PUN OBLIGATORIU in suprapresiune — proiectare/calcul conform SR EN 12101-13 si SR EN 12101-6.",
       "art_8_5_7_9_criterii_presiune": "Presiune pe usi circulatii orizontale <= 80 Pa (art. 8.5.7 alin.1); presiune pe usi degajamente/incaperi tampon/case scari conform SR EN 12101-13/12101-6 (alin.2); viteza aer >= 1 m/s la usile de acces nivel incendiat si acces scara din exterior (art. 8.5.9 alin.2); presiune casa scara >= 5 Pa peste spatiile presurizate adiacente (alin.3)."
     }
+  },
+  "P118_1_2025_T143": {
+    "id": "P118_1_2025_T143",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": null,
+    "titlu": "Caracteristici ale substantelor si materialelor ce determina incadrarea in riscuri de incendiu a spatiilor de productie si/sau depozitare existente (categoriile A-E)",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025), Anexa A.10, Art. A.10.2.1.4-A.10.2.1.5",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "agent de cercetare cu acces la PDF-ul oficial cached (a2t.ro mirror), extragere text-layer + cross-verificare interna (Art.2.1.2.5 vs Anexa 8, A.10.5.1.1 vs A.10.2.1.4-7 vs Tabelul 168)",
+    "data_extractie": "2026-07-19",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 143, coroborat cu Art. A.10.2.1.4-A.10.2.1.5",
+      "nota_importanta": "Aceste litere A-E sunt DEFINITE explicit DOAR pt constructii EXISTENTE (Anexa A.10). Pentru constructii NOI, P118-1/2025 (corpul principal) NU mai foloseste sistemul de litere A-E - clasificarea operativa e riscul de incendiu pe 4 niveluri (mic/mijlociu/mare/foarte mare) din densitatea sarcinii termice, Art. 2.1.2.2 + Tabelul 132 (Anexa 8.1). A-E ramane relevant pt constructii noi doar ca referinta convenționala catre alte normative care inca il citeaza (ex. I20-2000 paratrasnet).",
+      "categorii": [
+        {
+          "litera": "A",
+          "cod": "BE3a",
+          "risc": "foarte mare",
+          "criteriu": "Lichide cu temperatura de inflamabilitate a vaporilor pana la 28 grade C, gaze sau vapori cu limita inferioara de explozie pana la 10%, atunci cand acestea pot forma cu aerul amestecuri explozive."
+        },
+        {
+          "litera": "B",
+          "cod": "BE3b",
+          "risc": "foarte mare",
+          "criteriu": "Lichide cu temperatura de inflamabilitate a vaporilor cuprinsa intre 28 si 100 grade C, gaze sau vapori cu limita inferioara de explozie mai mare de 10%. Fibre, praf sau pulberi in cantitati ce pot forma cu aerul amestecuri explozive."
+        },
+        {
+          "litera": "C",
+          "cod": "BE2",
+          "risc": "mare",
+          "criteriu": "Substante si materiale combustibile solide. Lichide cu temperatura de inflamabilitate a vaporilor mai mare de 100 grade C.",
+          "override": "Daca densitatea sarcinii termice > 105 MJ/mp, riscul devine foarte mare/mare per notele tabelului."
+        },
+        {
+          "litera": "D",
+          "cod": "BE1a",
+          "risc": "mijlociu",
+          "criteriu": "Substante sau materiale incombustibile in stare fierbinte, topite sau incandescente, sau foc deschis sub orice forma, in absenta substantelor combustibile."
+        },
+        {
+          "litera": "E",
+          "cod": "BE1b",
+          "risc": "mic",
+          "criteriu": "Substante sau materiale incombustibile, in stare rece, sau materiale combustibile in stare de umiditate inaintata (peste 80%), astfel incat posibilitatea aprinderii lor este exclusa."
+        }
+      ]
+    }
   }
 }
