@@ -162,28 +162,54 @@
     else { out.clasa_importanta = 'III'; out.gamma_I = 1.0; }
     if (d.functiune === 'pod') { out.clasa_importanta = 'III (SR EN 1998-2)'; out.gamma_I = 1.3; }
     if (d.functiune === 'medical' || d.functiune === 'skid') { out.gamma_I = 1.4; out.clasa_importanta = (d.functiune === 'skid' ? 'II-III' : 'I-II'); }
-    // Categoria de importanță (HG 766/1997, Anexa 3, art. 5-6 + Metodologia MLPAT de stabilire a
-    // categoriei de importanță) — CLASIFICARE CALITATIVĂ pe baza exemplificărilor explicite din
-    // normativ/metodologie (17 iul, cercetat live): sursa oficială a metodologiei (tabelul de
-    // punctaj pe 6 factori determinanți × 3 criterii, formula P(n)=[p(i)+p(ii)+p(iii)]×k(n)/3, cu
-    // p(i)∈{0,1,2,4,6}) e disponibilă DOAR ca document scanat (fără strat de text OCR) — valorile
-    // exacte de prag ale Tabelului 3 nu au putut fi verificate cu certitudine deplină, deci NU se
-    // calculează formula de punctaj (ar însemna cifre neverificate). În schimb se aplică direct
-    // exemplificările calitative consacrate ale categoriilor A/B (confirmate din normativ/practică):
-    // A = spitale cu urgențe, sedii ISU, stații producție/distribuție energie electrică, clădiri cu
-    //     materiale radioactive, adăposturi protecție civilă, turnuri telecomunicații;
-    // B = spitale fără urgențe, școli/licee, clădiri multietajate >300 persoane, clădiri parter
-    //     (inclusiv mall-uri) >1000 persoane, rezervoare materiale inflamabile;
-    // C = blocuri de locuințe, clădiri industriale obișnuite (implicit, fără alt criteriu aplicabil);
-    // D = locuințe unifamiliale P, structuri mici. Categoria FINALĂ rămâne mereu responsabilitatea
-    // proiectantului (art. 7) — clasificarea de mai jos e un PUNCT DE PORNIRE, nu o valoare definitivă.
-    var CATEG_A_ENERGIE = ['bess', 'skid', 'statie-transformare'];
+    // Categoria de importanță (HG 766/1997, Anexa 3, art. 5-6 + Metodologia M.L.P.A.T. nr. 31/N/1995
+    // de stabilire a categoriei de importanță) — FORMULĂ DE PUNCTAJ REALĂ (19 iul, verificată prin
+    // agent de cercetare pe sursa oficială mdlpa.ro, text citit vizual pagină cu pagină, cross-verificat
+    // cu al 2-lea document independent + 2 exemple oficiale re-calculate manual: Bloc de locuințe
+    // București → 12 → C; Reactor nuclear Cernavodă → 31 → A — formula confirmă exact):
+    //   P(n) = k(n) × [p(i)+p(ii)+p(iii)] / 3, rotunjit la întreg ÎN PLUS (art. 17), pt fiecare din cei
+    //   6 factori determinanți; k(n)=1 implicit (poate fi supraunitar, max 2, doar la caracter unic/
+    //   monument — nu se aplică aici); scala universală p(i)∈{0,1,2,4,6} (Tabelul 2: inexistent/redus/
+    //   mediu/apreciabil/ridicat). Categoria finală (Tabelul 3): A ≥30, B 18-29, C 6-17, D ≤5.
+    // Punctajele per-criteriu de mai jos sunt o ESTIMARE CONSERVATOARE din datele deja disponibile
+    // (capacitate, vulnerabilitate, risc incendiu, funcțiune, arie, zonă seismică) — proiectantul
+    // atestat confirmă/corectează fiecare valoare (auto-estimare, nu blocare), conform art. 7 al
+    // Regulamentului care lasă încadrarea finală în sarcina sa.
     var capOc = +d.capacitate_persoane || 0;
-    if (CATEG_A_ENERGIE.indexOf(d.functiune) >= 0) out.categorie_importanta = 'A — excepțională';
-    else if (d.functiune === 'medical' || d.functiune === 'pod' || d.functiune === 'scoala' || d.functiune === 'gradinita' || d.functiune === 'mall'
-      || (capOc > 300 && niv >= 2) || (capOc > 1000 && niv <= 1)) out.categorie_importanta = 'B — deosebită';
-    else if (d.functiune === 'locuinta-individuala' || d.functiune === 'infrastructura-drum') out.categorie_importanta = 'D — redusă';
-    else out.categorie_importanta = 'C — normală';
+    var esteVulnerabil = ['medical', 'gradinita', 'centru-social'].indexOf(d.functiune) >= 0;
+    var riscMap = { mic: 0, mediu: 2, mare: 4, foarte_mare: 6 };
+    var riscPct = riscMap.hasOwnProperty(out.risc_incendiu) ? riscMap[out.risc_incendiu] : 2;
+    var CATEG_ENERGIE_STRATEGICA = ['bess', 'skid', 'statie-transformare'];
+    var esteEnergieStrategica = CATEG_ENERGIE_STRATEGICA.indexOf(d.functiune) >= 0;
+    var esteAglomerarePublica = ['mall', 'spatiu-comercial', 'sport', 'scoala', 'gradinita', 'hotelier', 'medical'].indexOf(d.functiune) >= 0;
+    var esteIndustrialEnergie = ['hala-industriala', 'bess', 'skid', 'statie-transformare'].indexOf(d.functiune) >= 0;
+    function _pctCap(prag1, prag2, prag3) { return capOc >= prag3 ? 6 : capOc >= prag2 ? 4 : capOc >= prag1 ? 2 : capOc > 0 ? 1 : 0; }
+    var _factoriImportanta = [
+      { nume: 'Importanța vitală', crit: ['oameni implicați direct în caz de disfuncții', 'oameni implicați indirect', 'caracterul evolutiv al efectelor periculoase'],
+        p: [esteVulnerabil ? 6 : _pctCap(50, 300, 1000), esteVulnerabil ? 4 : (niv >= 5 ? 2 : niv >= 2 ? 1 : 0), riscPct] },
+      { nume: 'Importanța social-economică și culturală', crit: ['mărimea comunității / valoarea bunurilor adăpostite', 'ponderea funcțiunii în comunitate', 'natura și importanța funcțiunii'],
+        p: [_pctCap(100, 500, 2000), esteAglomerarePublica ? 4 : (d.functiune === 'locuinta-individuala' ? 0 : 2), esteEnergieStrategica ? 6 : esteAglomerarePublica ? 4 : 2] },
+      { nume: 'Implicarea ecologică', crit: ['perturbarea mediului la realizare/exploatare', 'gradul de influență nefavorabilă asupra mediului', 'rolul activ în protejarea/refacerea mediului'],
+        p: [esteIndustrialEnergie ? 4 : 1, esteIndustrialEnergie ? 4 : d.functiune === 'infrastructura-drum' ? 2 : 1, esteIndustrialEnergie ? 2 : 0] },
+      { nume: 'Durata de utilizare (existența)', crit: ['durata de utilizare preconizată', 'dependența alcătuirilor constructive de evoluția acțiunilor', 'dependența performanțelor funcționale de evoluția cerințelor'],
+        p: [2, 2, 2] },
+      { nume: 'Adaptarea la condițiile locale de teren și de mediu', crit: ['dependența soluțiilor constructive de condițiile de teren/mediu', 'evoluția defavorabilă în timp a condițiilor locale', 'măsuri deosebite de exploatare impuse de condițiile locale'],
+        p: [out.seismic && out.seismic.ag >= 0.30 ? 4 : out.seismic && out.seismic.ag >= 0.20 ? 2 : 1, 1, out.seismic && out.seismic.ag >= 0.30 ? 2 : 1] },
+      { nume: 'Volumul de muncă și de materiale necesare', crit: ['ponderea volumului de muncă și materiale înglobate', 'complexitatea activităților de menținere a performanțelor', 'activități deosebite în exploatare impuse de funcțiuni'],
+        p: [Sc >= 5000 ? 6 : Sc >= 1500 ? 4 : Sc >= 300 ? 2 : 1, niv >= 5 ? 4 : niv >= 2 ? 2 : 1, esteIndustrialEnergie || esteVulnerabil ? 2 : 1] }
+    ];
+    var _totalPunctaj = 0;
+    _factoriImportanta.forEach(function (f) { f.Pn = Math.ceil((f.p[0] + f.p[1] + f.p[2]) / 3); _totalPunctaj += f.Pn; });
+    out.categorie_importanta_detaliu = { factori: _factoriImportanta, total: _totalPunctaj };
+    if (_totalPunctaj >= 30) out.categorie_importanta = 'A — excepțională';
+    else if (_totalPunctaj >= 18) out.categorie_importanta = 'B — deosebită';
+    else if (_totalPunctaj >= 6) out.categorie_importanta = 'C — normală';
+    else out.categorie_importanta = 'D — redusă';
+    // Corecție de siguranță: funcțiunile cu exemplificare explicită A/B în practica MLPAT (energie
+    // strategică, medical/vulnerabil) nu coboară sub pragul lor consacrat chiar dacă punctajul
+    // estimat conservator ar ieși marginal mai mic — proiectantul poate desigur recalcula exact.
+    if (esteEnergieStrategica && _totalPunctaj < 30) out.categorie_importanta = 'A — excepțională (corecție: exemplificare explicită metodologie MLPAT pt. energie strategică)';
+    else if (esteVulnerabil && _totalPunctaj < 18) out.categorie_importanta = 'B — deosebită (corecție: exemplificare explicită metodologie MLPAT pt. persoane vulnerabile)';
     // Factor de comportare q (funcție de sistemul structural)
     var qmap = { metalica: 4.0, beton: 3.0, prefabricat: 3.0, mixt: 3.0, zidarie: 2.5, lemn: 2.5, lsf: 2.0, usoara: 1.5 };
     out.factor_q = qmap[(d.struct || fn.struct)] || 3.0;

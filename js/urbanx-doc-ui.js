@@ -138,6 +138,9 @@
       form.appendChild(section('1', 'Identificare proiect', [fld('Nume proiect', 'nume', 'manual'), fld('Beneficiar', 'beneficiar', 'manual'), fld('Proiectant', 'proiectant', 'manual'), fld('Faza de proiectare', 'faza', 'select', { options: FAZE })]));
       form.appendChild(section('2–3', 'Teren + Certificat de Urbanism', [fld('Nr. cadastral', 'nrcad', 'manual'), fld('UAT / localitate', 'uat', 'manual'), fld('Județ', 'judet', 'manual', { ph: 'ex: Iași' }), fld('Suprafață teren (mp)', 'Steren', 'manual', { type: 'number' }), fld('Nr. CU', 'nrCU', 'manual'), gf('POT max (%)', 'POT_max', 'manual', { type: 'number' }), gf('CUT max', 'CUT_max', 'manual', { type: 'number' }), gf('Înălțime max din CU (m)', 'H_max', 'manual', { type: 'number', ph: 'ex: 10' }), gf('Nr. max niveluri (CU)', 'niv_max', 'manual', { type: 'number', ph: 'ex: 2' }), gf('Aliniament/față min. (m)', 'retragere_fata_min', 'manual', { type: 'number' }), gf('Retragere laterală min. (m)', 'retragere_lateral_min', 'manual', { type: 'number' }), gf('Retragere spate min. (m)', 'retragere_spate_min', 'manual', { type: 'number' })].filter(Boolean)));
       var _isEnergie = (D.functiune === 'parc-fotovoltaic'); // câmpurile de putere/montaj FV doar la parc fotovoltaic
+      var _esteHotel = (D.functiune === 'hotelier');
+      var _esteParcare = (D.functiune === 'parcare');
+      var _esteMedical = (D.functiune === 'medical');
       form.appendChild(section('4–5', 'Construcție propusă', [
         fld('Funcțiune propusă', 'functiune', 'select', { options: fnOpts })
       ].concat(_isEnergie ? [
@@ -171,8 +174,20 @@
         gf('Retragere spate propusă (m)', 'retragere_spate', 'manual', { type: 'number' }),
         gf('Parcaje propuse', 'parcaje_propuse', 'manual', { type: 'number' }),
         gf('POT propus', 'POT', 'auto'), gf('CUT propus', 'CUT', 'auto'),
-        gf('Parcaje necesare', 'parcaje_necesare', 'auto'), gf('Spații verzi min.', 'sv', 'auto')
-      ].filter(Boolean))));
+        gf('Parcaje necesare', 'parcaje_necesare', 'auto'), gf('Spații verzi min.', 'sv', 'auto'),
+        // Capacitate de persoane — folosită de motorul PSI (IDSAI/aglomerări, HG 571/2016 praguri
+        // de capacitate la hotel/sport/parcaj, HG 766/1997 categoria de importanță factor 1) și
+        // absentă complet din formular pana acum (câmp consumat de motor, dar niciodată introdus
+        // prin UI — găsit 19 iul, audit "nu lăsa ceva neacoperit").
+        gf('Capacitate de persoane (utilizatori simultan)', 'capacitate_persoane', 'manual', { type: 'number', ph: 'ex: 150' })
+      ].filter(Boolean).concat(_esteHotel ? [
+        fld('Nr. camere cazare (hotel)', 'nr_camere_cazare', 'manual', { type: 'number', ph: 'HG 571/2016: prag 8 camere' }),
+        fld('Nr. locuri cazare (hotel)', 'nr_locuri_cazare', 'manual', { type: 'number', ph: 'HG 571/2016: prag 16 locuri' })
+      ] : []).concat(_esteParcare ? [
+        fld('Nr. locuri de parcare proiectate', 'nr_locuri_parcare', 'manual', { type: 'number', ph: 'HG 571/2016: prag 10 autoturisme; gol = estimare din Sd' })
+      ] : []).concat(_esteMedical ? [
+        fld('Tip unitate medicală', 'tip_medical', 'select', { options: [['spitalizare_continua', 'Spitalizare continuă (spital/secție cu paturi) — HG 571/2016: fără prag de arie'], ['ambulatoriu', 'Dispensar/policlinică (fără paturi de internare) — HG 571/2016: prag 600 mp']] })
+      ] : []))));
       // Multi-corp (opțional): doar la clădiri (nu are sens la parc FV / pod)
       if (PROFIL === 'cladire') (function () {
         var sc = el('div', { style: 'margin-bottom:16px' });

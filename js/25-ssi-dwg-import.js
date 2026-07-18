@@ -23,7 +23,12 @@
     constructie_existenta: ['EXISTENT', 'CONSTRUCTIE_EXISTENTA', 'C_EXIST'],
     constructie_propusa: ['PROPUS', 'CONSTRUCTIE_PROPUSA', 'C_PROP', 'VOLUM_PROIECTAT'],
     acces_auto_speciale: ['ACCES_POMPIERI', 'ACCES_AUTOSPECIALE', 'DRUM_INTERVENTIE'],
-    cote_nivel: ['COTE', 'COTA_TEREN', 'NIVELMENT']
+    cote_nivel: ['COTE', 'COTA_TEREN', 'NIVELMENT'],
+    // ADAUGAT (18 iul, gap real gasit prin audit dedicat: "aliniamente" nu avea NICIUN cod de extractie,
+    // doar camp manual). Linia de aliniament (frontul stradal fata de care se masoara retragerea min.
+    // impusa de PUG/RLU) e desenata uzual ca o linie/polilinie deschisa distincta de limita de proprietate
+    // (care e un poligon inchis al INTREGII parcele) — layer separat, cautat generic.
+    aliniament: ['ALINIAMENT', 'LINIE_ALINIAMENT', 'ALINIAMENT_STRADAL', 'ALINIERE']
   };
 
   function detectFormat(file) {
@@ -74,16 +79,34 @@
     var scaraInfo = _detecteazaScaraMetri(pairs);
     var SC = scaraInfo.scara;
     var entities = [];
+    // FIX BUG REAL (18 iul, gasit prin audit dedicat: "block/BLOCK-definition entities are not
+    // excluded... o entitate care exista DOAR in definitia unui bloc (sectiunea BLOCKS) era parsata
+    // ca geometrie reala plasata in desen" — parserul vechi nu urmarea in ce SECTIUNE se afla).
+    // Acum: entitatile din sectiunea BLOCKS se colecteaza SEPARAT (per nume de bloc), NU in lista
+    // principala "entities" — elimina geometria fantoma. Entitatile INSERT raman in lista principala
+    // (asa cum erau si inainte), acum insa cu rotatie/scara capturate, pt rezolvarea reala a blocului
+    // (vezi rezolvaTamplarieDinBlocuri mai jos) — comportamentul vechi (entities/layers/nrEntitati din
+    // ENTITIES) ramane IDENTIC pt tot codul existent (rezistenta la regresii).
+    var blocuri = {}; // nume_bloc -> { entitati: [...], bazaX, bazaY }
+    var sectiuneCurenta = null; // 'ENTITIES' | 'BLOCKS' | alta | null
+    var blocCurent = null; // numele blocului in curs de definire (intre "0 BLOCK" si "0 ENDBLK")
     var i = 0, n = pairs.length;
     var cur = null; // entitate curenta in constructie
     var curVerts = null; // pentru LWPOLYLINE: acumulare {x,y}
     var pendingVertex = null; // pentru POLYLINE/VERTEX clasic (format vechi)
 
+    function _listaTinta() {
+      // in BLOCKS, cu un bloc curent activ -> lista PROPRIE a blocului (nu geometrie reala plasata);
+      // altfel (ENTITIES sau necunoscut) -> lista principala, comportament neschimbat.
+      if (sectiuneCurenta === 'BLOCKS' && blocCurent) return blocuri[blocCurent].entitati;
+      return entities;
+    }
+
     // Inchide ORICE entitate curenta (cunoscuta sau nu) — se apeleaza la FIECARE marcaj "0 <TIP>"
     // nou intalnit, nu doar cand tipul nou e recunoscut. Aceasta e reparatia critica.
     function flushCur() {
-      if (cur && cur.type === 'LWPOLYLINE') { cur.puncte = curVerts || []; entities.push(cur); }
-      else if (cur && _TIPURI_CUNOSCUTE[cur.type] && cur.type !== 'POLYLINE') { entities.push(cur); }
+      if (cur && cur.type === 'LWPOLYLINE') { cur.puncte = curVerts || []; _listaTinta().push(cur); }
+      else if (cur && _TIPURI_CUNOSCUTE[cur.type] && cur.type !== 'POLYLINE') { _listaTinta().push(cur); }
       cur = null; curVerts = null; pendingVertex = null;
     }
 
@@ -91,10 +114,32 @@
       var p = pairs[i];
       if (p.code === 0) {
         var v = p.value;
-        if (v === 'ENDSEC') { flushCur(); i++; continue; }
+        if (v === 'SECTION') {
+          flushCur();
+          // urmatoarea pereche ar trebui sa fie "2 <NUME_SECTIUNE>" (HEADER/TABLES/BLOCKS/ENTITIES/OBJECTS)
+          if (i + 1 < n && pairs[i + 1].code === 2) sectiuneCurenta = pairs[i + 1].value;
+          i++; continue;
+        }
+        if (v === 'ENDSEC') { flushCur(); sectiuneCurenta = null; i++; continue; }
+        if (v === 'BLOCK') {
+          flushCur();
+          // "0 BLOCK" e urmat de codurile proprii ale definitiei (2=nume, 10/20=punct de baza) —
+          // le citim direct aici (nu prin _TIPURI_CUNOSCUTE, BLOCK nu e o entitate desenabila).
+          var numeBloc = null, bazaX = 0, bazaY = 0;
+          var j = i + 1;
+          while (j < n && pairs[j].code !== 0) {
+            if (pairs[j].code === 2 && numeBloc == null) numeBloc = pairs[j].value;
+            if (pairs[j].code === 10) bazaX = parseFloat(pairs[j].value) * SC;
+            if (pairs[j].code === 20) bazaY = parseFloat(pairs[j].value) * SC;
+            j++;
+          }
+          if (numeBloc) { blocuri[numeBloc] = { entitati: [], bazaX: bazaX, bazaY: bazaY }; blocCurent = numeBloc; }
+          i = j; continue; // sarim direct la urmatorul marcaj "0 <TIP>" (am consumat coduri proprii BLOCK)
+        }
+        if (v === 'ENDBLK') { flushCur(); blocCurent = null; i++; continue; }
         // POLYLINE clasic (format vechi, cu sub-entitati VERTEX/SEQEND) — nu se inchide la VERTEX
         if (v === 'VERTEX' && cur && cur.type === 'POLYLINE') { pendingVertex = { x: null, y: null }; i++; continue; }
-        if (v === 'SEQEND' && cur && cur.type === 'POLYLINE') { entities.push(cur); cur = null; i++; continue; }
+        if (v === 'SEQEND' && cur && cur.type === 'POLYLINE') { _listaTinta().push(cur); cur = null; i++; continue; }
         // orice alt marcaj "0 <TIP>" (cunoscut SAU necunoscut, ex. HATCH/DIMENSION/ATTRIB/WIPEOUT/
         // VIEWPORT/IMAGE/SEQEND-ul unui INSERT cu atribute) incheie ferm entitatea anterioara —
         // altfel codurile 10/20 ale tipului necunoscut ar corupe entitatea deja "deschisa".
@@ -128,6 +173,9 @@
           if (p.code === 2) cur.blockName = p.value;
           if (p.code === 10) cur.x = parseFloat(p.value) * SC;
           if (p.code === 20) cur.y = parseFloat(p.value) * SC;
+          if (p.code === 41) cur.scaleX = parseFloat(p.value);
+          if (p.code === 42) cur.scaleY = parseFloat(p.value);
+          if (p.code === 50) cur.rotatieGrade = parseFloat(p.value);
         } else if (cur.type === 'TEXT' || cur.type === 'MTEXT') {
           // MTEXT: continutul lung vine in bucati de cod 3 (in ordine), apoi bucata finala in cod 1 —
           // varianta veche pastra DOAR ultimul cod 1, taind textul (ex. "Locuinta P+1E Sc=64 mp
@@ -151,7 +199,7 @@
 
     var layers = {};
     entities.forEach(function (e) { var l = e.layer || '0'; layers[l] = (layers[l] || 0) + 1; });
-    return { entities: entities, layers: Object.keys(layers), layerCounts: layers, nrEntitati: entities.length, unitateDetectata: scaraInfo.insunits, scaraLaMetri: SC };
+    return { entities: entities, layers: Object.keys(layers), layerCounts: layers, nrEntitati: entities.length, unitateDetectata: scaraInfo.insunits, scaraLaMetri: SC, blocuri: blocuri };
   }
 
   async function parseDXFFile(file) {
@@ -486,6 +534,65 @@
       out.nrPerechiAlipite = out.distante_intre_cladiri.filter(function (p) { return p.posibil_alipite; }).length;
     }
 
+    // FIX BUG REAL (18 iul, gasit prin audit dedicat: "acces_auto_speciale" era declarat ca layer
+    // asteptat + afisat in UI, dar extractGeometrie() nu-l citea NICIODATA — utilizatorul putea
+    // mapa un layer la "Acces autospeciale" si nu se intampla nimic cu maparea, silentios).
+    var accesLayer = m.acces_auto_speciale;
+    if (accesLayer) {
+      var refPolAcces = (propusPol || existentPol);
+      var linii = ents.filter(function (e) { return e.layer === accesLayer && e.type === 'LINE'; });
+      var poligoaneAcces = _entitatiPePoligon(ents, accesLayer);
+      out.acces_auto_speciale = [];
+      poligoaneAcces.forEach(function (p, idx) {
+        var arie = ariePoligonShoelace(p.puncte);
+        var perimetru = 0;
+        for (var k = 0; k < p.puncte.length; k++) { var a2 = p.puncte[k], b2 = p.puncte[(k + 1) % p.puncte.length]; perimetru += Math.hypot(b2.x - a2.x, b2.y - a2.y); }
+        var latimeAprox = perimetru > 0 ? Math.round((arie / (perimetru / 2)) * 100) / 100 : null; // aproximare grosiera (drum ~dreptunghiular)
+        out.acces_auto_speciale.push({
+          id: 'ACC' + (idx + 1), tip: 'suprafata_carosabila', arie_mp: Math.round(arie),
+          latime_aproximativa_m: latimeAprox,
+          distanta_la_constructie_m: refPolAcces ? (function () { var d = calculeazaDistantaMinima(refPolAcces.puncte, p.puncte); return d != null ? Math.round(d * 100) / 100 : null; })() : null,
+          distanta_la_limita_proprietate_m: limitaPol ? (function () { var d = calculeazaDistantaMinima(limitaPol.puncte, p.puncte); return d != null ? Math.round(d * 100) / 100 : null; })() : null
+        });
+      });
+      if (linii.length) {
+        var lungimeTotala = 0; linii.forEach(function (l) { lungimeTotala += Math.hypot(l.x2 - l.x1, l.y2 - l.y1); });
+        out.acces_auto_speciale.push({ id: 'ACC_linii', tip: 'traseu_liniar', lungime_totala_m: Math.round(lungimeTotala * 100) / 100, nr_segmente: linii.length });
+      }
+      if (!out.acces_auto_speciale.length) out.acces_auto_speciale = null; // layer mapat dar gol -> nu se preface ca exista date
+    }
+
+    // ADAUGAT (18 iul, gap real gasit prin audit: "aliniamente" nu avea niciun cod de extractie).
+    // Linia de aliniament = segmente LINE si/sau muchii de LWPOLYLINE (inchisa sau deschisa, nu conteaza —
+    // se foloseste ca poli-linie de segmente, indiferent) pe layerul mapat. Distanta fata de constructie
+    // = minimul intre orice muchie a cladirii (propuse/existente) si orice segment de aliniament.
+    var aliniamentLayer = m.aliniament;
+    if (aliniamentLayer) {
+      var refPolAliniament = (propusPol || existentPol);
+      var segmenteAliniament = [];
+      ents.filter(function (e) { return e.layer === aliniamentLayer; }).forEach(function (e) {
+        if (e.type === 'LINE') segmenteAliniament.push([{ x: e.x1, y: e.y1 }, { x: e.x2, y: e.y2 }]);
+        else if ((e.type === 'LWPOLYLINE' || e.type === 'POLYLINE') && e.puncte && e.puncte.length >= 2) {
+          for (var k2 = 0; k2 < e.puncte.length - 1; k2++) segmenteAliniament.push([e.puncte[k2], e.puncte[k2 + 1]]);
+          if (e.closed) segmenteAliniament.push([e.puncte[e.puncte.length - 1], e.puncte[0]]);
+        }
+      });
+      if (segmenteAliniament.length && refPolAliniament) {
+        var minDistAliniament = Infinity;
+        var nEdges = refPolAliniament.puncte.length;
+        for (var ei = 0; ei < nEdges; ei++) {
+          var edgeA = refPolAliniament.puncte[ei], edgeB = refPolAliniament.puncte[(ei + 1) % nEdges];
+          segmenteAliniament.forEach(function (seg) {
+            var d = _distSegmentSegment(edgeA, edgeB, seg[0], seg[1]);
+            if (d < minDistAliniament) minDistAliniament = d;
+          });
+        }
+        out.aliniament = { distanta_la_constructie_m: isFinite(minDistAliniament) ? Math.round(minDistAliniament * 100) / 100 : null, nr_segmente: segmenteAliniament.length };
+      } else if (segmenteAliniament.length) {
+        out.aliniament = { distanta_la_constructie_m: null, nr_segmente: segmenteAliniament.length, nota: 'linia de aliniament a fost citită, dar lipsește conturul construcției (propuse/existente) pentru a calcula distanța' };
+      }
+    }
+
     // Grupare in componente conexe pe graful de adiacenta (muchie = pereche "posibil_alipite") —
     // generalizeaza dincolo de perechi: 3 cladiri lipite una de alta = un singur grup "triplex",
     // tratat ca un volum construit continuu, nu ca perechi separate (regula v4.4 #25).
@@ -531,6 +638,58 @@
     });
   }
 
+  // FIX GAP REAL (18 iul, gasit prin audit dedicat: "geometria blocurilor CAD ale usilor NU se
+  // parseaza — ar necesita definitii BLOCK, mult mai fragil", citat explicit ca limitare cunoscuta).
+  // Acum ca parseDXF() separa entitatile din BLOCKS pe nume de bloc (parsedDXF.blocuri), putem
+  // REZOLVA fiecare INSERT al carui nume de bloc arata a usa/fereastra (tipar de denumire, nu
+  // geometrie universala — biblioteci CAD diferite numesc blocurile diferit, e o eristica, nu o
+  // certitudine) — latimea REALA rezulta din bounding-box-ul propriu al blocului (relativ la punctul
+  // sau de baza) x scara INSERT-ului (cod 41/42), NU doar dintr-o eticheta text.
+  // FIX BUG REAL (gasit prin test propriu, 18 iul): "_" e caracter de cuvant in regex (\w include
+  // underscore), deci \bUSA\b NU se potriveste in "USA_90" (nu exista granita de cuvant intre "A" si
+  // "_"). Tiparul de mai jos cere ca litera-cheie sa fie delimitata de INCEPUT/SFARSIT DE SIR sau de
+  // un caracter care NU e litera (underscore, cifra, spatiu) — acopera "USA_90", "USA90", "USA-90" etc.
+  var TIPARE_BLOC_TAMPLARIE = [
+    { tip: 'usa', re: /(^|[^A-Za-z])(USA|DOOR|DR)([^A-Za-z]|$)/i },
+    { tip: 'fereastra', re: /(^|[^A-Za-z])(FEREASTRA|FER|WINDOW|WIN|GEAM)([^A-Za-z]|$)/i }
+  ];
+  function _bboxLocalBloc(entitatiBloc, bazaX, bazaY) {
+    var xs = [], ys = [];
+    entitatiBloc.forEach(function (e) {
+      if (e.type === 'LINE') { xs.push(e.x1, e.x2); ys.push(e.y1, e.y2); }
+      else if ((e.type === 'LWPOLYLINE' || e.type === 'POLYLINE') && e.puncte) { e.puncte.forEach(function (pt) { xs.push(pt.x); ys.push(pt.y); }); }
+      else if (e.x != null && e.y != null) { xs.push(e.x); ys.push(e.y); }
+    });
+    if (!xs.length) return null;
+    return { xmin: Math.min.apply(null, xs) - bazaX, xmax: Math.max.apply(null, xs) - bazaX, ymin: Math.min.apply(null, ys) - bazaY, ymax: Math.max.apply(null, ys) - bazaY };
+  }
+  function rezolvaTamplarieDinBlocuri(parsedDXF) {
+    var blocuri = parsedDXF.blocuri || {};
+    var inserturi = (parsedDXF.entities || []).filter(function (e) { return e.type === 'INSERT' && e.blockName; });
+    var rezultate = [];
+    inserturi.forEach(function (ins) {
+      var tipGasit = null;
+      for (var i = 0; i < TIPARE_BLOC_TAMPLARIE.length; i++) { if (TIPARE_BLOC_TAMPLARIE[i].re.test(ins.blockName)) { tipGasit = TIPARE_BLOC_TAMPLARIE[i].tip; break; } }
+      if (!tipGasit) return;
+      var bloc = blocuri[ins.blockName];
+      if (!bloc) { rezultate.push({ tip: tipGasit, blockName: ins.blockName, latime_m: null, nota: 'blocul „' + ins.blockName + '" a fost referit (INSERT) dar definiția lui nu a fost găsită în fișier — poate fi un bloc extern (XREF)' }); return; }
+      var bbox = _bboxLocalBloc(bloc.entitati, bloc.bazaX, bloc.bazaY);
+      if (!bbox) return;
+      var latimeLocala = bbox.xmax - bbox.xmin;
+      var inaltimeLocala = bbox.ymax - bbox.ymin;
+      var scaleX = ins.scaleX != null ? ins.scaleX : 1, scaleY = ins.scaleY != null ? ins.scaleY : 1;
+      // latimea reala = dimensiunea mai mare a bbox-ului local (usile/ferestrele sunt uzual mult mai
+      // late decat groase in vederea de plan) x scara corespunzatoare acelei axe
+      var latimeReala = latimeLocala >= inaltimeLocala ? latimeLocala * scaleX : inaltimeLocala * scaleY;
+      rezultate.push({
+        tip: tipGasit, blockName: ins.blockName, layer: ins.layer,
+        latime_m: Math.round(latimeReala * 100) / 100,
+        pozitie: { x: ins.x, y: ins.y }, rotatie_grade: ins.rotatieGrade || 0
+      });
+    });
+    return rezultate;
+  }
+
   // Statistici pe layer (nr. poligoane inchise + aria min/med/max) — ajuta proiectantul sa
   // aleaga layerul corect dintr-o lista de nume criptice (ex. ArchiCAD "131_REF_Topo_Pen_No__241"),
   // vazand cate poligoane inchise are si ce arie au, in loc sa ghiceasca dupa nume.
@@ -569,7 +728,7 @@
     extrageAdnotariUrbanism: extrageAdnotariUrbanism, extrageCladiriDePeLayer: extrageCladiriDePeLayer,
     extrageIdentificareProprietati: extrageIdentificareProprietati,
     analizeazaLayerePoligoane: analizeazaLayerePoligoane, extrageFazaDinDXF: extrageFazaDinDXF,
-    grupeazaInComponenteConexe: _grupeazaInComponenteConexe
+    grupeazaInComponenteConexe: _grupeazaInComponenteConexe, rezolvaTamplarieDinBlocuri: rezolvaTamplarieDinBlocuri
   };
   console.log('[SSI] import DXF incarcat (window.SSI_DWG_IMPORT) — parser vanilla JS, fara dependinte externe');
 })(window);

@@ -60,6 +60,58 @@
     return o;
   }
 
+  // ADAUGAT (18 iul — Florin a semnalat repetat, cu capturi de ecran, ca nu gaseste optiune de INCARCARE
+  // pt Certificat de Urbanism/studiu geotehnic, doar o casuta goala de lipit text — se astepta la un
+  // buton de upload ca la sectiunea 1 (DXF). FIX real: adauga incarcare de fisier (.pdf/.txt) langa
+  // fiecare textarea, care extrage textul automat (PDF via pdf.js, deja folosit in platforma la
+  // js/25-ssi-materiale-extractie.js — acelasi tipar de asteptare CDN) si il pune in caseta + extrage automat.
+  function _asteaptaPdfjs(timeoutMs) {
+    return new Promise(function (resolve) {
+      var trecut = 0;
+      var iv = setInterval(function () {
+        trecut += 200;
+        if (window.pdfjsLib || trecut >= (timeoutMs || 8000)) { clearInterval(iv); resolve(!!window.pdfjsLib); }
+      }, 200);
+    });
+  }
+  async function _extrageTextDinFisier(file) {
+    if (/\.pdf$/i.test(file.name || '')) {
+      if (!window.pdfjsLib) {
+        try { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'; } catch (e) { /* noop */ }
+        var gata = await _asteaptaPdfjs(8000);
+        if (!gata) throw new Error('pdf.js nu s-a încărcat de pe CDN după 8 secunde — verifică conexiunea la internet sau un blocker de reclame; poți copia manual textul din PDF (Select All → Copy) în caseta de mai jos.');
+      }
+      var buf = await file.arrayBuffer();
+      var doc = await pdfjsLib.getDocument({ data: buf }).promise;
+      var texte = [];
+      for (var i = 1; i <= doc.numPages; i++) {
+        var pagina = await doc.getPage(i);
+        var continut = await pagina.getTextContent();
+        texte.push(continut.items.map(function (it) { return it.str; }).join(' '));
+      }
+      return texte.join('\n');
+    }
+    return await file.text();
+  }
+  function _cardFisierExtragere(titlu, textarea, btnExtrage, res) {
+    var wrap = el('div', { style: 'margin-top:8px;display:flex;align-items:center;gap:8px' });
+    wrap.appendChild(el('span', { style: 'font-size:11px;color:#94a3b8' }, 'SAU încarcă fișierul (.pdf/.txt):'));
+    var inp = el('input', { type: 'file', accept: '.pdf,.txt', style: 'font-size:12px;color:#cbd5e1' });
+    inp.onchange = function () {
+      var f = inp.files[0]; if (!f) return;
+      res.textContent = '⏳ Se extrage textul din „' + f.name + '"…';
+      _extrageTextDinFisier(f).then(function (txt) {
+        textarea.value = txt;
+        res.textContent = '✓ Text extras din „' + f.name + '" (' + txt.length + ' caractere) — apasă „' + titlu + '" pentru a identifica datele, sau editează textul mai întâi.';
+        btnExtrage.click();
+      }).catch(function (e) {
+        res.textContent = '⚠ ' + (e && e.message || 'Eroare la citirea fișierului.');
+      });
+    };
+    wrap.appendChild(inp);
+    return wrap;
+  }
+
   function open(D, onApply) {
     var ov = el('div', { id: 'uxing-ov', style: 'position:fixed;inset:0;background:#070c18;z-index:4400;overflow:auto;font-family:system-ui;color:#e6edf7' });
     var wrap = el('div', { style: 'max-width:820px;margin:0 auto;padding:18px 16px 60px' });
@@ -86,15 +138,20 @@
     var taCU = el('textarea', { style: 'width:100%;height:90px;background:#0a1120;border:1px solid rgba(148,163,184,.25);border-radius:7px;color:#e6edf7;padding:8px;font-size:12px;box-sizing:border-box', placeholder: 'ex: Certificat de urbanism nr. 123/2026 ... POT max 40% ... CUT max 1,2 ... înălțime maximă 10 m ... jud. Iași ...' });
     var bCU = el('button', { style: 'margin-top:8px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:7px;padding:7px 13px;font-size:12px;cursor:pointer' }, 'Extrage din CU');
     bCU.onclick = function () { var o = extractCU(taCU.value); for (var k in o) found[k] = o[k]; res.textContent = '✓ CU: ' + (Object.keys(o).length ? Object.keys(o).map(function (k) { return k + '=' + o[k]; }).join(', ') : 'nimic recunoscut — verifică textul'); };
-    cCU.appendChild(taCU); cCU.appendChild(bCU); wrap.appendChild(cCU);
+    cCU.appendChild(taCU); cCU.appendChild(bCU); cCU.appendChild(_cardFisierExtragere('Extrage din CU', taCU, bCU, res)); wrap.appendChild(cCU);
     // Geo text
     var cGeo = card('3 · Studiu geotehnic (text)', 'Lipește textul. Extrage presiunea convențională, adâncimea de fundare, categoria geotehnică.');
     var taGeo = el('textarea', { style: 'width:100%;height:70px;background:#0a1120;border:1px solid rgba(148,163,184,.25);border-radius:7px;color:#e6edf7;padding:8px;font-size:12px;box-sizing:border-box', placeholder: 'ex: presiunea convențională 200 kPa ... adâncime de fundare 1,5 m ... categorie geotehnică 2' });
     var bGeo = el('button', { style: 'margin-top:8px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:7px;padding:7px 13px;font-size:12px;cursor:pointer' }, 'Extrage din geotehnic');
     bGeo.onclick = function () { var o = extractGeo(taGeo.value); if (o.p_conv) found.p_conv = o.p_conv; if (o.adancime_fundare) found.adancime_fundare = o.adancime_fundare; if (o.cat_geo) found.cat_geo = o.cat_geo; res.textContent = '✓ Geo: ' + (Object.keys(o).length ? Object.keys(o).map(function (k) { return k + '=' + o[k]; }).join(', ') : 'nimic recunoscut'); };
-    cGeo.appendChild(taGeo); cGeo.appendChild(bGeo); wrap.appendChild(cGeo);
+    cGeo.appendChild(taGeo); cGeo.appendChild(bGeo); cGeo.appendChild(_cardFisierExtragere('Extrage din geotehnic', taGeo, bGeo, res)); wrap.appendChild(cGeo);
     // JSON din pipeline DWG (scripts/dwg-to-urbanx.py — ODA+ezdxf desktop)
-    var cJson = card('4 · Import JSON dintr-un DWG (pipeline dwg-to-urbanx.py)', 'Pentru DWG complet: rulează scripts/dwg-to-urbanx.py <fisier.dwg>, apoi încarcă aici urbanx_import.json. Prefill SC/SD/regim/grad din desen.');
+    // FIX BUG REAL (18 iul — Florin, cu capturi de ecran: "spui sa incarc un dwg... CUM?"): textul vechi
+    // era ambiguu — parea ca aici se incarca DIRECT fisierul .dwg, cand de fapt aceasta sectiune asteapta
+    // un JSON produs de un script Python rulat separat, in Terminal, pe calculator (nu in browser). Pentru
+    // majoritatea utilizatorilor care au deja export DXF (ca in cazul lui Florin), sectiunea 1 e suficienta
+    // si mult mai simpla — aceasta sectiune 4 e doar pt DWG-uri fara DXF exportat, cu pas tehnic separat.
+    var cJson = card('4 · (Avansat, opțional) Import JSON dintr-un DWG procesat separat', 'NU se încarcă aici fișierul .dwg direct — dacă ai deja fișiere .dxf (ca la pasul 1), ignoră complet această secțiune, e mai simplu. Această secțiune e utilă DOAR dacă ai NUMAI .dwg, fără .dxf: necesită rularea unui script pe calculatorul tău (nu în browser) — deschide Terminal, rulează python3 scripts/dwg-to-urbanx.py fisierul_tau.dwg, apoi încarcă AICI fișierul urbanx_import.json rezultat (nu .dwg-ul).');
     var fJson = el('input', { type: 'file', accept: '.json', style: 'font-size:12px;color:#cbd5e1' });
     function _regimNiv(r) { r = String(r || '').toLowerCase(); var m = r.match(/p\s*\+\s*(\d)/); if (m) return 1 + (+m[1]); if (/d\s*\+\s*p/.test(r)) return 2; if (/parter|^p\b/.test(r)) return 1; return null; }
     fJson.onchange = function () { var f = fJson.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { try { var j = JSON.parse(rd.result); var ind = j.indicatori || {}; var got = []; if (ind.Sc) { found.Sc = +String(ind.Sc).replace(/\./g, '').replace(',', '.'); got.push('Sc=' + found.Sc); } if (ind.Sd) { found.Sd = +String(ind.Sd).replace(/\./g, '').replace(',', '.'); got.push('Sd=' + found.Sd); } var nv = _regimNiv(ind.regim); if (nv) { found.niv_supraterane = nv; got.push('niv=' + nv); } if (ind.grad_foc) { found.grad = ind.grad_foc; got.push('grad=' + ind.grad_foc); } if (j.dotari_inventar) found._dotari = j.dotari_inventar; res.textContent = '✓ JSON DWG (' + (j.sursa || '') + '): ' + (got.join(', ') || 'fără indicatori') + (j.are_model_3D ? ' · model 3D prezent (BIM)' : ''); } catch (e) { res.textContent = '⚠ JSON invalid: ' + e.message; } }; rd.readAsText(f); };

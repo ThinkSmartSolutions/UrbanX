@@ -213,7 +213,44 @@
     },
     // Functiuni de productie/depozitare — Tabelul 116 NU se potriveste pe grad ca celelalte, ci pe
     // RISC de incendiu (mic/mijlociu/mare/foarte mare) x grad x parter/etaje (17 iul, runda 2).
-    MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE: { 'hala-industriala': 1, skid: 1, agricol: 1 },
+    // ADAUGAT (19 iul, cerere Florin "implementeaza orice tabel/clasificare/calcul... nu lasa ceva
+    // neacoperit"): parc-fotovoltaic/bess/statie-transformare (categoria FUNCTIUNI.cat='energie') nu
+    // aveau NICIUN tabel de lungime evacuare — cadeau pe fallback-ul generic 35/15m. Sunt cladiri
+    // tehnice cu ocupare redusa/nepermanenta (incaperi de control, celule de baterii, echipamente
+    // electrice) — nu se incadreaza in niciuna din destinatiile civile (locuit/comert/etc), cea mai
+    // apropiata categorie normativa REALA e productie/depozitare (Tabelul 116/170), nu o presupunere
+    // noua — judecata profesionala explicita, nu date inventate (T116/170 raman aceleasi valori reale
+    // deja extrase, doar se extinde CE functiuni le folosesc).
+    MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE: { 'hala-industriala': 1, skid: 1, agricol: 1, 'parc-fotovoltaic': 1, bess: 1, 'statie-transformare': 1 },
+    // Separare (rezistenta la foc pereti/usi pe caile comune de circulatie/evacuare) pe DESTINATIE,
+    // pt constructii EXISTENTE (Tabelele 152-159, Anexa A.10) — extrase si verificate 18 iul. Tabel
+    // MAI SPECIFIC decat T144 (care da doar un minim generic pe grad, fara distinctie de destinatie) —
+    // aplicabil DOAR la existent; la constructie NOUA nu exista inca un tabel echivalent extras.
+    MAP_FUNCTIUNE_TABEL_SEPARARE_EXISTENT: {
+      'locuinta-individuala': 'P118_1_2025_T152', 'bloc-locuinte': 'P118_1_2025_T152',
+      birouri: 'P118_1_2025_T153', 'cladire-mixta': 'P118_1_2025_T153',
+      mall: 'P118_1_2025_T154', 'spatiu-comercial': 'P118_1_2025_T154',
+      medical: 'P118_1_2025_T155', 'centru-social': 'P118_1_2025_T155',
+      gradinita: 'P118_1_2025_T157', scoala: 'P118_1_2025_T157',
+      hotelier: 'P118_1_2025_T158', sport: 'P118_1_2025_T156'
+    },
+    getSepararePeDestinatieExistent: function (opt) {
+      opt = opt || {};
+      if (opt.regim_tabele !== 'EXISTENTA_NEMODIFICATA') return { aplicabil: false, motiv: 'Tabel disponibil doar pentru construcții existente (Anexa A.10) — la construcție nouă, rezistența la foc pe elemente rezultă din Tabelul 2 (vezi 3.1).' };
+      var idTabel = ((+opt.H || 0) > 28) ? 'P118_1_2025_T159' : this.MAP_FUNCTIUNE_TABEL_SEPARARE_EXISTENT[opt.functiune];
+      if (!idTabel) return { aplicabil: false, motiv: 'Tabelul de separare pe destinație pentru funcțiunea „' + (opt.functiune || '—') + '" nu a fost încă extras din textul oficial P118-1/2025.' };
+      var entry = this.getMetaNormativ(idTabel);
+      if (!entry) return { aplicabil: true, eroare: 'SURSA_INDISPONIBILA', norma: idTabel };
+      var grad = String(opt.grad || 'II').toUpperCase();
+      var randuri = entry.valoare.randuri || [];
+      var rand = randuri.filter(function (r) { return String(r.nivel_stabilitate || '').indexOf(grad) >= 0; })[0] || randuri[0];
+      return {
+        aplicabil: true, disponibil: !!rand, rand: rand || null,
+        norma: entry.titlu + ' (' + idTabel.replace('P118_1_2025_', '') + ', pag. ' + entry.pagina + ')',
+        sursa_url: entry.sursa_url, status_validare: entry.status
+      };
+    },
+
     getLungimeEvacuare: function (opt) {
       opt = opt || {};
       if (this.MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE[opt.functiune]) return this._lungimeProductieDepozitare(opt);
@@ -265,6 +302,92 @@
         aplicabil: true, disponibil: true,
         rand: { lungime_doua_directii_m: doua, lungime_fund_de_sac_m: rand.fund_de_sac_m, observatii: 'Risc de incendiu: ' + risc + (parter ? ' (parter)' : ' (etaje)') },
         norma: entry.titlu + ' (T116, ' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status, nota_majorare: entry.valoare.nota
+      };
+    },
+
+    // Pragul de persoane/nivel sub care o SINGURA cale/casa de scari de evacuare e admisa INDIFERENT
+    // de lungimea traseului realizat — verificat direct pe textul oficial P118-1/2025 (18 iul, cerere
+    // dedicata Florin: cita art. A.10.2.5.12 dintr-un document real de la un exemplu real Dobarlau).
+    // A.10.2.5.12 (constructii EXISTENTE, Anexa A.10): prag 20 persoane/nivel. Documentul-sursa citat de
+    // Florin parafraza usor imprecis textul oficial ("timpul (lungimea)" -> oficial spune doar "lungimea";
+    // "categorie de pericol de incendiu" -> oficial spune "risc de incendiu", clasificari DIFERITE in
+    // P118 — risc de incendiu la civile, categorie de pericol doar la productie/depozitare). Pentru
+    // CONSTRUCTIE NOUA (corpul principal, nu Anexa A.10), pragul e Art. 2.5.1.2 alin.(3): 5 persoane/nivel
+    // (general) — MULT mai strict decat la existente; productie/depozitare are deja o exceptie separata
+    // de 10 utilizatori (art. 6.1.5.16 lit.a, vezi _lungimeProductieDepozitare mai sus), pastrata neschimbata.
+    getPragUnicaCaleEvacuare: function (opt) {
+      opt = opt || {};
+      // FIX (18 iul, gasit prin verificare headless imediata): regim_tabele NU e 'nou'/'existent'/'mixt'
+      // (acelea sunt TIPURI_LUCRARE[x].regim) — e STRING-ul deja normalizat de m0_tipLucrare(), fie
+      // 'CONSTRUCTIE_NOUA' fie 'EXISTENTA_NEMODIFICATA' (acelasi tipar folosit de getLungimeEvacuare/
+      // getCapacitateFluxEvacuare mai sus in acest fisier — verifica ACOLO valorile reale inainte de a
+      // presupune un nume nou de camp).
+      var esteExistent = opt.regim_tabele === 'EXISTENTA_NEMODIFICATA';
+      if (this.MAP_FUNCTIUNE_PRODUCTIE_DEPOZITARE[opt.functiune]) {
+        return { prag_persoane: 10, articol: 'Art. 6.1.5.16 lit. a) P118-1/2025', status_validare: 'extras_verificat_partial',
+          nota: 'Producție/depozitare — prag identic la nou și existent (aceeași excepție a normativului).' };
+      }
+      if (esteExistent) {
+        return { prag_persoane: 20, articol: 'Art. A.10.2.5.12 P118-1/2025 (Anexa A.10, construcții existente)', status_validare: 'verificat_text_oficial',
+          nota: 'O singură cale de evacuare e admisă indiferent de lungimea traseului realizat, dacă la fiecare nivel se pot afla simultan maximum 20 de persoane (sau, la un număr mai mare, dacă lungimea se încadrează în valoarea admisă pentru coridoare înfundate — vezi 3.4.c.1).' };
+      }
+      return { prag_persoane: 5, articol: 'Art. 2.5.1.2 alin. (3) P118-1/2025 (corpul principal, construcție nouă)', status_validare: 'verificat_text_oficial',
+        nota: 'La construcție nouă pragul general este mult mai strict decât la existente (5 persoane/nivel, nu 20) — verifică explicit regimul lucrării (M0) înainte de a aplica acest prag.' };
+    },
+
+    // Formula A.10.2.5.55 (constructii EXISTENTE) — cumularea la usile de la parter a persoanelor care
+    // vin prin scarile interioare, cand caile de evacuare in exterior ale celorlalte niveluri sunt
+    // COMUNE cu cele ale parterului. Verificat direct pe text oficial (18 iul): documentul-sursa citat de
+    // Florin scria gresit "60% de la ETAJ" ca al treilea termen — textul oficial spune "60% de la SUBSOL"
+    // (doua treimi ale formulei privesc parter+subsol, nu parter+etaj — o distinctie normativa reala, nu
+    // un detaliu stilistic). La constructie NOUA, echivalentul e Art. 2.5.8.5 (corp principal), formulat
+    // mai general ("niveluri situate sub/deasupra celui de evacuare"), nu doar subsol.
+    getFormulaLatimeCumulataParter: function (opt) {
+      opt = opt || {};
+      var esteExistent = opt.regim_tabele === 'EXISTENTA_NEMODIFICATA';
+      if (esteExistent) {
+        return {
+          articol: 'Art. A.10.2.5.55 P118-1/2025 (Anexa A.10, construcții existente)', status_validare: 'verificat_text_oficial',
+          termeni: ['numărul de persoane care vin prin scările interioare de la nivelul cel mai populat al clădirii existente', '60% din numărul de persoane aflate la parterul clădirii existente', '60% din numărul de persoane care vin prin scările interioare de la SUBSOL'],
+          nota: 'Se aplică doar când căile de evacuare în exterior ale celorlalte niveluri (inclusiv subsol, dacă există) sunt COMUNE cu cele ale parterului — altfel fiecare nivel evacuează independent prin propriile ieșiri (vezi 3.4.d).'
+        };
+      }
+      return {
+        articol: 'Art. 2.5.8.5 P118-1/2025 (corpul principal, construcție nouă)', status_validare: 'verificat_text_oficial',
+        termeni: ['numărul de persoane care vin prin scările interioare de la nivelul cel mai populat', '60% din numărul de persoane aflate la parter', '60% din numărul de persoane care vin prin scările interioare de la nivelurile situate sub/deasupra celui de evacuare (subsol și/sau etaje, după caz)'],
+        nota: 'Formulare mai generală decât la Anexa A.10 (nu se limitează la subsol) — se aplică doar când căile de evacuare ale celorlalte niveluri sunt COMUNE cu cele ale parterului.'
+      };
+    },
+
+    // Durata minima de functionare a iluminatului de siguranta (NP I7-2011, art. 7.23.6-7.23.10,
+    // Tabelul 7.23.1a/1b) — cercetat SI VERIFICAT VIZUAL direct pe pagina 27 a Monitorul Oficial
+    // 512/12.VI.2023 (Ordinul MDLPA 959/2023), randata la 250dpi si citita de Claude, nu doar extrasa
+    // ca text (18 iul, cerere Florin explicita: "nu te opresti pana nu finalizezi integral").
+    // CORECTIE FATA DE O RECONSTRUCTIE ANTERIOARA (aceeasi zi, din text linear): grid-ul vizual arata
+    // ca NU toate cele 4 categorii au acelasi prag — doar Evacuare/Panica/Local au baza fixa de 1h
+    // (extinsa pe destinatie conform Tabelul 7.23.1b, 1h->3h); Interventii-risc SI Continuarea
+    // lucrului NU au prag fix in ore ("Minimum considerat pentru indeplinirea sarcinii" — depinde de
+    // sarcina concreta, nu de un numar de ore). Aceasta functie calculeaza durata pt iluminatul de
+    // EVACUARE (cel mai relevant pt sectiunea 4.10 a scenariului SSI, art. 7.23.8) — daca in viitor se
+    // adauga si campuri separate pt panica/local, se aplica ACEEASI formula (1h/3h pe destinatie).
+    DESTINATII_ILUMINAT_3H: ['mall', 'spatiu-comercial', 'sport', 'gradinita', 'scoala', 'hotelier', 'medical', 'centru-social', 'parcare'],
+    getDurataIluminatSiguranta: function (opt) {
+      opt = opt || {};
+      var entry = this.getMetaNormativ('I7_2011_Art_7_23_iluminat_siguranta');
+      if (!entry) return null;
+      var H = +opt.H || 0;
+      // cladiri inalte/foarte inalte (H>28m) intra la 3h indiferent de functiune, conform Tabelul 7.23.1b
+      var este3h = H > 28 || this.DESTINATII_ILUMINAT_3H.indexOf(opt.functiune) >= 0;
+      // sanatate cu spitalizare (nu ambulatoriu) e un caz special in tabel — aproximat aici din functiune
+      // 'medical' fara distinctie spitalizare/ambulatoriu (platforma nu declara inca aceasta granularitate)
+      return {
+        timp_minim_h: este3h ? 3 : 1,
+        categorii: entry.valoare.categorii_articole,
+        grid_confirmat_vizual: entry.valoare.tabelul_7_23_1a_GRID_CONFIRMAT_VIZUAL,
+        nota_corectie: entry.valoare.corectie_18iul_a_doua || entry.valoare.nota_corectie,
+        regula_functiuni_mixte: entry.valoare.regula_functiuni_mixte,
+        norma: 'NP I7-2011 (amendat Ord. MDLPA 959/2023), art. 7.23.8 (evacuare) + Tabelul 7.23.1a (pag. 27) + Tabelul 7.23.1b, confirmat vizual pe pagina oficială',
+        sursa_url: entry.sursa_url, status_validare: 'validat_sursa'
       };
     },
 

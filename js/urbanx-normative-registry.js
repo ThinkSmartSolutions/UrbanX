@@ -97,8 +97,12 @@
     { cod: 'Legea 114/1996', titlu: 'Legea locuinței (Anexa 1 — suprafețe minime)', dom: 'Rezidențial', an: '1996 (r.)', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'Legea 448/2006', titlu: 'Protecția persoanelor cu handicap (accesibilitate)', dom: 'Accesibilitate', an: '2006 (r.)', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'Legea 307/2006', titlu: 'Apărarea împotriva incendiilor', dom: 'Incendiu', an: '2006 (r.)', stare: 'in_vigoare', verificat: '2026-07' },
-    { cod: 'Ordin MAI 129/2016', titlu: 'Norme avizare/autorizare securitate la incendiu', dom: 'Incendiu', an: '2016', stare: 'in_vigoare', verificat: '2026-07' },
-    { cod: 'HG 571/2016', titlu: 'Categorii construcții supuse avizării/autorizării ISU', dom: 'Incendiu', an: '2016', stare: 'in_vigoare', verificat: '2026-07' },
+    // CORECTIE (18 iul, cercetare directa pe Monitorul Oficial, motorul SSI din platforma): Ordinul MAI
+    // 129/2016 e ABROGAT/inlocuit de Ordinul MAI 180/2022 (Anexa 5 = modelul de scenariu de securitate
+    // la incendiu folosit efectiv de motorul SSI, js/urbanx-docx-builder.js) — registrul general afisa
+    // gresit norma veche ca "in_vigoare".
+    { cod: 'Ordin MAI 180/2022', titlu: 'Norme metodologice avizare/autorizare securitate la incendiu și protecție civilă (Anexa 4 — model scenariu, Anexa 5 — checklist capitole)', dom: 'Incendiu', an: '2022', stare: 'in_vigoare', verificat: '2026-07', nota: 'Înlocuiește Ordinul MAI 129/2016 (abrogat) — verificat direct în motorul SSI al platformei.' },
+    { cod: 'HG 571/2016', titlu: 'Categorii construcții supuse avizării/autorizării ISU', dom: 'Incendiu', an: '2016 (mod. HG 1.181/2022)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Modificată/completată de HG nr. 1.181 din 29.09.2022 — verificat pe text oficial.' },
     // — STRUCTURI / ACȚIUNI —
     { cod: 'P100-1/2013', titlu: 'Cod proiectare seismică — clădiri', dom: 'Structuri', an: '2013', stare: 'de_verificat', verificat: '2026-07', nota: 'Cod major — verifică apariția unei revizii (P100-1 nouă) + hărți zonare a_g/T_C.' },
     { cod: 'CR 0/2012', titlu: 'Bazele proiectării structurilor', dom: 'Structuri', an: '2012', stare: 'in_vigoare', verificat: '2026-07' },
@@ -111,9 +115,14 @@
     { cod: 'NP 112/2014', titlu: 'Proiectarea fundațiilor de suprafață', dom: 'Geotehnic', an: '2014', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'NP 074/2022', titlu: 'Documentații și studii geotehnice', dom: 'Geotehnic', an: '2022', stare: 'in_vigoare', verificat: '2026-07', nota: 'Revizuit 2022 (fostul NP 074/2014).' },
     // — SECURITATE LA INCENDIU —
-    { cod: 'P118-1/2022', titlu: 'Securitatea la incendiu — construcții', dom: 'Incendiu', an: '2022', stare: 'in_vigoare', verificat: '2026-07', nota: 'A înlocuit P118/1999; verifică erate/actualizări.' },
-    { cod: 'P118-2/2013', titlu: 'Instalații de stingere a incendiilor', dom: 'Incendiu', an: '2013 (act. 2019)', stare: 'in_vigoare', verificat: '2026-07' },
-    { cod: 'P118-3/2015', titlu: 'Instalații detectare-semnalizare-avertizare', dom: 'Incendiu', an: '2015', stare: 'in_vigoare', verificat: '2026-07' },
+    // CORECTIE (18 iul, verificat direct pe Monitorul Oficial, Partea I, Nr. 204 bis/10.III.2025, PDF
+    // integral 702 pag. descarcat si citit — nu doar cautare secundara): P118-1/2022 e VERSIUNEA VECHE,
+    // inlocuita de P118-1/2025 (Ordinul ministrului LPAT nr. 267/10.03.2025). Motorul SSI al platformei
+    // (data/ssi/normative.json, 40+ tabele extrase) foloseste deja P118-1/2025 — registrul general
+    // ramasese neactualizat la versiunea anterioara.
+    { cod: 'P118-1/2025', titlu: 'Securitatea la incendiu — construcții (corp principal + Anexa A.10 construcții existente)', dom: 'Incendiu', an: '2025', stare: 'in_vigoare', verificat: '2026-07', nota: 'Înlocuiește P118-1/2022 (Ordinul MLPAT nr. 267/10.03.2025, Monitorul Oficial nr. 204 bis/10.III.2025) — verificat pe text integral (702 pag.), folosit direct de motorul SSI al platformei.' },
+    { cod: 'P118-2/2013', titlu: 'Instalații de stingere a incendiilor', dom: 'Incendiu', an: '2013 (mod. Ord. 6026/2018)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Modificat de Ordinul MAI nr. 6026/2018 — verificat pe text (criteriile de hidranți interiori/exteriori, Art. 4.1/6.1).' },
+    { cod: 'P118-3/2015', titlu: 'Instalații detectare-semnalizare-avertizare', dom: 'Incendiu', an: '2015 (mod. Ord. 6025/2018)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Modificat de Ordinul MAI nr. 6025/2018 — verificat pe text (Art. 3.3.1, cazuri obligativitate IDSAI).' },
     // — FUNCȚIUNI CIVILE —
     { cod: 'NP 057-2002', titlu: 'Proiectarea clădirilor de locuințe', dom: 'Rezidențial', an: '2002', stare: 'de_verificat', verificat: '2026-07', nota: 'Normativ vechi (2002) — verifică revizuire/înlocuire.' },
     { cod: 'NP 068-2002', titlu: 'Siguranța în exploatare — clădiri aglomerate', dom: 'Siguranță', an: '2002', stare: 'de_verificat', verificat: '2026-07', nota: 'Vechi (2002) — verifică statut.' },

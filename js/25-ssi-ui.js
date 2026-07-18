@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null };
+  var STATE = { tip_lucrare: null, fazaDocument: 'AVIZ', vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null, inaltimiDetectate: null, atex: { are: false, gaze: '', vapori: '', pulberi: '', frecventa: 'ocazionala' } };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -174,6 +174,14 @@
       '<div class="ssiui-lbl">1.0 — Tip de lucrare (obligatoriu, decide tabelele P118-1/2025 aplicabile)</div>' +
       '<select class="ssiui-sel"' + (STATE.tip_lucrare ? '' : ' style="border:1px solid #f87171"') + ' onchange="SSI_UI._setTip(this.value)"><option value="">— selectează —</option>' + _optTip() + '</select>' +
       (STATE.tip_lucrare ? '' : '<div class="ssiui-note" style="border-color:#f87171;background:rgba(248,113,113,.1);color:#fca5a5">⚠ Fără această selecție, scenariul de securitate la incendiu se generează ca document GENERIC (3 paragrafe, fără cascada M0-M17, fără sarcina termică pe încăperi, fără timpii de intervenție) — indiferent câte alte câmpuri completezi mai jos (vecinătăți, relevee, distanță ISU etc.). Selectează tipul de lucrare ÎNAINTE de a genera documentele finale.</div>') +
+      '<div class="ssiui-lbl" style="margin-top:14px">0.1 — Faza documentului</div>' +
+      '<select class="ssiui-sel" onchange="SSI_UI._setFaza(this.value)">' +
+      '<option value="AVIZ"' + (STATE.fazaDocument !== 'AUTORIZARE' ? ' selected' : '') + '>Aviz ISU (fază de proiectare, D.T.A.C.) — soluții propuse</option>' +
+      '<option value="AUTORIZARE"' + (STATE.fazaDocument === 'AUTORIZARE' ? ' selected' : '') + '>Autorizație de securitate la incendiu (recepție/as-built)</option>' +
+      '</select>' +
+      '<div class="ssiui-note">' + (STATE.fazaDocument === 'AUTORIZARE'
+        ? 'Documentul va avea titlul „DOCUMENTAȚIE TEHNICĂ PENTRU OBȚINEREA AUTORIZAȚIEI DE SECURITATE LA INCENDIU" și include o anexă de verificare funcțională la recepție (Legea 307/2006, art. 30) — restul secțiunilor rămân aceeași fundamentare tehnică, folosită acum pentru atestarea execuției conforme.'
+        : 'Documentul va avea titlul „SCENARIU DE SECURITATE LA INCENDIU" (fază de proiectare/D.T.A.C.) — comportamentul implicit, neschimbat.') + '</div>' +
       '<div class="ssiui-lbl" style="margin-top:18px">Import geometrie din DXF (opțional — export din CAD, format ASCII)</div>' +
       '<input type="file" accept=".dxf" class="ssiui-inp" onchange="SSI_UI._onFile(this.files[0])">' +
       (STATE.planSituatieInfo
@@ -201,6 +209,10 @@
       '<div class="ssiui-lbl" style="margin-top:14px">3.4 — Timpi de intervenție ISU (distanța la cea mai apropiată subunitate)</div>' +
       '<div class="ssiui-note">Fără această valoare, timpul de deplasare (T3) se estimează conservator (15 min) — completează distanța reală (confirmată cu ISU județean) pentru un calcul precis al cascadei T1–T14.</div>' +
       '<div><div class="ssiui-lbl">Distanță la subunitatea ISU (km)</div><input class="ssiui-inp" type="number" step="0.1" min="0" value="' + (STATE.distantaIsuKm != null ? STATE.distantaIsuKm : '') + '" onchange="SSI_UI._setDistantaIsu(parseFloat(this.value)||null)"></div>' +
+      '<div class="ssiui-lbl" style="margin-top:14px">2.1 — Sarcina termică (tabel material-cu-material)</div>' +
+      '<div class="ssiui-note">' + (STATE.camereExtrase && STATE.camereExtrase.length ? STATE.camereExtrase.length + ' încăpere/încăperi calculate — descarcă tabelul complet (deschide direct în Excel/Numbers/Sheets), independent de generarea scenariului complet.' : 'Niciun tabel calculat încă — se populează automat la încărcarea unui plan/releveu sau la generarea camerelor standard din program funcțional.') + '</div>' +
+      '<button class="ssiui-btn sec" onclick="SSI_UI._exportSarcinaTermicaCSV()">⬇ Descarcă tabel sarcină termică (CSV/Excel)</button>' +
+      renderAtex() +
       '<div style="margin-top:16px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">' +
       '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#e6edf7;cursor:pointer">' +
       '<input type="checkbox"' + (STATE.modFinal ? ' checked' : '') + ' onchange="SSI_UI._setModFinal(this.checked)"> ' +
@@ -269,7 +281,7 @@
   var CATEGORII_LABEL = {
     limita_proprietate: 'Limită de proprietate', vecinatati: 'Vecinătăți (clădiri învecinate)',
     constructie_existenta: 'Construcție existentă', constructie_propusa: 'Construcție propusă',
-    acces_auto_speciale: 'Acces autospeciale', cote_nivel: 'Cote de nivel'
+    acces_auto_speciale: 'Acces autospeciale', cote_nivel: 'Cote de nivel', aliniament: 'Linie de aliniament'
   };
 
   // Descrierea "in cuvinte", pt utilizatori care nu stiu CAD — nu trebuie sa inteleaga ce e un
@@ -280,7 +292,8 @@
     constructie_existenta: 'conturul unei clădiri care EXISTĂ deja pe teren (dacă e cazul).',
     constructie_propusa: 'conturul clădirii/clădirilor pe care le construiești (amprenta la sol a casei/caselor din proiect) — de obicei MAI MULTE contururi mici, de mărimea unei case (zeci-sute de mp).',
     acces_auto_speciale: 'drumul/aleea pe care ar intra o mașină de pompieri, dacă e desenat distinct.',
-    cote_nivel: 'liniile de nivel/cotă ale terenului (dacă sunt desenate).'
+    cote_nivel: 'liniile de nivel/cotă ale terenului (dacă sunt desenate).',
+    aliniament: 'linia frontului stradal față de care se măsoară retragerea minimă impusă de PUG/RLU (o linie/polilinie DESCHISĂ, diferită de limita de proprietate) — dacă e desenată distinct.'
   };
 
   // Layerele NU sunt standardizate in Romania (multe CAD-uri, ex. ArchiCAD, au denumiri proprii de tip
@@ -306,6 +319,38 @@
       '</div>';
   }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  // ADAUGAT (18 iul, cerere Florin: "vreau sa am o sectiune de unde sa fac download la tabelul de
+  // sarcina termica.... excel. Nu doar in scenariu, uneori am nevoie doar de acel tabel"). Tipar CSV
+  // identic cu cel deja folosit la deviz (js/urbanx-deviz-engine.js, _csvCell/BOM/Blob), aceeasi
+  // structura per-material ca in scenariul SSI (2.1, D._camere[].detaliu_materiale) — nu o lista noua,
+  // ci exportul aceluiasi tabel deja calculat. Replica formatul real "Sarcina termica Fruntiseni.xlsx"
+  // (Incapere/tip/denumire/cantitate/greutate/Mi/Qi/Sq/As/qs/risc).
+  function _csvCell(s) { s = String(s == null ? '' : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function _csvSarcinaTermica(camere) {
+    var linii = ['Încăpere;Material;Cantitate;Unitate;Greutate unitară (kg);Total Mi (kg);Putere calorică Qi (MJ/kg);Sarcină termică Ii (MJ);Arie As (m²);Densitate sarcină termică qs (MJ/m²);Încadrare risc'];
+    (camere || []).forEach(function (c) {
+      var materiale = c.detaliu_materiale || [];
+      if (!materiale.length) {
+        linii.push([_csvCell(c.nume), '(fără detaliu material)', '', '', '', '', '', '', c.arie_mp || '', c.densitate_mj_mp || '', _csvCell(c.risc_incadrare || '')].join(';'));
+        return;
+      }
+      materiale.forEach(function (m) {
+        linii.push([_csvCell(c.nume), _csvCell(m.nume), m.cantitate, _csvCell(m.unitate), m.greutate_kg, m.total_kg, m.putere_calorica_mj_kg, m.sarcina_termica_mj, c.arie_mp || '', c.densitate_mj_mp || '', _csvCell(c.risc_incadrare || '')].join(';'));
+      });
+      linii.push([_csvCell(c.nume + ' — TOTAL'), '', '', '', '', '', '', c.sarcina_termica_mj, c.arie_mp || '', c.densitate_mj_mp || '', _csvCell(c.risc_incadrare || '')].join(';'));
+    });
+    return '﻿' + linii.join('\r\n');
+  }
+  function _exportSarcinaTermicaCSV() {
+    var camere = STATE.camereExtrase || [];
+    if (!camere.length) { if (G.ss) G.ss('⚠ Niciun tabel de sarcină termică calculat încă — încarcă un plan/releveu la secțiunea de relevee sau generează camere standard din program funcțional.'); return; }
+    try {
+      var blob = new Blob([_csvSarcinaTermica(camere)], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Sarcina_termica.csv';
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    } catch (e) { if (G.ss) G.ss('⚠ Eroare la export: ' + e.message); }
+  }
+  function _listaDinText(t) { return String(t || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean); }
 
   // Ghiceste layerul cel mai probabil pt "constructie propusa": cel cu cele mai multe forme in
   // intervalul de marime plauzibil pt o cladire (20-500mp) — doar o PRESELECTIE, editabila liber;
@@ -321,6 +366,34 @@
     return candidati.length ? candidati[0].l : null;
   }
 
+  // ADAUGAT (18 iul, cerere Florin — motorul M13 ATEX (js/25-ssi-atex.js) exista si functioneaza corect,
+  // dar D._spatii_atex nu avea NICIUN drum de intrare din UI (doar implicit auto pt functiunea 'skid') —
+  // pt orice alt proiect cu substante reale (hala industriala cu solvent, agricol cu siloz de faina etc.)
+  // utilizatorul nu putea declara nimic, desi motorul de analiza le-ar fi procesat corect daca ar fi primit
+  // date. Declaratie SIMPLA (o singura zona "ansamblul constructiei"), nu un builder complet per incapere —
+  // suficient pt marea majoritate a proiectelor reale, unde substantele periculoase sunt fie absente, fie
+  // concentrate intr-un singur spatiu tehnic declarat global (centrala GPL, depozit solventi etc.).
+  function renderAtex() {
+    var a = STATE.atex;
+    return '<div class="ssiui-lbl" style="margin-top:14px">3.5 — Substanțe cu potențial exploziv (ATEX)</div>' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:12px;color:#e6edf7;cursor:pointer">' +
+      '<input type="checkbox"' + (a.are ? ' checked' : '') + ' onchange="SSI_UI._setAtexAre(this.checked)"> ' +
+      'Proiectul are/poate avea gaze, vapori sau pulberi inflamabile/combustibile (GPL, gaz metan, hidrogen, solvenți, benzină, făină, rumeguș, praf metalic etc.)</label>' +
+      (a.are
+        ? '<div style="margin-top:6px;padding:8px;border-radius:6px;background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.3)">' +
+          '<div class="ssiui-lbl">Gaze (ex: GPL, gaz metan, hidrogen)</div><input class="ssiui-inp" value="' + esc(a.gaze) + '" onchange="SSI_UI._setAtexCamp(\'gaze\',this.value)">' +
+          '<div class="ssiui-lbl">Vapori inflamabili (ex: solvenți, benzină, alcool)</div><input class="ssiui-inp" value="' + esc(a.vapori) + '" onchange="SSI_UI._setAtexCamp(\'vapori\',this.value)">' +
+          '<div class="ssiui-lbl">Pulberi combustibile (ex: făină, rumeguș, praf aluminiu)</div><input class="ssiui-inp" value="' + esc(a.pulberi) + '" onchange="SSI_UI._setAtexCamp(\'pulberi\',this.value)">' +
+          '<div class="ssiui-lbl">Frecvența de scăpare (determină zona ATEX propusă)</div>' +
+          '<select class="ssiui-sel" onchange="SSI_UI._setAtexCamp(\'frecventa\',this.value)">' +
+          ['continua', 'frecventa', 'ocazionala', 'improbabila'].map(function (f) { return '<option value="' + f + '"' + (a.frecventa === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') +
+          '</select>' +
+          '<div class="ssiui-note" style="margin-top:6px">Motorul propune o zonă ATEX DE PRINCIPIU (0/1/2 pt. gaze-vapori, 20/21/22 pt. pulberi) — extinderea geometrică exactă pe plan rămâne responsabilitatea proiectantului de specialitate ATEX.</div>' +
+          '</div>'
+        : '') +
+      '';
+  }
+
   function renderMapareManuala() {
     var pd = STATE.pendingDxf; if (!pd) return '';
     var stats = pd.statsLayere || {};
@@ -332,6 +405,67 @@
       '<button class="ssiui-btn pri" onclick="SSI_UI._confirmaMapare()">✓ Confirmă layerele și extrage geometria</button>';
   }
 
+  // Numele-eticheta afisate pt fiecare tip de plansa detectata (window.SSI_DWG_MULTISHEET.clasificaPlansa)
+  var ETICHETA_TIP_PLANSA = {
+    plan_situatie: 'Plan de situație', plan_nivel: 'Plan de nivel', fatada: 'Fațadă', sectiune: 'Secțiune',
+    plan_acoperis: 'Plan acoperiș', plan_fundatii: 'Plan fundații', necunoscut: 'neclasificată'
+  };
+  // Construieste un "sub-parsedDXF" continand DOAR entitatile unei insule — reutilizeaza exact
+  // acelasi extractGeometrie()/mapLayers() ca la un fisier cu o singura plansa, fara sa dubleze cod.
+  function _subParsed(parsed, insula) {
+    var layers = {}; insula.entitati.forEach(function (e) { var l = e.layer || '0'; layers[l] = (layers[l] || 0) + 1; });
+    return { entities: insula.entitati, layers: Object.keys(layers), layerCounts: layers, nrEntitati: insula.entitati.length, unitateDetectata: parsed.unitateDetectata, scaraLaMetri: parsed.scaraLaMetri };
+  }
+
+  // ADAUGAT (18 iul, cerere Florin — a aratat un DWG real cu 6 planse (plan situatie + 2 fatade +
+  // 2 sectiuni + 2 planuri de nivel) TOATE in acelasi fisier, cerand explicit ca platforma sa
+  // recunoasca si foloseasca fiecare, nu doar planul de situatie): daca fisierul incarcat contine
+  // MAI MULTE planse detectabile (js/25-ssi-dwg-multisheet.js), fiecare se proceseaza cu motorul
+  // POTRIVIT tipului ei, in loc sa se trateze tot fisierul ca un singur plan de situatie (comportament
+  // vechi, singurul posibil pana acum). Daca se detecteaza O SINGURA insula (fisier cu o singura
+  // plansa, cazul obisnuit), comportamentul ramane EXACT cel vechi (backward-compatible).
+  function _proceseazaPlanseMultiple(parsed) {
+    var insule = G.SSI_DWG_MULTISHEET.detecteazaPlanse(parsed);
+    if (insule.length <= 1) return null; // o singura insula -> nu e cazul multi-plansa, fallback la vechi
+    var rezumat = [];
+    var gasitPlanSituatie = false;
+    insule.forEach(function (insula) {
+      var clasa = G.SSI_DWG_MULTISHEET.clasificaPlansa(insula);
+      insula.clasificare = clasa;
+      if (clasa.tip === 'plan_situatie' && !gasitPlanSituatie) {
+        gasitPlanSituatie = true;
+        var subParsed = _subParsed(parsed, insula);
+        var mapare = G.SSI_DWG_IMPORT.mapLayers(subParsed);
+        if (mapare.automata_completa) {
+          var geo = G.SSI_DWG_IMPORT.extractGeometrie(subParsed, mapare);
+          STATE.geometrie_teren = geo;
+          rezumat.push(ETICHETA_TIP_PLANSA.plan_situatie + ': ' + (geo.cladiri_propuse.length || (geo.volum_propus ? 1 : 0)) + ' clădire/clădiri, ' + (geo.vecinatati_geometrie.length) + ' vecinătate/vecinătăți detectate din geometrie');
+        } else {
+          STATE.pendingDxf = { parsed: subParsed, mapareCurenta: mapare.mapare, statsLayere: G.SSI_DWG_IMPORT.analizeazaLayerePoligoane(subParsed) };
+          rezumat.push(ETICHETA_TIP_PLANSA.plan_situatie + ': layere neclare — confirmă maparea mai jos');
+        }
+      } else if (clasa.tip === 'plan_nivel') {
+        var camereNivel = G.SSI_DWG_MULTISHEET.extrageCamereDinPlansaNivel(insula, G.SSI_DWG_IMPORT);
+        if (!STATE.camereExtrase) STATE.camereExtrase = [];
+        camereNivel.forEach(function (c) { if (!STATE.camereExtrase.some(function (x) { return x.nume === c.nume && x.nivel === c.nivel && x.arie_mp === c.arie_mp; })) STATE.camereExtrase.push(c); });
+        rezumat.push((clasa.nivel || ETICHETA_TIP_PLANSA.plan_nivel) + ': ' + camereNivel.length + ' încăpere/încăperi detectate' + (camereNivel.length ? ' (' + camereNivel.map(function (c) { return c.nume; }).join(', ') + ')' : ''));
+      } else if (clasa.tip === 'fatada' || clasa.tip === 'sectiune') {
+        var h = _extrageInaltimiDinDXF(_subParsed(parsed, insula));
+        if (h.cornisa != null || h.coama != null) {
+          STATE.inaltimiDetectate = STATE.inaltimiDetectate || {};
+          if (h.cornisa != null && STATE.inaltimiDetectate.cornisa == null) STATE.inaltimiDetectate.cornisa = h.cornisa;
+          if (h.coama != null && STATE.inaltimiDetectate.coama == null) STATE.inaltimiDetectate.coama = h.coama;
+          rezumat.push(ETICHETA_TIP_PLANSA[clasa.tip] + ': H cornișă=' + (h.cornisa != null ? h.cornisa + 'm' : '—') + ', H coamă=' + (h.coama != null ? h.coama + 'm' : '—'));
+        } else {
+          rezumat.push(ETICHETA_TIP_PLANSA[clasa.tip] + ': nicio cotă de nivel găsită ca text');
+        }
+      } else {
+        rezumat.push('Planșă neclasificată (' + insula.entitati.length + ' entități) — ignorată; adaugă un text cu titlul planșei (ex. "PLAN PARTER") pe desen pentru recunoaștere automată.');
+      }
+    });
+    return { nrPlanse: insule.length, rezumat: rezumat, gasitPlanSituatie: gasitPlanSituatie };
+  }
+
   async function onFile(file) {
     if (!file) return;
     STATE.planSituatieInfo = { nume: file.name, marime: _fmtKB(file.size), stare: 'se citește…' };
@@ -341,6 +475,18 @@
     try {
       var parsed = await G.SSI_DWG_IMPORT.parseDXFFile(file);
       STATE.planSituatieInfo.stare = parsed.nrEntitati + ' entități, ' + parsed.layers.length + ' layere citite';
+      // Detectare multi-plansa INAINTEA fluxului vechi (single-plansa) — daca fisierul are mai multe
+      // planse desenate impreuna (chenare/cartuse separate in acelasi DXF), fiecare se proceseaza cu
+      // motorul potrivit tipului ei; daca are UNA singura, cade exact pe comportamentul vechi.
+      if (G.SSI_DWG_MULTISHEET) {
+        var rezMulti = _proceseazaPlanseMultiple(parsed);
+        if (rezMulti) {
+          STATE.planSituatieInfo.stare = 'Fișier cu ' + rezMulti.nrPlanse + ' planșe detectate: ' + rezMulti.rezumat.join(' · ');
+          render();
+          if (G.ss) G.ss('✓ Am detectat ' + rezMulti.nrPlanse + ' planșe în același fișier — vezi rezumatul de mai sus. ' + (rezMulti.gasitPlanSituatie ? '' : 'Nicio planșă nu a fost recunoscută ca plan de situație — verifică maparea layerelor manual dacă e cazul.'));
+          return;
+        }
+      }
       var mapare = G.SSI_DWG_IMPORT.mapLayers(parsed);
       if (mapare.automata_completa) { _aplicaGeometrie(parsed, mapare); return; }
       var stats = G.SSI_DWG_IMPORT.analizeazaLayerePoligoane(parsed);
@@ -500,7 +646,7 @@
         !STATE.cladiriPropuse.length && STATE.distantaIsuKm == null;
       if (nimicCompletat) return null; // panoul e complet neatins — comportament neschimbat
       return {
-        tip_lucrare: STATE.tip_lucrare, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
+        tip_lucrare: STATE.tip_lucrare, faza_document: STATE.fazaDocument, _vecinatati: STATE.vecinatati, geometrie_teren: STATE.geometrie_teren,
         _elemente_structurale: STATE.elemente_structurale, _ssi_final_mode: STATE.modFinal,
         _normative_confirmate_de_proiectant: STATE.normativeConfirmate,
         _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee,
@@ -508,11 +654,18 @@
         _camere: (STATE.camereExtrase && STATE.camereExtrase.length) ? STATE.camereExtrase : undefined,
         _usi: (STATE.usiExtrase && STATE.usiExtrase.length) ? STATE.usiExtrase : undefined,
         _detasament_isu: STATE.distantaIsuKm != null ? { distanta_km: STATE.distantaIsuKm } : undefined,
+        _spatii_atex: STATE.atex.are ? [{
+          nume: 'Ansamblul construcției (declarație proiectant)',
+          substante_declarate: {
+            gaze: _listaDinText(STATE.atex.gaze), vapori: _listaDinText(STATE.atex.vapori), pulberi: _listaDinText(STATE.atex.pulberi)
+          },
+          date_exploatare: { frecventa_scurgere: STATE.atex.frecventa }
+        }] : undefined,
         grad_stabilitate: STATE.cartusExtras && STATE.cartusExtras.grad_stabilitate,
         categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
       };
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null }; },
+    clearPending: function () { STATE = { tip_lucrare: null, fazaDocument: 'AVIZ', vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null, inaltimiDetectate: null, atex: { are: false, gaze: '', vapori: '', pulberi: '', frecventa: 'ocazionala' } }; },
     _setDistantaIsu: function (v) { STATE.distantaIsuKm = v; render(); },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },
@@ -525,6 +678,14 @@
     _eliminaFisierRelevee: function (cheie, idx) { if (STATE.relevee[cheie] && STATE.relevee[cheie].fisiere) { STATE.relevee[cheie].fisiere.splice(idx, 1); render(); } },
     _uitaPlanSituatie: function () { STATE.planSituatieInfo = null; render(); },
     _setTip: function (v) { STATE.tip_lucrare = v || null; },
+    // ADAUGAT (18 iul, cerere Florin — a dat 2 exemple reale, unul de AVIZ ISU altul de AUTORIZAȚIE de
+    // securitate la incendiu): fara acest control, D.faza_document (motorul din urbanx-docx-builder.js,
+    // _buildScenariuSSICascada) nu era NICIODATA setat de UI — feature-ul backend era corect dar de
+    // negasit/inaccesibil pt un utilizator real.
+    _setFaza: function (v) { STATE.fazaDocument = v || 'AVIZ'; render(); },
+    _setAtexAre: function (v) { STATE.atex.are = !!v; render(); },
+    _setAtexCamp: function (camp, v) { STATE.atex[camp] = v; },
+    _exportSarcinaTermicaCSV: _exportSarcinaTermicaCSV,
     _addVecinatate: function () { STATE.vecinatati.push({ id: 'V' + (STATE.vecinatati.length + 1), sursa_distanta: 'manual' }); render(); },
     _remove: function (i) { STATE.vecinatati.splice(i, 1); render(); },
     _set: function (i, key, val) { if (STATE.vecinatati[i]) STATE.vecinatati[i][key] = val; },
@@ -553,7 +714,7 @@
     var orig = G.UXDocBuilder.genereazaDosar;
     G.UXDocBuilder.genereazaDosar = function (Dproj, v) {
       var pending = G.SSI_UI.getPending();
-      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; Dproj._relevee = Dproj._relevee || pending._relevee;
+      if (pending) { Dproj.tip_lucrare = Dproj.tip_lucrare || pending.tip_lucrare; Dproj.faza_document = pending.faza_document || Dproj.faza_document; Dproj._vecinatati = Dproj._vecinatati || pending._vecinatati; Dproj._elemente_structurale = Dproj._elemente_structurale || pending._elemente_structurale; Dproj._ssi_final_mode = pending._ssi_final_mode; Dproj._normative_confirmate_de_proiectant = pending._normative_confirmate_de_proiectant; Dproj._cladiri_propuse = Dproj._cladiri_propuse || pending._cladiri_propuse; Dproj._tipuri_cladiri = Dproj._tipuri_cladiri || pending._tipuri_cladiri; Dproj._relevee = Dproj._relevee || pending._relevee; Dproj._spatii_atex = Dproj._spatii_atex || pending._spatii_atex;
         // BUG REAL gasit (raport Florin): geometrie_teren (distante_intre_cladiri, grupuri_constructive,
         // limita_proprietate, adnotari_urbanism, faza_dwg) nu era MERGE-uit niciodata aici — doar
         // testele mele manuale (care setau D.geometrie_teren direct) mascau asta; in fluxul REAL din

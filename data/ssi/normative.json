@@ -790,137 +790,170 @@
     "noi": {
       "flux_evacuare_general_T51": {
         "pagina": 207,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T51"
       },
       "lungime_locuit_T56": {
         "pagina": 212,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T56"
       },
       "lungime_administrativ_T60": {
         "pagina": 217,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T60"
       },
       "lungime_comert_T64": {
         "pagina": 222,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T64"
       },
       "lungime_sanatate_T67_T68": {
         "pagina": "226-227",
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T67"
       },
       "lungime_cultura_T72": {
         "pagina": 231,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T72"
       },
       "lungime_invatamant_T77": {
         "pagina": 236,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T77"
       },
       "lungime_turism_T80": {
         "pagina": 238,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T80"
       },
       "lungime_cult_T81": {
         "pagina": 239,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T81"
       },
       "lungime_sport_T84": {
         "pagina": 241,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T84"
       },
       "lungime_inalte_T93": {
         "pagina": 270,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T93"
       },
       "lungime_f_inalte_T97": {
         "pagina": 285,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T97"
       },
       "flux_sali_aglomerate_T109": {
         "pagina": 297,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T109"
       },
       "lungime_sali_aglomerate_T110": {
         "pagina": 298,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T110"
       },
       "lungime_subterane_T113": {
         "pagina": 304,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T113"
       },
       "arii_niveluri_productie_depozitare_T114": {
         "pagina": 307,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T114"
       },
       "flux_productie_depozitare_T115": {
         "pagina": 314,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T115"
       },
       "lungime_productie_depozitare_T116": {
         "pagina": 314,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T116"
       },
       "lungime_parcaje_T88": {
         "pagina": 247,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T88"
       }
     },
     "existente": {
       "capacitate_evacuare_T150": {
         "pagina": 592,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T150"
       },
       "conditii_elemente_T151": {
         "pagina": 595,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T151"
       },
       "separare_locuit_T152": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T152"
       },
       "separare_administrativ_T153": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T153"
       },
       "separare_comert_T154": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T154"
       },
       "separare_sanatate_T155": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T155"
       },
       "separare_cultura_T156": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T156"
       },
       "separare_invatamant_T157": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T157"
       },
       "separare_turism_T158": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T158"
       },
       "separare_inalte_f_inalte_T159": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T159"
       },
       "lungime_inalte_f_inalte_T160": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T160"
       },
       "arii_niveluri_productie_depozitare_T168": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T168"
       },
       "flux_productie_depozitare_T169": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T169"
       },
       "lungime_productie_depozitare_T170": {
         "pagina": null,
-        "status": "necesita_extractie"
+        "status": "extras_verificat_partial",
+        "ref": "P118_1_2025_T170"
       }
     }
   },
@@ -2475,6 +2508,1063 @@
       "inaltime_max_racord_m": 1.5,
       "inclinare_racord_grade": 45,
       "diametru_cuplaj_storz_mm": 65
+    }
+  },
+  "P118_1_2025_T97": {
+    "id": "P118_1_2025_T97",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "pagina": 285,
+    "titlu": "Lungimi de evacuare in cladiri supraterane foarte inalte",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 97",
+      "nota": "Lungimea de evacuare intr-o directie (coridor infundat) se refera si la interiorul incaperilor si respectiv al apartamentelor de locuit.",
+      "randuri": [
+        {
+          "destinatie": "Administrativa, invatamant, turism, sanatate, comert, cult, locuinte colective etc.",
+          "lungime_doua_directii_m": 25,
+          "lungime_fund_de_sac_m": 15
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T151": {
+    "id": "P118_1_2025_T151",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 596,
+    "titlu": "Conditii pentru elementele de constructie la cladiri existente de locuit",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 151",
+      "nota": "Acopera elemente specifice locuintelor existente (nu e un tabel general pe toata Anexa A.10): pereti despartitori intre cladiri/tronsoane/apartamente, pereti bai-bucatarii, pereti boxe gospodaresti subsol/demisol.",
+      "randuri": [
+        {
+          "element": "Pereti despartitori intre cladiri existente, tronsoane si apartamente",
+          "conditie": "A1 sau A2-s1,d0, EI/REI 60",
+          "observatii": "NSI IV: pot fi C-s1..s3,d0..d1; NSI V: pot fi D-s1..s3,d0..d1"
+        },
+        {
+          "element": "Pereti despartitori intre bai si bucatarii, fata de celelalte incaperi ale apartamentului (NSI I si/sau II)",
+          "conditie": "A1 sau A2-s1,d0, EI 15",
+          "observatii": ""
+        },
+        {
+          "element": "Pereti despartitori intre boxele gospodaresti/de depozitare din subsol sau demisol (grupari max. 300 mp)",
+          "conditie": "A2-s1..s3,d2; B-s1..s3,d2; C-s1..s3,d2; D-s1..s3,d2; E-d2",
+          "observatii": ""
+        },
+        {
+          "element": "Pereti despartitori intre gruparile de boxe gospodaresti si intre acestea si spatiile tehnice",
+          "conditie": "A1 sau A2-s1,d0, EI/REI 60",
+          "observatii": "Usile spre coridoare vor fi minimum EI 15"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T152": {
+    "id": "P118_1_2025_T152",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "597-598",
+    "titlu": "Pereti si usi de separare a cailor comune de circulatie si de evacuare la cladiri existente de locuit",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 152",
+      "nota": "Coloana usi coridoare-holuri nu se aplica (locuinte) — vezi randuri.",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 30 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 30 (A1/A2-s1,d0)",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5S200"
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 30 (A1,A2-s1,d0 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "EI/REI 30 (A1,A2-s1,d0 sau B-s1..s3,d0..d1)",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 15 (A1,A2-s1,d0,B-s1..s3,d0..d1 sau C-s1..s3,d0..d1)",
+          "pereti_holuri": "EI/REI 15 (A1,A2-s1,d0,B-s1..s3,d0..d1 sau C-s1..s3,d0..d1)",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 120 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "- (A1,A2-s1,d0,B-s1..s3,d0..d1,C-s1..s3,d0..d1 sau D-s1..s3,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 15 (A1,A2-s1,d0 sau B-s1..s3,d0..d1)",
+          "usi_case_scari": "-"
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "- (A1,A2-s1,d0,B-s1..s3,d0..d1,C-s1..s3,d0..d1 sau D-s1..s3,d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 15 (A1,A2-s1,d0 sau B-s1..s3,d0..d1 sau C-s1..s3,d0..d1)",
+          "usi_case_scari": "-"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T153": {
+    "id": "P118_1_2025_T153",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "599-600",
+    "titlu": "Pereti si usi de separare a cailor comune de circulatie si de evacuare la cladiri existente cu functiune administrativa",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 153",
+      "nota": "Capacitatea de evacuare a unui flux = max. 80 persoane (Art. A.10.3.10.26).",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 60 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 60 (A1/A2-s1,d0)",
+          "usi_coridoare": "E 30-C5Sa",
+          "usi_holuri": "E 30-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 60-C5S200"
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 60 (A1/A2-s1,d0)",
+          "usi_coridoare": "E 15-C5Sa sau usi pline lemn/metal",
+          "usi_holuri": "E 30-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 30-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 30 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 45 (A1/A2-s1,d0)",
+          "usi_coridoare": "C5",
+          "usi_holuri": "E 15-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "C5",
+          "pereti_case_scari": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "usi_case_scari": "C5"
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "usi_case_scari": "-"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T154": {
+    "id": "P118_1_2025_T154",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "600-601",
+    "titlu": "Separare a cailor comune de circulatie si de evacuare la constructii existente de comert",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 154",
+      "nota": "Capacitatea de evacuare a unui flux = max. 70 persoane (Art. A.10.3.10.39).",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 90 (A1/A2-s1,d0)",
+          "usi_coridoare": "E 30-C5Sa",
+          "usi_holuri": "E 45-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 60-C5S200"
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 60 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 90 (A1/A2-s1,d0)",
+          "usi_coridoare": "E 15-C5Sa sau usi pline",
+          "usi_holuri": "E 45-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 30-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 45 (A1/A2-s1,d0)",
+          "usi_coridoare": "E 15-C5Sa sau usi pline",
+          "usi_holuri": "E 30-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30",
+          "pereti_holuri": "EI/REI 30",
+          "usi_coridoare": "C5",
+          "usi_holuri": "E 15-C5",
+          "pereti_case_scari": "EI/REI 45 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "usi_case_scari": "C5Sa"
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "C5",
+          "pereti_case_scari": "EI/REI 30 (min. C-s1..s3,d0..d1)",
+          "usi_case_scari": "C5"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T155": {
+    "id": "P118_1_2025_T155",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "602-603",
+    "titlu": "Separare a cailor comune de circulatie si de evacuare la cladiri existente de sanatate",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 155",
+      "nota": "Capacitatea de evacuare pt bolnavi transportabili = max. 50 persoane (Art. A.10.3.10.57). La NSI V usile/peretii case de scari NU SE ADMIT.",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "EI/REI 90 (A1/A2-s1,d0)",
+          "usi_coridoare": "C5Sa",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 60-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5Sa",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 45-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5Sa",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 30-C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "EI/REI 60 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_case_scari": "E 15-C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "NU SE ADMIT",
+          "pereti_case_scari": "NU SE ADMIT",
+          "usi_case_scari": null
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T156": {
+    "id": "P118_1_2025_T156",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 604,
+    "titlu": "Separare a cailor comune de circulatie si de evacuare la cladiri existente pentru cultura",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 156",
+      "nota": "",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 30-C5Sa",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 60-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 15-C5Sa sau usi pline lemn/metal",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 30-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 15-C5Sa sau usi pline lemn/metal",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 15-C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "EI/REI 60 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_case_scari": "C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "EI/REI 30 (min. C-s1..s3,d0..d1)",
+          "pereti_case_scari": "C5",
+          "usi_case_scari": null
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T157": {
+    "id": "P118_1_2025_T157",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "607-608",
+    "titlu": "Separare a cailor comune de circulatie si de evacuare la cladiri existente de invatamant",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 157",
+      "nota": "Capacitatea de evacuare: prescolar max. 50, alte constructii de invatamant max. 75 persoane (Art. A.10.3.10.103).",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 30-C5Sa",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 60-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 15-C5Sa sau usi pline lemn/metal",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 30-C5S200",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 15-C5Sa sau usi pline lemn/metal",
+          "usi_holuri": "EI/REI 180 (A1/A2-s1,d0)",
+          "pereti_case_scari": "E 15-C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "EI/REI 60 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_case_scari": "C5Sa",
+          "usi_case_scari": null
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "EI/REI 30 (min. C-s1..s3,d0..d1)",
+          "pereti_case_scari": "C5",
+          "usi_case_scari": null
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T158": {
+    "id": "P118_1_2025_T158",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 609,
+    "titlu": "Separarea cailor comune de circulatie si de evacuare la cladiri existente pentru turism",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 158",
+      "nota": "Capacitatea de evacuare = max. 70 persoane (Art. A.10.3.10.120).",
+      "randuri": [
+        {
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 30-C5Sa",
+          "usi_holuri": "E 30-C5Sa",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 60-C5S200"
+        },
+        {
+          "nivel_stabilitate": "II",
+          "pereti_coridoare": "EI/REI 90 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "E 15-C5Sa sau usi pline",
+          "usi_holuri": "E 15-C5Sa sau usi pline",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 30-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "III",
+          "pereti_coridoare": "EI/REI 45 (A1/A2-s1,d0)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "E 15-C5Sa sau usi pline",
+          "pereti_case_scari": "EI/REI 180 (A1/A2-s1,d0)",
+          "usi_case_scari": "E 15-C5Sa"
+        },
+        {
+          "nivel_stabilitate": "IV",
+          "pereti_coridoare": "EI/REI 30 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "C5",
+          "usi_holuri": "C5",
+          "pereti_case_scari": "EI/REI 60 (min. A2-s1..s3,d0..d1 sau B-s1..s3,d0..d1)",
+          "usi_case_scari": "C5Sa"
+        },
+        {
+          "nivel_stabilitate": "V",
+          "pereti_coridoare": "EI/REI 15 (min. C-s1..s3,d0..d1)",
+          "pereti_holuri": "idem",
+          "usi_coridoare": "-",
+          "usi_holuri": "-",
+          "pereti_case_scari": "EI/REI 45 (min. C-s1..s3,d0..d1)",
+          "usi_case_scari": "C5"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T159": {
+    "id": "P118_1_2025_T159",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 615,
+    "titlu": "Pereti de separare a cailor comune de circulatie si de evacuare la cladiri existente inalte si foarte inalte",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 159",
+      "nota": "Cladirile existente inalte/f.inalte trebuie sa fie NSI I (Art. A.10.4.1.1) — doar randul I se aplica in practica.",
+      "randuri": [
+        {
+          "tip_cladire": "foarte inalta",
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "A1 sau A2-s1,d0, >= EI/REI 120",
+          "pereti_holuri": "A1 sau A2-s1,d0, >= EI/REI 120",
+          "pereti_case_scari": "A1 sau A2-s1,d0, >= EI/REI 180"
+        },
+        {
+          "tip_cladire": "inalta",
+          "nivel_stabilitate": "I",
+          "pereti_coridoare": "A1 sau A2-s1,d0, >= EI/REI 60",
+          "pereti_holuri": "A1 sau A2-s1,d0, >= EI/REI 60",
+          "pereti_case_scari": "A1 sau A2-s1,d0, >= EI/REI 180"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T160": {
+    "id": "P118_1_2025_T160",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 617,
+    "titlu": "Lungimi de evacuare la cladiri existente inalte si foarte inalte",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 160",
+      "nota": "Capacitatea de evacuare a unui flux = 70 persoane (Art. A.10.4.1.24), daca nu e specificata alta valoare pe destinatie.",
+      "randuri": [
+        {
+          "destinatie": "Publica, administrativa, birouri, invatamant etc.",
+          "inalte_doua_directii_m": 35,
+          "inalte_fund_de_sac_m": 15,
+          "f_inalte_doua_directii_m": 25,
+          "f_inalte_fund_de_sac_m": 10
+        },
+        {
+          "destinatie": "Locuinte, hoteluri, sanatate",
+          "inalte_doua_directii_m": 35,
+          "inalte_fund_de_sac_m": 15,
+          "f_inalte_doua_directii_m": 20,
+          "f_inalte_fund_de_sac_m": 10
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T168": {
+    "id": "P118_1_2025_T168",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": "627-628",
+    "titlu": "Arii construite si numar de niveluri admise pentru constructii existente de productie si/sau depozitare",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 168",
+      "nota": "Ariile se pot majora cu 100% (instalatii automate de stingere) SAU 50% (evacuare fum) SAU 25% (semnalizare automata incendiu) — majorarile NU se cumuleaza. Marirea ariei parterului conditionata de planseu REI 150 (constructii <01.01.2007) sau REI 180 (constructii >=01.01.2007), fara goluri.",
+      "randuri": [
+        {
+          "categorie_pericol": "A, B (BE3ab)",
+          "nivel_stabilitate": "I-II",
+          "niveluri_admise": 6,
+          "arie_parter_mp": null,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "nelimitat pe toate coloanele de arie"
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "I",
+          "niveluri_admise": null,
+          "arie_parter_mp": null,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "nelimitat"
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "II",
+          "niveluri_admise": 6,
+          "arie_parter_mp": null,
+          "arie_2niv_mp": 11700,
+          "arie_3plusniv_mp": 7800,
+          "observatii": "arie_parter nelimitat"
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "III",
+          "niveluri_admise": 3,
+          "arie_parter_mp": 5200,
+          "arie_2niv_mp": 3500,
+          "arie_3plusniv_mp": 2600,
+          "observatii": ""
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "IV",
+          "niveluri_admise": 2,
+          "arie_parter_mp": 2800,
+          "arie_2niv_mp": 2000,
+          "arie_3plusniv_mp": null,
+          "observatii": "3+ niveluri nu se admit"
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "V",
+          "niveluri_admise": 1,
+          "arie_parter_mp": 1200,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "2+ niveluri nu se admit"
+        },
+        {
+          "categorie_pericol": "D (BE1a)",
+          "nivel_stabilitate": "I-II",
+          "niveluri_admise": null,
+          "arie_parter_mp": null,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "nelimitat"
+        },
+        {
+          "categorie_pericol": "D (BE1a)",
+          "nivel_stabilitate": "III",
+          "niveluri_admise": 3,
+          "arie_parter_mp": 6500,
+          "arie_2niv_mp": 5200,
+          "arie_3plusniv_mp": 3500,
+          "observatii": ""
+        },
+        {
+          "categorie_pericol": "D (BE1a)",
+          "nivel_stabilitate": "IV",
+          "niveluri_admise": 2,
+          "arie_parter_mp": 3500,
+          "arie_2niv_mp": 2600,
+          "arie_3plusniv_mp": null,
+          "observatii": "3+ niveluri nu se admit"
+        },
+        {
+          "categorie_pericol": "D (BE1a)",
+          "nivel_stabilitate": "V",
+          "niveluri_admise": 1,
+          "arie_parter_mp": 1500,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "2+ niveluri nu se admit"
+        },
+        {
+          "categorie_pericol": "E (BE1b)",
+          "nivel_stabilitate": "I-II",
+          "niveluri_admise": null,
+          "arie_parter_mp": null,
+          "arie_2niv_mp": null,
+          "arie_3plusniv_mp": null,
+          "observatii": "nelimitat pe parter/3+niv; 2 niveluri nu se admite"
+        },
+        {
+          "categorie_pericol": "E (BE1b)",
+          "nivel_stabilitate": "III",
+          "niveluri_admise": 3,
+          "arie_parter_mp": 7800,
+          "arie_2niv_mp": 6500,
+          "arie_3plusniv_mp": 3500,
+          "observatii": ""
+        },
+        {
+          "categorie_pericol": "E (BE1b)",
+          "nivel_stabilitate": "IV",
+          "niveluri_admise": 2,
+          "arie_parter_mp": 3500,
+          "arie_2niv_mp": 2600,
+          "arie_3plusniv_mp": null,
+          "observatii": "3+ niveluri nu se admit"
+        },
+        {
+          "categorie_pericol": "E (BE1b)",
+          "nivel_stabilitate": "V",
+          "niveluri_admise": 2,
+          "arie_parter_mp": 2600,
+          "arie_2niv_mp": 1500,
+          "arie_3plusniv_mp": null,
+          "observatii": "3+ niveluri nu se admit"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T169": {
+    "id": "P118_1_2025_T169",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 633,
+    "titlu": "Capacitati de evacuare pentru constructii existente de productie si/sau depozitare",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 169",
+      "randuri": [
+        {
+          "categorie_pericol": "A-B (BE3a,b)",
+          "capacitate_flux_persoane": 65
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "capacitate_flux_persoane": 75
+        },
+        {
+          "categorie_pericol": "D-E (BE1a,b)",
+          "capacitate_flux_persoane": 90
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T170": {
+    "id": "P118_1_2025_T170",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": 633,
+    "titlu": "Lungimi de evacuare pentru constructii existente de productie si/sau depozitare",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat vizual pe imaginea paginii (200dpi) pt tabelele numerice dense",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 170",
+      "nota": "Nu se normeaza lungimea in toate situatiile in care la fiecare nivel se pot afla simultan maximum 10 persoane, indiferent de categoria de pericol si nivelul de stabilitate.",
+      "randuri": [
+        {
+          "categorie_pericol": "A-B (BE3a,b)",
+          "nivel_stabilitate": "I si/sau II",
+          "doua_directii_parter_m": 30,
+          "doua_directii_etaje_m": 25,
+          "fund_de_sac_m": 20
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "I si/sau II",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "III",
+          "doua_directii_parter_m": 80,
+          "doua_directii_etaje_m": 60,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "IV",
+          "doua_directii_parter_m": 50,
+          "doua_directii_etaje_m": 30,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "C (BE2)",
+          "nivel_stabilitate": "V",
+          "doua_directii_parter_m": 45,
+          "doua_directii_etaje_m": 25,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "D-E (BE1a,b)",
+          "nivel_stabilitate": "I si/sau II",
+          "doua_directii_parter_m": null,
+          "doua_directii_etaje_m": null,
+          "fund_de_sac_m": null,
+          "observatii": "nu se limiteaza"
+        },
+        {
+          "categorie_pericol": "D-E (BE1a,b)",
+          "nivel_stabilitate": "III",
+          "doua_directii_parter_m": 100,
+          "doua_directii_etaje_m": 75,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "D-E (BE1a,b)",
+          "nivel_stabilitate": "IV",
+          "doua_directii_parter_m": 60,
+          "doua_directii_etaje_m": 50,
+          "fund_de_sac_m": 25
+        },
+        {
+          "categorie_pericol": "D-E (BE1a,b)",
+          "nivel_stabilitate": "V",
+          "doua_directii_parter_m": 50,
+          "doua_directii_etaje_m": 40,
+          "fund_de_sac_m": 25
+        }
+      ]
+    }
+  },
+  "I7_2011_Art_7_23_iluminat_siguranta": {
+    "id": "I7_2011_Art_7_23_iluminat_siguranta",
+    "titlu": "Iluminat de siguranta - categorii si durata minima de functionare (Tabelul 7.23.1a/1b)",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 512/12.VI.2023 (Ordinul MDLPA nr. 959/2023, Art. I pct. 60, modifica integral pct. 7.23 din NP I7-2011)",
+    "pagina": 27,
+    "status": "validat_sursa",
+    "metoda_extractie": "extragere text + RANDARE VIZUALA a paginii (250dpi) si citire directa a grilei complete de catre Claude — rezolva definitiv ambiguitatea coloanelor ramasa dupa extragerea de text (18 iul 2026)",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial (Monitorul Oficial); ramane necesara validarea de raspundere profesionala inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "categorii_articole": {
+        "7.23.6": "continuarea lucrului",
+        "7.23.7": "interventii in zone de risc",
+        "7.23.8": "evacuare (include si iluminatul de circulatie, art. 7.23.8.6, ca subclauza — nu categorie separata)",
+        "7.23.9": "local de siguranta (marcare hidranti, post prim-ajutor, declansatoare manuale, butoane persoane cu dizabilitati)",
+        "7.23.10": "impotriva panicii (antipanica)"
+      },
+      "nota_corectie": "CORECTIE (18 iul 2026): o cercetare anterioara propusese gresit 7.23.6->interventii/7.23.8->circulatie/7.23.9->antipanica. Mapare corecta verificata pe text verbatim din Monitorul Oficial: 7.23.6=continuare, 7.23.7=interventii-risc, 7.23.8=evacuare, 7.23.9=local, 7.23.10=antipanica.",
+      "tabelul_7_23_1a_rezumat": "Nivele minime iluminare: evacuare >=1 lx; antipanica >=0.5 lx; interventii-risc >=10% Em (min 15 lx); local = nu mai putin decat minimul de evacuare; continuarea lucrului = specific sarcinii vizuale (Tabelul 7.23.1c). Timp maxim activare: 5s (50% Emin) / 60s (100%) pt continuare/evacuare/local; 0.5s pt interventii-risc. Durata minima BAZA (nota 3): 1 ora pt continuarea lucrului, evacuare, interventii in zone de risc — extinsa pe destinatie conform Tabelul 7.23.1b.",
+      "tabelul_7_23_1b_durata_minima_pe_destinatie_h": [
+        {
+          "destinatie": "Cladiri inalte, foarte inalte",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Cladiri cu sali aglomerate categoria S1 si S2",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Spatii comerciale",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Cult",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Cultura",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Primire turistica",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Invatamant",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Parcari subterane si supraterane inchise",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Gari si aerogari",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Centre de asistenta sociala",
+          "timp_minim_h": 3
+        },
+        {
+          "destinatie": "Sanatate cu spitalizare",
+          "timp_minim_h": 3,
+          "observatii": "daca sursa centrala de rezerva nu asigura autonomie 24h, iluminatul pt continuarea lucrului se asigura local pt 24h"
+        },
+        {
+          "destinatie": "Sanatate cu tratament ambulatoriu",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Alimentatie publica",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Parcari supraterane deschise",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Administrativ",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Arene sportive",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Statii de distributie carburanti",
+          "timp_minim_h": 1
+        },
+        {
+          "destinatie": "Spatii comune din cladiri de locuit",
+          "timp_minim_h": 1
+        }
+      ],
+      "regula_functiuni_mixte": "Se aplica valoarea MAXIMA aplicabila (ex. restaurant intr-o cladire inalta -> 3h, nu 1h).",
+      "tabelul_7_23_1a_GRID_CONFIRMAT_VIZUAL": {
+        "nota": "CORECTIE (18 iul): reconstructia anterioara din text linear avea 2 celule gresite (durata pt interventii-risc/continuarea lucrului). Grid confirmat prin randarea vizuala a paginii 27 din Monitorul Oficial 512/2023 (Ordinul MDLPA 959/2023).",
+        "coloane_in_ordine": [
+          "Iluminat evacuare din cladire",
+          "Iluminat impotriva panicii",
+          "Iluminat interventii in zone de risc",
+          "Iluminat local",
+          "Iluminat continuarea lucrului"
+        ],
+        "Emin": {
+          "evacuare": "1 lx (nota: obligatoriu uniformitate 1:40)",
+          "panica": "0,5 lx (nota: obligatoriu uniformitate 1:40)",
+          "interventii_risc": "10% din nivelul normal de iluminare (Em) in zona de risc, dar nu mai mic de 15 lx",
+          "local": "Emin necesar stabilit printr-o evaluare a riscului asociat, dar nu mai mic decat Emin pentru evacuarea din cladire",
+          "continuarea_lucrului": "Se stabileste in functie de sarcina vizuala specifica fiecarei activitati (vezi Tabelul 7.23.1c pt exemple)"
+        },
+        "timp_maxim_punere_in_functiune": {
+          "evacuare": "5 s (nota: 50% din Emin in 5s, 100% in 60s)",
+          "panica": "5 s (nota: 50% din Emin in 5s, 100% in 60s)",
+          "interventii_risc": "0,5 s",
+          "local": "5 s",
+          "continuarea_lucrului": null
+        },
+        "durata_minima_functionare": {
+          "evacuare": "1 h (nota: se coreleaza cu destinatia cladirii, autonomia se extinde conform Tabelul 7.23.1b)",
+          "panica": "1 h (aceeasi nota)",
+          "interventii_risc": "Minimum considerat pentru indeplinirea sarcinii",
+          "local": "1 h (aceeasi nota)",
+          "continuarea_lucrului": "Minimum considerat pentru indeplinirea sarcinii"
+        }
+      },
+      "corectie_18iul_a_doua": "Reconstructia initiala (din text linear, aceeasi zi) presupusese gresit ca \"interventii-risc\" si \"evacuare\" au durata minima 1h iar \"continuarea lucrului\" nu — grid-ul vizual arata EXACT invers pt interventii-risc: Evacuare/Panica/Local = 1h (extins pe destinatie via T7.23.1b); Interventii-risc SI Continuarea lucrului = \"minimum considerat pentru indeplinirea sarcinii\" (fara prag fix in ore). Tabelul 7.23.1b (1h/3h pe destinatie) se aplica deci propriu-zis peste Evacuare/Panica/Local, nu peste toate cele 4 categorii nediferentiat."
+    }
+  },
+  "P118_1_2025_Art_8_1_desfumare_presurizare": {
+    "id": "P118_1_2025_Art_8_1_desfumare_presurizare",
+    "titlu": "Sisteme de control al fumului si gazelor fierbinti (desfumare) - obligativitate, presurizare case de scari, interactiune cu ventilatia generala",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025), Cap. 8",
+    "pagina": "329-346",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz) — verificat de Claude direct SI de un agent de cercetare independent (a doua confirmare), pagina cu pagina",
+    "data_extractie": "2026-07-18",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "corectie_normativ": "CORECTIE (18 iul): desfumarea, presurizarea caselor de scari SI interactiunea cu ventilatia generala se afla TOATE in P118-1/2025 (corpul principal, Cap. 8), NU in P118-3/2015 (detectare-semnalizare) si NU in P118/2-2013 (instalatii de stingere), cum se presupunea anterior.",
+      "art_8_1_5_interactiune_ventilatie": "Intrarea in functiune a oricarui sistem de evacuare a fumului si gazelor fierbinti in caz de incendiu va intrerupe automat functionarea instalatiilor normale de ventilare si climatizare ale constructiei.",
+      "art_8_1_6_interactiune_stingere": "Intrarea in functiune a oricarui sistem de evacuare a fumului si gazelor fierbinti se va face DUPA intrarea in functiune a instalatiilor automate de stingere.",
+      "art_8_1_7_incompatibilitate_gaze_pulberi": "Instalatiile de evacuare a fumului sunt incompatibile cu instalatiile de stingere cu gaze sau pulberi pt care se prevad sisteme de ventilare a spatiilor unde a fost refulat agentul de stingere.",
+      "art_8_1_8_cazuri_obligativitate": [
+        "a) sali aglomerate",
+        "b) scene cu suprafata >150 mp si buzunare cu inaltime >10 m",
+        "c) case de scari inchise si incaperi tampon (prin suprapresiune) de acces la scari din cladiri supraterane civile inalte/f.inalte si cladiri de sanatate (indiferent de regim), plus puturi ascensoare evacuare persoane cu dizabilitati/bolnavi",
+        "d) case de scari inchise (suprapresiune sau evacuare naturala) si circulatii comune orizontale fara ferestre exterioare, din cladiri/compartimente cu sali aglomerate",
+        "e)-f) case de scari inchise supraterane/subterane in anumite conditii (cand nu au SPD)",
+        "g) atriumuri inchise",
+        "h) degajamente protejate/tuneluri de evacuare din constructii cu orice destinatie",
+        "i) incaperi/compartimente/cladiri productie-depozitare cu arie utila >36 mp si densitate sarcina termica >105 MJ/mp",
+        "j) incaperi depozitare materiale combustibile in cladiri civile, densitate sarcina termica >105 MJ/mp si arie utila >36 mp",
+        "k)-l) parcaje subterane/deschise conform reglementarii specifice",
+        "m) incaperi risc foarte mare de incendiu in subteran, indiferent de arie",
+        "n) incaperi cu arie utila >36 mp si densitate sarcina termica >105 MJ/mp in subteran",
+        "o) incaperi din cladiri civile subterane cu >50 utilizatori simultan (si cai de evacuare aferente), inclusiv spatii comerciale la subsol",
+        "p) circulatii comune orizontale >30m lungime fara ferestre exterioare (conditionat de ferestrele incaperilor adiacente)",
+        "q) circulatii comune orizontale din cladiri inalte (art. 4.1.5.12) si f.inalte (art. 4.2.5.12)",
+        "r) constructii productie/depozitare inchise cu Ac>=20.000 mp si latime >72m",
+        "s) constructii productie/depozitare inchise cu Ac>1.000mp, activitate doar la lumina artificiala, acoperis/pereti plini",
+        "t) alte constructii/incaperi/spatii mentionate in normativ (lista deschisa)"
+      ],
+      "presurizare_standarde": "Incaperile tampon se presurizeaza conform SR EN 12101-6 (Sisteme pt controlul fumului — Partea 6: Specificatii pt sisteme cu presiune diferentiala, kituri) si SR EN 12101-13 (Partea 13: Sisteme cu presiune diferentiala — proiectare, instalare, incercari, mentenanta) — art. 8.1.9(5).",
+      "desfumare_naturala_prag": "Art. 8.1.10(2): suprafata aerodinamica libera a dispozitivelor cu deschidere automata (tiraj natural-organizat) minim 1% din aria incaperii.",
+      "art_8_5_1_regula_generala_presurizare": "Scarile supraterane inchise care asigura evacuarea utilizatorilor se prevad cu sistem de evacuare a fumului prin tiraj natural-organizat SAU se pun in suprapresiune (alternativa).",
+      "art_8_5_8_obligativitate_cladiri_inalte": "La cladirile inalte sau foarte inalte: casele de scari inchise si incaperile tampon SE PUN OBLIGATORIU in suprapresiune — proiectare/calcul conform SR EN 12101-13 si SR EN 12101-6.",
+      "art_8_5_7_9_criterii_presiune": "Presiune pe usi circulatii orizontale <= 80 Pa (art. 8.5.7 alin.1); presiune pe usi degajamente/incaperi tampon/case scari conform SR EN 12101-13/12101-6 (alin.2); viteza aer >= 1 m/s la usile de acces nivel incendiat si acces scara din exterior (art. 8.5.9 alin.2); presiune casa scara >= 5 Pa peste spatiile presurizate adiacente (alin.3)."
     }
   }
 }
