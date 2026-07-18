@@ -784,8 +784,8 @@
   },
   "tabele_evacuare_pe_destinatie": {
     "_meta": {
-      "status": "index_gasit_nu_valori",
-      "nota": "P118-1/2025 NU are un singur tabel generic de lungimi de evacuare / capacitate de flux — are tabele DISTINCTE per destinatie (locuit/administrativ/comert/sanatate/cultura/invatamant/turism/cult/sport/productie-depozitare/sali aglomerate/parcaje/subterane/inalte/f.inalte), atat pentru NOU cat si pentru EXISTENT. Indexul de mai jos are numarul real de tabel + pagina (verificate din cuprinsul documentului), dar valorile numerice NU au fost inca extrase — necesita o trecere dedicata de extractie (recomandat: motor de ingestie v3.0, extractie automata pe tabel, cu validare)."
+      "status": "index_reconciliat_toate_extrase",
+      "nota": "P118-1/2025 NU are un singur tabel generic de lungimi de evacuare / capacitate de flux - are tabele DISTINCTE per destinatie (locuit/administrativ/comert/sanatate/cultura/invatamant/turism/cult/sport/productie-depozitare/sali aglomerate/parcaje/subterane/inalte/f.inalte), atat pentru NOU cat si pentru EXISTENT. RECONCILIAT 18 iul 2026: toate cele 33 de intrari ale indexului au acum valori numerice reale extrase (status extras_verificat_partial pe fiecare tabel individual, vezi cheile noi/existente de mai jos) - eticheta veche a acestui _meta (index_gasit_nu_valori) ramasese neactualizata dupa reconciliere, corectata acum."
     },
     "noi": {
       "flux_evacuare_general_T51": {

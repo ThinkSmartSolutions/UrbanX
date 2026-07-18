@@ -1619,7 +1619,11 @@
             'agricol': { litera: 'I lit. g)', text: 'construcție agrozootehnică/agroindustrială cu aria construită ≥ 600 mp (excepție: silozuri metalice, depozite furaje fibroase, sere, solarii, răsadnițe, ciupercării)', prag: 600 },
             'hotelier': { litera: 'II lit. j)', text: 'primire turistică, cu mai mult de 8 camere și/sau 16 locuri (inclusiv unitățile de alimentație din incintă)', capacitate: true, pragCam: 8, pragLoc: 16 },
             'parcare': { litera: 'II lit. h)', text: 'parcaj, cu peste 10 autoturisme', capacitate: true, pragAuto: 10 },
-            'sport': { litera: 'V', text: 'construcții/amenajări sportive, cu capacitatea ≥ 200 locuri pe scaune în interior ori ≥ 1.000 locuri pe scaune în aer liber (recreativ, în centru de agrement: II lit. i), prag ≥ 600 mp)', capacitate: true, pragInt: 200, pragExt: 1000 }
+            'sport': { litera: 'V', text: 'construcții/amenajări sportive, cu capacitatea ≥ 200 locuri pe scaune în interior ori ≥ 1.000 locuri pe scaune în aer liber (recreativ, în centru de agrement: II lit. i), prag ≥ 600 mp)', capacitate: true, pragInt: 200, pragExt: 1000 },
+            // Clauza reziduala mixta (Punctul I lit. i) — se aplica DOAR cladirilor cu functiuni multiple
+            // care nu se incadreaza integral la nicio alta litera individuala; prag distinct (1.000 mp),
+            // mai mare decat pragurile individuale de mai sus.
+            'cladire-mixta': { litera: 'I lit. i)', text: 'clădire cu funcțiuni mixte ce nu se încadrează integral la nicio altă literă a Anexei 1, cu aria desfășurată ≥ 1.000 mp', prag: 1000 }
           };
           var hg571 = HG571_MAP[D.functiune];
           if (esteEnergieStrategicaHG571) {
@@ -1659,6 +1663,7 @@
                 : (HG571_MAP_TEMEI(D.functiune));
         function HG571_MAP_TEMEI(fnKey) {
           var m = { 'spatiu-comercial': 'II lit. a)', mall: 'II lit. a)', birouri: 'II lit. c)', scoala: 'II lit. e)', 'hala-industriala': 'II lit. k)', agricol: 'I lit. g)', hotelier: 'II lit. j)', parcare: 'II lit. h)', sport: 'V' };
+          if (fnKey === 'cladire-mixta') return 'H.G. 571/2016, Anexa 1, Punctul I lit. i) — clauză reziduală identificată din structura Anexei 1 (referită de agentul de cercetare ca „clauza generală de clădire mixtă"), dar NU redată verbatim cuvânt-cu-cuvânt ca celelalte litere de mai jos — de confirmat exact înainte de depunere';
           return m[fnKey] ? 'H.G. 571/2016, Anexa 1, Punctul ' + m[fnKey] + ' — text verificat verbatim' : 'H.G. 571/2016, Anexa 1 — DE COMPLETAT (funcțiune neacoperită încă de harta de praguri verificate)';
         }
         var motivFinal = motivSupune ? motivSupune.replace(/^,\s*/, '') : 'destinația reală (' + esc(destinatieT42.toLowerCase()) + ') nu a fost încă încadrată punctual în criteriile Anexei 1 — necesită verificare de specialitate.';
