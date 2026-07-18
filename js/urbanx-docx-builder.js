@@ -1683,6 +1683,12 @@
           '<p style="font-size:9pt;color:#666">' + camere.length + ' încăpere/încăperi cu detaliu complet. Sursa fiecărui rând (pardoseală reală de pe plan vs. inventar standard de mobilier/echipamente per tip de încăpere) e disponibilă în câmpul „sursă" al fiecărei încăperi.</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
+      { h: '2.2.b. Încadrarea potrivit Legii nr. 59/2016 (controlul pericolelor de accident major)', html: (function () {
+        var subiectPotential = ['hala-industriala', 'skid', 'agricol', 'bess', 'statie-transformare'].indexOf(D.functiune) >= 0;
+        var substanteDeclarate = (D._materiale || []).length || (D._camere || []).some(function (c) { return /combustibil|periculo|exploziv/i.test(c.risc_incadrare || ''); });
+        if (!subiectPotential) return '<p>Conform clasificării din <b>Legea nr. 59/2016</b> privind controlul asupra pericolelor de accident major în care sunt implicate substanțe periculoase, această construcție, potrivit destinației (' + esc(destinatieT42.toLowerCase()) + ') și specificului activităților ce se desfășoară, <b>NU intră sub incidența</b> acestui act normativ.</p>';
+        return '<p>Destinația proiectului (' + esc(destinatieT42.toLowerCase()) + ') poate implica, în funcție de tipul și cantitățile reale de substanțe periculoase utilizate/depozitate, o posibilă încadrare sub <b>Legea nr. 59/2016</b> (control asupra pericolelor de accident major) — încadrarea exactă (nivel „inferior"/„superior" conform Anexei 1, sau neîncadrare) se stabilește pe baza cantităților reale declarate de beneficiar, comparate cu pragurile Anexei 1 la lege; ' + (substanteDeclarate ? 'proiectul are materiale/substanțe declarate — se verifică punctual încadrarea la faza de proiect tehnic.' : 'nu sunt încă declarate cantități de substanțe periculoase pentru acest proiect — se completează de îndată ce beneficiarul furnizează lista/cantitățile.') + '</p>';
+      })() },
       { h: '2.2.a. Clasele de periculozitate ale materialelor și substanțelor', html: (function () {
         // ADAUGAT (18 iul, dupa un scenariu SSI real trimis ca reper): clasificarea P1/P2B/P3B/P4B/P4C
         // (proprietati fizico-chimice ale materialelor pt constructii de productie/depozitare) e un
@@ -2092,11 +2098,49 @@
         { stare: null, text: 'Sprinklere: ' + (ac.sprinklere_oblig ? 'obligatorii' : 'nu este cazul') + '. Instalație de desfumare: ' + (ac.desfumare_oblig ? 'necesară' : 'nu este cazul') + '.' },
         { stare: null, text: 'Detectare/semnalizare/alarmare (IDSAI): ' + (ac.idsi_oblig ? 'obligatorie' : 'nu este cazul') + '. Protecție împotriva trăsnetului: ' + (ac.paratraznet_oblig ? 'necesară' : 'de evaluat la faza de proiect tehnic') + '.' }
       ]) },
-      { h: '5. Măsuri compensatorii / corecții de proiect', html:
+      { h: '5.1. Instrucțiuni de funcționare a instalațiilor cu rol în asigurarea cerinței fundamentale „securitate la incendiu"', html: (function () {
+        // ADAUGAT (18 iul — dupa scenariul SSI real trimis ca reper): capitolul 5 (masuri tehnico-
+        // organizatorice, Ord. 180/2022 Anexa 4/5) lipsea INTEGRAL — doar cap. 6 (masuri compensatorii)
+        // exista. Continutul de mai jos e conditionat de instalatiile REAL obligatorii ale proiectului
+        // (ac.idsi_oblig/hidranti/sprinklere), nu un text generic repetat indiferent de configuratie.
+        var out = '';
+        if (ac.idsi_oblig) out += '<p><b>Instalația de detectare, semnalizare și avertizare incendiu (IDSAI)</b> se menține în permanentă stare de funcționare. Exploatarea, întreținerea și repararea se fac numai de personal specializat, cu respectarea instrucțiunilor furnizorului. Se ține un registru de control al instalației (caracteristici, data punerii în funcțiune, data verificării, elemente verificate, persoana care a verificat, defecțiuni apărute), accesibil în încăperea ECS.</p>';
+        if (ac.hidranti_int_oblig || ac.hidranti_ext_oblig || ac.sprinklere_oblig) out += '<p><b>Instalațiile de stingere (hidranți' + (ac.sprinklere_oblig ? '/sprinklere' : '') + ')</b> se exploatează cu respectarea întocmai a proiectului, a prezentului scenariu și a instrucțiunilor tehnice ale producătorilor de echipamente/substanțe de stingere.</p>';
+        out += '<p><b>Instalațiile electrice cu rol de securitate la incendiu</b> (iluminat de siguranță, alimentare de rezervă) se exploatează astfel încât soluțiile tehnice adoptate să nu favorizeze declanșarea sau extinderea incendiilor — orice lucrare la instalația electrică se execută numai de personal calificat, instruit și autorizat.</p>';
+        if (!ac.idsi_oblig && !ac.hidranti_int_oblig && !ac.hidranti_ext_oblig && !ac.sprinklere_oblig) out += '<p>Proiectul nu are instalații active de securitate la incendiu obligatorii (vezi cap. 4) — instrucțiunile de mai sus rămân aplicabile doar instalației electrice generale și iluminatului de siguranță, dacă sunt prevăzute.</p>';
+        return out;
+      })() },
+      { h: '5.2. Reguli de verificare și întreținere în exploatare a instalațiilor cu rol în asigurarea cerinței fundamentale „securitate la incendiu"', html: (function () {
+        var out = '<p>Instalațiile electrice cu rol de securitate la incendiu sunt supuse, în timpul execuției și înainte de punerea în funcțiune, verificării <b>inițiale</b> (inspecție + încercare, efectuată de persoană calificată competentă, conform SR HD 60364-6: continuitatea conductoarelor, rezistența izolației, protecția prin întrerupere automată, încercări funcționale, căderea de tensiune) și apoi verificărilor <b>periodice</b> (fără sau cu demontare parțială, confirmând timpii de deconectare ai echipamentelor de protecție).</p>';
+        if (ac.idsi_oblig) out += '<p><b>IDSAI</b> — verificare <b>zilnică</b> (starea ECS, alarmele din ziua precedentă tratate corespunzător), <b>lunară</b> (indicatoare optice/sonore funcționale, consumabile), <b>trimestrială</b> (acționarea a cel puțin un detector/declanșator per zonă, funcțiile de monitorizare a defectelor, liniile către dispecerat), <b>anuală</b> (fiecare detector, fiecare dispozitiv suplimentar, inspecția vizuală a cablurilor, testarea bateriilor) — conform procedurii de întreținere stabilite de proprietar/utilizator împreună cu firma atestată de întreținere.</p>';
+        if (ac.hidranti_int_oblig || ac.hidranti_ext_oblig) out += '<p><b>Hidranți de incendiu</b> — verificarea și mentenanța se efectuează conform SR EN 671-3 (sau reglementare echivalentă), incluzând starea furtunurilor, presiunea disponibilă și integritatea racordurilor.</p>';
+        out += '<p>Toate încercările și rezultatele se consemnează în <b>registrul de control</b> al instalațiilor de detectare, semnalizare, alertare, limitare și stingere a incendiilor, păstrat accesibil persoanelor desemnate.</p>';
+        return out;
+      })() },
+      { h: '5.3. Recomandări pentru organizarea apărării împotriva incendiilor', html: (function () {
+        var isuJudet = D.judet ? ('Inspectoratul pentru Situații de Urgență al județului ' + esc(D.judet)) : 'Inspectoratul pentru Situații de Urgență (ISU) al județului — de precizat conform amplasamentului';
+        return '<p>Conducerea/administratorul obiectivului numește, prin decizie scrisă, persoana cu atribuții în domeniul apărării împotriva incendiilor (cadru tehnic atestat, conform legii), care asigură organizarea acestei activități în concordanță cu <b>Legea nr. 307/2006</b>.</p>' +
+          '<p>Prima intervenție în caz de incendiu se asigură de personalul propriu, cu materialele din dotare (stingătoare, vezi 4.0). Intervenția calificată este asigurată de <b>' + isuJudet + '</b>.</p>' +
+          '<p>Documentele principale de organizare a apărării împotriva incendiilor pe durata exploatării construcției: dispoziție privind organizarea și responsabilitățile; instrucțiuni de apărare împotriva incendiilor și atribuții ale salariaților; dispoziție privind reglementarea lucrului cu foc deschis și a fumatului; dispoziție privind organizarea instruirii salariaților; dispoziție de numire a cadrului tehnic/personalului cu atribuții SSI; planuri de protecție împotriva incendiilor; planuri de evacuare în caz de incendiu.</p>' +
+          '<p>Măsuri de primă intervenție la declanșarea unui incendiu: anunțarea imediată a ' + isuJudet + '; scoaterea de sub tensiune a instalației electrice; utilizarea stingătoarelor din dotare de către personal instruit; organizarea concomitentă a evacuării persoanelor (fără ambuscade) și, după caz, a bunurilor.</p>' +
+          '<p>Conducerea unității va respecta valoarea densității sarcinii termice calculate la cap. 2 — materialele combustibile introduse în încăperi (sarcina mobilă de incendiu) se limitează la strictul necesar activității declarate, pentru a nu depăși încadrarea de risc stabilită.</p>' +
+          '<p>Se interzice: exploatarea instalațiilor/echipamentelor electrice cu defecțiuni sau improvizații; încărcarea instalațiilor electrice peste sarcina admisă; utilizarea lămpilor mobile fără protecție sau cu cordoane improvizate; folosirea filtrelor de lumină din materiale combustibile; fumatul și focul deschis în spații cu pericol de incendiu/explozie; depozitarea lichidelor combustibile/inflamabile în afara spațiilor destinate acestui scop.</p>';
+      })() },
+      { h: '5.4. Post de incendiu exterior / pichet PSI', html: (function () {
+        var risc = _riscTI;
+        var recomandat = (risc === 'mare' || risc === 'foarte mare') || ['hala-industriala', 'skid', 'agricol'].indexOf(D.functiune) >= 0;
+        return '<p>' + (recomandat
+          ? 'Dat fiind nivelul de risc de incendiu al proiectului (' + esc(risc) + ') și/sau destinația (' + esc(destinatieT42.toLowerCase()) + '), se <b>recomandă</b> dotarea unui post de incendiu exterior (pichet PSI), conform practicii Normelor generale de apărare împotriva incendiilor (O.M.A.I. nr. 163/2007), cu: cange PSI cu coadă, lopată PSI cu coadă, topor-târnăcop PSI, găleată PSI, ladă cu nisip (min. 0,5 m³), stingător portabil cu pulbere tip P6 — cantitățile exacte se stabilesc la faza de proiect tehnic, funcție de configurația reală a amplasamentului.'
+          : 'Pentru destinația și nivelul de risc ale acestui proiect (' + esc(risc) + '), un post de incendiu exterior dedicat nu este o cerință curentă de practică — dotarea cu stingătoare (vezi 4.0) acoperă necesarul de primă intervenție. Investitorul poate opta oricând pentru un pichet PSI suplimentar.') + '</p>';
+      })() },
+      { h: null, html: _concluzieCapitol(5, 'Măsuri tehnico-organizatorice privind exploatarea construcției', [
+        { stare: true, text: 'Instrucțiuni de funcționare, reguli de verificare/întreținere și recomandări de organizare a apărării împotriva incendiilor — tratate mai sus, condiționat de instalațiile reale ale proiectului.' }
+      ]) },
+      { h: '6. Măsuri compensatorii / corecții de proiect', html:
         '<p>Tabelul de mai jos distinge explicit între cerințe care necesită <b>corectare directă</b> a proiectului (nu au alternativă legală documentată) și cele pentru care există o <b>măsură compensatorie posibilă</b> (selecția rămâne a proiectantului atestat, nu se aplică automat).</p>' +
         _tblNeconformitatiV41(fiseNeconformitate) + '<p style="font-size:9pt;color:#666">Soluțiile compensatorii candidate detaliate (efect calculat + recalcul necesar) apar la secțiunile 3.2/3.3 de mai sus, imediat lângă cerința vizată.</p>' +
         (fiseNeconformitate.length ? '<p style="font-size:9pt;color:#666">Trasabilitate: fiecare soluție compensatorie aleasă se înregistrează cu nume + nr. atestat proiectant + dată (Ord. MAI 180/2022, Anexa 5, pct. 5). Orice corecție de proiect necesită reimport DWG + recalculul integral al cascadei M0-M17 (o modificare geometrică poate afecta și alte verificări).</p>' : '') },
-      { h: null, html: _concluzieCapitol(5, 'Măsuri compensatorii / corecții de proiect', [
+      { h: null, html: _concluzieCapitol(6, 'Măsuri compensatorii / corecții de proiect', [
         { stare: verdict.verdict === 'NEAPT_PENTRU_AVIZARE' ? false : (verdict.verdict === 'APT_CONDITIONAT' ? null : true), text: 'Verdict general (la începutul documentului): ' + esc(verdict.verdict_label) + '.' },
         { stare: fiseNeconformitate.length ? false : true, text: fiseNeconformitate.length ? fiseNeconformitate.length + ' neconformitate(ăți) identificate — tratate mai sus, prin corecție directă de proiect sau măsură compensatorie.' : 'Nu au fost identificate neconformități.' }
       ]) },
