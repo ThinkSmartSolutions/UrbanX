@@ -1683,6 +1683,24 @@
           '<p style="font-size:9pt;color:#666">' + camere.length + ' încăpere/încăperi cu detaliu complet. Sursa fiecărui rând (pardoseală reală de pe plan vs. inventar standard de mobilier/echipamente per tip de încăpere) e disponibilă în câmpul „sursă" al fiecărei încăperi.</p>';
       })() },
       { h: '2.2. Zone cu pericol de explozie (ATEX)', html: '<p>Se stabilește, pentru fiecare încăpere/zonă, dacă există substanțe cu potențial exploziv declarate — absența se confirmă explicit, nu se presupune.</p>' + htmlAtex },
+      { h: '2.2.a. Clasele de periculozitate ale materialelor și substanțelor', html: (function () {
+        // ADAUGAT (18 iul, dupa un scenariu SSI real trimis ca reper): clasificarea P1/P2B/P3B/P4B/P4C
+        // (proprietati fizico-chimice ale materialelor pt constructii de productie/depozitare) e un
+        // subpunct DISTINCT de clasa de reactie la foc (SR EN 13501-1, tratata la 3.1) - nu se
+        // suprapune, se completeaza. Sursa: P118-99 art./tab. 6.2.19 (numerotare veche, pastrata ca
+        // atare in practica - de verificat corespondentul exact in P118-1/2025 la faza finala).
+        var esteProductieDepozitare = ['hala-industriala', 'skid', 'agricol'].indexOf(D.functiune) >= 0;
+        if (!esteProductieDepozitare) return '<p>Clasificarea P1-P4C (proprietăți fizico-chimice ale materialelor, conform tab. 6.2.19 P118-99) se aplică destinațiilor de producție și/sau depozitare — nu este cazul pentru destinația acestui proiect (' + esc(destinatieT42.toLowerCase()) + ').</p>';
+        return '<p>Clasele de periculozitate ale materialelor combustibile utilizate/depozitate (conform art. și tab. 6.2.19 P118-99, păstrată ca reper de clasificare — de confirmat corespondentul exact în P118-1/2025 la faza de proiect tehnic):</p>' +
+          tbl([
+            ['P1', 'Fără periculozitate', 'materiale incombustibile care nu pot genera reacții periculoase (ex. rafturi metalice)'],
+            ['P2B', 'Aprindere dificilă, viteză redusă de ardere, putere calorică mică', 'aparate electrice, obiecte din bachelită/rășini fenolice/melamină'],
+            ['P3B', 'Periculozitate medie', 'fibre animale (lână, mătase, păr) și fibre artificiale cu combustibilitate redusă (poliamidice/poliesterice/poliacrilice/polivinilice); țesături/confecții din aceste fibre; articole din piele'],
+            ['P4B', 'Periculozitate mare', 'fibre vegetale (cânepă, bumbac), fibre artificiale cu putere calorică ridicată; confecții din aceste materiale, fibre textile, hârtie, carton'],
+            ['P4C', 'Periculozitate mare', 'aparatură electrică/electronică cu relee și contacte sensibile neîncapsulate, tuburi electronice']
+          ], ['Clasă', 'Nivel', 'Materiale/substanțe tipice']) +
+          '<p style="font-size:9pt;color:#666">Clasificarea reală, material cu material, a inventarului efectiv depozitat/utilizat rămâne responsabilitatea beneficiarului/proiectantului (declarație de cantități și tip, art. 1.4 lit. c) — clasele de mai sus sunt criteriul de încadrare, nu o presupunere a conținutului concret al acestui proiect.</p>';
+      })() },
       { h: null, html: (function () {
         function incadrareC2(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
         var camereC2 = D._camere || [];
