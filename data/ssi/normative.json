@@ -3619,5 +3619,84 @@
         }
       ]
     }
+  },
+  "P118_1_2025_T171": {
+    "id": "P118_1_2025_T171",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "pagina": null,
+    "titlu": "Clasificarea materialelor si substantelor depozitate dupa clasa de periculozitate, pentru constructii existente",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025), Anexa A.10, Art. A.10.6.2.19",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "agent de cercetare cu acces la PDF-ul oficial cached (a2t.ro mirror), extragere text-layer",
+    "data_extractie": "2026-07-19",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial pt structura de ansamblu si clasa P.4.C (verbatim); subincadrarea exacta pe litere A/B/C la P.2-P.4 NU a fost individual re-verificata - ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 171, coroborat cu Art. A.10.6.2.19",
+      "nota_importanta": "Sistemul e PASTRAT (fata de vechiul P118-99) dar structurat pe P.1/P.2(A-C)/P.3(A-C)/P.4(A-F)/P.5, distinct de sistemul BE1a-BE3b (Tabelul 143, categorii de pericol A-E pt spatiul in sine). Pentru constructii NOI, corpul principal foloseste in schimb Tabelul 133/134 (niveluri calitative, fara coduri fixe) - vezi P118_1_2025_T133_134.",
+      "clase": [
+        {
+          "cod": "P.1",
+          "nivel": "fara periculozitate",
+          "exemplu": "materiale incombustibile care nu pot genera reactii periculoase (ex. rafturi metalice)"
+        },
+        {
+          "cod": "P.2 (A-C)",
+          "nivel": "periculozitate redusa",
+          "exemplu": "aprindere dificila, viteza redusa de ardere, putere calorica mica"
+        },
+        {
+          "cod": "P.3 (A-C)",
+          "nivel": "periculozitate medie",
+          "exemplu": "fibre animale si fibre artificiale cu combustibilitate redusa"
+        },
+        {
+          "cod": "P.4 (A-F)",
+          "nivel": "periculozitate mare",
+          "exemplu": "fibre vegetale, fibre artificiale cu putere calorica ridicata, hartie, carton"
+        },
+        {
+          "cod": "P.4.C",
+          "nivel": "periculozitate mare",
+          "exemplu_verbatim": "Materiale si produse incombustibile care pot suferi deteriorari importante in urma actiunii temperaturilor inalte, a apei sau gazelor corozive... Aparatura electrica si electronica avand relee si contacte sensibile necapsulate; tuburi electronice; utilaje si aparate de inalta precizie; bijuterii; medicamente si produse cosmetice."
+        },
+        {
+          "cod": "P.5",
+          "nivel": "periculozitate deosebit de mare",
+          "exemplu": "substante incadrate suplimentar conform Regulamentului CLP/GHS (CE) 1272/2008"
+        }
+      ]
+    }
+  },
+  "P118_1_2025_T133_134": {
+    "id": "P118_1_2025_T133_134",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "pagina": null,
+    "titlu": "Clasificarea materialelor dupa periculozitate, pentru constructii noi (niveluri calitative)",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025), Capitolul 8, par. (299)-(302)",
+    "status": "extras_verificat_partial",
+    "metoda_extractie": "agent de cercetare cu acces la PDF-ul oficial cached (a2t.ro mirror), extragere text-layer",
+    "data_extractie": "2026-07-19",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Tabelul 133/134, coroborat cu par. (299)-(302)",
+      "nota_importanta": "Inlocuieste codurile fixe P1-P4C din P118-99 cu 5 niveluri calitative; nivelul deosebit de mare e legat de Regulamentul CLP (CE) 1272/2008 in loc de un cod fix. Vezi P118_1_2025_T171 pt echivalentul la constructii EXISTENTE (care pastreaza coduri P.1-P.5).",
+      "niveluri": [
+        "fara periculozitate relevanta",
+        "periculozitate redusa",
+        "periculozitate medie",
+        "periculozitate mare (include aparatura electrica/electronica sensibila, exemplu supravietuit din vechiul P4C)",
+        "periculozitate deosebit de mare (Regulament CLP (CE) 1272/2008)"
+      ]
+    }
   }
 }

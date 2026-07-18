@@ -1886,22 +1886,42 @@
         return '<p>Destinația proiectului (' + esc(destinatieT42.toLowerCase()) + ') poate implica, în funcție de tipul și cantitățile reale de substanțe periculoase utilizate/depozitate, o posibilă încadrare sub <b>Legea nr. 59/2016</b> (control asupra pericolelor de accident major) — încadrarea exactă (nivel „inferior"/„superior" conform Anexei 1, sau neîncadrare) se stabilește pe baza cantităților reale declarate de beneficiar, comparate cu pragurile Anexei 1 la lege; ' + (substanteDeclarate ? 'proiectul are materiale/substanțe declarate — se verifică punctual încadrarea la faza de proiect tehnic.' : 'nu sunt încă declarate cantități de substanțe periculoase pentru acest proiect — se completează de îndată ce beneficiarul furnizează lista/cantitățile.') + '</p>';
       })() },
       { h: '2.2.a. Clasele de periculozitate ale materialelor și substanțelor', html: (function () {
-        // ADAUGAT (18 iul, dupa un scenariu SSI real trimis ca reper): clasificarea P1/P2B/P3B/P4B/P4C
-        // (proprietati fizico-chimice ale materialelor pt constructii de productie/depozitare) e un
-        // subpunct DISTINCT de clasa de reactie la foc (SR EN 13501-1, tratata la 3.1) - nu se
-        // suprapune, se completeaza. Sursa: P118-99 art./tab. 6.2.19 (numerotare veche, pastrata ca
-        // atare in practica - de verificat corespondentul exact in P118-1/2025 la faza finala).
+        // ADAUGAT (18 iul, dupa un scenariu SSI real trimis ca reper): clasificarea materialelor dupa
+        // proprietati fizico-chimice (pt constructii de productie/depozitare) e un subpunct DISTINCT de
+        // clasa de reactie la foc (SR EN 13501-1, tratata la 3.1) - nu se suprapune, se completeaza.
+        // CORECTIE 19 iul (cercetare dedicata pe sursa oficiala P118-1/2025): vechea citare P118-99
+        // art./tab. 6.2.19 era neconfirmata pt normativul actual. Verificat: sistemul e PASTRAT dar
+        // BIFURCAT pe regim - EXISTENT: Art. A.10.6.2.19 + Tabelul 171 (coduri P.1/P.2 A-C/P.3 A-C/
+        // P.4 A-F/P.5, structura aproape identica celei vechi - P.4.C confirmat verbatim aproape identic
+        // cu vechiul P4C); NOU: Tabelul 133/134 (corpul principal), reformulat pe 5 niveluri calitative
+        // (fara periculozitate relevanta/redusa/medie/mare/deosebit de mare), cu nivelul "deosebit de
+        // mare" legat acum de Regulamentul CLP (CE) 1272/2008 in loc de un cod fix - codurile vechi
+        // P1/P2B/P3B/P4B/P4C NU se mai folosesc explicit la constructii NOI, desi exemplele de materiale
+        // (inclusiv aparatura electronica sensibila) raman recognoscibile sub noile niveluri calitative.
         var esteProductieDepozitare = ['hala-industriala', 'skid', 'agricol'].indexOf(D.functiune) >= 0;
-        if (!esteProductieDepozitare) return '<p>Clasificarea P1-P4C (proprietăți fizico-chimice ale materialelor, conform tab. 6.2.19 P118-99) se aplică destinațiilor de producție și/sau depozitare — nu este cazul pentru destinația acestui proiect (' + esc(destinatieT42.toLowerCase()) + ').</p>';
-        return '<p>Clasele de periculozitate ale materialelor combustibile utilizate/depozitate (conform art. și tab. 6.2.19 P118-99, păstrată ca reper de clasificare — de confirmat corespondentul exact în P118-1/2025 la faza de proiect tehnic):</p>' +
+        var esteExistent = m0.regim_tabele === 'EXISTENTA_NEMODIFICATA';
+        if (!esteProductieDepozitare) return '<p>Clasificarea materialelor după periculozitate (' + (esteExistent ? 'Art. A.10.6.2.19, Tabelul 171' : 'Tabelul 133/134') + ', P118-1/2025) se aplică destinațiilor de producție și/sau depozitare — nu este cazul pentru destinația acestui proiect (' + esc(destinatieT42.toLowerCase()) + ').</p>';
+        if (esteExistent) {
+          return '<p>Clasele de periculozitate ale materialelor combustibile utilizate/depozitate, pentru construcții <b>EXISTENTE</b> (conform <b>Art. A.10.6.2.19, Tabelul 171</b>, P118-1/2025 — verificat verbatim 19 iul 2026):</p>' +
+            tbl([
+              ['P.1', 'Fără periculozitate', 'materiale incombustibile care nu pot genera reacții periculoase (ex. rafturi metalice)'],
+              ['P.2 (A-C)', 'Periculozitate redusă', 'aprindere dificilă, viteză redusă de ardere, putere calorică mică — ex. aparate electrice, obiecte din bachelită/rășini fenolice/melamină'],
+              ['P.3 (A-C)', 'Periculozitate medie', 'fibre animale (lână, mătase, păr) și fibre artificiale cu combustibilitate redusă; țesături/confecții din aceste fibre; articole din piele'],
+              ['P.4 (A-F)', 'Periculozitate mare', 'fibre vegetale (cânepă, bumbac), fibre artificiale cu putere calorică ridicată, hârtie, carton'],
+              ['P.4.C', 'Periculozitate mare', 'aparatură electrică/electronică cu relee și contacte sensibile neîncapsulate, tuburi electronice, utilaje/aparate de înaltă precizie, bijuterii, medicamente și produse cosmetice (citat verbatim din tabel)'],
+              ['P.5', 'Periculozitate deosebit de mare', 'substanțe încadrate suplimentar conform Regulamentului CLP/GHS (CE) 1272/2008']
+            ], ['Clasă', 'Nivel', 'Materiale/substanțe tipice']) +
+            '<p style="font-size:9pt;color:#666">Subîncadrarea exactă pe litere (A/B/C la P.2-P.4) nu a fost re-verificată material cu material în acest motor dincolo de structura de ansamblu confirmată — de confirmat punctual la faza de proiect tehnic. Clasificarea reală a inventarului efectiv depozitat/utilizat rămâne responsabilitatea beneficiarului/proiectantului (declarație de cantități și tip, art. 1.4 lit. c).</p>';
+        }
+        return '<p>Clasele de periculozitate ale materialelor combustibile utilizate/depozitate, pentru construcții <b>NOI</b> (conform <b>Tabelul 133/134</b>, P118-1/2025, Capitolul 8 — verificat verbatim 19 iul 2026; nivelurile sunt calitative, nu mai folosesc codurile fixe P1-P4C din P118-99):</p>' +
           tbl([
-            ['P1', 'Fără periculozitate', 'materiale incombustibile care nu pot genera reacții periculoase (ex. rafturi metalice)'],
-            ['P2B', 'Aprindere dificilă, viteză redusă de ardere, putere calorică mică', 'aparate electrice, obiecte din bachelită/rășini fenolice/melamină'],
-            ['P3B', 'Periculozitate medie', 'fibre animale (lână, mătase, păr) și fibre artificiale cu combustibilitate redusă (poliamidice/poliesterice/poliacrilice/polivinilice); țesături/confecții din aceste fibre; articole din piele'],
-            ['P4B', 'Periculozitate mare', 'fibre vegetale (cânepă, bumbac), fibre artificiale cu putere calorică ridicată; confecții din aceste materiale, fibre textile, hârtie, carton'],
-            ['P4C', 'Periculozitate mare', 'aparatură electrică/electronică cu relee și contacte sensibile neîncapsulate, tuburi electronice']
-          ], ['Clasă', 'Nivel', 'Materiale/substanțe tipice']) +
-          '<p style="font-size:9pt;color:#666">Clasificarea reală, material cu material, a inventarului efectiv depozitat/utilizat rămâne responsabilitatea beneficiarului/proiectantului (declarație de cantități și tip, art. 1.4 lit. c) — clasele de mai sus sunt criteriul de încadrare, nu o presupunere a conținutului concret al acestui proiect.</p>';
+            ['Fără periculozitate relevantă', 'materiale incombustibile care nu pot genera reacții periculoase (ex. rafturi metalice)'],
+            ['Periculozitate redusă', 'aprindere dificilă, viteză redusă de ardere, putere calorică mică — ex. aparate electrice, obiecte din bachelită/rășini fenolice/melamină'],
+            ['Periculozitate medie', 'fibre animale și fibre artificiale cu combustibilitate redusă; țesături/confecții din aceste fibre; articole din piele'],
+            ['Periculozitate mare', 'fibre vegetale, fibre artificiale cu putere calorică ridicată, hârtie, carton; aparatură electrică/electronică cu relee și contacte sensibile neîncapsulate, tuburi electronice, utilaje/aparate de înaltă precizie, bijuterii, medicamente și produse cosmetice'],
+            ['Periculozitate deosebit de mare', 'substanțe încadrate conform Regulamentului CLP (CE) 1272/2008 (categorii de pericol fizic/pentru sănătate/pentru mediu)']
+          ], ['Nivel', 'Materiale/substanțe tipice']) +
+          '<p style="font-size:9pt;color:#666">Clasificarea reală, material cu material, a inventarului efectiv depozitat/utilizat rămâne responsabilitatea beneficiarului/proiectantului (declarație de cantități și tip, art. 1.4 lit. c) — nivelurile de mai sus sunt criteriul de încadrare, nu o presupunere a conținutului concret al acestui proiect.</p>';
       })() },
       { h: null, html: (function () {
         function incadrareC2(q) { return q > 1680 ? 'foarte mare' : q > 840 ? 'mare' : q > 420 ? 'mijlociu' : 'mic'; }
