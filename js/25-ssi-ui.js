@@ -15,7 +15,7 @@
   'use strict';
   var D = document;
 
-  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null };
+  var STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null };
   var TIPURI_ACOPERIS = { plat: 'Terasă/plat', sarpanta_doua_ape: 'Șarpantă 2 ape', sarpanta_patru_ape: 'Șarpantă 4 ape' };
 
   var DESTINATII = ['locuinta', 'birou', 'comert', 'depozit', 'hala_productie', 'statie_transformare', 'skid_gpl', 'altele', 'fara_constructie', 'strada_drum_public'];
@@ -417,6 +417,16 @@
         } else {
           rezumat.continut.push('nicio cotă de nivel găsită ca text — completează H manual');
         }
+        // Tablou de tâmplărie (uși) — extras din TOATE adnotările TEXT/MTEXT ale planșei DXF (18 iul,
+        // Florin: "liste de uși, caracteristici... REI de cat, câte deschideri"). Funcționează dacă
+        // proiectantul a scris deja tabloul de uși ca text pe planșă (uzual în practică) — NU se
+        // parsează geometria blocurilor CAD ale ușilor (ar necesita definiții BLOCK, mult mai fragil).
+        var texteDxf = (parsed.entities || []).filter(function (e) { return (e.type === 'TEXT' || e.type === 'MTEXT') && e.text; }).map(function (e) { return e.text; }).join('\n');
+        var usiDxf = G.SSI_MATERIALE_EXTRACTIE ? G.SSI_MATERIALE_EXTRACTIE.extrageTablouTamplarieDinText(texteDxf) : [];
+        if (usiDxf.length) {
+          usiDxf.forEach(function (u) { if (!STATE.usiExtrase.some(function (x) { return x.width === u.width && x.height === u.height && x.referinta === u.referinta; })) STATE.usiExtrase.push(u); });
+          rezumat.continut.push(usiDxf.length + ' uși identificate din text (tablou tâmplărie)');
+        }
       } catch (e) { rezumat.continut.push('eroare la citirea geometriei: ' + e.message); }
     } else if (rezumat.tip === 'PDF') {
       // Fix real (Florin, 12 iul): planurile/sectiunile PDF contin date reale — stratigrafia peretilor
@@ -445,6 +455,10 @@
         if (datePlan.cartus && (datePlan.cartus.grad_stabilitate || datePlan.cartus.categorie_importanta)) {
           STATE.cartusExtras = Object.assign({}, STATE.cartusExtras, datePlan.cartus);
           rezumat.continut.push('cartuș: ' + (datePlan.cartus.grad_stabilitate ? 'grad ' + datePlan.cartus.grad_stabilitate : '') + (datePlan.cartus.categorie_importanta ? ', categorie ' + datePlan.cartus.categorie_importanta : ''));
+        }
+        if (datePlan.usi && datePlan.usi.length) {
+          datePlan.usi.forEach(function (u) { if (!STATE.usiExtrase.some(function (x) { return x.width === u.width && x.height === u.height && x.referinta === u.referinta; })) STATE.usiExtrase.push(u); });
+          rezumat.continut.push(datePlan.usi.length + ' uși identificate din text (tablou tâmplărie)');
         }
         if (!rezumat.continut.length) rezumat.continut.push('nu am recunoscut date structurate pe text (poate fi PDF scanat/imagine) — completează manual');
       } catch (e) { rezumat.continut.push('nu s-a putut citi textul PDF: ' + e.message); }
@@ -482,7 +496,7 @@
       // obiectul cu tot ce exista (vecinatati/relevee/camere/distanta ISU raman aplicate chiar daca tipul
       // de lucrare lipseste inca) — doar cascada completa ramane conditionata de tip_lucrare, nu restul.
       var nimicCompletat = !STATE.tip_lucrare && !STATE.vecinatati.length && !STATE.materialeExtrase.length &&
-        !(STATE.camereExtrase && STATE.camereExtrase.length) && !Object.keys(STATE.relevee).length &&
+        !(STATE.camereExtrase && STATE.camereExtrase.length) && !(STATE.usiExtrase && STATE.usiExtrase.length) && !Object.keys(STATE.relevee).length &&
         !STATE.cladiriPropuse.length && STATE.distantaIsuKm == null;
       if (nimicCompletat) return null; // panoul e complet neatins — comportament neschimbat
       return {
@@ -492,12 +506,13 @@
         _cladiri_propuse: STATE.cladiriPropuse, _tipuri_cladiri: STATE.tipuriCladiri, _relevee: STATE.relevee,
         _materiale: STATE.materialeExtrase.length ? STATE.materialeExtrase : undefined,
         _camere: (STATE.camereExtrase && STATE.camereExtrase.length) ? STATE.camereExtrase : undefined,
+        _usi: (STATE.usiExtrase && STATE.usiExtrase.length) ? STATE.usiExtrase : undefined,
         _detasament_isu: STATE.distantaIsuKm != null ? { distanta_km: STATE.distantaIsuKm } : undefined,
         grad_stabilitate: STATE.cartusExtras && STATE.cartusExtras.grad_stabilitate,
         categorie_importanta: STATE.cartusExtras && STATE.cartusExtras.categorie_importanta
       };
     },
-    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null }; },
+    clearPending: function () { STATE = { tip_lucrare: null, vecinatati: [], geometrie_teren: null, elemente_structurale: [], pendingDxf: null, modFinal: false, normativeConfirmate: false, cladiriPropuse: [], tipuriCladiri: {}, relevee: {}, materialeExtrase: [], camereExtrase: [], usiExtrase: [], cartusExtras: {}, planSituatieInfo: null, distantaIsuKm: null }; },
     _setDistantaIsu: function (v) { STATE.distantaIsuKm = v; render(); },
     _setModFinal: function (v) { STATE.modFinal = !!v; },
     _setNormativeConfirmate: function (v) { STATE.normativeConfirmate = !!v; },

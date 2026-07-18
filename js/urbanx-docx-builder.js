@@ -1775,7 +1775,19 @@
         var latimeHtml;
         if (usi.length) {
           var subMin = usi.filter(function (u) { return (+u.width || 0) > 0 && (+u.width) < modulFlux; });
-          latimeHtml = '<p>Lățimea utilă a căilor de evacuare declarate (' + usi.length + ' uși pe trasee de evacuare, din releveu): minim <b>' + Math.min.apply(null, usi.map(function (u) { return +u.width || 99; })) + ' m</b>, maxim <b>' + Math.max.apply(null, usi.map(function (u) { return +u.width || 0; })) + ' m</b> — comparativ cu modulul de flux normat (' + modulFlux + ' m/flux, vezi 3.4.d pentru numărul de fluxuri necesar).' + (subMin.length ? ' <b style="color:#dc2626">' + subMin.length + ' ușă/uși sub modulul minim de flux — de verificat numărul de fluxuri alocat fiecăreia.</b>' : '') + '</p>';
+          latimeHtml = '<p>Lățimea utilă a căilor de evacuare declarate (' + usi.length + ' uși pe trasee de evacuare, din releveu): minim <b>' + Math.min.apply(null, usi.map(function (u) { return +u.width || 99; })) + ' m</b>, maxim <b>' + Math.max.apply(null, usi.map(function (u) { return +u.width || 0; })) + ' m</b> — comparativ cu modulul de flux normat (' + modulFlux + ' m/flux, vezi 3.4.d pentru numărul de fluxuri necesar).' + (subMin.length ? ' <b style="color:#dc2626">' + subMin.length + ' ușă/uși sub modulul minim de flux — de verificat numărul de fluxuri alocat fiecăreia.</b>' : '') + '</p>' +
+            '<p><b>Tablou de tâmplărie (uși pe trasee de evacuare)</b>, extras din planul/releveul încărcat:</p>' +
+            tbl(usi.map(function (u, i) {
+              var neconform = (+u.width || 0) > 0 && (+u.width) < modulFlux;
+              return [
+                '' + (i + 1),
+                (u.width || '—') + '×' + (u.height || '—') + ' m',
+                u.canaturi != null ? (u.canaturi + ' canat' + (u.canaturi > 1 ? 'uri' : '')) : 'nedeclarat',
+                u.rei_declarat || 'nedeclarat — necesită specificația proiectantului, conform peretelui pe care îl echipează (vezi 3.1)',
+                (u.referinta || '—') + (neconform ? ' <span style="color:#dc2626">(sub modulul de flux)</span>' : '')
+              ];
+            }), ['Nr.', 'Dimensiuni (L×H)', 'Canaturi', 'Rezistență la foc (REI/EI)', 'Referință/observații']) +
+            '<p style="font-size:9pt;color:#666">Dimensiunile (lățime/înălțime) și numărul de canaturi provin din tabloul de tâmplărie declarat pe planul/releveul încărcat — sursă text (adnotări reale de pe planșă), nu geometrie de bloc CAD. Rezistența la foc (REI/EI) NU se inventează din geometrie — se preia doar dacă e scrisă explicit lângă ușa respectivă; altfel rămâne „nedeclarat", derivat din cerința peretelui de compartimentare pe care îl echipează (vezi 3.1), până la confirmarea DoP-ului produsului efectiv montat.</p>';
         } else {
           latimeHtml = '<p>Lățimea utilă minimă a căilor de evacuare rezultă din numărul de fluxuri alocat fiecărei uși/culoar (modul ' + modulFlux + ' m/flux, vezi 3.4.d) — tabloul de tâmplărie (lățimi reale pe uși) nu este încă declarat pentru acest proiect (D._usi); se completează din planul de arhitectură/releveu la faza de proiect tehnic.</p>';
         }

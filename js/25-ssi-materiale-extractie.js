@@ -228,17 +228,55 @@
     return rezultat;
   }
 
+  // Tabloul de tâmplărie (uși) — extractie REALĂ din text (18 iul, Florin: "sa imi dai si liste de
+  // usi, caracteristici... REI de cat etc, cate deschideri?"). Multe planuri/memorii RO scriu deja
+  // tabloul de uși ca text pe planșă/în document, în formatul "LxH m, ușă în X canaturi ... pentru
+  // evacuarea din CAMERA" (verificat pe un scenariu SSI real trimis de Florin) — se extrage acest
+  // pattern din orice text disponibil (PDF planșă SAU adnotări TEXT/MTEXT dintr-un DXF), NU se
+  // presupune geometria fizică a ușii (bloc CAD/arc de deschidere), care ar necesita parsarea
+  // definițiilor de BLOCK — mult mai fragilă și neverificabilă fără un fișier real de test.
+  // REI-ul nu se inventează niciodată dintr-un tipar de lățime/înălțime — se extrage DOAR dacă e
+  // scris explicit lângă ușa respectivă (ex. "EI 30", "REI 60"); altfel rămâne null, marcat onest.
+  function extrageTablouTamplarieDinText(text) {
+    var usi = [];
+    var re = /(\d+[.,]\d+)\s*[x×]\s*(\d+[.,]\d+)\s*m,?\s*(?:uși|usi|us[aă]|u[șs][aă])\b([^\n]{0,180})/gi;
+    var m;
+    while ((m = re.exec(text || ''))) {
+      var lat = parseFloat(m[1].replace(',', '.'));
+      var inalt = parseFloat(m[2].replace(',', '.'));
+      var rest = m[3] || '';
+      var canaturi = null;
+      if (/dou[aă]\s+can[aă]t\w*/i.test(rest)) canaturi = 2;
+      else if (/(?:un\s+singur|intr-un|într-un)\s+can[aă]t/i.test(rest)) canaturi = 1;
+      else { var mc = /(\d+)\s*can[aă]t/i.exec(rest); if (mc) canaturi = parseInt(mc[1], 10); }
+      var mFlux = /\((\d+)\s*flux/i.exec(rest);
+      var mRei = /\b(REI|EI2?)\s*(\d+)/i.exec(rest);
+      var mCam = /(?:evacuar\w*\s+(?:din|direct)\s*)([^.(\n]*)/i.exec(rest);
+      if (!lat || !inalt || lat > 5 || inalt > 5) continue; // filtru sanitate: uși reale, nu cote de alt tip confundate cu tiparul
+      usi.push({
+        name: 'ușă ' + lat + '×' + inalt + 'm', width: lat, height: inalt, canaturi: canaturi,
+        fluxuri_declarate: mFlux ? parseInt(mFlux[1], 10) : null,
+        rei_declarat: mRei ? (mRei[1].toUpperCase() + ' ' + mRei[2]) : null,
+        referinta: mCam ? mCam[1].trim().replace(/\s+/g, ' ').replace(/\.$/, '') : null,
+        evacuare: true, sursa: 'text_plan',
+        text_brut: (m[0] || '').trim()
+      });
+    }
+    return usi;
+  }
+
   async function extrageDatePlanPDF(arrayBuffer) {
     var linii = await _liniiDinPDF(arrayBuffer);
     return {
       camere: extrageIncaperiSiSarcinaTermica(linii),
-      cartus: extrageGradSiCategorieDinPlanPDF(linii)
+      cartus: extrageGradSiCategorieDinPlanPDF(linii),
+      usi: extrageTablouTamplarieDinText(linii.join('\n'))
     };
   }
 
   G.SSI_MATERIALE_EXTRACTIE = {
     extrageMaterialeDinPDF: extrageMaterialeDinPDF, DICTIONAR: DICTIONAR,
-    extrageDatePlanPDF: extrageDatePlanPDF
+    extrageDatePlanPDF: extrageDatePlanPDF, extrageTablouTamplarieDinText: extrageTablouTamplarieDinText
   };
   console.log('[SSI] extractie materiale + incaperi/sarcina termica din PDF încărcată (window.SSI_MATERIALE_EXTRACTIE)');
 })(window);
