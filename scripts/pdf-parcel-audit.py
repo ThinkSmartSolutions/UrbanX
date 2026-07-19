@@ -61,9 +61,14 @@ SETUP_JS = r'''(function(){
 
 def runjs(gen, override):
     call = "%s(%s)" % (gen, override or "")
-    return r'''(function(){
+    # IMPORTANT: wrapper trebuie sa fie async + sa foloseasca await pe apelul
+    # generatorului — altfel promisiunea returnata de generateXStudy() (care
+    # asteapta intern captura hartii + randare inainte de pdf.save()) e ignorata,
+    # si citim window.__AUD.data INAINTE ca genratorul sa fi scris ceva in el
+    # (asta producea mereu pag=0 — audit orb, PASS fals pe toate cele 27 studii).
+    return r'''(async function(){
       window.__AUD.cur=%r; window.__AUD.data[%r]={over:[],tok:[],pages:0,err:null};
-      try{ var r=%s; if(r&&r.then){ } }
+      try{ await %s; }
       catch(e){ window.__AUD.data[%r].err=String(e&&e.message||e); }
       return JSON.stringify(window.__AUD.data[%r]);
     })()''' % (gen, gen, call, gen, gen)
@@ -117,11 +122,17 @@ def main():
                 d2=json.loads(raw2)
                 if d2: d=d2
             except Exception: pass
-            ok = not d.get('err') and not d.get('over') and not d.get('tok')
+            # pag=0 e la fel de grav ca overflow/token-uri stricate: inseamna ca
+            # generatorul nu a ajuns niciodata la pdf.save()/_pdfSaveMobile (blocat,
+            # eroare inghitita silentios, sau nu genereaza deloc PDF) — nu-l tratam
+            # ca PASS doar pentru ca nu am prins o exceptie explicita.
+            zero_pages = not d.get('err') and not d.get('pages')
+            ok = not d.get('err') and not d.get('over') and not d.get('tok') and not zero_pages
             if not ok: fail=True
-            print("%s %-32s pag=%-3s over=%d tok=%d %s"%('✅' if ok else '❌', gen,
+            flag = ' <<PAG=0 (niciun pdf.save() detectat)' if zero_pages else ''
+            print("%s %-32s pag=%-3s over=%d tok=%d %s%s"%('✅' if ok else '❌', gen,
                 str(d.get('pages','?')), len(d.get('over',[])), len(d.get('tok',[])),
-                ('ERR:'+d['err']) if d.get('err') else ''))
+                ('ERR:'+d['err']) if d.get('err') else '', flag))
             if d.get('over'): print("     overflow:", d['over'][:4])
             if d.get('tok'): print("     tokens:", d['tok'][:4])
         print("VERDICT PARCEL:", "PASS ✅" if not fail else "FAIL ❌ (vezi mai sus)")

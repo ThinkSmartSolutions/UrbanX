@@ -437,10 +437,19 @@ async function generateREPA(){
   cy=addImg(caps.img2D||caps.imgLocation,14,cy,W-28,65,'FIG. 1 — Plan situație · Amplasament');
   cy=sec('1.1. DATE SINTETICE PROIECT',cy);cy+=3;
   const kw3=(W-28)/3;
+  const fnLabel=(window.AEDIS_FN&&window.AEDIS_FN[fn]?.label)||S2(fn);
   [['Nr. cadastral',S2(nrcad)],['UAT',S2(uat)],['UTR',S2(utr)],
    ['Suprafață teren',areaNum+' m²'],['H propusă',aedisH.toFixed(1)+'m'],['SDA propusă',sda+' m²'],
-  ].forEach(([l,v],i)=>kv(l,v,14+(i%3)*kw3,i<3?cy:cy+24,kw3-2,[GOLD,BLUE,GREEN][i%3]));
-  cy+=52;
+   ['Funcțiune propusă',fnLabel],['Regim înălțime',(niv>1?'P+'+(niv-1):'P')+' ('+niv+' niveluri)'],['POT/CUT propus',Math.round(Math.round(areaNum*0.65)/areaNum*100)+'% / '+(sda/areaNum).toFixed(2)],
+  ].forEach(([l,v],i)=>kv(l,v,14+(i%3)*kw3,cy+Math.floor(i/3)*24,kw3-2,[GOLD,BLUE,GREEN][i%3]));
+  cy+=76;
+  cy=sec('1.2. SCOPUL VERIFICĂRII PREALABILE',cy);cy+=3;
+  cy=body('Prezentul raport verifică, înainte de depunerea documentației de autorizare, dacă parcela '+
+    S2(nrcad)+' (UAT '+S2(uat)+', UTR '+S2(utr)+') respectă indicatorii urbanistici din regulamentul local '+
+    '(POT, CUT, regim de înălțime, retrageri), identifică avizele și acordurile obligatorii conform Legii '+
+    '50/1991 art.7, și estimează calendarul și costurile de autorizare pe baza conținutului-cadru din '+
+    'HG 907/2016. Verificarea prealabilă reduce riscul de respingere a Certificatului de Urbanism sau al '+
+    'Autorizației de Construire pentru neconformități care puteau fi identificate din timp.',14,cy);cy+=4;
 
   // PAG 3 — Checklist indicatori urbanistici
   cy=newPage('2. CONFORMITATE INDICATORI URBANISTICI PUG/RLU',3);
@@ -546,6 +555,13 @@ async function generateREPA(){
   cy=newPage('7. VEDERI AMPLASAMENT',8);
   cy=addImg(caps.v3dDay||caps.img3D,14,cy,W-28,82,'FIG. 3 — Vedere 3D · Context urban real');
   cy=addImg(caps.img2D,14,cy,W-28,72,'FIG. 4 — Plan situație topografică');
+  cy=sec('7.1. INTERPRETAREA VEDERILOR DE AMPLASAMENT',cy);cy+=3;
+  cy=body('FIG. 3 arată volumul edificabil propus ('+niv+' niveluri, H='+aedisH.toFixed(1)+'m) integrat în '+
+    'contextul construit real din jurul parcelei '+S2(nrcad)+' — vecinătățile, regimul de înălțime al '+
+    'clădirilor învecinate și relația cu strada. FIG. 4 arată încadrarea topografică exactă: conturul '+
+    'parcelei, limitele de proprietate și accesul din domeniul public, preluate din planul de situație '+
+    'oficial, nu dintr-o schiță aproximativă. Ambele vederi sunt utile ca anexă vizuală la cererea de '+
+    'Certificat de Urbanism, alături de indicatorii calculați în paginile anterioare.',14,cy);cy+=4;
 
   cy=newPage('8. BAZE LEGALE',9);
   cy=sec('8.1. CADRU LEGISLATIV AUTORIZARE CONSTRUIRE',cy);cy+=3;
