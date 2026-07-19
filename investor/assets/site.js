@@ -123,7 +123,6 @@ function _uxInitLangToggle() {
   }
   let saved = 'ro';
   try { saved = localStorage.getItem(_UX_LANG_KEY) || 'ro'; } catch (e) {}
-  apply(saved);
   const navInner = document.querySelector('.nav-inner');
   if (navInner && !document.getElementById('langToggleBtn')) {
     const btn = document.createElement('button');
@@ -133,6 +132,7 @@ function _uxInitLangToggle() {
     btn.onclick = function () { apply(_uxLang() === 'en' ? 'ro' : 'en'); };
     navInner.appendChild(btn);
   }
+  apply(saved);
 }
 
 document.addEventListener('DOMContentLoaded', function () {
