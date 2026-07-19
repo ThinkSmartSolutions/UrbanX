@@ -66,7 +66,32 @@ function _uxInitDemoForm(formId) {
   });
 }
 
+// ── Carduri interactive (.feature-card cu .f-more) — click/Enter extinde un
+// mini-exemplu real din platformă, în loc de un card static needclicabil. ──
+function _uxInitInteractiveCards() {
+  document.querySelectorAll('.feature-card').forEach((card) => {
+    if (!card.querySelector('.f-more')) return; // fără exemplu = fără toggle, rămâne card simplu
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    if (!card.querySelector('.f-toggle')) {
+      const t = document.createElement('div');
+      t.className = 'f-toggle';
+      card.appendChild(t);
+    }
+    const toggle = () => {
+      card.classList.toggle('open');
+      if (window.UrbanXDemo && card.classList.contains('open')) {
+        const h3 = card.querySelector('h3');
+        window.UrbanXDemo.trackFeature('card-example:' + (h3 ? h3.textContent : 'unknown'));
+      }
+    };
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
   _uxInitReveal();
   _uxInitDemoForm('demoForm');
+  _uxInitInteractiveCards();
 });

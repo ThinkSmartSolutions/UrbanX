@@ -61,16 +61,28 @@
       </p>
     </div>
     <div class="feature-grid reveal">
-      <div class="feature-card"><div class="f-ico">🗺</div><h3>Toate zonele PUG</h3><p>Regulament + indicatori (POT/CUT/regim) pe fiecare zonă funcțională a UAT-ului, pe hartă, nu în anexe scanate.</p></div>
-      <div class="feature-card"><div class="f-ico">📍</div><h3>Orice parcelă, în 3 secunde</h3><p>Click pe hartă → conformitate, avize obligatorii, trafic estimat, valoare de teren — <a href="#" onclick="return false" style="color:var(--teal-300)">Fișa parcelei 360°</a>.</p></div>
-      <div class="feature-card"><div class="f-ico">🌐</div><h3>Date live agregate</h3><p>OSM (rețea stradală, POI), ANAR (risc inundații), demografie INSE — pe aceeași hartă, nu în 5 aplicații separate.</p></div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">🗺</div><h3>Toate zonele PUG</h3><p>Regulament + indicatori (POT/CUT/regim) pe fiecare zonă funcțională a UAT-ului, pe hartă, nu în anexe scanate.</p>
+        <div class="f-more">Exemplu: Municipiul Iași are <b>586 de zone PUG</b> încărcate live pe hartă — click pe oricare arată regulamentul complet, nu un fișier PDF scanat de căutat manual.</div>
+      </div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">📍</div><h3>Orice parcelă, în 3 secunde</h3><p>Click pe hartă → conformitate, avize obligatorii, trafic estimat, valoare de teren, într-o singură fișă.</p>
+        <div class="f-more">Exemplu real: parcelă 9.044 mp Iași → scor conformitate <b>100/100</b>, 2 avize obligatorii (ISU, APM), trafic estimat <b>224 vehicule la ora de vârf</b> — toate calculate în secundele în care ai citit asta.</div>
+      </div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">🌐</div><h3>Date live agregate</h3><p>OSM, ANAR, demografie INSE — pe aceeași hartă, nu în 5 aplicații separate.</p>
+        <div class="f-more">Rețea stradală și POI din OpenStreetMap, risc de inundații din WMS-ul oficial ANAR (gis.rowater.ro), date demografice din seturile reale INS TEMPO — agregate automat, nu copiate manual din 3 surse.</div>
+      </div>
     </div>
     <div class="callout reveal">
-      <div class="eyebrow">Roadmap direct pe această fundație</div>
-      <p>Ce urmează, construit peste harta vie de azi: dashboard agregat cu toate PUZ-urile/PUD-urile aflate în
+      <div class="eyebrow">🔧 În planificare și implementare — pe fundația live de azi</div>
+      <p>Ce construim acum peste harta vie de azi: dashboard agregat cu toate PUZ-urile/PUD-urile aflate în
         avizare, urmărirea autorizațiilor emise, și corelarea automată cu rețelele de utilități existente.
-        Fundația tehnică (harta vie + indicatori per parcelă) există deja — ce lipsește e stratul de flux
-        administrativ intern al primăriei.</p>
+        Fundația tehnică (harta vie + indicatori per parcelă) există deja și funcționează — pasul următor e
+        stratul de flux administrativ intern al instituției.</p>
     </div>
   </div>
 </section>
@@ -133,12 +145,13 @@
       <div class="engine-media"><img src="assets/screenshots/03-fisa-parcela-360.png" alt="Fișa parcelei 360 grade"></div>
     </div>
     <div class="callout reveal">
-      <div class="eyebrow">Roadmap — viziune, nu funcție livrată azi</div>
+      <div class="eyebrow">🔧 În planificare și implementare</div>
       <p><b style="color:var(--ink-0)">„Dacă aprob acest PUZ..."</b> — simularea impactului cumulat al unei
         dezvoltări asupra cartierului (locuri noi în școli, capacitate de canalizare, trafic suplimentar,
-        necesar de energie) și validarea automată înainte de ședința CTATU sunt direcția în care construim
-        peste motorul de analiză per-parcelă deja funcțional. Nu sunt o funcție disponibilă astăzi — le
-        semnalăm explicit ca roadmap, nu ca literatură de vânzare.</p>
+        necesar de energie) și validarea automată înainte de ședința CTATU sunt pasul următor de dezvoltare,
+        construit direct peste motorul de analiză per-parcelă deja funcțional (Fișa parcelei 360° de mai sus).
+        Încă nu sunt disponibile în platformă — le semnalăm explicit ca aflate în implementare, nu ca literatură
+        de vânzare.</p>
     </div>
   </div>
 </section>
@@ -156,9 +169,21 @@
       </p>
     </div>
     <div class="feature-grid reveal">
-      <div class="feature-card"><div class="f-ico">⏸</div><h3>Mod „Pauză" / „Explică"</h3><p>Prezentatorul oprește pe orice scenă și explică pe îndelete — construit explicit pentru ședințe, nu doar pentru rulare automată.</p></div>
-      <div class="feature-card"><div class="f-ico">🎬</div><h3>Export video</h3><p>Orice scenă sau parcurs complet se exportă ca fișier video (.webm), pentru redare offline la o ședință fără conexiune sigură.</p></div>
-      <div class="feature-card"><div class="f-ico">🔗</div><h3>Punte spre Masterplan</h3><p>O scenă dedicată sintetizează cele 6 axe strategice și include un cod QR direct spre documentul Masterplan complet.</p></div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">⏸</div><h3>Mod „Pauză" / „Explică"</h3><p>Prezentatorul oprește pe orice scenă și explică pe îndelete — construit explicit pentru ședințe, nu doar pentru rulare automată.</p>
+        <div class="f-more">Motorul are <b>63 de scene</b> organizate în 7 acte narative — de la context geopolitic la risc seismic și coridoare de dezvoltare — navigabile scenă-cu-scenă, nu doar un film care rulează singur.</div>
+      </div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">🎬</div><h3>Export video</h3><p>Orice scenă sau parcurs complet se exportă ca fișier video (.webm), pentru redare offline la o ședință fără conexiune sigură.</p>
+        <div class="f-more">Util direct pentru o sală de ședințe cu conexiune slabă/inexistentă — încarci fișierul video o dată, îl rulezi oricând.</div>
+      </div>
+      <div class="feature-card">
+        <span class="badge-live">Live azi</span>
+        <div class="f-ico">🔗</div><h3>Punte spre Masterplan</h3><p>O scenă dedicată sintetizează cele 6 axe strategice și include un cod QR direct spre documentul Masterplan complet.</p>
+        <div class="f-more">Consilierul scanează codul QR de pe ecran cu telefonul propriu și are documentul complet de 100+ pagini în buzunar, înainte să iasă din sală.</div>
+      </div>
     </div>
     <div class="mock reveal" style="margin-top:32px; max-width:900px; margin-left:auto; margin-right:auto">
       <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
@@ -201,12 +226,12 @@
       <p class="lead center" style="margin-top:14px">Nu scheletul unui document — conținut real, cu cifre, formule și surse citate.</p>
     </div>
     <div class="feature-grid reveal">
-      <div class="feature-card"><h3>Housing</h3><p>~98 pagini — locuire, necesar, prognoză.</p></div>
-      <div class="feature-card"><h3>Smart City</h3><p>~87 pagini — digitalizare, infrastructură inteligentă.</p></div>
-      <div class="feature-card"><h3>Turistic / Cultural</h3><p>~90 pagini — patrimoniu, turism, valorificare.</p></div>
-      <div class="feature-card"><h3>SIDU, SDL, Metropolitan</h3><p>Documente teritoriale standard, integrate în același meniu.</p></div>
-      <div class="feature-card"><h3>Registrul de Indicatori</h3><p>60 de indicatori în 8 domenii (demografie, mediu, mobilitate, risc, imobiliar), cu formulă și sursă pe fiecare.</p></div>
-      <div class="feature-card"><h3>HBU / RCAI teritorial</h3><p>Cea mai bună utilizare &amp; analiza cost-avantaj la nivel de UAT — peste 100 pagini fiecare.</p></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>Housing</h3><p>~98 pagini — locuire, necesar, prognoză.</p><div class="f-more">Include prognoza necesarului de locuințe pe orizont de 10-30 ani, corelată cu evoluția demografică reală a UAT-ului.</div></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>Smart City</h3><p>~87 pagini — digitalizare, infrastructură inteligentă.</p><div class="f-more">Acoperă senzoristică urbană, iluminat inteligent, mobilitate conectată — cu exemple aplicabile direct bugetului local.</div></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>Turistic / Cultural</h3><p>~90 pagini — patrimoniu, turism, valorificare.</p><div class="f-more">Util direct pentru cereri de finanțare pe componenta turism/cultură, cu argumentare documentată, nu doar declarativă.</div></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>SIDU, SDL, Metropolitan</h3><p>Documente teritoriale standard, integrate în același meniu.</p><div class="f-more">Aceleași motoare de date stau la baza tuturor — nu redactezi de la zero de fiecare dată când schimbi tipul de document.</div></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>Registrul de Indicatori</h3><p>60 de indicatori în 8 domenii (demografie, mediu, mobilitate, risc, imobiliar), cu formulă și sursă pe fiecare.</p><div class="f-more">Fiecare indicator arată exact de unde vine (INSE, Eurostat, OSM) și cum se calculează — verificabil de oricine, nu o cutie neagră.</div></div>
+      <div class="feature-card"><span class="badge-live">Live azi</span><h3>HBU / RCAI teritorial</h3><p>Cea mai bună utilizare &amp; analiza cost-avantaj la nivel de UAT — peste 100 pagini fiecare.</p><div class="f-more">Documente de nivel investițional, utile direct în discuții cu potențiali investitori instituționali sau parteneri de dezvoltare.</div></div>
     </div>
   </div>
 </section>
