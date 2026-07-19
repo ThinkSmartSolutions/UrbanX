@@ -70,13 +70,22 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
 <div class="page">
   <div class="eyebrow">Ce vede administratorul UAT-ului</div>
   <h2>O hartă vie, nu un raport depus o dată pe an</h2>
-  <p>Toate zonele funcționale PUG ale UAT-ului, cu regulament și indicatori (POT/CUT/regim), disponibile oricui
-    din primărie are acces, în orice moment — nu doar la solicitare către un consultant extern.</p>
+  <p>Astăzi, informația despre teritoriu e împrăștiată în PDF-uri scanate, planuri desenate acum un deceniu și
+    răspunsuri primite de la un consultant extern peste câteva zile. UrbanX schimbă asta radical: toate zonele
+    funcționale ale Planului Urbanistic General al UAT-ului, cu regulamentul complet și indicatorii urbanistici
+    (POT, CUT, regim de înălțime) pe fiecare zonă, sunt disponibile pe o hartă vie, interogabilă instant, de
+    oricine din instituție are acces — primar, arhitect șef, funcționar din serviciul urbanism sau consilier
+    local. Nu mai există un singur punct de acces la informație (un desenator sau un consultant extern) care
+    trebuie așteptat; harta e disponibilă permanent, actualizată din aceleași date pe care se bazează deciziile
+    tehnice reale.</p>
+  <p>Diferența nu e cosmetică. O comisie tehnică poate verifica în ședință, în timp real, dacă un amplasament
+    respectă regulamentul zonei, în loc să amâne discuția până la o verificare ulterioară. Un primar poate
+    răspunde unui cetățean sau unui investitor cu cifre exacte, nu cu o promisiune „revin cu un răspuns".</p>
   <div class="shot"><img src="assets/screenshots/01-hero-harta.png" alt="Harta vie UrbanX"></div>
   <div class="feature-grid">
-    <div class="feature"><span class="badge-live">Live azi</span><h3>Toate zonele PUG</h3><p>Regulament pe fiecare zonă, direct pe hartă.</p></div>
-    <div class="feature"><span class="badge-live">Live azi</span><h3>Orice parcelă, în 3 secunde</h3><p>Fișa parcelei 360° — conformitate, avize, trafic.</p></div>
-    <div class="feature"><span class="badge-live">Live azi</span><h3>Date live agregate</h3><p>OSM, ANAR (risc), demografie INSE.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Toate zonele PUG</h3><p>Regulament complet pe fiecare zonă funcțională, direct pe hartă — nu într-o anexă scanată de căutat manual.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Orice parcelă, în 3 secunde</h3><p>Fișa parcelei 360°: scor de conformitate, avize obligatorii identificate automat, trafic estimat la oră de vârf.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Date live agregate</h3><p>Rețea și puncte de interes din OpenStreetMap, risc de inundații din WMS-ul oficial ANAR, demografie din INSE — pe aceeași hartă.</p></div>
   </div>
   <div class="pagenum">02</div>
 </div>
@@ -86,14 +95,20 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
   <div class="eyebrow">Masterplan Urban</div>
   <span class="badge-live">Live azi</span>
   <h2>Un model viu, nu un document care îmbătrânește</h2>
-  <p>Document strategic de peste 100 de pagini, generat automat din datele curente ale UAT-ului — regenerabil
-    oricând, nu o comandă externă livrată o singură dată.</p>
-  <ul class="tl">
-    <li>Indicatori urbani, portofoliu de proiecte, hărți de risc, infrastructură regională</li>
-    <li>Turism, vitalitate urbană, servicii, locuire, energie, participare publică</li>
-    <li>Metodologie citată (model gravitațional CNAIR) + surse INSE, Eurostat, ANCPI, ANAR, ANM</li>
-    <li>PMUD (mobilitate urbană durabilă) — document separat, pe structura ghidului MDLPA/UE</li>
-  </ul>
+  <p>Un Masterplan clasic e o comandă externă de câteva luni, livrată o singură dată, apoi neschimbată un
+    deceniu — chiar dacă între timp populația UAT-ului crește sau scade, se construiesc drumuri noi sau se
+    schimbă regulamentul de urbanism. Masterplanul Dinamic generat de UrbanX rezolvă exact această problemă:
+    e un document strategic de peste 100 de pagini, generat automat din datele curente ale UAT-ului, regenerabil
+    de câte ori e nevoie — pentru o cerere de finanțare, o ședință de consiliu sau o revizuire de strategie —
+    fără să reia de la zero un contract de consultanță.</p>
+  <p>Documentul acoperă indicatori urbani, portofoliul de proiecte al UAT-ului, hărți de risc (seismic, inundații),
+    infrastructura regională, turism, vitalitate urbană, servicii publice, locuire, energie și participare publică
+    — capitole integrate, nu module disparate cumpărate separat. Metodologia e citată explicit (model demografic
+    cohortă-componentă, model gravitațional CNAIR pentru fluxuri), iar sursele — INSE, Eurostat, ANCPI, ANAR,
+    ANM — sunt aceleași folosite oficial în documentele administrative, nu estimări proprii nedocumentate.</p>
+  <p>Planul de Mobilitate Urbană Durabilă (PMUD) nu e tratat ca un capitol secundar pierdut în Masterplan — e
+    generat ca document propriu, structurat pe cele 8 componente cerute de ghidul oficial MDLPA/UE (SUMP),
+    exact în formatul cerut de finanțatori și avizatori care îl solicită separat.</p>
   <div class="callout">
     <p><b>Roadmap:</b> simularea impactului cumulat al aprobării unui PUZ (utilități, trafic, capacitate școli)
       și validarea automată înainte de ședința CTATU sunt direcția de dezvoltare — construite peste motorul de
@@ -107,9 +122,20 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
   <div class="eyebrow">Ședințe de comisie și consiliu</div>
   <span class="badge-live">Live azi</span>
   <h2>Comisia vede orașul — nu 50 de planșe</h2>
-  <p>Motorul de prezentare cinematică randează teritoriul în 3D cu date reale, navigabil scenă cu scenă, cu
-    moduri construite special pentru prezentări live: pauză/explică pe orice scenă, export video pentru redare
-    offline, și o scenă dedicată de sinteză cu QR direct spre Masterplan.</p>
+  <p>O ședință de Comisie Tehnică de Amenajare a Teritoriului și Urbanism sau de Consiliu Local se ține astăzi
+    în jurul unui teanc de planșe pe hârtie, un PowerPoint static și o discuție în care fiecare participant își
+    imaginează diferit proiectul discutat. Motorul de prezentare cinematică al UrbanX înlocuiește acest ritual
+    cu o randare 3D a teritoriului, construită din date reale — trafic, risc seismic, inundații, context
+    regional — navigabilă scenă cu scenă, nu un simplu film care rulează de la un capăt la altul.</p>
+  <p>Are moduri construite special pentru prezentări live: prezentatorul poate opri pe orice scenă și explica
+    pe îndelete, exact ca la o expunere cu diapozitive, dar peste un model 3D interactiv. Orice scenă sau
+    parcurs complet se poate exporta ca fișier video, pentru redare offline într-o sală fără conexiune sigură.
+    O scenă dedicată sintetizează cele 6 axe strategice ale UAT-ului și include un cod QR direct spre documentul
+    Masterplan complet — consilierul scanează codul cu telefonul propriu și pleacă din sală cu documentul de
+    peste 100 de pagini în buzunar, nu cu promisiunea că i se va trimite pe e-mail.</p>
+  <p>Consiliul Local folosește motorul pentru întreg teritoriul UAT-ului, la nivel de strategie; CTATU și
+    Comisia de Urbanism, pentru proiectul sau ansamblul aflat spre avizare — același motor, două niveluri
+    diferite de zoom, aceeași sursă de adevăr pentru toată lumea din sală.</p>
   <div class="shot"><img src="assets/screenshots/05-cinematic-3d.png" alt="Prezentare cinematică teritorială"></div>
   <div class="pagenum">04</div>
 </div>
@@ -119,16 +145,26 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
   <div class="eyebrow">Dincolo de oraș</div>
   <span class="badge-live">Live azi · ★ flagship</span>
   <h2>Regionalizare — județ, regiune, țară</h2>
-  <p>Simulator pe granițele reale a 42 de unități (41 județe + București), 4 scenarii de regionalizare, cu
-    populație, PIB/cap, mandate parlamentare recalculate real și conformitate NUTS-2 — document național de
-    peste 400 de pagini.</p>
+  <p>Pentru un consiliu județean, discuția nu se oprește la un singur UAT — se pune problema coordonării
+    întregului județ sau a poziționării în context regional și național. Simulatorul de Regionalizare al
+    UrbanX lucrează pe granițele reale a 42 de unități administrative (41 de județe + București, din surse
+    geo-spațiale oficiale românești, nu contururi aproximative) și calculează 4 scenarii de regionalizare —
+    status-quo pe cele 8 regiuni actuale, regiuni cu personalitate juridică, provincii istorice și
+    macro-regiuni — fiecare cu populație, PIB per capita raportat la media UE, mandate parlamentare recalculate
+    real pe scenariu și verificare automată de conformitate NUTS-2. Rezultatul e un document național de peste
+    400 de pagini, structurat pe 20 de module de conținut, cu nivel de detaliu construit pentru o audiență
+    instituțională sau ministerială, nu pentru un rezumat de o pagină.</p>
   <h2 style="margin-top:20px">20 de studii teritoriale, deja scrise</h2>
-  <ul class="tl">
-    <li>Housing (~98 pagini), Smart City (~87 pagini), Turistic/Cultural (~90 pagini)</li>
-    <li>SIDU, SDL, Metropolitan — documente teritoriale standard</li>
-    <li>Registrul de Indicatori — 60 de indicatori în 8 domenii, cu formulă și sursă</li>
-    <li>HBU/RCAI teritorial — peste 100 de pagini fiecare</li>
-  </ul>
+  <p>Dincolo de Masterplan și Regionalizare, platforma include o suită completă de 20 de studii teritoriale de
+    rang superior — nu scheletul unui document, ci conținut real, cu cifre, formule și surse citate pe fiecare
+    pagină. Housing (~98 pagini) acoperă necesarul de locuințe și prognoza pe 10-30 de ani; Smart City
+    (~87 pagini) tratează digitalizarea și infrastructura inteligentă; studiul Turistic/Cultural (~90 pagini)
+    documentează patrimoniul și valorificarea turistică. SIDU, SDL și documentul Metropolitan urmează aceeași
+    structură standard, comparabile între ele fără muncă manuală de normalizare. Registrul de Indicatori
+    agregă 60 de indicatori în 8 domenii — demografie, mediu, mobilitate, risc, imobiliar — fiecare cu formula
+    și sursa exactă, verificabile de oricine. Studiile HBU/RCAI la nivel teritorial, de peste 100 de pagini
+    fiecare, oferă documentație de nivel investițional, utilă direct în discuții cu parteneri de dezvoltare
+    sau instituții finanțatoare.</p>
   <div class="pagenum">05</div>
 </div>
 
