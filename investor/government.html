@@ -14,8 +14,9 @@
     <a href="index.html" class="brand"><span class="brand-mark">X</span> UrbanX</a>
     <nav class="nav-links">
       <span class="audience-pill">🏛 Administrații Publice</span>
-      <a href="#dashboard">Dashboard</a>
+      <a href="#digital-twin">Digital Twin</a>
       <a href="#masterplan">Masterplan</a>
+      <a href="#whatif">Ce-ar fi dacă</a>
       <a href="#ctatu">CTATU &amp; Consiliul Local</a>
       <a href="#regionalizare">Regionalizare</a>
       <a href="index.html">↩ Alte audiențe</a>
@@ -28,12 +29,13 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="eyebrow">Pentru primării, consilii județene, agenții de dezvoltare</div>
+      <div class="eyebrow">Predictive Urbanism · Pentru primării, consilii județene, agenții de dezvoltare</div>
       <h1>Administrația vede <span class="hl">teritoriul</span>,<br>nu PDF-ul.</h1>
       <p class="lead" style="margin-top:22px">
-        Un Digital Twin al teritoriului: harta vie cu toate zonele PUG și parcelele, Masterplan-ul care se
-        actualizează în loc să îmbătrânească într-un sertar, și un mod de prezentare făcut special pentru
-        ședințele de Comisie Tehnică (CTATU) și Consiliu Local.
+        UrbanX nu concurează cu AutoCAD sau ArchiCAD — e o categorie nouă, la intersecția dintre GIS, BIM,
+        Digital Twin și suport de decizie. Un Digital Twin al teritoriului: harta vie cu toate zonele PUG și
+        parcelele, Masterplan-ul care se actualizează în loc să îmbătrânească într-un sertar, și un mod de
+        prezentare făcut special pentru ședințele de Comisie Tehnică (CTATU) și Consiliu Local.
       </p>
       <div class="hero-actions">
         <a href="#acces-demo" class="btn btn-primary">Cere demo dedicat →</a>
@@ -47,17 +49,50 @@
   </div>
 </section>
 
-<!-- CE VEDE ADMINISTRATORUL UAT-ULUI -->
+<!-- DIGITAL TWIN — primul lucru pe care il vede un primar -->
+<section class="section" id="digital-twin">
+  <div class="wrap">
+    <div class="vision reveal">
+      <div class="eyebrow" style="justify-content:center">UrbanX Digital Twin</div>
+      <h2>Nu este un model 3D. Este copia digitală a întregului teritoriu.</h2>
+      <p class="lead center" style="margin:16px auto 0; max-width:720px">
+        Construcții · Drumuri · Utilități · Demografie · Trafic · PUG · PUZ · Riscuri · Investiții ·
+        Infrastructură · Indicatori — într-un singur model, actualizat din date reale, nu desenat o singură
+        dată și uitat.
+      </p>
+      <div class="feature-grid reveal" style="margin-top:36px; text-align:left">
+        <div class="feature-card">
+          <span class="badge-live">Live azi</span>
+          <div class="f-ico">🗺</div><h3>Teritoriul, la zi</h3><p>Zone PUG, parcele, regulament — nu un instantaneu vechi de la ultima actualizare a unui GIS instituțional.</p>
+          <div class="f-more">Municipiul Iași: 586 de zone PUG, fiecare cu regulament complet, interogabile pe hartă în timp real.</div>
+        </div>
+        <div class="feature-card">
+          <span class="badge-live">Live azi</span>
+          <div class="f-ico">🧬</div><h3>Un model, nu straturi izolate</h3><p>Regulament, risc, demografie și context regional pe aceeași hartă — corelate, nu în 5 aplicații separate.</p>
+          <div class="f-more">OSM (rețea+POI), ANAR (risc inundații), INSE (demografie) — agregate automat pe un singur model, nu suprapuse manual în GIS.</div>
+        </div>
+        <div class="feature-card">
+          <span class="badge-roadmap">🔧 În planificare și implementare</span>
+          <div class="f-ico">🔄</div><h3>Sincronizare completă cu autorizațiile</h3><p>Legătura live cu toate autorizațiile emise și investițiile în curs, la nivel de instituție.</p>
+          <div class="f-more">Fundația (harta vie + indicatori per parcelă) există și funcționează azi. Stratul de flux administrativ intern (autorizații emise, investiții în curs) e pasul următor de dezvoltare.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CE VEDE ADMINISTRATORUL UAT-ULUI (Urban Observatory) -->
 <section class="section" id="dashboard">
   <div class="wrap">
     <div class="section-head center">
       <span class="badge-live">Live azi</span>
+      <div class="eyebrow" style="justify-content:center">Urban Observatory</div>
       <h2>Ce vede administratorul UAT-ului</h2>
       <p class="lead center" style="margin-top:14px">
         Primar, președinte de consiliu județean sau director de agenție de dezvoltare — oricine conduce
-        un UAT are nevoie de aceeași imagine de ansamblu. Nu un raport PDF depus o dată pe an, ci o hartă
-        vie, actualizată, cu toate zonele funcționale și parcelele UAT-ului, deschisă în orice moment,
-        de oricine din instituție are acces.
+        un UAT are nevoie de aceeași imagine de ansamblu. Nu un modul tehnic nou, ci un ecran de sinteză peste
+        datele deja agregate: o hartă vie, actualizată, cu toate zonele funcționale și parcelele UAT-ului,
+        deschisă în orice moment, de oricine din instituție are acces.
       </p>
     </div>
     <div class="feature-grid reveal">
@@ -93,11 +128,11 @@
     <div class="engine reveal">
       <div>
         <span class="badge-live">Live azi</span>
-        <div class="engine-num">MASTERPLAN URBAN</div>
-        <h3 style="font-size:24px">Un model viu, nu un document care îmbătrânește</h3>
+        <div class="engine-num">MASTERPLAN DINAMIC</div>
+        <h3 style="font-size:24px">Nu un document. Un sistem viu care se actualizează permanent.</h3>
         <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
           Masterplan-ul clasic e o comandă externă de 6 luni, livrată o dată, apoi neschimbată 10 ani.
-          Masterplan-ul UrbanX se generează din datele curente ale UAT-ului — de câte ori e nevoie, cu
+          Masterplan-ul Dinamic UrbanX se generează din datele curente ale UAT-ului — de câte ori e nevoie, cu
           date la zi, nu cu ipoteze vechi de un deceniu.
         </p>
         <ul>
@@ -126,7 +161,7 @@
   </div>
 </section>
 
-<!-- VALIDARE / SIMULARE -->
+<!-- VALIDARE DE PARCELA (live) -->
 <section class="section">
   <div class="wrap">
     <div class="section-head center">
@@ -137,21 +172,49 @@
         <span class="badge-live">Live azi</span>
         <h3>Fișa parcelei 360° — verificare instantă</h3>
         <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
-          Înainte de emiterea unui Certificat de Urbanism, aparatul tehnic poate verifica în secunde: scor de
-          conformitate, avize obligatorii identificate automat (ISU, mediu etc.), trafic estimat la oră de vârf,
-          încadrare POT/CUT reală față de regulament.
+          Înainte de emiterea unui Certificat de Urbanism, aparatul tehnic poate verifica în secunde, pe
+          <b style="color:var(--ink-0)">o singură parcelă</b>: scor de conformitate, avize obligatorii
+          identificate automat (ISU, mediu etc.), trafic estimat la oră de vârf, încadrare POT/CUT reală
+          față de regulament.
         </p>
       </div>
       <div class="engine-media"><img src="assets/screenshots/03-fisa-parcela-360.png" alt="Fișa parcelei 360 grade"></div>
     </div>
-    <div class="callout reveal">
-      <div class="eyebrow">🔧 În planificare și implementare</div>
-      <p><b style="color:var(--ink-0)">„Dacă aprob acest PUZ..."</b> — simularea impactului cumulat al unei
-        dezvoltări asupra cartierului (locuri noi în școli, capacitate de canalizare, trafic suplimentar,
-        necesar de energie) și validarea automată înainte de ședința CTATU sunt pasul următor de dezvoltare,
-        construit direct peste motorul de analiză per-parcelă deja funcțional (Fișa parcelei 360° de mai sus).
-        Încă nu sunt disponibile în platformă — le semnalăm explicit ca aflate în implementare, nu ca literatură
-        de vânzare.</p>
+  </div>
+</section>
+
+<!-- CE-AR FI DACA — sectiune dedicata, vizuala, cu garda live/roadmap explicita -->
+<section class="section" id="whatif" style="background:rgba(124,58,237,.04); border-top:1px solid rgba(124,58,237,.15); border-bottom:1px solid rgba(124,58,237,.15)">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="badge-roadmap">🔧 În planificare și implementare</span>
+      <h2>Ce se întâmplă dacă aprobăm acest PUZ?</h2>
+      <p class="lead center" style="margin-top:14px">
+        Viziunea: UrbanX calculează impactul cumulat al unei dezvoltări asupra întregului cartier — nu doar
+        pe hârtie, ci ca simulare instantă, înaintea oricărei ședințe.
+      </p>
+    </div>
+    <div class="feature-grid reveal" style="grid-template-columns:repeat(4,1fr)">
+      <div class="feature-card"><h3 style="font-size:14px">👥 Populație nouă</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🚗 Trafic suplimentar</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">💧 Consum apă</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🚰 Consum canalizare</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">⚡ Consum energie</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🏫 Necesar școli</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🧸 Necesar grădinițe</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🅿️ Parcări</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🌳 Spații verzi</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">💰 Impact fiscal</h3></div>
+      <div class="feature-card"><h3 style="font-size:14px">🏗 Investiții necesare</h3></div>
+    </div>
+    <div class="callout reveal" style="margin-top:24px">
+      <div class="eyebrow">Status onest — verificat, nu presupus</div>
+      <p><b style="color:var(--ink-0)">Niciunul dintre indicatorii de mai sus nu e calculat live azi, la nivel de cartier.</b>
+        Ce e live: <b style="color:var(--ink-0)">Fișa parcelei 360°</b> de mai sus — conformitate, avize, trafic
+        estimat și valoare, calculate instant, dar pentru <b style="color:var(--ink-0)">o singură parcelă</b>,
+        nu pentru impactul cumulat al unei dezvoltări asupra întregului cartier. Simularea de mai sus e direcția
+        de dezvoltare, construită direct peste acest motor de analiză per-parcelă deja funcțional — nu o
+        funcție disponibilă astăzi. O semnalăm explicit ca aflată în implementare, nu ca literatură de vânzare.</p>
     </div>
   </div>
 </section>
@@ -167,6 +230,17 @@
         seismic, inundații, context regional), navigabil scenă cu scenă, cu moduri special construite pentru
         prezentări live.
       </p>
+    </div>
+    <div class="compare reveal" style="margin-bottom:36px">
+      <div class="compare-col before">
+        <h4>Astăzi</h4>
+        <div class="stat-row"><span class="stat-label">PDF · planșe pe hârtie · PowerPoint static · discuții fără imagine comună</span></div>
+      </div>
+      <div class="arrow-big">→</div>
+      <div class="compare-col after">
+        <h4>UrbanX</h4>
+        <div class="stat-row"><span class="stat-label">Deschizi orașul · rotești · activezi straturi · simulezi · votezi pe aceeași imagine</span></div>
+      </div>
     </div>
     <div class="feature-grid reveal">
       <div class="feature-card">
@@ -189,6 +263,14 @@
       <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
       <img src="assets/screenshots/05-cinematic-3d.png" alt="Prezentare cinematică — context geopolitic și regional">
     </div>
+    <div class="vision reveal" style="margin-top:36px">
+      <div class="eyebrow" style="justify-content:center">Pentru Consiliul Local</div>
+      <h2 style="font-size:22px">În loc de 100 de planșe, consilierii văd orașul.</h2>
+      <p class="lead center" style="margin:12px auto 0">
+        Pot opri animația, pot întreba, pot vedea scenarii — o discuție reală, nu o defilare de documente
+        pe care nimeni nu apucă să le citească înainte de vot.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -209,6 +291,7 @@
         <ul>
           <li>Document național de peste 400 de pagini, structurat pe 20 de module de conținut</li>
           <li>Granițe reale (surse geo-spațiale oficiale), nu contururi aproximative</li>
+          <li>Fonduri UE și impact economic per regiune, corelate cu absorbția reală (precedent Polonia/Cehia)</li>
           <li>Nivel de detaliu construit pentru audiență instituțională/ministerială</li>
         </ul>
       </div>
@@ -238,6 +321,24 @@
       <img src="assets/screenshots/08-strategic-planning-suite.png" alt="Meniul Strategic Planning Suite — toate studiile teritoriale, într-un singur loc">
     </div>
     <p class="placeholder-note">Meniul real din platformă — fiecare linie deschide un studiu complet, nu o pagină goală.</p>
+  </div>
+</section>
+
+<!-- IERARHIE PUBLIC GUVERNAMENTAL -->
+<section class="section" style="background:rgba(255,255,255,.015); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="section-head center">
+      <h2>„Administrație publică" nu e un singur public</h2>
+      <p class="lead center" style="margin-top:14px">Fiecare nivel are nevoi diferite — nu le tratăm identic.</p>
+    </div>
+    <div class="timeline reveal" style="max-width:640px; margin:0 auto">
+      <div class="tl-step"><div class="tl-dot">1</div><div><h3>Administrație locală (primării)</h3><p>Digital Twin, Masterplan Dinamic, Fișa parcelei 360° — pagina de față.</p></div></div>
+      <div class="tl-step"><div class="tl-dot">2</div><div><h3>Consilii județene</h3><p>Regionalizare, context metropolitan, coordonare cu UAT-urile componente.</p></div></div>
+      <div class="tl-step"><div class="tl-dot">3</div><div><h3>Ministere &amp; agenții</h3><p>Indicatori naționali, nu proiecte individuale — <a href="ministry.html" style="color:var(--teal-300)">pagina dedicată →</a></p></div></div>
+      <div class="tl-step"><div class="tl-dot">4</div><div><h3>Operatori de utilități</h3><p>Vizibilitate timpurie asupra dezvoltărilor — <a href="utilities.html" style="color:var(--teal-300)">pagina dedicată →</a></p></div></div>
+      <div class="tl-step"><div class="tl-dot">5</div><div><h3>Servicii de urgență</h3><p>Scenarii SSI, categorii de risc, căi de evacuare — parte din motorul de documentație tehnică.</p></div></div>
+      <div class="tl-step"><div class="tl-dot">6</div><div><h3>Consultare publică</h3><p>Date transparente, verificabile — aceleași pentru cetățean și funcționar.</p></div></div>
+    </div>
   </div>
 </section>
 
