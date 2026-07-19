@@ -145,6 +145,8 @@ header.nav{
 }
 .feature-card .f-toggle::after{content:'exemplu din platformă →'; }
 .feature-card.open .f-toggle::after{content:'ascunde ↑'; }
+html[lang="en"] .feature-card .f-toggle::after{content:'example from the platform →'; }
+html[lang="en"] .feature-card.open .f-toggle::after{content:'hide ↑'; }
 .feature-card .f-more{
   max-height:0; overflow:hidden; opacity:0; transition:max-height .35s ease, opacity .3s ease, margin-top .35s ease;
   font-size:12.5px; color:var(--ink-2); border-top:1px dashed var(--line-soft); margin-top:0;
