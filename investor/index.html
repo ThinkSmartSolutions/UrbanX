@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanX — Motorul de agregare, interpretare, analiză, proiectare și predicție pentru construcții</title>
+<meta name="description" content="UrbanX comprimă un flux de 8 aplicații și 5 zile într-un singur sistem — de la teren la autorizație, în 3 ore.">
+<style>
+:root{
+  --navy-950:#050b14; --navy-900:#0a1628; --navy-800:#0f1f38; --navy-700:#152a4a; --navy-600:#1c3a5e;
+  --teal-400:#2dd4bf; --teal-300:#5eead4; --teal-500:#14b8a6; --teal-glow:rgba(45,212,191,.35);
+  --ink-0:#f3f7fb; --ink-1:#c7d4e6; --ink-2:#8ea3c2; --ink-3:#5b7095;
+  --line:rgba(94,234,212,.14); --line-soft:rgba(148,163,184,.10);
+  --amber:#f2b84b;
+  --radius:16px;
+  --maxw:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(45,212,191,.10), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(28,58,94,.35), transparent 55%),
+    var(--navy-950);
+  color:var(--ink-1);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.6; overflow-x:hidden;
+}
+img{max-width:100%; display:block}
+a{color:inherit}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--teal-300); margin-bottom:16px;
+}
+.eyebrow::before{content:'';width:22px;height:2px;background:var(--teal-400);display:inline-block}
+h1,h2,h3{color:var(--ink-0); font-weight:800; letter-spacing:-.01em; margin:0}
+h1{font-size:clamp(32px,5.4vw,58px); line-height:1.08}
+h2{font-size:clamp(26px,3.6vw,40px); line-height:1.15}
+h3{font-size:19px}
+p{margin:0}
+.lead{font-size:clamp(16px,1.9vw,19px); color:var(--ink-1); max-width:680px}
+.section{padding:96px 0}
+.section-head{max-width:720px; margin:0 0 52px}
+.center{text-align:center; margin-left:auto; margin-right:auto}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px; font-weight:700; font-size:15px;
+  padding:15px 28px; border-radius:12px; cursor:pointer; border:1px solid transparent; text-decoration:none;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease; white-space:nowrap;
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{
+  background:linear-gradient(180deg,var(--teal-400),var(--teal-500)); color:#04211d; box-shadow:0 8px 30px -8px var(--teal-glow);
+}
+.btn-primary:hover{transform:translateY(-2px); box-shadow:0 14px 40px -10px var(--teal-glow)}
+.btn-ghost{background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.14); color:var(--ink-0)}
+.btn-ghost:hover{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.24)}
+
+/* ── NAV ─────────────────────────────────────────── */
+header.nav{
+  position:sticky; top:0; z-index:100; backdrop-filter:blur(14px) saturate(140%);
+  background:rgba(5,11,20,.72); border-bottom:1px solid var(--line-soft);
+}
+.nav-inner{max-width:var(--maxw); margin:0 auto; padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px}
+.brand{display:flex; align-items:center; gap:10px; font-weight:800; color:var(--ink-0); font-size:18px}
+.brand-mark{
+  width:30px;height:30px;border-radius:9px; background:linear-gradient(135deg,var(--teal-400),var(--navy-600));
+  display:flex; align-items:center; justify-content:center; font-size:15px; color:#04211d; font-weight:900;
+}
+.nav-links{display:flex; gap:26px; font-size:14px; color:var(--ink-2)}
+.nav-links a{text-decoration:none; transition:color .15s}
+.nav-links a:hover{color:var(--teal-300)}
+@media (max-width:860px){.nav-links{display:none}}
+
+/* ── HERO ────────────────────────────────────────── */
+.hero{padding:88px 0 40px; position:relative}
+.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center}
+@media (max-width:980px){.hero-grid{grid-template-columns:1fr}}
+.hero h1{margin-bottom:22px}
+.hero h1 .hl{color:var(--teal-300)}
+.audience-strip{
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:30px;
+}
+.chip{
+  font-size:12px; font-weight:600; color:var(--ink-2); border:1px solid var(--line-soft); background:rgba(255,255,255,.03);
+  padding:7px 13px; border-radius:100px;
+}
+.hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-top:34px}
+.mock{
+  border-radius:18px; border:1px solid var(--line); background:var(--navy-800); padding:10px;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.02);
+  transform:perspective(1400px) rotateY(-4deg) rotateX(2deg);
+}
+.mock img{border-radius:11px; display:block}
+.mock-bar{display:flex; gap:6px; padding:4px 8px 10px}
+.mock-dot{width:9px;height:9px;border-radius:50%; background:rgba(255,255,255,.14)}
+
+/* ── BEFORE/AFTER ────────────────────────────────── */
+.compare{
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:28px;
+  border:1px solid var(--line-soft); border-radius:20px; padding:44px; background:rgba(255,255,255,.015);
+}
+@media (max-width:820px){.compare{grid-template-columns:1fr; text-align:center}}
+.compare-col h4{color:var(--ink-3); font-size:12px; text-transform:uppercase; letter-spacing:.12em; font-weight:800; margin-bottom:22px}
+.compare-col.after h4{color:var(--teal-300)}
+.stat-row{display:flex; align-items:baseline; gap:12px; margin-bottom:16px}
+.stat-num{font-size:34px; font-weight:900; color:var(--ink-0); min-width:64px}
+.compare-col.after .stat-num{color:var(--teal-300)}
+.stat-label{color:var(--ink-2); font-size:14px}
+.arrow-big{font-size:34px; color:var(--teal-400); justify-self:center}
+
+/* ── ENGINES ─────────────────────────────────────── */
+.engine{
+  display:grid; grid-template-columns:.85fr 1.15fr; gap:48px; align-items:center; padding:54px 0;
+  border-top:1px solid var(--line-soft);
+}
+.engine:nth-child(even){grid-template-columns:1.15fr .85fr}
+.engine:nth-child(even) .engine-media{order:2}
+@media (max-width:900px){
+  .engine, .engine:nth-child(even){grid-template-columns:1fr}
+  .engine:nth-child(even) .engine-media{order:0}
+}
+.engine-num{font-size:13px; font-weight:800; color:var(--teal-400); letter-spacing:.1em; margin-bottom:12px}
+.engine ul{margin:18px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:9px}
+.engine li{padding-left:22px; position:relative; color:var(--ink-2); font-size:14.5px}
+.engine li::before{content:'→'; position:absolute; left:0; color:var(--teal-400); font-weight:800}
+.engine-media img{
+  border-radius:14px; border:1px solid var(--line); box-shadow:0 30px 70px -24px rgba(0,0,0,.65);
+}
+/* Progressive enhancement: elements are visible by default (no-JS / crawler safe).
+   JS adds .reveal-armed at load, which hides until .in is added on scroll-into-view. */
+.reveal{transition:opacity .7s ease, transform .7s ease}
+.reveal.reveal-armed{opacity:0; transform:translateY(26px)}
+.reveal.reveal-armed.in{opacity:1; transform:none}
+
+/* ── DEMO NARRATIVE ──────────────────────────────── */
+.flow{display:flex; flex-wrap:wrap; gap:0; align-items:stretch; justify-content:center; margin-top:12px}
+.flow-step{
+  display:flex; flex-direction:column; align-items:center; text-align:center; width:150px; padding:18px 10px;
+}
+.flow-badge{
+  width:44px;height:44px;border-radius:50%; background:var(--navy-800); border:1px solid var(--teal-400);
+  color:var(--teal-300); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; margin-bottom:12px;
+}
+.flow-step span{font-size:13px; color:var(--ink-2); font-weight:600}
+.flow-arrow{align-self:center; color:var(--ink-3); font-size:20px; padding-top:14px}
+.flow-time{
+  text-align:center; margin-top:34px; font-size:15px; color:var(--ink-2);
+}
+.flow-time b{color:var(--teal-300); font-size:22px}
+
+/* ── MARKET ──────────────────────────────────────── */
+.market-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px}
+@media (max-width:820px){.market-grid{grid-template-columns:repeat(2,1fr)}}
+.market-card{border:1px solid var(--line-soft); border-radius:16px; padding:26px 20px; background:rgba(255,255,255,.02); text-align:center}
+.market-card .m-num{font-size:28px; font-weight:900; color:var(--teal-300)}
+.market-card .m-lbl{font-size:13px; color:var(--ink-2); margin-top:6px; font-weight:700}
+.market-card .m-sub{font-size:12px; color:var(--ink-3); margin-top:8px}
+
+/* ── COMPETITION TABLE ───────────────────────────── */
+.tbl-wrap{overflow-x:auto; border:1px solid var(--line-soft); border-radius:16px}
+table.cmp{width:100%; border-collapse:collapse; min-width:640px}
+table.cmp th, table.cmp td{padding:16px 18px; text-align:center; font-size:14px; border-bottom:1px solid var(--line-soft)}
+table.cmp th{color:var(--ink-0); font-weight:800; background:rgba(255,255,255,.03)}
+table.cmp td:first-child, table.cmp th:first-child{text-align:left; color:var(--ink-1); font-weight:600}
+table.cmp tr:last-child td{border-bottom:none}
+table.cmp th:last-child{color:var(--teal-300)}
+td.yes{color:var(--teal-300); font-weight:800}
+td.no{color:var(--ink-3)}
+td.partial{color:var(--amber)}
+.cmp-col-x{background:rgba(45,212,191,.05)}
+
+/* ── BUSINESS MODEL ──────────────────────────────── */
+.biz-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px}
+@media (max-width:900px){.biz-grid{grid-template-columns:1fr}}
+.biz-card{border:1px solid var(--line-soft); border-radius:16px; padding:28px; background:rgba(255,255,255,.02)}
+.biz-card h3{margin-bottom:10px}
+.biz-card p{color:var(--ink-2); font-size:14.5px}
+
+/* ── VISION / TEAM ───────────────────────────────── */
+.vision{
+  border-radius:24px; padding:64px 48px; text-align:center; background:
+    radial-gradient(600px 300px at 50% 0%, rgba(45,212,191,.12), transparent 70%), var(--navy-800);
+  border:1px solid var(--line);
+}
+.vision h2{max-width:760px; margin:0 auto 14px}
+.team-row{display:flex; align-items:center; gap:18px; margin-top:40px; justify-content:center}
+.avatar{
+  width:56px;height:56px;border-radius:50%; background:linear-gradient(135deg,var(--teal-400),var(--navy-600));
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#04211d; font-size:20px;
+}
+
+/* ── CTA / FORM ──────────────────────────────────── */
+.cta-final{
+  border-radius:24px; border:1px solid var(--line); padding:56px; background:var(--navy-800);
+  display:grid; grid-template-columns:1fr 1fr; gap:48px;
+}
+@media (max-width:900px){.cta-final{grid-template-columns:1fr; padding:32px}}
+.cta-final h2{margin-bottom:14px}
+.cta-points{margin-top:26px; display:flex; flex-direction:column; gap:12px}
+.cta-points div{display:flex; gap:10px; font-size:14px; color:var(--ink-2)}
+.cta-points div::before{content:'✓'; color:var(--teal-400); font-weight:800}
+form.demo-form{display:flex; flex-direction:column; gap:14px}
+.demo-form input, .demo-form textarea{
+  width:100%; padding:13px 15px; border-radius:10px; border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.03); color:var(--ink-0); font-size:14.5px; font-family:inherit; outline:none;
+  transition:border-color .15s;
+}
+.demo-form input:focus, .demo-form textarea:focus{border-color:var(--teal-400)}
+.demo-form textarea{min-height:80px; resize:vertical}
+.demo-form label{font-size:12px; color:var(--ink-3); font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:-6px}
+.form-msg{font-size:13.5px; padding:12px 14px; border-radius:10px; display:none}
+.form-msg.ok{display:block; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.3); color:var(--teal-300)}
+.form-msg.err{display:block; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.3); color:#fca5a5}
+.demo-link-box{
+  margin-top:6px; padding:14px; border-radius:10px; background:rgba(45,212,191,.08); border:1px dashed rgba(45,212,191,.4);
+  font-size:13px; color:var(--teal-300); word-break:break-all; display:none;
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer{border-top:1px solid var(--line-soft); padding:40px 0; margin-top:40px}
+.footer-inner{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--ink-3)}
+.footer-inner a{text-decoration:none; color:var(--ink-3)}
+.footer-inner a:hover{color:var(--teal-300)}
+
+.placeholder-note{
+  font-size:11px; color:var(--ink-3); text-align:center; margin-top:8px; font-style:italic;
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="brand-mark">X</span> UrbanX</div>
+    <nav class="nav-links">
+      <a href="#motoare">Cele 5 motoare</a>
+      <a href="#demo">Demo</a>
+      <a href="#piata">Piață</a>
+      <a href="#concurenta">Concurență</a>
+      <a href="#model">Model de business</a>
+      <a href="#viziune">Viziune</a>
+      <a href="brosura.html" target="_blank">📄 Broșură PDF</a>
+    </nav>
+    <a href="#acces-demo" class="btn btn-primary" style="padding:10px 20px;font-size:13.5px">Cere acces demo</a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">UrbanX · TRL 3 → SaaS</div>
+      <h1>Industria construcțiilor încă<br>proiectează ca acum <span class="hl">20 de ani.</span></h1>
+      <p class="lead" style="margin-top:22px">
+        8 aplicații separate. 40 de documente diferite. 5 zile pentru un singur proiect.
+        UrbanX agregă, interpretează, analizează, proiectează și prezice — într-un singur flux.
+        De la teren la autorizație, <b style="color:var(--ink-0)">în 3 ore, nu în 5 zile.</b>
+      </p>
+      <div class="hero-actions">
+        <a href="#acces-demo" class="btn btn-primary">Vreau acces demo →</a>
+        <a href="#demo" class="btn btn-ghost">Vezi cum funcționează</a>
+      </div>
+      <div class="audience-strip">
+        <span class="chip">Investitori &amp; VC</span>
+        <span class="chip">Presă &amp; media</span>
+        <span class="chip">Dezvoltatori imobiliari</span>
+        <span class="chip">Arhitecți &amp; proiectanți</span>
+        <span class="chip">Administrații publice</span>
+      </div>
+    </div>
+    <div class="mock reveal">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+      <img src="assets/screenshots/01-hero-harta.png" alt="UrbanX — hartă live cu zone PUG, Municipiul Iași">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ BEFORE/AFTER ═══════════════════════ -->
+<section class="section">
+  <div class="wrap">
+    <div class="compare reveal">
+      <div class="compare-col before">
+        <h4>Astăzi</h4>
+        <div class="stat-row"><span class="stat-num">8</span><span class="stat-label">aplicații separate, fără coordonare</span></div>
+        <div class="stat-row"><span class="stat-num">40</span><span class="stat-label">documente diferite, completate manual</span></div>
+        <div class="stat-row"><span class="stat-num">5 zile</span><span class="stat-label">până la un proiect complet</span></div>
+      </div>
+      <div class="arrow-big">→</div>
+      <div class="compare-col after">
+        <h4>Cu UrbanX</h4>
+        <div class="stat-row"><span class="stat-num">1</span><span class="stat-label">aplicație unificată</span></div>
+        <div class="stat-row"><span class="stat-num">1</span><span class="stat-label">flux complet, capăt-la-capăt</span></div>
+        <div class="stat-row"><span class="stat-num">3 ore</span><span class="stat-label">până la documentația completă</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ 5 MOTOARE ═══════════════════════ -->
+<section class="section" id="motoare">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center">Arhitectură</div>
+      <h2>Cinci motoare. Un singur flux.</h2>
+      <p class="lead center" style="margin-top:14px">
+        Fiecare capacitate rezolvă o parte din procesul care astăzi e împărțit între arhitect, urbanist,
+        inginer, ISU, expert tehnic, jurist, primărie — opt actori, opt canale de comunicare, zero coordonare.
+        UrbanX îi conectează pe toți într-un singur flux de date și decizii.
+      </p>
+    </div>
+
+    <div class="engine reveal">
+      <div>
+        <div class="engine-num">01 · AGREGARE</div>
+        <h3>Toate sursele, unificate automat</h3>
+        <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
+          UrbanX citește harta oficială și normele locale în locul tău, în secunde — nu în săptămâni de research prin arhive și dosare.
+        </p>
+        <ul>
+          <li>PUG, PUZ, PATN — zone funcționale, regulamente locale</li>
+          <li>Cadastru &amp; GIS — geometrie reală de parcelă</li>
+          <li>Normative &amp; legislație tehnică actualizată</li>
+          <li>Statistici demografice &amp; infrastructură existentă</li>
+        </ul>
+      </div>
+      <div class="engine-media"><img src="assets/screenshots/01-hero-harta.png" alt="Agregare date teritoriale — hartă live UrbanX"></div>
+    </div>
+
+    <div class="engine reveal">
+      <div>
+        <div class="engine-num">02 · INTERPRETARE</div>
+        <h3>Legislația, tradusă în decizie</h3>
+        <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
+          Nu mai citești zeci de pagini de regulament ca să afli ce ai voie să construiești — UrbanX îți spune direct.
+        </p>
+        <ul>
+          <li>Indicatori urbanistici (POT, CUT, regim de înălțime) per parcelă</li>
+          <li>Restricții &amp; incompatibilități funcționale</li>
+          <li>Verificare automată de conformitate</li>
+        </ul>
+      </div>
+      <div class="engine-media"><img src="assets/screenshots/02-parcela-indicatori.png" alt="Interpretare indicatori urbanistici pe parcelă selectată"></div>
+    </div>
+
+    <div class="engine reveal">
+      <div>
+        <div class="engine-num">03 · ANALIZĂ</div>
+        <h3>Fișa completă a unei parcele, într-un click</h3>
+        <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
+          Scor de conformitate, oportunitate de dezvoltare, marjă pro-formă, etichetă carbon, valoare de teren,
+          avize obligatorii — toate calculate instant, nu estimate manual de un consultant în două săptămâni.
+        </p>
+        <ul>
+          <li>Scor de conformitate &amp; oportunitate</li>
+          <li>Estimare pro-formă &amp; valoare de teren</li>
+          <li>Avize obligatorii identificate automat</li>
+        </ul>
+      </div>
+      <div class="engine-media"><img src="assets/screenshots/03-fisa-parcela-360.png" alt="Fișa parcelei 360 grade — analiză completă instant"></div>
+    </div>
+
+    <div class="engine reveal">
+      <div>
+        <div class="engine-num">04 · PROIECTARE</div>
+        <h3>18 documente tehnice, generate automat</h3>
+        <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
+          DTAC, PTh, DE, scenarii de securitate la incendiu, modele BIM — documentația completă pentru autorizare,
+          generată dintr-un formular, nu redactată document cu document, săptămâni la rând.
+        </p>
+        <ul>
+          <li>DTAC, PTh, DE — pachet complet de autorizare</li>
+          <li>Scenarii SSI conforme P118 / Ord. 180/2022</li>
+          <li>Modele BIM &amp; export IFC/GLB</li>
+        </ul>
+      </div>
+      <div class="engine-media"><img src="assets/screenshots/04-generator-documente.png" alt="Generator de documentații tehnice — 18 documente într-un ZIP"></div>
+    </div>
+
+    <div class="engine reveal">
+      <div>
+        <div class="engine-num">05 · PREDICȚIE</div>
+        <h3>Vede orașul înainte să fie construit</h3>
+        <p style="color:var(--ink-2);margin-top:10px;font-size:14.5px">
+          De la o parcelă la scenariul teritorial: dezvoltarea unui municipiu, coridoare de creștere, poziția
+          regională — simulate, nu ghicite.
+        </p>
+        <ul>
+          <li>Scenarii de dezvoltare teritorială pe termen lung</li>
+          <li>Context regional &amp; coridoare de infrastructură</li>
+          <li>Evoluție demografică &amp; economică</li>
+        </ul>
+      </div>
+      <div class="engine-media"><img src="assets/screenshots/05-cinematic-3d.png" alt="Predicție teritorială — context geopolitic și coridoare regionale"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ DEMO NARATIVE ═══════════════════ -->
+<section class="section" id="demo" style="background:rgba(255,255,255,.015); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center">Demo narativ</div>
+      <h2>„Creez o clădire." — de la teren la autorizație.</h2>
+      <p class="lead center" style="margin-top:14px">Acesta este reportajul: un proces care astăzi durează zile, filmat în timp real, capăt la capăt.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="flow-step"><div class="flow-badge">1</div><span>Aleg terenul</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-badge">2</div><span>UrbanX citește PUG-ul</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-badge">3</div><span>Propune POT &amp; CUT</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-badge">4</div><span>Verifică la incendiu</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-badge">5</div><span>Generează DTAC</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-badge">6</div><span>Export PDF</span></div>
+    </div>
+    <div class="flow-time">Timp total: <b>3 minute</b> de demonstrat live · <b>3 ore</b> pentru documentația reală completă</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PIAȚA ═══════════════════════════ -->
+<section class="section" id="piata">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center">Piața</div>
+      <h2>De la piața locală, la scară europeană.</h2>
+    </div>
+    <div class="market-grid reveal">
+      <div class="market-card"><div class="m-num">~180 mil €</div><div class="m-lbl">România</div><div class="m-sub">Servicii de urbanism, avizare și proiectare</div></div>
+      <div class="market-card"><div class="m-num">~650 mil €</div><div class="m-lbl">CEE</div><div class="m-sub">Piețe cu cadru legislativ și nevoi similare</div></div>
+      <div class="market-card"><div class="m-num">~1,2 mld €</div><div class="m-lbl">Europa</div><div class="m-sub">Software pentru urbanism, GIS și AEC</div></div>
+      <div class="market-card"><div class="m-num">~4,8 mld €</div><div class="m-lbl">Global</div><div class="m-sub">Piața globală de software pentru construcții &amp; AEC</div></div>
+    </div>
+    <p class="placeholder-note">Estimări preliminare, de validat cu o analiză de piață detaliată.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ CONCURENȚA ═══════════════════════ -->
+<section class="section" id="concurenta">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center">Poziționare</div>
+      <h2>Nu concurăm pe teren cunoscut.</h2>
+      <p class="lead center" style="margin-top:14px">
+        Scopul nu e să arătăm că ceilalți sunt slabi — ci unde UrbanX oferă o capacitate pe care ei nu o au.
+      </p>
+    </div>
+    <div class="tbl-wrap reveal">
+      <table class="cmp">
+        <thead>
+          <tr><th>Capabilitate</th><th>Autodesk</th><th>ArchiCAD</th><th>Procore</th><th>ACCA</th><th class="cmp-col-x">UrbanX</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Proiectare CAD/BIM</td><td class="yes">Da</td><td class="yes">Da</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes cmp-col-x">Da</td></tr>
+          <tr><td>Interpretare legislație &amp; PUG</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes cmp-col-x">Da</td></tr>
+          <tr><td>Documentație completă (DTAC–recepție)</td><td class="no">Nu</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes">Da</td><td class="yes cmp-col-x">Da</td></tr>
+          <tr><td>Predicție &amp; scenarii teritoriale</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="yes cmp-col-x">Da</td></tr>
+          <tr><td>Management de șantier/proiect</td><td class="partial">Parțial</td><td class="no">Nu</td><td class="yes">Da</td><td class="partial">Parțial</td><td class="partial cmp-col-x">Parțial</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="placeholder-note">Bariera de intrare pentru un concurent nou: expertiză combinată în legislație urbanistică, GIS și inginerie software, plus acces la date teritoriale actualizate.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ MODEL DE BUSINESS ═══════════════ -->
+<section class="section" id="model">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow" style="justify-content:center">Model de business</div>
+      <h2>Venituri recurente, din trei direcții complementare.</h2>
+    </div>
+    <div class="biz-grid reveal">
+      <div class="biz-card">
+        <h3>SaaS pentru proiectanți</h3>
+        <p>Abonament lunar/anual per utilizator sau birou de arhitectură — acces la toate cele 5 motoare.</p>
+      </div>
+      <div class="biz-card">
+        <h3>Licențiere instituțională</h3>
+        <p>Contract anual pentru primării și administrații publice — modulul teritorial și de predicție.</p>
+      </div>
+      <div class="biz-card">
+        <h3>Plată per document</h3>
+        <p>Taxă la generarea unui document sau a unei analize de conformitate — pentru utilizare ocazională.</p>
+      </div>
+    </div>
+    <div class="mock reveal" style="margin-top:44px; max-width:760px; margin-left:auto; margin-right:auto">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+      <img src="assets/screenshots/06-meniu-rapoarte.png" alt="Pachete UrbanX adaptate pe rol — Explorator, Developer, Administrație, Professional">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ VIZIUNE + ECHIPĂ ═════════════════ -->
+<section class="section" id="viziune">
+  <div class="wrap">
+    <div class="vision reveal">
+      <div class="eyebrow" style="justify-content:center">Viziune pe 10 ani</div>
+      <h2>UrbanX poate deveni sistemul de operare al industriei construcțiilor.</h2>
+      <p class="lead center" style="margin:18px auto 0">
+        De la o platformă de proiectare, la infrastructura digitală pe care se coordonează arhitecți, ingineri,
+        autorități și investitori — conectată la Primării, ISC, IGSU, OCPI, ANAF, ANCPI și sistemele BIM/ERP existente.
+      </p>
+      <div class="team-row">
+        <div class="avatar">FG</div>
+        <div style="text-align:left">
+          <div style="color:var(--ink-0); font-weight:800">Florin Grierasu</div>
+          <div style="color:var(--ink-3); font-size:13px">Fondator, UrbanX · ThinkSmart Solutions SRL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ CTA FINAL / FORM ═════════════════ -->
+<section class="section" id="acces-demo">
+  <div class="wrap">
+    <div class="cta-final reveal">
+      <div>
+        <div class="eyebrow">Acces demo</div>
+        <h2>Vrei să vezi UrbanX rulând pe un teren real?</h2>
+        <p class="lead" style="margin-top:14px">
+          Primești un cont demo dedicat, izolat, cu proiecte deja încărcate (bloc de locuințe, spital, centru
+          social) — testezi platforma imediat, fără să aștepți setup.
+        </p>
+        <div class="cta-points">
+          <div>Cont activ 14 zile, dedicat exclusiv ție</div>
+          <div>Date demonstrative — nu afectează niciun proiect real</div>
+          <div>Acces la toate cele 5 motoare + generator de documentații</div>
+        </div>
+        <div style="margin-top:30px; font-size:13.5px; color:var(--ink-3)">
+          Preferi o demonstrație live? <a href="#contact" style="color:var(--teal-300); font-weight:700">Programează un apel →</a>
+        </div>
+      </div>
+      <div>
+        <form class="demo-form" id="demoForm">
+          <label>Nume</label>
+          <input type="text" id="df-nume" required placeholder="Numele tău">
+          <label>Email</label>
+          <input type="email" id="df-email" required placeholder="email@organizatie.ro">
+          <label>Organizație</label>
+          <input type="text" id="df-org" placeholder="Birou de arhitectură / Fond de investiții / Redacție / Primărie">
+          <label>Motiv</label>
+          <textarea id="df-motiv" placeholder="Ce vrei să vezi în platformă?"></textarea>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px">Trimite cererea de acces →</button>
+          <div class="form-msg" id="df-msg"></div>
+          <div class="demo-link-box" id="df-link"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <div>© 2026 UrbanX · ThinkSmart Solutions SRL</div>
+    <div>Florin Grierasu · <a href="mailto:office@think-ss.eu">office@think-ss.eu</a> · 0725 246 822</div>
+    <div><a href="../index.html">Deschide aplicația UrbanX →</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // client Supabase minimal, doar pt cererea de cont demo (nu încarcă restul aplicației)
+  const _supabase = (typeof supabase !== 'undefined')
+    ? supabase.createClient(
+        'https://xzctxxchdykowysqjzkq.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6Y3R4eGNoZHlrb3d5c3FqemtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mzg4NzAsImV4cCI6MjA5MzIxNDg3MH0.6ffZgWVs8PmDB8tNg1UmGmvHZQrNv6zhr6BE9fTmyS0'
+      )
+    : null;
+</script>
+<script src="../js/urbanx-demo-system.js?v=20260719a"></script>
+<script>
+// scroll reveal — progressive enhancement: only hide content once we're sure
+// IntersectionObserver works, so a script error/older browser never leaves the
+// page permanently blank below the fold.
+if('IntersectionObserver' in window){
+  const revealEls = document.querySelectorAll('.reveal');
+  revealEls.forEach(el=>el.classList.add('reveal-armed'));
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.1});
+  revealEls.forEach(el=>io.observe(el));
+  // safety net: if something never intersects (e.g. very short viewport, print view), reveal anyway after a delay
+  setTimeout(()=>revealEls.forEach(el=>el.classList.add('in')), 3500);
+}
+
+// ── Formular cerere acces demo ─────────────────────────────────────────
+// NOTĂ TEHNICĂ: acest handler apelează window.UrbanXDemo.request(...) — implementat
+// în js/urbanx-demo-system.js (RPC Supabase request_demo_account). Dacă scriptul nu
+// e încărcat pe această pagină încă, cade pe un mesaj clar în loc să eșueze silențios.
+document.getElementById('demoForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  const msg = document.getElementById('df-msg');
+  const linkBox = document.getElementById('df-link');
+  const nume = document.getElementById('df-nume').value.trim();
+  const email = document.getElementById('df-email').value.trim();
+  const org = document.getElementById('df-org').value.trim();
+  const motiv = document.getElementById('df-motiv').value.trim();
+
+  msg.className = 'form-msg'; linkBox.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Se procesează…';
+
+  try{
+    if(window.UrbanXDemo && typeof window.UrbanXDemo.request === 'function'){
+      const res = await window.UrbanXDemo.request({nume, email, organizatie: org, motiv});
+      if(res && res.ok){
+        msg.textContent = '✅ Cont creat! Linkul tău de acces (valabil 14 zile) e mai jos.';
+        msg.className = 'form-msg ok';
+        linkBox.style.display = 'block';
+        linkBox.textContent = res.link;
+        e.target.reset();
+      } else {
+        msg.textContent = '⚠ ' + (res && res.error || 'Nu am putut crea contul. Încearcă din nou sau scrie-ne direct.');
+        msg.className = 'form-msg err';
+      }
+    } else {
+      // fallback: sistemul de conturi demo nu e încă încărcat pe această pagină
+      msg.textContent = '✅ Cerere înregistrată local. Sistemul de conturi demo se conectează în curând — te contactăm direct la ' + email + '.';
+      msg.className = 'form-msg ok';
+      console.warn('[UrbanX Demo] window.UrbanXDemo indisponibil — vezi js/urbanx-demo-system.js');
+    }
+  } catch(err){
+    msg.textContent = '⚠ Eroare: ' + err.message;
+    msg.className = 'form-msg err';
+  }
+  btn.disabled = false; btn.textContent = 'Trimite cererea de acces →';
+});
+</script>
+</body>
+</html>

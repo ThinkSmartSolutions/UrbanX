@@ -3309,7 +3309,11 @@
         opis = 'Dosar documentații UrbanX\n' + docs.length + ' documente\n\n' + docs.map(function (d) { return '· ' + _folderAscii(d.cat) + '/' + d.file; }).join('\n');
       }
       zip.file('OPIS.txt', opis);
-      zip.generateAsync({ type: 'blob' }).then(function (blob) { _save(blob, base + '.zip'); if (G.ss) G.ss('✅ ' + docs.length + ' documente generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : '')); });
+      zip.generateAsync({ type: 'blob' }).then(function (blob) {
+        _save(blob, base + '.zip');
+        if (G.ss) G.ss('✅ ' + docs.length + ' documente generate (ZIP)' + (v.neconformitati ? ' · ' + v.neconformitati + ' neconformități' : ''));
+        try { if (G._DEMO_MODE && G.UrbanXDemo) G.UrbanXDemo.trackDocument(v.faza || 'DTAC/PTh', docs.length); } catch (e) {}
+      });
     } else {
       docs.forEach(function (dc) { _save(docBlob(dc.html), dc.file); });
       if (G.ss) G.ss('✅ ' + docs.length + ' documente Word generate (JSZip indisponibil — salvate individual).');

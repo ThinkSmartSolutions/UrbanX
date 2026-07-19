@@ -162,6 +162,7 @@
     // studii SPS generice din meniul TERITORIU → mod 'T' (TERITORIAL, mereu).
     // Versiunea pe parcelă e DOAR în Rapoarte (mod 'P'), ca să nu se dubleze (teritoriu≠parcelă).
     if (!fn && id && id.indexOf('sps:') === 0) { var sid = id.slice(4); fn = function () { try { G._SPS && G._SPS.generate(sid, G.TCI && G.TCI.cityKey, 'T'); } catch (e) {} }; }
+    try { if (G._DEMO_MODE && G.UrbanXDemo) G.UrbanXDemo.trackModule(id); } catch (e) {}
     close(); // închide sertarul, apoi deschide modulul
     setTimeout(function () { if (fn) fn(); else G.ss && G.ss(id + ' — nedisponibil'); }, 20);
   }

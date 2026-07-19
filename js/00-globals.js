@@ -1181,6 +1181,22 @@ function _authLogout(userTriggered=false) {
 (async function _authInit() {
   const ok = _initSupabase();
 
+  // ── Cont demo (token-based, js/urbanx-demo-system.js) ────────────────────
+  // Verificat ÎNAINTE de login-ul normal: un vizitator cu link demo valid
+  // (?demo=TOKEN, sau reluat din localStorage) nu trece deloc prin auth.users
+  // — e un sistem paralel, separat, care nu ocolește invite-only-ul real.
+  try {
+    const hasDemoRef = new URLSearchParams(location.search).get('demo') || localStorage.getItem('ux_demo_token');
+    if(ok && hasDemoRef && window.UrbanXDemo) {
+      const demoRes = await UrbanXDemo.checkAndBoot();
+      if(demoRes && (demoRes.active || demoRes.blocked)) {
+        const ov = document.getElementById('auth-overlay');
+        if(ov) ov.style.display = 'none';
+        return; // modul demo gestionează separat restul (badge sau ecran de blocare)
+      }
+    }
+  } catch(e) { console.warn('[UrbanXDemo] boot check failed:', e.message); }
+
   if(!ok || SUPABASE_URL.includes('INLOCUIESTE')) {
     // Supabase neconfigurat — afișăm overlay în mod demo
     // Utilizatorul poate intra apăsând butonul (bypass automat)

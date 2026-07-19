@@ -212,6 +212,9 @@ const _CloudSync = {
 
   // ── Sync bidirectional (local + cloud) ────────────────────────────────────
   async syncAll() {
+    // Izolare cont demo: proiectele din modul demo raman STRICT locale (IndexedDB),
+    // niciodata sincronizate catre tabela de productie urbanx_projects.
+    if(window._DEMO_MODE) return;
     if(this.isSyncing || !_SUPABASE_CONFIG.configured) return;
     this.isSyncing = true;
 

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>UrbanX — Broșură</title>
+<style>
+:root{
+  --navy-950:#050b14; --navy-900:#0a1628; --navy-800:#0f1f38;
+  --teal-400:#2dd4bf; --teal-300:#5eead4; --teal-500:#0d9488;
+  --ink-0:#0f1a2b; --ink-1:#2a3b52; --ink-2:#5b7095;
+  --line:#dbe4ef; --amber:#b8860b;
+}
+*{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+html,body{margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink-0); background:#fff}
+img{max-width:100%; display:block}
+.page{
+  width:210mm; min-height:297mm; padding:16mm 18mm; position:relative; page-break-after:always;
+  display:flex; flex-direction:column;
+}
+.page:last-child{page-break-after:auto}
+@media print{
+  @page{ size:A4; margin:0; }
+  .page{ page-break-after:always; }
+  .noprint{ display:none; }
+}
+@media screen{
+  body{ background:#94a3b8; padding:20px 0 }
+  .page{ margin:0 auto 20px; box-shadow:0 10px 40px rgba(0,0,0,.25); background:#fff }
+}
+.dark{ background:linear-gradient(160deg,var(--navy-950),var(--navy-900) 60%,#0a2233); color:#eaf2fa }
+.dark .eyebrow{ color:var(--teal-300) }
+.eyebrow{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--teal-500); margin-bottom:8px }
+h1{ font-size:34px; font-weight:900; letter-spacing:-.01em; margin:0 0 10px; line-height:1.12 }
+h2{ font-size:22px; font-weight:900; margin:0 0 6px; color:var(--ink-0) }
+.dark h2{ color:#fff }
+h3{ font-size:14px; font-weight:800; margin:0 0 4px }
+p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1) }
+.dark p{ color:#c7d4e6 }
+.pagenum{ position:absolute; bottom:10mm; right:18mm; font-size:9px; color:var(--ink-2) }
+.dark .pagenum{ color:#5b7095 }
+.brand{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:14px }
+.brand-mark{ width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--teal-400),var(--navy-800));display:flex;align-items:center;justify-content:center;color:#04211d;font-weight:900;font-size:11px }
+.stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px }
+.stat{ border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center }
+.dark .stat{ border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.03) }
+.stat b{ display:block; font-size:20px; color:var(--teal-500) }
+.dark .stat b{ color:var(--teal-300) }
+.stat span{ font-size:9.5px; color:var(--ink-2); text-transform:uppercase; letter-spacing:.05em }
+.shot{ border-radius:10px; border:1px solid var(--line); overflow:hidden; margin-top:10px }
+.shot img{ width:100% }
+table.cmp{ width:100%; border-collapse:collapse; font-size:10.5px; margin-top:10px }
+table.cmp th,table.cmp td{ border:1px solid var(--line); padding:6px 8px; text-align:center }
+table.cmp th{ background:#f1f5f9; font-weight:800 }
+table.cmp td:first-child, table.cmp th:first-child{ text-align:left }
+.yes{ color:var(--teal-500); font-weight:800 } .no{ color:#94a3b8 } .partial{ color:var(--amber) }
+.engine-row{ display:flex; gap:12px; align-items:flex-start; margin-bottom:14px }
+.engine-num{ width:28px;height:28px;border-radius:50%;background:var(--teal-500);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0 }
+.biz-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px }
+.biz{ border:1px solid var(--line); border-radius:10px; padding:10px }
+.flow{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; font-size:10px }
+.flow span{ background:#f1f5f9; border-radius:100px; padding:5px 10px; font-weight:700 }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 — COVER -->
+<div class="page dark">
+  <div class="brand"><span class="brand-mark">X</span> URBANX</div>
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:140mm">
+    <div class="eyebrow">Broșură de prezentare · 2026</div>
+    <h1>Industria construcțiilor<br>încă proiectează ca<br>acum 20 de ani.</h1>
+    <p style="font-size:14px; max-width:120mm">
+      8 aplicații separate. 40 de documente diferite. 5 zile pentru un singur proiect.
+      UrbanX comprimă tot fluxul într-un singur sistem — de la teren la autorizație, în 3 ore.
+    </p>
+  </div>
+  <div style="font-size:10px; color:#5b7095">UrbanX · ThinkSmart Solutions SRL · office@think-ss.eu · 0725 246 822</div>
+</div>
+
+<!-- PAGE 2 — PROBLEMA -->
+<div class="page">
+  <div class="eyebrow">Problema</div>
+  <h2>De la 8 aplicații și 5 zile, la 1 flux și 3 ore</h2>
+  <p>Astăzi, un singur proiect de construcție trece prin arhitect, urbanist, inginer, ISU, expert tehnic, jurist,
+    primărie și beneficiar — opt actori, opt canale de comunicare, zero coordonare.</p>
+  <div class="stat-grid">
+    <div class="stat"><b>8→1</b><span>Aplicații separate → unificate</span></div>
+    <div class="stat"><b>40→1</b><span>Documente diferite → un flux</span></div>
+    <div class="stat"><b>5 zile→3 ore</b><span>Până la documentația completă</span></div>
+  </div>
+  <div class="shot"><img src="assets/screenshots/01-hero-harta.png" alt="Hartă UrbanX"></div>
+  <p style="margin-top:8px; font-style:italic">UrbanX transformă mii de pagini de legislație, hărți, normative și documentații
+    într-un sistem unificat de analiză și suport decizional pentru investiții și proiectare.</p>
+  <div class="pagenum">02</div>
+</div>
+
+<!-- PAGE 3 — 5 MOTOARE (1) -->
+<div class="page">
+  <div class="eyebrow">Arhitectură</div>
+  <h2>Cinci motoare, un singur flux</h2>
+  <div class="engine-row">
+    <div class="engine-num">1</div>
+    <div><h3>Agregare</h3><p>Colectează date din PUG, PUZ, PATN, cadastru, GIS, normative, legislație, statistici, infrastructură.</p></div>
+  </div>
+  <div class="engine-row">
+    <div class="engine-num">2</div>
+    <div><h3>Interpretare</h3><p>Indicatori urbanistici, restricții, incompatibilități — verificare automată de conformitate.</p></div>
+  </div>
+  <div class="engine-row">
+    <div class="engine-num">3</div>
+    <div><h3>Analiză</h3><p>Scor de conformitate, oportunitate, marjă pro-formă, etichetă carbon, valoare de teren — instant.</p></div>
+  </div>
+  <div class="shot"><img src="assets/screenshots/03-fisa-parcela-360.png" alt="Fișa parcelei 360 grade"></div>
+  <div class="pagenum">03</div>
+</div>
+
+<!-- PAGE 4 — 5 MOTOARE (2) + demo -->
+<div class="page">
+  <div class="engine-row">
+    <div class="engine-num">4</div>
+    <div><h3>Proiectare</h3><p>Generează DTAC, PTh, DE, scenarii SSI, modele BIM și rapoarte — 18 documente într-un click.</p></div>
+  </div>
+  <div class="shot"><img src="assets/screenshots/04-generator-documente.png" alt="Generator documentații"></div>
+  <div class="engine-row" style="margin-top:14px">
+    <div class="engine-num">5</div>
+    <div><h3>Predicție</h3><p>Simulează dezvoltarea municipiilor, context regional, coridoare de infrastructură, scenarii pe termen lung.</p></div>
+  </div>
+  <div class="shot"><img src="assets/screenshots/05-cinematic-3d.png" alt="Predicție teritorială"></div>
+  <div class="pagenum">04</div>
+</div>
+
+<!-- PAGE 5 — DEMO NARATIV + PIAȚA -->
+<div class="page">
+  <div class="eyebrow">Demo narativ</div>
+  <h2>„Creez o clădire." — de la teren la autorizație</h2>
+  <div class="flow">
+    <span>1 · Aleg terenul</span><span>→</span><span>2 · UrbanX citește PUG-ul</span><span>→</span>
+    <span>3 · Propune POT/CUT</span><span>→</span><span>4 · Verifică la incendiu</span><span>→</span>
+    <span>5 · Generează DTAC</span><span>→</span><span>6 · Export PDF</span>
+  </div>
+  <p style="margin-top:8px">Acesta e reportajul: un proces care astăzi durează zile, filmat în timp real, capăt la capăt. 3 minute de demonstrat live.</p>
+
+  <div class="eyebrow" style="margin-top:22px">Piața</div>
+  <h2>De la piața locală, la scară europeană</h2>
+  <div class="stat-grid">
+    <div class="stat"><b>~180 mil €</b><span>România</span></div>
+    <div class="stat"><b>~650 mil €</b><span>CEE</span></div>
+    <div class="stat"><b>~1,2 mld €</b><span>Europa</span></div>
+  </div>
+  <p style="margin-top:6px">Global: ~4,8 mld € (software pentru construcții &amp; AEC). Estimări preliminare, de validat cu o analiză de piață detaliată.</p>
+  <div class="pagenum">05</div>
+</div>
+
+<!-- PAGE 6 — CONCURENȚA -->
+<div class="page">
+  <div class="eyebrow">Poziționare</div>
+  <h2>Nu concurăm pe teren cunoscut</h2>
+  <p>Scopul nu e să arătăm că ceilalți sunt slabi — ci unde UrbanX oferă o capacitate pe care ei nu o au.</p>
+  <table class="cmp">
+    <tr><th>Capabilitate</th><th>Autodesk</th><th>ArchiCAD</th><th>Procore</th><th>ACCA</th><th>UrbanX</th></tr>
+    <tr><td>Proiectare CAD/BIM</td><td class="yes">Da</td><td class="yes">Da</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes">Da</td></tr>
+    <tr><td>Interpretare legislație &amp; PUG</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes">Da</td></tr>
+    <tr><td>Documentație completă (DTAC–recepție)</td><td class="no">Nu</td><td class="no">Nu</td><td class="partial">Parțial</td><td class="yes">Da</td><td class="yes">Da</td></tr>
+    <tr><td>Predicție &amp; scenarii teritoriale</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="no">Nu</td><td class="yes">Da</td></tr>
+    <tr><td>Management de șantier/proiect</td><td class="partial">Parțial</td><td class="no">Nu</td><td class="yes">Da</td><td class="partial">Parțial</td><td class="partial">Parțial</td></tr>
+  </table>
+  <p style="margin-top:8px; font-style:italic">Bariera de intrare pentru un concurent nou: expertiză combinată în legislație urbanistică, GIS și inginerie software, plus acces la date teritoriale actualizate.</p>
+  <div class="pagenum">06</div>
+</div>
+
+<!-- PAGE 7 — MODEL DE BUSINESS -->
+<div class="page">
+  <div class="eyebrow">Model de business</div>
+  <h2>Venituri recurente, din trei direcții complementare</h2>
+  <div class="biz-grid">
+    <div class="biz"><h3>SaaS pentru proiectanți</h3><p>Abonament lunar/anual per utilizator sau birou de arhitectură — acces la toate cele 5 motoare.</p></div>
+    <div class="biz"><h3>Licențiere instituțională</h3><p>Contract anual pentru primării și administrații publice — modulul teritorial și de predicție.</p></div>
+    <div class="biz"><h3>Plată per document</h3><p>Taxă la generarea unui document sau a unei analize de conformitate — utilizare ocazională.</p></div>
+  </div>
+  <div class="shot" style="margin-top:16px"><img src="assets/screenshots/06-meniu-rapoarte.png" alt="Pachete pe rol"></div>
+  <p style="margin-top:6px; font-style:italic">Platforma se adaptează la rolul utilizatorului — Explorator, Developer, Administrație, Professional.</p>
+  <div class="pagenum">07</div>
+</div>
+
+<!-- PAGE 8 — VIZIUNE + CONTACT -->
+<div class="page dark">
+  <div class="eyebrow">Viziune pe 10 ani</div>
+  <h2 style="font-size:26px">UrbanX poate deveni sistemul de operare al industriei construcțiilor</h2>
+  <p style="max-width:140mm">De la o platformă de proiectare, la infrastructura digitală pe care se coordonează arhitecți, ingineri,
+    autorități și investitori — conectată la Primării, ISC, IGSU, OCPI, ANAF, ANCPI și sistemele BIM/ERP existente.</p>
+
+  <div style="flex:1"></div>
+
+  <div style="border-top:1px solid rgba(255,255,255,.15); padding-top:14px">
+    <div class="eyebrow">Stadiul actual</div>
+    <p>MVP funcțional pe modulele core. Cont demo disponibil la cerere, cu acces temporar de 14 zile.</p>
+  </div>
+  <div style="margin-top:16px">
+    <h3 style="color:#fff; font-size:16px">Hai să construim infrastructura digitală a industriei construcțiilor.</h3>
+    <p style="margin-top:6px">Florin Grierasu · Fondator, UrbanX<br>office@think-ss.eu · 0725 246 822</p>
+  </div>
+</div>
+
+<div class="noprint" style="position:fixed; top:16px; right:16px; z-index:10">
+  <button onclick="window.print()" style="background:#0d9488;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.3)">🖨 Salvează ca PDF</button>
+</div>
+
+</body>
+</html>

@@ -20,6 +20,7 @@ function _adminOpen() {
         ['users','\uD83D\uDC65 Utilizatori'],
         ['roles','\uD83D\uDD10 Roluri & Acces'],
         ['uat','\uD83D\uDDFA UAT & Date'],
+        ['demo','\uD83E\uDDEA Conturi Demo'],
         ['guide','\uD83D\uDCD6 Ghid Admin'],
       ].map(([id,l])=>'<button id="adm-tab-'+id+'" onclick="_admTab(\''+id+'\')"'
         +' style="padding:7px 14px;border:none;border-radius:8px 8px 0 0;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:transparent;color:#475569;border-bottom:2px solid transparent"'
@@ -33,7 +34,7 @@ function _adminOpen() {
 
 function _admTab(tab){
   // Stiluri tabs
-  ['users','roles','uat','guide'].forEach(t=>{
+  ['users','roles','uat','demo','guide'].forEach(t=>{
     const btn=document.getElementById('adm-tab-'+t);
     if(!btn) return;
     const active=t===tab;
@@ -93,6 +94,8 @@ function _admTab(tab){
     _adminLoadUsers();
   } else if(tab==='uat'){
     _admRenderUAT(body);
+  } else if(tab==='demo'){
+    _admRenderDemo(body);
   } else if(tab==='guide'){
     _admRenderGuide(body);
   }
@@ -442,6 +445,181 @@ function _admMsg(el, txt, type) {
   const colors = { ok: '#34d399', warn: '#fbbf24', err: '#f87171', info: '#60a5fa' };
   el.style.color = colors[type] || '#94a3b8';
   el.textContent = txt;
+}
+
+// ── TAB CONTURI DEMO (js/urbanx-demo-system.js — RPC-uri admin_*) ───────────
+function _admRenderDemo(body){
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      ${[['adm-demo-total','—','#3b82f6','Total conturi'],['adm-demo-activ','—','#34d399','Active'],
+         ['adm-demo-expirat','—','#fbbf24','Expirate'],['adm-demo-revocat','—','#f87171','Revocate']].map(([id,v,c,l])=>`
+        <div style="background:#080f1c;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:${c}" id="${id}">${v}</div>
+          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:3px">${l}</div>
+        </div>`).join('')}
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em">Conturi demo (investitori/presă/testeri)</div>
+        <button onclick="_admLoadDemoAccounts()" id="adm-demo-reload-btn" style="background:rgba(45,212,191,.15);border:1px solid rgba(45,212,191,.3);color:#5eead4;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;font-weight:600">🔄 Reîncarcă</button>
+      </div>
+      <div id="adm-demo-msg" style="font-size:12px;margin-bottom:8px"></div>
+      <div id="adm-demo-list" style="border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;min-height:60px">
+        <div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Se încarcă...</div>
+      </div>
+    </div>
+    <div style="background:#080f1c;border:1px solid rgba(45,212,191,.15);border-radius:10px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:#5eead4;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📊 Cele mai folosite module (toate conturile demo)</div>
+      <div id="adm-demo-usage" style="font-size:11px;color:#64748b">Se încarcă...</div>
+    </div>
+    <div id="adm-demo-sessions-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
+      <div style="background:#0b1220;border:1px solid rgba(255,255,255,.1);border-radius:14px;max-width:640px;width:92%;max-height:80vh;overflow:auto;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:14px;font-weight:800;color:#e6edf7">Istoric sesiuni</div>
+          <button onclick="document.getElementById('adm-demo-sessions-modal').style.display='none'" style="background:none;border:none;color:#64748b;font-size:18px;cursor:pointer">×</button>
+        </div>
+        <div id="adm-demo-sessions-body" style="font-size:11px;color:#94a3b8"></div>
+      </div>
+    </div>`;
+  _admLoadDemoAccounts();
+  _admLoadDemoUsage();
+}
+
+async function _admLoadDemoAccounts(){
+  const msg = document.getElementById('adm-demo-msg');
+  const container = document.getElementById('adm-demo-list');
+  const btn = document.getElementById('adm-demo-reload-btn');
+  if(!_supabase){ _admMsg(msg, '⚠ Supabase neconfigurat.', 'warn'); return; }
+  if(btn) btn.disabled = true;
+  _admMsg(msg, '⏳ Se încarcă...', 'info');
+  try{
+    const { data, error } = await _supabase.rpc('admin_list_demo_accounts');
+    if(error){
+      const missing = error.message && (error.message.includes('Could not find') || error.code === 'PGRST202');
+      if(missing){
+        container.innerHTML = `<div style="padding:20px 24px;color:#fbbf24">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">⚙️ Setup SQL necesar</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.7">Funcțiile RPC pentru conturi demo nu sunt create încă. Rulează SQL-ul din
+          <code style="color:#a78bfa">UrbanXDemo.setupSQL()</code> (js/urbanx-demo-system.js) în Supabase → SQL Editor.</div></div>`;
+        _admMsg(msg, '⚠ RPC-uri demo lipsesc', 'warn');
+      } else { _admMsg(msg, '❌ ' + error.message, 'err'); }
+      return;
+    }
+    const rows = data || [];
+    document.getElementById('adm-demo-total').textContent = rows.length;
+    document.getElementById('adm-demo-activ').textContent = rows.filter(r=>r.status==='activ').length;
+    document.getElementById('adm-demo-expirat').textContent = rows.filter(r=>r.status==='expirat').length;
+    document.getElementById('adm-demo-revocat').textContent = rows.filter(r=>r.status==='revocat').length;
+    _admRenderDemoTable(rows, container);
+    _admMsg(msg, `✓ ${rows.length} conturi`, 'ok');
+  } catch(e){
+    _admMsg(msg, '❌ ' + e.message, 'err');
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+function _admRenderDemoTable(rows, container){
+  if(!rows.length){ container.innerHTML = '<div style="padding:24px;text-align:center;color:#64748b;font-size:12px">Niciun cont demo încă.</div>'; return; }
+  const badge = (status) => {
+    const map = { activ: ['#34d399','rgba(52,211,153,.12)','✓ Activ'], expirat: ['#fbbf24','rgba(251,191,36,.12)','⏳ Expirat'], revocat: ['#f87171','rgba(248,113,113,.12)','✕ Revocat'] };
+    const [c,bg,l] = map[status] || ['#94a3b8','rgba(148,163,184,.12)',status];
+    return `<span style="font-size:10px;background:${bg};color:${c};border-radius:999px;padding:2px 9px;font-weight:700">${l}</span>`;
+  };
+  container.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#060d18">
+        ${['Contact','Organizație','Status','Zile rămase','Sesiuni','Creat','Acțiuni'].map(h=>
+          `<th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:9px 11px;color:#e2e8f0">
+              <div style="font-weight:600">${r.nume || '—'}</div>
+              <div style="color:#64748b;font-size:10px">${r.email}</div>
+            </td>
+            <td style="padding:9px 11px;color:#94a3b8">${r.organizatie || '—'}</td>
+            <td style="padding:9px 11px">${badge(r.status)}</td>
+            <td style="padding:9px 11px;color:${r.days_remaining<=3 && r.status==='activ' ? '#fbbf24' : '#e2e8f0'}">${r.status==='activ' ? r.days_remaining+'z' : '—'}</td>
+            <td style="padding:9px 11px;color:#94a3b8">
+              <button onclick="_admDemoShowSessions('${r.id}')" style="background:none;border:1px solid rgba(255,255,255,.12);color:#94a3b8;border-radius:6px;padding:2px 8px;font-size:10px;cursor:pointer">${r.session_count} 👁</button>
+            </td>
+            <td style="padding:9px 11px;color:#64748b;font-size:11px">${new Date(r.created_at).toLocaleDateString('ro-RO')}</td>
+            <td style="padding:9px 11px">
+              <div style="display:flex;gap:5px;flex-wrap:wrap">
+                ${r.status==='activ' ? `
+                  <button onclick="_admDemoAction('extend','${r.id}',7)" title="Extinde 7 zile" style="font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid rgba(45,212,191,.3);background:rgba(45,212,191,.1);color:#5eead4;cursor:pointer;font-weight:600">+7z</button>
+                  <button onclick="_admDemoAction('revoke','${r.id}')" title="Revocă acces" style="font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#f87171;cursor:pointer;font-weight:600">Revocă</button>
+                ` : `
+                  <button onclick="_admDemoAction('reactivate','${r.id}',14)" title="Reactivează 14 zile" style="font-size:10px;padding:3px 7px;border-radius:6px;border:1px solid rgba(212,175,55,.3);background:rgba(212,175,55,.1);color:#d4af37;cursor:pointer;font-weight:600">Reactivează</button>
+                `}
+              </div>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+async function _admDemoAction(kind, accountId, days){
+  const msg = document.getElementById('adm-demo-msg');
+  const fnMap = { extend: 'admin_extend_demo', revoke: 'admin_revoke_demo', reactivate: 'admin_reactivate_demo' };
+  const labelMap = { extend: 'Extinzi', revoke: 'Revoci', reactivate: 'Reactivezi' };
+  if(!confirm(`${labelMap[kind]} acest cont demo?`)) return;
+  try{
+    const params = { p_account_id: accountId };
+    if(kind !== 'revoke') params.p_days = days;
+    const { error } = await _supabase.rpc(fnMap[kind], params);
+    if(error) throw error;
+    _admMsg(msg, '✅ Actualizat', 'ok');
+    setTimeout(() => _admLoadDemoAccounts(), 400);
+  } catch(e){ _admMsg(msg, '❌ ' + e.message, 'err'); }
+}
+
+async function _admDemoShowSessions(accountId){
+  const modal = document.getElementById('adm-demo-sessions-modal');
+  const body = document.getElementById('adm-demo-sessions-body');
+  modal.style.display = 'flex';
+  body.innerHTML = 'Se încarcă...';
+  try{
+    const { data, error } = await _supabase.rpc('admin_demo_sessions', { p_account_id: accountId });
+    if(error) throw error;
+    const rows = data || [];
+    if(!rows.length){ body.innerHTML = 'Niciun login încă.'; return; }
+    body.innerHTML = rows.map(s => `
+      <div style="border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;color:#e2e8f0;font-weight:600;margin-bottom:4px">
+          <span>${new Date(s.login_at).toLocaleString('ro-RO')}</span>
+          <span style="color:#64748b;font-weight:400">${s.ip || 'IP necunoscut'}</span>
+        </div>
+        <div style="color:#94a3b8">
+          Durată: ${Math.round((s.duration_seconds||0)/60)} min ·
+          Module: ${(s.modules||[]).length} ·
+          Funcții: ${(s.features||[]).length} ·
+          Click-uri: ${(s.clicks||[]).length} ·
+          Documente: ${(s.documents||[]).reduce((a,d)=>a+(d.count||1),0)}
+        </div>
+      </div>`).join('');
+  } catch(e){ body.innerHTML = '❌ ' + e.message; }
+}
+
+async function _admLoadDemoUsage(){
+  const el = document.getElementById('adm-demo-usage');
+  try{
+    const { data, error } = await _supabase.rpc('admin_demo_usage_summary');
+    if(error) throw error;
+    const rows = data || [];
+    if(!rows.length){ el.textContent = 'Fără date încă — apar după primele sesiuni demo.'; return; }
+    const max = Math.max(...rows.map(r=>Number(r.uses)));
+    el.innerHTML = rows.map(r => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:120px;color:#e2e8f0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.item}</div>
+        <div style="flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:8px;overflow:hidden">
+          <div style="width:${Math.max(4,(r.uses/max)*100)}%;height:100%;background:#2dd4bf"></div>
+        </div>
+        <div style="width:24px;text-align:right;color:#64748b;font-size:11px">${r.uses}</div>
+      </div>`).join('');
+  } catch(e){ el.textContent = '❌ ' + e.message; }
 }
 
 // Escape închide panoul
