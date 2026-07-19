@@ -278,3 +278,8 @@ footer{border-top:1px solid var(--line-soft); padding:40px 0; margin-top:40px}
 .footer-inner a{text-decoration:none; color:var(--ink-3)}
 .footer-inner a:hover{color:var(--teal-300)}
 .placeholder-note{font-size:11px; color:var(--ink-3); text-align:center; margin-top:8px; font-style:italic}
+
+/* ── I18N RO/EN — perechi scrise manual, toggle prin html[lang] ─────── */
+.i18n-en{display:none}
+html[lang="en"] .i18n-ro{display:none}
+html[lang="en"] .i18n-en{display:inline}
