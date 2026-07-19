@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>UrbanX pentru Orașe și Comune — Broșură</title>
+<style>
+:root{
+  --navy-950:#050b14; --navy-900:#0a1628; --navy-800:#0f1f38;
+  --teal-400:#2dd4bf; --teal-300:#5eead4; --teal-500:#0d9488;
+  --ink-0:#0f1a2b; --ink-1:#2a3b52; --ink-2:#5b7095;
+  --line:#dbe4ef; --violet:#7c3aed;
+}
+*{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+html,body{margin:0; padding:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink-0); background:#fff}
+img{max-width:100%; display:block}
+.page{width:210mm; min-height:297mm; padding:16mm 18mm; position:relative; page-break-after:always; display:flex; flex-direction:column}
+.page:last-child{page-break-after:auto}
+@media print{ @page{ size:A4; margin:0; } .noprint{display:none} }
+@media screen{ body{background:#94a3b8; padding:20px 0} .page{margin:0 auto 20px; box-shadow:0 10px 40px rgba(0,0,0,.25); background:#fff} }
+.dark{ background:linear-gradient(160deg,var(--navy-950),var(--navy-900) 60%,#0a2233); color:#eaf2fa }
+.dark .eyebrow{ color:var(--teal-300) }
+.eyebrow{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--teal-500); margin-bottom:8px }
+h1{ font-size:32px; font-weight:900; letter-spacing:-.01em; margin:0 0 10px; line-height:1.14 }
+h2{ font-size:21px; font-weight:900; margin:0 0 6px; color:var(--ink-0) }
+.dark h2{ color:#fff }
+h3{ font-size:14px; font-weight:800; margin:0 0 4px }
+p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1) }
+.dark p{ color:#c7d4e6 }
+.pagenum{ position:absolute; bottom:10mm; right:18mm; font-size:9px; color:var(--ink-2) }
+.dark .pagenum{ color:#5b7095 }
+.brand{ display:flex; align-items:center; gap:8px; font-weight:900; font-size:14px }
+.brand-mark{ width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--teal-400),var(--navy-800));display:flex;align-items:center;justify-content:center;color:#04211d;font-weight:900;font-size:11px }
+.feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px }
+.feature{ border:1px solid var(--line); border-radius:10px; padding:12px }
+.feature h3{ margin-bottom:4px }
+.shot{ border-radius:10px; border:1px solid var(--line); overflow:hidden; margin-top:10px }
+.shot img{ width:100% }
+.badge-live, .badge-roadmap{
+  display:inline-block; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+  padding:3px 9px; border-radius:100px; margin-bottom:8px;
+}
+.badge-live{ background:#ccfbf1; color:#0f766e }
+.badge-roadmap{ background:#ede9fe; color:var(--violet) }
+.dark .badge-live{ background:rgba(45,212,191,.15); color:var(--teal-300) }
+.dark .badge-roadmap{ background:rgba(124,58,237,.18); color:#c4b5fd }
+.callout{ border:1px solid #ede9fe; background:#faf5ff; border-radius:10px; padding:12px 14px; margin-top:10px }
+.callout p{ font-size:11.5px; color:#5b21b6 }
+ul.tl{ margin:10px 0 0; padding:0; list-style:none }
+ul.tl li{ padding:6px 0 6px 18px; position:relative; font-size:12px; color:var(--ink-1); border-bottom:1px solid var(--line) }
+ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500); font-weight:800 }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 — COVER -->
+<div class="page dark">
+  <div class="brand"><span class="brand-mark">X</span> URBANX</div>
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width:150mm">
+    <div class="eyebrow">Broșură pentru administrații publice · 2026</div>
+    <h1>Primăria vede orașul.<br>Nu PDF-ul.</h1>
+    <p style="font-size:14px; max-width:130mm">
+      Un Digital Twin al teritoriului: hartă vie cu toate zonele PUG, Masterplan viu, Regionalizare pe date reale
+      și un mod de prezentare făcut special pentru CTATU și Consiliul Local.
+    </p>
+  </div>
+  <div style="font-size:10px; color:#5b7095">UrbanX · ThinkSmart Solutions SRL · office@think-ss.eu · 0725 246 822</div>
+</div>
+
+<!-- PAGE 2 — DASHBOARD -->
+<div class="page">
+  <div class="eyebrow">Ce vede primarul</div>
+  <h2>O hartă vie, nu un raport depus o dată pe an</h2>
+  <p>Toate zonele funcționale PUG ale UAT-ului, cu regulament și indicatori (POT/CUT/regim), disponibile oricui
+    din primărie are acces, în orice moment — nu doar la solicitare către un consultant extern.</p>
+  <div class="shot"><img src="assets/screenshots/01-hero-harta.png" alt="Harta vie UrbanX"></div>
+  <div class="feature-grid">
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Toate zonele PUG</h3><p>Regulament pe fiecare zonă, direct pe hartă.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Orice parcelă, în 3 secunde</h3><p>Fișa parcelei 360° — conformitate, avize, trafic.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Date live agregate</h3><p>OSM, ANAR (risc), demografie INSE.</p></div>
+  </div>
+  <div class="pagenum">02</div>
+</div>
+
+<!-- PAGE 3 — MASTERPLAN -->
+<div class="page">
+  <div class="eyebrow">Masterplan Urban</div>
+  <span class="badge-live">Live azi</span>
+  <h2>Un model viu, nu un document care îmbătrânește</h2>
+  <p>Document strategic de peste 100 de pagini, generat automat din datele curente ale UAT-ului — regenerabil
+    oricând, nu o comandă externă livrată o singură dată.</p>
+  <ul class="tl">
+    <li>Indicatori urbani, portofoliu de proiecte, hărți de risc, infrastructură regională</li>
+    <li>Turism, vitalitate urbană, servicii, locuire, energie, participare publică</li>
+    <li>Metodologie citată (model gravitațional CNAIR) + surse INSE, Eurostat, ANCPI, ANAR, ANM</li>
+    <li>PMUD (mobilitate urbană durabilă) — document separat, pe structura ghidului MDLPA/UE</li>
+  </ul>
+  <div class="callout">
+    <p><b>Roadmap:</b> simularea impactului cumulat al aprobării unui PUZ (utilități, trafic, capacitate școli)
+      și validarea automată înainte de ședința CTATU sunt direcția de dezvoltare — construite peste motorul de
+      analiză per-parcelă deja funcțional (Fișa parcelei 360°), nu funcții disponibile azi.</p>
+  </div>
+  <div class="pagenum">03</div>
+</div>
+
+<!-- PAGE 4 — CTATU / CONSILIUL LOCAL -->
+<div class="page">
+  <div class="eyebrow">Ședințe de comisie și consiliu</div>
+  <span class="badge-live">Live azi</span>
+  <h2>Comisia vede orașul — nu 50 de planșe</h2>
+  <p>Motorul de prezentare cinematică randează teritoriul în 3D cu date reale, navigabil scenă cu scenă, cu
+    moduri construite special pentru prezentări live: pauză/explică pe orice scenă, export video pentru redare
+    offline, și o scenă dedicată de sinteză cu QR direct spre Masterplan.</p>
+  <div class="shot"><img src="assets/screenshots/05-cinematic-3d.png" alt="Prezentare cinematică teritorială"></div>
+  <div class="pagenum">04</div>
+</div>
+
+<!-- PAGE 5 — REGIONALIZARE + STUDII -->
+<div class="page">
+  <div class="eyebrow">Dincolo de oraș</div>
+  <span class="badge-live">Live azi · ★ flagship</span>
+  <h2>Regionalizare — județ, regiune, țară</h2>
+  <p>Simulator pe granițele reale a 42 de unități (41 județe + București), 4 scenarii de regionalizare, cu
+    populație, PIB/cap, mandate parlamentare recalculate real și conformitate NUTS-2 — document național de
+    peste 400 de pagini.</p>
+  <h2 style="margin-top:20px">20 de studii teritoriale, deja scrise</h2>
+  <ul class="tl">
+    <li>Housing (~98 pagini), Smart City (~87 pagini), Turistic/Cultural (~90 pagini)</li>
+    <li>SIDU, SDL, Metropolitan — documente teritoriale standard</li>
+    <li>Registrul de Indicatori — 60 de indicatori în 8 domenii, cu formulă și sursă</li>
+    <li>HBU/RCAI teritorial — peste 100 de pagini fiecare</li>
+  </ul>
+  <div class="pagenum">05</div>
+</div>
+
+<!-- PAGE 6 — MODEL + CONTACT -->
+<div class="page dark">
+  <div class="eyebrow">Model de licențiere</div>
+  <h2 style="font-size:24px">Pentru instituții</h2>
+  <p>Licență instituțională anuală, proiecte pilot cu primării, sesiuni dedicate de prezentare pentru CTATU
+    și Consiliul Local.</p>
+  <div style="flex:1"></div>
+  <div style="border-top:1px solid rgba(255,255,255,.15); padding-top:14px">
+    <h3 style="color:#fff; font-size:16px">Vezi UrbanX pe teritoriul propriei localități.</h3>
+    <p style="margin-top:6px">Florin Grierasu · Fondator, UrbanX<br>office@think-ss.eu · 0725 246 822<br>thinksmartsolutions.github.io/UrbanX/investor/government.html</p>
+  </div>
+</div>
+
+<div class="noprint" style="position:fixed; top:16px; right:16px; z-index:10">
+  <button onclick="window.print()" style="background:#0d9488;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.3)">🖨 Salvează ca PDF</button>
+</div>
+
+</body>
+</html>
