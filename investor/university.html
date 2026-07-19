@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanX pentru Universități — laborator urban, Digital Twin, cercetare</title>
+<meta name="description" content="Digital Twin, GIS, BIM, smart cities — infrastructură reală pentru predare și cercetare în planificare urbană.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand"><span class="brand-mark">X</span> UrbanX</a>
+    <nav class="nav-links">
+      <span class="audience-pill">🎓 Universități</span>
+      <a href="#laborator">Laborator urban</a>
+      <a href="#cercetare">Cercetare</a>
+      <a href="index.html">↩ Alte audiențe</a>
+    </nav>
+    <a href="#acces-demo" class="btn btn-primary" style="padding:10px 20px;font-size:13.5px">Propune parteneriat</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Pentru facultăți de arhitectură, urbanism, geografie, IT</div>
+      <h1>Un <span class="hl">laborator urban</span> live,<br>nu doar un studiu de caz static.</h1>
+      <p class="lead" style="margin-top:22px">
+        Studenții și cercetătorii lucrează cu date reale de UAT, PUG, cadastru și normative —
+        pe aceeași platformă folosită azi de proiectanți și administrații, nu pe un exercițiu izolat.
+      </p>
+      <div class="hero-actions">
+        <a href="#acces-demo" class="btn btn-primary">Propune un parteneriat →</a>
+      </div>
+    </div>
+    <div class="mock reveal">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+      <img src="assets/screenshots/03-fisa-parcela-360.png" alt="Analiză de parcelă — indicatori reali">
+    </div>
+  </div>
+</section>
+
+<section class="section" id="laborator">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="badge-live">Live azi</span>
+      <h2>Ce pot folosi studenții, azi</h2>
+    </div>
+    <div class="feature-grid reveal">
+      <div class="feature-card"><div class="f-ico">🗺</div><h3>GIS real</h3><p>Zone funcționale PUG, cadastru, regulamente — pe hărți reale de UAT-uri din România.</p></div>
+      <div class="feature-card"><div class="f-ico">🏙</div><h3>Digital Twin</h3><p>Randare 3D a teritoriului cu date reale (trafic, risc, context regional).</p></div>
+      <div class="feature-card"><div class="f-ico">🏗</div><h3>BIM &amp; documentație</h3><p>Fluxul complet DTAC/PTh/DE ca material didactic pentru cursuri de proiectare/legislație.</p></div>
+      <div class="feature-card"><div class="f-ico">📊</div><h3>Indicatori &amp; metodologie</h3><p>60 de indicatori cu formulă și sursă — bază solidă pentru teze și cercetare aplicată.</p></div>
+      <div class="feature-card"><div class="f-ico">🌍</div><h3>Regionalizare</h3><p>Studiu de caz real pe 42 de unități teritoriale, util pentru cursuri de administrație publică.</p></div>
+      <div class="feature-card"><div class="f-ico">🧪</div><h3>Smart Cities</h3><p>Studii teritoriale deja scrise (Smart City ~87 pagini) ca material de referință.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cercetare" style="background:rgba(255,255,255,.015); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="section-head center">
+      <h2>Oportunități de cercetare</h2>
+      <p class="lead center" style="margin-top:14px">
+        O platformă cu date reale și motoare funcționale e teren fertil pentru cercetare aplicată,
+        nu doar predare.
+      </p>
+    </div>
+    <div class="biz-grid reveal">
+      <div class="biz-card"><h3>Acces academic la date</h3><p>Seturi de date urbane reale, structurate, pentru proiecte de cercetare și dizertații.</p></div>
+      <div class="biz-card"><h3>Validare metodologică</h3><p>Metodologiile folosite (cohortă-componentă, model gravitațional) — teren pentru revizuire academică.</p></div>
+      <div class="biz-card"><h3>Colaborare pe module noi</h3><p>Propuneri de extindere a platformei ca proiecte de cercetare aplicată sau licență/disertație.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="acces-demo">
+  <div class="wrap">
+    <div class="cta-final reveal">
+      <div>
+        <div class="eyebrow">Parteneriat de cercetare</div>
+        <h2>Propune o colaborare cu facultatea ta</h2>
+        <p class="lead" style="margin-top:14px">Cont demo pentru explorare, sau o discuție directă despre un parteneriat de cercetare/predare.</p>
+        <div class="cta-points">
+          <div>Cont demo 14 zile pentru testare</div>
+          <div>Date reale de UAT pentru proiecte studențești</div>
+          <div>Deschis la propuneri de cercetare aplicată</div>
+        </div>
+      </div>
+      <div>
+        <form class="demo-form" id="demoForm">
+          <label>Nume</label>
+          <input type="text" id="df-nume" required placeholder="Numele tău">
+          <label>Email</label>
+          <input type="email" id="df-email" required placeholder="email@universitate.ro">
+          <label>Facultate / Universitate</label>
+          <input type="text" id="df-org" placeholder="Facultatea de Arhitectură / Urbanism / Geografie ...">
+          <label>Motiv</label>
+          <textarea id="df-motiv" placeholder="Curs, cercetare, proiect studențesc?"></textarea>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px">Trimite cererea de acces →</button>
+          <div class="form-msg" id="df-msg"></div>
+          <div class="demo-link-box" id="df-link"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <div>© 2026 UrbanX · ThinkSmart Solutions SRL</div>
+    <div>Florin Grierasu · <a href="mailto:office@think-ss.eu">office@think-ss.eu</a> · 0725 246 822</div>
+    <div><a href="../index.html">Deschide aplicația UrbanX →</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/urbanx-demo-system.js?v=20260719a"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

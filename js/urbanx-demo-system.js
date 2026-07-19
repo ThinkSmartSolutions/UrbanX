@@ -29,11 +29,14 @@ CREATE TABLE IF NOT EXISTS public.demo_accounts (
   extended_by     TEXT,
   extended_at     TIMESTAMPTZ,
   extension_days  INT NOT NULL DEFAULT 0,
-  last_seen_at    TIMESTAMPTZ
+  last_seen_at    TIMESTAMPTZ,
+  sursa           TEXT
 );
+ALTER TABLE public.demo_accounts ADD COLUMN IF NOT EXISTS sursa TEXT;
 CREATE INDEX IF NOT EXISTS idx_demo_accounts_token  ON public.demo_accounts(token);
 CREATE INDEX IF NOT EXISTS idx_demo_accounts_email  ON public.demo_accounts(email);
 CREATE INDEX IF NOT EXISTS idx_demo_accounts_status ON public.demo_accounts(status);
+CREATE INDEX IF NOT EXISTS idx_demo_accounts_sursa  ON public.demo_accounts(sursa);
 
 CREATE TABLE IF NOT EXISTS public.demo_sessions (
   id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -64,7 +67,10 @@ CREATE POLICY "admin reads demo_sessions" ON public.demo_sessions
   FOR SELECT USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 
 -- ── Cerere cont demo (public, apelat din formularul de pe website) ────────
-CREATE OR REPLACE FUNCTION public.request_demo_account(p_nume TEXT, p_email TEXT, p_organizatie TEXT, p_motiv TEXT)
+-- DROP întâi: adăugarea unui parametru nou schimbă semnătura — fără DROP,
+-- CREATE OR REPLACE ar crea un al doilea overload în loc să înlocuiască vechea funcție.
+DROP FUNCTION IF EXISTS public.request_demo_account(TEXT,TEXT,TEXT,TEXT);
+CREATE OR REPLACE FUNCTION public.request_demo_account(p_nume TEXT, p_email TEXT, p_organizatie TEXT, p_motiv TEXT, p_sursa TEXT DEFAULT NULL)
 RETURNS TABLE(token TEXT, expires_at TIMESTAMPTZ, reused BOOLEAN) AS $$
 DECLARE
   v_existing RECORD;
@@ -92,8 +98,8 @@ BEGIN
   v_token := replace(gen_random_uuid()::text, '-', '') || replace(gen_random_uuid()::text, '-', '');
   v_expires := now() + INTERVAL '14 days';
 
-  INSERT INTO public.demo_accounts (token, nume, email, organizatie, motiv, expires_at)
-  VALUES (v_token, p_nume, lower(p_email), p_organizatie, p_motiv, v_expires);
+  INSERT INTO public.demo_accounts (token, nume, email, organizatie, motiv, expires_at, sursa)
+  VALUES (v_token, p_nume, lower(p_email), p_organizatie, p_motiv, v_expires, p_sursa);
 
   RETURN QUERY SELECT v_token, v_expires, false;
 END;
@@ -183,10 +189,11 @@ CREATE OR REPLACE FUNCTION public._is_admin() RETURNS BOOLEAN AS $$
   SELECT EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin');
 $$ LANGUAGE sql SECURITY DEFINER SET search_path = public;
 
+DROP FUNCTION IF EXISTS public.admin_list_demo_accounts();
 CREATE OR REPLACE FUNCTION public.admin_list_demo_accounts()
 RETURNS TABLE(id UUID, token TEXT, nume TEXT, email TEXT, organizatie TEXT, motiv TEXT,
               created_at TIMESTAMPTZ, expires_at TIMESTAMPTZ, status TEXT, days_remaining INT,
-              last_seen_at TIMESTAMPTZ, session_count BIGINT) AS $$
+              last_seen_at TIMESTAMPTZ, session_count BIGINT, sursa TEXT) AS $$
 BEGIN
   IF NOT public._is_admin() THEN RAISE EXCEPTION 'Acces interzis'; END IF;
   -- alias (da.) obligatoriu: RETURNS TABLE de mai jos declară 'status'/'expires_at' ca variabile.
@@ -195,8 +202,20 @@ BEGIN
     SELECT a.id, a.token, a.nume, a.email, a.organizatie, a.motiv, a.created_at, a.expires_at, a.status,
            GREATEST(0, CEIL(EXTRACT(EPOCH FROM (a.expires_at - now())) / 86400)::INT),
            a.last_seen_at,
-           (SELECT count(*) FROM public.demo_sessions s WHERE s.account_id = a.id)
+           (SELECT count(*) FROM public.demo_sessions s WHERE s.account_id = a.id),
+           a.sursa
     FROM public.demo_accounts a ORDER BY a.created_at DESC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE OR REPLACE FUNCTION public.admin_demo_source_summary()
+RETURNS TABLE(sursa TEXT, total BIGINT, active BIGINT) AS $$
+BEGIN
+  IF NOT public._is_admin() THEN RAISE EXCEPTION 'Acces interzis'; END IF;
+  RETURN QUERY
+    SELECT COALESCE(a.sursa, '(necunoscut)'), count(*),
+           count(*) FILTER (WHERE a.status = 'activ')
+    FROM public.demo_accounts a GROUP BY a.sursa ORDER BY 2 DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
@@ -249,7 +268,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- ── Permisiuni de execuție ────────────────────────────────────────────────
-GRANT EXECUTE ON FUNCTION public.request_demo_account(TEXT,TEXT,TEXT,TEXT)  TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.request_demo_account(TEXT,TEXT,TEXT,TEXT,TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_demo_source_summary()                TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_demo_status(TEXT)                     TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.record_demo_login(TEXT,TEXT)              TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.record_demo_event(UUID,TEXT,JSONB)        TO anon, authenticated;
@@ -273,13 +293,18 @@ const UrbanXDemo = {
     return (typeof _supabase !== 'undefined' && _supabase) ? _supabase : null;
   },
 
-  // ── Cerere formular (website investitori) ──────────────────────────────
-  async request({ nume, email, organizatie, motiv }) {
+  // ── Cerere formular (website multi-audiență) ────────────────────────────
+  // sursa: identificator al paginii de unde vine cererea (government/ministry/
+  // designer/developer/investitori/press/university/utilities) — dacă lipsește,
+  // se deduce din numele fișierului curent (window._UX_AUDIENCE sau location).
+  async request({ nume, email, organizatie, motiv, sursa }) {
     const sb = this._sb();
     if (!sb) return { ok: false, error: 'Supabase indisponibil — reîncearcă mai târziu.' };
+    const src = sursa || window._UX_AUDIENCE || (location.pathname.match(/([a-z]+)\.html/) || [])[1] || 'necunoscut';
     try {
       const { data, error } = await sb.rpc('request_demo_account', {
         p_nume: nume || null, p_email: email, p_organizatie: organizatie || null, p_motiv: motiv || null,
+        p_sursa: src,
       });
       if (error) return { ok: false, error: error.message };
       const row = Array.isArray(data) ? data[0] : data;

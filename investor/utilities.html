@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UrbanX pentru Operatori de Utilități — vezi dezvoltările înainte să apară</title>
+<meta name="description" content="Apă, electricitate, gaz, telecom — planificare de rețea pe baza dezvoltării urbane reale, nu ghicită.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand"><span class="brand-mark">X</span> UrbanX</a>
+    <nav class="nav-links">
+      <span class="audience-pill">💧 Utilități</span>
+      <a href="#vizibilitate">Vizibilitate</a>
+      <a href="#planificare">Planificare rețea</a>
+      <a href="index.html">↩ Alte audiențe</a>
+    </nav>
+    <a href="#acces-demo" class="btn btn-primary" style="padding:10px 20px;font-size:13.5px">Cere acces</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Pentru operatori de apă, electricitate, gaz, telecom</div>
+      <h1>Vezi dezvoltarea <span class="hl">înainte să apară.</span></h1>
+      <p class="lead" style="margin-top:22px">
+        Rețelele se dimensionează azi reactiv — după ce cererea de racord vine la ghișeu. UrbanX pune la
+        dispoziție aceleași date teritoriale (zone PUG, parcele, indicatori de dezvoltare) pe care le văd
+        deja proiectanții și administrațiile, ca semnal timpuriu pentru planificarea rețelei.
+      </p>
+      <div class="hero-actions">
+        <a href="#acces-demo" class="btn btn-primary">Cere acces →</a>
+      </div>
+    </div>
+    <div class="mock reveal">
+      <div class="mock-bar"><span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span></div>
+      <img src="assets/screenshots/01-hero-harta.png" alt="Harta teritorială UrbanX">
+    </div>
+  </div>
+</section>
+
+<section class="section" id="vizibilitate">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="badge-live">Live azi</span>
+      <h2>Ce se vede deja pe hartă</h2>
+    </div>
+    <div class="feature-grid reveal">
+      <div class="feature-card"><div class="f-ico">🗺</div><h3>Zone funcționale &amp; regim de dezvoltare</h3><p>POT/CUT/regim de înălțime pe fiecare zonă — bază pentru estimarea densității viitoare de consum.</p></div>
+      <div class="feature-card"><div class="f-ico">📍</div><h3>Parcele individuale analizate</h3><p>Fișa parcelei 360° arată funcțiunea propusă și suprafața — semnal direct de cerere viitoare de racord.</p></div>
+      <div class="feature-card"><div class="f-ico">📈</div><h3>Masterplan cu proiecții demografice</h3><p>Evoluție de populație și dezvoltare pe termen lung, per UAT, deja parte din documentul Masterplan.</p></div>
+    </div>
+    <div class="callout reveal">
+      <div class="eyebrow">Roadmap — modul dedicat de planificare rețea</div>
+      <p>Dimensionarea automată a capacității necesare (apă/electricitate/gaz) pe baza dezvoltărilor
+        proiectate, hărți de blocaje de rețea, și alerte timpurii de saturare sunt direcția de dezvoltare —
+        nu funcții disponibile azi. Datele teritoriale de bază (zone, parcele, Masterplan) există deja și
+        sunt fundația directă pentru acest modul.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="planificare" style="background:rgba(255,255,255,.015); border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft)">
+  <div class="wrap">
+    <div class="section-head center">
+      <h2>De ce contează pentru un operator de rețea</h2>
+    </div>
+    <div class="biz-grid reveal">
+      <div class="biz-card"><h3>Planificare de investiții</h3><p>Vezi unde apar dezvoltări noi înainte de cererea formală de racord.</p></div>
+      <div class="biz-card"><h3>Prioritizare de extindere</h3><p>Corelezi zonele cu creștere reală de POT/CUT cu nevoia viitoare de capacitate.</p></div>
+      <div class="biz-card"><h3>Colaborare cu administrația</h3><p>Aceleași date folosite de primărie — o singură sursă de adevăr, nu estimări divergente.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="acces-demo">
+  <div class="wrap">
+    <div class="cta-final reveal">
+      <div>
+        <div class="eyebrow">Acces demo</div>
+        <h2>Vezi datele teritoriale pe zona ta de operare</h2>
+        <p class="lead" style="margin-top:14px">Cont demo dedicat, 14 zile, izolat de datele reale.</p>
+        <div class="cta-points">
+          <div>Acces la harta teritorială și indicatorii de dezvoltare</div>
+          <div>Cont izolat — fără risc asupra datelor reale</div>
+          <div>14 zile de testare</div>
+        </div>
+      </div>
+      <div>
+        <form class="demo-form" id="demoForm">
+          <label>Nume</label>
+          <input type="text" id="df-nume" required placeholder="Numele tău">
+          <label>Email</label>
+          <input type="email" id="df-email" required placeholder="email@operator-utilitati.ro">
+          <label>Companie / Operator</label>
+          <input type="text" id="df-org" placeholder="Apă / Electricitate / Gaz / Telecom">
+          <label>Motiv</label>
+          <textarea id="df-motiv" placeholder="Ce zonă/rețea te interesează?"></textarea>
+          <button type="submit" class="btn btn-primary" style="margin-top:6px">Trimite cererea de acces →</button>
+          <div class="form-msg" id="df-msg"></div>
+          <div class="demo-link-box" id="df-link"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <div>© 2026 UrbanX · ThinkSmart Solutions SRL</div>
+    <div>Florin Grierasu · <a href="mailto:office@think-ss.eu">office@think-ss.eu</a> · 0725 246 822</div>
+    <div><a href="../index.html">Deschide aplicația UrbanX →</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/urbanx-demo-system.js?v=20260719a"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>

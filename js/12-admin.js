@@ -472,6 +472,10 @@ function _admRenderDemo(body){
       <div style="font-size:11px;font-weight:700;color:#5eead4;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">📊 Cele mai folosite module (toate conturile demo)</div>
       <div id="adm-demo-usage" style="font-size:11px;color:#64748b">Se încarcă...</div>
     </div>
+    <div style="background:#080f1c;border:1px solid rgba(167,139,250,.15);border-radius:10px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">🎯 Cereri pe sursă (ce pagină/audiență generează interes)</div>
+      <div id="adm-demo-sources" style="font-size:11px;color:#64748b">Se încarcă...</div>
+    </div>
     <div id="adm-demo-sessions-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
       <div style="background:#0b1220;border:1px solid rgba(255,255,255,.1);border-radius:14px;max-width:640px;width:92%;max-height:80vh;overflow:auto;padding:20px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -483,6 +487,26 @@ function _admRenderDemo(body){
     </div>`;
   _admLoadDemoAccounts();
   _admLoadDemoUsage();
+  _admLoadDemoSources();
+}
+
+async function _admLoadDemoSources(){
+  const el = document.getElementById('adm-demo-sources');
+  try{
+    const { data, error } = await _supabase.rpc('admin_demo_source_summary');
+    if(error) throw error;
+    const rows = data || [];
+    if(!rows.length){ el.textContent = 'Fără cereri demo încă.'; return; }
+    const max = Math.max(...rows.map(r=>Number(r.total)));
+    el.innerHTML = rows.map(r => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:100px;color:#e2e8f0;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.sursa}</div>
+        <div style="flex:1;background:rgba(255,255,255,.05);border-radius:4px;height:8px;overflow:hidden">
+          <div style="width:${Math.max(4,(r.total/max)*100)}%;height:100%;background:#a78bfa"></div>
+        </div>
+        <div style="width:70px;text-align:right;color:#64748b;font-size:10px">${r.total} (${r.active} activ${r.active===1?'':'e'})</div>
+      </div>`).join('');
+  } catch(e){ el.textContent = '❌ ' + e.message; }
 }
 
 async function _admLoadDemoAccounts(){
@@ -529,7 +553,7 @@ function _admRenderDemoTable(rows, container){
   container.innerHTML = `
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr style="background:#060d18">
-        ${['Contact','Organizație','Status','Zile rămase','Sesiuni','Creat','Acțiuni'].map(h=>
+        ${['Contact','Organizație','Sursă','Status','Zile rămase','Sesiuni','Creat','Acțiuni'].map(h=>
           `<th style="padding:9px 11px;text-align:left;color:#64748b;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.08)">${h}</th>`).join('')}
       </tr></thead>
       <tbody>
@@ -540,6 +564,7 @@ function _admRenderDemoTable(rows, container){
               <div style="color:#64748b;font-size:10px">${r.email}</div>
             </td>
             <td style="padding:9px 11px;color:#94a3b8">${r.organizatie || '—'}</td>
+            <td style="padding:9px 11px"><span style="font-size:10px;background:rgba(167,139,250,.12);color:#c4b5fd;border-radius:6px;padding:2px 7px">${r.sursa || '—'}</span></td>
             <td style="padding:9px 11px">${badge(r.status)}</td>
             <td style="padding:9px 11px;color:${r.days_remaining<=3 && r.status==='activ' ? '#fbbf24' : '#e2e8f0'}">${r.status==='activ' ? r.days_remaining+'z' : '—'}</td>
             <td style="padding:9px 11px;color:#94a3b8">
