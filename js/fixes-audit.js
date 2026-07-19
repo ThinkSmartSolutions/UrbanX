@@ -178,14 +178,26 @@
       .replace(/\u2265/g,'>=')  // ≥
       .replace(/\u00d7/g,'x')   // × înmulțire
       .replace(/\u00f7/g,'/')   // ÷ împărțire
-      // ─── Catch-all: orice caracter non-Latin1 rămas → ?  ─────────────
+      // ─── Simboluri suplimentare care altfel cădeau pe catch-all -> "?" vizibil ──
+      .replace(/\u2705/g,'v')          // ✅ check verde
+      .replace(/[\u274c\u2717\u2718]/g,'x')  // ❌ ✗ ✘
+      .replace(/\u26a0/g,'!')          // ⚠ atenție
+      .replace(/\u0394/g,'delta ')     // Δ (diferență) — ex. ΔLw -> delta Lw
+      .replace(/\u2139/g,'i')          // ℹ info
+      .replace(/[\u25b2\u25b3]/g,'^') // ▲ △
+      .replace(/[\u25bc\u25bd]/g,'v') // ▼ ▽
+      .replace(/\u25cb/g,'o')          // ○
+      // emoji (plan astral, perechi surogat) -> eliminate complet, nu 2x"?" per emoji
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+      .replace(/[\u2600-\u27bf]/g,'') // orice alt simbol/dingbat ramas dupa mapari explicite
+      // ─── Catch-all: orice caracter non-Latin1 rămas → eliminat (nu "?" vizibil în document)
       // (jsPDF Helvetica suportă doar ISO-8859-1 = U+0000–U+00FF)
       .replace(/[^\x00-\xFF]/g, function(ch){
         // Încearcă o mapare de urgență pentru litere comune
         const emergency = {
           '\u0410':'A','\u0430':'a','\u0411':'B','\u0431':'b', // Cyrillic basic
         };
-        return emergency[ch] || '?';
+        return emergency[ch] || '';
       });
   }
 

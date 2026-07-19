@@ -2433,7 +2433,7 @@ async function generateNoiseStudy(){
   cy=_pdfStudyClassBanner(pdf,W,28,'AI_ESTIMAT','Studiu Acustic Urban - Estimare AI pe OSM');
 
   // PAG 2: Vedere 3D + surse zgomot
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - SURSE ZGOMOT IDENTIFICATE',2);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONTEXT URBAN 3D - SURSE ZGOMOT IDENTIFICATE');ftr();
   cy=28;
   cy=addImg(caps.img3D,14,cy,W-28,70,'FIG. 1 — Vedere 3D principala · Context urban · Surse de zgomot in raza 200m',{legend:_STUDY_LEGENDS.acoustic,northArrow:true,viewMeta:"3D Acustic · UrbanX"});
   cy=sec('1. SURSE DE ZGOMOT IN RAZA DE 200m - TABEL DETALIAT',cy);cy+=2;
@@ -2447,7 +2447,7 @@ async function generateNoiseStudy(){
   [['Nivel echivalent estimat Leq',Ltotal.toFixed(1)+' dB(A)',confZi?'CONFORM':'DEPASIRE'],['Limita zi (06:00-22:00)',limit_zi+' dB(A)',Ltotal<=limit_zi?'OK':'DEPASIT'],['Limita noapte (22:00-06:00)',limit_n+' dB(A)',Ltotal<=limit_n?'OK':'DEPASIT'],['Atenuare necesara',Math.max(0,Ltotal-limit_zi).toFixed(1)+' dB(A)',Ltotal>limit_zi?'NECESARA':'—']].forEach(r=>{cy=tblRow(r,cy,false,[80,52,46]);});
 
   // PAG 3: Viewer 3D zi + noapte + masuri
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - MASURI DE ATENUARE',3);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D ZI / NOAPTE - MASURI DE ATENUARE');ftr();
   cy=28;
   cy=addImg(caps.v3dDay,14,cy,half,58,'FIG. 2 — Viewer 3D Urban3D · Iluminare ZI · Fatade si materiale');
   addImg(caps.v3dNight,14+half+4,cy-58,half,58,'FIG. 3 — Viewer 3D Urban3D · NOAPTE · Impact acustic nocturn crescut');
@@ -2458,7 +2458,7 @@ async function generateNoiseStudy(){
   [['Tamplarie PVC/Al cu tripan',Ltotal>limit_zi?'OBLIGATORIU':'RECOMANDAT','40-48 dB(A)','Toate fatadele expuse'],['Vitraj exterior dublu/triplu','RECOMANDAT','35-45 dB(A)','Fatadele expuse zgomotului'],['Zidarie exterioara >30cm','STANDARD','45 dB(A)','Peretii exteriori portanti'],['Tavan casetat fonoabsorbant','OPTIONAL','5-10 dB(A)','Spatii de locuit/birouri'],['Peisagism cu arbori/gard viu','RECOMANDAT','3-6 dB(A)','Aliniament stradal frontal'],['Fatada ventilata cu strat fonoabs.','RECOMANDAT','8-15 dB(A)','Fatadele spre surse majore']].forEach(r=>{cy=tblRow(r,cy,false,[54,28,32,64]);});
 
   // PAG 4: Viewer golden + overcast + orientare functionala
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN HOUR / INNORIRAT - ORIENTARE FUNCTIONALA',4);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VIEWER 3D GOLDEN HOUR / INNORIRAT - ORIENTARE FUNCTIONALA');ftr();
   cy=28;
   cy=addImg(caps.v3dGolden,14,cy,half,58,'FIG. 4 — Viewer 3D Urban3D · GOLDEN HOUR · Vizualizare seara');
   addImg(caps.v3dOvercast||caps.imgAerial,14+half+4,cy-58,half,58,'FIG. 5 — Viewer 3D Urban3D · CER INNORIRAT / Vedere aeriana');
@@ -2472,7 +2472,7 @@ async function generateNoiseStudy(){
    'Birouri si spatii administrative: toleranta mai mare fata de zgomot decat spatiile rezidentiale — plasare flexibila.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
   // PAG 5: Plan 2D + distante + baza legala
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + DISTANTE - BAZA LEGALA',5);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('PLAN 2D + DISTANTE - BAZA LEGALA');ftr();
   cy=28;
   cy=addImg(caps.img2D,14,cy,half,52,'FIG. 6 — Plan 2D cadastral · Surse zgomot identificate in zona');
   addImg(caps.imgDist,14+half+4,cy-52,half,52,'FIG. 7 — Plan distante contur-la-contur · Aliniamente');
@@ -2483,7 +2483,7 @@ async function generateNoiseStudy(){
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior cladirilor.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Directiva 2002/49/CE privind evaluarea si gestionarea zgomotului ambiental in mediul urban.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica in cladiri.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
   // PAG 6: Vederi multiple
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D - CONTEXT COMPLET',6);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('VEDERI MULTIPLE 3D - CONTEXT COMPLET');ftr();
   cy=28;
   cy=addImg(caps.imgFront,14,cy,half,50,'FIG. 8 — Vedere frontala (Nord) · Fatada principala · Expunere primara');
   addImg(caps.imgBack,14+half+4,cy-50,half,50,'FIG. 9 — Vedere posterioara (Sud) · Curte spate');
@@ -2495,7 +2495,7 @@ async function generateNoiseStudy(){
 
   // PAG 7: Semnatura
   // PAG 8: Specificatii tehnice izolare acustica
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE IZOLARE ACUSTICA - SOLUTII CONSTRUCTIVE',8);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE IZOLARE ACUSTICA - SOLUTII CONSTRUCTIVE');ftr();
   cy=28;
   cy=sec('8. SOLUTII TEHNICE DE IZOLARE ACUSTICA RECOMANDATE',cy);cy+=2;
   cy=body('Pe baza nivelului de zgomot estimat (Leq='+Ltotal.toFixed(1)+' dB(A)) si a functiunii propuse (UTR '+utr+', zona acustica '+getZgomotConfig().zona_acustica+'), se recomanda urmatoarele solutii constructive pentru asigurarea confortului acustic interior conform SR EN ISO 717-1:2013 si normativul C 125-2013.',14,cy);cy+=4;
@@ -2528,7 +2528,7 @@ async function generateNoiseStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[55,35,35,57]));
 
   // PAG 9: Harta zgomot + plan monitorizare
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ZGOMOT URBANA - PLAN DE MONITORIZARE ACUSTICA',9);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('HARTA ZGOMOT URBANA - PLAN DE MONITORIZARE ACUSTICA');ftr();
   cy=28;
   cy=addImg(caps.imgCity,14,cy,W-28,55,'\1'+S2(uat)+'\2');cy+=4;
   cy=sec('9. HARTA ZGOMOT STRATEGIC — DATE DE REFERINTA UAT '+getUATLabel().toUpperCase(),cy);cy+=2;
@@ -2552,7 +2552,7 @@ async function generateNoiseStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[65,35,38,44]));
 
   // PAG 10: Baza legala completa + concluzii
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA COMPLETA - CONCLUZII FINALE',10);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA COMPLETA - CONCLUZII FINALE');ftr();
   cy=28;
   cy=sec('10. CONCLUZII FINALE - STUDIU ACUSTIC URBAN',cy);cy+=2;
   cy=body('Studiul acustic urban pentru amplasamentul '+nrcad+' (UTR '+utr+', suprafata '+area+' mp) a identificat '+surse.length+' surse de zgomot in raza de 200m. Nivelul de zgomot echivalent estimat este Leq='+Ltotal.toFixed(1)+' dB(A). '+(Ltotal<=limit_zi?'Valoarea SE INCADREAZA in limitele SR 10009:2017 pentru zona acustica '+getZgomotConfig().zona_acustica+' (limita zi: '+limit_zi+' dB(A)). Constructia poate continua cu masuri standard de izolare.':'Valoarea DEPASESTE limita admisa pentru zona acustica '+getZgomotConfig().zona_acustica+' (limita zi: '+limit_zi+' dB(A)). Sunt necesare masuri suplimentare de izolare acustica si un studiu acustic detaliat.'),14,cy);cy+=4;
@@ -2567,10 +2567,8 @@ async function generateNoiseStudy(){
   cy=sec('10.1. BAZA LEGALA COMPLETA',cy);cy+=2;
   ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica si a tratamentelor acustice.','SR EN ISO 717-1:2013 Acustica — Evaluarea izolarii acustice in cladiri si a elementelor de constructii.','SR EN ISO 717-2:2013 — Evaluarea izolarii la zgomot de impact.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul, cu mod. ulterioare.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
-
   // ── PAG 11: SPECIFICATII TEHNICE DETALIATE TAMPLARIE + IZOLARE ─────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE DETALIATE TAMPLARIE SI IZOLARE ACUSTICA',11);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE DETALIATE TAMPLARIE SI IZOLARE ACUSTICA');ftr();
   let cy2=33;
   cy2=sec('11. SPECIFICATII TEHNICE COMPLETE TAMPLARIE EXTERIOARA — C 125-2013',cy2);cy2+=2;
   cy2=body('Specificațiile de mai jos sunt aplicabile pentru conformarea la limitele SR 10009:2017 UTR '+utr+' (zona '+getZgomotConfig().zona_acustica+'). Tâmplăria exterioară este elementul constructiv cu cel mai mare impact acustic la fațadele expuse la sursele de zgomot identificate. Parametrul Rw (rezistența la zgomot aerian) este cel mai relevant pentru proiect.',14,cy2);cy2+=3;
@@ -2603,7 +2601,7 @@ async function generateNoiseStudy(){
   cy2+=4;
 
   // ── PAG 12: HARTA ESTIMATIVA ZGOMOT + CONCLUZII FINALE ──────────────────────
-  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SIMULARE NIVELURI ZGOMOT PERIMETRALE + CONCLUZII FINALE ACUSTICE',12);ftr();
+  pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SIMULARE NIVELURI ZGOMOT PERIMETRALE + CONCLUZII FINALE ACUSTICE');ftr();
   cy2=33;
   cy2=sec('12. HARTA ESTIMATIVA NIVELURI ZGOMOT LA FATADELE PROIECTULUI',cy2);cy2+=2;
   cy2=body('Simularea orientativă a nivelurilor de zgomot la fațadele amplasamentului a fost realizată pe baza surselor identificate în raza de 200m și a coeficienților de atenuare cu distanța (formula CNOSSOS-EU — EN ISO 9613-2). Valorile sunt estimate fără screening (fără obstacole între sursă și receptor).',14,cy2);cy2+=3;
@@ -2625,7 +2623,7 @@ async function generateNoiseStudy(){
    ['*','Zonificare acustică: funcțiuni zgomotoase la fațadă stradală, dormitoare spre curte','—','0 EUR (proiect)','NP 016-97/NP 016/1-2003 + OMS 119/2014'],
   ].forEach(r=>cy2=tblRow(r,cy2,false,[18,75,22,24,43]));
   cy2=28;sign();
-  try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,AEDIS.corpuri[0]?.niv*3||12,AEDIS.fn||'rezidential_colectiv',12,'Studiu Acustic',[
+  try{ _addConcluziePage(pdf,W,H,S2,hdr,ftr,sec,body,tblRow,nrcad,utr,uat,params,AEDIS.corpuri[0]?.niv*3||12,AEDIS.fn||'rezidential_colectiv',null,'Studiu Acustic',[
     {criteriu:'Nivel zgomot calculat Lz',valoare:Ltotal.toFixed(1)+' dB',status:confZi?'OK':'MASURI',obs:confZi?'Conform SR 10009:2017':'Depasire limita zi '+limit_zi+'dB — masuri fonice obligatorii in proiectul tehnic',remediere:'Prevede tamplarie cu geam tripan Rw>45dB pe fatadele expuse, ecrane fonice sau fatada ventilata cu strat fonoabsorbant — constructia este permisa cu aceste masuri standard'},
     {criteriu:'Nivel noapte Ln',valoare:Ltotal.toFixed(1)+' dB',status:confNoap?'OK':'ATENTIE',obs:confNoap?'Sub limita nocturnă':'Posibilă depășire '+limit_n+'dB',remediere:'Ferestre cu geam tripan Rw>48dB pe fațadele expuse'},
     {criteriu:'Zone sensibile în 200m',valoare:zgomot.surse_principale?.length||0+' surse',status:'ATENTIE',obs:'Verificare obligatorie SR 10009:2017 + HG 321/2005',remediere:'Harta strategică de zgomot consultabilă la Primărie'},
