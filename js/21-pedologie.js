@@ -24,14 +24,17 @@
     4: { rom: 'IV', nota: '21–40', desc: 'Fertilitate scăzută, limitări severe', restr: 'Scoatere facilă, taxă redusă', col: [210, 120, 40] },
     5: { rom: 'V', nota: '1–20', desc: 'Fertilitate foarte scăzută / teren neproductiv', restr: 'Scoatere facilă, taxă minimă', col: [185, 60, 40] }
   };
-  var TAXA = {
-    arabil: { 1: 1.65, 2: 1.32, 3: 0.99, 4: 0.66, 5: 0.33 },
-    pasune: { 1: 0.83, 2: 0.66, 3: 0.50, 4: 0.33, 5: 0.17 },
-    faneta: { 1: 0.83, 2: 0.66, 3: 0.50, 4: 0.33, 5: 0.17 },
-    vie: { 1: 2.48, 2: 1.98, 3: 1.49, 4: 0.99, 5: 0.50 },
-    livada: { 1: 2.48, 2: 1.98, 3: 1.49, 4: 0.99, 5: 0.50 },
-    padure: { 1: 1.24, 2: 0.99, 3: 0.74, 4: 0.50, 5: 0.25 }
-  };
+  // Tarif de scoatere din circuitul agricol — Anexa nr. 1 la Legea nr. 18/1991 (fondul funciar),
+  // astfel cum a fost modificată prin Legea nr. 231/2018: tarif UNIC pe clasă de calitate (I-V),
+  // în lei/mp, INDIFERENT de categoria de folosință (arabil/pășune/vie/livadă/pădure) — categoria
+  // de folosință nu diferențiază tariful legal, apare doar ca dată descriptivă în studiul pedologic.
+  // Valoare de bază (2018): 4,00 / 3,50 / 3,00 / 2,50 / 2,00 lei/mp (Cl. I-V).
+  // Se indexează ANUAL prin ordin al ministrului agriculturii (nu prin HG) — lanțul de indexare
+  // pornește din Ordinul MADR nr. 1.343/2018; cea mai recentă actualizare identificată: Ordinul
+  // MADR nr. 10/21.01.2026 (M.Of. nr. 52/23.01.2026) → valorile 2026 de mai jos. A NU se confunda
+  // cu Ordinul MADR nr. 83/2018, care aprobă PROCEDURA de scoatere, nu tariful.
+  var TAXA_AN = 2026;
+  var TAXA_CLASA = { 1: 4.29, 2: 3.76, 3: 3.22, 4: 2.68, 5: 2.15 }; // lei/mp, indexate 2026
   var SOLURI = [
     ['CZ', 'Cernoziom', 'Cernisol', 'foarte ridicată', 'Cel mai fertil sol; humus 3–6%, structură glomerulară, orizont Am molic gros'],
     ['FZ', 'Faeoziom', 'Cernisol', 'ridicată', 'Orizont Am închis; silvostepă; fertilitate bună'],
@@ -47,7 +50,9 @@
     fosforMobil: { opt: '20 – 80', u: 'ppm' }, potasiuMobil: { opt: '100 – 250', u: 'ppm' }, CaCO3: { opt: '0.5 – 5.0', u: '%' }
   };
   var LEGAL = [
-    ['Ordinul MADR nr. 83/2018', 'Coeficienți de echivalent valoric pentru scoaterea terenurilor din circuitul agricol; se actualizează anual prin HG.'],
+    ['Legea nr. 18/1991 (fondul funciar), Anexa nr. 1, modificată prin Legea nr. 231/2018', 'Stabilește TARIFUL de scoatere din circuitul agricol, unic pe clasă de calitate (I-V), în lei/mp — baza legală a taxei.'],
+    ['Ordinul MADR de indexare anuală (lanț din Ordinul nr. 1.343/2018; actualizat prin Ordinul nr. 10/2026)', 'Indexează anual tariful din Anexa 1 cu coeficientul de inflație — valoarea în vigoare se verifică la data depunerii.'],
+    ['Ordinul MADR nr. 83/2018', 'Aprobă PROCEDURA de scoatere definitivă/temporară din circuitul agricol a terenurilor din extravilan — nu stabilește tariful.'],
     ['Legea nr. 18/1991 (fondul funciar)', 'Protecția terenurilor agricole; categoriile de folosință; regimul scoaterii din circuit; competențe de aprobare.'],
     ['SRTS 2012 (ICPA)', 'Sistemul Român de Taxonomie a Solurilor — clasificarea tipurilor și subtipurilor de sol pe orizonturi diagnostice.'],
     ['OUG nr. 195/2005 (mediu)', 'Aviz de mediu (APM) obligatoriu pentru schimbarea folosinței; evaluarea impactului.'],
@@ -69,14 +74,16 @@
   function pedLoad(uat) { try { var r = localStorage.getItem(_key(uat)); if (r) Object.assign(G._PEDOLOGIE_REGISTRY, JSON.parse(r)); } catch (e) {} }
   function pedSave(uat) { try { var o = {}; Object.keys(G._PEDOLOGIE_REGISTRY).forEach(function (k) { if (G._PEDOLOGIE_REGISTRY[k].uat === uat) o[k] = G._PEDOLOGIE_REGISTRY[k]; }); localStorage.setItem(_key(uat), JSON.stringify(o)); } catch (e) {} }
 
-  // ── Calcul taxă Ord. 83/2018 ──────────────────────────────────────────────
+  // ── Calcul taxă scoatere circuit agricol — Legea 18/1991 Anexa 1 (mod. Legea 231/2018) ────────
+  // Tarif UNIC pe clasă de calitate (I-V), lei/mp, indexat anual prin ordin MADR — NU depinde de
+  // categoria de folosință (arabil/pășune/vie/livadă/pădure); categoria e păstrată doar descriptiv.
   function calculeazaTaxaScoatere(nrCad, suprafataMP, categorie, clasaOverride) {
     var st = G._PEDOLOGIE_REGISTRY[nrCad] || {};
     var clasa = clasaOverride || (st.claseCalitate && st.claseCalitate[categorie]) || st.clasaCalitateEfectiva || 3;
-    var tarif = (TAXA[categorie] && TAXA[categorie][clasa]) || 0;
-    var ha = (suprafataMP || 0) / 10000;
-    var brut = tarif * ha;
-    return { clasa: clasa, categorie: categorie, suprafataMP: suprafataMP, suprafataHa: ha.toFixed(4), tarifLeiHa: tarif, taxaLei: brut.toFixed(2), baza: 'Ord. MADR 83/2018' };
+    var tarif = TAXA_CLASA[clasa] || 0;
+    var mp = suprafataMP || 0;
+    var brut = tarif * mp;
+    return { clasa: clasa, categorie: categorie, suprafataMP: suprafataMP, suprafataHa: (mp / 10000).toFixed(4), tarifLeiMp: tarif, anIndexare: TAXA_AN, taxaLei: brut.toFixed(2), baza: 'Legea 18/1991, Anexa 1 (mod. Legea 231/2018) — tarif indexat ' + TAXA_AN };
   }
   G.calculeazaTaxaScoatere = calculeazaTaxaScoatere;
 
@@ -165,7 +172,7 @@
     cy = tblRow(['Act normativ', 'Obiect'], cy, true, [58, 124]);
     LEGAL.forEach(function (r) { cy = checkY(cy, 16, TITLE, pg); cy = tblRow(r, cy, false, [58, 124]); });
     cy += 3;
-    P('Ordinul MADR nr. 83/2018 stabilește coeficienții de echivalent valoric (lei/mp, respectiv lei/ha) diferențiați pe categorii de folosință (arabil, pășune, fâneață, vie, livadă, pădure) și pe clase de calitate (I–V). Aceste valori se actualizează periodic prin hotărâre de guvern; ' + _normNote());
+    P('Anexa nr. 1 la Legea nr. 18/1991, astfel cum a fost modificată prin Legea nr. 231/2018, stabilește tariful de scoatere din circuitul agricol — un tarif UNIC pe clasă de calitate (I–V), exprimat în lei/mp, indiferent de categoria de folosință (arabil, pășune, fâneață, vie, livadă, pădure). Tariful se actualizează ANUAL prin ordin al ministrului agriculturii (nu prin hotărâre de guvern). Ordinul MADR nr. 83/2018, la rândul său, aprobă procedura de scoatere din circuitul agricol, nu tariful; ' + _normNote());
     P('Legea nr. 18/1991 instituie principiul protecției terenurilor agricole de clasă superioară (I și II), pentru care scoaterea din circuit este permisă doar cu aprobare la nivel superior (Ministerul Agriculturii) și în situații justificate. Terenurile de clasă inferioară (IV–V) beneficiază de o procedură simplificată și de taxe reduse. Schimbarea categoriei de folosință fără aprobare constituie contravenție sau, după caz, infracțiune.');
 
     // ── CAP 2: METODOLOGIE ──
@@ -276,7 +283,7 @@
 
     // ── CAP 9: CLASE CALITATE ──
     page('CLASE DE CALITATE'); SEC('9. CLASELE DE CALITATE I–V');
-    P('Încadrarea terenurilor agricole în clase de calitate se face pe baza notei de bonitare, conform metodologiei ICPA și Ordinului MADR 83/2018. Clasele reflectă gradul de fertilitate și, implicit, valoarea economică și nivelul de protecție legală:');
+    P('Încadrarea terenurilor agricole în clase de calitate se face pe baza notei de bonitare, conform metodologiei ICPA; clasa de calitate rezultată este și baza tarifului legal de scoatere din circuitul agricol (Legea 18/1991, Anexa 1). Clasele reflectă gradul de fertilitate și, implicit, valoarea economică și nivelul de protecție legală:');
     cy = tblRow(['Clasa', 'Notă', 'Descriere', 'Regim scoatere'], cy, true, [18, 26, 74, 64]);
     [1, 2, 3, 4, 5].forEach(function (c) { var m = CLASE[c]; cy = checkY(cy, 16, TITLE, pg); cy = tblRow([m.rom, m.nota, m.desc, m.restr], cy, false, [18, 26, 74, 64]); });
     cy += 3;
@@ -295,22 +302,22 @@
     P('Favorabilitatea pentru scoatere trebuie interpretată în dublu sens: agronomic (cât de valoros este solul pierdut) și procedural (cât de complexă este aprobarea). Un teren de Clasa IV–V este „favorabil" scoaterii în ambele sensuri — pierdere agricolă mică și procedură simplă. Un teren de Clasa I–II este „nefavorabil": chiar dacă din punct de vedere tehnic construcția este posibilă, pierderea unei resurse agricole valoroase impune justificare temeinică și aprobare la nivel superior, iar taxa este maximă. Recomandarea urbanistică generală este orientarea dezvoltărilor către terenuri de clasă inferioară, conservând fondul agricol de clasă superioară.');
 
     // ── CAP 11: TAXA ──
-    page('TAXA DE SCOATERE'); SEC('11. TAXA DE SCOATERE (Ord. MADR 83/2018)');
-    P('Taxa de scoatere din circuitul agricol se calculează prin înmulțirea tarifului corespunzător categoriei de folosință și clasei de calitate (în lei/ha, conform Ord. 83/2018) cu suprafața exprimată în hectare, ajustată eventual cu multiplicatori de zonă. Formula: Taxa = Tarif(categorie, clasă) × Suprafață(ha) × Multiplicator_zonă.');
+    page('TAXA DE SCOATERE'); SEC('11. TAXA DE SCOATERE (Legea 18/1991, Anexa 1)');
+    P('Taxa de scoatere din circuitul agricol se calculează prin înmulțirea suprafeței terenului (exprimată în metri pătrați) cu tariful corespunzător clasei de calitate a terenului (I–V), prevăzut în Anexa nr. 1 la Legea nr. 18/1991, astfel cum a fost modificată prin Legea nr. 231/2018, și actualizat anual prin ordinul de indexare al Ministerului Agriculturii și Dezvoltării Rurale. Formula: Taxa = Suprafață (mp) × Tarif indexat (lei/mp). Tariful depinde DOAR de clasa de calitate — nu de categoria de folosință (arabil/pășune/vie/livadă/pădure), care rămâne o dată descriptivă a studiului pedologic. Legislația națională nu prevede un „multiplicator de zonă" pentru această taxă; dacă un asemenea coeficient e folosit intern pentru estimări (ex. context regional), el nu are valoare legală și nu se aplică la taxa oficială.');
     var tx = calculeazaTaxaScoatere(nrcad, area, categorie, clasa);
-    P('Exemplu de calcul pentru parcela analizată — categoria „' + categorie + '", Clasa ' + cm.rom + ':');
+    P('Exemplu de calcul pentru parcela analizată — Clasa ' + cm.rom + ' (categoria de folosință „' + categorie + '" este menționată descriptiv, fără efect asupra tarifului):');
     cy = tblRow(['Element', 'Valoare'], cy, true, [90, 92]);
-    [['Categorie de folosință', categorie], ['Clasă de calitate', 'Clasa ' + cm.rom], ['Tarif (Ord. 83/2018)', tx.tarifLeiHa + ' lei/ha'],
-     ['Suprafață', area.toLocaleString('ro-RO') + ' mp = ' + tx.suprafataHa + ' ha'], ['Multiplicator zonă', '1.00 (implicit — de ajustat)'],
+    [['Clasă de calitate', 'Clasa ' + cm.rom], ['Categorie de folosință (descriptiv)', categorie], ['Tarif indexat (Legea 18/1991, Anexa 1, an ' + tx.anIndexare + ')', tx.tarifLeiMp + ' lei/mp'],
+     ['Suprafață', area.toLocaleString('ro-RO') + ' mp (' + tx.suprafataHa + ' ha)'],
      ['TAXĂ ESTIMATĂ', tx.taxaLei + ' lei']
     ].forEach(function (r) { cy = tblRow(r, cy, false, [90, 92]); });
     cy += 3;
-    SEC('Tarife pe categorii și clase (lei/ha)');
-    cy = tblRow(['Categorie', 'Cl. I', 'Cl. II', 'Cl. III', 'Cl. IV', 'Cl. V'], cy, true, [42, 28, 28, 28, 28, 28]);
-    Object.keys(TAXA).forEach(function (cat) { var t = TAXA[cat]; cy = tblRow([cat, '' + t[1], '' + t[2], '' + t[3], '' + t[4], '' + t[5]], cy, false, [42, 28, 28, 28, 28, 28]); });
+    SEC('Tarife pe clase de calitate (lei/mp, an ' + TAXA_AN + ')');
+    cy = tblRow(['Clasa', 'I', 'II', 'III', 'IV', 'V'], cy, true, [42, 32, 32, 32, 32, 32]);
+    cy = tblRow(['Tarif (lei/mp)', '' + TAXA_CLASA[1], '' + TAXA_CLASA[2], '' + TAXA_CLASA[3], '' + TAXA_CLASA[4], '' + TAXA_CLASA[5]], cy, false, [42, 32, 32, 32, 32, 32]);
     cy += 3;
-    cy = miniChart(['Categorie', 'Tarif Cl.I'], Object.keys(TAXA).map(function (c) { return [c, TAXA[c][1]]; }), 'Tarif de scoatere Clasa I pe categorii (lei/ha)', cy) || cy;
-    P('Notă importantă: valorile de mai sus sunt cele din Ord. 83/2018 și se actualizează anual prin hotărâre de guvern. Pentru dosarul oficial se utilizează tariful în vigoare la data depunerii, publicat în Monitorul Oficial. ' + _normNote());
+    cy = miniChart(['Clasa', 'Tarif lei/mp'], [1, 2, 3, 4, 5].map(function (c) { return ['Cl. ' + CLASE[c].rom, TAXA_CLASA[c]]; }), 'Tarif de scoatere pe clasă de calitate (lei/mp, an ' + TAXA_AN + ')', cy) || cy;
+    P('Notă importantă: valorile de mai sus reprezintă tariful indexat pentru anul ' + TAXA_AN + ', conform ordinului anual de indexare MADR (lanț din Ordinul MADR nr. 1.343/2018). Tariful se actualizează anual prin ordin al ministrului agriculturii — pentru dosarul oficial se utilizează valoarea în vigoare la data depunerii, publicată în Monitorul Oficial. ' + _normNote());
 
     // ── CAP 12: PROTECȚIE L.18/1991 ──
     page('PROTECȚIA TERENURILOR'); SEC('12. PROTECȚIA TERENURILOR AGRICOLE (Legea 18/1991)');
@@ -318,7 +325,7 @@
     ['1. Întocmirea studiului pedologic de teren de către OSPA / persoană atestată MADR (determinarea clasei de calitate și a notei de bonitare).',
      '2. Obținerea avizelor: Direcția pentru Agricultură Județeană (DAJ), aviz de mediu (APM) și, după caz, avizul Apelor Române pentru terenuri din luncă.',
      '3. Pentru terenuri de Clasa I–II: aprobare la nivelul Ministerului Agriculturii (MADR); pentru Clasa III–V: aprobare la nivel județean.',
-     '4. Achitarea taxei de scoatere (Ord. 83/2018), calculată pe categorie și clasă.',
+     '4. Achitarea taxei de scoatere (Legea 18/1991, Anexa 1, indexată anual prin ordin MADR), calculată pe clasă de calitate.',
      '5. Emiterea deciziei de scoatere (temporară sau definitivă) și actualizarea categoriei de folosință în cartea funciară.'
     ].forEach(function (t) { P(t); });
     P('Scoaterea temporară (de regulă până la 2 ani, cu posibilitate de prelungire) obligă la redarea terenului în circuitul agricol la finalul lucrărilor, cu refacerea stratului fertil. Scoaterea definitivă schimbă permanent categoria de folosință și este condiția prealabilă pentru autorizarea construcțiilor pe teren extravilan agricol.');
@@ -416,7 +423,7 @@
     page('CONCLUZII'); SEC('16. CONCLUZII');
     P('Terenul cu nr. cadastral ' + nrcad + ', în suprafață de ' + (area ? area.toLocaleString('ro-RO') : '—') + ' mp, situat în ' + (uat || 'UAT') + ', categoria de folosință „' + categorie + '", se încadrează preliminar în Clasa ' + cm.rom + ' de calitate (notă de bonitare estimată ' + notaEst + '/100).');
     P('Din perspectiva reliefului (altitudine medie ' + (site.elevMed != null ? site.elevMed + ' m' : '—') + ', pantă ' + (site.slope != null ? site.slope + '%' : '—') + ', risc de eroziune ' + er.r + '), terenul este ' + (site.slope != null && site.slope >= 12 ? 'expus proceselor de versant, necesitând măsuri antierozionale.' : 'stabil, fără restricții majore de relief.'));
-    P('Favorabilitate pentru scoaterea din circuitul agricol: ' + favor + '. Taxa estimată de scoatere: ' + tx.taxaLei + ' lei (tarif ' + tx.tarifLeiHa + ' lei/ha, Ord. 83/2018).');
+    P('Favorabilitate pentru scoaterea din circuitul agricol: ' + favor + '. Taxa estimată de scoatere: ' + tx.taxaLei + ' lei (tarif ' + tx.tarifLeiMp + ' lei/mp, Legea 18/1991 Anexa 1, an ' + tx.anIndexare + ').');
     P('Prezentul studiu are caracter orientativ și preliminar; fundamentarea oficială a procedurii de scoatere necesită studiul pedologic de teren, executat și semnat de OSPA sau de o persoană atestată MADR, și avizele legale aferente.');
 
     // ── ANEXE ──
