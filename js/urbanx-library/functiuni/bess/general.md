@@ -1,87 +1,482 @@
-# MEMORIU TEHNIC GENERAL — BESS (STOCARE ENERGIE ÎN BATERII) (DTAC)
+# MEMORIU TEHNIC GENERAL — BESS (SISTEM DE STOCARE A ENERGIEI ÎN BATERII), 25 MW / 50 MWh (DTAC)
 
-## 1. Date generale
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 republicată, Anexa nr. 1, pentru un sistem de stocare a energiei electrice în baterii (Battery Energy Storage System — BESS), cu putere instalată **25 MW** și capacitate energetică **50 MWh**, realizat în soluție containerizată, montat la sol, adiacent unui parc fotovoltaic existent sau proiectat, cu racord la Sistemul Energetic Național (SEN). Memoriul se corelează cu memoriile de specialitate (structură, instalații electrice de curenți tari, automatizări/SCADA), cu scenariul/raportul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică, cu raportul de testare la propagarea fenomenului de „thermal runaway” (UL 9540A) și cu piesele desenate, fără a le dubla conținutul. Datele numerice prezentate au caracter de referință pentru configurația 25 MW/50 MWh tratată; ele se ajustează, la nevoie, la parametrii exacți ai echipamentului contractat și ai amplasamentului real, fără a modifica principiile de proiectare și structura documentației.
 
-Piesă scrisă generală DTAC (Legea 50/1991 Anexa 1) pentru **instalație BESS 25 MW / 50 MWh**, containere Li-ion **LFP**, montaj la sol, adiacentă parc FV, racord SEN.
+---
 
-| Parametru | Valoare |
+## 1. DATE GENERALE
+
+### 1.1. Date de identificare a investiției
+
+| Element | Date |
 |---|---|
-| Putere P / Capacitate E | 25 MW / 50 MWh (t = E/P = 2 h, C-rate 0,5C) |
-| Tehnologie | Li-ion **LFP** (LiFePO₄) containerizat |
-| Racord | 20 kV → 110 kV prin stație conexiune |
-| Rol | peak-shaving / arbitraj / servicii sistem FCR-aFRR / backup FV |
-| η round-trip | 87% proiectat (≥85 garantat) |
-| Categoria importanță | **C** (HG 766/1997) |
-| Clasa seismică | **III (γI 1,0)** — containere ancorate |
-| Risc incendiu | **MARE** (thermal runaway Li-ion) |
+| Denumirea obiectivului | Instalație de stocare a energiei electrice în baterii (BESS), 25 MW / 50 MWh |
+| Amplasament | Extravilan/zonă tehnico-industrială energetică, adiacent parc fotovoltaic (FV) și/sau stație electrică de transformare, conform PUZ/CU în vigoare |
+| Beneficiar / Investitor | Operator economic din domeniul energiei regenerabile / dezvoltator independent de proiecte de stocare (persoană juridică), titular de licență/autorizație ANRE pentru activitatea de stocare |
+| Proiectant general | Birou de proiectare atestat, cu experiență în instalații energetice de medie/înaltă tensiune, coordonare multidisciplinară (structură, electric, automatizări, PSI) |
+| Faza de proiectare | D.T.A.C. (documentație tehnică pentru autorizarea construirii) |
+| Putere instalată (P) / Capacitate energetică (E) | **25 MW / 50 MWh** (durata de descărcare t = E/P = 2 ore, C-rate = P/E = 0,5C) |
+| Tehnologie de stocare | Litiu-ion, chimie **LFP** (litiu-fer-fosfat, LiFePO₄), soluție containerizată integrată |
+| Punct de racord | Medie tensiune 20 kV, cu evacuare în SEN prin stație de conexiune proprie, eventual cu transformare suplimentară 20/110 kV |
+| Rolul funcțional | time-shifting energie FV (peak-shaving/arbitraj), servicii tehnologice de sistem (FCR, aFRR), reducere curtailment FV, backup/rezervă |
+| Randament round-trip (η) | 87% proiectat (nivel minim garantat contractual ≥ 85%) |
+| Categoria de importanță | **C (normală)**, conform HG 766/1997 |
+| Clasa de importanță și expunere seismică | **III (γI = 1,0)**, conform P100-1/2013, cu containere ancorate de platforme de beton armat |
+| Nivelul de risc de incendiu | **MARE** (fenomenul de „thermal runaway” la nivel de celulă Li-ion) |
+| Durata de execuție estimată | 8-12 luni |
 
-**Cadru normativ:** Legea 50/1991, 10/1995, HG 907/2016, 766/1997, 350/2001; Legea energiei 123/2012 (stocarea = activitate distinctă, Dir. UE 2019/944), Ord. ANRE racordare/licențiere, Legea 220/2008, Cod RET/RED; **IEC 62933 (EES), IEC 62619 (baterii industriale), IEC 63056 (Li în EES), UL 9540 + UL 9540A (test thermal runaway propagation — CRITIC), NFPA 855 (instalare — CRITIC)**; P118-1/2/3 + Ordin MAI 129/2016 (ISU risc mare); OUG 195/2005, Legea 292/2018 (EIA), Directiva 2006/66/CE + OUG 5/2015 + Reg. UE 2023/1542 (baterii uzate).
+Datele de identificare cadastrală (număr cadastral, carte funciară), denumirea exactă a titularului investiției și adresa poștală/administrativă completă a amplasamentului se preiau din extrasul de carte funciară actualizat și din Certificatul de Urbanism, completându-se în cartușul pieselor scrise și desenate. Prezentul memoriu tratează, ca referință de proiectare, o instalație BESS de 25 MW/50 MWh organizată în 10 containere standard tip ISO 20 picioare (câte ~5 MWh energie utilă fiecare), cuplate la o stație de conexiune proprie și evacuate în SEN printr-un racord de medie/înaltă tensiune. Un asemenea sistem nu este, prin natura sa, o clădire în sensul clasic (locuibilă sau cu ocupare permanentă de persoane), ci o instalație tehnologică energetică cu ocupare umană sporadică (mentenanță programată, intervenții punctuale), aspect cu implicații directe asupra categoriei de risc pentru viață — redusă comparativ cu o clădire civilă — dar contrabalansat de un risc tehnologic și de mediu ridicat, generat de energia chimică înmagazinată în cantitate mare pe o suprafață relativ compactă. Această dualitate — expunere umană redusă versus potențial energetic ridicat concentrat — este firul roșu care justifică, pe tot parcursul acestui memoriu, tratarea instalației ca proiect de categorie C (nu B sau A, dat fiind absența aglomerărilor de persoane și a funcțiunilor cu risc special pentru populație), dar cu un regim de securitate la incendiu agravat, echivalent unei instalații industriale cu risc mare de incendiu.
 
-## 2. Categorie și clasă
+### 1.2. Componența documentației DTAC
 
-**HG 766/1997:** categoria **C normală** (6 factori; factor ecologic/risc ridicat → tratare agravantă cerințele Cc/Ci fără schimbarea categoriei). **P100-1/2013 tab. 4.2:** clasa **III γI 1,0**; containere **ancorate** de platforme b.a. **Fb = γI·Sd(T1)·m·λ**; container ~35 t, ag 0,20g, β0 2,5, q 1,5 → Fb ≈ 1,0·(0,20·2,5/1,5)·35t·g ≈ **114 kN** ancoraj (verificare forfecare+smulgere buloane SR EN 1992-4).
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
 
-## 3. Grad RF și risc incendiu
+**A. Piese scrise:**
+- Lista și semnăturile proiectanților (coordonator + specialități: structură, electric MT/JT, automatizări, PSI);
+- Memoriu general (prezentul document);
+- Memorii de specialitate: structură (platforme/fundații containere, stație de conexiune), instalații electrice de curenți tari (racord, celule MT, transformator, cabluri, protecții), automatizări/SCADA (EMS, protecții de linie, telecomandă), instalații de detecție-alarmare-stingere incendiu, sisteme de ventilare/climatizare containere;
+- Referatele verificatorilor de proiect atestați (cerințele A-F, după caz Is/It/Ie);
+- Scenariul/raportul de securitate la incendiu (document distinct, cu tratare specifică a riscului „thermal runaway”, care nu se dublează aici);
+- Raportul de testare la propagarea fenomenului termic (**UL 9540A**), anexă tehnică obligatorie pentru fundamentarea distanțelor de siguranță și a soluțiilor de detecție/stingere, prezentat autorității ISU;
+- Studiul geotehnic verificat la cerința Af;
+- Ridicarea topografică vizată OCPI;
+- Devizul general estimativ (HG 907/2016);
+- Programul de control al calității lucrărilor (faze determinante) — vizat ISC;
+- Documentația justificativă privind încadrarea instalației în cerințele Codului Rețelei (Cod RET pentru racordul la Transelectrica sau Cod RED pentru racordul la operatorul de distribuție), utilă la Avizul Tehnic de Racordare (ATR) și la licențierea ANRE.
 
-**Thermal runaway Li-ion** = risc dominant: declanșat de abuz electric (supraîncărcare)/defect intern (dendrite)/abuz termic (>60-80°C)/deteriorare mecanică → **gaze venting inflamabile** (H₂, CO, CH₄, C₂H₄, electroliți) → propagare cell-to-cell → atmosferă explozivă. **LFP mult mai stabil ca NMC** (declanșare ~250-270°C vs. 150-210, fără O₂ din catod) → risc redus, nu eliminat → **LFP preferat**. **Risc MARE**.
+**B. Piese desenate:**
+- Plan de încadrare în zonă (1:2000/1:5000);
+- Plan de situație (1:500/1:200), cu amplasarea containerelor, a stației de conexiune, a distanțelor de siguranță reglementare, a împrejmuirii, a drumurilor interioare și a platformei de intervenție pentru autospecialele de pompieri;
+- Planuri de arhitectură/structură de principiu ale platformelor de fundare a containerelor și ale clădirii/cabinei tehnice a stației de conexiune (dacă există construcție civilă asociată);
+- Secțiuni caracteristice prin platforma-container, cu detalii de ancorare;
+- Scheme electrice monofilare de principiu (racord MT, celule, transformator, EMS);
+- Detalii semnificative (ancoraj container, împrejmuire, drenaj, bazin de retenție ape de stingere).
+
+Piesele desenate se corelează integral cu piesele scrise și poartă cartușul cu datele de identificare, faza, scara și semnăturile. Planul de situație este piesa-cheie pentru evaluarea distanțelor de siguranță între containere, între containere și limitele de proprietate, și între containere și eventualele construcții/funcțiuni învecinate — distanțe dimensionate, conform capitolului 3, pe baza rezultatelor testului UL 9540A și a prevederilor NFPA 855, nu pe o valoare convențională arbitrară.
+
+**C. Avize și acorduri** conform Certificatului de Urbanism (a se vedea cap. 11), inclusiv Avizul Tehnic de Racordare (ATR) emis de operatorul de distribuție/transport, licența/autorizația ANRE pentru activitatea de stocare a energiei electrice, avizul de securitate la incendiu emis de ISU (cu statut de risc mare, tratat agravant conform Ordinului MAI nr. 129/2016), acordul de mediu (după parcurgerea procedurii de încadrare/screening conform Legii nr. 292/2018) și, după caz, avize de gospodărire a apelor și de protecție civilă.
+
+Documentația DTAC este întocmită și semnată de proiectanți cu drept de semnătură pe specialitățile respective și verificată de verificatori de proiecte atestați. Ea trebuie să fie completă, corelată între specialități și conformă cu Certificatul de Urbanism și cu cadrul normativ aplicabil, astfel încât să permită autorității emitente evaluarea și emiterea Autorizației de Construire. Pentru o instalație BESS, coordonarea între specialități este critică din două motive specifice: (1) dimensionarea structurală a platformelor de ancorare depinde direct de masa și de configurația containerelor furnizate de producătorul de echipamente, informație care trebuie să circule timpuriu de la specialitatea electrică/tehnologică spre cea de structură; (2) soluția de securitate la incendiu (distanțe, detecție, stingere, venting) derivă, așa cum se detaliază la capitolul 3, din rezultatele testului UL 9540A al configurației specifice de container/rack/celulă contractate — un test generic, efectuat pe un alt model de container, nu poate fundamenta juridic distanțele de siguranță ale proiectului curent.
+
+### 1.3. Cadrul normativ românesc — construcții, urbanism, calitate
+
+Proiectarea și autorizarea instalației se realizează cu respectarea următorului cadru normativ național, pe domenii:
+
+| Domeniu | Acte normative principale | Ce reglementează |
+|---|---|---|
+| Autorizare construcții | **Legea nr. 50/1991** republicată, cu normele metodologice de aplicare | Procedura de autorizare a executării lucrărilor de construcții; conținutul documentației DTAC (Anexa 1) |
+| Calitatea în construcții | **Legea nr. 10/1995** republicată | Cele șase cerințe fundamentale (A-F), obligațiile participanților, verificarea și expertizarea tehnică |
+| Urbanism și amenajarea teritoriului | **Legea nr. 350/2001** | Documentațiile de urbanism (PUG, PUZ, PUD), regulamentele locale de urbanism, procedura de aprobare |
+| Devize și indicatori tehnico-economici | **HG nr. 907/2016** | Structura devizului general, conținutul-cadru al documentațiilor tehnico-economice pe faze |
+| Categorii de importanță | **HG nr. 766/1997** | Metodologia de stabilire a categoriei de importanță a construcțiilor (categoriile A-D) |
+| Regimul de calitate în amplasarea construcțiilor | **HG nr. 273/1994** | Recepția lucrărilor de construcții |
+| Legea energiei electrice și a gazelor naturale | **Legea nr. 123/2012**, cu modificările ulterioare (inclusiv cele care introduc stocarea ca activitate distinctă în piața de energie, transpunând Directiva UE 2019/944) | Cadrul de organizare a pieței de energie electrică; activitatea de stocare a energiei ca segment distinct de producere/furnizare; condițiile de licențiere |
+| Eficiența energetică | **Legea nr. 220/2008** (promovarea SRE) și legislația secundară aferentă | Sprijinul pentru producerea energiei din surse regenerabile, schemele de sprijin aplicabile și proiectelor hibride FV+stocare |
+| Codul tehnic al rețelei electrice de transport (Cod RET) / Codul rețelei electrice de distribuție (Cod RED) | Ordine ANRE de aprobare | Condițiile tehnice de racordare, funcționare și exploatare a instalațiilor de producere/stocare racordate la rețea, inclusiv cerințele de furnizare a serviciilor tehnologice de sistem |
+| Reglementări ANRE de racordare/licențiere | Ordine ANRE (avize tehnice de racordare, metodologii de racordare a capacităților de stocare, condiții de licențiere) | Procedura ATR, condițiile de acordare a licenței de stocare a energiei electrice |
+| Mediu | **OUG nr. 195/2005** (protecția mediului), **Legea nr. 292/2018** (evaluarea impactului asupra mediului) | Procedura de evaluare/screening a impactului asupra mediului pentru proiecte energetice |
+| Gestionarea deșeurilor / baterii | **OUG nr. 5/2015** (transpunerea Directivei 2006/66/CE) și **Regulamentul (UE) 2023/1542** | Colectarea, tratarea și reciclarea bateriilor uzate; obligațiile producătorilor/operatorilor privind trasabilitatea și reciclarea |
+| Situații de urgență | **Legea nr. 307/2006**, **HG nr. 571/2016**, **Ordinul MAI nr. 129/2016** | Apărarea împotriva incendiilor; categoriile de construcții/instalații care se supun avizării/autorizării ISU; instalațiile tehnice cu risc mare |
+| Securitate și sănătate în muncă | **Legea nr. 319/2006**, **HG nr. 300/2006** | Cerințe SSM la execuție și exploatare, în special pentru manipularea echipamentelor electrice de medie tensiune și a bateriilor |
+| Urmărirea comportării în timp | **P130/1999** | Programul de urmărire a comportării structurilor pe durata exploatării |
+
+Cadrul normativ românesc aplicabil unei instalații BESS se distinge structural de cel al unei clădiri civile obișnuite prin dubla sa natură: pe de o parte, ansamblul rămâne o „construcție” în sensul Legii nr. 50/1991 (platforme, fundații, eventual cabină tehnică), supusă integral regimului de autorizare, cerințelor fundamentale ale Legii nr. 10/1995 și metodologiei de încadrare pe categorii de importanță a HG nr. 766/1997; pe de altă parte, este o instalație tehnologică din sectorul energetic, supusă Legii energiei electrice, Codului Rețelei și reglementărilor ANRE, care condiționează nu autorizarea construirii, ci punerea sub tensiune și funcționarea comercială (analog modului în care, la o unitate hotelieră, certificatul de clasificare turistică nu condiționează Autorizația de Construire, ci exploatarea comercială). Proiectul de față este structurat astfel încât ambele paliere de reglementare — construcții și energie — să fie satisfăcute integral și corelat, fără ca vreunul să fie tratat ca secundar.
+
+### 1.4. Cadrul normativ european — piața de energie, baterii, tranziție energetică
+
+La nivel european, instalația se înscrie în următorul cadru de reglementare, cu relevanță directă asupra fundamentării investiției (cap. 4) și asupra obligațiilor de mediu (cap. 10):
+
+- **Directiva (UE) 2019/944** privind normele comune pentru piața internă de energie electrică recunoaște explicit stocarea energiei ca activitate distinctă de producere și de furnizare, eliminând barierele de reglementare care, în cadrul legislativ anterior, tratau adesea stocarea ca pe o formă de producere supusă acelorași restricții (de exemplu, interdicția operatorilor de rețea de a deține active de stocare, cu excepții limitate). Transpunerea acestei directive în legislația română (prin modificările aduse Legii nr. 123/2012) este temeiul juridic care permite dezvoltatorilor independenți să opereze instalații BESS de sine stătătoare (stand-alone) sau hibride (cuplate cu un parc FV), să participe la piața de energie și la piața de servicii tehnologice de sistem, și să solicite licență de stocare la ANRE.
+- **Regulamentul (UE) 2023/1542** privind bateriile și deșeurile de baterii (înlocuind, în etape, Directiva 2006/66/CE) introduce cerințe extinse privind: „amprenta de carbon” declarată a bateriilor introduse pe piață, un pașaport digital al bateriei (de la o anumită dată de aplicare), conținutul minim de materiale reciclate, obligații de colectare și rate minime de reciclare pentru materiile prime critice (litiu, cobalt, nichel), și responsabilitatea extinsă a producătorului. Pentru o instalație BESS de 50 MWh, aceste obligații se traduc, la nivel de proiect, în necesitatea de a documenta, încă din faza de proiectare, traseul de gestionare la finalul duratei de viață a bateriilor (reciclare autorizată, eventual „second-life”), aspect detaliat la capitolul 10.
+- **Fit for 55** (pachetul legislativ care vizează reducerea cu 55% a emisiilor nete de gaze cu efect de seră până în 2030 față de 1990) și **RED III** (Directiva revizuită privind promovarea energiei din surse regenerabile) fixează ținte crescute de penetrare a energiei regenerabile în mixul energetic european, condiție care, prin variabilitatea intrinsecă a producției eoliene și fotovoltaice, crește direct necesitatea capacităților de stocare pentru echilibrarea sistemului — context detaliat la capitolul 4.
+- **PNIESC** (Planul Național Integrat în domeniul Energiei și Schimbărilor Climatice) și **PNRR** (Planul Național de Redresare și Reziliență) stabilesc, la nivel național, țintele de capacitate regenerabilă instalată și, respectiv, finanțează (prin componentele dedicate energiei) proiecte de stocare a energiei electrice, ca măsură structurală de flexibilizare a sistemului energetic național, cu relevanță directă pentru fundamentarea economică a proiectului tratat la capitolul 4.
+
+### 1.5. Standarde tehnice internaționale de referință — ce reglementează fiecare
+
+Pe lângă cadrul legal, proiectarea unei instalații BESS se realizează cu respectarea unui set de standarde tehnice internaționale specifice tehnologiei de stocare electrochimică, standarde care nu au (încă) un corespondent identic în reglementarea tehnică românească dedicată și care sunt, prin urmare, referința de bună practică inginerească acceptată de verificatorii tehnici, de ISU și de asigurători:
+
+- **IEC 62933** (seria de standarde pentru sistemele de stocare a energiei electrice — „Electrical Energy Storage (EES) systems”) definește terminologia, metodele de specificare a performanței (capacitate, putere, randament, durată de viață), cerințele de siguranță generale ale sistemului și metodologiile de testare la nivel de sistem integrat (nu doar la nivel de celulă). Partea dedicată planificării și evaluării performanței (IEC 62933-2) oferă cadrul pentru definirea indicatorilor tehnici prezentați la capitolul 8 (E, P, η, DoD), iar partea dedicată siguranței (IEC 62933-5) tratează cerințele de siguranță funcțională a întregului sistem, inclusiv interfața dintre BMS, PCS și sistemele de protecție la incendiu.
+- **IEC 62619** („Secondary cells and batteries containing alkaline or other non-acid electrolytes — Safety requirements for secondary lithium cells and batteries, for use in industrial applications”) stabilește cerințele de siguranță pentru celulele și bateriile litiu-ion utilizate în aplicații industriale (inclusiv stocare staționară), acoperind testele de abuz electric (supraîncărcare, descărcare excesivă, scurtcircuit extern), abuz mecanic (impact, strivire, vibrații) și abuz termic (expunere la temperatură ridicată), precum și cerințele constructive ale modulelor (grad de protecție, izolație). Acest standard este referința tehnică pentru certificarea celulelor/modulelor utilizate în proiect.
+- **IEC 63056** este completarea specifică a IEC 62619 pentru bateriile litiu-ion utilizate în sisteme de stocare a energiei electrice de tip „grid-connected” (EES), adăugând cerințe de siguranță la nivel de sistem (nu doar celulă/modul), inclusiv comportamentul la propagarea termică între module adiacente în interiorul aceluiași container — element de legătură directă cu testul UL 9540A tratat mai jos.
+- **UL 9540** („Standard for Energy Storage Systems and Equipment”) este standardul de certificare a siguranței întregului sistem de stocare (baterie + PCS + BMS + carcasă/container), acoperind proiectarea electrică, mecanică și de protecție a sistemului ca ansamblu integrat, nu doar a componentelor individuale.
+- **UL 9540A** („Test Method for Evaluating Thermal Runaway Fire Propagation in Battery Energy Storage Systems”) este, dintre toate standardele enumerate, cel cu impactul cel mai direct asupra proiectării și autorizării: este o metodologie de testare experimentală, în patru niveluri succesive de scară (celulă → modul → unitate/rack → instalație completă la scară de container), care determină dacă și cum se propagă un eveniment de „thermal runaway” declanșat intenționat într-o celulă către celulele/modulele adiacente, ce cantitate și compoziție de gaze este eliberată, ce fluxuri termice radiante rezultă la diverse distanțe și dacă apare deflagrație a gazelor acumulate. Rezultatele acestui test — nu o valoare convențională dintr-un normativ generic — sunt cele care fundamentează, pentru configurația exactă de baterie/container contractată, distanțele de siguranță reale, necesarul de sisteme de detecție/stingere/venting și limitele de expunere pentru echipele de intervenție. Din acest motiv, raportul UL 9540A al configurației specifice contractate este tratat, la capitolul 3, drept anexă tehnică obligatorie a documentației prezentate la avizare ISU.
+- **NFPA 855** („Standard for the Installation of Stationary Energy Storage Systems”) este standardul american de instalare a sistemelor staționare de stocare a energiei, cel mai complet și mai frecvent adoptat ca bună practică internațională (inclusiv de asigurătorii și proiectanții europeni, în absența unui standard european/românesc la fel de detaliat), reglementând: distanțele minime de separare între unitățile de stocare și între acestea și clădiri/limite de proprietate/căi publice, cerințele de compartimentare la foc a containerelor (rezistență la foc a anvelopei), cerințele de detecție și de stingere/răcire, cerințele de ventilare a gazelor de deflagrație, accesul autospecialelor de intervenție și instruirea personalului de intervenție. NFPA 855 permite, de altfel, reducerea distanțelor standard prevăzute în tabelele sale generice atunci când proiectantul prezintă rezultatele unui test UL 9540A specific configurației utilizate — mecanism care leagă direct cele două standarde și care este exploatat, la acest proiect, pentru optimizarea amprentei la sol (cap. 6).
+
+Aceste standarde nu se substituie cadrului legal românesc (Legea 10/1995, HG 766/1997, P100, P118), ci îl completează pe segmentul specific tehnologiei de stocare electrochimică, neacoperit în detaliu de normativele naționale de construcții. Verificatorii tehnici atestați și avizatorul ISU evaluează conformitatea proiectului atât cu cerințele fundamentale naționale, cât și cu buna practică internațională materializată în aceste standarde, ca parte a fundamentării tehnice a soluțiilor de siguranță adoptate.
+
+### 1.6. Beneficiarul și contextul investiției
+
+Titularul investiției este, tipic, un operator economic activ în dezvoltarea și operarea de capacități de producere a energiei din surse regenerabile (parcuri fotovoltaice sau eoliene), care extinde portofoliul cu o capacitate de stocare adiacentă, sau un dezvoltator independent de proiecte de stocare (fără producere proprie asociată), care valorifică arbitrajul de piață și serviciile tehnologice de sistem ca model de afaceri de sine stătător. În ambele situații, beneficiarul solicită licența/autorizația ANRE pentru activitatea de stocare a energiei electrice, distinctă de eventuala licență de producere deținută pentru parcul FV adiacent, conform cadrului legal descris la capitolul 1.3-1.4. Amplasamentul tratat de referință în acest memoriu este adiacent unui parc fotovoltaic existent sau proiectat concomitent, soluție care permite partajarea infrastructurii de racordare la SEN (celule MT, eventual transformator 20/110 kV) și optimizează investiția totală în racord, dar instalația poate funcționa și ca proiect stand-alone, cu racord propriu independent de orice sursă de producere, situație în care distincția juridică și tehnică față de un parc de producere este și mai clară.
+
+---
+
+## 2. CATEGORIA DE IMPORTANȚĂ ȘI CLASA SEISMICĂ
+
+### 2.1. Încadrarea în categoria de importanță (HG 766/1997)
+
+Categoria de importanță a construcției se stabilește conform HG nr. 766/1997 și metodologiei de încadrare aprobate prin ordinul ministerial aferent, pe baza punctajului mediu ponderat al șase criterii: implicații privind siguranța vieții oamenilor, importanța economică și socială, implicarea în funcționarea altor obiective de investiție, necesitatea de a lua măsuri urgente în caz de accident, gradul de risc pe considerente ecologice și complexitatea și noutatea construcției/gradul de risc în exploatare.
+
+Pentru o instalație BESS, evaluarea acestor șase criterii conduce la un profil caracteristic, cu punctaje divergente pe criterii diferite: (1) **implicațiile pentru siguranța vieții oamenilor** sunt reduse — instalația nu are ocupare umană permanentă, personalul de exploatare/mentenanță are acces punctual și programat, iar zona nu este destinată publicului; (2) **importanța economică și socială** este moderată spre ridicată la nivel de sistem energetic (contribuție la stabilitatea rețelei, la integrarea SRE), dar redusă la nivel local/individual — instalația nu deservește direct o comunitate sau un obiectiv public; (3) **implicarea în funcționarea altor obiective** poate fi relevantă dacă instalația este integrată funcțional cu un parc FV sau cu o stație electrică de transformare cu rol în alimentarea unei zone, dar rămâne, per ansamblu, un element de flexibilitate, nu un element unic de alimentare fără de care ar exista o întrerupere de serviciu esențial; (4) **necesitatea măsurilor urgente în caz de accident** este moderată — un eveniment de tip incendiu implică intervenție promptă, dar nu evacuare de populație; (5) **gradul de risc pe considerente ecologice** este semnificativ, dat fiind potențialul de emisie de gaze toxice/inflamabile în caz de „thermal runaway” necontrolat și riscul de contaminare a solului/apei prin apele de stingere; (6) **complexitatea și noutatea tehnologică** este ridicată, dat fiind caracterul relativ nou al reglementării tehnice dedicate stocării electrochimice la scară de utilitate publică în România.
+
+Media ponderată a acestor șase criterii, cu factorul ecologic/de risc tehnologic tratat agravant (dar fără a modifica prin el însuși încadrarea de categorie, ci reflectat în cerințele suplimentare de securitate la incendiu detaliate la capitolul 3), plasează instalația în **categoria C (normală)**. Această încadrare este consecventă cu practica de proiectare a altor instalații energetice tehnologice fără ocupare permanentă (stații electrice de transformare, centrale fotovoltaice, hale tehnologice fără personal permanent), care se încadrează, de regulă, tot în categoria C, spre diferență de clădirile civile cu aglomerări de persoane (categoria B) sau de construcțiile speciale cu risc excepțional pentru populație/mediu la scară largă (categoria A, rezervată unui număr restrâns de obiective, precum instalațiile nucleare). Este important de subliniat că încadrarea în categoria C **nu reduce** cerințele de securitate la incendiu, care rămân guvernate, în paralel, de nivelul de risc de incendiu al instalației (tratat distinct la capitolul 3) — cele două clasificări (categorie de importanță și nivel de risc de incendiu) sunt paralele, nu identice, iar o instalație de categorie C poate avea, așa cum este cazul de față, un nivel de risc de incendiu MARE.
+
+### 2.2. Clasa de importanță și expunere seismică (P100-1/2013)
+
+Conform P100-1/2013, tabelul 4.2, categoriei de importanță C stabilite mai sus îi corespunde, pentru construcții energetice tehnologice fără aglomerări de persoane, **clasa de importanță și expunere seismică III**, cu factorul de importanță **γI = 1,0** — clasa de bază, fără majorare sau reducere a acțiunii seismice de proiectare față de valoarea de referință a hazardului seismic al amplasamentului. Această încadrare este coerentă cu natura instalației: elementele structurale propriu-zise sunt limitate la platformele/fundațiile de ancorare a containerelor și, eventual, la cabina tehnică a stației de conexiune, elemente a căror cedare seismică nu ar pune în pericol direct vieți omenești (dat fiind absența ocupării permanente), dar a căror integritate este esențială pentru menținerea containerelor pe poziție și pentru evitarea deteriorării mecanice a bateriilor și a echipamentelor electrice în timpul și după un eveniment seismic — deteriorare care ar putea, la rândul ei, declanșa un eveniment de tip „thermal runaway” prin abuz mecanic (a se vedea capitolul 3.2).
+
+### 2.3. Metodologia de calcul a forței de ancorare a containerelor
+
+Containerele de baterii, spre diferență de o construcție convențională fixată prin structură proprie de fundație, sunt echipamente prefabricate, autoportante, care se așează pe platforme de beton armat și se fixează prin ancoraje mecanice (buloane de ancorare/console de prindere) dimensionate să reziste forței seismice orizontale echivalente masei containerului. Metodologia de calcul, conform P100-1/2013, pornește de la formula generală a forței seismice de bază aplicate unui element rigid ancorat:
+
+**Fb = γI · Sd(T1) · m · λ**
+
+unde: γI este factorul de importanță (1,0, pentru clasa III stabilită la 2.2); Sd(T1) este ordonata spectrului de proiectare la perioada proprie T1 a elementului (pentru un element foarte rigid, precum un container ancorat rigid de o platformă masivă, T1 este redusă, iar Sd(T1) tinde spre valoarea de vârf a spectrului de proiectare, Sd(T1) ≈ ag·β0/q); m este masa elementului (masa containerului echipat complet cu module de baterii, estimată la ~35 tone pentru un container ISO 20' cu ~5 MWh de energie utilă instalată); λ este factorul de corecție care ține cont de participarea modală efectivă (λ = 1,0 pentru structuri cu un singur nivel/element rigid, conform P100-1).
+
+Pentru un amplasament de referință cu accelerația terenului pentru proiectare ag = 0,20g, factorul de amplificare dinamică maximă β0 = 2,5 și factorul de comportare q = 1,5 (valoare redusă, adecvată unui element rigid ancorat, fără capacitate semnificativă de disipare inelastică — spre diferență de o structură de beton armat cu ductilitate proiectată), rezultă:
+
+Sd(T1) ≈ ag · β0 / q = 0,20 · 2,5 / 1,5 ≈ 0,333g
+
+Fb = γI · Sd(T1) · m · g = 1,0 · 0,333 · 35.000 kg · 9,81 m/s² ≈ **114 kN**
+
+Această forță de bază reprezintă rezultanta orizontală care trebuie transferată, prin sistemul de ancorare, de la baza containerului la platforma de beton armat suport. Dimensionarea propriu-zisă a ancorajelor (numărul, diametrul și dispunerea buloanelor chimice/mecanice, verificarea la forfecare și la smulgere) se realizează conform SR EN 1992-4 (proiectarea ancorajelor pentru utilizare în beton), cu verificarea atât a capacității oțelului buloanelor, cât și a capacității betonului la smulgere de con și la despicare, luând în calcul distanțele față de marginile platformei și eventualele grupuri de ancoraje solicitate simultan. Se verifică, suplimentar, componenta verticală a acțiunii seismice (relevantă pentru amplasamentele apropiate de epicentre sau pentru configurațiile în care containerul este suprapus/supraînălțat), precum și răsturnarea (overturning) containerului, verificare de stabilitate la moment de răsturnare raportat la momentul stabilizator dat de greutatea proprie, cu un coeficient de siguranță minim impus de proiectantul de structură. Valorile numerice de mai sus (ag, β0, q, masa containerului) sunt orientative, calibrate pentru o zonă seismică de nivel mediu; valorile exacte, specifice amplasamentului real (preluate din harta de zonare seismică P100-1 și din fișa tehnică a containerului furnizat de producător) se folosesc la breviarul de calcul definitiv, prezentat integral în memoriul de rezistență, care nu se dublează în prezentul document.
+
+### 2.4. Fundația platformei-suport și interacțiunea cu structura geotehnică
+
+Platformele de beton armat pe care se ancorează containerele se dimensionează atât la solicitările statice (greutatea proprie a containerului echipat, aproximativ 35 tone, distribuită pe amprenta de bază, tipic de ordinul a 6,1 × 2,9 m pentru un container ISO 20'), cât și la solicitările dinamice derivate din forța seismică de ancorare calculată mai sus. Fundația poate fi realizată ca fundație continuă de tip grindă de fundare sub conturul containerului sau ca placă de beton armat continuă pe toată amprenta grupului de containere, soluție care uniformizează tasările diferențiale și simplifică execuția rețelelor de cabluri îngropate între containere. Alegerea tipului de fundație se face pe baza concluziilor studiului geotehnic (capacitate portantă a terenului, adâncime de îngheț conform STAS 6054, nivel al apei subterane) și se detaliază, cu breviarul de calcul complet, în memoriul de rezistență. Se acordă atenție particulară protecției anticorozive a elementelor metalice de ancorare, expuse la intemperii pe toată durata de viață a instalației (estimată la peste 20 de ani pentru structura civilă, chiar dacă durata de viață a bateriilor propriu-zise este mai redusă, a se vedea capitolul 5.5).
+
+---
+
+## 3. GRADUL DE RISC DE INCENDIU — MECANISMUL „THERMAL RUNAWAY” ȘI MĂSURILE DE PROTECȚIE
+
+### 3.1. Fizico-chimia fenomenului de „thermal runaway”
+
+Riscul de incendiu dominant al oricărei instalații de stocare electrochimică pe bază de litiu este fenomenul de **propagare termică necontrolată** („thermal runaway”): un lanț de reacții exoterme autoîntreținute în interiorul unei celule Li-ion, declanșat atunci când temperatura internă a celulei depășește un prag critic (tipic în intervalul 150-270°C, variabil în funcție de chimia catodului — a se vedea comparația de la 3.4). Odată depășit acest prag, descompunerea termică a electrolitului organic și a materialelor active ale electrozilor eliberează căldură suplimentară mai rapid decât poate fi disipată, într-un proces în buclă pozitivă: creșterea temperaturii accelerează reacțiile de descompunere, care generează și mai multă căldură, ridicând în continuare temperatura. Rezultatul este o creștere rapidă (de ordinul secundelor până la câteva minute) a temperaturii celulei, până la valori care pot depăși 700-1000°C, însoțită de eliberarea unui volum semnificativ de gaze (a se vedea 3.3), de posibila ejectare de material incandescent și, în absența unei bariere termice eficiente, de propagarea evenimentului către celulele adiacente din același modul și, apoi, către modulele adiacente din același rack sau container.
+
+### 3.2. Modurile de defectare care declanșează evenimentul
+
+Literatura tehnică și standardele de siguranță electrochimică (IEC 62619, IEC 63056) identifică patru categorii principale de moduri de defectare care pot iniția un eveniment de „thermal runaway”, fiecare cu o cauză fizică distinctă și cu măsuri de prevenire specifice, integrate în proiectarea sistemului BMS (a se vedea capitolul 7.1):
+
+- **Abuzul electric** — supraîncărcarea celulei peste tensiunea limită superioară (care poate provoca depunerea de litiu metalic pe anod, un fenomen numit „lithium plating”, precursor al formării de dendrite), descărcarea excesivă sub tensiunea limită inferioară (care poate provoca dizolvarea colectorului de curent de cupru), sau scurtcircuitul extern (contact accidental între borne, care generează curenți foarte mari și încălzire prin efect Joule). Prevenirea acestor moduri de defectare este funcția primară a sistemului de management al bateriei (BMS), care monitorizează continuu tensiunea individuală a fiecărei celule și deconectează circuitul la depășirea limitelor.
+- **Defectul intern** — formarea de dendrite de litiu metalic (rezultat, tipic, al ciclării repetate la temperaturi scăzute sau al supraîncărcării repetate), care pot perfora separatorul polimeric dintre anod și catod, provocând un scurtcircuit intern greu de detectat din exterior până la manifestarea sa termică; contaminarea cu particule metalice în procesul de fabricație, care pot cauza, similar, perforarea separatorului în timp.
+- **Abuzul termic** — expunerea celulei la o sursă externă de căldură (de exemplu, propagarea de la o celulă adiacentă deja în „thermal runaway”, sau o defecțiune a sistemului de climatizare a containerului care permite acumularea de căldură peste limitele normale de funcționare, tipic 15-35°C pentru chimia LFP), care ridică temperatura celulei peste pragul de declanșare fără a fi nevoie de un defect electric sau mecanic prealabil.
+- **Deteriorarea mecanică** — impact, strivire sau penetrare a carcasei celulei (accidental, în timpul manipulării/transportului, sau ca urmare a unui eveniment seismic necontrolat prin ancorare deficitară, a se vedea capitolul 2), care poate deforma sau perfora separatorul intern, provocând un scurtcircuit intern imediat.
+
+Proiectarea unui sistem BESS sigur presupune măsuri de prevenire pe fiecare dintre aceste patru căi: BMS pentru abuzul electric, control de calitate al producătorului de celule pentru defectele interne (verificabil, indirect, prin certificarea IEC 62619), climatizare și monitorizare termică a containerului pentru abuzul termic, și ancorare seismică + protecție mecanică a containerului pentru deteriorarea mecanică — motiv pentru care capitolele 2 (ancorare seismică) și 3 (protecție la incendiu) ale prezentului memoriu sunt conceptual interconectate, nu independente.
+
+### 3.3. Compoziția și pericolele gazelor de „venting”
+
+Odată declanșat, un eveniment de „thermal runaway” eliberează, prin supapele de siguranță ale celulei (proiectate să prevină explozia catastrofică a carcasei prin eliberarea controlată a presiunii interne — proces numit „venting”), un amestec complex de gaze, a cărui compoziție exactă variază în funcție de chimia celulei, de starea de încărcare (SOC) în momentul declanșării și de intensitatea evenimentului, dar care include, tipic, hidrogen (H₂), monoxid de carbon (CO), metan (CH₄), etilenă (C₂H₄) și vapori de electrolit organic (carbonați organici, inflamabili și toxici prin inhalare). Aceste gaze prezintă un dublu pericol: (1) **pericol de inflamabilitate/explozivitate** — amestecul de gaze, dacă se acumulează într-un spațiu confinat (interiorul containerului) și întâlnește o sursă de aprindere (arcuri electrice, suprafețe supraîncălzite), poate produce o deflagrație, cu suprapresiune capabilă să deterioreze structura containerului sau să proiecteze fragmente; (2) **pericol de toxicitate** — monoxidul de carbon și vaporii de electrolit sunt toxici prin inhalare, cu relevanță directă pentru siguranța echipelor de intervenție care se apropie de un container afectat înainte de ventilarea completă a atmosferei interioare. Aceste două riscuri fundamentează, la capitolul 3.6-3.7, cerințele de ventilare/deflagrație (NFPA 68/69) și protocoalele de intervenție care impun echipamentul de protecție respiratorie al pompierilor și menținerea unei distanțe de siguranță până la confirmarea ventilării complete.
+
+### 3.4. Comparația de siguranță termică între chimiile Li-ion
+
+Severitatea și probabilitatea fenomenului de „thermal runaway” variază semnificativ în funcție de chimia materialului catodic al celulei litiu-ion, aspect esențial pentru alegerea tehnologică justificată la capitolul 5:
+
+| Chimie catod | Temperatură tipică de declanșare | Eliberare de oxigen din catod | Severitate relativă a evenimentului |
+|---|---|---|---|
+| **NMC** (nichel-mangan-cobalt) | ~150-210°C | **Da** (catodul oxidic eliberează oxigen la descompunere, alimentând autonom combustia internă) | Ridicată — energie specifică mare, dar reacție exotermă auto-oxidantă |
+| **NCA** (nichel-cobalt-aluminiu) | similar NMC, adesea inferior | Da | Ridicată, similar NMC |
+| **LFP** (litiu-fer-fosfat) — **chimia adoptată** | ~250-270°C | **Nu** (legătura fosfor-oxigen din structura cristalină este mult mai stabilă termic, iar catodul nu eliberează oxigen liber la descompunere) | **Redusă** — prag de declanșare mai ridicat, reacție mai puțin exotermă, fără sursă internă de oxigen care să întrețină combustia |
+
+Absența eliberării de oxigen din catodul LFP este diferența fundamentală față de chimiile NMC/NCA: un eveniment termic la o celulă LFP, deși posibil, tinde să fie mai puțin violent, cu o rată de creștere a temperaturii mai lentă și cu o probabilitate mai redusă de propagare necontrolată către celulele adiacente, dat fiind că reacția nu se autoalimentează cu oxigen intern precum la chimiile bogate în nichel. Acesta este motivul tehnic principal — dincolo de considerentele economice și de ciclu de viață tratate la capitolul 5 — pentru care chimia LFP este preferată la instalațiile staționare de stocare la scară de utilitate publică, unde profilul de siguranță pe termen lung, în regim de funcționare continuă și cu expunere redusă la supraveghere umană, primează asupra densității energetice maxime (relevantă, în schimb, pentru aplicațiile de mobilitate electrică, unde greutatea și volumul sunt constrângeri critice). Este important de subliniat, totuși, că **riscul nu este eliminat, ci redus**: chiar și celulele LFP pot suferi „thermal runaway” în condiții de abuz suficient de severe (de exemplu, penetrare mecanică directă sau supraîncălzire externă prelungită), motiv pentru care întregul set de măsuri de protecție descris la capitolele 3.6-3.7 rămâne necesar, iar nivelul de risc de incendiu al instalației se menține la categoria **MARE**.
+
+### 3.5. Metodologia de testare UL 9540A și rolul său critic în autorizare
+
+Standardul **UL 9540A** este, așa cum s-a introdus la capitolul 1.5, o metodologie experimentală structurată pe patru niveluri succesive de scară, fiecare cu obiective specifice:
+
+1. **Nivelul celulă** — se declanșează intenționat „thermal runaway” într-o singură celulă (prin încălzire controlată, suprasolicitare electrică sau penetrare), măsurându-se temperatura de declanșare, cantitatea și compoziția gazelor eliberate și energia termică totală degajată.
+2. **Nivelul modul** — se repetă testul la nivelul unui modul complet (grup de celule interconectate), verificându-se dacă evenimentul declanșat la o celulă se propagă la celulele adiacente din același modul și cu ce viteză.
+3. **Nivelul unitate/rack** — testul se extinde la nivelul unui rack complet (grup de module), evaluând propagarea inter-modul și eficiența eventualelor bariere termice interne proiectate de producător între module.
+4. **Nivelul instalație** — testul final, la scara reală a containerului (sau a unei configurații reprezentative de containere adiacente), măsoară dacă evenimentul se propagă către containerele/unitățile vecine, ce fluxuri termice radiante rezultă la diverse distanțe de la containerul afectat și dacă apare deflagrație a gazelor acumulate în spațiul confinat.
+
+Rezultatele acestei testări — specifice modelului exact de celulă, modul, rack și container contractat, nu o valoare generică transferabilă de la un alt produs — sunt cele care fundamentează tehnic: (a) distanța minimă reală de separare între containere, care poate fi redusă față de valoarea convențională din tabelele generice NFPA 855 dacă testul demonstrează absența propagării la o distanță mai mică, sau care poate necesita majorare dacă testul demonstrează un flux termic radiant peste limitele acceptabile la distanța standard; (b) necesarul real de sisteme de detecție, stingere și răcire (tipul de agent, debitul, timpul de răspuns necesar); (c) necesarul și dimensionarea sistemului de ventilare a deflagrației (suprafața panourilor de suprapresiune, în funcție de volumul de gaze măsurat experimental); (d) protocolul de intervenție al pompierilor (distanța de abordare sigură, echipamentul de protecție necesar, timpul minim de așteptare înainte de intervenție directă). Din aceste motive, raportul de testare UL 9540A al configurației exacte contractate pentru acest proiect constituie o **anexă tehnică obligatorie** a documentației prezentate la avizarea ISU, iar absența sa sau prezentarea unui raport corespunzător unei alte configurații de echipament reprezintă un motiv de respingere sau de amânare a avizului.
+
+### 3.6. Cerințele de protecție la incendiu — sinteză tehnică
+
+Pe baza principiilor de mai sus și a prevederilor NFPA 855, măsurile de protecție la incendiu ale instalației se sintetizează astfel:
 
 | Element | Cerință |
 |---|---|
-| Anvelopă container | **EI 120** (NFPA 855 §9) |
-| Uși | EI2 60-C |
-| **Distanță container-container** | **≥3,0 m** (NFPA 855) sau conform UL 9540A |
-| Detecție | gaze H₂/CO + fum aspirativ |
-| Stingere | aerosol/gaz inert + drencer răcire exterior |
-| Venting deflagrație | panouri suprapresiune (NFPA 68/69) |
+| Anvelopa/carcasa containerului | Rezistență la foc **EI 120** (izolare termică și etanșeitate la foc timp de minimum 120 de minute), conform NFPA 855 §9 |
+| Ușile de acces la container | **EI2 60-C** (rezistență la foc 60 de minute, cu autoînchidere) |
+| Distanța container-container | **Minimum 3,0 m** conform valorii convenționale NFPA 855, ajustabilă (redusă sau majorată) pe baza rezultatelor testului UL 9540A specific configurației contractate (a se vedea 3.5) |
+| Distanța container-limită de proprietate/clădiri învecinate | Conform tabelelor NFPA 855, funcție de capacitatea energetică a grupului de containere, ajustabilă similar pe baza UL 9540A |
+| Detecția | Detectoare de gaze specifice (hidrogen H₂, monoxid de carbon CO) în interiorul fiecărui container, completate de detecție de fum de tip aspirativ (mai sensibilă decât detecția punctuală convențională, adecvată detectării precoce a fazei de „venting” anterioare flăcării deschise) |
+| Stingerea | Sistem de stingere cu agent de tip aerosol condensat sau gaz inert (care nu conduce electricitatea și nu dăunează echipamentelor electronice), completat de un sistem de răcire exterioară cu apă pulverizată (tip drencer), destinat răcirii containerelor adiacente pentru a preveni propagarea termică prin radiație, nu neapărat stingerii focului intern al bateriei (care, odată declanșat la scară de modul, este dificil de stins prin mijloace convenționale — strategia de intervenție se orientează, tipic, spre limitarea propagării și răcirea perimetrală, nu spre stingerea imediată a evenimentului intern) |
+| Ventilarea de deflagrație | Panouri de suprapresiune dimensionate conform NFPA 68/69, care se deschid controlat la acumularea de gaze peste un prag de presiune, prevenind ruperea necontrolată a carcasei containerului |
+| Accesul de intervenție | Cale de acces perimetrală pentru autospecialele ISU, cu lățime și rază de bracare conforme normativelor de intervenție, menținută liberă permanent |
 
-**UL 9540A CRITIC:** testul (celulă/modul/unit/instalație) determină propagarea, **distanțele reale**, necesarul stingere/venting, fluxul termic la limită. Raport UL 9540A = anexă obligatorie la PTh pentru avizare ISU.
+### 3.7. Strategia de intervenție și protocolul operațional
 
-## 4. Necesitate și oportunitate
+Strategia de intervenție în caz de eveniment la un container BESS diferă fundamental de strategia clasică de stingere a unui incendiu de clădire civilă: dat fiind că un eveniment de „thermal runaway” la scară de modul/rack este, în practică, dificil de stins prin mijloace convenționale odată ce a depășit faza incipientă (energia chimică stocată în celulele adiacente continuă să alimenteze evenimentul independent de agentul de stingere aplicat), protocolul operațional recomandat de producătorii de echipamente și de bună practica internațională (reflectată în NFPA 855) prioritizează: (1) izolarea electrică imediată a containerului afectat (deconectare automată comandată de BMS/PCS, urmată de izolare manuală la nevoie); (2) răcirea perimetrală a containerelor/modulelor adiacente prin sistemul de drencere, pentru limitarea propagării prin radiație termică, nu neapărat stingerea focului intern; (3) menținerea unei distanțe de siguranță de către echipele de intervenție umană, dat fiind riscul de reaprindere și de reeliberare de gaze toxice/inflamabile pe o durată de ore de la evenimentul inițial (fenomen documentat pentru bateriile Li-ion, care pot suferi reaprinderi întârziate); (4) monitorizarea atmosferei (gaze inflamabile/toxice) înainte de reluarea accesului la zona afectată. Acest protocol, cu detaliere completă a timpilor, a distanțelor și a echipamentului de intervenție specific configurației contractate, se prezintă integral în scenariul/raportul de securitate la incendiu, corelat cu raportul UL 9540A al proiectului.
 
-Integrare SRE (time-shifting FV diurn → livrare vârf seară, reduce curtailment); **servicii sistem Transelectrica (FCR <secunde, aFRR)** (răspuns <1s superior grupuri convenționale); arbitraj (PZU + piața echilibrare); peak-shaving + backup; cadru **PNRR + PNIESC + Fit for 55**.
+---
 
-## 5. Tipuri BESS — tehnologia aleasă
+## 4. NECESITATEA ȘI OPORTUNITATEA INVESTIȚIEI
 
-| Tehnologie | Densitate | Siguranță | Aplicație |
+### 4.1. Serviciile tehnologice de sistem — FCR, aFRR, mFRR
+
+O instalație BESS de 25 MW, prin viteza sa de răspuns net superioară grupurilor de producere convenționale (termice sau hidro cu turbine), este un furnizor tehnic ideal de servicii tehnologice de sistem, tranzacționate pe piața de echilibrare administrată de operatorul de transport (Transelectrica), care asigură menținerea permanentă a echilibrului între producție și consum la nivelul întregului sistem energetic național:
+
+- **FCR (Frequency Containment Reserve — rezerva primară de reglaj)** — răspuns automat, în mai puțin de o secundă, la abaterile de frecvență ale sistemului, prin injectarea sau absorbția de putere activă proporțional cu deviația de frecvență măsurată local. Un sistem BESS, prin absența inerției mecanice a unui grup rotativ și prin controlul electronic direct al invertoarelor (PCS), poate răspunde la o viteză net superioară unui grup convențional (care necesită timp pentru modificarea debitului de abur/apă/combustibil), ceea ce face din BESS un furnizor tehnic preferat pentru acest serviciu, cu remunerare tipic superioară altor tipuri de rezervă.
+- **aFRR (automatic Frequency Restoration Reserve — rezerva secundară de reglaj automat)** — răspuns automat, în câteva minute, la instrucțiunile centralizate ale operatorului de transport, pentru restabilirea frecvenței și a schimburilor programate de putere la valorile de referință, după acțiunea inițială a rezervei primare.
+- **mFRR (manual Frequency Restoration Reserve — rezerva terțiară de reglaj manual)** — activată manual, la comanda dispecerului, pentru refacerea rezervelor de reglaj secundar epuizate, cu timp de răspuns de ordinul a 15 minute, compatibil cu durata de descărcare de 2 ore a instalației (E/P = 50/25 = 2h).
+
+Participarea la aceste piețe de servicii tehnologice de sistem se realizează prin intermediul unui agregator/furnizor de servicii de echilibrare licențiat, în baza unui contract cu operatorul de transport, cu prevalidare tehnică a instalației (verificarea capacității reale de răspuns la testele impuse de Transelectrica) — proces distinct de licențierea ANRE pentru activitatea de stocare (cap. 1.4), dar condiționat de aceasta.
+
+### 4.2. Time-shifting fotovoltaic, peak-shaving, arbitraj și reducerea curtailment-ului
+
+Rolul funcțional descris la capitolul 1.1 — integrarea cu un parc fotovoltaic adiacent — se fundamentează pe caracterul intermitent și necorelat cu cererea al producției solare: producția FV este concentrată în intervalul orar diurn (tipic 9:00-17:00), în timp ce vârful de cerere al sistemului energetic național survine, tipic, seara (18:00-21:00), după apusul soarelui. O instalație BESS cuplată parcului FV permite **time-shifting**-ul energiei produse: încărcarea bateriilor din surplusul de producție solară diurnă (adesea necontractat eficient pe piața spot, la prețuri scăzute ca urmare a suprasaturării ofertei solare la orele de vârf de producție) și descărcarea acesteia în intervalul de seară, la prețuri de piață superioare — mecanism cunoscut ca **arbitraj de preț** pe Piața pentru Ziua Următoare (PZU) și pe piața de echilibrare. În paralel, instalația reduce fenomenul de **curtailment** (limitarea forțată a producției FV de către operatorul de rețea în intervalele de suprasaturare a capacității de evacuare), prin absorbția excedentului care, altfel, ar fi pierdut — beneficiu cu impact direct asupra veniturilor parcului FV adiacent și asupra eficienței globale a utilizării resursei regenerabile. Suplimentar, funcția de **peak-shaving** (aplatizarea vârfurilor de cerere/injecție) reduce solicitarea instantanee asupra infrastructurii de evacuare, cu beneficii pentru operatorul de rețea în privința dimensionării capacității de transport.
+
+### 4.3. Contextul de tranziție energetică — PNRR, PNIESC, Fit for 55, RED III
+
+Necesitatea capacităților de stocare la scară de utilitate publică este o consecință directă a creșterii rapide a ponderii producției regenerabile variabile (solară și eoliană) în mixul energetic național și european, impusă de țintele asumate prin PNIESC (Planul Național Integrat în domeniul Energiei și Schimbărilor Climatice) și de cadrul european Fit for 55/RED III (a se vedea capitolul 1.4). Fără capacități de stocare corelate, creșterea penetrării SRE variabile generează, peste un anumit prag, dificultăți de echilibrare a sistemului (necesitatea unor rezerve de reglaj crescute, risc de curtailment extins, congestii de rețea la orele de vârf de producție solară) — fenomene deja observabile în sistemul energetic românesc în anii cu creștere accelerată a capacității fotovoltaice instalate. Componentele de energie ale PNRR alocă finanțare dedicată dezvoltării capacităților de stocare, ca măsură structurală, complementară investițiilor în surse regenerabile propriu-zise, recunoscând stocarea drept infrastructură critică pentru integrarea eficientă a producției variabile, nu doar o opțiune comercială marginală. Instalația tratată în prezentul memoriu se înscrie direct în acest context de politică energetică: contribuie la flexibilizarea sistemului, la reducerea curtailment-ului resurselor regenerabile deja instalate și la furnizarea de servicii tehnologice de sistem cu răspuns rapid, cerute în volum crescător de operatorul de transport pe măsură ce ponderea SRE variabile crește.
+
+### 4.4. Conformitatea cu Codul Rețelei și cerințele de racordare
+
+Furnizarea serviciilor tehnologice de sistem descrise la 4.1 este condiționată de conformitatea instalației cu cerințele tehnice ale Codului Rețelei (Cod RET, pentru racordul la rețeaua de transport, sau Cod RED, pentru racordul la rețeaua de distribuție), care stabilesc, printre altele: capacitatea instalației de a menține funcționarea în condiții de abateri de frecvență/tensiune în limite specificate (fără deconectare intempestivă — cerință de tip „fault ride-through”), precizia și viteza de răspuns la comenzile de reglaj, capacitatea de a furniza sau absorbi putere reactivă în sprijinul tensiunii de rețea, și interfața de comunicație/telecomandă cu dispecerul operatorului de rețea. Aceste cerințe sunt verificate tehnic la faza de Aviz Tehnic de Racordare (ATR) și, ulterior, prin testele de prevalidare impuse de operatorul de rețea înainte de punerea în funcțiune comercială, aspecte tratate detaliat în memoriul de instalații electrice și de automatizări, care nu se dublează în prezentul document.
+
+---
+
+## 5. TIPURILE DE TEHNOLOGIE BESS — FUNDAMENTAREA ALEGERII TEHNOLOGICE
+
+### 5.1. Litiu-ion NMC (nichel-mangan-cobalt)
+
+Chimia NMC oferă cea mai ridicată densitate energetică gravimetrică dintre tehnologiile litiu-ion comerciale de volum mare (tipic 150-220 Wh/kg la nivel de celulă), avantaj determinant pentru aplicațiile de mobilitate electrică, unde greutatea și volumul disponibil sunt constrângeri critice. În schimb, așa cum s-a detaliat la capitolul 3.4, profilul de siguranță termică este inferior chimiei LFP — prag de declanșare a „thermal runaway” mai scăzut și eliberare de oxigen din catod, care alimentează autonom o eventuală combustie internă — iar prezența cobaltului ridică atât costul materiei prime, cât și considerentele etice/de lanț de aprovizionare (mineritul de cobalt este concentrat geografic și asociat, în anumite jurisdicții, cu riscuri de guvernanță și de muncă). Pentru aplicații staționare de tip BESS la scară de utilitate publică, unde spațiul disponibil este, de regulă, mai puțin constrâns decât greutatea/volumul unui vehicul, avantajul de densitate al NMC este mai puțin relevant, în timp ce dezavantajele de siguranță și cost devin determinante.
+
+### 5.2. Litiu-ion LFP (litiu-fer-fosfat) — chimia adoptată
+
+Chimia LFP oferă o densitate energetică ceva mai redusă decât NMC (tipic 90-160 Wh/kg la nivel de celulă), dar compensează prin: (1) **siguranță termică superioară**, detaliată la capitolul 3.4 (prag de declanșare mai ridicat, absența oxigenului liber din catod); (2) **durată de viață ciclică superioară**, cu producători care garantează, la o adâncime de descărcare (DoD) de 90%, peste 6.000 de cicluri complete de încărcare-descărcare, echivalent unei durate de exploatare de peste 15 ani în regim tipic de o descărcare completă pe zi; (3) **absența cobaltului**, cu beneficii de cost și de reziliență a lanțului de aprovizionare; (4) **maturitatea tehnologică pe segmentul de stocare la scară de utilitate publică (grid-scale)**, unde chimia LFP este, la momentul redactării acestui memoriu, opțiunea dominantă la nivel mondial pentru proiectele noi de BESS staționar, cu o bază largă de experiență operațională și de fiabilitate demonstrată.
+
+Rata de solicitare a bateriei (C-rate), definită ca raportul dintre puterea instalată și capacitatea energetică (C-rate = P/E), este pentru configurația de proiect C-rate = 25 MW / 50 MWh = **0,5C**, echivalent unei descărcări complete în 2 ore. Această rată este considerată moderată în raport cu plaja tipică a aplicațiilor BESS staționare (care variază de la aplicații de răspuns rapid la frecvență, cu C-rate ridicat și durată scurtă de descărcare, până la aplicații de arbitraj/deplasare energetică de lungă durată, cu C-rate redus), și este favorabilă atât duratei de viață a celulelor (o rată de solicitare mai redusă limitează încălzirea internă generată de rezistența ohmică a celulei și încetinește mecanismele de degradare accelerată), cât și controlului termic al containerului (căldura generată de pierderile electrice interne, proporțională cu pătratul curentului, este mai ușor de evacuat de sistemul de climatizare la o rată de solicitare moderată).
+
+### 5.3. Baterii de curgere (flow batteries) — tehnologia redox cu vanadiu (VRFB)
+
+Bateriile redox cu curgere de vanadiu (Vanadium Redox Flow Batteries) stochează energia electrochimic în electroliți lichizi conținând ioni de vanadiu în stări de oxidare diferite, pompați între rezervoare de stocare și o celulă electrochimică unde are loc reacția redox reversibilă. Această arhitectură separă fizic capacitatea energetică (determinată de volumul rezervoarelor de electrolit) de puterea instalată (determinată de dimensiunea celulei electrochimice), permitind o scalare independentă a celor doi parametri — avantaj util pentru aplicații cu durată de descărcare foarte lungă (peste 4-8 ore). Densitatea energetică volumetrică este semnificativ mai redusă decât la litiu-ion (tipic 15-25 Wh/kg la nivel de sistem), ceea ce impune o amprentă la sol considerabil mai mare pentru aceeași capacitate energetică, dar oferă, în compensație, o siguranță termică foarte ridicată (electrolitul apos nu este inflamabil, absent riscul de „thermal runaway” caracteristic litiu-ion) și o durată de viață ciclică practic nelimitată la nivelul componentelor electrochimice (electrolitul nu se degradează semnificativ prin ciclare, spre diferență de electrozii solizi ai bateriilor litiu-ion). Pentru configurația de proiect (C-rate 0,5C, durată de descărcare 2 ore), tehnologia VRFB nu reprezintă opțiunea optimă din punct de vedere al amprentei la sol și al costului per MWh la orizontul actual de maturitate comercială, dar rămâne o alternativă relevantă pentru extinderi viitoare orientate spre durate de descărcare mai lungi (4 ore și peste).
+
+### 5.4. Sodiu-ion și alte tehnologii emergente
+
+Bateriile sodiu-ion, aflate într-un stadiu de maturitate comercială mai incipient decât litiu-ion la scara de utilitate publică, oferă un potențial de reducere semnificativă a costului materiei prime (sodiul este abundent și larg distribuit geografic, spre diferență de litiu și cobalt) și un profil de siguranță termică promițător, comparabil sau superior chimiei LFP, dar cu o densitate energetică inferioară și cu o bază de experiență operațională la scară industrială încă limitată la momentul redactării acestui memoriu. Alte tehnologii emergente (baterii cu stare solidă, baterii cu zinc, sisteme de stocare mecanică precum volanții de inerție sau aerul comprimat, relevante pentru aplicații de putere de foarte scurtă durată sau de energie de foarte lungă durată) nu sunt tratate ca opțiuni pentru configurația curentă a proiectului, dat fiind stadiul lor de maturitate comercială la data prezentului memoriu, insuficient verificat pentru un proiect de 25 MW/50 MWh cu orizont de execuție apropiat; ele rămân, însă, opțiuni de monitorizat pentru extinderi viitoare sau pentru proiecte ulterioare ale beneficiarului.
+
+### 5.5. Considerații privind ciclul de viață, degradarea și „second-life”
+
+Bateriile litiu-ion, indiferent de chimie, se degradează progresiv pe durata exploatării, prin mecanisme precum creșterea stratului de interfază solid-electrolit (SEI) pe anod, pierderea de litiu ciclabil și degradarea structurală a materialului catodic, cu efect cumulat de reducere a capacității utile disponibile (tipic exprimată ca procent din capacitatea nominală inițială) și de creștere a rezistenței interne. Producătorii de celule LFP pentru aplicații staționare garantează, tipic, o capacitate reziduală de ordinul a 80% din capacitatea nominală după atingerea numărului de cicluri garantat (peste 6.000 de cicluri la DoD 90%, conform capitolului 5.2), prag dincolo de care operatorul evaluează fie continuarea exploatării la capacitate redusă, fie înlocuirea modulelor de baterii. La finalul duratei de viață utile în aplicația de stocare la scară de utilitate publică (care impune cerințe stricte de putere și de disponibilitate), modulele de baterii LFP păstrează, adesea, o capacitate reziduală suficientă pentru aplicații secundare mai puțin solicitante (stocare rezidențială, sisteme de rezervă necritice) — practică denumită **„second-life”** — înainte de a intra, la finalul complet al ciclului de viață util, în fluxul de reciclare autorizată tratat la capitolul 10.5, conform obligațiilor Regulamentului (UE) 2023/1542. Decizia de valorificare „second-life” versus reciclare directă depinde de starea de sănătate (SOH) reală a modulelor la momentul retragerii din exploatarea primară și de existența unor operatori autorizați dispuși să preia loturile pentru reutilizare — aspect ce excedează faza DTAC a proiectului, dar care se semnalează ca opțiune de gestionare responsabilă la finalul de viață, alături de reciclarea directă.
+
+### 5.6. Sinteza justificării tehnologice
+
+| Tehnologie | Densitate energetică (nivel celulă) | Profil de siguranță termică | Aplicație tipică |
 |---|---|---|---|
-| Li-ion NMC | mare 150-220 Wh/kg | mai redusă (O₂ catod) | mobilitate |
-| **Li-ion LFP (adoptat)** | mare 90-160 | **ridicată** (fără O₂) | staționar grid |
-| Flow redox VRFB | redusă 15-25 | foarte ridicată (apos) | lungă durată |
-| Sodiu-ion | medie | ridicată | perspectivă |
+| Li-ion NMC | Ridicată — 150-220 Wh/kg | Mai redus (eliberare de oxigen din catod) | Mobilitate electrică; BESS unde spațiul e critic |
+| **Li-ion LFP (adoptată)** | Ridicată — 90-160 Wh/kg | **Ridicat** (fără eliberare de oxigen din catod) | Stocare staționară la scară de utilitate publică |
+| Redox cu curgere (VRFB) | Redusă — 15-25 Wh/kg | Foarte ridicat (electrolit apos, neinflamabil) | Stocare de foarte lungă durată (≥4-8 h) |
+| Sodiu-ion | Medie, sub LFP | Ridicat (promițător, în validare) | Perspectivă pe termen mediu, cost redus |
 
-**Adoptat LFP:** siguranță termică + durată >6.000 cicluri (DoD 90%) + fără cobalt + maturitate grid. C-rate = P/E = 25/50 = **0,5C** (moderat, favorabil viață + control termic).
+Chimia **LFP** este adoptată pentru configurația de proiect de 25 MW/50 MWh pe baza convergenței a patru factori: siguranța termică superioară (capitolul 3.4), durata de viață ciclică ridicată la o adâncime de descărcare de 90% (peste 6.000 de cicluri, peste 15 ani de exploatare), absența cobaltului din compoziție, și maturitatea tehnologică demonstrată la scara de utilitate publică. C-rate-ul de proiectare (0,5C, capitolul 5.2) este moderat și favorabil atât duratei de viață a celulelor, cât și controlului termic, consolidând coerența tehnică a soluției adoptate.
 
-## 6. Încadrare urbanistică
+---
 
-Extravilan/zonă tehnico-industrială energetică → **PUZ** (Legea 350/2001) + RLU: funcțiune stocare energie, POT ≤30-40% / CUT ≤0,4-0,6 (reduse — mult teren pt distanțe), regim parter tehnic H ≤6-7 m, distanțe siguranță NFPA 855/P118/ISU. Orientativ: teren ~12.000-15.000 mp, Sc ~1.800-2.400, **POT ~15-20% / CUT ~0,15-0,20**, verzi ≥20%.
+## 6. ÎNCADRAREA URBANISTICĂ
 
-## 7. Descriere tehnică
+### 6.1. Documentația de urbanism aplicabilă — necesitatea PUZ
 
-Ansamblu modular containerizat: (1) **containere baterii** ISO 20' (rack module LFP + **BMS 3 niveluri** modul→rack→sistem + HVAC 15-35°C + detecție/stingere/venting + EI 120); (2) **PCS Power Conversion System** (invertoare bidirecționale DC↔AC, P/Q, grid-forming/following); (3) transformator ridicător 0,8/20 kV; (4) racord SEN (celule MT + stație + eventual 20/110 kV, ATR); (5) **EMS** (dispecerizare arbitraj/servicii + SCADA); (6) auxiliare (CCTV, iluminat, împrejmuire, drumuri, platformă pompieri).
+Amplasamentul, situat tipic în extravilan sau într-o zonă cu funcțiune tehnico-industrială energetică, se reglementează, conform Legii nr. 350/2001, prin **Plan Urbanistic Zonal (PUZ)** dedicat sau prin regulamentul local de urbanism (RLU) aferent zonei, atunci când documentația de urbanism de rang superior (PUG) prevede deja o zonă compatibilă cu funcțiunea de producere/stocare a energiei. Necesitatea unui PUZ dedicat derivă, de regulă, din caracterul specific al funcțiunii — o instalație tehnologică fără precedent tipologic în reglementările generice ale PUG — și din necesitatea de a stabili, la nivel de detaliu, indicatorii urbanistici specifici (POT, CUT, regim de înălțime redus, distanțe de siguranță), diferiți fundamental de cei ai unei construcții civile obișnuite.
 
-## 8. Indicatori
+### 6.2. Logica indicatorilor urbanistici specifici unei instalații BESS
+
+Spre diferență de o clădire civilă, unde POT și CUT ridicate reflectă, de regulă, o utilizare eficientă și dorită a terenului, la o instalație BESS indicatorii urbanistici sunt structural reduși, nu din lipsă de eficiență economică, ci din **necesitatea impusă de distanțele de siguranță la incendiu** (capitolul 3.6): fiecare container trebuie separat de containerele adiacente cu minimum 3,0 m (sau distanța rezultată din testul UL 9540A), iar grupul de containere trebuie separat, la rândul său, de limitele de proprietate și de eventualele construcții învecinate cu distanțe suplimentare, dimensionate conform NFPA 855. Rezultatul net este o amprentă construită la sol (suprafața containerelor propriu-zise și a stației de conexiune) relativ redusă în raport cu suprafața totală de teren ocupată de instalație — cea mai mare parte a terenului fiind, de fapt, „spațiu de siguranță” neconstruit, dar funcțional indispensabil, nu spațiu verde amenajat în sensul clasic urbanistic (deși poate fi tratat ca atare pentru încadrarea procentuală, dacă este înierbat/plantat cu vegetație joasă compatibilă cu accesul autospecialelor de intervenție).
+
+Această logică se traduce în indicatori orientativi de tipul: **POT ≤ 30-40%** (ca prag reglementat maxim prin RLU, cu marjă generoasă) și **CUT ≤ 0,4-0,6**, valori mult reduse față de zonele rezidențiale sau comerciale, dar reglementate astfel tocmai pentru a acomoda distanțele de siguranță fără a restricționa artificial extinderea viitoare a instalației; regim de înălțime de tip parter tehnic, cu **H ≤ 6-7 m** (înălțimea unui container standard, tipic 2,9 m, plus eventuale supraetajări tehnice sau echipamente montate pe acoperișul containerului, precum unități de climatizare sau transformatoare de mici dimensiuni, rămân bine sub acest plafon).
+
+### 6.3. Indicatorii propuși pentru configurația de proiect
+
+Pentru configurația de referință de 25 MW/50 MWh, tratată orientativ pe un teren de **~12.000-15.000 mp**, cu o suprafață construită la sol (containere + stație de conexiune + eventuală cabină tehnică) de **~1.800-2.400 mp**, rezultă indicatori de ordinul:
+
+| Indicator | Valoare orientativă |
+|---|---|
+| POT propus | ~15-20% |
+| CUT propus | ~0,15-0,20 |
+| Regim de înălțime | Parter tehnic, H ≤ 6-7 m |
+| Procent spații verzi/neconstruite | ≥ 20% |
+
+Diferența semnificativă dintre suprafața de teren ocupată (~12.000-15.000 mp) și suprafața efectiv construită (~1.800-2.400 mp) reflectă exact logica descrisă la 6.2: cea mai mare parte a incintei este ocupată de distanțele de siguranță între containere și de drumurile interioare de acces/intervenție, nu de spații verzi amenajate în sensul recreativ, deși pot fi tratate ca atare din perspectivă procentuală și pot găzdui vegetație joasă, cu condiția să nu obstrucționeze accesul autospecialelor de intervenție și să nu introducă un risc suplimentar de propagare a incendiului (vegetație uscată/înaltă, necesitând întreținere periodică).
+
+### 6.4. Logica de amplasare determinată de distanțele de siguranță
+
+Configurația plan a instalației (dispunerea grupului de containere, poziția stației de conexiune, traseul drumurilor interioare) este dictată, în ordine de prioritate, de: (1) distanțele de siguranță la incendiu între containere și față de limitele de proprietate/construcții învecinate (capitolul 3.6, fundamentate pe raportul UL 9540A specific proiectului); (2) accesibilitatea autospecialelor de intervenție ISU pe tot perimetrul grupului de containere, cu cale de acces continuă și cu lățime suficientă pentru manevrarea autospecialelor; (3) proximitatea față de punctul de racord la rețeaua electrică (pentru minimizarea lungimii cablurilor de medie tensiune și a pierderilor asociate); (4) orientarea care minimizează expunerea solară directă a containerelor (relevantă pentru sarcina termică a sistemului de climatizare, capitolul 7.1). Această ierarhie de priorități, specifică unei instalații tehnologice cu risc de incendiu ridicat, este fundamental diferită de logica de amplasare a unei clădiri civile, unde orientarea, însorirea vecinătăților și relația cu spațiul public primează.
+
+---
+
+## 7. DESCRIEREA TEHNICĂ A INSTALAȚIEI
+
+### 7.1. Containerele de baterii — arhitectura modul/rack și sistemul BMS pe trei niveluri
+
+Fiecare container de baterii este un echipament prefabricat, tipic în format ISO 20 picioare, complet echipat de producător cu: rack-uri de module de baterii LFP (fiecare rack cuprinzând un număr de module conectate în serie/paralel pentru atingerea tensiunii și capacității de proiect), sistem de climatizare dedicat (HVAC, menținând temperatura internă în intervalul optim de funcționare a chimiei LFP, tipic 15-35°C, esențial atât pentru performanța și durata de viață a bateriilor, cât și pentru prevenirea abuzului termic descris la capitolul 3.2), sistem de detecție de gaze și de fum, sistem de stingere/răcire, panouri de ventilare a deflagrației, și anvelopă cu rezistență la foc EI 120 (capitolul 3.6).
+
+Sistemul de management al bateriei (**BMS — Battery Management System**) este organizat, la un proiect de această scară, pe o arhitectură ierarhică de trei niveluri, fiecare cu rol funcțional distinct:
+
+- **Nivelul modul** — monitorizează tensiunea și temperatura fiecărei celule individuale din modul, realizează echilibrarea celulelor (balancing, redistribuind mici cantități de energie între celule pentru a preveni divergența tensiunilor individuale în timp, fenomen care ar accelera degradarea neuniformă) și transmite datele agregate la nivelul superior.
+- **Nivelul rack** — agregă datele de la toate modulele racku-lui, calculează starea de încărcare (SOC — State of Charge) și starea de sănătate (SOH — State of Health) la nivel de rack, și poate izola electric un modul defect fără a scoate din funcțiune întregul rack.
+- **Nivelul sistem/container** — coordonează toate rack-urile din container, comunică cu sistemul EMS (capitolul 7.5) pentru dispecerizarea puterii, implementează protecțiile de sistem (limite de tensiune/curent/temperatură la nivel de container) și comandă deconectarea electrică de urgență în caz de detectare a unui eveniment anormal, în corelare cu sistemul de detecție-alarmare-stingere descris la capitolul 3.6.
+
+Această arhitectură pe trei niveluri asigură atât granularitatea necesară detectării precoce a unei anomalii la nivel de celulă individuală (esențială pentru prevenirea propagării unui eveniment de tip „thermal runaway”, capitolul 3.1), cât și robustețea operațională (izolarea unui modul/rack defect fără oprirea întregului container).
+
+### 7.2. Sistemul de conversie a puterii (PCS)
+
+**PCS (Power Conversion System)** este ansamblul de invertoare bidirecționale care realizează conversia între curentul continuu (DC) al bateriilor și curentul alternativ (AC) al rețelei electrice, atât în modul de încărcare (AC→DC), cât și în modul de descărcare (DC→AC). Invertoarele moderne pentru aplicații BESS la scară de utilitate publică oferă control independent al puterii active (P) și reactive (Q), permitind instalației să funcționeze fie în regim „grid-following” (sincronizat cu tensiunea și frecvența impuse de rețea, mod standard de operare atunci când rețeaua este stabilă), fie în regim „grid-forming” (capabil să impună propria referință de tensiune și frecvență, funcție relevantă pentru scenarii de rețea slabă sau pentru servicii avansate de stabilitate a sistemului, cerute în volum crescător pe măsură ce ponderea surselor regenerabile fără inerție mecanică crește în mixul energetic). PCS-ul este echipamentul care primește comenzile de dispecerizare de la sistemul EMS și le traduce în puncte de funcționare reale ale bateriilor (încărcare/descărcare, nivel de putere activă/reactivă), fiind astfel interfața critică între decizia de operare (arbitraj, servicii de sistem) și comportamentul fizic al instalației.
+
+### 7.3. Transformatorul ridicător și racordul la rețeaua electrică
+
+Puterea de ieșire a invertoarelor PCS, produsă la tensiune joasă (tipic sub 1 kV), este ridicată la nivelul de medie tensiune al racordului prin **transformatoare ridicătoare**, tipic cu raport de transformare de ordinul 0,8/20 kV, dimensionate la puterea nominală a grupului de invertoare deservit. Transformatoarele pot fi integrate în containere dedicate (soluție compactă, frecventă la instalațiile modulare) sau amplasate pe platforme dedicate în cadrul stației de conexiune, cu cuvă de retenție a uleiului electroizolant (dacă transformatorul este de tip cu ulei) dimensionată să prevină scurgerea în sol/apele subterane în caz de avarie — măsură de protecție a mediului tratată la capitolul 10.
+
+### 7.4. Stația de conexiune la Sistemul Energetic Național
+
+Evacuarea energiei în SEN se realizează printr-o **stație de conexiune** proprie, care cuprinde: celule de medie tensiune (20 kV) cu echipamentele de comutație și protecție aferente (întreruptoare, separatoare, transformatoare de măsură), sistemul de protecții de linie (protecții de supracurent, protecții diferențiale, protecții de distanță, după caz, dimensionate conform cerințelor Codului Rețelei și ale operatorului de rețea), și, funcție de configurația specifică a racordului, un eventual transformator suplimentar de ridicare la 110 kV, atunci când punctul de racord alocat de operatorul de transport se situează la acest nivel de tensiune (decizie care rezultă din studiul de soluție de racordare și din Avizul Tehnic de Racordare emis de operator, nu dintr-o alegere de proiectare autonomă a beneficiarului). Stația de conexiune este echipată cu sistem propriu de protecție împotriva incendiului (adecvat riscului specific echipamentelor electrice de medie/înaltă tensiune, distinct de riscul „thermal runaway” al containerelor de baterii) și cu sistem de măsurare fiscală a energiei electrice, cerință obligatorie pentru decontarea comercială a energiei tranzacționate.
+
+### 7.5. Sistemul de management al energiei (EMS) și SCADA
+
+**EMS (Energy Management System)** este platforma software-hardware care orchestrează întreaga strategie de operare a instalației: primește semnalele de piață (prețuri PZU, instrucțiuni de la operatorul de transport pentru serviciile tehnologice de sistem contractate, capitolul 4.1), starea curentă a bateriilor (SOC, SOH, temperatură, raportate de BMS), și starea sistemului electric (frecvență, tensiune de rețea), și calculează, în timp real, punctele optime de funcționare (încărcare/descărcare, nivel de putere) pentru maximizarea veniturilor din arbitraj și servicii de sistem, cu respectarea limitelor de siguranță impuse de BMS și de Codul Rețelei. EMS-ul comunică aceste comenzi către PCS (capitolul 7.2) și este integrat cu sistemul **SCADA** (Supervisory Control and Data Acquisition) al instalației, care asigură monitorizarea, telecomanda și telesemnalizarea de la distanță, inclusiv interfața cu dispecerul operatorului de rețea, conform cerințelor de telecontrol impuse la Avizul Tehnic de Racordare. Redundanța și securitatea cibernetică a sistemului EMS/SCADA (protecție împotriva accesului neautorizat, care ar putea compromite funcționarea sigură a instalației conectate la rețeaua națională) se detaliază în memoriul de automatizări, care nu se dublează în prezentul document.
+
+### 7.6. Sistemele auxiliare
+
+Instalația este completată de un set de sisteme auxiliare, necesare funcționării, securității și mentenanței de ansamblu: **CCTV** (supraveghere video perimetrală și a zonei containerelor, cu rol atât de securitate fizică — prevenirea accesului neautorizat/vandalismului —, cât și de suport pentru investigarea post-eveniment); **iluminat** perimetral și de mentenanță; **împrejmuire** perimetrală, dimensionată să prevină accesul persoanelor neautorizate, cu porți de acces controlat; **drumuri interioare**, dimensionate atât pentru accesul de mentenanță curentă, cât și pentru manevrarea autospecialelor de intervenție ISU (capitolul 3.7); **platformă de intervenție pentru pompieri**, poziționată strategic pentru acces rapid la orice punct al grupului de containere; **sistem de detecție a efracției**, integrat cu CCTV și cu telesemnalizarea către un dispecerat de securitate. Aceste sisteme auxiliare, deși nu constituie „nucleul tehnologic” al instalației (bateriile, PCS, stația de conexiune), sunt parte integrantă a soluției de securitate și de exploatare curentă, detaliate în memoriile de specialitate aferente (electrice curenți slabi, arhitectură/amenajări incintă).
+
+---
+
+## 8. INDICATORI TEHNICO-ECONOMICI
+
+### 8.1. Tabel de indicatori principali
 
 | Indicator | Valoare |
 |---|---|
-| E / nr. containere | 50 MWh / 10 (e_c ~5 MWh/container 20') |
-| P / C-rate / durată | 25 MW / 0,5C / 2 h |
-| η round-trip | 87% (E_in = 50/0,87 ≈ 57,5 MWh) |
-| DoD / viață | 90% / >6.000 cicluri, >15 ani |
+| Capacitate energetică (E) / Număr de containere | 50 MWh / 10 containere (energie utilă ~5 MWh/container ISO 20') |
+| Putere instalată (P) / C-rate / Durată de descărcare | 25 MW / 0,5C / 2 ore |
+| Randament round-trip (η) | 87% proiectat (E_in = E/η = 50/0,87 ≈ 57,5 MWh energie de încărcare necesară pentru 50 MWh livrați) |
+| Adâncimea de descărcare (DoD) / Durata de viață ciclică | 90% / peste 6.000 de cicluri, peste 15 ani |
+| Suprafață teren | ~12.000-15.000 mp (orientativ) |
+| Suprafață construită la sol | ~1.800-2.400 mp (orientativ) |
+| POT / CUT | ~15-20% / ~0,15-0,20 |
+| Categoria de importanță | C (normală) |
+| Clasa de importanță și expunere seismică | III (γI = 1,0) |
+| Nivelul de risc de incendiu | MARE |
+| Durata de execuție estimată | 8-12 luni |
 
-**E = N_c × e_c = 10 × 5 = 50 MWh.**
+### 8.2. Verificarea capacității energetice
 
-## 9. Utilități
+Capacitatea energetică totală a instalației rezultă din însumarea energiei utile a containerelor individuale:
 
-Racord SEN + consum auxiliar (HVAC/EMS/iluminat) din rețea; apă (rezervă incendiu + drencer răcire); canal menajer + **bazin retenție ape stingere contaminate** (NU în emisar); comunicații fibră SCADA/telegestiune; drumuri + platformă intervenție pompieri.
+**E = N_c × e_c = 10 × 5 MWh = 50 MWh**
 
-## 10. Mediu și siguranță
+unde N_c este numărul de containere (10) și e_c este energia utilă per container (~5 MWh, valoare tipică pentru un container ISO 20' echipat cu module LFP de generație actuală, variabilă în funcție de producătorul de echipamente contractat și de densitatea energetică specifică a modulelor furnizate). Puterea instalată de 25 MW rezultă din suma puterilor nominale ale invertoarelor PCS asociate celor 10 containere, dimensionate pentru atingerea C-rate-ului de proiect de 0,5C (capitolul 5.2).
 
-**Exploatare normală:** impact redus (fără emisii proces/ape uzate, zgomot <STAS 10009); screening EIA (L 292/2018). **Riscuri + măsuri:** thermal runaway (LFP + BMS + HVAC + detecție gaze), gaze inflamabile (ventilație deflagrație NFPA 68/69), propagare (distanțe UL 9540A/3 m + EI 120), incendiu (stingere + răcire apă + acces 2 laturi), ape stingere (bazin retenție etanș), baterii uzate (reciclare autorizată — recuperare Li/Fe/Cu/Al, Dir. 2006/66 + OUG 5/2015 + Reg. UE 2023/1542, opțional second-life).
+### 8.3. Verificarea randamentului round-trip
 
-## 11. Avize
+Randamentul round-trip (η) reprezintă raportul dintre energia livrată la descărcare și energia consumată la încărcare, incluzând toate pierderile din lanțul de conversie: pierderile electrochimice interne ale celulelor (rezistență internă), pierderile de conversie ale invertoarelor PCS (AC↔DC), pierderile în transformatoarele ridicătoare, și consumul propriu al sistemelor auxiliare (în principal climatizarea containerelor, capitolul 7.1). Pentru configurația de proiect, randamentul proiectat este de **87%**, cu un nivel minim garantat contractual de **85%** (garanție tipică a producătorilor de echipamente pentru primii ani de exploatare, cu degradare graduală ulterioară corelată cu îmbătrânirea celulelor). Practic, pentru a livra 50 MWh la descărcare, instalația necesită E_in = E/η = 50/0,87 ≈ **57,5 MWh** de energie de încărcare — diferența de ~7,5 MWh reprezintă pierderile totale ale ciclului complet de încărcare-descărcare, cost operațional relevant pentru modelul economic al arbitrajului de preț (capitolul 4.2), unde marja de profit trebuie să acopere aceste pierderi pentru ca operațiunea să fie rentabilă.
 
-CU, **ATR (OD/Transelectrica)**, **aviz/licență ANRE** (stocare), **aviz ISU CRITIC** (risc mare, Ord. MAI 129/2016 + raport UL 9540A), acord mediu APM (screening EIA), pompieri/protecție civilă (în ISU), utilități, DSP (după caz).
+### 8.4. Durata de viață și degradarea capacității
 
-## 12. Concluzii
+Durata de viață ciclică garantată (peste 6.000 de cicluri complete la o adâncime de descărcare de 90%) corespunde, în regim tipic de operare cu o descărcare completă echivalentă pe zi (profil compatibil cu strategia de arbitraj zilnic descrisă la capitolul 4.2), unei durate calendaristice de exploatare de peste **15 ani**, înainte ca degradarea capacității să atingă pragul convențional de sfârșit de viață utilă în aplicația primară (tipic 80% din capacitatea nominală inițială, capitolul 5.5). Această durată de viață a componentei electrochimice este, tipic, inferioară duratei de viață a componentelor civile/structurale ale instalației (platforme, stație de conexiune, estimate la peste 20-25 ani), fapt care implică, la proiectarea economică a investiției, un ciclu de înlocuire a modulelor de baterii (repowering) la un orizont de aproximativ 15 ani, aspect ce excedează faza DTAC, dar care se semnalează ca element de planificare pe termen lung a exploatării.
 
-BESS Li-ion LFP 25 MW/50 MWh, categoria C, clasa III (γI 1,0), **risc MARE** (LFP reduce severitatea). Cadru = construcții + energie + mediu + **standarde BESS (IEC 62933/62619/63056, UL 9540/9540A, NFPA 855)**. Oportun strategic (SRE + servicii sistem + PNRR/PNIESC). Autorizare condiționată de ATR + ANRE + **ISU (critic)** + mediu + **raport UL 9540A** la PTh. Cele 6 cerințe L10/1995 (B tratată agravant). Se completează cu memoriile de specialitate + piese desenate.
+---
+
+## 9. UTILITĂȚI ȘI RACORDURI
+
+### 9.1. Alimentarea cu energie electrică — racordul principal și consumul auxiliar
+
+Instalația are o dublă relație cu rețeaua electrică: pe de o parte, este ea însăși un consumator/producător racordat la SEN prin stația de conexiune descrisă la capitolul 7.4, prin care se realizează atât evacuarea energiei descărcate din baterii, cât și absorbția energiei de încărcare; pe de altă parte, sistemele auxiliare ale instalației (climatizarea containerelor, sistemul EMS/SCADA, iluminatul, sistemele de securitate și de protecție la incendiu) necesită un consum propriu continuu de energie electrică, alimentat, tipic, printr-un branșament de servicii proprii de joasă tensiune derivat din transformatorul auxiliar al stației de conexiune sau, ca soluție de rezervă pentru funcțiile critice (sistemul de detecție-alarmare, iluminatul de siguranță, sistemul de securitate), printr-o sursă neîntreruptibilă (UPS) și, după caz, un grup electrogen de rezervă. Continuitatea alimentării sistemelor de climatizare a containerelor este deosebit de importantă, dat fiind rolul acestora în menținerea temperaturii interne a bateriilor în plaja optimă de funcționare (15-35°C) și în prevenirea abuzului termic descris la capitolul 3.2.
+
+### 9.2. Alimentarea cu apă
+
+Necesarul de apă al instalației este limitat, în regim normal de exploatare, la eventualele necesități igienico-sanitare punctuale ale personalului de mentenanță (dacă există o cabină tehnică cu grup sanitar), dar devine semnificativ în scenariul de intervenție la incendiu, unde sistemul de răcire perimetrală cu apă pulverizată (drencer, capitolul 3.6) necesită o rezervă de apă dedicată, dimensionată conform breviarului de calcul al scenariului de securitate la incendiu (debit și durată de funcționare continuă necesare pentru răcirea containerelor adiacente unui eveniment). Rezerva de apă pentru incendiu poate fi asigurată printr-un rezervor propriu (cu pompe dedicate) sau prin racord la o rețea de hidranți exteriori existentă în zonă, funcție de disponibilitatea infrastructurii locale, decizie care se detaliază în memoriul de instalații sanitare/PSI.
+
+### 9.3. Canalizarea și gestionarea apelor de stingere contaminate
+
+Un aspect tehnic esențial, specific instalațiilor cu risc de incendiu care implică substanțe chimice (bateriile Li-ion și electroliții lor), este **gestionarea apelor rezultate dintr-o eventuală intervenție de stingere/răcire**: aceste ape, care ar putea intra în contact cu reziduuri de electrolit, cu produși de descompunere termică ai bateriilor sau cu alte substanțe eliberate în timpul unui eveniment, sunt considerate potențial contaminate și **nu se descarcă în emisarul natural sau în rețeaua de canalizare pluvială obișnuită**. Instalația prevede un **bazin de retenție etanș**, dimensionat să colecteze integral volumul de apă utilizat de sistemul de stingere/răcire pe durata unei intervenții, din care apa colectată este ulterior analizată și evacuată/tratată conform reglementărilor de mediu aplicabile (prin operator autorizat de gestionare a deșeurilor lichide periculoase, dacă analiza confirmă contaminarea, sau prin descărcare controlată, dacă analiza o permite). Această soluție previne contaminarea solului și a apelor subterane/de suprafață și este un element central al studiului de evaluare a impactului asupra mediului (capitolul 10.2).
+
+### 9.4. Comunicații și telegestiune
+
+Instalația necesită o legătură de **comunicații prin fibră optică** (sau, ca soluție de rezervă, legătură radio dedicată), care asigură atât telecontrolul SCADA/EMS descris la capitolul 7.5, cât și transmiterea semnalelor de detecție-alarmare către un dispecerat de monitorizare (propriu sau al unui operator de securitate/pompieri contractat), precum și interfața de telemăsurare fiscală și de telecomandă cu dispeceratul operatorului de rețea, cerință obligatorie a Codului Rețelei pentru instalațiile care furnizează servicii tehnologice de sistem (capitolul 4.1).
+
+### 9.5. Drumuri și platforme
+
+Accesul rutier la instalație se realizează printr-un drum de acces racordat la rețeaua rutieră existentă, dimensionat pentru traficul de mentenanță curentă și pentru transportul echipamentelor grele la faza de execuție (containerele complet echipate, cu greutăți de ordinul a 35 tone fiecare, capitolul 2.3, necesită transport special și manevre de descărcare cu macara/trailer specializat). Drumurile interioare ale incintei, așa cum s-a detaliat la capitolul 6.4 și 7.6, sunt dimensionate prioritar pentru accesul autospecialelor de intervenție ISU pe tot perimetrul grupului de containere, cu platformă dedicată de intervenție pentru pompieri.
+
+---
+
+## 10. MEDIU ȘI SIGURANȚĂ
+
+### 10.1. Impactul în exploatare normală
+
+În regim normal de exploatare, instalația are un impact de mediu relativ redus comparativ cu alte instalații energetice: nu generează emisii de proces (spre diferență de o centrală termică convențională), nu generează ape uzate tehnologice semnificative (consumul de apă fiind limitat, în regim normal, la necesitățile igienico-sanitare punctuale, capitolul 9.2), iar nivelul de zgomot generat de sistemele de climatizare a containerelor și de eventualele ventilatoare ale transformatoarelor se încadrează, prin proiectare (alegerea echipamentelor cu nivel de zgomot redus, poziționare care maximizează distanța față de eventuale vecinătăți sensibile), în limitele admise de STAS 10009 (acustica urbană, limitele admisibile ale nivelului de zgomot). Emisiile electromagnetice ale echipamentelor de medie/înaltă tensiune (transformatoare, celule de conexiune) se încadrează în limitele de expunere a publicului stabilite prin reglementările naționale/europene privind câmpurile electromagnetice, verificate, dacă este cazul, printr-un studiu dedicat la faza de proiectare a stației de conexiune.
+
+### 10.2. Procedura de evaluare a impactului asupra mediului (screening EIA)
+
+Conform Legii nr. 292/2018 privind evaluarea impactului anumitor proiecte publice și private asupra mediului, instalația se supune unei proceduri de **încadrare (screening)**, în cadrul căreia autoritatea competentă de protecția mediului decide, pe baza unei documentații tehnice sumare, dacă proiectul necesită parcurgerea integrală a procedurii de evaluare a impactului asupra mediului (EIA) sau dacă poate fi autorizat direct, pe baza unui acord de mediu emis în urma etapei de încadrare. Decizia de încadrare ține cont, printre altele, de dimensiunea instalației, de sensibilitatea amplasamentului (proximitatea față de arii naturale protejate, corpuri de apă, zone locuite) și de riscurile tehnologice specifice — inclusiv riscul de incendiu cu potențial de emisie de gaze toxice și riscul de contaminare prin apele de stingere, tratate la capitolele 3 și 9.3, care sunt elemente relevante pe care autoritatea de mediu le evaluează la stabilirea necesității unei evaluări aprofundate.
+
+### 10.3. Riscurile tehnologice și măsurile de atenuare — sinteză integrată
+
+| Risc | Măsuri de atenuare |
+|---|---|
+| „Thermal runaway” la nivel de celulă/modul | Chimie LFP (prag de declanșare ridicat, fără eliberare de oxigen), BMS pe trei niveluri (capitolul 7.1), climatizare dedicată (15-35°C), detecție precoce de gaze/fum |
+| Propagarea evenimentului la containerele adiacente | Distanțe de siguranță fundamentate pe testul UL 9540A (capitolul 3.5), anvelopă EI 120, sistem de răcire perimetrală (drencer) |
+| Eliberarea de gaze inflamabile/toxice (venting) | Panouri de ventilare a deflagrației (NFPA 68/69), protocol de intervenție cu distanță de siguranță și echipament de protecție respiratorie (capitolul 3.7) |
+| Deteriorare mecanică/seismică a containerelor | Ancorare dimensionată conform P100-1 (capitolul 2.3), verificare la răsturnare și la forfecare/smulgere a buloanelor |
+| Contaminarea solului/apei prin apele de stingere | Bazin de retenție etanș (capitolul 9.3), analiza și tratarea/evacuarea controlată a apelor colectate |
+| Gestionarea bateriilor la finalul duratei de viață | Reciclare prin operator autorizat, cu recuperarea materialelor critice (litiu, fier, cupru, aluminiu), conform Directivei 2006/66/CE, OUG nr. 5/2015 și Regulamentului (UE) 2023/1542; opțional, valorificare „second-life” (capitolul 5.5) înainte de reciclarea finală |
+| Acces neautorizat / vandalism | Împrejmuire perimetrală, CCTV, detecție de efracție, control de acces (capitolul 7.6) |
+
+### 10.4. Securitatea și sănătatea în muncă
+
+Personalul de mentenanță și de intervenție care operează în incinta instalației este expus la riscuri specifice mediului cu echipamente electrice de medie/înaltă tensiune (electrocutare, arc electric) și la riscurile specifice manipulării bateriilor litiu-ion (contact cu electrolit în caz de deteriorare a unei celule, expunere la gaze în caz de eveniment termic). Măsurile de securitate și sănătate în muncă (proceduri de lucru sub tensiune/scos de sub tensiune, echipament individual de protecție dielectric, proceduri de blocare-etichetare — lockout-tagout — pentru intervenții de mentenanță, instruire specifică privind riscurile bateriilor Li-ion) se stabilesc conform Legii nr. 319/2006 și HG nr. 300/2006, și se detaliază în planul de securitate și sănătate specific instalației, elaborat de coordonatorul SSM al proiectului.
+
+### 10.5. Gestionarea bateriilor la finalul duratei de viață
+
+Așa cum s-a detaliat la capitolul 5.5, bateriile litiu-ion ale instalației, la finalul duratei lor de viață utile (fie direct, fie după o eventuală etapă de valorificare „second-life”), intră sub incidența obligațiilor de colectare și reciclare stabilite de Regulamentul (UE) 2023/1542 (care revizuiește progresiv cadrul anterior al Directivei 2006/66/CE, transpusă în legislația română prin OUG nr. 5/2015), care impune rate minime de colectare și de eficiență a reciclării, precum și recuperarea materialelor critice conținute (litiu, fier, cupru, aluminiu — în cazul chimiei LFP, absența cobaltului simplifică fluxul de reciclare față de chimiile NMC/NCA, unde recuperarea cobaltului este atât o obligație de mediu, cât și un stimulent economic suplimentar). Operatorul instalației are obligația de a contracta, din faza de proiectare a modelului de operare (deși execuția efectivă a reciclării survine la orizont de peste 15 ani, capitolul 8.4), un operator autorizat de colectare/reciclare a bateriilor uzate, sau de a se asigura că producătorul/furnizorul echipamentelor își asumă, conform principiului responsabilității extinse a producătorului, această obligație contractuală.
+
+---
+
+## 11. AVIZE ȘI ACORDURI NECESARE
+
+Pe lângă avizele și acordurile uzuale stabilite prin Certificatul de Urbanism, instalația necesită, specific tehnologiei de stocare a energiei electrice:
+
+| Aviz/acord | Emitent | Rol |
+|---|---|---|
+| Certificat de Urbanism | Autoritatea publică locală | Stabilește regimul juridic, economic și tehnic al amplasamentului și lista avizelor necesare |
+| **Aviz Tehnic de Racordare (ATR)** | Operatorul de distribuție (OD) sau Transelectrica (pentru racord la rețeaua de transport) | Stabilește soluția tehnică de racordare la SEN, condițiile Codului Rețelei aplicabile și punctul/nivelul de tensiune al racordului |
+| **Licență/autorizație ANRE pentru activitatea de stocare** | ANRE | Autorizează funcționarea comercială a instalației ca activitate distinctă de stocare a energiei electrice, conform Legii nr. 123/2012 |
+| **Aviz de securitate la incendiu (ISU)** | Inspectoratul pentru Situații de Urgență | Condiționat de tratarea instalației ca risc mare de incendiu (Ordinul MAI nr. 129/2016), cu prezentarea obligatorie a raportului de testare UL 9540A specific configurației contractate (capitolul 3.5) |
+| Acord de mediu (după parcurgerea procedurii de încadrare/screening) | Agenția pentru Protecția Mediului (APM) | Conform Legii nr. 292/2018, evaluează necesitatea unei proceduri EIA complete și condițiile de autorizare din perspectiva impactului asupra mediului |
+| Aviz de protecție civilă | Inspectoratul pentru Situații de Urgență (integrat, tipic, în avizul ISU) | Verifică măsurile de protecție a populației în vecinătate în caz de eveniment major |
+| Avize de utilități | Operatori de rețele (apă-canal, dacă e cazul; telecomunicații) | Confirmă posibilitatea și condițiile de racordare la rețelele edilitare necesare |
+| Aviz sanitar (DSP) | Direcția de Sănătate Publică | După caz, dacă instalația include spații cu prezență de personal ce impun verificare sanitară (cabină tehnică cu grup sanitar) |
+
+Corelarea acestor avize este esențială pentru succesul procesului de autorizare: Avizul Tehnic de Racordare condiționează soluția tehnică a stației de conexiune (capitolul 7.4), care la rândul ei influențează amplasarea și configurația generală a incintei (capitolul 6.4); licența ANRE nu condiționează Autorizația de Construire, dar este obligatorie pentru punerea în funcțiune comercială, analog certificatului de clasificare turistică al unei unități hoteliere; avizul ISU, dat fiind statutul de risc mare al instalației, este cel mai exigent din punct de vedere al documentației tehnice suport, necesitând raportul UL 9540A ca anexă obligatorie, fără de care avizarea nu poate fi finalizată în cunoștință de cauză asupra distanțelor de siguranță reale ale configurației proiectate.
+
+---
+
+## 12. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995 (CERINȚELE FUNDAMENTALE A-F)
+
+### 12.1. Sinteza soluției
+
+Instalația de stocare a energiei electrice în baterii litiu-ion cu chimie LFP, de 25 MW/50 MWh, se încadrează în **categoria de importanță C (normală)** conform HG nr. 766/1997 (justificat de absența ocupării umane permanente și de caracterul tehnologic al construcției, deși cu un grad de risc ecologic/tehnologic tratat agravant în cerințele de securitate la incendiu) și în **clasa de importanță și expunere seismică III (γI = 1,0)** conform P100-1/2013, cu containerele ancorate mecanic de platforme de beton armat, dimensionate la o forță seismică de bază de ordinul a **114 kN** pentru configurația de referință (capitolul 2.3). Nivelul de risc de incendiu al instalației este **MARE**, determinat de fenomenul de „thermal runaway” specific bateriilor litiu-ion (capitolul 3), atenuat semnificativ, dar nu eliminat, de alegerea chimiei LFP în locul chimiilor NMC/NCA, mai energodense dar mai puțin stabile termic (capitolul 3.4, 5).
+
+### 12.2. Conformitatea cu cele șase cerințe fundamentale (Legea 10/1995, art. 5)
+
+| Cerință | Mod de îndeplinire |
+|---|---|
+| **A — Rezistență mecanică și stabilitate** | Platforme de beton armat dimensionate la încărcările statice ale containerelor (~35 t/container) și la forța seismică de ancorare calculată conform P100-1 (~114 kN, clasa III, γI = 1,0); verificare la forfecare și smulgere a ancorajelor conform SR EN 1992-4; verificare la răsturnare. |
+| **B — Securitate la incendiu** | Anvelopă EI 120, uși EI2 60-C, distanțe de siguranță fundamentate pe testul UL 9540A specific configurației, detecție de gaze/fum, stingere cu agent neconductor + răcire perimetrală, ventilare de deflagrație (NFPA 68/69); tratare **agravantă**, ca risc mare de incendiu, conform Ordinului MAI nr. 129/2016, cu raport UL 9540A ca anexă obligatorie la avizarea ISU. |
+| **C — Igienă, sănătate, mediu** | Bazin de retenție etanș pentru apele de stingere contaminate (nu se descarcă în emisar), gestionare autorizată a bateriilor la finalul duratei de viață (reciclare/second-life conform Reg. UE 2023/1542), încadrare la procedura de evaluare a impactului asupra mediului (screening EIA, Legea 292/2018). |
+| **D — Siguranță în exploatare** | Împrejmuire perimetrală, control de acces, CCTV, detecție de efracție; acces de mentenanță și de intervenție dimensionat conform normativelor; proceduri SSM specifice riscurilor electrice de medie/înaltă tensiune și riscurilor chimice ale bateriilor. |
+| **E — Protecția împotriva zgomotului** | Nivel de zgomot al sistemelor de climatizare și al echipamentelor electrice încadrat în limitele STAS 10009, prin alegerea echipamentelor și poziționarea în incintă. |
+| **F — Economie de energie și izolare termică** | Nu se aplică în sensul clasic (instalație tehnologică, nu clădire cu anvelopă termică locuibilă); relevanța energetică a proiectului constă, de fapt, în rolul său funcțional de eficientizare a sistemului energetic (capitolul 4), nu în performanța termică a unei anvelope de clădire. |
+
+### 12.3. Oportunitatea strategică a investiției
+
+Instalația se înscrie într-un cadru de oportunitate strategică fundamentat pe convergența a trei factori: (1) necesitatea tehnică de echilibrare a unui sistem energetic cu penetrare crescândă a surselor regenerabile variabile, prin furnizarea de servicii tehnologice de sistem cu răspuns rapid (FCR, aFRR — capitolul 4.1) și prin reducerea curtailment-ului resurselor regenerabile deja instalate (capitolul 4.2); (2) cadrul de politică energetică națională și europeană (PNRR, PNIESC, Fit for 55, RED III — capitolul 1.4, 4.3), care recunoaște stocarea drept infrastructură critică de tranziție energetică, nu doar oportunitate comercială marginală; (3) maturitatea tehnologică și comercială a chimiei LFP pentru aplicații staționare la scară de utilitate publică (capitolul 5), care oferă un profil de risc tehnologic gestionabil, documentat și acceptat de bună practica internațională (IEC 62933/62619/63056, UL 9540/9540A, NFPA 855).
+
+### 12.4. Condiționările autorizării
+
+Autorizarea și punerea în funcțiune a instalației sunt condiționate, pe lângă documentația generală de construire, de: Avizul Tehnic de Racordare (ATR) al operatorului de rețea, licența/autorizația ANRE pentru activitatea de stocare, avizul ISU — obținut pe baza unei documentații care include, obligatoriu, raportul de testare UL 9540A al configurației exacte de echipament contractate (capitolul 3.5), fără de care distanțele de siguranță și dimensionarea sistemelor de protecție la incendiu nu pot fi validate tehnic — și acordul de mediu, rezultat al procedurii de încadrare/screening conform Legii nr. 292/2018. Cele șase cerințe fundamentale ale Legii nr. 10/1995 sunt îndeplinite integral, cu cerința B (securitate la incendiu) tratată agravant, proporțional cu nivelul de risc MARE specific tehnologiei de stocare electrochimică.
+
+### 12.5. Documentele complementare
+
+Prezentul memoriu general se completează, fără duplicare de conținut, cu: memoriul de rezistență (breviarul de calcul complet al ancorajelor și platformelor, verificarea la răsturnare și la subpresiune, dacă e cazul), memoriul de instalații electrice (dimensionarea PCS, a transformatoarelor, a celulelor de medie tensiune, bilanțul de putere), memoriul de automatizări (arhitectura EMS/SCADA, protocoalele de comunicație cu operatorul de rețea), scenariul/raportul de securitate la incendiu (calculul distanțelor de siguranță, dimensionarea sistemelor de detecție/stingere/ventilare, protocolul de intervenție), raportul de testare UL 9540A al configurației contractate, studiul geotehnic, ridicarea topografică și piesele desenate. Fiecare dintre aceste documente tratează un domeniu distinct și complementar, iar prezentul memoriu are rolul de a sintetiza soluția de ansamblu și de a corela cerințele fiecărei specialități, fără a relua conținutul lor detaliat.
