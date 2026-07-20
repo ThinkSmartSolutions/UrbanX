@@ -46,6 +46,12 @@
     return String(s || '').toUpperCase()
       .replace(/[ĂÂ]/g, 'A').replace(/[Î]/g, 'I').replace(/[ȘŞ]/g, 'S').replace(/[ȚŢ]/g, 'T');
   }
+  // MTEXT vine des cu coduri de formatare AutoCAD brute ("{\fVerdana|b0|i0|c0;PLAN PARTER}") care
+  // ar rupe potrivirea cuvintelor-cheie daca nu sunt curatate mai intai (bug real gasit pe fisier
+  // real Cresa Pogana — titlurile de plansa erau in MTEXT needecodat, cascada de clasificare pica).
+  function _textCurat(t) {
+    return G.SSI_DWG_IMPORT && typeof G.SSI_DWG_IMPORT.cleanMText === 'function' ? G.SSI_DWG_IMPORT.cleanMText(t) : String(t || '');
+  }
 
   // Bounding box al unei entitati (LINE/LWPOLYLINE/POLYLINE/TEXT/MTEXT/INSERT/CIRCLE/ARC) —
   // reutilizeaza campurile deja populate de parseDXF() din 25-ssi-dwg-import.js.
@@ -118,7 +124,7 @@
   // multe potriviri (rar, dar posibil daca cartusul mentioneaza alte plansa in note), ia prima
   // din TIPARE_CLASIFICARE (ordine = specificitate descrescatoare).
   function clasificaPlansa(insula) {
-    var texte = insula.entitati.filter(function (e) { return e.type === 'TEXT' || e.type === 'MTEXT'; }).map(function (e) { return _fara_diacritice(e.text || ''); });
+    var texte = insula.entitati.filter(function (e) { return e.type === 'TEXT' || e.type === 'MTEXT'; }).map(function (e) { return _fara_diacritice(_textCurat(e.text)); });
     var tot = texte.join(' | ');
     for (var i = 0; i < TIPARE_CLASIFICARE.length; i++) {
       var t = TIPARE_CLASIFICARE[i];
@@ -132,6 +138,76 @@
       }
     }
     return { tip: 'necunoscut', sursa_text: null };
+  }
+
+  // GAP REAL gasit pe fisier real (Cresa Pogana, 20 iul, cerere Florin): cand planșele sunt asezate
+  // COMPACT in acelasi modelspace (foarte comun la o cladire mica, tot proiectul pe o singura
+  // "pagina" de desen), clusterizarea spatiala (detecteazaPlanse) le uneste intr-o SINGURA insula
+  // uriasa (69.033 entitati aici) — clasificaPlansa ia doar PRIMA potrivire de cuvant-cheie gasita
+  // in tot textul insulei si eticheteaza GRESIT tot blocul cu un singur tip, desi contine de fapt
+  // plan parter + fatada + sectiune + plan invelitoare deodata (verificat: toate 4 cuvintele-cheie
+  // erau prezente in text, dar clasificaPlansa raporta doar "plan_acoperis").
+  // Gaseste TOATE entitatile text ce se potrivesc cu un tip cunoscut (nu doar prima ca la
+  // clasificaPlansa) — devin "ancore" pt re-separarea insulelor suprapuse.
+  function _gasesteAncore(insula) {
+    var ancore = [];
+    insula.entitati.forEach(function (e) {
+      if (e.type !== 'TEXT' && e.type !== 'MTEXT') return;
+      if (e.x == null || e.y == null) return;
+      var txt = _fara_diacritice(_textCurat(e.text));
+      for (var i = 0; i < TIPARE_CLASIFICARE.length; i++) {
+        var t = TIPARE_CLASIFICARE[i];
+        var m = txt.match(t.re);
+        if (m) {
+          var rezultat = { tip: t.tip, sursa_text: m[0], x: e.x, y: e.y };
+          if (t.nivel) rezultat.nivel = t.nivel;
+          else if (t.nivelDinGrup && m[t.nivelDinGrup]) rezultat.nivel = t.nivelPrefix + m[t.nivelDinGrup];
+          else if (t.tip === 'plan_nivel' && t.nivelPrefix && !m[1]) rezultat.nivel = t.nivelPrefix.trim();
+          ancore.push(rezultat);
+          break;
+        }
+      }
+    });
+    return ancore;
+  }
+  function _centruEntitate(e) { var b = _bboxEntitate(e); return b ? { x: (b.xmin + b.xmax) / 2, y: (b.ymin + b.ymax) / 2 } : null; }
+
+  // Daca o insula contine ancore de MAI MULTE tipuri distincte, o desparte in sub-insule prin
+  // atribuire "cel mai apropiat vecin" (fiecare entitate merge la titlul de plansa cel mai apropiat
+  // spatial) — aproximare rezonabila cand plansele sunt asezate compact in grid, fara sa necesite
+  // detectarea explicita a chenarului/cartusului fiecarei planse (motor separat, mai robust, de
+  // adaugat ulterior daca aceasta aproximare nu separa suficient de curat pe fisiere viitoare).
+  function _separaInsulaMultipla(insula) {
+    var ancore = _gasesteAncore(insula);
+    var tipuriDistincte = {}; ancore.forEach(function (a) { tipuriDistincte[a.tip] = 1; });
+    if (Object.keys(tipuriDistincte).length < 2) return [insula]; // un singur tip real gasit -> nu desparte
+    var grupuri = ancore.map(function (a) { return { entitati: [], ancora: a }; });
+    insula.entitati.forEach(function (e) {
+      var c = _centruEntitate(e); if (!c) return;
+      var best = 0, bestD = Infinity;
+      for (var i = 0; i < ancore.length; i++) {
+        var d = Math.hypot(c.x - ancore[i].x, c.y - ancore[i].y);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      grupuri[best].entitati.push(e);
+    });
+    return grupuri.filter(function (g) { return g.entitati.length >= 3; }).map(function (g, idx) {
+      var bboxuri = g.entitati.map(_bboxEntitate).filter(Boolean);
+      var bbox = bboxuri.reduce(function (acc, b) { return acc ? _uniuneBbox(acc, b) : b; }, null);
+      return {
+        id: insula.id + '.' + (idx + 1), entitati: g.entitati, bbox: bbox || insula.bbox,
+        arie_bbox: bbox ? (bbox.xmax - bbox.xmin) * (bbox.ymax - bbox.ymin) : 0, _ancoraDeSeparare: g.ancora
+      };
+    });
+  }
+
+  // Aplica separarea pe toate insulele detectate — de apelat DUPA detecteazaPlanse() si INAINTE de
+  // clasificarea finala a fiecarei (sub-)insule. Insulele cu un singur tip (sau fara niciun titlu
+  // recunoscut) raman neschimbate.
+  function separaPlanseSuprapuse(insule) {
+    var rezultat = [];
+    (insule || []).forEach(function (ins) { rezultat = rezultat.concat(_separaInsulaMultipla(ins)); });
+    return rezultat;
   }
 
   // Extrage camere dintr-o insula clasificata ca plan_nivel: poligoane inchise de arie plauzibila
@@ -193,7 +269,7 @@
 
   G.SSI_DWG_MULTISHEET = {
     detecteazaPlanse: detecteazaPlanse, clasificaPlansa: clasificaPlansa,
-    extrageCamereDinPlansaNivel: extrageCamereDinPlansaNivel
+    extrageCamereDinPlansaNivel: extrageCamereDinPlansaNivel, separaPlanseSuprapuse: separaPlanseSuprapuse
   };
   console.log('[SSI] detectare planse multiple in DXF incarcata (window.SSI_DWG_MULTISHEET)');
 })(window);

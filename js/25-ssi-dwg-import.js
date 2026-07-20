@@ -728,7 +728,8 @@
     extrageAdnotariUrbanism: extrageAdnotariUrbanism, extrageCladiriDePeLayer: extrageCladiriDePeLayer,
     extrageIdentificareProprietati: extrageIdentificareProprietati,
     analizeazaLayerePoligoane: analizeazaLayerePoligoane, extrageFazaDinDXF: extrageFazaDinDXF,
-    grupeazaInComponenteConexe: _grupeazaInComponenteConexe, rezolvaTamplarieDinBlocuri: rezolvaTamplarieDinBlocuri
+    grupeazaInComponenteConexe: _grupeazaInComponenteConexe, rezolvaTamplarieDinBlocuri: rezolvaTamplarieDinBlocuri,
+    cleanMText: _cleanMText
   };
   console.log('[SSI] import DXF incarcat (window.SSI_DWG_IMPORT) — parser vanilla JS, fara dependinte externe');
 })(window);

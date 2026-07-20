@@ -431,6 +431,10 @@
   function _proceseazaPlanseMultiple(parsed) {
     var insule = G.SSI_DWG_MULTISHEET.detecteazaPlanse(parsed);
     if (insule.length <= 1) return null; // o singura insula -> nu e cazul multi-plansa, fallback la vechi
+    // Re-separa insulele care contin de fapt MAI MULTE plansa fizice asezate compact (aceeasi
+    // "pagina" de modelspace) — bug real gasit pe fisier Cresa Pogana: o insula uriasa continea
+    // plan parter + fatada + sectiune + plan invelitoare deodata, clasificata gresit ca un singur tip.
+    if (G.SSI_DWG_MULTISHEET.separaPlanseSuprapuse) insule = G.SSI_DWG_MULTISHEET.separaPlanseSuprapuse(insule);
     var rezumat = [];
     var gasitPlanSituatie = false;
     insule.forEach(function (insula) {
