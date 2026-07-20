@@ -34,7 +34,7 @@ h1{ font-size:34px; font-weight:900; letter-spacing:-.01em; margin:0 0 10px; lin
 h2{ font-size:22px; font-weight:900; margin:0 0 6px; color:var(--ink-0) }
 .dark h2{ color:#fff }
 h3{ font-size:14px; font-weight:800; margin:0 0 4px }
-p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1) }
+p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1); text-align:justify; hyphens:auto }
 .dark p{ color:#c7d4e6 }
 .pagenum{ position:absolute; bottom:10mm; right:18mm; font-size:9px; color:var(--ink-2) }
 .dark .pagenum{ color:#5b7095 }
@@ -155,12 +155,14 @@ table.cmp td:first-child, table.cmp th:first-child{ text-align:left }
 
   <div class="eyebrow" style="margin-top:22px">Piața</div>
   <h2>De la piața locală, la scară europeană</h2>
-  <div class="stat-grid">
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
     <div class="stat"><b>~180 mil €</b><span>România</span></div>
     <div class="stat"><b>~650 mil €</b><span>CEE</span></div>
     <div class="stat"><b>~1,2 mld €</b><span>Europa</span></div>
+    <div class="stat"><b>3.181</b><span>UAT-uri acoperite</span></div>
   </div>
   <p style="margin-top:6px">Global: ~4,8 mld € (software pentru construcții &amp; AEC — arhitectură, inginerie, construcții). Estimare proprie, bazată pe rapoarte publice de piață.</p>
+  <p style="margin-top:10px">Baza tehnică e deja construită pentru scară națională, nu doar pentru cazuri pilot: aceeași infrastructură (registrul UAT-urilor, motorul de reguli, motorul de documentații) acoperă orice unitate administrativă din România, cu aceeași metodologie și aceleași surse oficiale — nu date culese eterogen, primărie cu primărie.</p>
   <div class="pagenum">05</div>
 </div>
 
@@ -178,6 +180,11 @@ table.cmp td:first-child, table.cmp th:first-child{ text-align:left }
     <tr><td>Management de șantier/proiect</td><td class="partial">Parțial</td><td class="no">Nu</td><td class="yes">Da</td><td class="partial">Parțial</td><td class="partial">Parțial</td></tr>
   </table>
   <p style="margin-top:8px; font-style:italic">Bariera de intrare pentru un concurent nou: expertiză combinată în legislație urbanistică, GIS și inginerie software, plus acces la date teritoriale actualizate.</p>
+  <div class="biz-grid" style="margin-top:20px">
+    <div class="biz"><h3>Interpretare legislație &amp; PUG</h3><p>Autodesk, ArchiCAD și Procore nu o fac deloc — UrbanX traduce regulamentul direct în indicatori per parcelă.</p></div>
+    <div class="biz"><h3>Documentație completă</h3><p>De la DTAC la recepție, într-un singur flux — nu doar desen CAD/BIM, ca la Autodesk sau ArchiCAD.</p></div>
+    <div class="biz"><h3>Predicție &amp; scenarii teritoriale</h3><p>Niciunul din cei patru concurenți nu oferă simulare de dezvoltare pe termen lung — doar UrbanX.</p></div>
+  </div>
   <div class="pagenum">06</div>
 </div>
 

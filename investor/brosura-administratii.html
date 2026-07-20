@@ -24,7 +24,7 @@ h1{ font-size:32px; font-weight:900; letter-spacing:-.01em; margin:0 0 10px; lin
 h2{ font-size:21px; font-weight:900; margin:0 0 6px; color:var(--ink-0) }
 .dark h2{ color:#fff }
 h3{ font-size:14px; font-weight:800; margin:0 0 4px }
-p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1) }
+p{ margin:0; line-height:1.55; font-size:12.5px; color:var(--ink-1); text-align:justify; hyphens:auto }
 .dark p{ color:#c7d4e6 }
 .pagenum{ position:absolute; bottom:10mm; right:18mm; font-size:9px; color:var(--ink-2) }
 .dark .pagenum{ color:#5b7095 }
@@ -98,7 +98,7 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
   <p>Un Masterplan clasic e o comandă externă de câteva luni, livrată o singură dată, apoi neschimbată un
     deceniu — chiar dacă între timp populația UAT-ului crește sau scade, se construiesc drumuri noi sau se
     schimbă regulamentul de urbanism. Masterplanul Dinamic generat de UrbanX rezolvă exact această problemă:
-    e un document strategic de peste 100 de pagini, generat automat din datele curente ale UAT-ului, regenerabil
+    e un document strategic amplu și complet, generat automat din datele curente ale UAT-ului, regenerabil
     de câte ori e nevoie — pentru o cerere de finanțare, o ședință de consiliu sau o revizuire de strategie —
     fără să reia de la zero un contract de consultanță.</p>
   <p>Documentul acoperă indicatori urbani, portofoliul de proiecte al UAT-ului, hărți de risc (seismic, inundații),
@@ -114,6 +114,12 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
       și validarea automată înainte de ședința CTATU sunt direcția de dezvoltare — construite peste motorul de
       analiză per-parcelă deja funcțional (Fișa parcelei 360°), nu funcții disponibile azi.</p>
   </div>
+  <div class="feature-grid">
+    <div class="feature"><span class="badge-live">Live azi</span><h3>6 axe strategice</h3><p>O scenă dedicată din prezentarea cinematică sintetizează cele 6 axe de dezvoltare ale UAT-ului, cu cod QR direct spre Masterplanul complet.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Regenerabil oricând</h3><p>Nu un document livrat o singură dată — se regenerează din datele curente pentru orice cerere de finanțare sau ședință de consiliu.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>PMUD conform SUMP</h3><p>Planul de Mobilitate Urbană Durabilă, generat ca document propriu pe cele 8 componente cerute de ghidul MDLPA/UE.</p></div>
+  </div>
+  <div class="shot" style="max-width:65%; margin:14px auto 0"><img src="assets/screenshots/08-strategic-planning-suite.png" alt="Meniul Teritoriu — Masterplan, PMUD, SDL, Strategia Metropolitana"></div>
   <div class="pagenum">03</div>
 </div>
 
@@ -131,8 +137,8 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
     pe îndelete, exact ca la o expunere cu diapozitive, dar peste un model 3D interactiv. Orice scenă sau
     parcurs complet se poate exporta ca fișier video, pentru redare offline într-o sală fără conexiune sigură.
     O scenă dedicată sintetizează cele 6 axe strategice ale UAT-ului și include un cod QR direct spre documentul
-    Masterplan complet — consilierul scanează codul cu telefonul propriu și pleacă din sală cu documentul de
-    peste 100 de pagini în buzunar, nu cu promisiunea că i se va trimite pe e-mail.</p>
+    Masterplan complet — consilierul scanează codul cu telefonul propriu și pleacă din sală cu documentul
+    complet în buzunar, nu cu promisiunea că i se va trimite pe e-mail.</p>
   <p>Consiliul Local folosește motorul pentru întreg teritoriul UAT-ului, la nivel de strategie; CTATU și
     Comisia de Urbanism, pentru proiectul sau ansamblul aflat spre avizare — același motor, două niveluri
     diferite de zoom, aceeași sursă de adevăr pentru toată lumea din sală.</p>
@@ -151,20 +157,26 @@ ul.tl li::before{ content:'→'; position:absolute; left:0; color:var(--teal-500
     geo-spațiale oficiale românești, nu contururi aproximative) și calculează 4 scenarii de regionalizare —
     status-quo pe cele 8 regiuni actuale, regiuni cu personalitate juridică, provincii istorice și
     macro-regiuni — fiecare cu populație, PIB per capita raportat la media UE, mandate parlamentare recalculate
-    real pe scenariu și verificare automată de conformitate NUTS-2. Rezultatul e un document național de peste
-    400 de pagini, structurat pe 20 de module de conținut, cu nivel de detaliu construit pentru o audiență
+    real pe scenariu și verificare automată de conformitate NUTS-2. Rezultatul e un document național amplu,
+    structurat pe 20 de module de conținut, cu nivel de detaliu construit pentru o audiență
     instituțională sau ministerială, nu pentru un rezumat de o pagină.</p>
   <h2 style="margin-top:20px">20 de studii teritoriale, deja scrise</h2>
   <p>Dincolo de Masterplan și Regionalizare, platforma include o suită completă de 20 de studii teritoriale de
     rang superior — nu scheletul unui document, ci conținut real, cu cifre, formule și surse citate pe fiecare
-    pagină. Housing (~98 pagini) acoperă necesarul de locuințe și prognoza pe 10-30 de ani; Smart City
-    (~87 pagini) tratează digitalizarea și infrastructura inteligentă; studiul Turistic/Cultural (~90 pagini)
+    pagină. Housing acoperă necesarul de locuințe și prognoza pe 10-30 de ani; Smart City
+    tratează digitalizarea și infrastructura inteligentă; studiul Turistic/Cultural
     documentează patrimoniul și valorificarea turistică. SIDU, SDL și documentul Metropolitan urmează aceeași
     structură standard, comparabile între ele fără muncă manuală de normalizare. Registrul de Indicatori
     agregă 60 de indicatori în 8 domenii — demografie, mediu, mobilitate, risc, imobiliar — fiecare cu formula
-    și sursa exactă, verificabile de oricine. Studiile HBU/RCAI la nivel teritorial, de peste 100 de pagini
-    fiecare, oferă documentație de nivel investițional, utilă direct în discuții cu parteneri de dezvoltare
+    și sursa exactă, verificabile de oricine. Studiile HBU/RCAI la nivel teritorial oferă documentație de
+    nivel investițional, utilă direct în discuții cu parteneri de dezvoltare
     sau instituții finanțatoare.</p>
+  <div class="feature-grid">
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Studii sectoriale</h3><p>Housing, Smart City, Turistic/Cultural, Mediu — deja scrise, adaptabile pe orice UAT, cu cifre și surse citate.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>Registrul de Indicatori</h3><p>60 de indicatori în 8 domenii — demografie, mediu, mobilitate, risc, imobiliar — fiecare cu formula și sursa exactă.</p></div>
+    <div class="feature"><span class="badge-live">Live azi</span><h3>HBU/RCAI teritorial</h3><p>Cea mai bună utilizare și analiza cost-avantaj la nivel de UAT — documentație de nivel investițional.</p></div>
+  </div>
+  <div class="shot" style="max-width:65%; margin:14px auto 0"><img src="assets/screenshots/07-regionalizare-sti.png" alt="Simulator Regionalizare — cele 4 scenarii, granite reale de judet"></div>
   <div class="pagenum">05</div>
 </div>
 
