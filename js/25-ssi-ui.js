@@ -210,7 +210,11 @@
       '<div class="ssiui-note">Fără această valoare, timpul de deplasare (T3) se estimează conservator (15 min) — completează distanța reală (confirmată cu ISU județean) pentru un calcul precis al cascadei T1–T14.</div>' +
       '<div><div class="ssiui-lbl">Distanță la subunitatea ISU (km)</div><input class="ssiui-inp" type="number" step="0.1" min="0" value="' + (STATE.distantaIsuKm != null ? STATE.distantaIsuKm : '') + '" onchange="SSI_UI._setDistantaIsu(parseFloat(this.value)||null)"></div>' +
       '<div class="ssiui-lbl" style="margin-top:14px">2.1 — Sarcina termică (tabel material-cu-material)</div>' +
-      '<div class="ssiui-note">' + (STATE.camereExtrase && STATE.camereExtrase.length ? STATE.camereExtrase.length + ' încăpere/încăperi calculate — descarcă tabelul complet (deschide direct în Excel/Numbers/Sheets), independent de generarea scenariului complet.' : 'Niciun tabel calculat încă — se populează automat la încărcarea unui plan/releveu sau la generarea camerelor standard din program funcțional.') + '</div>' +
+      '<div class="ssiui-note">' + (STATE.camereExtrase && STATE.camereExtrase.length ? STATE.camereExtrase.length + ' încăpere/încăperi calculate — descarcă tabelul complet (deschide direct în Excel/Numbers/Sheets), independent de generarea scenariului complet.' : 'Niciun tabel calculat încă. Sursa cea mai bună: <b>planul/releveul real</b> al clădirii (buton mai jos). Dacă nu ai încă un relevee, poți genera o estimare din programul funcțional STANDARD al funcțiunii proiectului curent (buton „Generează camere standard" — arată explicit ce funcțiune s-a folosit, ca să poți verifica dacă e cea corectă).') + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">' +
+      '<button class="ssiui-btn sec" onclick="SSI_UI._deschideRelevee()">📐 Deschide Relevee (plan/secțiuni/fațade pe clădire)</button>' +
+      '<button class="ssiui-btn sec" onclick="SSI_UI._genereazaCamereStandardAcum()">⚙ Generează camere standard din program funcțional</button>' +
+      '</div>' +
       '<button class="ssiui-btn sec" onclick="SSI_UI._exportSarcinaTermicaCSV()">⬇ Descarcă tabel sarcină termică (CSV/Excel)</button>' +
       renderAtex() +
       '<div style="margin-top:16px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">' +
@@ -705,6 +709,29 @@
       r.vecinatati.forEach(function (v) { STATE.vecinatati.push(v); });
       render();
       if (G.ss) G.ss('📍 ' + r.nrDetectate + ' vecinătăți detectate din hartă (estimare conservatoare, grad V/risc mare) — verifică și corectează unde e cazul.');
+    },
+    // Raspuns direct la "unde incarc releveele pe cladiri? sectiuni, fatade etc?" (Florin, 20 iul) —
+    // panoul de sarcina termica nu avea NICIUN buton catre uneltele reale, doar o nota pasiva.
+    _deschideRelevee: function () {
+      if (typeof G.generateRelevee !== 'function') { if (G.ss) G.ss('⚠ Modulul Relevee nu e încărcat.'); return; }
+      close();
+      G.generateRelevee();
+      if (G.ss) G.ss('📐 Relevee — desenează/încarcă planul (parter/etaje/secțiuni/fațade). Datele completate aici alimentează automat sarcina termică la revenirea în Scenariul SSI.');
+    },
+    // Genereaza explicit camere standard din functiunea PROIECTULUI ACTIV (nu ascuns, nu la generarea
+    // finala) — arata clar ce functiune s-a folosit, ca sa se vada imediat daca nu e cea corecta
+    // (Florin, 20 iul: "de unde naiba asistent social" — venea dintr-o functiune gresita, netransmisa).
+    _genereazaCamereStandardAcum: function () {
+      var Dproj = (G.UXDoc && G.UXDoc.getD) ? G.UXDoc.getD() : null;
+      var functiune = Dproj && Dproj.functiune;
+      if (!functiune) { if (G.ss) G.ss('⚠ Nicio funcțiune selectată — deschide Generatorul de Documentații Tehnice și alege funcțiunea proiectului înainte de a genera camere standard.'); return; }
+      if (!G.SSI_SARCINA_TERMICA || typeof G.SSI_SARCINA_TERMICA.genereazaCamereStandard !== 'function') { if (G.ss) G.ss('⚠ Motorul de sarcină termică nu e încărcat.'); return; }
+      var fnLabel = (G.UXDoc.FUNCTIUNI && G.UXDoc.FUNCTIUNI[functiune] && G.UXDoc.FUNCTIUNI[functiune].label) || functiune;
+      var camere = G.SSI_SARCINA_TERMICA.genereazaCamereStandard(functiune, Dproj);
+      if (!camere || !camere.length) { if (G.ss) G.ss('⚠ Nu există încă un program funcțional standard pentru funcțiunea „' + fnLabel + '" — completează un relevee real (buton „Deschide Relevee").'); return; }
+      STATE.camereExtrase = camere;
+      render();
+      if (G.ss) G.ss('⚙ ' + camere.length + ' camere estimate din programul funcțional STANDARD al funcțiunii „' + fnLabel + '" (estimare conservatoare — verifică dacă aceasta e funcțiunea corectă a proiectului tău).');
     }
   };
 

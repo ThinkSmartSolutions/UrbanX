@@ -408,5 +408,9 @@
   }
 
   G.UXDoc = G.UXDoc || {}; G.UXDoc.openPanel = openPanel;
+  // Getter read-only pt D (formularul curent) — necesar altor module (ex. SSI) care au nevoie
+  // sa citeasca functiunea/parametrii proiectului activ fara sa duplice starea (Florin, 20 iul:
+  // "de unde naiba asistent social" — panoul SSI genera camere standard fara sa stie functiunea reala).
+  G.UXDoc.getD = function () { return D; };
   console.log('[UXDoc] UI încărcat (window.UXDoc.openPanel)');
 })(window);
