@@ -21,7 +21,7 @@
       dataCompletare: '2026-06-04',
       completatDe: 'TSS·FG',
       trupuri: ['Trup principal', 'Alexandru cel Bun', 'Girov', 'Dumbrava Roșie'],
-      seismic: { ag: 0.35, Tc: 1.6, zona: 'E', nota: 'Zonă cu seismicitate ridicată' },
+      seismic: { ag: 0.25, Tc: 0.7, zona: 'D', nota: 'Corectat 26 iul (era ag=0.35/Tc=1.6, gresit) — sursa reala: P100-1/2013, Tabel A1 (PIATRA NEAMȚ, jud. NEAMȚ): ag=0.25g, Tc=0.7s' },
       statiuneTuristica: true,
       nota: 'Municipiu declarat stațiune turistică — RLU 2018 stabilește direcții specifice de dezvoltare turistică',
     },

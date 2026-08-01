@@ -10,7 +10,9 @@
  *
  * window.SSI_NORMATIVE_ENGINE: load() · getMetaNormativ() · getDistantaMinima()
  * · getAriiMaxime() · getNiveluriMaxime() · getStabilitateElement()
- * · getRezistentaPereti() · verificaStatusNormativeFolosite()
+ * · getRezistentaPereti() · getRiscIncendiuCivil() · getAccesAutospecialeLocuinte()
+ * · getDesfumareNaturalaMecanism() · getCaracteristiciAccesAutospeciale()
+ * · verificaStatusNormativeFolosite()
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -500,6 +502,81 @@
       var entry = this.getMetaNormativ('P118_2_2013_Art_6_8_9_10_distante_hidranti_ext');
       if (!entry) return null;
       return { valoare: entry.valoare, norma: entry.titlu + ' (' + entry.pagina + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status };
+    },
+
+    // Risc de incendiu dupa densitatea sarcinii termice (q) — constructii CIVILE NOI (Art. 2.1.2.2 +
+    // Tabelul 132, Anexa 8.1) — ADAUGAT 26 iul: gap real, motorul M0-M12 nu avea o functie dedicata
+    // pt clasificarea risc mic/mijlociu/mare/f.mare pe q, desi SSI_NORMATIVE.risc din js/25-ssi.js
+    // avea deja pragurile corecte (dar fara sursa/status urmarite, doar constanta hardcodata).
+    getRiscIncendiuCivil: function (opt) {
+      opt = opt || {};
+      var entry = this.getMetaNormativ('P118_1_2025_T132_risc_incendiu_civil');
+      if (!entry) return { risc: null, eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_T132_risc_incendiu_civil' };
+      var q = +opt.q_MJ_mp || 0;
+      var praguri = entry.valoare.praguri || [];
+      var rand = praguri.filter(function (p) {
+        var min = p.q_min_MJ_mp == null ? -Infinity : p.q_min_MJ_mp, max = p.q_max_MJ_mp == null ? Infinity : p.q_max_MJ_mp;
+        return q > min && q <= max;
+      })[0] || (q <= 0 ? praguri[0] : null);
+      return {
+        risc: rand ? rand.risc : null, q_MJ_mp: q, prag: rand || null,
+        norma: entry.titlu + ' (Art. 2.1.2.2 + Tabelul 132)', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status,
+        nota_incadrare_compartiment: entry.valoare.nota_incadrare_compartiment
+      };
+    },
+
+    // Acces autospeciale de stingere la cladiri de locuit NOI — Art. 3.2.1.13 (procent din perimetrul
+    // peretilor exteriori, diferentiat h<=8m vs h>8m) — ADAUGAT 26 iul: gap real gasit prin audit —
+    // motorul M0-M12 nu avea acces_isu specific locuintelor (doar regula generica hardcodata in
+    // js/25-ssi.js, fara procent de perimetru si fara distinctie h<=8/>8m).
+    getAccesAutospecialeLocuinte: function (opt) {
+      opt = opt || {};
+      var entry = this.getMetaNormativ('P118_1_2025_Art_3_2_1_13_acces_locuinte');
+      if (!entry) return { eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_Art_3_2_1_13_acces_locuinte' };
+      var H = +opt.H || 0;
+      var procent = H <= (entry.valoare.prag_h || 8) ? entry.valoare.procent_perimetru_h_sub_8m : entry.valoare.procent_perimetru_h_peste_8m;
+      return {
+        H: H, prag_h: entry.valoare.prag_h, procent_perimetru: procent, min_laturi: 1,
+        articol: entry.valoare.articol, text_aplicabil: H <= (entry.valoare.prag_h || 8) ? entry.valoare.alin_1 : entry.valoare.alin_2,
+        norma: entry.titlu + ' (' + entry.valoare.articol + ')', sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status
+      };
+    },
+
+    // Mecanismul desfumarii naturale prin tiraj (Art. 8.2.1, comun tuturor constructiilor — util pt
+    // descrierea tirajului prin ferestre la constructii care NU se incadreaza in niciun caz de
+    // OBLIGATIVITATE al Art. 8.1.8, ex. locuinte individuale/cuplate) — ADAUGAT 26 iul.
+    getDesfumareNaturalaMecanism: function () {
+      var entry = this.getMetaNormativ('P118_1_2025_Art_8_1_desfumare_presurizare');
+      if (!entry) return { eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_Art_8_1_desfumare_presurizare' };
+      var m = entry.valoare.art_8_2_1_mecanism_tiraj_natural;
+      if (!m) return { eroare: 'CAMP_LIPSA', norma: entry.titlu };
+      return {
+        articol: m.articol, alin_1: m.alin_1, alin_2: m.alin_2, nota: m.nota,
+        norma: entry.titlu + ' (' + m.articol + ')', sursa_url: entry.sursa_url, pagina: m.pagina, status_validare: m.status
+      };
+    },
+
+    // Acces carosabil autospeciale — comun TUTUROR destinatiilor (Art. 2.6.2/2.6.3/2.6.5) — ADAUGAT
+    // 26 iul: inlocuieste constantele hardcodate din js/25-ssi.js (SSI_NORMATIVE.acces_isu), care
+    // aveau valori GRESITE (raza viraj 12,5 in loc de 11,00; distanta max 18 in loc de 10; portanta
+    // 17t/osie fara corespondent real) — verificat direct pe text oficial.
+    getCaracteristiciAccesAutospeciale: function (opt) {
+      opt = opt || {};
+      var entry = this.getMetaNormativ('P118_1_2025_Art_2_6_2_3_5_acces_autospeciale_general');
+      if (!entry) return { eroare: 'SURSA_INDISPONIBILA', norma: 'P118_1_2025_Art_2_6_2_3_5_acces_autospeciale_general' };
+      var v = entry.valoare;
+      var H = +opt.H || 0, lungimeCarosabil = +opt.lungime_carosabil_m || 0;
+      var a262 = v.art_2_6_2_latime_min_carosabil;
+      var latimeNecesara = (H > 15 || lungimeCarosabil > 30) ? a262.lat_7_00m : a262.lat_3_50m;
+      return {
+        latime_min_carosabil_m: latimeNecesara, motiv_latime: (H > 15 || lungimeCarosabil > 30) ? a262.conditie_lat_7_00m : a262.conditie_lat_3_50m,
+        inaltime_libera_m: a262.inaltime_libera_pe_traseu_m,
+        distanta_min_m: a262.distanta_min_constructie_carosabil_m, distanta_max_m: a262.distanta_max_constructie_carosabil_m,
+        doua_benzi_necesare: lungimeCarosabil > 30, latime_doua_benzi_m: lungimeCarosabil > 30 ? a262.doua_benzi_peste_30m : null,
+        raza_minima_viraj_m: v.art_2_6_3_caracteristici_tehnice_autospeciala.raza_minima_viraj_m,
+        masa_maxima_kg: v.art_2_6_3_caracteristici_tehnice_autospeciala.masa_maxima_kg,
+        articol: 'Art. 2.6.2 / Art. 2.6.3', norma: entry.titlu, sursa_url: entry.sursa_url, pagina: entry.pagina, status_validare: entry.status
+      };
     },
 
     // Verifica daca vreun normativ dintr-o lista de id-uri folosite in proiectul curent nu are status 'validat_sursa'/'validat'

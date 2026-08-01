@@ -2828,10 +2828,35 @@ setInterval(()=>{
   <!-- Deck.gl v9 — compatibil cu Mapbox GL JS v3 -->
   <script src="js/uats-registry.js?v=2026051201"></script>
   <script src="js/17-tci-cinema.js?v=20260624wgl"></script>
-  <!-- fix seismic: ag pe județ (P100-1/2022) — corectează bug bbox (ex. Cluj 0.30g→0.10g);
-       monotonic-safe (fallback la lookup-ul original când județul lipsește) -->
-  <script src="js/seismic-fix.js?v=20260623"></script>
-  
+  <!-- fix seismic: ag/Tc reale pe 337 localitati (Tabel A1, P100-1/2013) — inlocuieste aproximarea
+       pe judet (bug confirmat: Iasi 0.35g gresit -> 0.25g real, Timisoara 0.10g gresit -> 0.20g real);
+       fallback pe judet doar pt localitati absente din cele 337 -->
+  <script src="js/seismic-fix.js?v=20260726"></script>
+  <!-- motor seismic real P100-1/2013: forta seismica de baza (Fb), calcul LIVE din date de proiect
+       (nu exemplu static) — vezi data/structural/*.json, formule verificate vizual pe text oficial -->
+  <script src="js/25-seismic-normative.js?v=20260726"></script>
+  <!-- motor putere electrica reala I7/2011 (Art. 3.2.2.1/3.2.2.2, Tabelele 3.3/3.4/3.5) — calcul
+       LIVE din date de proiect (nu exemplu static) — vezi data/electrice/*.json -->
+  <script src="js/25-electric-normative.js?v=20260726"></script>
+  <!-- motor debite apa real I9/2015 (Art. 9.8 relatia 5, Anexa 1/Anexa 2) — calcul LIVE din date
+       de proiect (nu exemplu static) — vezi data/sanitare/*.json -->
+  <script src="js/25-sanitare-normative.js?v=20260726"></script>
+  <!-- motor conformitate igiena real Ordin MS 119/2014 (Art. 17/18) — verificare LIVE pe programul
+       de spatii real al proiectului (nu exemplu static) — vezi data/arhitectura/*.json -->
+  <script src="js/25-arhitectura-normative.js?v=20260726"></script>
+  <!-- motor necesar de caldura real SR 1907-1:2014 (Art. 4.1, formulele 1-3, Anexa A Tabelul A.1) —
+       theta exterioara REALA pe localitate + cM, calcul LIVE (nu exemplu static) — vezi data/termice/*.json.
+       PDF standard furnizat direct de Florin (era indisponibil liber) — vezi 26 iul -->
+  <script src="js/25-termice-normative.js?v=20260726"></script>
+  <!-- motor incarcare zapada real CR 1-1-3/2012 (Art. 4.1, relatia 4.1, Anexa A Tabelul A.1 - 337
+       localitati reale, acelasi set ca P100-1/2013) — calcul LIVE (nu exemplu static) — vezi
+       data/structural/cr113-zapada.json -->
+  <script src="js/25-zapada-normative.js?v=20260726"></script>
+  <!-- motor actiune vant real CR 1-1-4/2012 (Anexa A Tabelul A.1 - 337 localitati reale, acelasi
+       set ca P100-1/2013/CR 1-1-3/2012) — calcul LIVE (nu exemplu static) — vezi
+       data/structural/cr114-vant.json; foloseste getVantConfig() (06-aedis.js) -->
+  <script src="js/25-vant-normative.js?v=20260726"></script>
+
   <script src="js/18-animation-engine.js?v=20260520c"></script>
   <script src="js/uats-extended-data.js?v=20260520c"></script><!-- Date extinse: etnic+ISD+AROPE+geo+poli+TFR+migratii -->
   <script src="js/tci-masterplan.js?v=20260628fname"></script>
@@ -5885,7 +5910,7 @@ console.log('[UrbanX] Patch v20260520c: cinema UAT dinamic + openTCI wrapper + r
 <script src="js/urbanx-versioning.js?v=20260705b"></script>
 <script src="js/urbanx-paragrafe.js?v=20260706g"></script>
 <script src="js/urbanx-library/functiuni/centru-social-zi.js?v=20260704u"></script>
-<script src="js/urbanx-library/lib-loader.js?v=20260720c"></script>
+<script src="js/urbanx-library/lib-loader.js?v=20260801a"></script>
 <script src="js/urbanx-docx-builder.js?v=20260713r"></script>
 <script src="js/25-ssi-normative.js?v=20260712a"></script><!-- SSI: accesor normativ P118-1/2025 (sursa+status, date reale) -->
 <script src="js/25-ssi-engine.js?v=20260711g"></script><!-- SSI: cascada M0-M12 (tip lucrare + vecinatati/distante) -->

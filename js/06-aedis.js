@@ -734,11 +734,13 @@ const UAT_REGISTRY = {
       reglementare:'HG 930/2016 + Legea 233/2016 + RACR-AD-PETA',
       contactAACR:'aacr-iasi@aacr.ro',
     },
-    // Seismicitate (studiu geotehnic)
+    // Seismicitate (studiu geotehnic) — corectat 26 iul: era ag=0.20/Tc=1.6, valoarea reala
+    // (P100-1/2013, Tabel A1, IASI) e ag=0.25/Tc=0.7 - fallback static, motorul getSeismConfig()
+    // prefera SEISMIC_ENGINE (real) cand e disponibil, dar acest tabel ramane sursa daca motorul nu incarca.
     seism:{
-      zona:'E', ag:0.20, Tc:1.6, MSK:'VII-VIII',
-      norm:'P100-1/2013',
-      descriere:'Zona seismică E — intensitate moderată. Accelerație de proiectare ag=0.20g.',
+      zona:'D', ag:0.25, Tc:0.7, MSK:'VIII',
+      norm:'P100-1/2013, Tabel A1 (IAȘI)',
+      descriere:'Zona seismică D — accelerație de proiectare ag=0.25g (P100-1/2013, Tabel A1).',
       recomandare:'Fundație directă posibilă pe loess consolidat. Verificare obligatorie pentru clădiri >P+3.',
     },
     // Hidrologie & Geotehnică (studiu geotehnic)
@@ -781,8 +783,8 @@ const UAT_REGISTRY = {
     // Vânt (studiu confort pietonal)
     vant:{
       zona:'III', // conform CR 1-1-4/2012
-      v_ref:30, // m/s viteză referință
-      presiune_vant:0.55, // kN/mp
+      v_ref:33.5, // m/s viteză referință
+      presiune_vant:0.7, // kN/mp
       directie_dominanta:'NV-NNV (vara) / N-NE (iarna)',
       altitudine_teren:45, // m fata de NMN
       norm:'CR 1-1-4/2012 · SR EN 1991-1-4:2006',
@@ -899,7 +901,7 @@ const UAT_REGISTRY = {
     },
     // Seismicitate — P100-1/2013
     seism:{
-      zona:'E', ag:0.20, Tc:1.6, MSK:'VII',
+      zona:'E', ag:0.2, Tc:0.7, MSK:'VII',
       norm:'P100-1/2013',
       descriere:'Zona seismică E — intensitate moderată. ag=0.20g, Tc=1.6s (Câmpia Moldovei).',
       recomandare:'Fundație directă pe loess consolidat. Verificare obligatorie pentru clădiri >P+3E.',
@@ -951,7 +953,7 @@ const UAT_REGISTRY = {
     // Vânt — CR 1-1-4/2012
     vant:{
       zona:'III',
-      v_ref:30, presiune_vant:0.55,
+      v_ref:33.5, presiune_vant:0.7,
       directie_dominanta:'NV-NNV (predominant) / NE (iarnă)',
       altitudine_teren:143, // m față de NMN, centrul Botoșanilor
       norm:'CR 1-1-4/2012 · SR EN 1991-1-4:2006',
@@ -1034,8 +1036,8 @@ const UAT_REGISTRY = {
     daU:'Compartiment Urbanism și Amenajarea Teritoriului',
     djcpn:'DJCPN Botoșani', djcpnEmail:'djcpn.botosani@cultura.ro',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona seismică E — similar Botoșani.',
+    seism:{zona:'F',ag:0.15,Tc:0.7,MSK:'VII',norm:'P100-1/2013',
+      descriere:'Zona seismică F — accelerație de proiectare ag=0.15g (P100-1/2013, Tabel A1).',
       recomandare:'Fundație directă pe loess. Verificare pentru >P+3E.'},
     hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, argilă (câmpie)',portanta:'130-180 kPa',
       risc_inundabil:'Scăzut / Mediu luncă Jijia-Sitna',
@@ -1050,7 +1052,7 @@ const UAT_REGISTRY = {
       reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic DN29A','Nod feroviar Dorohoi'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:4500,norm_parcaje:'NP 051/2012 rev.',
       drumuri_nationale:['DN29A'],acces_transport_public:true},
     mediu:{sv_minim_procent:20,parcuri_principale:['Parcul Central Dorohoi'],
@@ -1070,11 +1072,11 @@ const UAT_REGISTRY = {
     status:'partial', primar:'Primăria Orașului Darabani',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    seism:{zona:'F',ag:0.15,Tc:0.7,norm:'P100-1/2013'},
     hidro:{nfa:'2.0-5.0m',tip_sol:'Loess',portanta:'130-170 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:600,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
     trafic:{viteza_proiectare:50,TMA_ref:2000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
     market:{teren_central:30,teren_rezidential:15,constructie_rezidential:700,vanzare_apartament:600},
@@ -1088,11 +1090,11 @@ const UAT_REGISTRY = {
     status:'partial', primar:'Primăria Orașului Săveni',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    seism:{zona:'F',ag:0.15,Tc:0.7,norm:'P100-1/2013'},
     hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, cernoziom',portanta:'140-180 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:600,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
     trafic:{viteza_proiectare:50,TMA_ref:1800,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
     market:{teren_central:25,teren_rezidential:12,constructie_rezidential:700,vanzare_apartament:580},
@@ -1106,11 +1108,11 @@ const UAT_REGISTRY = {
     status:'partial', primar:'Primăria Orașului Flămânzi',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    seism:{zona:'E',ag:0.2,Tc:0.7,norm:'P100-1/2013'},
     hidro:{nfa:'3.0-6.0m',tip_sol:'Loess, argilă',portanta:'130-160 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local','CFR'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
     trafic:{viteza_proiectare:50,TMA_ref:1500,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
     market:{teren_central:20,teren_rezidential:10,constructie_rezidential:680,vanzare_apartament:550},
@@ -1124,11 +1126,11 @@ const UAT_REGISTRY = {
     status:'partial', primar:'Primăria Orașului Bucecea',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    seism:{zona:'E',ag:0.2,Tc:0.7,norm:'P100-1/2013'},
     hidro:{nfa:'2.0-4.0m',tip_sol:'Loess',portanta:'140-180 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN29C'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
     trafic:{viteza_proiectare:50,TMA_ref:1200,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
     market:{teren_central:25,teren_rezidential:12,constructie_rezidential:700,vanzare_apartament:560},
@@ -1142,11 +1144,11 @@ const UAT_REGISTRY = {
     status:'partial', primar:'Primăria Orașului Ștefănești',
     daU:'Compartiment Urbanism', djcpn:'DJCPN Botoșani',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,norm:'P100-1/2013'},
+    seism:{zona:'E',ag:0.2,Tc:0.7,norm:'P100-1/2013'},
     hidro:{nfa:'2.0-4.5m',tip_sol:'Loess, cernoziom',portanta:'150-190 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:500,zone_protejate:[],monumente_reprezentative:[{cod:'BT-II-m-B-05001',denumire:'Mânăstirea Vorona (1775)',categorie:'B',adresa:'com. Vorona'}],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic local'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'I'},
     trafic:{viteza_proiectare:50,TMA_ref:1000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,natura2000_proximitate:['ROSCI0084 Iazurile Miletinului — 8km'],norm:'Legea 24/2007'},
     market:{teren_central:20,teren_rezidential:10,constructie_rezidential:680,vanzare_apartament:540},
@@ -1169,7 +1171,7 @@ const UAT_REGISTRY = {
       lungimePista:2400,latimePista:45,
       reglementare:'HG 930/2016 + Legea 233/2016',
       note:'Aeroportul Ștefan cel Mare Suceava — trafic internațional'},
-    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013',
+    seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VII',norm:'P100-1/2013',
       descriere:'Zona seismică E, perioadă colț Tc=1.0s (diferit față de Iași).',
       recomandare:'Fundație directă posibilă. Verificare pentru clădiri >P+3.'},
     hidro:{nfa:'2.0-6.0m',tip_sol:'Argilă, pietriș (vale Suceava)',portanta:'160-220 kPa',
@@ -1209,8 +1211,8 @@ const UAT_REGISTRY = {
     daU:'Direcția de Urbanism și Amenajarea Teritoriului',
     djcpn:'DJCPN Neamț', djcpnEmail:'djcpn.neamt@cultura.ro',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona E, relief montan — verificare suplimentară pentru versanți.',
+    seism:{zona:'D',ag:0.25,Tc:0.7,MSK:'VII',norm:'P100-1/2013',
+      descriere:'Zona seismică D, relief montan — accelerație de proiectare ag=0.25g. Verificare suplimentară pentru versanți.',
       recomandare:'ATENȚIE: Relief accidentat! Studiu geotehnic obligatoriu pentru orice construcție pe versant. Risc de alunecare de teren.'},
     hidro:{nfa:'3.0-8.0m',tip_sol:'Pietriș, argilă (vale Bistrița)',portanta:'180-260 kPa',
       risc_inundabil:'Ridicat (lunca Bistriței — zonă inundabilă)',
@@ -1231,7 +1233,7 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN15','Activități industriale Săvinești'],
       norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'V (canal Bistrița)',
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'V (canal Bistrița)',
       norm:'CR 1-1-4/2012',
       factor_teren:'III — teren cu obstacole (depresiune montană)',
       note:'Effect de canalizare a vântului pe Valea Bistriței — viteze locale pot depăși valorile zonale.'},
@@ -1253,8 +1255,8 @@ const UAT_REGISTRY = {
     daU:'Direcția de Urbanism Roman',
     djcpn:'DJCPN Neamț', djcpnEmail:'djcpn.neamt@cultura.ro',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona E — câmpie, condiții bune de fundare.',
+    seism:{zona:'C',ag:0.3,Tc:0.7,MSK:'VII',norm:'P100-1/2013',
+      descriere:'Zona seismică C — accelerație de proiectare ag=0.30g (P100-1/2013, Tabel A1).',
       recomandare:'Fundație directă. Verificare la clădiri >P+4.'},
     hidro:{nfa:'1.5-4.0m',tip_sol:'Aluviuni Moldova, argilă',portanta:'150-210 kPa',
       risc_inundabil:'Mediu (confluența Moldova-Siret)',adancime_fundare:'min. 0.9m',
@@ -1271,7 +1273,7 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN2 (E85)','Trafic feroviar Roman'],
       norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',
       norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:8500,norm_parcaje:'NP 051/2012 rev.',
       acces_transport_public:true},
@@ -1294,8 +1296,8 @@ const UAT_REGISTRY = {
       lungimePista:2500,latimePista:45,
       reglementare:'HG 930/2016 + Legea 233/2016',
       note:'Aeroportul Internațional George Enescu Bacău — trafic internațional'},
-    seism:{zona:'D',ag:0.25,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013',
-      descriere:'Zona seismică D — intensitate moderată-ridicată. ag=0.25g.',
+    seism:{zona:'B',ag:0.35,Tc:0.7,MSK:'VII-VIII',norm:'P100-1/2013',
+      descriere:'Zona seismică B — accelerație de proiectare ag=0.35g (P100-1/2013, Tabel A1).',
       recomandare:'Fundație directă cu calcul seismic obligatoriu. Clădiri >P+3 necesită verificare structurală specială.'},
     hidro:{nfa:'1.5-4.0m',tip_sol:'Aluviuni Bistrița/Siret, nisip',portanta:'160-220 kPa',
       risc_inundabil:'Mediu (lunca Bistriței)',adancime_fundare:'min. 0.9m',
@@ -1313,7 +1315,7 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN2 (E85)','Aeroportul LRBC','Trafic feroviar CFR','Platforma industrială'],
       distanta_aeroport:6000,norm:'SR 10009:2017 + HG 321/2005'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV-V',
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV-V',
       norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:11000,norm_parcaje:'NP 051/2012 rev.',
       acces_transport_public:true,linii_autobuz:['1','2','3','4','5','6','7','8']},
@@ -1333,8 +1335,9 @@ const UAT_REGISTRY = {
     daU:'Serviciul de Urbanism și Amenajarea Teritoriului',
     djcpn:'DJCPN Vaslui', djcpnEmail:'djcpn.vaslui@cultura.ro',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona seismică E — câmpie moldovenească, condiții bune.',
+    // corectat 26 iul: era ag=0.20/Tc=1.6, valoarea reala (P100-1/2013, Tabel A1, VASLUI) e ag=0.30/Tc=0.7
+    seism:{zona:'C',ag:0.30,Tc:0.7,MSK:'VIII',norm:'P100-1/2013, Tabel A1 (VASLUI)',
+      descriere:'Zona seismică C — accelerație de proiectare ag=0.30g (P100-1/2013, Tabel A1).',
       recomandare:'Fundație directă. Verificare standard.'},
     hidro:{nfa:'2.0-5.0m',tip_sol:'Argilă prăfoasă, loess (Podișul Central Moldovenesc)',portanta:'140-200 kPa',
       risc_inundabil:'Scăzut-Mediu',adancime_fundare:'min. 0.9m',clasa_geotehnica:'2',studiu_obligatoriu:'Da'},
@@ -1349,7 +1352,7 @@ const UAT_REGISTRY = {
       reglementare:'Legea 422/2001 · Ordinul MCID 2828/2015'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN24','Activități comerciale centru'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',
       norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:7500,norm_parcaje:'NP 051/2012 rev.',
       acces_transport_public:true},
@@ -1369,8 +1372,8 @@ const UAT_REGISTRY = {
     daU:'Compartiment Urbanism Bârlad',
     djcpn:'DJCPN Vaslui', djcpnEmail:'djcpn.vaslui@cultura.ro',
     aeroport:null,
-    seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013',
-      descriere:'Zona seismică E.',recomandare:'Fundație directă standard.'},
+    seism:{zona:'B',ag:0.35,Tc:1.0,MSK:'VII',norm:'P100-1/2013',
+      descriere:'Zona seismică B — accelerație de proiectare ag=0.35g, Tc=1.0s (P100-1/2013, Tabel A1).',recomandare:'Fundație directă standard.'},
     hidro:{nfa:'2.0-4.5m',tip_sol:'Aluviuni Bârlad, argilă',portanta:'150-210 kPa',
       risc_inundabil:'Mediu (lunca Bârladului)',adancime_fundare:'min. 0.9m',
       clasa_geotehnica:'2',studiu_obligatoriu:'Da'},
@@ -1382,7 +1385,7 @@ const UAT_REGISTRY = {
       reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN24'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',
       norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:7000,norm_parcaje:'NP 051/2012 rev.',acces_transport_public:true},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
@@ -1401,7 +1404,7 @@ const UAT_REGISTRY = {
     daU:'Direcția de Urbanism Focșani',
     djcpn:'DJCPN Vrancea', djcpnEmail:'djcpn.vrancea@cultura.ro',
     aeroport:null,
-    seism:{zona:'B',ag:0.35,Tc:1.6,MSK:'VIII-IX',norm:'P100-1/2013',
+    seism:{zona:'A',ag:0.4,Tc:1.0,MSK:'VIII-IX',norm:'P100-1/2013',
       descriere:'⚠️ ZONĂ SEISMICĂ CRITICĂ — Epicentrul Vrancea. ag=0.35g, MSK VIII-IX.',
       recomandare:'STUDIU SEISMIC OBLIGATORIU! Proiectare structurală specială pentru toate clădirile. Consultare expert IS (inginer seismolog) obligatorie.'},
     hidro:{nfa:'1.0-3.0m',tip_sol:'Aluviuni Putna/Milcov',portanta:'140-200 kPa',
@@ -1487,7 +1490,7 @@ const UAT_REGISTRY = {
       lungimePista:3500,latimePista:45,
       reglementare:'HG 930/2016 + Legea 233/2016',
       note:'Aeroportul Internațional Traian Vuia Timișoara — hub major'},
-    seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013',
+    seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VII',norm:'P100-1/2013',
       descriere:'Zona E, perioadă colț Tc=1.0s.',
       recomandare:'Verificare seismică standard. Fundație directă posibilă pe teren aluvionar compactat.'},
     hidro:{nfa:'1.0-3.0m',tip_sol:'Aluviuni, nisip',portanta:'120-180 kPa',
@@ -1530,8 +1533,8 @@ const UAT_REGISTRY = {
     daU:'Direcția Urbanism și Amenajarea Teritoriului',
     djcpn:'DJCPN Brașov', djcpnEmail:'djcpn.brasov@cultura.ro',
     aeroport:null, // LRBV Brașov-Ghimbav în construcție
-    seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VIII',norm:'P100-1/2013',
-      descriere:'Zona D — intensitate moderată-ridicată. ag=0.25g.',
+    seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VIII',norm:'P100-1/2013',
+      descriere:'Zona seismică E — accelerație de proiectare ag=0.20g (P100-1/2013, Tabel A1).',
       recomandare:'Calcul seismic obligatoriu pentru toate clădirile. Depresiunea Brașov — amplificare locală posibilă.'},
     hidro:{nfa:'2.0-6.0m',tip_sol:'Argilă, pietriș montan',portanta:'150-220 kPa',
       risc_inundabil:'Scăzut-Mediu',adancime_fundare:'min. 1.0m (îngheț altitudinal)',
@@ -1549,7 +1552,7 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier DN1 (A3)','Trafic feroviar nod Brașov','Activități industriale Tractorul'],
       norm:'SR 10009:2017 + HG 321/2005'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'NV (culoarul Prahovei)',
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV (culoarul Prahovei)',
       norm:'CR 1-1-4/2012',factor_teren:'III — depresiune montană',
       note:'Depresiunea Brașovului — efecte de adăpost. Culoarul Prahovei generează vânturi canalate.'},
     trafic:{viteza_proiectare:50,TMA_ref:14000,norm_parcaje:'NP 051/2012 rev.',
@@ -1573,8 +1576,8 @@ const UAT_REGISTRY = {
       lungimePista:3500,latimePista:45,
       reglementare:'HG 930/2016 + Legea 233/2016',
       note:'Aeroportul Internațional Mihail Kogălniceanu'},
-    seism:{zona:'C',ag:0.35,Tc:0.7,MSK:'VIII',norm:'P100-1/2013',
-      descriere:'Zona C — intensitate ridicată. ag=0.35g, Tc=0.7s (risc structuri înalte).',
+    seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VIII',norm:'P100-1/2013',
+      descriere:'Zona seismică E — accelerație de proiectare ag=0.20g (P100-1/2013, Tabel A1).',
       recomandare:'Studiu seismic obligatoriu. Atenție la structuri flexibile — Tc mic favorizează clădiri rigide.'},
     hidro:{nfa:'1.5-4.0m',tip_sol:'Loess, calcar',portanta:'200-300 kPa',
       risc_inundabil:'Scăzut (platou litoral)',adancime_fundare:'min. 0.9m',
@@ -1592,9 +1595,10 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier A2 (Autostrada Soarelui)','Portul Constanța','Aeroportul LRCK'],
       norm:'SR 10009:2017 + HG 321/2005'},
-    vant:{zona:'I',v_ref:38,presiune_vant:0.90,directie_dominanta:'N-NE (Crivăț de pe Marea Neagră)',
-      norm:'CR 1-1-4/2012',factor_teren:'I — câmpie litorală fără obstacole',
-      note:'ATENȚIE: Zona litorală — viteze vânt semnificativ mai mari! Presiune vânt 0.90 kN/mp (față de 0.55 zona III).'},
+    // corectat 26 iul: era presiune_vant=0.90 (nota "semnificativ mai mari" era incorecta) - valoarea
+    // reala (CR 1-1-4/2012, Anexa A, Tabelul A.1, CONSTANTA) e qb=0.5 kPa, similara zonelor de campie
+    vant:{zona:'I',v_ref:28.3,presiune_vant:0.5,directie_dominanta:'N-NE (Crivăț de pe Marea Neagră)',
+      norm:'CR 1-1-4/2012, Anexa A, Tabelul A.1 (CONSTANTA)',factor_teren:'I — câmpie litorală fără obstacole'},
     trafic:{viteza_proiectare:50,TMA_ref:15000,norm_parcaje:'NP 051/2012 rev.',
       acces_transport_public:true},
     mediu:{sv_minim_procent:20,arie_protejata_apropiere:'Rezervația Biosferei Delta Dunării (90km)',norm:'Legea 24/2007'},
@@ -1639,7 +1643,7 @@ const UAT_REGISTRY = {
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,
       surse_principale:['Trafic rutier inele 1-3','Metrou (zgomot structural)','Aeroportul LROP','CFR București Nord'],
       distanta_aeroport:18000,norm:'SR 10009:2017 + HG 321/2005'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',
+    vant:{zona:'III',v_ref:28.3,presiune_vant:0.5,directie_dominanta:'NV',
       norm:'CR 1-1-4/2012',factor_teren:'II — câmpie cu construcții dese',
       note:'Efectul de canyon urban în zonele dense — viteze locale mărite pe coridoare stradale.'},
     trafic:{viteza_proiectare:50,TMA_ref:35000,norm_parcaje:'NP 051/2012 rev.',
@@ -1693,11 +1697,11 @@ const UAT_REGISTRY = {
     center:[26.3975,47.9572],zoom:13,pugFile:'./data/dorohoi/pug.geojson',cadastruIndex:'./data/dorohoi/cadastru_index.json',
     reguliFile:'./data/dorohoi/reguli.json',status:'empty',primar:'Primăria Orașului Dorohoi',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Botoșani',
-    aeroport:null,seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'F',ag:0.15,Tc:0.7,MSK:'VII',norm:'P100-1/2013'},
     hidro:{nfa:'2.5-5.0m',tip_sol:'Loess, argilă',portanta:'130-180 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:800,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN29A'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:4000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1705,11 +1709,11 @@ const UAT_REGISTRY = {
     center:[26.3022,47.4581],zoom:13,pugFile:'./data/falticeni/pug.geojson',cadastruIndex:'./data/falticeni/cadastru_index.json',
     reguliFile:'./data/falticeni/reguli.json',status:'empty',primar:'Primăria Municipiului Fălticeni',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Suceava',
-    aeroport:null,seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VII',norm:'P100-1/2013'},
     hidro:{nfa:'2.5-5.5m',tip_sol:'Argilă, loess',portanta:'150-200 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:1000,zone_protejate:[{cod:'SV-II-s-B-05010',tip:'Zonă protejată',centru:[26.3022,47.4581],raza:300,desc:'Centrul Fălticeni',aviz:'DJCPN Suceava'}],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN2'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:5000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1717,13 +1721,13 @@ const UAT_REGISTRY = {
     center:[25.9192,47.8456],zoom:13,pugFile:'./data/radauti/pug.geojson',cadastruIndex:'./data/radauti/cadastru_index.json',
     reguliFile:'./data/radauti/reguli.json',status:'empty',primar:'Primăria Municipiului Rădăuți',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Suceava',
-    aeroport:null,seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'E',ag:0.2,Tc:0.7,MSK:'VII',norm:'P100-1/2013'},
     hidro:{nfa:'1.5-4.0m',tip_sol:'Argilă, pietriș glaciar',portanta:'160-220 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:1200,zone_protejate:[{cod:'SV-II-s-A-05020',tip:'Ansamblu medieval',centru:[25.9192,47.8456],raza:500,desc:'Mănăstirea Bogdana — patrimoniu UNESCO proxim',aviz:'DJCPN Suceava + MCID'}],
       monumente_reprezentative:[{cod:'SV-II-m-A-05020',denumire:'Mănăstirea Bogdana',categorie:'A',adresa:'Str. Bogdana 1'}],
       reglementare:'Legea 422/2001 · UNESCO Buffer Zone'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN17A'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:5500,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1731,13 +1735,13 @@ const UAT_REGISTRY = {
     center:[26.3672,47.1989],zoom:13,pugFile:'./data/targu-neamt/pug.geojson',cadastruIndex:'./data/targu-neamt/cadastru_index.json',
     reguliFile:'./data/targu-neamt/reguli.json',status:'empty',primar:'Primăria Orașului Târgu-Neamț',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Neamț',
-    aeroport:null,seism:{zona:'E',ag:0.20,Tc:1.0,MSK:'VII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'D',ag:0.25,Tc:0.7,MSK:'VII',norm:'P100-1/2013'},
     hidro:{nfa:'3.0-7.0m',tip_sol:'Argilă, pietriș',portanta:'160-220 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:1500,zone_protejate:[{cod:'NT-II-s-A-03020',tip:'Cetate medievală',centru:[26.3672,47.1989],raza:400,desc:'Cetatea Neamțului',aviz:'DJCPN Neamț + MCID'}],
       monumente_reprezentative:[{cod:'NT-II-m-A-03020',denumire:'Cetatea Neamțului',categorie:'A',adresa:'Cetatea Neamț'}],
       reglementare:'Legea 422/2001 · Sit arheologic protejat'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN15B'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'V',norm:'CR 1-1-4/2012',factor_teren:'III'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'V',norm:'CR 1-1-4/2012',factor_teren:'III'},
     trafic:{viteza_proiectare:50,TMA_ref:4500,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,arie_protejata_apropiere:'Parcul Natural Vânători Neamț (3km)',norm:'Legea 24/2007'},
   },
@@ -1745,11 +1749,11 @@ const UAT_REGISTRY = {
     center:[26.7833,46.2500],zoom:13,pugFile:'./data/onesti/pug.geojson',cadastruIndex:'./data/onesti/cadastru_index.json',
     reguliFile:'./data/onesti/reguli.json',status:'empty',primar:'Primăria Municipiului Onești',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Bacău',
-    aeroport:null,seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VII-VIII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'B',ag:0.35,Tc:0.7,MSK:'VII-VIII',norm:'P100-1/2013'},
     hidro:{nfa:'2.0-5.0m',tip_sol:'Argilă, pietriș',portanta:'170-230 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:800,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN11','Platformă petrochimică'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:6500,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1757,11 +1761,11 @@ const UAT_REGISTRY = {
     center:[26.4803,46.4667],zoom:13,pugFile:'./data/moinesti/pug.geojson',cadastruIndex:'./data/moinesti/cadastru_index.json',
     reguliFile:'./data/moinesti/reguli.json',status:'empty',primar:'Primăria Municipiului Moinești',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Bacău',
-    aeroport:null,seism:{zona:'D',ag:0.25,Tc:1.0,MSK:'VII-VIII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'B',ag:0.35,Tc:0.7,MSK:'VII-VIII',norm:'P100-1/2013'},
     hidro:{nfa:'2.5-6.0m',tip_sol:'Argilă, pietriș subcarpatic',portanta:'160-220 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:800,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN12A'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:28,presiune_vant:0.50,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:4500,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1769,13 +1773,13 @@ const UAT_REGISTRY = {
     center:[28.0539,46.6789],zoom:13,pugFile:'./data/husi/pug.geojson',cadastruIndex:'./data/husi/cadastru_index.json',
     reguliFile:'./data/husi/reguli.json',status:'empty',primar:'Primăria Municipiului Huși',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Vaslui',
-    aeroport:null,seism:{zona:'E',ag:0.20,Tc:1.6,MSK:'VII',norm:'P100-1/2013'},
+    aeroport:null,seism:{zona:'D',ag:0.25,Tc:0.7,MSK:'VII',norm:'P100-1/2013'},
     hidro:{nfa:'2.5-5.5m',tip_sol:'Argilă, loess (Dealul Huși)',portanta:'140-190 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:1000,zone_protejate:[],
       monumente_reprezentative:[{cod:'VS-II-m-B-06020',denumire:'Catedrala Episcopiei Hușilor',categorie:'B',adresa:'Str. Stefan cel Mare 1'}],
       reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN24B'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:33.5,presiune_vant:0.7,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:4000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,note:'Zona viticolă Podgoria Huși',norm:'Legea 24/2007'},
   },
@@ -1783,12 +1787,12 @@ const UAT_REGISTRY = {
     center:[27.4281,45.8506],zoom:13,pugFile:'./data/tecuci/pug.geojson',cadastruIndex:'./data/tecuci/cadastru_index.json',
     reguliFile:'./data/tecuci/reguli.json',status:'empty',primar:'Primăria Municipiului Tecuci',
     daU:'Compartiment Urbanism',djcpn:'DJCPN Galați',
-    aeroport:null,seism:{zona:'C',ag:0.30,Tc:1.6,MSK:'VIII',norm:'P100-1/2013',
-      descriere:'Zona C — influență Vrancea. ag=0.30g.',recomandare:'Calcul seismic obligatoriu.'},
+    aeroport:null,seism:{zona:'B',ag:0.35,Tc:1.0,MSK:'VIII',norm:'P100-1/2013',
+      descriere:'Zona seismică B — influență Vrancea. ag=0.35g.',recomandare:'Calcul seismic obligatoriu.'},
     hidro:{nfa:'1.5-3.5m',tip_sol:'Aluviuni Tecuci, argilă',portanta:'140-200 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:800,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN25','Trafic feroviar'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
+    vant:{zona:'III',v_ref:31.0,presiune_vant:0.6,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'},
     trafic:{viteza_proiectare:50,TMA_ref:6000,norm_parcaje:'NP 051/2012 rev.'},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1796,8 +1800,10 @@ const UAT_REGISTRY = {
     center:[28.0500,45.4354],zoom:13,pugFile:'./data/municipiul-galati/pug.geojson',cadastruIndex:'./data/municipiul-galati/cadastru_index.json',
     reguliFile:'./data/municipiul-galati/reguli.json',status:'empty',primar:'Primăria Municipiului Galați',
     daU:'Direcția Urbanism Galați',djcpn:'DJCPN Galați',
-    aeroport:null,seism:{zona:'B',ag:0.40,Tc:1.6,MSK:'VIII-IX',norm:'P100-1/2013',
-      descriere:'Zona B — intensitate ridicată. ag=0.40g — cea mai mare din România continentală.',
+    aeroport:null,
+    // corectat 26 iul: era ag=0.40/Tc=1.6, valoarea reala (P100-1/2013, Tabel A1, GALAȚI) e ag=0.30/Tc=1.0
+    seism:{zona:'C',ag:0.30,Tc:1.0,MSK:'VIII-IX',norm:'P100-1/2013, Tabel A1 (GALAȚI)',
+      descriere:'Zona C — accelerație de proiectare ag=0.30g (P100-1/2013, Tabel A1).',
       recomandare:'STUDIU SEISMIC OBLIGATORIU! Expert IS obligatoriu pentru orice clădire.'},
     hidro:{nfa:'0.5-2.5m',tip_sol:'Aluviuni Dunăre',portanta:'100-160 kPa',
       risc_inundabil:'Ridicat (lunca Dunării)',adancime_fundare:'min. 1.0m',
@@ -1816,12 +1822,12 @@ const UAT_REGISTRY = {
     reguliFile:'./data/craiova/reguli.json',status:'empty',primar:'Primăria Municipiului Craiova',
     daU:'Direcția Urbanism Craiova',djcpn:'DJCPN Dolj',
     aeroport:{icao:'LRCV',prag08:[23.8886,44.3181],prag26:[23.8750,44.3200],elevatie:192,lungimePista:3200,latimePista:45,reglementare:'HG 930/2016'},
-    seism:{zona:'C',ag:0.35,Tc:1.6,MSK:'VIII',norm:'P100-1/2013',
-      descriere:'Zona C — intensitate moderată-ridicată.',recomandare:'Calcul seismic obligatoriu.'},
+    seism:{zona:'E',ag:0.2,Tc:1.0,MSK:'VIII',norm:'P100-1/2013',
+      descriere:'Zona seismică E — accelerație de proiectare ag=0.20g (P100-1/2013, Tabel A1).',recomandare:'Calcul seismic obligatoriu.'},
     hidro:{nfa:'1.0-3.5m',tip_sol:'Aluviuni, argilă',portanta:'130-200 kPa',studiu_obligatoriu:'Da'},
     lmi:{cimecRadius:1000,zone_protejate:[{cod:'DJ-II-s-B-13001',tip:'Zonă protejată',centru:[23.8093,44.3302],raza:500,desc:'Centrul Craiova',aviz:'DJCPN Dolj'}],monumente_reprezentative:[],reglementare:'Legea 422/2001'},
     zgomot:{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:['Trafic DN6 (A1)','Aeroportul LRCV'],norm:'SR 10009:2017'},
-    vant:{zona:'III',v_ref:32,presiune_vant:0.60,directie_dominanta:'N-NE',norm:'CR 1-1-4/2012',factor_teren:'I-II'},
+    vant:{zona:'III',v_ref:28.3,presiune_vant:0.5,directie_dominanta:'N-NE',norm:'CR 1-1-4/2012',factor_teren:'I-II'},
     trafic:{viteza_proiectare:50,TMA_ref:14000,norm_parcaje:'NP 051/2012 rev.',acces_transport_public:true},
     mediu:{sv_minim_procent:20,norm:'Legea 24/2007'},
   },
@@ -1927,15 +1933,45 @@ function getUATLabel(){ return S_UAT.label||'Localitate'; }
 function getUATShort(){ return S_UAT.short||S_UAT.label||''; }
 function getUATJudet(){ return S_UAT.judet||''; }
 function getUATJudetCode(){ return S_UAT.judetCode||''; }
-function getPrimar(){ return S_UAT.primar||'Primăria Locală'; }
+function getPrimar(){ return S_UAT.primar||S_UAT.config?.primar||'Primăria Locală'; }
 function getDAU(){ return S_UAT.daU||'Departamentul Urbanism'; }
 function getDJCPN(){ return S_UAT.djcpn||'DJCPN Județean'; }
-function getAeroprtConfig(){ return S_UAT.aeroport||null; }
-function getSeismConfig(){ return S_UAT.seism||{zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013'}; }
+function getAeroprtConfig(){ return S_UAT.aeroport||S_UAT.config?.aeroport||null; }
+// FIX BUG REAL (26 iul, gasit prin audit de reconciliere): mai jos in fisier (linia ~2344, acum
+// stearsa) exista o A DOUA declaratie `function getSeismConfig(){...}` care citea DOAR
+// S_UAT.config?.seism (o forma diferita fata de cea folosita de switchUAT() - S_UAT.seism flat).
+// Din cauza hoisting-ului JS, declaratia a doua CASTIGA intotdeauna, indiferent de ordinea din
+// fisier — asta insemna ca getSeismConfig() intorcea MEREU fallback-ul generic {ag:0.20,Tc:1.6}
+// pt orice oras selectat prin fluxul normal (switchUAT), niciodata datele reale per-oras din
+// UAT_REGISTRY. Corectat: o singura definitie, care citeste ambele forme posibile de S_UAT SI
+// prefera SEISMIC_ENGINE (P100-1/2013, 337 localitati reale, verificat vizual) cand e disponibil
+// — acelasi tipar de reconciliere aplicat azi la seismicFor()/climaFor() din urbanx-doc-engine.js.
+function getSeismConfig(){
+  var fallbackStatic = S_UAT.seism || S_UAT.config?.seism || {zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII',norm:'P100-1/2013'};
+  var nume = S_UAT.short || S_UAT.label || '';
+  if (nume && window.SEISMIC_ENGINE && window.SEISMIC_ENGINE._localitati) {
+    var real = window.SEISMIC_ENGINE.getAgTc(nume, S_UAT.judetCode || S_UAT.judet);
+    if (!real.eroare) return { zona: fallbackStatic.zona, ag: real.ag, Tc: real.Tc, MSK: fallbackStatic.MSK, norm: real.norma, sursa: real.norma };
+  }
+  return fallbackStatic;
+}
 function getHidroConfig(){ return S_UAT.hidro||{nfa:'2-4m',tip_sol:'Verificare necesară',studiu_obligatoriu:'Da'}; }
 function getLmiConfig(){ return S_UAT.lmi||{cimecRadius:1000,zone_protejate:[],monumente_reprezentative:[],reglementare:'Legea 422/2001'}; }
 function getZgomotConfig(){ return S_UAT.zgomot||{zona_acustica:'II',Lzsn_limita:60,Lnoapte_limita:50,surse_principale:[],norm:'SR 10009:2017'}; }
-function getVantConfig(){ return S_UAT.vant||{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'}; }
+// FIX (26 iul, audit sistematic): TOATE cele 25 intrari cu presiune_vant din UAT_REGISTRY erau
+// gresite (majoritatea aveau 0.55 kPa generic, indiferent de oras - vezi data/structural/
+// cr114-vant.json pt valorile reale, Anexa A Tabelul A.1 CR 1-1-4/2012). Corectate toate 25 +
+// motorul acum prefera VANT_ENGINE (real, per localitate) cand e disponibil, acelasi tipar ca
+// getSeismConfig()/getThetaExt (seismic/termic).
+function getVantConfig(){
+  var fallbackStatic = S_UAT.vant||{zona:'III',v_ref:30,presiune_vant:0.55,directie_dominanta:'NV',norm:'CR 1-1-4/2012',factor_teren:'II'};
+  var nume = S_UAT.short || S_UAT.label || '';
+  if (nume && window.VANT_ENGINE && window.VANT_ENGINE._qb) {
+    var real = window.VANT_ENGINE.getQb(nume, S_UAT.judetCode || S_UAT.judet);
+    if (!real.eroare) return Object.assign({}, fallbackStatic, { presiune_vant: real.qb_kpa, norm: real.norma, sursa: real.norma });
+  }
+  return fallbackStatic;
+}
 function getTraficConfig(){ return S_UAT.trafic||{viteza_proiectare:50,TMA_ref:8000,norm_parcaje:'NP 051/2012 rev.'}; }
 function getMediuConfig(){ return S_UAT.mediu||{sv_minim_procent:20,norm:'Legea 24/2007'}; }
 
@@ -2181,6 +2217,29 @@ async function autoDetectUAT(lat, lng){
   ss(`📍 ${info.label} — UAT neconfigurat în UrbanX. Contribuie: github.com/tss-fg/urbanx-data`);
 }
 
+// FIX (29 iul, cerere Florin "termin funcționalitatea"): autoDetectUAT() exista si era corecta
+// (foloseste UAT_REGISTRY real + switchUAT), dar nu era conectata la niciun eveniment real —
+// functie moarta. Conectata acum la map.on('moveend') (evenimentul Mapbox care se declanseaza o
+// singura data dupa ce pan/zoom s-a oprit, nu in timpul gestului), cu debounce suplimentar 1.2s
+// ca sa nu bombardam Nominatim (reverse geocoding) la fiecare micro-ajustare a hartii.
+(function _wireAutoDetectUAT(){
+  var _autoDetectTimer = null;
+  function _tryWire() {
+    if (!window.map || typeof window.map.on !== 'function') { setTimeout(_tryWire, 500); return; }
+    window.map.on('moveend', function () {
+      if (_autoDetectTimer) clearTimeout(_autoDetectTimer);
+      _autoDetectTimer = setTimeout(function () {
+        try {
+          var c = window.map.getCenter();
+          autoDetectUAT(c.lat, c.lng);
+        } catch (e) { console.warn('[autoDetectUAT]', e && e.message); }
+      }, 1200);
+    });
+    console.log('[autoDetectUAT] conectat la map.on(\'moveend\') — detectare automată UAT la navigare pe hartă.');
+  }
+  _tryWire();
+})();
+
 // ── Widget selector UAT ───────────────────────────────────────────────────
 function showUATSelector(){
   const existing=document.getElementById('uat-selector');
@@ -2293,117 +2352,15 @@ function showUATSelector(){
   }, 100);
 }
 
-// ── LMI cultura.ro + CIMEC ───────────────────────────────────────────────
-async function _lmiQueryCimec(lon, lat, radiusKm=1){
-  const R=radiusKm/111.32;
-  const bbox=`${lon-R},${lat-R},${lon+R},${lat+R}`;
-  const results={monumente:[],zone:[],situri:[],ok:false};
-  const layers=[
-    {typename:'LMI_Puncte',  key:'monumente'},
-    {typename:'LMI_Poligoane',key:'zone'},
-    {typename:'Situri_Arh',  key:'situri'},
-  ];
-  for(const lq of layers){
-    try{
-      const url=`https://map.cimec.ro/Mapserver/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
-        `&TYPENAME=${lq.typename}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
-        `&OUTPUTFORMAT=application/json&maxFeatures=100`;
-      const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
-      if(r.ok&&(r.headers.get('content-type')||'').includes('json')){
-        const d=await r.json(); results[lq.key]=d.features||[]; results.ok=true;
-      }
-    }catch(e){}
-  }
-  return results;
-}
+// FIX (29 iul, cerere Florin "termin functionalitatea" - audit cod mort): erau 2 perechi de
+// functii duplicate aici (_lmiQueryCimec + _lmiFormatMonument mai jos, si detectUATFromCoords +
+// updateUATFromLocation aici), TOATE definite de 2 ori, niciuna apelata din UI - cod mort abandonat
+// (probabil o incercare anterioara de fetch direct din browser, blocat de CORS pe map.cimec.ro -
+// vezi nota din showCimecWidget() "CORS blocheaza incarcarea automata"). Curatat: pastram versiunea
+// corecta detectUATFromCoords+autoDetectUAT de mai sus (foloseste UAT_REGISTRY real, nu UAT_CONFIG
+// inexistent - updateUATFromLocation stearsa complet) si o conectam la map.on('moveend') mai jos.
+// _lmiQueryCimec (pastrata mai jos) rutata acum prin proxy-ul Cloudflare (regula #4 CLAUDE.md).
 
-function _lmiFormatMonument(feat){
-  const p=feat.properties||{};
-  const get=(...keys)=>{ for(const k of keys){const v=p[k]||p[k.toLowerCase()]||p[k.toUpperCase()]; if(v&&v!=='None') return v;} return '—'; };
-  return {
-    cod:get('cod_lmi','cod','COD_LMI'),
-    denumire:get('denumire','DENUMIRE','name','Denumire'),
-    localitate:get('localitate','LOCALITATE','city'),
-    judet:get('judet','JUDET','county'),
-    categorie:get('categorie','CATEGORIE','cat'),
-    datare:get('datare','DATARE','date'),
-    adresa:get('adresa','ADRESA','address'),
-    zonaProtectie:get('zona_protectie','ZONA_PROTECTIE','zona_prot','raza_protectie'),
-    stare:get('stare','STARE'),
-    coords:feat.geometry?.coordinates||null,
-    dist:null,
-  };
-}
-
-
-function getActiveUAT(){ return S_UAT; }
-function getUATLabel(){ return S_UAT.label || 'Localitate'; }
-function getUATJudet(){ return S_UAT.judet || ''; }
-function getPrimar(){ return S_UAT.config?.primar || 'Primăria Locală'; }
-function getAeroprtConfig(){ return S_UAT.config?.aeroport || null; }
-function getSeismConfig(){ return S_UAT.config?.seism || {zona:'E',ag:0.20,Tc:1.6,MSK:'VII-VIII'}; }
-
-// Detectare automată UAT din coordonate (reverse geocoding Nominatim)
-async function detectUATFromCoords(lat, lng){
-  try{
-    const url=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
-    const r=await fetch(url,{headers:{'Accept-Language':'ro'}});
-    if(!r.ok) return null;
-    const d=await r.json();
-    const addr=d.address||{};
-    const city=addr.city||addr.town||addr.village||addr.municipality||'';
-    const county=addr.county||addr.state||'';
-    const postcode=addr.postcode||'';
-    return {
-      city, county, postcode,
-      raw: addr,
-      label: city+(county?', '+county:''),
-      country: addr.country_code?.toUpperCase()||'RO'
-    };
-  }catch(e){ return null; }
-}
-
-// Actualizare UAT când utilizatorul navighează pe hartă
-async function updateUATFromLocation(lat, lng){
-  const info = await detectUATFromCoords(lat, lng);
-  if(!info || info.country!=='RO') return;
-
-  const cityNorm = info.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-
-  // Caută în UAT_CONFIG
-  let matched = null;
-  for(const [id, cfg] of Object.entries(UAT_CONFIG)){
-    if(id==='_template') continue;
-    const cfgNorm = cfg.label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    if(cfgNorm.includes(cityNorm)||cityNorm.includes(cfgNorm.split(' ').pop())){
-      matched={id,cfg}; break;
-    }
-  }
-
-  if(matched){
-    S_UAT = {id:matched.id, config:matched.cfg, label:matched.cfg.label, judet:matched.cfg.judet, judetCode:matched.cfg.judetCode};
-  } else {
-    // UAT neconfigurat — creem unul dinamic cu date minime
-    S_UAT = {
-      id:'dynamic-'+cityNorm,
-      config:{...UAT_CONFIG._template, label:info.city, judet:info.county, pugFile:null, cadastruIndex:null},
-      label:info.city, judet:info.county, judetCode:'',
-      _dynamic:true, _raw:info
-    };
-  }
-
-  // Actualizăm UI
-  const uatEl=document.getElementById('uat-indicator');
-  if(uatEl) uatEl.textContent=S_UAT.label;
-
-  // Dacă PUG-ul UAT-ului nou e diferit de cel încărcat, notificăm
-  if(matched && matched.cfg.pugFile && matched.cfg.pugFile!==S_UAT.config?.pugFile){
-    ss(`📍 UAT detectat: ${S_UAT.label} — PUG disponibil`);
-    // loadDataForUAT(matched.id); // dezactivat până la implementare completă per UAT
-  } else if(S_UAT._dynamic){
-    ss(`📍 ${S_UAT.label}, ${S_UAT.judet} — PUG local indisponibil. Parametrii se preiau din ANCPI/IGRP.`);
-  }
-}
 
 // ── LMI cultura.ro — interogare CIMEC WFS cu câmpuri complete ────────────
 async function _lmiQueryCimec(lon, lat, radiusKm=2){
@@ -2418,12 +2375,16 @@ async function _lmiQueryCimec(lon, lat, radiusKm=2){
     {typename:'Situri_Arh',  key:'situri'},
   ];
 
+  // FIX (29 iul): map.cimec.ro nu are CORS activat pt fetch direct din browser — de asta functia
+  // asta nu functiona niciodata (era si cod mort, nefolosita). Rutam prin proxy-ul Cloudflare
+  // (regula #4 CLAUDE.md: "Toate fetch-urile externe prin proxy").
+  const PROXY = 'https://urbanx-proxy.3dtravelsoftart.workers.dev/proxy?url=';
   for(const lq of layerQueries){
     try{
       const url=`https://map.cimec.ro/Mapserver/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature`+
         `&TYPENAME=${lq.typename}&BBOX=${bbox},EPSG:4326&SRSNAME=EPSG:4326`+
         `&OUTPUTFORMAT=application/json&maxFeatures=100`;
-      const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+      const r=await fetch(PROXY+encodeURIComponent(url),{signal:AbortSignal.timeout(10000)});
       if(r.ok){
         const ct=r.headers.get('content-type')||'';
         if(ct.includes('json')){
@@ -2442,7 +2403,7 @@ async function _lmiQueryCimec(lon, lat, radiusKm=2){
         `&QUERY_LAYERS=LMI_Puncte&LAYERS=LMI_Puncte`+
         `&BBOX=${bbox}&CRS=EPSG:4326&WIDTH=100&HEIGHT=100`+
         `&I=50&J=50&INFO_FORMAT=application/json`;
-      const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+      const r=await fetch(PROXY+encodeURIComponent(url),{signal:AbortSignal.timeout(6000)});
       if(r.ok) results.ok=true;
     }catch(e){}
   }
@@ -2466,6 +2427,7 @@ function _lmiFormatMonument(feat){
     stare:    p.stare     ||p.STARE     ||'—',
     descriere:p.descriere ||p.DESCRIERE ||'',
     coords:   feat.geometry?.coordinates||null,
+    dist:     null,
   };
 }
 
@@ -2578,6 +2540,13 @@ function showCimecWidget(){
         : ''
       )+
 
+      // Monumente LIVE din CIMEC WFS (via proxy Cloudflare) — FIX 29 iul: se completeaza async
+      // dupa afisarea widgetului (nu blocheaza deschiderea), vezi kick-off dupa appendChild mai jos.
+      '<div id="cimec-live-section" style="margin-bottom:12px">'+
+        '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">Monumente CIMEC în apropiere (interogare live)</div>'+
+        '<div id="cimec-live-content" style="color:#64748b;font-size:10px">⏳ Se interoghează CIMEC WFS…</div>'+
+      '</div>'+
+
       // Harta embed — Google Maps centrat pe parcela
       '<div style="margin-bottom:12px">'+
         '<div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px">🗺 Hartă amplasament (Google Maps)</div>'+
@@ -2612,6 +2581,50 @@ function showCimecWidget(){
   document.body.appendChild(div);
   document.getElementById('cimec-close-btn')?.addEventListener('click',()=>div.remove());
   ss('🏛 LMI: '+(inZona?'ATENȚIE zonă protejată!':'hartă CIMEC deschisă'));
+
+  // Interogare LIVE CIMEC WFS (async, nu blochează deschiderea widgetului) — FIX 29 iul.
+  (async()=>{
+    const contentEl=document.getElementById('cimec-live-content');
+    if(!contentEl) return;
+    try{
+      const res=await _lmiQueryCimec(ctr[0], ctr[1], 2);
+      if(!document.body.contains(contentEl)) return; // widget închis între timp
+      if(!res.ok){
+        contentEl.innerHTML='<span style="color:#64748b">Interogarea live CIMEC nu a returnat date (server indisponibil sau fără rezultate în rază) — vezi verificarea manuală mai jos.</span>';
+        return;
+      }
+      const toateFeat=[...res.monumente,...res.zone,...res.situri];
+      if(!toateFeat.length){
+        contentEl.innerHTML='<span style="color:#4ade80">Nicio intrare CIMEC găsită în raza de 2 km (WFS live).</span>';
+        return;
+      }
+      const monumenteFormatate=toateFeat.map(f=>{
+        const m=_lmiFormatMonument(f);
+        try{
+          if(m.coords) m.dist=Math.round(turf.distance(
+            {type:'Feature',geometry:{type:'Point',coordinates:ctr},properties:{}},
+            {type:'Feature',geometry:{type:'Point',coordinates:m.coords.length===2&&typeof m.coords[0]==='number'?m.coords:m.coords[0]},properties:{}},
+            {units:'meters'}
+          ));
+        }catch(e){}
+        return m;
+      }).sort((a,b)=>(a.dist??999999)-(b.dist??999999)).slice(0,15);
+      contentEl.innerHTML=monumenteFormatate.map(m=>
+        '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 9px;margin-bottom:5px">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'+
+            '<div style="flex:1">'+
+              '<div style="color:#e2e8f0;font-size:10px;font-weight:600">'+m.denumire+'</div>'+
+              '<div style="color:#64748b;font-size:8.5px;margin-top:1px">'+m.cod+' · '+m.categorie+(m.datare&&m.datare!=='—'?' · '+m.datare:'')+'</div>'+
+            '</div>'+
+            (m.dist!=null?'<div style="color:#d4af37;font-size:10px;font-weight:700;flex-shrink:0">'+m.dist+'m</div>':'')+
+          '</div>'+
+        '</div>'
+      ).join('')+
+      '<div style="font-size:8px;color:#334155;margin-top:4px">'+monumenteFormatate.length+' rezultate (max. 15 afișate) · sursă: '+(res.source||'CIMEC WFS')+' via proxy Cloudflare</div>';
+    }catch(e){
+      if(document.body.contains(contentEl)) contentEl.innerHTML='<span style="color:#64748b">Interogare live indisponibilă momentan — vezi verificarea manuală mai jos.</span>';
+    }
+  })();
 }
 
 

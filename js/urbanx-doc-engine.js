@@ -80,19 +80,51 @@
     var k = _stripDia(nume).replace(/^(municipiul|orasul|oras|comuna|judetul|jud\.?)\s+/, '').trim();
     return M[k] || null;
   }
-  function seismicFor(judet) {
+  // FIX 26 iul (audit legal, cerere Florin: "calcule reale, live"): prioritate la SEISMIC_ENGINE
+  // (P100-1/2013, Tabel A1, 337 localitati reale, verificat vizual pe text oficial — vezi
+  // js/25-seismic-normative.js) — precizie per LOCALITATE, nu doar per judet. Tabelul vechi pe judet
+  // (G._SEISMIC_ZONES, din cinema-data.js) ramane doar fallback pt localitati absente din cele 337
+  // sau daca motorul inca nu s-a incarcat (fetch async). Confirmat: tabelul vechi avea erori reale
+  // fata de sursa oficiala (ex. Vaslui Tc=1.0 gresit vs 0.7 real, Piatra-Neamt ag=0.35/Tc=1.6 gresit
+  // vs 0.25/0.7 real) — corectate separat si in js/rlu-vaslui.js/js/rlu-piatra-neamt.js.
+  function seismicFor(judet, numeLocalitate) {
+    if (numeLocalitate && G.SEISMIC_ENGINE && G.SEISMIC_ENGINE._localitati) {
+      // FIX (26 iul, gasit prin verificare live in browser real): nume de localitate ambigue
+      // (ex. Stefanesti - exista si in Arges si in Botosani, cu ag diferit: 0.30 vs 0.20) trebuie
+      // disambiguate cu judetul real al proiectului, altfel motorul risca sa returneze valoarea
+      // gresitei localitati omonime — de aceea trecem judetul mai departe, nu doar numele.
+      var real = G.SEISMIC_ENGINE.getAgTc(numeLocalitate, judet);
+      if (!real.eroare) return { ag: real.ag, Tc: real.Tc, zona: null, cod: judet || '?', sursa: real.norma, status_validare: real.status_validare };
+    }
     var z = G._SEISMIC_ZONES || {};
     var cod = /^[A-Z]{1,2}$/.test(judet || '') ? judet : _judByName(judet);
-    if (cod && z[cod]) return { ag: z[cod].ag, Tc: z[cod].Tc, zona: z[cod].zona, cod: cod };
-    return { ag: 0.20, Tc: 1.0, zona: 'C', cod: cod || '?', estimat: true };
+    if (cod && z[cod]) return { ag: z[cod].ag, Tc: z[cod].Tc, zona: z[cod].zona, cod: cod, sursa: 'aproximare pe județ (P100-1/2013, fallback)', estimat: true };
+    return { ag: 0.20, Tc: 1.0, zona: 'C', cod: cod || '?', estimat: true, sursa: 'valoare implicită generică (fără date de județ/localitate)' };
   }
-  // Zone climatice — sk zăpadă (CR 1-1-3/2012) + Te iarnă (SR 1907) pe cod județ
-  function climaFor(judet) {
+  // Zone climatice — sk zăpadă (CR 1-1-3/2012) + Te iarnă (SR 1907-1) pe cod județ
+  function climaFor(judet, numeLocalitate) {
     var cod = /^[A-Z]{1,2}$/.test(judet || '') ? judet : _judByName(judet);
-    // sk (kN/m²) zonă zăpadă CR 1-1-3/2012 + Te (°C) temperatură exterioară SR 1907 — TOATE județele
+    // sk (kN/m²) zonă zăpadă CR 1-1-3/2012 — aproximare pe județ, folosită doar ca fallback
     var SK = { 'AB': 1.5, 'AR': 1.0, 'AG': 2.0, 'BC': 2.5, 'BH': 1.5, 'BN': 2.0, 'BT': 2.5, 'BR': 2.5, 'BV': 2.0, 'BZ': 2.0, 'CS': 1.5, 'CL': 2.0, 'CJ': 2.0, 'CT': 1.5, 'CV': 2.0, 'DB': 2.0, 'DJ': 1.5, 'GL': 2.5, 'GR': 2.0, 'GJ': 1.5, 'HR': 2.5, 'HD': 1.5, 'IL': 2.0, 'IS': 2.5, 'IF': 2.0, 'MM': 2.5, 'MH': 1.5, 'MS': 1.5, 'NT': 2.5, 'OT': 1.5, 'PH': 2.5, 'SJ': 1.5, 'SM': 1.5, 'SB': 2.0, 'SV': 2.5, 'TR': 2.0, 'TM': 1.5, 'TL': 1.5, 'VL': 2.0, 'VS': 2.5, 'VN': 2.0, 'B': 2.0 };
-    var TE = { 'AB': -18, 'AR': -15, 'AG': -15, 'BC': -18, 'BH': -15, 'BN': -18, 'BT': -21, 'BR': -15, 'BV': -21, 'BZ': -15, 'CS': -15, 'CL': -15, 'CJ': -18, 'CT': -12, 'CV': -21, 'DB': -15, 'DJ': -15, 'GL': -15, 'GR': -15, 'GJ': -15, 'HR': -21, 'HD': -18, 'IL': -15, 'IS': -18, 'IF': -15, 'MM': -21, 'MH': -15, 'MS': -18, 'NT': -18, 'OT': -15, 'PH': -18, 'SJ': -18, 'SM': -15, 'SB': -18, 'SV': -21, 'TR': -15, 'TM': -15, 'TL': -12, 'VL': -15, 'VS': -18, 'VN': -15, 'B': -15 };
-    return { sk: (cod && SK[cod]) || 2.0, Te: (cod && TE[cod]) || -18, cod: cod || '?', estimat: !(cod && SK[cod]) };
+    // FIX (26 iul): sk si Te aveau doar aproximare pe judet, desi motoarele noi (ZAPADA_ENGINE —
+    // CR 1-1-3/2012 Anexa A, 337 localitati reale — si TERMICE_ENGINE — SR 1907-1 Anexa A, 64
+    // localitati reale) au acum valori precise per localitate, verificate pe text oficial —
+    // exact bug-ul gasit deja la seismic (sursa veche per-judet in paralel cu motorul precis).
+    var sk = (cod && SK[cod]) || 2.0, sursa_sk = 'aproximare pe județ (fallback)';
+    if (numeLocalitate && G.ZAPADA_ENGINE && G.ZAPADA_ENGINE._data) {
+      var realSk = G.ZAPADA_ENGINE.getSk(numeLocalitate, judet);
+      if (realSk.sk !== null) { sk = realSk.sk; sursa_sk = realSk.norma; }
+    }
+    var Te = null, sursa_Te = null;
+    if (numeLocalitate && G.TERMICE_ENGINE && G.TERMICE_ENGINE._data) {
+      var real = G.TERMICE_ENGINE.getThetaExt(numeLocalitate);
+      if (real.thetaeo !== null) { Te = real.thetaeo; sursa_Te = real.norma; }
+    }
+    if (Te === null) {
+      var TE = { 'AB': -18, 'AR': -15, 'AG': -15, 'BC': -18, 'BH': -15, 'BN': -18, 'BT': -21, 'BR': -15, 'BV': -21, 'BZ': -15, 'CS': -15, 'CL': -15, 'CJ': -18, 'CT': -12, 'CV': -21, 'DB': -15, 'DJ': -15, 'GL': -15, 'GR': -15, 'GJ': -15, 'HR': -21, 'HD': -18, 'IL': -15, 'IS': -18, 'IF': -15, 'MM': -21, 'MH': -15, 'MS': -18, 'NT': -18, 'OT': -15, 'PH': -18, 'SJ': -18, 'SM': -15, 'SB': -18, 'SV': -21, 'TR': -15, 'TM': -15, 'TL': -12, 'VL': -15, 'VS': -18, 'VN': -15, 'B': -15 };
+      Te = (cod && TE[cod]) || -18; sursa_Te = 'aproximare pe județ (fallback)';
+    }
+    return { sk: sk, Te: Te, cod: cod || '?', estimat: !(cod && SK[cod]), sursa_sk: sursa_sk, sursa_Te: sursa_Te };
   }
   function autoCalc(d) {
     d = d || {}; var Steren = +d.Steren || 0, Sc = +d.Sc || 0, Sd = +d.Sd || 0;
@@ -139,7 +171,7 @@
     else nrParcaje = pk.val;
     out.parcaje_necesare = nrParcaje; out.parcaje_norma = pk;
     // seismic + climă din județ (auto — P100-1/2013 + CR 1-1-3)
-    out.seismic = seismicFor(d.judet); out.clima = climaFor(d.judet);
+    out.seismic = seismicFor(d.judet, d.uat); out.clima = climaFor(d.judet, d.uat);
     // grad/psi/struct default
     out.psi_default = fn.psi; out.grad_default = fn.grad; out.struct_default = fn.struct;
     out.risc_incendiu = fn.risc || 'mediu';

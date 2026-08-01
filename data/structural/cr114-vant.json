@@ -1,0 +1,2094 @@
+{
+ "_meta": {
+  "sursa": "CR 1-1-4/2012 - Cod de proiectare. Evaluarea actiunii vantului asupra constructiilor (Ordin MDRT, text integral, ugir.ro)",
+  "metoda_extractie": "extragere text real (PDF cu strat de text, nu scanat) + parsare programatica, verificat prin esantionare (Iasi, Cluj-Napoca, Bucuresti, Constanta etc.)",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_text_oficial",
+  "nota_coliziune": "Localitatea Stefanesti apare de 2 ori (Arges qb=0.5, Botosani qb=0.7) - identic cu coliziunea gasita la P100-1/2013 si CR 1-1-3/2012 (acelasi set de 337 localitati urbane) - motorul cere judetul pt dezambiguizare."
+ },
+ "art_2_2_presiune_referinta": {
+  "articol": "Art. 2.2, alin (1)-(4)",
+  "definitie_vb": "Valoarea de referinta a vitezei vantului (vb) - viteza caracteristica mediata pe 10 minute, la 10m inaltime, teren categoria II, IMR=50 ani.",
+  "formula_2_1": "qb = 0.5 * rho * vb^2",
+  "formula_2_2_aer_standard": "qb [Pa] = 0.625 * vb^2 [m/s] (pentru rho=1.25 kg/m3, aer standard)",
+  "nota": "Valorile de referinta qb pentru cele 337 localitati (Tabelul A.1) sunt VALORI DIRECTE (kPa), nu necesita recalcul din vb pentru determinarea amplasamentului."
+ },
+ "anexa_A_tabelul_A1_qb_localitati": {
+  "articol": "Anexa A, Tabelul A.1",
+  "unitate": "kPa",
+  "grad_asigurare": "IMR = 50 ani",
+  "valabilitate": "altitudini <= 1000m; pentru A>1000m se aplica relatia (A.1); pentru sud-vestul Banatului (qb>=0.7kPa) si zone montane >1000m se recomanda date ANM recente",
+  "localitati": [
+   {
+    "nr": 1,
+    "localitate": "Abrud",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 2,
+    "localitate": "Adamclisi",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 3,
+    "localitate": "Adjud",
+    "judet": "VRANCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 4,
+    "localitate": "Agnita",
+    "judet": "SIBIU",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 5,
+    "localitate": "Aiud",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 6,
+    "localitate": "ALBA IULIA",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 7,
+    "localitate": "Alesd",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 8,
+    "localitate": "ALEXANDRIA",
+    "judet": "TELEORMAN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 9,
+    "localitate": "Amara",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 10,
+    "localitate": "Anina",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 11,
+    "localitate": "Aninoasa",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 12,
+    "localitate": "ARAD",
+    "judet": "ARAD",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 13,
+    "localitate": "Ardud",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 14,
+    "localitate": "Avrameni",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 15,
+    "localitate": "Avrig",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 16,
+    "localitate": "Azuga",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 17,
+    "localitate": "Babadag",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 18,
+    "localitate": "BACAU",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 19,
+    "localitate": "Baia de Arama",
+    "judet": "MEHEDINTI",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 20,
+    "localitate": "Baia de Aries",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 21,
+    "localitate": "BAIA MARE",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 22,
+    "localitate": "Baia Sprie",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 23,
+    "localitate": "Bals",
+    "judet": "DOLJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 24,
+    "localitate": "Banloc",
+    "judet": "TIMIS",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 25,
+    "localitate": "Baraolt",
+    "judet": "COVASNA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 26,
+    "localitate": "Basarabi",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 27,
+    "localitate": "Baicoi",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 28,
+    "localitate": "Babeni",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 29,
+    "localitate": "Baile Govora",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 30,
+    "localitate": "Baile Herculane",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 31,
+    "localitate": "Baile Olanesti",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 32,
+    "localitate": "Baile Tusnad",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 33,
+    "localitate": "Bailesti",
+    "judet": "DOLJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 34,
+    "localitate": "Balan",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 35,
+    "localitate": "Balcesti",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 36,
+    "localitate": "Baneasa",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 37,
+    "localitate": "Bârlad",
+    "judet": "VASLUI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 38,
+    "localitate": "Bechet",
+    "judet": "DOLJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 39,
+    "localitate": "Beclean",
+    "judet": "BISTRITA NASAUD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 40,
+    "localitate": "Beius",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 41,
+    "localitate": "Berbesti",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 42,
+    "localitate": "Beresti",
+    "judet": "GALATI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 43,
+    "localitate": "Bicaz",
+    "judet": "NEAMT",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 44,
+    "localitate": "BISTRITA",
+    "judet": "BISTRITA NASAUD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 45,
+    "localitate": "Blaj",
+    "judet": "ALBA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 46,
+    "localitate": "Bocsa",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 47,
+    "localitate": "Boldesti-Scaeni",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 48,
+    "localitate": "Bolintin-Vale",
+    "judet": "GIURGIU",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 49,
+    "localitate": "Borod",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 50,
+    "localitate": "Borsec",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 51,
+    "localitate": "Borsa",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 52,
+    "localitate": "BOTOSANI",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 53,
+    "localitate": "Brad",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 54,
+    "localitate": "Bragadiru",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 55,
+    "localitate": "BRASOV",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 56,
+    "localitate": "BRAILA",
+    "judet": "BRAILA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 57,
+    "localitate": "Breaza",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 58,
+    "localitate": "Brezoi",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 59,
+    "localitate": "Brosteni",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 60,
+    "localitate": "Bucecea",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 61,
+    "localitate": "BUCURESTI",
+    "judet": "BUCURESTI",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 62,
+    "localitate": "Budesti",
+    "judet": "CALARASI",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 63,
+    "localitate": "Buftea",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 64,
+    "localitate": "Buhusi",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 65,
+    "localitate": "Bumbesti-Jiu",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 66,
+    "localitate": "Busteni",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 67,
+    "localitate": "BUZAU",
+    "judet": "BUZAU",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 68,
+    "localitate": "Buzias",
+    "judet": "TIMIS",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 69,
+    "localitate": "Cajvana",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 70,
+    "localitate": "Calafat",
+    "judet": "DOLJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 71,
+    "localitate": "Caracal",
+    "judet": "OLT",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 72,
+    "localitate": "Caransebes",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 73,
+    "localitate": "Carei",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 74,
+    "localitate": "Cavnic",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 75,
+    "localitate": "Calan",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 76,
+    "localitate": "CALARASI",
+    "judet": "CALARASI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 77,
+    "localitate": "Calimanesti",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 78,
+    "localitate": "Cazanesti",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 79,
+    "localitate": "Câmpia Turzii",
+    "judet": "CLUJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 80,
+    "localitate": "Câmpeni",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 81,
+    "localitate": "Câmpina",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 82,
+    "localitate": "Câmpulung",
+    "judet": "ARGES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 83,
+    "localitate": "Câmpulung Mold.",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 84,
+    "localitate": "Ceahlau",
+    "judet": "NEAMT",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 85,
+    "localitate": "Cehu Silvaniei",
+    "judet": "SALAJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 86,
+    "localitate": "Cernavoda",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 87,
+    "localitate": "Chisineu-Cris",
+    "judet": "ARAD",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 88,
+    "localitate": "Chitila",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 89,
+    "localitate": "Ciacova",
+    "judet": "TIMIS",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 90,
+    "localitate": "Cisnadie",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 91,
+    "localitate": "CLUJ-NAPOCA",
+    "judet": "CLUJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 92,
+    "localitate": "Codlea",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 93,
+    "localitate": "Colibasi",
+    "judet": "ARGES",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 94,
+    "localitate": "Comarnic",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 95,
+    "localitate": "Comanesti",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 96,
+    "localitate": "CONSTANTA",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 97,
+    "localitate": "Copsa Mica",
+    "judet": "SIBIU",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 98,
+    "localitate": "Corabia",
+    "judet": "OLT",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 99,
+    "localitate": "Corugea",
+    "judet": "TULCEA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 100,
+    "localitate": "Costesti",
+    "judet": "ARGES",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 101,
+    "localitate": "Cotnari",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 102,
+    "localitate": "Covasna",
+    "judet": "COVASNA",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 103,
+    "localitate": "CRAIOVA",
+    "judet": "DOLJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 104,
+    "localitate": "Cristuru Secuiesc",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 105,
+    "localitate": "Cugir",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 106,
+    "localitate": "Curtea de Arges",
+    "judet": "ARGES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 107,
+    "localitate": "107 Curtici",
+    "judet": "ARAD",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 108,
+    "localitate": "Darabani",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 109,
+    "localitate": "Dabuleni",
+    "judet": "DOLJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 110,
+    "localitate": "Darmanesti",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 111,
+    "localitate": "Dej",
+    "judet": "CLUJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 112,
+    "localitate": "Deta",
+    "judet": "TIMIS",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 113,
+    "localitate": "DEVA",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 114,
+    "localitate": "Dolhasca",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 115,
+    "localitate": "Dorohoi",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 116,
+    "localitate": "Dragomiresti",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 117,
+    "localitate": "Dragasani",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 118,
+    "localitate": "Draganesti-Olt",
+    "judet": "OLT",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 119,
+    "localitate": "DROBETA TURNU SEVERIN",
+    "judet": "MEHEDINTI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 120,
+    "localitate": "Dumbraveni",
+    "judet": "SIBIU",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 121,
+    "localitate": "Eforie Nord",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 122,
+    "localitate": "Eforie Sud",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 123,
+    "localitate": "Fagaras",
+    "judet": "BRASOV",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 124,
+    "localitate": "Faget",
+    "judet": "TIMIS",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 125,
+    "localitate": "Falticeni",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 126,
+    "localitate": "Faurei",
+    "judet": "BRAILA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 127,
+    "localitate": "Fetesti",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 128,
+    "localitate": "Fieni",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 129,
+    "localitate": "Fierbinti-Târg",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 130,
+    "localitate": "Filiasi",
+    "judet": "DOLJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 131,
+    "localitate": "Flamânzi",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 132,
+    "localitate": "FOCSANI",
+    "judet": "VRANCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 133,
+    "localitate": "Fundulea",
+    "judet": "CALARASI",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 134,
+    "localitate": "Frasin",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 135,
+    "localitate": "GALATI",
+    "judet": "GALATI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 136,
+    "localitate": "Gaesti",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 137,
+    "localitate": "Gataia",
+    "judet": "TIMIS",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 138,
+    "localitate": "Geoagiu",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 139,
+    "localitate": "Gheorgheni",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 140,
+    "localitate": "Gherla",
+    "judet": "CLUJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 141,
+    "localitate": "Ghimbav",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 142,
+    "localitate": "GIURGIU",
+    "judet": "GIURGIU",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 143,
+    "localitate": "Grivita",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 144,
+    "localitate": "Gurahont",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 145,
+    "localitate": "Gura Humorului",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 146,
+    "localitate": "Hateg",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 147,
+    "localitate": "Hârlau",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 148,
+    "localitate": "Hârsova",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 149,
+    "localitate": "Holod",
+    "judet": "BIHOR",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 150,
+    "localitate": "Horezu",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 151,
+    "localitate": "Huedin",
+    "judet": "CLUJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 152,
+    "localitate": "Hunedoara",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 153,
+    "localitate": "Husi",
+    "judet": "VASLUI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 154,
+    "localitate": "Ianca",
+    "judet": "BRAILA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 155,
+    "localitate": "IASI",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 156,
+    "localitate": "Iernut",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 157,
+    "localitate": "Ineu",
+    "judet": "ARAD",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 158,
+    "localitate": "Isaccea",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 159,
+    "localitate": "Însuratei",
+    "judet": "BRAILA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 160,
+    "localitate": "Întorsura Buzaului",
+    "judet": "COVASNA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 161,
+    "localitate": "Jimbolia",
+    "judet": "TIMIS",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 162,
+    "localitate": "Jibou",
+    "judet": "SALAJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 163,
+    "localitate": "Jurilovca",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 164,
+    "localitate": "Lehliu Gara",
+    "judet": "CALARASI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 165,
+    "localitate": "Lipova",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 166,
+    "localitate": "Liteni",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 167,
+    "localitate": "Livada",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 168,
+    "localitate": "Ludus",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 169,
+    "localitate": "Lugoj",
+    "judet": "TIMIS",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 170,
+    "localitate": "Lupeni",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 171,
+    "localitate": "Mangalia",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 172,
+    "localitate": "Marghita",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 173,
+    "localitate": "Macin",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 174,
+    "localitate": "Magurele",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 175,
+    "localitate": "Marasesti",
+    "judet": "VRANCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 176,
+    "localitate": "Medgidia",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 177,
+    "localitate": "Medias",
+    "judet": "SIBIU",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 178,
+    "localitate": "MIERCUREA CIUC",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 179,
+    "localitate": "Miercurea Nirajului",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 180,
+    "localitate": "Miercurea Sibiului",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 181,
+    "localitate": "Mihailesti",
+    "judet": "GIURGIU",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 182,
+    "localitate": "Milisauti",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 183,
+    "localitate": "Mizil",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 184,
+    "localitate": "Moinesti",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 185,
+    "localitate": "Moldova Noua",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 186,
+    "localitate": "Moneasa",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 187,
+    "localitate": "Moreni",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 188,
+    "localitate": "Motru",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 189,
+    "localitate": "Murgeni",
+    "judet": "VASLUI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 190,
+    "localitate": "Nadlac",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 191,
+    "localitate": "Nasaud",
+    "judet": "BISTRITA NASAUD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 192,
+    "localitate": "Navodari",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 193,
+    "localitate": "Negresti",
+    "judet": "VASLUI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 194,
+    "localitate": "Negresti Oas",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 195,
+    "localitate": "Negru Voda",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 196,
+    "localitate": "Nehoiu",
+    "judet": "BUZAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 197,
+    "localitate": "Novaci",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 198,
+    "localitate": "Nucet",
+    "judet": "BIHOR",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 199,
+    "localitate": "Ocna Mures",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 200,
+    "localitate": "Ocna Sibiului",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 201,
+    "localitate": "Ocnele Mari",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 202,
+    "localitate": "Odobesti",
+    "judet": "VRANCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 203,
+    "localitate": "Odorheiul Secuiesc",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 204,
+    "localitate": "Oltenita",
+    "judet": "CALARASI",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 205,
+    "localitate": "Onesti",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 206,
+    "localitate": "ORADEA",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 207,
+    "localitate": "Oravita",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 208,
+    "localitate": "Orastie",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 209,
+    "localitate": "Orsova",
+    "judet": "MEHEDINTI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 210,
+    "localitate": "Otopeni",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 211,
+    "localitate": "Otelu Rosu",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 212,
+    "localitate": "Ovidiu",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 213,
+    "localitate": "Panciu",
+    "judet": "VRANCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 214,
+    "localitate": "Pantelimon",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 215,
+    "localitate": "Pascani",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 216,
+    "localitate": "Patârlagele",
+    "judet": "BUZAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 217,
+    "localitate": "Pâncota",
+    "judet": "ARAD",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 218,
+    "localitate": "Pecica",
+    "judet": "ARAD",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 219,
+    "localitate": "Petrila",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 220,
+    "localitate": "Petrosani",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 221,
+    "localitate": "PIATRA NEAMT",
+    "judet": "NEAMT",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 222,
+    "localitate": "Piatra Olt",
+    "judet": "DOLJ",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 223,
+    "localitate": "PITESTI",
+    "judet": "ARGES",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 224,
+    "localitate": "PLOIESTI",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 225,
+    "localitate": "Plopeni",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 226,
+    "localitate": "Podu Iloaiei",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 227,
+    "localitate": "Pogoanele",
+    "judet": "BUZAU",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 228,
+    "localitate": "Popesti Leordeni",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 229,
+    "localitate": "Potcoava",
+    "judet": "OLT",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 230,
+    "localitate": "Predeal",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 231,
+    "localitate": "Pucioasa",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 232,
+    "localitate": "Racari",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 233,
+    "localitate": "Radauti",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 234,
+    "localitate": "Rauseni",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 235,
+    "localitate": "Râmnicu Sarat",
+    "judet": "BUZAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 236,
+    "localitate": "RÂMNICU VÂLCEA",
+    "judet": "VÂLCEA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 237,
+    "localitate": "Râsnov",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 238,
+    "localitate": "Recas",
+    "judet": "TIMIS",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 239,
+    "localitate": "Reghin",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 240,
+    "localitate": "Resita",
+    "judet": "CARAS-SEVERIN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 241,
+    "localitate": "Roman",
+    "judet": "NEAMT",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 242,
+    "localitate": "Rosiori de Vede",
+    "judet": "TELEORMAN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 243,
+    "localitate": "Rovinari",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 244,
+    "localitate": "Roznov",
+    "judet": "NEAMT",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 245,
+    "localitate": "Rupea",
+    "judet": "BRASOV",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 246,
+    "localitate": "Salcea",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 247,
+    "localitate": "Salonta",
+    "judet": "BIHOR",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 248,
+    "localitate": "Sântana",
+    "judet": "ARAD",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 249,
+    "localitate": "SATU MARE",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 250,
+    "localitate": "Sacele",
+    "judet": "BRASOV",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 251,
+    "localitate": "Sacuieni",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 252,
+    "localitate": "Saliste",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 253,
+    "localitate": "Salistea de Sus",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 254,
+    "localitate": "Sarmasu",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 255,
+    "localitate": "Savârsin",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 256,
+    "localitate": "Saveni",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 257,
+    "localitate": "Sângeorz Bai",
+    "judet": "BISTRITA NASAUD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 258,
+    "localitate": "Sângeorgiu de Padure",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 259,
+    "localitate": "Sânnicolau Mare",
+    "judet": "TIMIS",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 260,
+    "localitate": "Scornicesti",
+    "judet": "OLT",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 261,
+    "localitate": "Sebes",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 262,
+    "localitate": "Sebis",
+    "judet": "ARAD",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 263,
+    "localitate": "Seini",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 264,
+    "localitate": "Segarcea",
+    "judet": "DOLJ",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 265,
+    "localitate": "SFÂNTU GHEORGHE",
+    "judet": "COVASNA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 266,
+    "localitate": "Sf. Gheorghe",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 267,
+    "localitate": "SIBIU",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 268,
+    "localitate": "Sighetul Marmatiei",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 269,
+    "localitate": "Sighisoara",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 270,
+    "localitate": "Simeria",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 271,
+    "localitate": "Sinaia",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 272,
+    "localitate": "Siret",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 273,
+    "localitate": "SLATINA",
+    "judet": "OLT",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 274,
+    "localitate": "Slanic Moldova",
+    "judet": "BACAU",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 275,
+    "localitate": "Slanic Prahova",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 276,
+    "localitate": "SLOBOZIA",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 277,
+    "localitate": "Solca",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 278,
+    "localitate": "Sovata",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 279,
+    "localitate": "Stei",
+    "judet": "BIHOR",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 280,
+    "localitate": "Strehaia",
+    "judet": "MEHEDINTI",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 281,
+    "localitate": "SUCEAVA",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 282,
+    "localitate": "Sulina",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 283,
+    "localitate": "Simleul Silvaniei",
+    "judet": "SALAJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 284,
+    "localitate": "Somcuta Mare",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 285,
+    "localitate": "Stefanesti",
+    "judet": "ARGES",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 286,
+    "localitate": "Stefanesti",
+    "judet": "BOTOSANI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 287,
+    "localitate": "Talmaciu",
+    "judet": "SIBIU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 288,
+    "localitate": "Tasnad",
+    "judet": "SATU MARE",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 289,
+    "localitate": "Tautii Magheraus",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 290,
+    "localitate": "TÂRGOVISTE",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 291,
+    "localitate": "Târgu Bujor",
+    "judet": "GALATI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 292,
+    "localitate": "Târgu Carbunesti",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 293,
+    "localitate": "Târgu Frumos",
+    "judet": "IASI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 294,
+    "localitate": "TÂRGU JIU",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 295,
+    "localitate": "Târgu Lapus",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 296,
+    "localitate": "TÂRGU MURES",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 297,
+    "localitate": "Târgu Ocna",
+    "judet": "BACAU",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 298,
+    "localitate": "Târgu Neamt",
+    "judet": "NEAMT",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 299,
+    "localitate": "Târgu Secuiesc",
+    "judet": "COVASNA",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 300,
+    "localitate": "Târnaveni",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 301,
+    "localitate": "Techirghiol",
+    "judet": "CONSTANTA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 302,
+    "localitate": "Tecuci",
+    "judet": "GALATI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 303,
+    "localitate": "Teius",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 304,
+    "localitate": "Tismana",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 305,
+    "localitate": "Titu",
+    "judet": "DÂMBOVITA",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 306,
+    "localitate": "TIMISOARA",
+    "judet": "TIMIS",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 307,
+    "localitate": "Toplita",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 308,
+    "localitate": "Topoloveni",
+    "judet": "ARGES",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 309,
+    "localitate": "Turceni",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 310,
+    "localitate": "Turnu Magurele",
+    "judet": "TELEORMAN",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 311,
+    "localitate": "TULCEA",
+    "judet": "TULCEA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 312,
+    "localitate": "Turda",
+    "judet": "CLUJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 313,
+    "localitate": "Tusnad",
+    "judet": "HARGHITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 314,
+    "localitate": "Tandarei",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 315,
+    "localitate": "Ticleni",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 316,
+    "localitate": "Ulmeni",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 317,
+    "localitate": "Ungheni",
+    "judet": "MURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 318,
+    "localitate": "Uricani",
+    "judet": "GORJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 319,
+    "localitate": "Urlati",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 320,
+    "localitate": "Urziceni",
+    "judet": "IALOMITA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 321,
+    "localitate": "Valea lui Mihai",
+    "judet": "BIHOR",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 322,
+    "localitate": "VASLUI",
+    "judet": "VASLUI",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 323,
+    "localitate": "Vascau",
+    "judet": "BIHOR",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 324,
+    "localitate": "Vatra Dornei",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 325,
+    "localitate": "Valenii de Munte",
+    "judet": "PRAHOVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 326,
+    "localitate": "Vânju Mare",
+    "judet": "MEHEDINTI",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 327,
+    "localitate": "Vicovu de Sus",
+    "judet": "SUCEAVA",
+    "qb_kpa": 0.6
+   },
+   {
+    "nr": 328,
+    "localitate": "Victoria",
+    "judet": "BRASOV",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 329,
+    "localitate": "Videle",
+    "judet": "TELEORMAN",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 330,
+    "localitate": "Viseu de Sus",
+    "judet": "MARAMURES",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 331,
+    "localitate": "Vlahita",
+    "judet": "Harghita",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 332,
+    "localitate": "Voluntari",
+    "judet": "ILFOV",
+    "qb_kpa": 0.5
+   },
+   {
+    "nr": 333,
+    "localitate": "Vulcani",
+    "judet": "HUNEDOARA",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 334,
+    "localitate": "ZALAU",
+    "judet": "SALAJ",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 335,
+    "localitate": "Zarnesti",
+    "judet": "BRASOV",
+    "qb_kpa": 0.4
+   },
+   {
+    "nr": 336,
+    "localitate": "Zimnicea",
+    "judet": "TELEORMAN",
+    "qb_kpa": 0.7
+   },
+   {
+    "nr": 337,
+    "localitate": "Zlatna",
+    "judet": "ALBA",
+    "qb_kpa": 0.4
+   }
+  ]
+ },
+ "tabelul_2_1_categorii_teren": {
+  "articol": "Art. 2.3, alin (1), Tabelul 2.1",
+  "categorii": {
+   "0": {
+    "descriere": "Mare sau zone costiere expuse vanturilor dinspre mare",
+    "z0_m": 0.003,
+    "zmin_m": 1
+   },
+   "I": {
+    "descriere": "Lacuri sau terenuri plate si orizontale, fara obstacole",
+    "z0_m": 0.01,
+    "zmin_m": 1
+   },
+   "II": {
+    "descriere": "Camp deschis - terenuri cu iarba si/sau obstacole izolate la distante >=20x inaltimea obstacolului",
+    "z0_m": 0.05,
+    "zmin_m": 2
+   },
+   "III": {
+    "descriere": "Zone acoperite uniform cu vegetatie/cladiri, obstacole la distante <=20x inaltimea (sate, teren suburban, paduri)",
+    "z0_m": 0.3,
+    "zmin_m": 5
+   },
+   "IV": {
+    "descriere": "Zone urbane - min. 15% din suprafata acoperita cu constructii >15m inaltime",
+    "z0_m": 1.0,
+    "zmin_m": 10
+   }
+  },
+  "nota_gap": "Coeficientii aerodinamici de presiune (Cpe, Capitolul 5/7 - dependenti de forma acoperisului/fatadei) raman date specifice proiectului, nu calculabile generic - vezi formula_qp_z de mai jos pt presiunea de calcul qp(z), care nu mai depinde de Cpe (acela intra abia in pasul urmator, presiunea pe o suprafata w=qp(z)*Cpe)."
+ },
+ "tabelul_2_2_factor_rugozitate_kr": {
+  "articol": "Art. 2.3, alin (3)-(4), formulele (2.4)/(2.5), Tabelul 2.2",
+  "formula_cr_z": "cr(z) = kr(z0) * ln(z/z0), pentru zmin < z <= zmax=200m; cr(z)=cr(zmin) pentru z<=zmin",
+  "formula_kr": "kr(z0) = 0.189 * (z0/0.05)^0.07",
+  "kr_pe_categorie": { "0": 0.155, "I": 0.169, "II": 0.189, "III": 0.214, "IV": 0.233 }
+ },
+ "tabelul_2_3_turbulenta_sqrtb": {
+  "articol": "Art. 2.4, alin (2)-(3), formula (2.11), Tabelul 2.3",
+  "formula_Iv_z": "Iv(z) = sqrt(b) / (2.5 * ln(z/z0)), pentru zmin<z<=200m; Iv(z)=Iv(zmin) pentru z<=zmin",
+  "sqrtb_pe_categorie": { "0": 2.74, "I": 2.74, "II": 2.66, "III": 2.35, "IV": 2.12 }
+ },
+ "formula_qp_z": {
+  "articol": "Art. 2.4, alin (6)-(8), formulele (2.14)-(2.17)",
+  "cpq_z": "cpq(z) = 1 + 7 * Iv(z)  (g=3.5 fixat, factor de rafala pt presiune dinamica)",
+  "qp_z": "qp(z) = cpq(z) * cr(z)^2 * qb",
+  "nota": "qp(z) e presiunea de calcul a vantului la inaltimea z deasupra terenului, pt categoria de teren reala a amplasamentului - NU inca presiunea finala pe o suprafata a constructiei (aceea necesita Cpe, coeficientul aerodinamic de presiune, dependent de forma acoperisului/fatadei - date specifice de proiectare, nu generic din amplasament)."
+ }
+}

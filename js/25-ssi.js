@@ -22,11 +22,20 @@
     },
     grade: { I: 'R 120 (beton/metal protejat) — H nelimitat', II: 'R 90 — H nelimitat', III: 'R 45 — max P+4E', IV: 'R 15 — max P+1E', V: 'neimpus — P' },
     rezistenta: { structura: { I: 'R 120', II: 'R 90', III: 'R 45', IV: 'R 15', V: 'neimpus' }, plansee: { I: 'REI 120', II: 'REI 90', III: 'REI 60', IV: 'REI 30', V: 'neimpus' }, pereti_antifoc: { principal: 'EI 180', secundar: 'EI 120', compartimentare: 'EI 60' } },
+    // ATENTIE (audit 26 iul): aceste limite sunt in VOLUM (mc), aproximative, NU sunt inca
+    // verificate/sursate din P118-1/2025 (care normeaza compartimentarea in ARIE construita mp,
+    // vezi Tabelul 41/T147 — grad I-II=3500mp, III=2500mp, IV=2000/1500mp, V=1000/800mp, prin
+    // js/25-ssi-engine.js M5/SSI_NORMATIVE_ENGINE.getAriiMaxime — sursa reala, verificata). Motorul
+    // GENERIC de aici (hale/SKID) foloseste inca un prag propriu, necorelat cu M5 — de migrat la M5
+    // inainte de a-l folosi ca document FINAL pt cladiri civile.
     compartiment: { fara: { mic: 12000, mediu: 6000, mare: 3000 }, cu: { mic: 36000, mediu: 18000, mare: 9000 } },
     evacuare: { lungimi: { mic: 60, mediu: 50, mare: 40, foarte_mare: 30 }, latimi: { usa: 0.90, usa_industriala: 1.20, culoar: 1.20, scara: 1.00 }, flux: { usa: 80, scara: 60, culoar: 90 } },
     hidranti: { int_debit: 2.1, int_presiune: 2.5, int_nr_simultan: 2, ext_autonomie: 180, ext_dist_max: 120, ext_debit: { mic: 15, mediu: 20, mare: 25, foarte_mare: 30 } },
     stingatoare: { mic: 200, mediu: 150, mare: 100, foarte_mare: 50 },
-    acces_isu: { latime: 4.0, H_libera: 4.5, portanta: 17, raza: 12.5, dist_max: 18 },
+    // Verificat direct pe text oficial P118-1/2025, Art. 2.6.2/2.6.3 (26 iul) — inlocuieste valorile
+    // vechi, gresite (raza 12,5→11,00; dist_max 18→10; portanta 17t/osie→masa totala 50.000 kg).
+    // latime_h_sub_15: h<=15m si lungime carosabil<=30m; latime_h_peste_15: altfel (Art. 2.6.2).
+    acces_isu: { latime_h_sub_15: 3.5, latime_h_peste_15: 7.0, H_libera: 4.2, masa_max_kg: 50000, raza: 11.0, dist_max: 10.0 },
     reactie_foc: { cai_evacuare: 'min. C-s2,d1', spatii_publice: 'min. C-s1,d0', hale: 'min. D', depozite: 'min. C' }
   };
   var SSI_TIPOLOGII = {
@@ -41,7 +50,7 @@
   var LEGAL = [
     ['Ordinul MAI nr. 180/2022, Anexa 5', 'Norme metodologice privind avizarea si autorizarea de securitate la incendiu si protectie civila (inlocuieste Ord. 129/2016)'],
     ['Legea nr. 307/2006 (rep.)', 'Apărarea împotriva incendiilor (mod. L.180/2021, L.291/2023)'],
-    ['P 118/1-2015', 'Securitatea la incendiu a construcțiilor (completare Ord. MAI 87/2019)'],
+    ['P 118-1/2025', 'Securitatea la incendiu a construcțiilor (M.O. Partea I, Nr. 204 bis/10.III.2025 — înlocuiește P118/1-2015)'],
     ['P 118/2-2013', 'Instalații de stingere cu apă'],
     ['P 118/3-2015', 'Instalații de detectare, semnalizare, alarmare'],
     ['Ord. MAI nr. 163/2007', 'Norme generale de apărare împotriva incendiilor'],
@@ -75,13 +84,18 @@
     // verificări
     var erori = [], avert = [], oblig = [];
     var limC = (sprinklere ? SSI_NORMATIVE.compartiment.cu : SSI_NORMATIVE.compartiment.fara)[risc === 'foarte_mare' ? 'mare' : risc] || 6000;
-    if (V > limC) erori.push({ cap: 'Cap.3', cod: 'CI_VOL', msg: 'Volum compartiment ' + V.toLocaleString('ro-RO') + ' mc > limita P118 de ' + limC.toLocaleString('ro-RO') + ' mc (risc ' + risc + (sprinklere ? ' cu' : ' fără') + ' sprinklere) → pereți antifoc sau sprinklere', norma: 'P118/1-2015 Tab.2.2' });
+    if (V > limC) erori.push({ cap: 'Cap.3', cod: 'CI_VOL', msg: 'Volum compartiment ' + V.toLocaleString('ro-RO') + ' mc > limita internă de ' + limC.toLocaleString('ro-RO') + ' mc (risc ' + risc + (sprinklere ? ' cu' : ' fără') + ' sprinklere) → pereți antifoc sau sprinklere — prag aproximativ, necorelat încă cu Tabelul 41/P118-1/2025 (limită reală în arie mp, nu volum mc — vezi SSI_ENGINE.m5_compartimentare)', norma: 'prag intern aproximativ — verifică Tabelul 41 (P118-1/2025) pentru limita legală reală' });
     if (H > 28 && !sprinklere) erori.push({ cap: 'Cap.4', cod: 'SPR_H28', msg: 'H > 28 m → sprinklere obligatorii', norma: 'P118/2-2013 art.3.1' });
     if (H > 28) oblig.push({ cap: 'Cap.4', cod: 'DET_H28', msg: 'H > 28 m → detectare automată + sistem vocal + scară de pompieri', norma: 'P118/3-2015' });
     if (tip === 'skid_GPL' || tip === 'statie_GPL' || risc === 'foarte_mare') oblig.push({ cap: 'Cap.4', cod: 'ATEX', msg: 'Risc foarte mare / GPL → zonare ATEX + detectoare gaz Ex + electrovană + Document Protecție Explozie (HG 1058/2006)', norma: 'PT C8-2010 + ATEX' });
     var nrIesiri = nrPers < 50 && Sc <= 300 ? 1 : nrPers < 200 ? 2 : nrPers < 500 ? 3 : 4;
     if (Sc > 500 && nrIesiri < 2) nrIesiri = 2;
-    if (Sc > 1000 && tip === 'hala_industriala') oblig.push({ cap: 'Cap.4', cod: 'DESFUM', msg: 'Hală Sc > 1000 mp → desfumare naturală (trape ≥ 2% Sc)', norma: 'P118/1-2015 art.8.2' });
+    // Prag Sc>1000mp e o simplificare proprie, NU coincide exact cu niciunul din cele 18 cazuri
+    // reale de obligativitate ale Art. 8.1.8 (vezi data/ssi/normative.json, P118_1_2025_Art_8_1_
+    // desfumare_presurizare) — de verificat cazul exact (litera a-t) inainte de a folosi ca FINAL.
+    // Procentul de 1% (nu 2%) e insa verificat: Art. 8.1.10 alin.(2) P118-1/2025 — suprafata
+    // aerodinamica libera minima a dispozitivelor cu deschidere automata = 1% din aria incaperii.
+    if (Sc > 1000 && tip === 'hala_industriala') oblig.push({ cap: 'Cap.4', cod: 'DESFUM', msg: 'Hală Sc > 1000 mp → verifică încadrarea în cazurile de obligativitate Art. 8.1.8 (18 cazuri, litera a-t); dacă se confirmă, desfumare naturală cu suprafață aerodinamică liberă minimă 1% din aria încăperii', norma: 'P118-1/2025, Art. 8.1.8 + Art. 8.1.10 alin. (2) — prag Sc>1000mp e aproximativ, nu un caz literal din normativ' });
     var nrSting = Math.ceil(Sc / (SSI_NORMATIVE.stingatoare[risc] || 150));
     var hidrantiInt = Sc > 600;
     var hidrantiExtDebit = SSI_NORMATIVE.hidranti.ext_debit[risc] || 20;
@@ -153,7 +167,7 @@
     [['Structură portantă', SSI_NORMATIVE.rezistenta.structura[c.grad]], ['Planșee de separare', SSI_NORMATIVE.rezistenta.plansee[c.grad]], ['Pereți antifoc principali', SSI_NORMATIVE.rezistenta.pereti_antifoc.principal], ['Pereți de compartimentare', SSI_NORMATIVE.rezistenta.pereti_antifoc.compartimentare], ['Uși antifoc (casa scării)', 'EI2 30–120 după caz']
     ].forEach(function (r) { cy = tblRow(r, cy, false, [90, 92]); });
     cy += 3;
-    P('Volumul compartimentului de incendiu este ' + c.V.toLocaleString('ro-RO') + ' mc, față de limita de ' + c.limC.toLocaleString('ro-RO') + ' mc (P118/1-2015 Tab. 2.2, risc ' + c.risc + (c.sprinklere ? ' cu' : ' fără') + ' sprinklere). ' + (c.V > c.limC ? 'DEPĂȘIT → sunt necesari pereți antifoc de compartimentare sau sprinklere automate.' : 'Se încadrează în limită.'));
+    P('Volumul compartimentului de incendiu este ' + c.V.toLocaleString('ro-RO') + ' mc, față de un prag intern aproximativ de ' + c.limC.toLocaleString('ro-RO') + ' mc (risc ' + c.risc + (c.sprinklere ? ' cu' : ' fără') + ' sprinklere) — necorelat încă cu limita legală reală (Tabelul 41, P118-1/2025, în arie construită mp, nu volum mc). ' + (c.V > c.limC ? 'DEPĂȘIT → sunt necesari pereți antifoc de compartimentare sau sprinklere automate; verifică suplimentar Tabelul 41.' : 'Se încadrează în pragul intern; verifică suplimentar Tabelul 41 pentru limita legală reală.'));
 
     page('CAP.4 ECHIPARE'); SEC('CAPITOLUL 4 — ECHIPAREA ȘI DOTAREA');
     cy = tblRow(['Mijloc tehnic', 'Necesar / parametri'], cy, true, [70, 112]);
@@ -178,7 +192,7 @@
 
     page('CAP.7 INTERVENȚIE'); SEC('CAPITOLUL 7 — FORȚE ȘI MIJLOACE DE INTERVENȚIE');
     cy = tblRow(['Element', 'Valoare / cerință'], cy, true, [70, 112]);
-    [['ISU teritorial', 'Detașamentul/garda cel mai apropiat'], ['Acces autospeciale — lățime', SSI_NORMATIVE.acces_isu.latime + ' m'], ['Înălțime liberă acces', SSI_NORMATIVE.acces_isu.H_libera + ' m'], ['Capacitate portantă', SSI_NORMATIVE.acces_isu.portanta + ' t/osie'], ['Rază de viraj', SSI_NORMATIVE.acces_isu.raza + ' m'], ['Distanță max. față de fațadă', SSI_NORMATIVE.acces_isu.dist_max + ' m'], ['Responsabil PSI + instruire', 'obligatoriu (L.307/2006)']
+    [['ISU teritorial', 'Detașamentul/garda cel mai apropiat'], ['Acces autospeciale — lățime', (c.H > 15 ? SSI_NORMATIVE.acces_isu.latime_h_peste_15 : SSI_NORMATIVE.acces_isu.latime_h_sub_15) + ' m (' + (c.H > 15 ? 'H>15m' : 'H≤15m') + ', Art. 2.6.2)'], ['Înălțime liberă acces', SSI_NORMATIVE.acces_isu.H_libera + ' m (Art. 2.6.2)'], ['Masă maximă autospecială', SSI_NORMATIVE.acces_isu.masa_max_kg.toLocaleString('ro-RO') + ' kg (Art. 2.6.3)'], ['Rază minimă de viraj', SSI_NORMATIVE.acces_isu.raza + ' m (Art. 2.6.3)'], ['Distanță max. față de fațadă', SSI_NORMATIVE.acces_isu.dist_max + ' m (Art. 2.6.2)'], ['Responsabil PSI + instruire', 'obligatoriu (L.307/2006)']
     ].forEach(function (r) { cy = tblRow(r, cy, false, [70, 112]); });
     cy += 3;
     P('Accesul autospecialelor ISU se asigură pe min. o fațadă (două pentru Sc > 2000 mp sau H > 30 m), cu platformă de manevră. Se întocmește plan de intervenție și se asigură personal instruit PSI.');

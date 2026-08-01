@@ -1,0 +1,2371 @@
+{
+ "_meta": {
+  "sursa": "P100-1/2013, Cod de proiectare seismica, MDRAP/UTCB, mai 2013 (in vigoare, cf. registrului platformei) — Anexa A.6, Tabel A1",
+  "titlu": "Valorile acceleratiei terenului pentru proiectare (ag) si ale perioadei de control (colt) Tc, pentru 337 localitati urbane din Romania, conform Fig. 3.1 si Fig. 3.2, IMR=225 ani (20% probabilitate de depasire in 50 ani)",
+  "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), parsat si validat (337/337 randuri, zero lipsa, zero duplicate)",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_text_oficial",
+  "nota": "Inlocuieste aproximarea anterioara pe judet (js/seismic-fix.js, SEISMIC_JUDET) care avea erori confirmate la orase mari (ex: Iasi 0.35g gresit vs 0.25g real; Timisoara 0.10g gresit vs 0.20g real). Pentru localitati care NU apar in acest tabel (comune mici, nu sunt in cele 337 'localitati urbane'), se foloseste in continuare aproximarea pe judet ca fallback, cu precizie mai mica."
+ },
+ "localitati": [
+  {
+   "nr": 1,
+   "localitate": "Abrud",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 2,
+   "localitate": "Adamclisi",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 3,
+   "localitate": "Adjud",
+   "judet": "VRANCEA",
+   "Tc": 1.0,
+   "ag": 0.4
+  },
+  {
+   "nr": 4,
+   "localitate": "Agnita",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 5,
+   "localitate": "Aiud",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 6,
+   "localitate": "ALBA IULIA",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 7,
+   "localitate": "Aleşd",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 8,
+   "localitate": "ALEXANDRIA",
+   "judet": "TELEORMAN",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 9,
+   "localitate": "Amara",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 10,
+   "localitate": "Anina",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 11,
+   "localitate": "Aninoasa",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 12,
+   "localitate": "ARAD",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 13,
+   "localitate": "Ardud",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 14,
+   "localitate": "Avrămeni",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 15,
+   "localitate": "Avrig",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 16,
+   "localitate": "Azuga",
+   "judet": "PRAHOVA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 17,
+   "localitate": "Babadag",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 18,
+   "localitate": "BACĂU",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 19,
+   "localitate": "Baia de Aramă",
+   "judet": "MEHEDINŢI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 20,
+   "localitate": "Baia de Arieş",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 21,
+   "localitate": "BAIA MARE",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 22,
+   "localitate": "Baia Sprie",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 23,
+   "localitate": "Balş",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 24,
+   "localitate": "Banloc",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 25,
+   "localitate": "Baraolt",
+   "judet": "COVASNA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 26,
+   "localitate": "Basarabi",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 27,
+   "localitate": "Băicoi",
+   "judet": "PRAHOVA",
+   "Tc": 1.0,
+   "ag": 0.35
+  },
+  {
+   "nr": 28,
+   "localitate": "Băbeni",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 29,
+   "localitate": "Băile Govora",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 30,
+   "localitate": "Băile Herculane",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 31,
+   "localitate": "Băile Olăneşti",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 32,
+   "localitate": "Băile Tuşnad",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 33,
+   "localitate": "Băileşti",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.15
+  },
+  {
+   "nr": 34,
+   "localitate": "Bălan",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 35,
+   "localitate": "Bălceşti",
+   "judet": "VÂLCEA",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 36,
+   "localitate": "Băneasa",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 37,
+   "localitate": "Bârlad",
+   "judet": "VASLUI",
+   "Tc": 1.0,
+   "ag": 0.35
+  },
+  {
+   "nr": 38,
+   "localitate": "Bechet",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 39,
+   "localitate": "Beclean",
+   "judet": "BISTRIŢA NĂSĂUD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 40,
+   "localitate": "Beiuş",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 41,
+   "localitate": "Berbeşti",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 42,
+   "localitate": "Bereşti",
+   "judet": "GALAŢI",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 43,
+   "localitate": "Bicaz",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 44,
+   "localitate": "BISTRIŢA",
+   "judet": "BISTRIŢA NĂSĂUD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 45,
+   "localitate": "Blaj",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 46,
+   "localitate": "Bocşa",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 47,
+   "localitate": "Boldeşti-Scăeni",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 48,
+   "localitate": "Bolintin-Vale",
+   "judet": "GIURGIU",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 49,
+   "localitate": "Borod",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 50,
+   "localitate": "Borsec",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 51,
+   "localitate": "Borşa",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 52,
+   "localitate": "BOTOŞANI",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 53,
+   "localitate": "Brad",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 54,
+   "localitate": "Bragadiru",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 55,
+   "localitate": "BRAŞOV",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 56,
+   "localitate": "BRĂILA",
+   "judet": "BRĂILA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 57,
+   "localitate": "Breaza",
+   "judet": "PRAHOVA",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 58,
+   "localitate": "Brezoi",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 59,
+   "localitate": "Broşteni",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 60,
+   "localitate": "Bucecea",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 61,
+   "localitate": "BUCUREŞTI",
+   "judet": "BUCUREŞTI",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 62,
+   "localitate": "Budeşti",
+   "judet": "CĂLĂRAŞI",
+   "Tc": 1.6,
+   "ag": 0.25
+  },
+  {
+   "nr": 63,
+   "localitate": "Buftea",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 64,
+   "localitate": "Buhuşi",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 65,
+   "localitate": "Bumbeşti-Jiu",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 66,
+   "localitate": "Buşteni",
+   "judet": "PRAHOVA",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 67,
+   "localitate": "BUZĂU",
+   "judet": "BUZĂU",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 68,
+   "localitate": "Buziaş",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 69,
+   "localitate": "Cajvana",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 70,
+   "localitate": "Calafat",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.15
+  },
+  {
+   "nr": 71,
+   "localitate": "Caracal",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 72,
+   "localitate": "Caransebeş",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 73,
+   "localitate": "Carei",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 74,
+   "localitate": "Cavnic",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 75,
+   "localitate": "Călan",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 76,
+   "localitate": "CĂLĂRAŞI",
+   "judet": "CĂLĂRAŞI",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 77,
+   "localitate": "Călimăneşti",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 78,
+   "localitate": "Căzăneşti",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 79,
+   "localitate": "Câmpia Turzii",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 80,
+   "localitate": "Câmpeni",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 81,
+   "localitate": "Câmpina",
+   "judet": "PRAHOVA",
+   "Tc": 1.0,
+   "ag": 0.35
+  },
+  {
+   "nr": 82,
+   "localitate": "Câmpulung",
+   "judet": "ARGEŞ",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 83,
+   "localitate": "Câmpulung Moldovenesc",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 84,
+   "localitate": "Ceahlău",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 85,
+   "localitate": "Cehu Silvaniei",
+   "judet": "SĂLAJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 86,
+   "localitate": "Cernavodă",
+   "judet": "CONSTANŢA",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 87,
+   "localitate": "Chişineu-Criş",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 88,
+   "localitate": "Chitila",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 89,
+   "localitate": "Ciacova",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 90,
+   "localitate": "Cisnădie",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 91,
+   "localitate": "CLUJ-NAPOCA",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 92,
+   "localitate": "Codlea",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 93,
+   "localitate": "Colibaşi",
+   "judet": "ARGEŞ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 94,
+   "localitate": "Comarnic",
+   "judet": "PRAHOVA",
+   "Tc": 1.0,
+   "ag": 0.35
+  },
+  {
+   "nr": 95,
+   "localitate": "Comăneşti",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 96,
+   "localitate": "CONSTANŢA",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 97,
+   "localitate": "Copşa Mică",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 98,
+   "localitate": "Corabia",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 99,
+   "localitate": "Corugea",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 100,
+   "localitate": "Costeşti",
+   "judet": "ARGEŞ",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 101,
+   "localitate": "Cotnari",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 102,
+   "localitate": "Covasna",
+   "judet": "COVASNA",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 103,
+   "localitate": "CRAIOVA",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 104,
+   "localitate": "Cristuru Secuiesc",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 105,
+   "localitate": "Cugir",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 106,
+   "localitate": "Curtea de Argeş",
+   "judet": "ARGEŞ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 107,
+   "localitate": "Curtici",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 108,
+   "localitate": "Darabani",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 109,
+   "localitate": "Dăbuleni",
+   "judet": "DOLJ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 110,
+   "localitate": "Dărmăneşti",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 111,
+   "localitate": "Dej",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 112,
+   "localitate": "Deta",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 113,
+   "localitate": "DEVA",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 114,
+   "localitate": "Dolhasca",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 115,
+   "localitate": "Dorohoi",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 116,
+   "localitate": "Dragomireşti",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 117,
+   "localitate": "Drăgăşani",
+   "judet": "VÂLCEA",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 118,
+   "localitate": "Drăgăneşti-Olt",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 119,
+   "localitate": "DROBETA TURNU SEVERIN",
+   "judet": "MEHEDINŢI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 120,
+   "localitate": "Dumbrăveni",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 121,
+   "localitate": "Eforie Nord",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 122,
+   "localitate": "Eforie Sud",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 123,
+   "localitate": "Făgăraş",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 124,
+   "localitate": "Făget",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 125,
+   "localitate": "Fălticeni",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 126,
+   "localitate": "Făurei",
+   "judet": "BRĂILA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 127,
+   "localitate": "Feteşti",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 128,
+   "localitate": "Fieni",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 129,
+   "localitate": "Fierbinţi-Târg",
+   "judet": "IALOMIŢA",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 130,
+   "localitate": "Filiaşi",
+   "judet": "DOLJ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 131,
+   "localitate": "Flămânzi",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 132,
+   "localitate": "FOCŞANI",
+   "judet": "VRANCEA",
+   "Tc": 1.0,
+   "ag": 0.4
+  },
+  {
+   "nr": 133,
+   "localitate": "Fundulea",
+   "judet": "CĂLĂRAŞI",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 134,
+   "localitate": "Frasin",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 135,
+   "localitate": "GALAŢI",
+   "judet": "GALAŢI",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 136,
+   "localitate": "Găeşti",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 137,
+   "localitate": "Gătaia",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 138,
+   "localitate": "Geoagiu",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 139,
+   "localitate": "Gheorgheni",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 140,
+   "localitate": "Gherla",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 141,
+   "localitate": "Ghimbav",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 142,
+   "localitate": "GIURGIU",
+   "judet": "GIURGIU",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 143,
+   "localitate": "Griviţa",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 144,
+   "localitate": "Gurahonţ",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 145,
+   "localitate": "Gura Humorului",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 146,
+   "localitate": "Haţeg",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 147,
+   "localitate": "Hârlău",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 148,
+   "localitate": "Hârşova",
+   "judet": "CONSTANŢA",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 149,
+   "localitate": "Holod",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 150,
+   "localitate": "Horezu",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 151,
+   "localitate": "Huedin",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 152,
+   "localitate": "Hunedoara",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 153,
+   "localitate": "Huşi",
+   "judet": "VASLUI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 154,
+   "localitate": "Ianca",
+   "judet": "BRĂILA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 155,
+   "localitate": "IAŞI",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 156,
+   "localitate": "Iernut",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 157,
+   "localitate": "Ineu",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 158,
+   "localitate": "Isaccea",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 159,
+   "localitate": "Însurăţei",
+   "judet": "BRĂILA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 160,
+   "localitate": "Întorsura Buzăului",
+   "judet": "COVASNA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 161,
+   "localitate": "Jimbolia",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 162,
+   "localitate": "Jibou",
+   "judet": "SĂLAJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 163,
+   "localitate": "Jurilovca",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 164,
+   "localitate": "Lehliu Gară",
+   "judet": "CĂLĂRAŞI",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 165,
+   "localitate": "Lipova",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 166,
+   "localitate": "Liteni",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 167,
+   "localitate": "Livada",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 168,
+   "localitate": "Luduş",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 169,
+   "localitate": "Lugoj",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 170,
+   "localitate": "Lupeni",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 171,
+   "localitate": "Mangalia",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 172,
+   "localitate": "Marghita",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 173,
+   "localitate": "Măcin",
+   "judet": "TULCEA",
+   "Tc": 0.1,
+   "ag": 0.25
+  },
+  {
+   "nr": 174,
+   "localitate": "Măgurele",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 175,
+   "localitate": "Mărăşeşti",
+   "judet": "VRANCEA",
+   "Tc": 1.0,
+   "ag": 0.4
+  },
+  {
+   "nr": 176,
+   "localitate": "Medgidia",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 177,
+   "localitate": "Mediaş",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 178,
+   "localitate": "MIERCUREA CIUC",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 179,
+   "localitate": "Miercurea Nirajului",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 180,
+   "localitate": "Miercurea Sibiului",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 181,
+   "localitate": "Mihăileşti",
+   "judet": "GIURGIU",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 182,
+   "localitate": "Milisăuţi",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 183,
+   "localitate": "Mizil",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 184,
+   "localitate": "Moineşti",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 185,
+   "localitate": "Moldova Nouă",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 186,
+   "localitate": "Moneasa",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 187,
+   "localitate": "Moreni",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 188,
+   "localitate": "Motru",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 189,
+   "localitate": "Murgeni",
+   "judet": "VASLUI",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 190,
+   "localitate": "Nădlac",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 191,
+   "localitate": "Năsăud",
+   "judet": "BISTRIŢA NĂSĂUD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 192,
+   "localitate": "Năvodari",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 193,
+   "localitate": "Negreşti",
+   "judet": "VASLUI",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 194,
+   "localitate": "Negreşti Oaş",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 195,
+   "localitate": "Negru Vodă",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 196,
+   "localitate": "Nehoiu",
+   "judet": "BUZĂU",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 197,
+   "localitate": "Novaci",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 198,
+   "localitate": "Nucet",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 199,
+   "localitate": "Ocna Mureş",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 200,
+   "localitate": "Ocna Sibiului",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 201,
+   "localitate": "Ocnele Mari",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 202,
+   "localitate": "Odobeşti",
+   "judet": "VRANCEA",
+   "Tc": 1.0,
+   "ag": 0.4
+  },
+  {
+   "nr": 203,
+   "localitate": "Odorheiul Secuiesc",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 204,
+   "localitate": "Olteniţa",
+   "judet": "CĂLĂRAŞI",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 205,
+   "localitate": "Oneşti",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 206,
+   "localitate": "ORADEA",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 207,
+   "localitate": "Oraviţa",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 208,
+   "localitate": "Orăştie",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 209,
+   "localitate": "Orşova",
+   "judet": "MEHEDINŢI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 210,
+   "localitate": "Otopeni",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 211,
+   "localitate": "Oţelu Roşu",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 212,
+   "localitate": "Ovidiu",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 213,
+   "localitate": "Panciu",
+   "judet": "VRANCEA",
+   "Tc": 1.0,
+   "ag": 0.4
+  },
+  {
+   "nr": 214,
+   "localitate": "Pantelimon",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 215,
+   "localitate": "Paşcani",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 216,
+   "localitate": "Pătârlagele",
+   "judet": "BUZĂU",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 217,
+   "localitate": "Pâncota",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 218,
+   "localitate": "Pecica",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 219,
+   "localitate": "Petrila",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 220,
+   "localitate": "Petroşani",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 221,
+   "localitate": "PIATRA NEAMŢ",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 222,
+   "localitate": "Piatra Olt",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 223,
+   "localitate": "PITEŞTI",
+   "judet": "ARGEŞ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 224,
+   "localitate": "PLOIEŞTI",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 225,
+   "localitate": "Plopeni",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 226,
+   "localitate": "Podu Iloaiei",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 227,
+   "localitate": "Pogoanele",
+   "judet": "BUZĂU",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 228,
+   "localitate": "Popeşti Leordeni",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 229,
+   "localitate": "Potcoava",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 230,
+   "localitate": "Predeal",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 231,
+   "localitate": "Pucioasa",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 232,
+   "localitate": "Răcari",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 233,
+   "localitate": "Rădăuţi",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 234,
+   "localitate": "Răuseni",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 235,
+   "localitate": "Râmnicu Sărat",
+   "judet": "BUZĂU",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 236,
+   "localitate": "RÂMNICU VÂLCEA",
+   "judet": "VÂLCEA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 237,
+   "localitate": "Râşnov",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 238,
+   "localitate": "Recaş",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 239,
+   "localitate": "Reghin",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 240,
+   "localitate": "REŞIŢA",
+   "judet": "CARAŞ-SEVERIN",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 241,
+   "localitate": "Roman",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 242,
+   "localitate": "Roşiori de Vede",
+   "judet": "TELEORMAN",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 243,
+   "localitate": "Rovinari",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 244,
+   "localitate": "Roznov",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 245,
+   "localitate": "Rupea",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 246,
+   "localitate": "Salcea",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 247,
+   "localitate": "Salonta",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 248,
+   "localitate": "Sântana",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 249,
+   "localitate": "SATU MARE",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 250,
+   "localitate": "Săcele",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 251,
+   "localitate": "Săcuieni",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 252,
+   "localitate": "Sălişte",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 253,
+   "localitate": "Săliştea de Sus",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 254,
+   "localitate": "Sărmaşu",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 255,
+   "localitate": "Săvârşin",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 256,
+   "localitate": "Săveni",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 257,
+   "localitate": "Sângeorz Băi",
+   "judet": "BISTRIŢA NĂSĂUD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 258,
+   "localitate": "Sângeorgiu de Pădure",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 259,
+   "localitate": "Sânnicolau Mare",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 260,
+   "localitate": "Scorniceşti",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 261,
+   "localitate": "Sebeş",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 262,
+   "localitate": "Sebiş",
+   "judet": "ARAD",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 263,
+   "localitate": "Seini",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 264,
+   "localitate": "Segarcea",
+   "judet": "DOLJ",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 265,
+   "localitate": "SFÂNTU GHEORGHE",
+   "judet": "COVASNA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 266,
+   "localitate": "Sf. Gheorghe",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 267,
+   "localitate": "SIBIU",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 268,
+   "localitate": "Sighetul Marmaţiei",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 269,
+   "localitate": "Sighişoara",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 270,
+   "localitate": "Simeria",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 271,
+   "localitate": "Sinaia",
+   "judet": "PRAHOVA",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 272,
+   "localitate": "Siret",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 273,
+   "localitate": "SLATINA",
+   "judet": "OLT",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 274,
+   "localitate": "Slănic Moldova",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 275,
+   "localitate": "Slănic Prahova",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 276,
+   "localitate": "SLOBOZIA",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 277,
+   "localitate": "Solca",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 278,
+   "localitate": "Sovata",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 279,
+   "localitate": "Stei",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 280,
+   "localitate": "Strehaia",
+   "judet": "MEHEDINŢI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 281,
+   "localitate": "SUCEAVA",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 282,
+   "localitate": "Sulina",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 283,
+   "localitate": "Şimleul Silvaniei",
+   "judet": "SĂLAJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 284,
+   "localitate": "Şomcuţa Mare",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 285,
+   "localitate": "Ştefăneşti",
+   "judet": "ARGEŞ",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 286,
+   "localitate": "Ştefăneşti",
+   "judet": "BOTOŞANI",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 287,
+   "localitate": "Tălmaciu",
+   "judet": "SIBIU",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 288,
+   "localitate": "Tăsnad",
+   "judet": "SATU MARE",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 289,
+   "localitate": "Tăuţii Magherăuş",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 290,
+   "localitate": "TÂRGOVIŞTE",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 291,
+   "localitate": "Târgu Bujor",
+   "judet": "GALAŢI",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 292,
+   "localitate": "Târgu Cărbuneşti",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 293,
+   "localitate": "Târgu Frumos",
+   "judet": "IAŞI",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 294,
+   "localitate": "TÂRGU JIU",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 295,
+   "localitate": "Târgu Lăpuş",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 296,
+   "localitate": "TÂRGU MUREŞ",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 297,
+   "localitate": "Târgu Ocna",
+   "judet": "BACĂU",
+   "Tc": 0.7,
+   "ag": 0.35
+  },
+  {
+   "nr": 298,
+   "localitate": "Târgu Neamţ",
+   "judet": "NEAMŢ",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 299,
+   "localitate": "Târgu Secuiesc",
+   "judet": "COVASNA",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 300,
+   "localitate": "Târnăveni",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 301,
+   "localitate": "Techirghiol",
+   "judet": "CONSTANŢA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 302,
+   "localitate": "Tecuci",
+   "judet": "GALAŢI",
+   "Tc": 1.0,
+   "ag": 0.35
+  },
+  {
+   "nr": 303,
+   "localitate": "Teiuş",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 304,
+   "localitate": "Tismana",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 305,
+   "localitate": "Titu",
+   "judet": "DÂMBOVIŢA",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 306,
+   "localitate": "TIMIŞOARA",
+   "judet": "TIMIŞ",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 307,
+   "localitate": "Topliţa",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 308,
+   "localitate": "Topoloveni",
+   "judet": "ARGEŞ",
+   "Tc": 1.0,
+   "ag": 0.3
+  },
+  {
+   "nr": 309,
+   "localitate": "Turceni",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 310,
+   "localitate": "Turnu Măgurele",
+   "judet": "TELEORMAN",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 311,
+   "localitate": "TULCEA",
+   "judet": "TULCEA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 312,
+   "localitate": "Turda",
+   "judet": "CLUJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 313,
+   "localitate": "Tuşnad",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 314,
+   "localitate": "Ţăndărei",
+   "judet": "IALOMIŢA",
+   "Tc": 1.0,
+   "ag": 0.25
+  },
+  {
+   "nr": 315,
+   "localitate": "Ţicleni",
+   "judet": "GORJ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 316,
+   "localitate": "Ulmeni",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 317,
+   "localitate": "Ungheni",
+   "judet": "MUREŞ",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 318,
+   "localitate": "Uricani",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 319,
+   "localitate": "Urlaţi",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 320,
+   "localitate": "Urziceni",
+   "judet": "IALOMIŢA",
+   "Tc": 1.6,
+   "ag": 0.35
+  },
+  {
+   "nr": 321,
+   "localitate": "Valea lui Mihai",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 322,
+   "localitate": "VASLUI",
+   "judet": "VASLUI",
+   "Tc": 0.7,
+   "ag": 0.3
+  },
+  {
+   "nr": 323,
+   "localitate": "Vaşcău",
+   "judet": "BIHOR",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 324,
+   "localitate": "Vatra Dornei",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 325,
+   "localitate": "Vălenii de Munte",
+   "judet": "PRAHOVA",
+   "Tc": 1.6,
+   "ag": 0.4
+  },
+  {
+   "nr": 326,
+   "localitate": "Vânju Mare",
+   "judet": "MEHEDINŢI",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 327,
+   "localitate": "Vicovu de Sus",
+   "judet": "SUCEAVA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 328,
+   "localitate": "Victoria",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.25
+  },
+  {
+   "nr": 329,
+   "localitate": "Videle",
+   "judet": "TELEORMAN",
+   "Tc": 1.6,
+   "ag": 0.25
+  },
+  {
+   "nr": 330,
+   "localitate": "Vişeu de Sus",
+   "judet": "MARAMUREŞ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 331,
+   "localitate": "Vlăhiţa",
+   "judet": "HARGHITA",
+   "Tc": 0.7,
+   "ag": 0.15
+  },
+  {
+   "nr": 332,
+   "localitate": "Voluntari",
+   "judet": "ILFOV",
+   "Tc": 1.6,
+   "ag": 0.3
+  },
+  {
+   "nr": 333,
+   "localitate": "Vulcani",
+   "judet": "HUNEDOARA",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 334,
+   "localitate": "ZALĂU",
+   "judet": "SĂLAJ",
+   "Tc": 0.7,
+   "ag": 0.1
+  },
+  {
+   "nr": 335,
+   "localitate": "Zărneşti",
+   "judet": "BRAŞOV",
+   "Tc": 0.7,
+   "ag": 0.2
+  },
+  {
+   "nr": 336,
+   "localitate": "Zimnicea",
+   "judet": "TELEORMAN",
+   "Tc": 1.0,
+   "ag": 0.2
+  },
+  {
+   "nr": 337,
+   "localitate": "Zlatna",
+   "judet": "ALBA",
+   "Tc": 0.7,
+   "ag": 0.1
+  }
+ ]
+}

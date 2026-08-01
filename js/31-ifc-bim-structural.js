@@ -309,7 +309,13 @@
       { name: 'Normative', val: 'NP057/2002;OMS119/2014;P118-2/2013;NP067/2002;NP051/2012;P100-1/2013;C107-1/2010' },
       { name: 'ClassaBeton_Structura', val: 'C25/30' },
       { name: 'ClassaBeton_Fundatii', val: 'C30/37' },
-      { name: 'ZonaSeismica', val: 'ag=0.20g Tc=0.7s (P100-1/2013)' },
+      { name: 'ZonaSeismica', val: (function () {
+        // FIX (26 iul, audit reconciliere): era string hardcodat 'ag=0.20g Tc=0.7s', identic pt
+        // orice oraș/parcelă exportat(ă) — ignora complet localitatea reală. getSeismConfig()
+        // (js/06-aedis.js, corectat azi) preferă acum SEISMIC_ENGINE (P100-1/2013, per localitate).
+        var s = (typeof getSeismConfig === 'function') ? getSeismConfig() : null;
+        return s ? ('ag=' + s.ag + 'g Tc=' + s.Tc + 's (' + (s.norm || 'P100-1/2013') + ')') : 'ag=0.20g Tc=0.7s (P100-1/2013, valoare implicită — verificați amplasamentul)';
+      })() },
     ]);
 
     // MaterialLayerSets globale

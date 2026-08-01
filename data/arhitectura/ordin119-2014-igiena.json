@@ -1,0 +1,27 @@
+{
+ "_meta": {
+  "sursa": "Ordinul Ministerului Sanatatii nr. 119/2014 pentru aprobarea Normelor de igiena si sanatate publica privind mediul de viata al populatiei, Monitorul Oficial nr. 127/21.02.2014, forma consolidata (modificat de Ordinul 994/2018 si Ordinul 562/2023)",
+  "metoda_extractie": "extragere directa din PDF oficial (text-layer curat, fitz)",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_text_oficial"
+ },
+ "art_17_parametri_sanitari_locuinte": {
+  "articol": "Art. 17 (Capitolul I), forma consolidata dupa Ordinul 994/2018",
+  "suprafata_minima_camera_mp": 12,
+  "suprafata_minima_bucatarie_mp": 5,
+  "inaltime_sub_plafon_m": 2.55,
+  "volum_minim_aer_persoana_mc": 30,
+  "raport_minim_fereastra_podea": "1/20 (suprafata parte mobila fereastra / suprafata podelei, camera de locuit)",
+  "temperaturi_minime_C": {
+   "baie_wc": 22,
+   "camera_zi": 22,
+   "dormitor": 20
+  },
+  "nota": "Incaperile de locuit si bucatariile trebuie sa aiba deschideri directe catre aer liber (usi/ferestre) pt ventilatie naturala; iluminatul natural trebuie sa permita activitatile zilnice fara lumina artificiala."
+ },
+ "art_18_circulatii": {
+  "articol": "Art. 18 (Capitolul I)",
+  "latime_minima_culoar_m": 1.2,
+  "nota": "Pentru circulatia comoda a copiilor, persoanelor in varsta si a celor cu dizabilitati; fara trepte inutile intre camere; bai/WC nu se amplaseaza deasupra camerelor de locuit/bucatariilor."
+ }
+}

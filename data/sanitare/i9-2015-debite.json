@@ -1,0 +1,169 @@
+{
+ "_meta": {
+  "sursa": "Normativ I9/2015 (Ordinul MDRAP nr. 818/2015), Monitorul Oficial Partea I, Nr. 830 bis/6.XI.2015",
+  "metoda_extractie": "verificare vizuala pagina cu pagina (imagine, nu text OCR - fisierul sursa are stratul de text corupt/nealiat)",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_vizual_text_oficial",
+  "nota": "Registrul normativ al platformei lista I9/2015 cu varianta 2022 - folosim editia 2015 (text obtinut si verificat); editia 2022 ramane de verificat separat daca modifica aceste tabele/formule."
+ },
+ "art_9_8_formula_debit_calcul_locuinte": {
+  "articol": "Art. 9.8, relatia (5)",
+  "formula": "Vc = a * (0.15 * sqrt(E) + 0.004 * E)",
+  "unitate": "l/s",
+  "conditie": "cladiri de locuit, necesar specific de apa 280 l/zi.pers, 2.75 persoane/apartament, consum specific 0.57 l/s.apartament",
+  "a_apa_rece": 1.0,
+  "a_apa_calda": 0.7,
+  "E_definitie": "E = suma echivalentilor de debit ai punctelor de consum alimentate de conducta respectiva (Anexa 2)"
+ },
+ "anexa_1_necesar_specific_locuinte": {
+  "articol": "ANEXA 1",
+  "unitate": "l/zi.pers",
+  "randuri": [
+   {
+    "id": "central_cu_cada_dus_spalator",
+    "descriere": "Preparare centrala apa calda - apartamente cu closet, lavoar, cada de baie/dus si spalator",
+    "necesar_total_apa_rece": {
+     "caz1": 280,
+     "caz2": 210,
+     "caz3": 140
+    },
+    "necesar_apa_rece": {
+     "caz1": 170,
+     "caz2": 120,
+     "caz3": 70
+    },
+    "necesar_apa_calda_60C": {
+     "caz1": 110,
+     "caz2": 90,
+     "caz3": 70
+    }
+   },
+   {
+    "id": "locala_instant_gaz_electric",
+    "descriere": "Preparare locala a apei calde cu incalzitoare instant (gaze/electric) - closet, lavoar, cada/dus, spalator",
+    "necesar_total_apa_rece": {
+     "caz1": 140,
+     "caz2": 120,
+     "caz3": 100
+    },
+    "necesar_apa_rece": {
+     "caz1": 70,
+     "caz2": 60,
+     "caz3": 50
+    },
+    "necesar_apa_calda_60C": {
+     "caz1": 70,
+     "caz2": 60,
+     "caz3": 50
+    }
+   },
+   {
+    "id": "locala_cazan_acumulare",
+    "descriere": "Preparare locala a apei calde cu cazane cu acumulare (lemne/carbuni/combustibil lichid/gaze) - closet, lavoar, cada/dus, spalator",
+    "necesar_total_apa_rece": {
+     "caz1": 120,
+     "caz2": 100,
+     "caz3": 80
+    },
+    "necesar_apa_rece": {
+     "caz1": null,
+     "caz2": 60,
+     "caz3": 50
+    },
+    "necesar_apa_calda_60C": {
+     "caz1": null,
+     "caz2": 50,
+     "caz3": 40
+    }
+   }
+  ],
+  "nota_cazuri": "caz1 = fara contorizare si cu armaturi vechi; caz2 = cu contorizare si armaturi vechi; caz3 = cu contorizare si armaturi eficiente"
+ },
+ "anexa_2_echivalenti_debit": {
+  "articol": "ANEXA 2",
+  "randuri": [
+   {
+    "obiect": "Lavoar DN15 (robinet)",
+    "Vs_l_s": 0.07,
+    "e": 0.35,
+    "Pu_bar": 0.2
+   },
+   {
+    "obiect": "Cada de baie DN15 (robinet)",
+    "Vs_l_s": 0.2,
+    "e": 1.0,
+    "Pu_bar": 0.3
+   },
+   {
+    "obiect": "Dus DN15 (robinet)",
+    "Vs_l_s": 0.2,
+    "e": 1.0,
+    "Pu_bar": 0.3
+   },
+   {
+    "obiect": "Spalator DN15 sau chiuveta DN15 (baterie)",
+    "Vs_l_s": 0.2,
+    "e": 1.0,
+    "Pu_bar": 0.2
+   },
+   {
+    "obiect": "Rezervor de closet DN15 (robinet)",
+    "Vs_l_s": 0.15,
+    "e": 0.75,
+    "Pu_bar": 0.2
+   },
+   {
+    "obiect": "Rezervor de closet DN10 (robinet)",
+    "Vs_l_s": 0.1,
+    "e": 0.5,
+    "Pu_bar": 0.2
+   },
+   {
+    "obiect": "Bideu DN15 (robinet)",
+    "Vs_l_s": 0.07,
+    "e": 0.35,
+    "Pu_bar": 0.2
+   },
+   {
+    "obiect": "Masina de spalat vase DN15 (robinet)",
+    "Vs_l_s": 0.1,
+    "e": 0.5,
+    "Pu_bar": 0.4
+   },
+   {
+    "obiect": "Masina de spalat rufe DN15 (robinet)",
+    "Vs_l_s": 0.17,
+    "e": 0.85,
+    "Pu_bar": 0.4
+   },
+   {
+    "obiect": "Robinet de stropit gradina DN15",
+    "Vs_l_s": 0.17,
+    "e": 0.85,
+    "Pu_bar": 0.6
+   }
+  ]
+ },
+ "set_standard_locuinta_o_baie": {
+  "nota": "Ipoteza de proiect rezonabila si acoperitoare (1 baie completa pe unitate locativa) - de confirmat/adaptat de proiectant conform programului de spatii real.",
+  "obiecte": [
+   "Lavoar DN15 (robinet)",
+   "Cada de baie DN15 (robinet)",
+   "Rezervor de closet DN15 (robinet)",
+   "Spalator DN15 sau chiuveta DN15 (baterie)",
+   "Masina de spalat rufe DN15 (robinet)"
+  ]
+ },
+ "set_per_baie_si_per_unitate": {
+  "nota": "Descompunere pt cazul in care nr. real de bai/unitate e cunoscut din programul de spatii (D._spatii) - obiectele din baie se repeta pe fiecare baie reala, cele de bucatarie/spalatorie o singura data per unitate, indiferent de nr. de bai.",
+  "per_baie": [
+   "Lavoar DN15 (robinet)",
+   "Cada de baie DN15 (robinet)",
+   "Rezervor de closet DN15 (robinet)"
+  ],
+  "per_unitate": [
+   "Spalator DN15 sau chiuveta DN15 (baterie)",
+   "Masina de spalat rufe DN15 (robinet)"
+  ]
+ }
+}

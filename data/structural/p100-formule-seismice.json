@@ -1,0 +1,142 @@
+{
+ "_meta": {
+  "sursa": "P100-1/2013, Cod de proiectare seismica, MDRAP/UTCB, mai 2013 (editia in vigoare confirmata de js/urbanx-normative-registry.js)",
+  "metoda_extractie": "verificare VIZUALA pagina cu pagina (imagine, nu text OCR) - formulele matematice din PDF se corup la extragerea de text (fractii/indici amestecati); fiecare formula de mai jos a fost citita ca imagine",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_vizual_text_oficial",
+  "nota": "Acopera metoda fortelor seismice statice echivalente (Art. 4.5.3.2), pt proiectare PRELIMINARA (T1 din formule simplificate Anexa B, nu din calcul dinamic real) - conform cu faza DTAC. Pentru PTh/DE, calculul T1/Fb trebuie refacut de inginerul structurist cu model de calcul real (Anexa C sau software structural)."
+ },
+ "art_3_2_spectru_proiectare": {
+  "articol": "Art. 3.2, formulele (3.17)/(3.18)",
+  "beta0": 2.5,
+  "TB_relatie": "TB = 0.2 * TC (simplificat, conform textului de la Art. 3.2(7))",
+  "TD_dupa_TC": {
+   "0.7": 3.0,
+   "1.0": 3.0,
+   "1.6": 2.0
+  },
+  "formula_T_leq_TB": "Sd(T) = ag * (1 + (beta0/q - 1) / TB * T)",
+  "formula_T_gt_TB": "Sd(T) = max(ag * beta(T) / q, 0.2 * ag)",
+  "beta_T_branches": {
+   "0<=T<=TB": "beta(T) = 1 + (beta0-1)/TB * T",
+   "TB<T<=TC": "beta(T) = beta0",
+   "TC<T<=TD": "beta(T) = beta0 * TC/T",
+   "TD<T<=5": "beta(T) = beta0 * TC*TD / T^2"
+  }
+ },
+ "art_4_4_5_factori_importanta": {
+  "articol": "Art. 4.4.5, Tabelul 4.2",
+  "clase": {
+   "I": {
+    "gamma_Ie": 1.4,
+    "descriere": "cladiri cu functiuni esentiale (spitale cu urgente, pompieri, politie, statii energie/apa esentiale, etc.)"
+   },
+   "II": {
+    "gamma_Ie": 1.2,
+    "descriere": "cladiri cu pericol major pt siguranta publica (scoli, spitale >100 pers, cladiri multietajate locuit/birouri >300 pers, sali aglomerate, cladiri h>45m etc.)"
+   },
+   "III": {
+    "gamma_Ie": 1.0,
+    "descriere": "cladiri de tip curent, care nu apartin celorlalte clase"
+   },
+   "IV": {
+    "gamma_Ie": 0.8,
+    "descriere": "cladiri de mica importanta, grad redus de ocupare, constructii agricole/temporare"
+   }
+  }
+ },
+ "anexa_B_perioada_fundamentala": {
+  "articol": "Anexa B.2, formulele (B.4) si (B.8) - metode simplificate pt PROIECTARE PRELIMINARA, cladiri <=40m",
+  "formula_generala": "T1 = Ct * H^0.75",
+  "Ct": {
+   "cadre_spatiale_otel": 0.085,
+   "cadre_spatiale_beton_armat_sau_otel_contravantuit_excentric": 0.075,
+   "alte_tipuri_structuri": 0.05
+  },
+  "formula_simplificata_cadre_scazute": {
+   "conditie": "structuri in cadre beton armat/otel, <=12 etaje, inaltime medie nivel ~3m",
+   "formula": "T1 = 0.1 * n",
+   "n": "numarul de niveluri"
+  }
+ },
+ "tabelul_5_1_factor_q_beton_armat": {
+  "articol": "Art. 5.2.2.2, Tabelul 5.1 (structuri de BETON ARMAT)",
+  "structura_tip_cadru_sau_duala": {
+   "DCH": "5 * (au/a1)",
+   "DCM": "3.5 * (au/a1)",
+   "DCL": "2.0 (daca nu_d<=0.75, altfel 1.5)"
+  },
+  "structura_tip_pereti_necuplati": {
+   "DCH": "4 * kw * (au/a1)",
+   "DCM": "3 * kw * (au/a1)",
+   "DCL": 2.0
+  },
+  "au_a1_aproximari_uzuale": {
+   "cadre_1nivel": 1.15,
+   "cadre_multinivel_o_deschidere": 1.25,
+   "cadre_multinivel_mai_multe_deschideri": 1.35,
+   "pereti_2pe_directie": 1.0,
+   "pereti_mai_multi": 1.15,
+   "pereti_cuplati_sau_duala_pereti_preponderenti": 1.25
+  },
+  "kw_nota": "kw = factor de zveltete al peretilor (Art. 5.2.2.2, definitie separata) - implicit kw=1 pt pereti zvelti (raport inaltime/lungime >=2); pt pereti mai putin zvelti necesita calcul separat de la proiectant."
+ },
+ "tabelul_6_1_6_3_factor_q_otel": {
+  "articol": "Art. 6.3.2, Tabelul 6.1 (limite generale) + Tabelul 6.3 (valori pe tip de sistem), structuri de OTEL",
+  "DCL_general": "q <= 1.5 (q <= 1.0 daca elemente cu sectiune de clasa 4)",
+  "sisteme": {
+   "cadre_neconstravantuite_parter": { "DCH": "3.0", "DCM": "2.5", "descriere": "cadre necontravantuite, structuri parter (1 nivel)" },
+   "cadre_neconstravantuite_parter_articulat": { "DCH": "5 * (au/a1)", "DCM": 4, "au_a1_uzual": 1.0, "au_a1_uzual_nota": "1.1 pt cadre cu acoperis in 2 ape (tip hala), 1.0 pt alte tipuri parter", "descriere": "cadre necontravantuite parter, cu articulatii (tip hala industriala)" },
+   "cadre_neconstravantuite_etajate": { "DCH": "5 * (au/a1)", "DCM": 4, "au_a1_uzual": 1.2, "au_a1_uzual_nota": "1.2 pt cadre cu o singura deschidere, 1.3 pt cadre cu mai multe deschideri", "descriere": "cadre necontravantuite, structuri etajate (multinivel), zone disipative in grinzi si la baza stalpilor" },
+   "cadre_contravantuite_centric_diagonale_intinse": { "DCH": 4, "DCM": 4, "descriere": "contravantuiri cu diagonale intinse (X), zone disipative doar diagonalele intinse" },
+   "cadre_contravantuite_centric_diagonale_V": { "DCH": 2.5, "DCM": 2, "descriere": "contravantuiri cu diagonale in V, zone disipative diagonalele intinse si comprimate" },
+   "cadre_contravantuite_excentric": { "DCH": "5 * (au/a1)", "DCM": 4, "au_a1_uzual": 1.2, "descriere": "cadre contravantuite excentric, zone disipative in barele disipative incovoiate/forfecate" },
+   "pendul_inversat_baza_stalpilor": { "DCH": "2 * (au/a1)", "DCM": 2, "au_a1_uzual": 1.0, "descriere": "pendul inversat, zone disipative la baza stalpilor" },
+   "pendul_inversat_in_stalpi": { "DCH": "2 * (au/a1)", "DCM": 2, "au_a1_uzual": 1.1, "descriere": "pendul inversat, zone disipative in stalpi (NEd/NplRd>0.3)" }
+  },
+  "nota_neregularitate": "Daca cladirea e neregulata in elevatie (Art. 4.4.3.3), valorile q din Tabelul 6.3 se reduc cu 20%."
+ },
+ "tabelul_8_10_factor_q_zidarie": {
+  "articol": "Art. 8.3.4, Tabelul 8.10, structuri cu PERETI STRUCTURALI DIN ZIDARIE",
+  "tipuri_zidarie": {
+   "ZNA": "zidarie simpla/nearmata",
+   "ZC": "zidarie confinata",
+   "ZC_AR": "zidarie confinata si armata in rosturile orizontale",
+   "ZIA": "zidarie cu inima armata"
+  },
+  "coeficienti_q_pe_regularitate": {
+   "regulat_plan_si_elevatie": { "ZNA": "1.75 * (au/a1)", "ZC": "2.25 * (au/a1)", "ZC_AR": "2.50 * (au/a1)", "ZIA": "2.75 * (au/a1)" },
+   "neregulat_plan_sau_elevatie": { "ZNA": "1.50 * (au/a1)", "ZC": "2.00 * (au/a1)", "ZC_AR": "2.25 * (au/a1)", "ZIA": "2.50 * (au/a1)" }
+  },
+  "au_a1_implicit": { "ZNA": 1.10, "ZC": 1.25, "ZC_AR": 1.25, "ZIA": 1.25, "nota": "valabil pt cladiri cu nniv>=2, cu lege constitutiva sigma-epsilon cu deformatii specifice mare (epsilon_mu/epsilon_m1>>1.0); ZC+AR foloseste valorile din tabel doar daca armaturile din rosturi respecta cerintele minime, altfel se folosesc valorile ZC" },
+  "reducere_1_nivel": "Pentru structurile cu un singur nivel, valorile q din Tabelul 8.10 se reduc cu 15%."
+ },
+ "tabelul_9_2_factor_q_lemn": {
+  "articol": "Art. 9.3, Tabelul 9.2, structuri de LEMN",
+  "nota_neregularitate": "Pentru structuri neregulate pe inaltime, q se reduce cu 20% fata de valorile din tabel (cu conditia q>=1.5).",
+  "nota_element_critic": "Elementul structural cel mai putin ductil din ansamblul structurii determina valoarea q folosita pentru tot ansamblul.",
+  "sisteme": {
+   "console_grinzi_arce": { "q": 1.5, "clasa": "DCL", "descriere": "Console, grinzi, grinzi cu zabrele cu imbinari prin chertare/inele, sarpante cu conectori, arce cu 2/3 articulatii" },
+   "grinzi_zabrele_dornuri_buloane_DCM": { "q": 2, "clasa": "DCM", "descriere": "Grinzi cu zabrele cu imbinari cu dornuri/buloane; structuri mixte (cadre+inchideri fara rol structural); pereti panouri lemn fete incleiate imbinate cu cuie/buloane" },
+   "cadre_dornuri_buloane_DCM": { "q": 2.5, "clasa": "DCM", "descriere": "Structuri in cadre cu imbinari cu dornuri/buloane (Art. 9.4.2.4); pereti panouri lemn fete imbinate cu cuie/buloane pe schelet lemn (Art. 9.4.2.5)" },
+   "grinzi_zabrele_cuie_DCH": { "q": 3, "clasa": "DCH", "descriere": "Grinzi cu zabrele cu imbinari cu cuie" },
+   "cadre_dornuri_buloane_DCH": { "q": 4, "clasa": "DCH", "descriere": "Structuri in cadre cu imbinari cu dornuri/buloane (Art. 9.4.2.7)" },
+   "panouri_cuie_schelet_DCH": { "q": 5, "clasa": "DCH", "descriere": "Structuri din panouri lemn cu fete imbinate cu cuie pe schelet lemn (Art. 9.4.2.7)" }
+  }
+ },
+ "tabelul_7_2_factor_q_compozit": {
+  "articol": "Art. 7.3.2, Tabelul 7.2, structuri COMPOZITE (otel-beton)",
+  "nota_neregularitate": "Valorile q din Tabelul 7.2 se reduc cu 20% daca cladirea e neregulata in elevatie (Art. 4.4.3.1(5)).",
+  "nota_au_a1_max": "Daca au/a1 se determina prin calcul static neliniar, valoarea nu poate depasi 1.6.",
+  "sisteme": {
+   "cadre_neconstravantuite_1nivel": { "DCH": "5 * (au/a1)", "DCM": "4 * (au/a1)", "DCL": 2, "au_a1_uzual": 1.1, "descriere": "Cadre compozite fara contravantuiri/structuri duale, cadre cu 1 nivel" },
+   "cadre_neconstravantuite_o_deschidere_multinivel": { "DCH": "5 * (au/a1)", "DCM": "4 * (au/a1)", "DCL": 2, "au_a1_uzual": 1.2, "descriere": "Cadre cu o deschidere si mai multe niveluri, pereti cuplati" },
+   "cadre_neconstravantuite_mai_multe_deschideri": { "DCH": "5 * (au/a1)", "DCM": "4 * (au/a1)", "DCL": 2, "au_a1_uzual": 1.3, "descriere": "Cadre cu mai multe deschideri si niveluri" },
+   "cadre_contravantuite_centric": { "DCH": 4, "DCM": 4, "DCL": 2, "descriere": "Cadre compozite contravantuite centric" },
+   "cadre_contravantuite_excentric": { "DCH": "5 * (au/a1)", "DCM": 4, "DCL": 2, "au_a1_uzual": 1.2, "descriere": "Cadre compozite contravantuite excentric" },
+   "pendul_inversat": { "DCH": "2 * (au/a1)", "DCM": 2, "DCL": 1.5, "au_a1_uzual": 1.0, "descriere": "Structuri tip pendul inversat, zone disipative la baza stalpilor" },
+   "pereti_compoziti": { "DCH": "4 * kw * (au/a1)", "DCM": "3 * kw * (au/a1)", "DCL": 1.5, "au_a1_uzual": 1.15, "kw_nota": "kw = coeficient de forma al peretilor (relatiile 5.2/5.3, Capitolul 5 - acelasi ca la beton armat)", "descriere": "Structuri cu pereti structurali compoziti (zone de capat compozite, cuplati cu grinzi otel/compozite, panou otel inglobat, sau diagonale otel inglobate)" },
+   "sensibile_la_torsiune": { "DCH": 3, "DCM": 2, "DCL": 1.5, "descriere": "Structuri compozite sensibile la torsiune" }
+  }
+ }
+}

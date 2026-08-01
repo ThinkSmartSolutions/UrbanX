@@ -443,6 +443,351 @@
     }
     return null;
   }
+  // Puterea electrica absorbita — calcul REAL, LIVE (Art. 3.2.2.1/3.2.2.2, Normativ I7/2011,
+  // Tabelele 3.3/3.4/3.5) — ADAUGAT 26 iul (audit legal, cerere Florin: "calcule reale, live").
+  // Acopera locuinte (individuale/cuplate/colective, pe baza Sc reala si nr. real de unitati) si,
+  // partial, cladiri nerezidentiale (Tabelul 3.5, cautare directa dupa denumirea destinatiei).
+  function _tipUnitateDinSc(Sc, esteVila) {
+    if (Sc == null) return null;
+    if (Sc < 50) return 'Garsonieră 1 cameră + dependințe';
+    if (Sc < 90) return 'Apartament 2-3 camere + dependințe';
+    if (esteVila) return Sc < 150 ? 'Vilă ≤5 camere + dependințe' : 'Vilă >5 camere + dependințe';
+    return Sc < 150 ? 'Apartament 4-5 camere + dependințe, Sc<100mp' : 'Apartament 4-5 camere + dependințe, Sc>100mp';
+  }
+  // EXTINDERE (29 iul, cerere Florin "continua"): Tabelul 3.3 (I7/2011) clasifică real după NUMĂRUL
+  // de camere (Garsonieră 1 cameră / Apartament 2-3 camere / 4-5 camere), nu după Sc — Sc e doar
+  // criteriu secundar (Sc<100mp vs >100mp) în interiorul benzii 4-5 camere. Dacă programul de spații
+  // real (D._spatii) e disponibil, numărăm camerele REALE (cameră de zi + dormitoare) în loc să
+  // aproximăm din Sc — mai fidel normativului. Fallback pe Sc dacă nu există program de spații.
+  function _nrCamereDinSpatii(spatii) {
+    if (!spatii || !spatii.length) return null;
+    var nr = 0, gasit = false;
+    spatii.forEach(function (s) {
+      var nume = String(s.nume || '').toLowerCase(), cat = String(s.cat || s.zona || '').toLowerCase();
+      if (/dormitor|cameră de zi|camera de zi|living/.test(nume) || /dormitor|zi|living/.test(cat)) {
+        nr += (+s.buc || 1); gasit = true;
+      }
+    });
+    return gasit ? nr : null;
+  }
+  function _tipUnitateDinCamere(nrCamere, Sc, esteVila) {
+    if (nrCamere == null) return null;
+    if (nrCamere <= 1) return 'Garsonieră 1 cameră + dependințe';
+    if (nrCamere <= 3) return 'Apartament 2-3 camere + dependințe';
+    if (esteVila) return nrCamere <= 5 ? 'Vilă ≤5 camere + dependințe' : 'Vilă >5 camere + dependințe';
+    return (Sc == null || Sc < 150) ? 'Apartament 4-5 camere + dependințe, Sc<100mp' : 'Apartament 4-5 camere + dependințe, Sc>100mp';
+  }
+  function _putereElectricaSec(D, v) {
+    var EE = G.ELECTRIC_ENGINE;
+    if (!EE || !EE._data) return '<p><i>Motorul de calcul al puterii electrice (I7/2011) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var esteLocuinta = /locuinta|bloc-locuinte|cladire-mixta/.test(D.functiune || '');
+    if (!esteLocuinta) {
+      var r2 = EE.getPutereNerezidential(D._destinatie_electrica_i7 || '');
+      if (r2.eroare) return '<p>Puterea electrică pentru destinația „' + esc(D.functiune || '—') + '" se stabilește orientativ din Tabelul 3.5 (I7/2011) — necesită selectarea explicită a categoriei celei mai apropiate (' + r2.destinatii_disponibile.slice(0, 4).join(', ') + '…), nu e determinată automat încă pentru această funcțiune.</p>';
+      var rd = r2.rand;
+      return '<p>Destinație: <b>' + esc(rd.destinatie) + '</b> — putere ' + (rd.um.indexOf('/m2') >= 0 ? (rd.valoare_specifica[0] + '…' + rd.valoare_specifica[1] + ' ' + rd.um + ' × Sc reală (' + (D.Sc || '—') + ' mp)') : (rd.valoare_totala ? rd.valoare_totala[0] + '…' + rd.valoare_totala[1] + ' kW total' : '—')) + ', ku=' + rd.ku + ' (' + r2.norma + ', ' + r2.formula + ')</p>';
+    }
+    var cladiriPropuse = D._cladiri_propuse || [];
+    var unitati = [];
+    if (cladiriPropuse.length > 1 && D._tipuri_cladiri) {
+      var grupuri = {};
+      cladiriPropuse.forEach(function (c) {
+        var sc = (c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null) ? c.urbanism_adnotat.sc_mp : c.arie_mp;
+        var cheie = 'Sc_' + sc;
+        grupuri[cheie] = grupuri[cheie] || { sc: sc, n: 0 };
+        grupuri[cheie].n++;
+      });
+      Object.keys(grupuri).forEach(function (k) {
+        var g = grupuri[k];
+        var tip = _tipUnitateDinSc(g.sc, D.functiune === 'locuinta-individuala');
+        if (tip) unitati.push({ tip_unitate: tip, nr: g.n });
+      });
+    } else {
+      var nr = +D.nr_apartamente || +D.nr_unitati_locative || 1;
+      var nrCamereReale = _nrCamereDinSpatii(D._spatii);
+      var tipUnic = nrCamereReale != null
+        ? _tipUnitateDinCamere(nrCamereReale, +D.Sc || null, D.functiune === 'locuinta-individuala')
+        : _tipUnitateDinSc(+D.Sc || null, D.functiune === 'locuinta-individuala');
+      if (tipUnic) unitati.push({ tip_unitate: tipUnic, nr: nr, sursa_clasificare: nrCamereReale != null ? ('real, ' + nrCamereReale + ' camere din programul de spații') : 'aproximat din Sc (' + (D.Sc || '—') + ' mp)' });
+    }
+    if (!unitati.length) return '<p>Puterea electrică absorbită nu poate fi calculată — lipsesc datele reale ale proiectului (Sc pe unitate și numărul de unități locative).</p>';
+    var res = EE.calculPutereAnsambluLocuinte({ varianta: D._varianta_electrica_i7 || 'fara_electric', unitati: unitati });
+    var rows = res.detalii.map(function (d) {
+      return d.eroare ? [d.tip_unitate + ' (' + d.nr + ' buc.)', 'necatalogat în Tabelul 3.3 — verifică manual', ''] :
+        [d.tip_unitate + ' × ' + d.nr, 'Pi=' + d.Pi_kW_unitate + ' kW, ku=' + d.ku + ' → Pa unitate=' + d.Pa_kW_unitate.toFixed(1) + ' kW', d.sursa_clasificare || ''];
+    });
+    var araraSursaClasificare = rows.some(function (r3) { return r3[2]; });
+    var html = '<p>Calcul conform Art. 3.2.2.1 (I7/2011): <b>Pa = Pi × ku × ks</b>, cu Pi/ku din Tabelul 3.3 (pe tip de unitate) și ks din Tabelul 3.4 (pe numărul real de unități ale ansamblului: ' + res.nrTotalUnitati + ').</p>' +
+      '<table><tr><th>Tip unitate</th><th>Pi / ku (Tabelul 3.3)</th>' + (araraSursaClasificare ? '<th>Clasificare</th>' : '') + '</tr>' + rows.map(function (r3) { return '<tr><td>' + r3[0] + '</td><td>' + r3[1] + '</td>' + (araraSursaClasificare ? '<td style="font-size:9pt;color:#666">' + esc(r3[2]) + '</td>' : '') + '</tr>'; }).join('') + '</table>' +
+      '<p>Puterea instalată totală (neponderată): <b>' + res.Pi_kW_ansamblu_neponderat.toFixed(0) + ' kW</b>. Factor de simultaneitate ks (Tabelul 3.4, ' + res.nrTotalUnitati + ' unități): <b>' + res.ks + '</b>' + (res.surse_ks.status_validare === 'aproximare_conservatoare' ? ' (' + res.surse_ks.nota + ')' : '') + '.</p>' +
+      '<p><b>Puterea absorbită totală a ansamblului: Pa = ' + res.Pa_kW_ansamblu.toFixed(1) + ' kW</b> (' + res.norma + ').</p>';
+    return html;
+  }
+
+  // Verificare conformitate igiena (Ordinul MS 119/2014, Art. 17/18) — calcul REAL, LIVE, din
+  // programul de spatii real al proiectului (D._spatii) — ADAUGAT 26 iul (audit legal, cerere
+  // Florin: "calcule reale, live, nu inventam nimic").
+  function _igienaSec(D, v) {
+    var AE = G.ARHITECTURA_ENGINE;
+    if (!AE || !AE._data) return '<p><i>Motorul de verificare igienă (Ordin 119/2014) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var spatii = D._spatii || [];
+    if (!spatii.length) return '<p>Verificarea conformității cu Ordinul 119/2014 (Art. 17: 12 mp/cameră, 5 mp/bucătărie, min. 2,55 m înălțime) necesită programul de spații real al proiectului (nu este încă completat/aplicat pentru acest proiect).</p>';
+    // EXTINDERE (27 iul): H_total/niveluri trecute pentru aproximarea inaltimii libere + volum aer/persoana
+    // (foloseste "ocup" real din programul de spatii) - vezi 25-arhitectura-normative.js pt detalii onestitate.
+    var res = AE.verificaSpatii(spatii, { latime_culoar_m: D.latime_culoar_m, H_total: D.H, niveluri: D.niv_supraterane });
+    var rows = res.rezultate.map(function (r) {
+      var prag = r.prag_mp != null ? r.prag_mp + ' mp' : (r.prag_mc != null ? r.prag_mc + ' mc' : r.prag_m + ' m');
+      var val = r.valoare_mp != null ? r.valoare_mp + ' mp' : (r.valoare_mc != null ? r.valoare_mc + ' mc' + (r.detaliu ? ' (' + esc(r.detaliu) + ')' : '') : r.valoare_m + ' m');
+      return '<tr><td>' + esc(r.spatiu) + '</td><td>' + r.tip + (r.aproximat ? ' ⓘ' : '') + '</td><td>' + prag + '</td><td>' + val + '</td><td>' + (r.conform ? '✓ Conform' : '✗ NECONFORM') + '</td></tr>';
+    }).join('');
+    var html = '<p>Verificare automată, pe programul de spații real al proiectului, contra pragurilor minime din Ordinul MS 119/2014, Art. 17 (suprafață cameră/bucătărie, înălțime liberă, volum aer/persoană) și Art. 18 (lățime minimă culoar):</p>' +
+      '<table><tr><th>Spațiu</th><th>Tip</th><th>Prag minim</th><th>Valoare proiect</th><th>Conformitate</th></tr>' + rows + '</table>';
+    if (res.inaltime_libera_aproximata_m != null) {
+      html += '<p style="font-size:9pt;color:#666">ⓘ Înălțimea liberă (' + res.inaltime_libera_aproximata_m + ' m) e <b>aproximată</b> din regimul de înălțime declarat (H=' + D.H + ' m ÷ ' + D.niv_supraterane + ' niveluri, minus alocație uzuală planșee/finisaje ~0,35 m) — nu e o măsurătoare reală pe releveu; se confirmă de proiectant.</p>';
+    }
+    if (res.nrNeconforme > 0) {
+      html += '<p><b>Atenție: ' + res.nrNeconforme + ' spații neconforme</b> cu pragurile minime din Ordinul 119/2014 — necesită corectare înainte de depunere.</p>';
+    } else {
+      html += '<p>Toate spațiile verificate se încadrează în pragurile minime ale Ordinului 119/2014.</p>';
+    }
+    html += '<p><i>Praguri suplimentare de verificat manual (neautomatizate încă — necesită date de arhitectură neincluse în programul de spații): raport fereastră/podea ≥1/20, temperaturi minime pe destinație (22°C baie/cameră de zi, 20°C dormitor) — Art. 17, Ordinul 119/2014.</i></p>';
+    return html;
+  }
+
+  // Debitul de calcul apa — calcul REAL, LIVE (Art. 9.8 relatia 5, Normativ I9/2015, Anexa 1/Anexa 2)
+  // — ADAUGAT 26 iul (audit legal, cerere Florin: "calcule reale, live, nu inventam nimic"). Acopera
+  // cladiri de locuit (individuale/cuplate/colective), pe baza nr. real de unitati locative.
+  function _debitApaSec(D, v) {
+    var SA = G.SANITARE_ENGINE;
+    if (!SA || !SA._data) return '<p><i>Motorul de calcul al debitelor de apă (I9/2015) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var esteLocuinta = /locuinta|bloc-locuinte|cladire-mixta/.test(D.functiune || '');
+    if (!esteLocuinta) {
+      return '<p>Debitele de calcul pentru clădiri nerezidențiale (administrative, comerciale, social-culturale) se stabilesc conform Tabelul 4 (I9/2015, Art. 9.9) — necesită selectarea categoriei corespunzătoare de către proiectant; nu e determinat automat încă pentru această funcțiune.</p>';
+    }
+    var nrUnitati = +D.nr_apartamente || +D.nr_unitati_locative || (D._cladiri_propuse || []).length || 1;
+    var nec = SA.getNecesarSpecific({ caz: D._caz_contorizare_i9 || 'caz2', id: D._tip_preparare_apa_calda_i9 });
+    // EXTINDERE (27 iul): daca programul de spatii real (D._spatii) contine incaperi identificate ca
+    // "baie", insumam nr. real de bai (camp "buc") in loc sa presupunem mereu 1 baie/unitate — vezi
+    // set_per_baie_si_per_unitate in 25-sanitare-normative.js.
+    var nrBaiTotal = null;
+    if (D._spatii && D._spatii.length) {
+      var baiGasite = D._spatii.filter(function (s) { return /\bbaie\b/i.test(s.nume || '') || /\bbaie\b/i.test(s.cat || s.zona || ''); });
+      if (baiGasite.length) nrBaiTotal = baiGasite.reduce(function (s, r) { return s + (+r.buc || 1); }, 0);
+    }
+    var vc = SA.calculVc(nrBaiTotal != null ? { nrUnitati: nrUnitati, nrBaiTotal: nrBaiTotal } : { nrUnitati: nrUnitati });
+    var rowsEchiv = vc.detalii_echivalenti.map(function (d) { return '<tr><td>' + esc(d.obiect) + '</td><td>' + (d.e != null ? d.e : 'necatalogat') + '</td></tr>'; }).join('');
+    return '<p>Necesar specific de apă (Anexa 1, ' + esc(nec.descriere || '') + '): <b>' + nec.necesar_total_l_zi_pers + ' l/zi.pers</b> (' + nec.norma + ').</p>' +
+      '<p>Set de obiecte sanitare considerat — sursă: <b>' + esc(vc.sursa_set) + '</b>:</p>' +
+      '<table><tr><th>Obiect sanitar</th><th>Echivalent de debit e (Anexa 2)</th></tr>' + rowsEchiv + '</table>' +
+      '<p>E per unitate = ' + vc.E_per_unitate.toFixed(2) + '. Pentru ansamblul real (<b>' + nrUnitati + ' unități locative</b>' + (nrBaiTotal != null ? ', ' + nrBaiTotal + ' băi' : '') + '): <b>E total = ' + vc.E_total.toFixed(1) + '</b>.</p>' +
+      '<p>Debitul de calcul (' + vc.formula + '):</p>' +
+      '<table><tr><th>Conductă</th><th>Debit de calcul Vc</th></tr><tr><td>Apă rece</td><td><b>' + vc.Vc_apa_rece_l_s.toFixed(2) + ' l/s</b></td></tr><tr><td>Apă caldă</td><td><b>' + vc.Vc_apa_calda_l_s.toFixed(2) + ' l/s</b></td></tr></table>' +
+      '<p><i>' + vc.norma + ' — aplicabil la ' + vc.conditie_aplicare + '.' + (nrBaiTotal == null ? ' Set de obiecte sanitare presupus (1 baie completă/unitate) — se adaptează de proiectant conform programului de spații real dacă diferă.' : '') + '</i></p>';
+  }
+
+  // Necesarul de caldura de calcul — calcul REAL, LIVE (Art. 4.1, SR 1907-1:2014, formulele 1-3 +
+  // Anexa A Tabelul A.1) — ADAUGAT 26 iul (audit legal, cerere Florin: "calcule reale, live, nu
+  // inventam nimic"). PDF-ul standardului a fost furnizat direct de Florin (era indisponibil liber
+  // pana atunci). Foloseste temperatura exterioara REALA a localitatii proiectului (Tabelul A.1,
+  // 64 localitati) si formulele oficiale QT/Qi — dar Aj/Rj (anvelopa) si na (schimburi de aer) sunt
+  // date SPECIFICE proiectului de arhitectura/instalatii, nu se pot inventa generic: motorul arata
+  // onest ce e calculat automat (thetaeo, cM) si ce ramane de introdus de proiectant (Aj/Rj/Vi/na).
+  function _necesarCalduraSec(D, v) {
+    var TE = G.TERMICE_ENGINE;
+    if (!TE || !TE._data) return '<p><i>Motorul de calcul al necesarului de căldură (SR 1907-1:2014) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var localitate = D.uat || '';
+    var t = TE.getThetaExt(localitate);
+    var pereteUsor = D.struct !== 'zidarie' && D.struct !== 'zidarie-groasa';
+    var cm = TE.getCM(pereteUsor);
+    var html = '<p>Necesarul de căldură de calcul se determină conform <b>SR 1907-1:2014</b>, Art. 4.1: <b>Qo = QT + Qi</b> (flux prin transmisie + flux pentru încălzirea aerului de ventilare), pe fiecare încăpere.</p>';
+    if (t.thetaeo !== null) {
+      html += '<p>Temperatura exterioară convențională de calcul pentru <b>' + esc(t.localitate_matched) + '</b> (grad de asigurare 98%): <b>θe = ' + t.thetaeo + ' °C</b> (' + t.norma + ').</p>';
+    } else {
+      html += '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" nu apare în cele 64 din Tabelul A.1 aici încărcat — ' + esc(t.nota) + '</p>';
+    }
+    html += '<p>Coeficient de masă termică <b>cM = ' + cm.cM + '</b> (' + cm.norma + ' — ' + esc(cm.conditie) + ').</p>' +
+      '<table><tr><th>Formulă</th><th>Sursă</th></tr>' +
+      '<tr><td>QT = cM × Σ(Aj/R\'j) × (θi − θej) + QS</td><td>Art. 4.1.1, formula (2)</td></tr>' +
+      '<tr><td>Qi = 0,334 × na × cM × Vi × (θa − θeo) + Qu</td><td>Art. 4.1.2, formula (3)</td></tr></table>' +
+      '<p><i>QT necesită ariile Aj și rezistențele termice corectate R\'j ale fiecărui element de anvelopă (pereți, ferestre, planșee) — date specifice anvelopei acestei clădiri, din proiectul de arhitectură și calculul termotehnic (SR EN ISO 6946), neintroduse încă. Qi necesită volumul interior real Vi al fiecărei încăperi și numărul de schimburi de aer na, stabilit de proiectant în funcție de sistemul de ventilare prevăzut (Art. 4.1.2.1) — nu există o valoare implicită unică în standard. Regim de încălzire pentru locuințe (Art. 4.3.1): continuu, sau cu reducere nocturnă până la minimum 17 °C, fără majorarea necesarului calculat.</i></p>';
+    return html;
+  }
+
+  // Fortă seismică de bază — calcul REAL, LIVE, din datele proiectului (nu exemplu static) —
+  // ADAUGAT 26 iul (audit legal, cerere Florin: "calcule reale, live, nu inventam nimic").
+  // Foloseste G.SEISMIC_ENGINE (js/25-seismic-normative.js), cu ag/Tc reale pe cele 337 localitati
+  // din Tabelul A1 (P100-1/2013) - nu aproximare pe judet. Acopera DOAR structuri de beton armat
+  // (cadre sau pereti) - pt otel/zidarie/mixt, motorul semnaleaza onest ca nu e inca acoperit.
+  function _seismicFbSec(D, v) {
+    var SE = G.SEISMIC_ENGINE;
+    if (!SE || !SE._formule) return '<p><i>Motorul de calcul seismic real (P100-1/2013) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    // FIX (27 iul, cerere Florin "finalizeaza metodic tot"): inchide gap-ul semnalat explicit aici
+    // ("implementat momentan doar pentru beton armat") — multe functiuni reale au struct implicit
+    // 'zidarie' (locuinta-individuala, gradinita) sau 'metalica' (hala-industriala, BESS, SKID, sport,
+    // agricol), deci restrictia bloca exact cazurile comune. Acoperite acum si OTEL (Tabelul 6.3) si
+    // ZIDARIE (Tabelul 8.10 + formula (8.7), diferita de spectrul Sd(T1) generic) — vezi 25-seismic-normative.js.
+    var niveluri = +D.niv_supraterane || 1;
+    var H = +D.H || (niveluri * 3);
+    var localitate = D.uat || '';
+    var clasaImp = (v.calc && v.calc.clasa_importanta) || 'III';
+    var masaT = +D.masa_seismica_t || 0;
+    var r, qLabel, formulaLabel, normaFormula;
+
+    if (D.struct === 'zidarie') {
+      r = SE.calculFbZidarie({
+        localitate: localitate, judet: D.judet, clasa_importanta: clasaImp,
+        tip_zidarie: D.tip_zidarie || 'ZC', regulat_plan: D.regulat_plan, regulat_elevatie: D.regulat_elevatie,
+        niveluri: niveluri, masa_totala_t: masaT
+      });
+      qLabel = 'Factor de comportare q (zidărie ' + (D.tip_zidarie || 'ZC') + ')';
+      formulaLabel = 'cs = a_g × γI,e × β0 × η × λ / q, Fb = cs × m';
+      normaFormula = 'Art. 8.4.2.1, relația (8.7), P100-1/2013';
+    } else if (D.struct === 'metalica') {
+      r = SE.calculFb({
+        localitate: localitate, judet: D.judet, clasa_importanta: clasaImp,
+        H: H, niveluri: niveluri, material: 'otel', sistem_otel: D.sistem_otel || 'cadre_neconstravantuite_etajate',
+        ductilitate: D.ductilitate_seismica || 'DCM', masa_totala_t: masaT
+      });
+      qLabel = 'Factor de comportare q (oțel, ' + (D.ductilitate_seismica || 'DCM') + ')';
+      formulaLabel = 'Fb = Sd(T1) × γI,e × m × λ';
+      normaFormula = 'Art. 4.5.3.2.2, formula (4.3), P100-1/2013';
+    } else if (D.struct === 'beton') {
+      r = SE.calculFb({
+        localitate: localitate, judet: D.judet, clasa_importanta: clasaImp,
+        H: H, niveluri: niveluri, sistem: 'cadre_beton_armat', ductilitate: 'DCM',
+        o_singura_deschidere: false, masa_totala_t: masaT
+      });
+      qLabel = 'Factor de comportare q (cadre beton armat, DCM)';
+      formulaLabel = 'Fb = Sd(T1) × γI,e × m × λ';
+      normaFormula = 'Art. 4.5.3.2.2, formula (4.3), P100-1/2013';
+    } else if (D.struct === 'lemn') {
+      r = SE.calculFb({
+        localitate: localitate, judet: D.judet, clasa_importanta: clasaImp,
+        H: H, niveluri: niveluri, material: 'lemn', sistem_lemn: D.sistem_lemn || 'cadre_dornuri_buloane_DCM',
+        masa_totala_t: masaT
+      });
+      qLabel = 'Factor de comportare q (lemn' + (r && r.ductilitate ? ', ' + r.ductilitate : '') + ')';
+      formulaLabel = 'Fb = Sd(T1) × γI,e × m × λ';
+      normaFormula = 'Art. 4.5.3.2.2, formula (4.3), P100-1/2013';
+    } else if (D.struct === 'compozit') {
+      // FIX (28 iul, cerere Florin "continua pana finalizezi"): 'compozit' (otel-beton, Cap. 7
+      // P100-1/2013) — valoare EXPLICITA, nu implicita pt nicio functiune din FUNCTIUNI (spre
+      // deosebire de beton/metalica/zidarie). D.struct='mixt' (folosit ca implicit la spatiu-comercial)
+      // NU e rutat automat aici — 'mixt' e ambiguu (poate insemna zidarie+beton, nu neaparat compozit
+      // otel-beton tehnic) - proiectantul trebuie sa declare explicit 'compozit' pt acest calcul.
+      r = SE.calculFb({
+        localitate: localitate, judet: D.judet, clasa_importanta: clasaImp,
+        H: H, niveluri: niveluri, material: 'compozit', sistem_compozit: D.sistem_compozit || 'cadre_neconstravantuite_o_deschidere_multinivel',
+        ductilitate: D.ductilitate_seismica || 'DCM', masa_totala_t: masaT
+      });
+      qLabel = 'Factor de comportare q (compozit oțel-beton, ' + (D.ductilitate_seismica || 'DCM') + ')';
+      formulaLabel = 'Fb = Sd(T1) × γI,e × m × λ';
+      normaFormula = 'Art. 4.5.3.2.2, formula (4.3), P100-1/2013';
+    } else {
+      return '<p>Sistemul structural declarat ("' + esc(D.struct || '—') + '") nu este încă acoperit de motorul de calcul seismic real (beton armat/oțel/zidărie/lemn/compozit — Tabelele 5.1/6.3/8.10/9.2/7.2, P100-1/2013) — factorul q și forța de bază pentru acest sistem se stabilesc de inginerul structurist. Notă: "mixt" (structură nespecificată) nu se rutează automat la niciun tabel — declarați explicit materialul real (ex. D.struct=\'compozit\') dacă e cazul.</p>';
+    }
+    if (r.eroare === 'LOCALITATE_NEGASITA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" nu apare în cele 337 localități urbane ale Tabelului A1 (P100-1/2013) — valorile a_g/T_C afișate mai sus (Anexă) provin din altă sursă și trebuie verificate manual contra hărților Fig. 3.1/3.2 din P100-1/2013.</p>';
+    }
+    if (r.eroare === 'LOCALITATE_AMBIGUA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" apare de mai multe ori în Tabelul A1 (P100-1/2013), în județe diferite, cu a_g DIFERIT — nu se poate alege automat fără riscul unei valori greșite. Verificați că județul proiectului (' + esc(D.judet || '—') + ') e cel corect completat și încercați din nou.</p>';
+    }
+    var rows = [
+      ['Localitate (a_g, T_C reale)', r.surse.ag_Tc],
+      ['a_g (accelerația terenului pentru proiectare)', r.ag + ' g'],
+      ['T_C (perioada de control/colț)', r.Tc + ' s'],
+      ['Clasă/factor de importanță γI,e', clasaImp + ', γI,e = ' + r.gamma_Ie + ' (' + r.surse.gamma + ')']
+    ];
+    if (r.T1 != null) rows.push(['Perioadă proprie estimată T1 (proiectare preliminară)', r.T1.toFixed(3) + ' s (' + r.surse.T1 + ')']);
+    rows.push([qLabel, r.q.toFixed(2) + ' (' + r.surse.q + ')']);
+    if (r.Sd != null) rows.push(['Ordonata spectrului de proiectare Sd(T1)', r.Sd.toFixed(4) + ' g (' + r.surse.Sd + ')']);
+    if (r.cs != null) rows.push(['Coeficient seismic global cs', r.cs.toFixed(4) + ' (η=' + r.eta + ', β0=' + r.beta0 + ')']);
+    rows.push(['Factor de corecție λ', String(r.lambda)]);
+    var html = '<p>Calculul de mai jos folosește <b>' + formulaLabel + '</b> (' + normaFormula + '), cu toate valorile de intrare determinate din datele reale ale proiectului (amplasament, regim de înălțime, sistem structural) — nu dintr-un exemplu generic.</p>' +
+      '<table><tr><th>Parametru</th><th>Valoare / sursă</th></tr>' + rows.map(function (r2) { return '<tr><td>' + r2[0] + '</td><td>' + r2[1] + '</td></tr>'; }).join('') + '</table>';
+    if (r.masa_t > 0) {
+      html += '<p><b>Forța tăietoare de bază Fb = ' + r.Fb_tf.toFixed(1) + ' tf</b> (masă seismică totală introdusă: ' + r.masa_t + ' t).</p>';
+    } else {
+      html += '<p><b>Pentru forța tăietoare de bază finală (' + formulaLabel + '), înmulțiți valoarea de mai sus cu masa seismică totală reală a clădirii (m, în tone)</b> — masa seismică totală se preia din modelul structural (greutate proprie + cotă parte din încărcarea utilă, conform CR 0) și nu este încă disponibilă ca dată de proiect introdusă.</p>';
+    }
+    html += '<p><i>Estimare pentru proiectare preliminară (fază DTAC)' + (r.T1 != null ? ' — perioada proprie T1 e determinată din formula simplificată (Anexa B.2), nu din calcul dinamic real' : '') + '. Pentru PTh/DE, inginerul structurist recalculează Fb cu un model de calcul complet.</i></p>';
+    return html;
+  }
+
+  // Incarcarea din zapada pe acoperis — calcul REAL, LIVE (Art. 4.1, relatia 4.1, CR 1-1-3/2012,
+  // Anexa A Tabelul A.1 + Tabelele 4.2/4.3/5.1) — ADAUGAT 26 iul (audit legal, cerere Florin:
+  // "calcule reale, live, nu inventam nimic"). Foloseste G.ZAPADA_ENGINE (js/25-zapada-normative.js),
+  // cu sk real pe cele 337 localitati (acelasi set ca P100-1/2013) - nu aproximare pe judet.
+  function _zapadaSec(D, v) {
+    var ZE = G.ZAPADA_ENGINE;
+    if (!ZE || !ZE._data) return '<p><i>Motorul de calcul al încărcării din zăpadă (CR 1-1-3/2012) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var localitate = D.uat || '';
+    var r = ZE.calculS({
+      localitate: localitate, judet: D.judet,
+      clasa_importanta: v.calc && v.calc.clasa_importanta || 'III',
+      tip_expunere: D.tip_expunere_zapada || 'normala',
+      unghi_acoperis_grade: D.unghi_acoperis_grade != null ? +D.unghi_acoperis_grade : null
+    });
+    if (r.eroare === 'LOCALITATE_NEGASITA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" nu apare în cele 337 localități urbane ale Tabelului A.1 (CR 1-1-3/2012) — valoarea s_k afișată în Anexă provine din altă sursă și trebuie verificată manual contra hărții Fig. 3.1.</p>';
+    }
+    if (r.eroare === 'LOCALITATE_AMBIGUA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" apare de mai multe ori în Tabelul A.1 (CR 1-1-3/2012), în județe diferite, cu s_k diferit — verificați că județul proiectului (' + esc(D.judet || '—') + ') e corect completat.</p>';
+    }
+    var html = '<p>Încărcarea caracteristică din zăpadă pe acoperiș, pentru situația de proiectare persistentă/tranzitorie (fără aglomerare excepțională): <b>s = Is × μi × Ce × Ct × sk</b> (Art. 4.1, alin. (8), relația 4.1, CR 1-1-3/2012).</p>';
+    if (r.eroare === 'MU_I_NECESAR') {
+      html += '<table><tr><th>Parametru</th><th>Valoare / sursă</th></tr>' +
+        '<tr><td>s_k (încărcare caracteristică pe sol)</td><td>' + r.sk.sk + ' kN/m² (' + r.sk.norma + ')</td></tr>' +
+        '<tr><td>Is (clasă/factor de importanță-expunere)</td><td>' + r.Is.Is + ' (' + r.Is.norma + ')</td></tr>' +
+        '<tr><td>Ce (coeficient de expunere)</td><td>' + r.Ce.Ce + ' (' + r.Ce.norma + ')</td></tr></table>' +
+        '<p><b>Atenție:</b> ' + esc(r.norma) + ' Introduceți unghiul real al acoperișului pentru calculul complet al lui s.</p>';
+      return html;
+    }
+    var rows = [
+      ['s_k (încărcare caracteristică pe sol, localitate reală)', r.intrari.sk + ' kN/m² (' + r.surse.sk + ')'],
+      ['Is (clasă/factor de importanță-expunere)', r.intrari.Is + ' (' + r.surse.Is + ')'],
+      ['μi (coeficient de formă acoperiș)', r.intrari.mu_i + ' (' + r.surse.mu_i + ')'],
+      ['Ce (coeficient de expunere)', r.intrari.Ce + ' (' + r.surse.Ce + ')'],
+      ['Ct (coeficient termic)', String(r.intrari.Ct)]
+    ];
+    html += '<table><tr><th>Parametru</th><th>Valoare / sursă</th></tr>' + rows.map(function (r2) { return '<tr><td>' + r2[0] + '</td><td>' + r2[1] + '</td></tr>'; }).join('') + '</table>' +
+      '<p><b>Încărcarea caracteristică din zăpadă pe acoperiș: s = ' + r.s + ' kN/m²</b> (' + r.norma + ').</p>' +
+      '<p><i>Valabil pentru acoperișuri cu o pantă/două pante, fără parazăpezi/parapete/obstacole (Tabelul 5.1). Pentru configurații speciale (diferențe de nivel, aglomerare excepțională — Capitolul 7) coeficientul de formă se stabilește separat de proiectant.</i></p>';
+    return html;
+  }
+
+  // Presiunea de calcul a vantului qp(z) — calcul REAL, LIVE (Art. 2.4, formulele 2.4/2.5/2.11/
+  // 2.14/2.17, CR 1-1-4/2012) — ADAUGAT 29 iul (cerere Florin "finalizeaza performant, perfectionist,
+  // real, live orice tine de proiectare"). Foloseste G.VANT_ENGINE, cu qb real pe cele 337 localitati
+  // (acelasi set ca P100-1/2013/CR 1-1-3/2012) - nu doar valoarea de referinta bruta, ci presiunea de
+  // calcul reala la inaltimea cladirii, pt categoria de teren declarata a amplasamentului.
+  function _vantSec(D, v) {
+    var VE = G.VANT_ENGINE;
+    if (!VE || !VE._data) return '<p><i>Motorul de calcul al acțiunii vântului (CR 1-1-4/2012) nu este încă încărcat — reîncearcă generarea documentului peste câteva secunde.</i></p>';
+    var localitate = D.uat || '';
+    var H = +D.H || ((+D.niv_supraterane || 1) * 3);
+    var r = VE.calculQp({ localitate: localitate, judet: D.judet, categorie_teren: D.categorie_teren_vant || 'II', z_m: H });
+    if (r.eroare === 'LOCALITATE_NEGASITA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" nu apare în cele 337 localități urbane ale Tabelului A.1 (CR 1-1-4/2012) — valoarea q_b afișată în Anexă provine din altă sursă și trebuie verificată manual contra hărții Fig. 2.1.</p>';
+    }
+    if (r.eroare === 'LOCALITATE_AMBIGUA') {
+      return '<p><b>Atenție:</b> localitatea „' + esc(localitate) + '" apare de mai multe ori în Tabelul A.1 (CR 1-1-4/2012), în județe diferite, cu q_b diferit — verificați că județul proiectului (' + esc(D.judet || '—') + ') e corect completat.</p>';
+    }
+    var catTeren = VE.getCategorieTeren(r.categorie_teren);
+    var rows = [
+      ['q_b (presiune de referință, localitate reală)', r.qb_kpa + ' kPa (' + r.surse.qb + ')'],
+      ['Categoria de teren', r.categorie_teren + ' — ' + esc(catTeren.descriere || r.surse.teren)],
+      ['Înălțimea de calcul z', r.z_m + ' m'],
+      ['c_r(z) (factor de rugozitate)', r.cr_z + ' (Art. 2.3, formulele 2.4/2.5)'],
+      ['I_v(z) (intensitatea turbulenței)', r.Iv_z + ' (Art. 2.4, formula 2.11)'],
+      ['c_pq(z) (factor de rafală pt. presiune)', r.cpq_z + ' (Art. 2.4, formula 2.14)']
+    ];
+    var html = '<p>Presiunea de calcul a vântului la înălțimea clădirii, pentru categoria de teren declarată a amplasamentului: <b>qp(z) = cpq(z) × cr(z)² × qb</b> (' + r.norma + ').</p>' +
+      '<table><tr><th>Parametru</th><th>Valoare / sursă</th></tr>' + rows.map(function (r2) { return '<tr><td>' + r2[0] + '</td><td>' + r2[1] + '</td></tr>'; }).join('') + '</table>' +
+      '<p><b>Presiunea de calcul a vântului: qp(z) = ' + r.qp_kpa + ' kPa</b>, la înălțimea z = ' + r.z_m + ' m.</p>' +
+      '<p><i>' + r.nota + '</i></p>';
+    return html;
+  }
   // FIX BUG REAL (Florin, 17 iul — proiect Catamarasti/154452, 65 unitati detectate din plan): cele 4
   // memorii de baza (general/arhitectura/rezistenta/instalatii) foloseau DOAR continutul static din
   // biblioteca per-functiune (js/urbanx-library/functiuni/{fn}/*.md) — acel continut descrie O SINGURA
@@ -808,6 +1153,24 @@
     // mai multe de 1 (ansamblu/plan de lotizare, nu o singura constructie). Tabelul 4/145 se aplica
     // INTRE cladirile proprii la fel ca fata de vecinii externi (M6b) — nu doar la limita de proprietate.
     var cladiriPropuse = D._cladiri_propuse || [];
+    // FIX (Florin, 26 iul — proiect Catamarasti, tabel de compartimente livrat manual: comp. 1 arăta
+    // "7 clădiri tip A", dar comp. 2-26 arătau doar numărul parcelei, fără tip — deși sursa reală
+    // (Excel-ul de loturi) avea tipologia completă pe fiecare parcelă). STANDARD acum: orice tabel de
+    // compartimente/clădiri arată tipul REAL pe fiecare rând, nu doar pe primul ca exemplu — vezi
+    // memoria "florin-ssi-complete-building-classification-standard". Aceeași sursă de adevăr ca
+    // m_urbanismAnsamblu (cheie 'Sc_'+sc → denumire din D._tipuri_cladiri), nu o presupunere nouă.
+    var _cladirePeId = {}; cladiriPropuse.forEach(function (c) { _cladirePeId[c.id] = c; });
+    function _tipCladireDenumire(id) {
+      var c = _cladirePeId[id]; if (!c) return null;
+      var sc = (c.urbanism_adnotat && c.urbanism_adnotat.sc_mp != null) ? c.urbanism_adnotat.sc_mp : c.arie_mp;
+      var cheie = 'Sc_' + sc;
+      return (D._tipuri_cladiri && D._tipuri_cladiri[cheie]) || ('Tip Sc=' + sc + ' mp');
+    }
+    function _tipuriCompartiment(idsCladiri) {
+      var denumiri = (idsCladiri || []).map(_tipCladireDenumire).filter(Boolean);
+      var unice = denumiri.filter(function (d2, idx) { return denumiri.indexOf(d2) === idx; });
+      return unice.length ? unice.join(' + ') : '—';
+    }
     var distanteIntreCladiri = (D.geometrie_teren && D.geometrie_teren.distante_intre_cladiri) || [];
     // Grupuri constructive (v4.4): componente conexe de cladiri alipite (<0,3m intre contururi) —
     // un duplex/triplex e un SINGUR volum continuu, nu perechi/triplete de cladiri independente.
@@ -1723,12 +2086,12 @@
           var volumComplet = volumeGrup.length && volumeGrup.every(function (v) { return v && v.volum_total_mc != null && !isNaN(v.volum_total_mc); });
           var volumTxt = volumComplet ? Math.round(volumeGrup.reduce(function (s, v) { return s + v.volum_total_mc; }, 0)) + ' m³' : 'necalculat — lipsă releveu';
           var conformTxt = !g.verificare ? 'nedeterminat' : (g.verificare.conform === false ? 'NU' : 'DA');
-          return ['' + (idx + 1), g.id_grup, destinatieT42, (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
+          return ['' + (idx + 1), g.id_grup, _tipuriCompartiment(g.cladiri_incluse), destinatieT42, (g.arie_verificata_mp != null ? g.arie_verificata_mp + ' m²' : '—'), volumTxt, conformTxt];
         });
         var nrNeconforme = m5bGrupuri.filter(function (g) { return g.verificare && g.verificare.conform === false; }).length;
         return '<p><b>Total: ' + m5bGrupuri.length + ' compartimente de incendiu</b>, listate integral mai jos (' + m5bGrupuri.map(function (g) { return g.id_grup; }).join(', ') + '), rezultate din ' + cladiriPropuse.length + ' clădiri — grupurile cuplate fără perete antifoc declarat formează UN SINGUR compartiment fiecare, cu aria însumată; detaliul complet pe grup (ce clădiri conține fiecare) e la secțiunea „Compunerea compartimentelor" imediat de mai jos.</p>' +
           (nrNeconforme ? '<p style="color:#dc2626"><b>' + nrNeconforme + ' compartiment/compartimente depășesc aria maximă admisă</b> — vezi secțiunea 5 pentru măsurile compensatorii/corecțiile necesare.</p>' : '<p style="color:#16a34a">Toate cele ' + m5bGrupuri.length + ' compartimente respectă aria maximă admisă.</p>') +
-          tbl(rows, ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
+          tbl(rows, ['Nr.', 'Compartiment', 'Tip clădire', 'Funcțiuni', 'Arie', 'Volum', 'Conform limitei admise']);
       })() : tbl([
         ['1', 'CI-01', destinatieT42, (m5.arie_proiectata_mp || 0) + ' m²', Math.round((m5.arie_proiectata_mp || 0) * (+D.niv_supraterane || 1) * 3) + ' m³ (estimat)', m5.conform === false ? 'NU' : (m5.conform ? 'DA' : 'nedeterminat')]
       ], ['Nr.', 'Compartiment', 'Funcțiuni', 'Arie', 'Volum (estimat)', 'Conform limitei admise']) }
@@ -2483,7 +2846,8 @@
       var deep = _lib(D, 'arhitectura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'arh_pth');
       var secs = deep ? _withProgram([
         { h: null, html: deep },
-        { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + _ariiStandardTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' }
+        { h: 'Anexă — indicatori și date specifice proiectului', html: _indicatoriTbl(D, v) + _ariiStandardTbl(D, v) + '<p>Vecinătăți: N — ' + esc(D.vecin_N || 'de precizat') + ', S — ' + esc(D.vecin_S || 'de precizat') + ', E — ' + esc(D.vecin_E || 'de precizat') + ', V — ' + esc(D.vecin_V || 'de precizat') + '. Retrageri propuse: aliniament ' + esc(D.retragere_fata || '—') + ' m, lateral ' + esc(D.retragere_lateral || '—') + ' m, posterior ' + esc(D.retragere_spate || '—') + ' m.</p>' },
+        { h: 'Verificarea conformității cu Ordinul MS 119/2014 (Art. 17/18) — calcul real', html: _igienaSec(D, v) }
       ], D, v) : (G.UXParagrafe ? G.UXParagrafe.arhitectura(D, v) : [
         { h: '1. Situația existentă', html: '<p>Terenul în suprafață de ' + esc(D.Steren || '—') + ' mp, situat în ' + esc(D.uat || '—') + '.</p>' }
       ]);
@@ -2493,7 +2857,10 @@
       var deep = _lib(D, 'structura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'str_pth');
       var secs = deep ? _withProgram([
         { h: null, html: deep },
-        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997)', esc(v.calc.categorie_importanta || '—')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) }
+        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997)', esc(v.calc.categorie_importanta || '—')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) },
+        { h: 'Forța seismică de bază — estimare preliminară (calcul real, Art. 4.5.3.2.2 P100-1/2013)', html: _seismicFbSec(D, v) },
+        { h: 'Încărcarea din zăpadă pe acoperiș — calcul real (Art. 4.1, relația 4.1, CR 1-1-3/2012)', html: _zapadaSec(D, v) },
+        { h: 'Presiunea de calcul a vântului — calcul real (Art. 2.4, CR 1-1-4/2012)', html: _vantSec(D, v) }
       ], D, v) : (G.UXParagrafe ? G.UXParagrafe.rezistenta(D, v) : [
         { h: '1. Sistemul structural', html: '<p>Structura de rezistență: ' + esc(D.struct || 'metalică') + '.</p>' }
       ]);
@@ -2503,7 +2870,10 @@
       var deep = _lib(D, 'instalatii'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'inst_pth');
       var secs = deep ? _withProgram([
         { h: null, html: deep },
-        { h: 'Anexă — soluții alese pentru proiect', html: tbl([['Încălzire', esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit')], ['Alimentare cu apă', esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit')]], ['Instalație', 'Soluție']) }
+        { h: 'Anexă — soluții alese pentru proiect', html: tbl([['Încălzire', esc(({ ct_gaz: 'centrală termică pe gaz', pompa: 'pompă de căldură', vrf: 'sistem VRF', termoficare: 'racord termoficare', electric: 'încălzire electrică', radiant: 'radiant infraroșu' })[D.incalzire] || D.incalzire || 'de stabilit')], ['Alimentare cu apă', esc(({ retea: 'rețea publică', put: 'puț forat', rezervor: 'rezervor propriu' })[D.apa] || 'de stabilit')]], ['Instalație', 'Soluție']) },
+        { h: 'Puterea electrică absorbită — calcul real (Art. 3.2.2.1/3.2.2.2, Normativ I7/2011)', html: _putereElectricaSec(D, v) },
+        { h: 'Debitul de calcul apă — calcul real (Art. 9.8, Normativ I9/2015)', html: _debitApaSec(D, v) },
+        { h: 'Necesarul de căldură de calcul — date reale amplasament (Art. 4.1, SR 1907-1:2014)', html: _necesarCalduraSec(D, v) }
       ], D, v) : (G.UXParagrafe ? G.UXParagrafe.instalatii(D, v) : [
         { h: 'Instalații', html: '<p>Instalații termice, sanitare, electrice, ventilare și PSI conform destinației și normativelor I13/I9/I7/I5/P118.</p>' }
       ]);

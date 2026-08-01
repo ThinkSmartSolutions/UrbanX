@@ -190,7 +190,7 @@ tr:nth-child(even) td{background:#f8fafc}
   <div class="kpi y"><div class="kv">${n(need.locuinteTotale)}</div><div class="kl">Locuințe necesare</div><div class="ks">HFE + Cohort 2025-2055</div></div>
   <div class="kpi ${feas.viable?'g':'r'}"><div class="kv">${feas.roi||'—'}%</div><div class="kl">ROI ajustat</div><div class="ks">×absorbție · ${feas.viable?'✓ Viabil':'⚠ Risc'}</div></div>
   <div class="kpi b"><div class="kv">≈${n(Math.round((need.totalM2||0)*1200/1e6))}M€</div><div class="kl">Investiție estimată</div><div class="ks">€1.200/m² (ANCPI 2024)</div></div>
-  <div class="kpi ${seis.ag>=.35?'r':'y'}"><div class="kv">ag=${seis.ag}g</div><div class="kl">Risc seismic · R+${seis.hMaxStory}</div><div class="ks">P100-1/2022 MDLPA</div></div>
+  <div class="kpi ${seis.ag>=.35?'r':'y'}"><div class="kv">ag=${seis.ag}g</div><div class="kl">Risc seismic · R+${seis.hMaxStory} (estimare)</div><div class="ks">ag: P100-1/2013 · Hmax: estimare UrbanX</div></div>
   <div class="kpi ${(feas.absorbtieAn||0)>200?'g':(feas.absorbtieAn||0)>80?'y':'r'}"><div class="kv">${n(feas.absorbtieAn||0)}</div><div class="kl">Absorbție un./an</div><div class="ks">INS salariu + BNR credit</div></div>
   <div class="kpi"><div class="kv">${clim.uhi}°C</div><div class="kl">UHI 2055</div><div class="ks">IPCC AR6 · zona ${clim.zone}</div></div>
 </div>
@@ -447,7 +447,7 @@ ${udreProfile ? `
 </table>
 ${udreProfile.hasPUG ? `
 <div class="success-box">
-  ✅ Datele UDRE provin din <strong>${udreProfile.dataPUG}</strong>. Fiecare zonă are codul UTR real, POT/CUT/Hmax conform Regulamentului Local Urbanism (RLU). Înălțimile au fost corectate automat pentru ag=${seis.ag}g per P100-1/2022.
+  ✅ Datele UDRE provin din <strong>${udreProfile.dataPUG}</strong>. Fiecare zonă are codul UTR real, POT/CUT/Hmax conform Regulamentului Local Urbanism (RLU). Înălțimile au fost ajustate printr-o estimare heuristică proprie UrbanX pentru zona seismică ag=${seis.ag}g (zonare conform P100-1/2013) — nu e un calcul structural normativ, ci o corecție orientativă de prognoză.
 </div>` : `
 <div class="warning-box">
   ⚠ ${udreProfile.disclaimer}
@@ -557,7 +557,7 @@ ${uxlProfile ? `
     { c:'Geometrie UAT (frontieră)', s:'⚠ CENTROID', src:'SIRUTA + estimare geometrică', cert:'60%', imp:'Frontier analysis imprecisă — zonele pot ieși din UAT' },
     { c:'Elevație teren (DEM)', s:'⚠ API extern', src:'Open-Elevation API — intermitent', cert:'50%', imp:'Slope suitability = 0 pentru toate zonele' },
     { c:'Timp acces OSRM', s:'⚠ API extern', src:'router.project-osrm.org — instabil', cert:'55%', imp:'Ac=0 în calcul zones → devScore afectat' },
-    { c:`Seismic ag=${seis.ag}g`, s:'✅ REAL', src:'P100-1/2022 MDLPA · hartă zonare seismică', cert:'99%', imp:'Hmax și cost construcție incorect' },
+    { c:`Seismic ag=${seis.ag}g`, s:'⚠ ESTIMAT', src:'P100-1/2013 · zonare per județ (de verificat contra hărții oficiale MDLPA)', cert:'70%', imp:'Hmax și cost construcție incorect dacă ag e greșit' },
     { c:'Prețuri vânzare imobiliare', s:'✅ REAL', src:`ANCPI Raport Piață 2024 · jud. ${d.judet}`, cert:'90%', imp:'ROI brut eronat' },
     { c:`Salariu mediu net jud. ${d.judet}`, s:'✅ REAL', src:'INS TEMPO 2024', cert:'95%', imp:'Absorbție credit greșită → ROI ajustat eronat' },
     { c:'Rata BNR (5.75%)', s:'✅ REAL', src:'BNR Raport mai 2026', cert:'100%', imp:'Accesibilitate credit și ROI complet eronat' },
@@ -660,7 +660,7 @@ ${uxlProfile ? `
   <tr><td><strong>F44</strong></td><td><code>Db = min(1, cladiri_400m ÷ 15)</code></td><td>[0,1]</td><td>OSM buildings via Overpass API</td><td>Densitate clădiri vecinătate 400m. Frontier=Db∈(0.05,0.70).</td></tr>
   <tr><td><strong>F45</strong></td><td><code>Zf = developable→0.9 | Db<0.3→0.7 | else 0.4</code></td><td>{0.4,0.7,0.9}</td><td>OSM landuse: farmland/meadow=developable | forest/cemetery=exclus</td><td>Compatibilitatea terenului. Pâloage → scor mare. Păduri → excluse.</td></tr>
   <tr><td><strong>F46</strong></td><td><code>Ec = min(1, coef_hub × min(1.4, permitsGrowth))</code></td><td>[0,1]</td><td>coef_hub din CNAIR+INS · permitsGrowth din INS TEMPO LOC103A</td><td>Factorul economic. Include trendul real al autorizațiilor de construire.</td></tr>
-  <tr><td><strong>F47</strong></td><td><code>Ce = max(0, 1 − ag÷0.5×0.4 − flood×0.2)</code></td><td>[0,1]</td><td>P100-1/2022 · ANAR/IPCC flood risk</td><td>Siguranța climatică și seismică. ag=0.40→penalizare mare.</td></tr>
+  <tr><td><strong>F47</strong></td><td><code>Ce = max(0, 1 − ag÷0.5×0.4 − flood×0.2)</code></td><td>[0,1]</td><td>indice compus UrbanX (ag ref. P100-1/2013) · ANAR/IPCC flood risk</td><td>Siguranța climatică și seismică. ag=0.40→penalizare mare.</td></tr>
   <tr><td><strong>F48</strong></td><td><code>Sg = min(1, (deltaPop>0→0.7|else 0.3) + (loc>5000→0.3|else 0.1))</code></td><td>[0,1]</td><td>Cohort engine (F15-F21)</td><td>Presiunea demografică locală. Crește la cerere mare de locuințe.</td></tr>
   <tr><td><strong>F49</strong></td><td><code>Id_euclidian = max(0, 1 − distanta ÷ raza)</code> → <code>Id_OSRM = f(durMin)</code></td><td>[0,1]</td><td>OSRM Table API (dacă disponibil) | geometrie euclidiană (fallback)</td><td>Proximitate centru bazată pe timp real, nu distanță. <10min→1.0. >45min→0.05.</td></tr>
   <tr><td><strong>F50</strong></td><td><code>slopeDeg = arctan(|Δelev| ÷ distM) × 180÷π</code></td><td>[0°,90°]</td><td>Mapbox Terrain-RGB · elevation=-10000+(R×256²+G×256+B)×0.1</td><td>Panta terenului. >25°=interzis. 10-25°+econ=premium villă.</td></tr>
@@ -672,8 +672,8 @@ ${uxlProfile ? `
 <h3>G. Seismic, Climatic și Support</h3>
 <table>
   <tr><th>#</th><th>Formulă</th><th>Valoare ${d.name}</th><th>Sursă</th><th>Rol în sistem</th></tr>
-  <tr><td><strong>F43s</strong></td><td><code>ag = SEISMIC_ZONES[bbox].ag</code></td><td>ag=${seis.ag}g · R+${seis.hMaxStory}</td><td>P100-1/2022 MDLPA · 5 zone seismice Romania</td><td>Limitează Hmax structural. Crește costul construcției (F31).</td></tr>
-  <tr><td><strong>F44s</strong></td><td><code>Hmax = ag≥0.35→P+6 | ag≥0.30→P+8 | ag≥0.20→P+12 | ag≥0.10→nelimitat</code></td><td>P+${seis.hMaxStory}/R+${seis.hMaxStory}</td><td>P100-1/2022 · calcul structural implicit</td><td>Înălțimea maximă legală per zonă seismică</td></tr>
+  <tr><td><strong>F43s</strong></td><td><code>ag = SEISMIC_ZONES[bbox].ag</code></td><td>ag=${seis.ag}g · R+${seis.hMaxStory} (estimare)</td><td>ag: P100-1/2013, zonare per județ · Hmax: estimare euristică UrbanX, NU calcul normativ</td><td>Orientativ pt Hmax structural. Crește costul construcției (F31).</td></tr>
+  <tr><td><strong>F44s</strong></td><td><code>Hmax = ag≥0.35→P+6 | ag≥0.30→P+8 | ag≥0.20→P+12 | ag≥0.10→nelimitat</code></td><td>P+${seis.hMaxStory}/R+${seis.hMaxStory}</td><td>estimare heuristică proprie UrbanX (NU o prevedere P100-1 reală — vezi js/seismic-fix.js)</td><td>Estimare orientativă a înălțimii maxime probabile per zonă seismică — nu înlocuiește calculul structural de specialitate</td></tr>
   <tr><td><strong>F45s</strong></td><td><code>UHI(2055) = uhi_mediu × trend_IPCC</code></td><td>+${clim.uhi}°C · zonă ${clim.zone}</td><td>IPCC AR6 RCP8.5 · Copernicus LST · ANM</td><td>Risc termic urban 2055. Alimentează recomandări verdeață.</td></tr>
   <tr><td><strong>F46s</strong></td><td><code>Monte Carlo UPE: P(D) = #{sc_i>0.5} ÷ 300</code></td><td>N=300 iterații</td><td>Metodologie originală TSS·FG</td><td>Simulare incertitudine imobiliară. Distribuție normală σ=0.20-0.30 per factor.</td></tr>
 </table>
@@ -682,7 +682,7 @@ ${uxlProfile ? `
 <h3>H. UDRE + UXL (Module Noi v137)</h3>
 <table>
   <tr><th>#</th><th>Formulă</th><th>Valoare ${d.name}</th><th>Sursă</th><th>Rol în sistem</th></tr>
-  <tr><td><strong>F47u</strong></td><td><code>seismicFactor_UDRE = ag≥0.35→0.80 | ag≥0.30→0.88 | ag≥0.25→0.94 | else 1.00</code></td><td>×${seis.ag>=.35?'0.80':seis.ag>=.30?'0.88':seis.ag>=.25?'0.94':'1.00'}</td><td>P100-1/2022 · mai conservator decât Hmax nominal PUG</td><td>Corectează hMaxFloors din PUG cu realitatea structurală seismică</td></tr>
+  <tr><td><strong>F47u</strong></td><td><code>seismicFactor_UDRE = ag≥0.35→0.80 | ag≥0.30→0.88 | ag≥0.25→0.94 | else 1.00</code></td><td>×${seis.ag>=.35?'0.80':seis.ag>=.30?'0.88':seis.ag>=.25?'0.94':'1.00'}</td><td>factor de prudență propriu UrbanX (ag ref. P100-1/2013) · mai conservator decât Hmax nominal PUG</td><td>Ajustează orientativ hMaxFloors din PUG față de riscul seismic — estimare, nu calcul structural</td></tr>
   <tr><td><strong>F48u</strong></td><td><code>UDRE_ecoScore = pot/100×0.40 + min(cut/5,1)×0.35 + min(floors/12,1)×0.25</code></td><td>${uxlProfile?.uxlScore||'—'}/100</td><td>PUG_REGISTRY sau algoritm UDRE</td><td>Viabilitatea economică a zonei per reguli urbanistice. Apare în UI+PDF.</td></tr>
   <tr><td><strong>F49u</strong></td><td><code>UXL_verde = min(100, (mp_loc ÷ 26) × 100)</code></td><td>${uxlProfile?.verde?.mp_loc?.toFixed(1)||'—'} mp/loc</td><td>INS · WHO Green Space Atlas EU 2023 · target=26 mp/loc</td><td>Scorul de verde urban accesibil. Alimentează heat island și recomandări.</td></tr>
   <tr><td><strong>F50u</strong></td><td><code>UXL_walk = 28 + coef_hub×42 + f(pop)</code> (generic)</td><td>${uxlProfile?.walk?.score||'—'}/100</td><td>PMUD local · OSM · Pedestrian LoS · benchmark UE</td><td>Walkability per cartier. Corelat cu Housing Mix (walk mic→suburban mai mare)</td></tr>

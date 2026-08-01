@@ -1,0 +1,354 @@
+{
+ "_meta": {
+  "sursa": "Normativ I7/2011 (Ordinul MDRT nr. 2.741/2011), Monitorul Oficial Partea I, Nr. 802 bis/14.XI.2011",
+  "metoda_extractie": "verificare vizuala pagina cu pagina (imagine, nu text OCR)",
+  "data_extractie": "2026-07-26",
+  "status": "verificat_vizual_text_oficial"
+ },
+ "art_3_2_2_1_formula_locuinte": {
+  "articol": "Art. 3.2.2.1",
+  "formula": "Pa = Pi * ku * ks",
+  "nota": "Pi, ku din Tabelul 3.3 (pe apartament/vila); ks din Tabelul 3.4 (pe ansamblu, dupa nr. de apartamente)."
+ },
+ "art_3_2_2_2_formula_nerezidential": {
+  "articol": "Art. 3.2.2.2",
+  "formula": "Pa = Pi * ku",
+  "nota": "Pentru cladiri comerciale, social-culturale si administrative. Pi si ku din Tabelul 3.5."
+ },
+ "tabelul_3_3_putere_locuinte": {
+  "articol": "Tabelul 3.3",
+  "variante": [
+   {
+    "id": "fara_electric",
+    "descriere": "Iluminat, conservare hrana, audiovizual, gospodaresti + apa calda/incalzire/gatit FARA energie electrica",
+    "randuri": [
+     {
+      "tip": "Garsonieră 1 cameră + dependințe",
+      "Pi_kW": 8,
+      "ku": 0.65
+     },
+     {
+      "tip": "Apartament 2-3 camere + dependințe",
+      "Pi_kW": 12,
+      "ku": 0.5
+     },
+     {
+      "tip": "Apartament 4-5 camere + dependințe, Sc<100mp",
+      "Pi_kW": 20,
+      "ku": 0.3
+     },
+     {
+      "tip": "Apartament 4-5 camere + dependințe, Sc>100mp",
+      "Pi_kW": 20,
+      "ku": 0.5
+     },
+     {
+      "tip": "Vilă ≤5 camere + dependințe",
+      "Pi_kW": 20,
+      "ku": 0.6
+     },
+     {
+      "tip": "Vilă >5 camere + dependințe",
+      "Pi_kW": 25,
+      "ku": 0.6
+     }
+    ]
+   },
+   {
+    "id": "incalzire_fara_electric_apa_electrica",
+    "descriere": "Ca mai sus + asigurarea electrică a apei calde; încălzire/gătit fără electric",
+    "randuri": [
+     {
+      "tip": "Garsonieră 1 cameră + dependințe",
+      "Pi_kW": 10,
+      "ku": 0.65
+     },
+     {
+      "tip": "Apartament 2-3 camere + dependințe",
+      "Pi_kW": 15,
+      "ku": 0.43
+     },
+     {
+      "tip": "Apartament 4-5 camere + dependințe",
+      "Pi_kW": 23,
+      "ku": 0.39
+     },
+     {
+      "tip": "Vilă ≤5 camere + dependințe",
+      "Pi_kW": 23,
+      "ku": 0.6
+     },
+     {
+      "tip": "Vilă >5 camere + dependințe",
+      "Pi_kW": 28,
+      "ku": 0.6
+     }
+    ]
+   },
+   {
+    "id": "incalzire_fara_electric_apa_si_gatit_electric",
+    "descriere": "Asigurarea electrică a apei calde și a gătitului; încălzire fără electric",
+    "randuri": [
+     {
+      "tip": "Garsonieră 1 cameră + dependințe",
+      "Pi_kW": 13,
+      "ku": 0.65
+     },
+     {
+      "tip": "Apartament 2-3 camere + dependințe",
+      "Pi_kW": 18,
+      "ku": 0.55
+     },
+     {
+      "tip": "Apartament 4-5 camere + dependințe",
+      "Pi_kW": 26,
+      "ku": 0.5
+     },
+     {
+      "tip": "Vilă ≤5 camere + dependințe",
+      "Pi_kW": 26,
+      "ku": 0.65
+     },
+     {
+      "tip": "Vilă >5 camere + dependințe",
+      "Pi_kW": 30,
+      "ku": 0.65
+     }
+    ]
+   },
+   {
+    "id": "incalzire_apa_gatit_toate_electrice",
+    "descriere": "Asigurarea electrică a apei calde, a încălzirii și a gătitului (toate cu energie electrică)",
+    "randuri": [
+     {
+      "tip": "Garsonieră 1 cameră + dependințe",
+      "Pi_kW": 18,
+      "ku": 0.55
+     },
+     {
+      "tip": "Apartament 2-3 camere + dependințe",
+      "Pi_kW": 23,
+      "ku": 0.6
+     },
+     {
+      "tip": "Apartament 4-5 camere + dependințe",
+      "Pi_kW": 32,
+      "ku": 0.6
+     },
+     {
+      "tip": "Vilă ≤5 camere + dependințe",
+      "Pi_kW": 32,
+      "ku": 0.65
+     },
+     {
+      "tip": "Vilă >5 camere + dependințe",
+      "Pi_kW": 35,
+      "ku": 0.65
+     }
+    ]
+   }
+  ]
+ },
+ "tabelul_3_4_factor_simultaneitate_ks": {
+  "articol": "Tabelul 3.4",
+  "nota": "ks in functie de numarul de apartamente din ansamblu/cladire; pt >20 apartamente, valoare nefurnizata explicit in tabel - se foloseste conservator ultima valoare (ks=0,48 la 20 apartamente) pana la extractia unei surse suplimentare.",
+  "randuri": [
+   {
+    "n": 1,
+    "ks": 1.0
+   },
+   {
+    "n": 2,
+    "ks": 0.9
+   },
+   {
+    "n": 3,
+    "ks": 0.9
+   },
+   {
+    "n": 4,
+    "ks": 0.83
+   },
+   {
+    "n": 5,
+    "ks": 0.83
+   },
+   {
+    "n": 6,
+    "ks": 0.83
+   },
+   {
+    "n": 7,
+    "ks": 0.72
+   },
+   {
+    "n": 8,
+    "ks": 0.72
+   },
+   {
+    "n": 9,
+    "ks": 0.72
+   },
+   {
+    "n": 10,
+    "ks": 0.66
+   },
+   {
+    "n": 11,
+    "ks": 0.62
+   },
+   {
+    "n": 12,
+    "ks": 0.62
+   },
+   {
+    "n": 13,
+    "ks": 0.55
+   },
+   {
+    "n": 14,
+    "ks": 0.55
+   },
+   {
+    "n": 15,
+    "ks": 0.55
+   },
+   {
+    "n": 16,
+    "ks": 0.52
+   },
+   {
+    "n": 17,
+    "ks": 0.5
+   },
+   {
+    "n": 18,
+    "ks": 0.5
+   },
+   {
+    "n": 19,
+    "ks": 0.48
+   },
+   {
+    "n": 20,
+    "ks": 0.48
+   }
+  ]
+ },
+ "tabelul_3_5_putere_nerezidential": {
+  "articol": "Tabelul 3.5",
+  "randuri": [
+   {
+    "destinatie": "Magazine, spații comerciale, servicii (inclusiv reclame)",
+    "um": "W/m2",
+    "valoare_specifica": [
+     75,
+     100
+    ],
+    "ku": 0.8
+   },
+   {
+    "destinatie": "Hoteluri - cameră",
+    "um": "kW/cameră",
+    "valoare_specifica": [
+     1,
+     1
+    ],
+    "ku": 0.7
+   },
+   {
+    "destinatie": "Hoteluri - restaurant",
+    "um": "kW total",
+    "valoare_totala": [
+     15,
+     100
+    ],
+    "ku": 0.9
+   },
+   {
+    "destinatie": "Sedii administrative, politice, economice etc.",
+    "um": "W/m2",
+    "valoare_specifica": [
+     120,
+     200
+    ],
+    "ku": 0.9
+   },
+   {
+    "destinatie": "Policlinici",
+    "um": "kW total",
+    "valoare_totala": [
+     20,
+     140
+    ],
+    "ku": 0.65
+   },
+   {
+    "destinatie": "Spitale, clinici, sanatorii",
+    "um": "W/pat",
+    "valoare_specifica": [
+     500,
+     1000
+    ],
+    "ku": 0.7
+   },
+   {
+    "destinatie": "Creșe, grădinițe, cămine",
+    "um": "W/m2",
+    "valoare_specifica": [
+     20,
+     50
+    ],
+    "ku": 0.75
+   },
+   {
+    "destinatie": "Școli generale, licee",
+    "um": "W/m2",
+    "valoare_specifica": [
+     20,
+     50
+    ],
+    "ku": 0.75
+   },
+   {
+    "destinatie": "Facultăți, institute de învățământ superior",
+    "um": "W/m2",
+    "valoare_specifica": [
+     50,
+     75
+    ],
+    "ku": 0.8
+   },
+   {
+    "destinatie": "Teatre, filarmonici, muzee, săli de expoziție etc",
+    "um": "W/m2",
+    "valoare_specifica": [
+     50,
+     75
+    ],
+    "ku": [
+     0.6,
+     0.75
+    ]
+   },
+   {
+    "destinatie": "Cinematografe",
+    "um": "kW total",
+    "valoare_totala": [
+     50,
+     70
+    ],
+    "ku": 0.7
+   },
+   {
+    "destinatie": "Puncte termice",
+    "um": "kW total",
+    "valoare_totala": [
+     80,
+     120
+    ],
+    "ku": 0.85
+   }
+  ]
+ }
+}

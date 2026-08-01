@@ -46,14 +46,14 @@
         // Câmpuri probabilistice
         pot:    { value: base.pot,         confidence: pugConf,      source },
         cut:    { value: base.cut,         confidence: pugConf,      source },
-        hMax:   { value: base.hMaxFloors,  confidence: seismicConf,  source: 'P100-1/2022 + ' + source },
-        hMaxM:  { value: base.hMaxM,       confidence: seismicConf,  source: 'P100-1/2022' },
+        hMax:   { value: base.hMaxFloors,  confidence: seismicConf,  source: 'estimare UrbanX (NU normativă) din ag P100-1/2013 + ' + source },
+        hMaxM:  { value: base.hMaxM,       confidence: seismicConf,  source: 'estimare UrbanX (NU normativă) din ag P100-1/2013' },
         retrag: { value: base.retragereStrada, confidence: pugConf,  source },
         // Câmpuri contextuale
         tipologie: { value: base.tipLabel, confidence: pugConf,      source },
         mixFunc:   { value: base.mixFunc,  confidence: inferredConf, source: 'tipologie_inferata' },
         // Seismic
-        seismicAg: { value: base.seismicAg,    confidence: 0.95, source: 'P100-1/2022' },
+        seismicAg: { value: base.seismicAg,    confidence: 0.95, source: 'P100-1/2013 (zonare ag, de verificat contra hărții oficiale)' },
         seismicAlert: base.seismicAlert,
         // Meta
         hasPUG,
@@ -132,8 +132,8 @@
       return {
         pot:    { value: potBase,            confidence: potConf, source: 'inferred_gravity' },
         cut:    { value: cutBase,            confidence: potConf, source: 'inferred_gravity' },
-        hMax:   { value: seis.hMaxStory,     confidence: 0.85,   source: 'P100-1/2022' },
-        seismicAg: { value: seis.ag,         confidence: 0.90,   source: 'P100-1/2022' },
+        hMax:   { value: seis.hMaxStory,     confidence: 0.85,   source: 'estimare UrbanX (NU normativă) din ag P100-1/2013' },
+        seismicAg: { value: seis.ag,         confidence: 0.90,   source: 'P100-1/2013 (zonare ag, de verificat contra hărții oficiale)' },
         overallConfidence: 38,
         overallLabel: '🔶 Date estimate din TCI (fără PUG)',
         hasPUG: false,

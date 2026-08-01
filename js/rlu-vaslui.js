@@ -22,7 +22,7 @@
       dataCompletare: '2026-06-04',
       completatDe: 'TSS·FG',
       trupuri: ['Trup A (centru)', 'Trup A1', 'Trup A2', 'Trup A3', 'Trup B — Moara Grecilor', 'Trup C — Vișoara', 'Trup D', 'Trup E — Rediu', 'Trup F — Brodoc', 'Trup I'],
-      seismic: { ag: 0.30, Tc: 1.0, zona: 'C' },
+      seismic: { ag: 0.30, Tc: 0.7, zona: 'C', sursa: 'P100-1/2013, Tabel A1 (VASLUI, jud. VASLUI) — Tc corectat 26 iul (era 1.0, gresit; valoarea oficiala e 0.7)' },
       nota: 'UTR 6 și 29 — risc alunecare teren; interdicție temporară până la lucrări stabilizare versanți',
     },
 

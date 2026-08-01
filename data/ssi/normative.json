@@ -3564,7 +3564,17 @@
       "desfumare_naturala_prag": "Art. 8.1.10(2): suprafata aerodinamica libera a dispozitivelor cu deschidere automata (tiraj natural-organizat) minim 1% din aria incaperii.",
       "art_8_5_1_regula_generala_presurizare": "Scarile supraterane inchise care asigura evacuarea utilizatorilor se prevad cu sistem de evacuare a fumului prin tiraj natural-organizat SAU se pun in suprapresiune (alternativa).",
       "art_8_5_8_obligativitate_cladiri_inalte": "La cladirile inalte sau foarte inalte: casele de scari inchise si incaperile tampon SE PUN OBLIGATORIU in suprapresiune — proiectare/calcul conform SR EN 12101-13 si SR EN 12101-6.",
-      "art_8_5_7_9_criterii_presiune": "Presiune pe usi circulatii orizontale <= 80 Pa (art. 8.5.7 alin.1); presiune pe usi degajamente/incaperi tampon/case scari conform SR EN 12101-13/12101-6 (alin.2); viteza aer >= 1 m/s la usile de acces nivel incendiat si acces scara din exterior (art. 8.5.9 alin.2); presiune casa scara >= 5 Pa peste spatiile presurizate adiacente (alin.3)."
+      "art_8_5_7_9_criterii_presiune": "Presiune pe usi circulatii orizontale <= 80 Pa (art. 8.5.7 alin.1); presiune pe usi degajamente/incaperi tampon/case scari conform SR EN 12101-13/12101-6 (alin.2); viteza aer >= 1 m/s la usile de acces nivel incendiat si acces scara din exterior (art. 8.5.9 alin.2); presiune casa scara >= 5 Pa peste spatiile presurizate adiacente (alin.3).",
+      "art_8_2_1_mecanism_tiraj_natural": {
+        "articol": "Art. 8.2.1",
+        "data_extractie": "2026-07-26",
+        "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat pagina cu pagina de Claude",
+        "pagina": "337-338",
+        "status": "verificat_text_oficial",
+        "alin_1": "Evacuarea fumului prin tiraj natural-organizat se realizeaza prin introduceri de aer si goluri de evacuare a fumului care pot comunica cu exteriorul direct sau prin canale sau prin ghene, astfel dispuse, dimensionate si realizate incat sa asigure circulatia controlata a aerului in volumul protejat si evacuarea fumului.",
+        "alin_2": "Introducerea aerului se realizeaza prin goluri de admisie cu aria aerodinamica libera utila de 75% din aria aerodinamica libera utila a evacuarilor, iar evacuarea fumului prin goluri in fatade (libere sau inchise cu dispozitive care se deschid automat in caz de incendiu), prin canale si ghene, ori prin dispozitive (trape) cu deschidere automata dispuse in treimea superioara a sarpantei, raportata la inaltimea maxima a sarpantei, sau in treimea superioara a peretilor exteriori ai incaperii (atunci cand tavanul are o inclinare mai mica de 20 grade). Dispozitivele de evacuare a fumului prin tiraj natural-organizat asigura evacuarea fumului pe maximum 30 m adancime a incaperii.",
+        "nota": "Se aplica in comun tuturor constructiilor (Capitolul 8 nu e diferentiat nou/existent, spre deosebire de Cap. 1-7/Anexa 10). Util pentru descrierea tirajului natural prin ferestre/ochiuri mobile la locuinte individuale/cuplate care nu se incadreaza in niciunul din cazurile de OBLIGATIVITATE ale art_8_1_8 — descrie mecanismul, nu creeaza o obligatie noua."
+      }
     }
   },
   "P118_1_2025_T143": {
@@ -3697,6 +3707,142 @@
         "periculozitate mare (include aparatura electrica/electronica sensibila, exemplu supravietuit din vechiul P4C)",
         "periculozitate deosebit de mare (Regulament CLP (CE) 1272/2008)"
       ]
+    }
+  },
+  "P118_1_2025_Art_3_2_1_13_acces_locuinte": {
+    "id": "P118_1_2025_Art_3_2_1_13_acces_locuinte",
+    "titlu": "Accesul si interventia autospecialelor de stingere la cladiri de locuit supraterane NOI (individuale/cuplate si colective)",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "211",
+    "data_extractie": "2026-07-26",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat pagina cu pagina de Claude",
+    "status": "verificat_text_oficial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Art. 3.2.1.13",
+      "alin_1": "Cladirile de locuit reprezentand unitati individuale (cu locuinte unifamiliale, de serviciu, de interventie, de necesitate de sprijin, de protocol, case de vacanta) sau un ansamblu rezidential care se constituie in condominiu format din locuinte si constructii cu alta destinatie, individuale, amplasate izolat, insiruit sau cuplat, in care proprietatile individuale sunt interdependente printr-o proprietate comuna fortata si perpetua, cu inaltimea h = maximum 8 m (unde \"h\" reprezinta cota ultimului planseu accesibil al constructiei, fata de nivelul de referinta), vor avea asigurat accesul si interventia autospecialelor de stingere in caz de incendiu, cel putin pe o latura si, totodata, cel putin pe 15% din perimetrul peretilor exteriori.",
+      "alin_2": "Cladirile de locuit colective supraterane cu inaltimi obisnuite cu inaltimea h > 8 m vor avea asigurat accesul si interventia autospecialelor de stingere in caz de incendiu, cel putin pe o latura si, totodata, cel putin pe 25% din perimetrul peretilor exteriori.",
+      "alin_3": "Cu acceptul autoritatilor locale (serviciilor/inspectoratelor pentru situatii de urgenta) si daca configuratia urbanistica permite, se pot utiliza cai de acces amplasate adiacent accesului de intrare in cladirile de locuit colective cu inaltimi obisnuite cu maximum 4 niveluri supraterane.",
+      "prag_h": 8,
+      "procent_perimetru_h_sub_8m": 15,
+      "procent_perimetru_h_peste_8m": 25
+    }
+  },
+  "P118_1_2025_T132_risc_incendiu_civil": {
+    "id": "P118_1_2025_T132_risc_incendiu_civil",
+    "titlu": "Incadrarea in risc de incendiu dupa densitatea sarcinii termice (q) — constructii civile NOI",
+    "aplicabil_la": "CONSTRUCTIE_NOUA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "66 (Art. 2.1.2.2) / 532 (Tabelul 132, Anexa 8.1)",
+    "data_extractie": "2026-07-26",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat pagina cu pagina de Claude",
+    "status": "verificat_text_oficial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "articol": "Art. 2.1.2.2 + Tabelul 132 (Anexa 8.1, titlu explicit \"Incadrare in risc de incendiu (constructii noi)\")",
+      "praguri": [
+        {
+          "risc": "mic",
+          "q_min_MJ_mp": null,
+          "q_max_MJ_mp": 420
+        },
+        {
+          "risc": "mijlociu",
+          "q_min_MJ_mp": 420,
+          "q_max_MJ_mp": 840,
+          "nota": "sau se utilizeaza foc deschis sub orice forma"
+        },
+        {
+          "risc": "mare",
+          "q_min_MJ_mp": 840,
+          "q_max_MJ_mp": 1680
+        },
+        {
+          "risc": "foarte mare",
+          "q_min_MJ_mp": 1680,
+          "q_max_MJ_mp": null,
+          "nota": "si/sau exista risc de explozie volumetrica"
+        }
+      ],
+      "nota_incadrare_compartiment": "Incadrarea intregului compartiment de incendiu in risc mare/f.mare (nu doar incaperea) se aplica atunci cand incaperile cu risc mijlociu/mare depasesc 30% din volumul compartimentului — verificare separata, nu automata din pragurile de mai sus."
+    }
+  },
+  "P118_1_2025_A10_2_5_71_formula_viteza_NUMAI_EXISTENT": {
+    "id": "P118_1_2025_A10_2_5_71_formula_viteza_NUMAI_EXISTENT",
+    "titlu": "Formula vitezei de deplasare pentru determinarea perioadei teoretice de evacuare (0,4 m/s orizontal / 0,3 m/s vertical) — EXCLUSIV Anexa 10 (constructii EXISTENTE)",
+    "aplicabil_la": "EXISTENTA_NEMODIFICATA",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "584",
+    "data_extractie": "2026-07-26",
+    "metoda_extractie": "cautare text integral pe cele 698 de pagini ale PDF-ului oficial (fitz), confirmata o SINGURA aparitie",
+    "status": "verificat_text_oficial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Cautare full-text confirmata: sirul '0,4 m/s' si '0,3 m/s' (viteza de deplasare pt evacuare) apare o SINGURA data in tot documentul (698 pagini), exclusiv la Art. A.10.2.5.71."
+    },
+    "valoare": {
+      "articol": "Art. A.10.2.5.71",
+      "text": "Determinarea perioadei teoretice de timp necesare evacuarii utilizatorilor conform prevederilor din prezenta anexa se efectueaza prin posibila raportare a lungimilor de evacuare admise la viteza medie de deplasare, considerata 0,4 m/s pe orizontala si 0,3 m/s pe verticala (scari, pante).",
+      "auto_limitare": "Textul articolului se auto-limiteaza explicit: 'conform prevederilor DIN PREZENTA ANEXA' — Anexa 10 = constructii existente.",
+      "avertisment_NU_folosi_la_nou": "NU exista niciun echivalent al acestei formule pentru CONSTRUCTIE NOUA in tot normativul (verificat exhaustiv). La constructie noua, conformarea evacuarii se verifica EXCLUSIV prin lungimile admise (Art. 3.2.1.12 si tabelele pe destinatie, ex. T56/T60/T64/T67/T68/T77/T80/T84/T88/T116) si capacitatea fluxurilor (Art. 3.1.5.3/3.1.5.6, T51) — NU printr-un calcul separat de timp teoretic de evacuare, care nu e cerut de normativ la constructii noi."
+    }
+  },
+  "P118_1_2025_Art_2_6_2_3_5_acces_autospeciale_general": {
+    "id": "P118_1_2025_Art_2_6_2_3_5_acces_autospeciale_general",
+    "titlu": "Accesul autospecialelor de interventie la constructii (cai de circulatie carosabile, caracteristici tehnice autospeciale, curti interioare) - comun tuturor destinatiilor",
+    "aplicabil_la": "TOATE",
+    "sursa_url": "Monitorul Oficial al Romaniei, Partea I, Nr. 204 bis/10.III.2025 (Normativ P118-1/2025)",
+    "pagina": "185-187",
+    "data_extractie": "2026-07-26",
+    "metoda_extractie": "extragere directa din PDF oficial (text-layer, fitz), verificat pagina cu pagina de Claude",
+    "status": "verificat_text_oficial",
+    "validat_de": {
+      "nume": null,
+      "nr_atestat_Is": null,
+      "data_validare": null,
+      "nota": "Extragere confirmata pe text sursa oficial; ramane necesara validarea de raspundere profesionala (Ord. 180/2022) inainte de folosire ca document FINAL."
+    },
+    "valoare": {
+      "art_2_6_2_latime_min_carosabil": {
+        "articol": "Art. 2.6.2",
+        "conditie_lat_3_50m": "h <= 15,00 m (de la nivelul de referinta la cota de calcare a ultimului nivel folosit de utilizatori) SI lungime/adancime carosabil accesibil autospecialelor <= 30,00 m",
+        "lat_3_50m": 3.5,
+        "conditie_lat_7_00m": "h > 15,00 m SAU lungime/adancime carosabil > 30,00 m",
+        "lat_7_00m": 7.0,
+        "inaltime_libera_pe_traseu_m": 4.2,
+        "distanta_min_constructie_carosabil_m": 3.0,
+        "distanta_max_constructie_carosabil_m": 10.0,
+        "zona_calare_15_28m": "6,00 m x 12,50 m, la cel putin o fatada, la fiecare 50,00 m liniari (doar h intre 15-28m)",
+        "zona_calare_peste_28m": "8,20 m x 12,50 m, la cel putin doua fatade, la fiecare 50,00 m liniari (doar h>=28m)",
+        "doua_benzi_peste_30m": "daca accesul carosabil depaseste 30,00 m lungime, se asigura 2 benzi cu latimea totala minima de 7,00 m"
+      },
+      "art_2_6_3_caracteristici_tehnice_autospeciala": {
+        "articol": "Art. 2.6.3",
+        "latime_vehicul_m": 2.55,
+        "inaltime_vehicul_m": 4.0,
+        "raza_minima_viraj_m": 11.0,
+        "panta_maxima_pct": 30,
+        "masa_maxima_kg": 50000,
+        "latime_loc_calare_m": 8.2
+      },
+      "art_2_6_5_curti_interioare": {
+        "articol": "Art. 2.6.5",
+        "curte_peste_800mp": "min. 4,00 m latime x 4,50 m inaltime, cale de acces carosabila",
+        "curte_200_800mp_diferenta_nivel": "min. 1,50 m latime x 2,10 m inaltime, acces pietonal"
+      }
     }
   }
 }
