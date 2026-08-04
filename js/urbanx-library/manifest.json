@@ -12,6 +12,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "birouri": [
@@ -29,6 +31,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "scenariu_psi",
 "receptie",
 "carte_tehnica"
@@ -90,7 +94,9 @@
 "structura",
 "instalatii",
 "general",
+"arh_pth",
 "str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "infrastructura-drum": [
@@ -99,6 +105,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "locuinta-individuala": [
@@ -114,6 +122,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "medical": [
@@ -145,6 +155,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "pod": [
@@ -152,7 +164,9 @@
 "structura",
 "instalatii",
 "general",
+"arh_pth",
 "str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "scoala": [
@@ -161,6 +175,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "skid": [
@@ -169,6 +185,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "spatiu-comercial": [
@@ -177,6 +195,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "sport": [
@@ -185,6 +205,8 @@
 "instalatii",
 "general",
 "arh_pth",
+"str_pth",
+"inst_pth",
 "carte_tehnica"
 ],
 "statie-transformare": [
