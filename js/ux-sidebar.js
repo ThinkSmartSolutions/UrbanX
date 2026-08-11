@@ -60,7 +60,8 @@
     economie: function () { try { G._Economy && G._Economy.openPanel(G.TCI && G.TCI.cityKey); } catch (e) {} },
     spsTodo: function () { try { G.ss && G.ss('Modul Strategic Planning Suite — în dezvoltare. Disponibile acum: SIDU · Masterplan · PMUD · Climatică (SECAP) · Economică · HBU · RCAI Teritoriu.'); } catch (e) {} },
     rcaiT: function () { try { G._RCAI && G._RCAI.generatePDF(G.TCI && G.TCI.cityKey, 'T'); } catch (e) {} },
-    dataFresh: function () { try { G._DataFreshness && G._DataFreshness.openPanel(); } catch (e) {} }
+    dataFresh: function () { try { G._DataFreshness && G._DataFreshness.openPanel(); } catch (e) {} },
+    devize: mod('UXDevizePro', 'openPanel')
   };
 
   // ── NAV — PLANIFICARE URBANĂ: doar UAT / teritoriu / predicții (parcela+avizare = Flux de avizare) ──
@@ -136,6 +137,8 @@
       { label: 'Proiecție urbanistică 10/20/30 ani', moduleId: 'proiectie' },
       { label: 'AI Memoriu justificativ', moduleId: 'aiMemoriu' },
       { label: '🗓 Prospețimea datelor (surse la zi)', moduleId: 'dataFresh' } ] },
+    { id: 'investitii', label: 'Devize & Investiții', ico: '💰', color: '#0d9488', items: [
+      { label: '💰 Devize & Cost Management', moduleId: 'devize', info: 'devize' } ] },
     { id: 'cetateni', label: 'Cetățeni & consultare', ico: '👥', color: '#1D9E75', items: [
       { label: 'Sesizare urbană', moduleId: 'sesizari' },
       { label: 'Hartă sesizări (pe/off)', moduleId: 'sesizari-map' },

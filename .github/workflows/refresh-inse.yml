@@ -31,8 +31,8 @@ jobs:
         run: |
           git config user.name  "urbanx-inse-bot"
           git config user.email "actions@users.noreply.github.com"
-          if [ -n "$(git status --porcelain data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json)" ]; then
-            git add data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json
+          if [ -n "$(git status --porcelain data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json data/ins-cns107d.json)" ]; then
+            git add data/ins-populatie-domiciliu.json data/ins-rezidenta-judet.json data/ins-cns107d.json
             git commit -m "chore: actualizare automată date INS TEMPO ($(date -u +%Y-%m-%d))"
             git push
             echo "Date INS actualizate și publicate."

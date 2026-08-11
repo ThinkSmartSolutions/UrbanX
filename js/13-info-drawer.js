@@ -491,6 +491,22 @@ const RAPORT_INFO = {
     ],
     nu: ['Rețelele din OSM = date estimate (confirmați cu operatorii)', 'Dispecerizarea reală prin email/API + portalul avizatorilor + plata online = etapă viitoare (necesită server)', 'Nu înlocuiește CU-ul oficial emis de primărie'],
   },
+  devize: {
+    ico: '💰', label: 'Devize & Cost Management', badge: 'nou', badgeLabel: 'Investiții · integrat cu GIS', color: '13,148,136',
+    fn: 'window.UXDevizePro&&window.UXDevizePro.openPanel&&window.UXDevizePro.openPanel()',
+    ce: 'Modul complet de gestiune a costurilor unei investiții: Proiect → Obiecte → Categorii de lucrări → Articole de deviz (cu resurse materiale/manoperă/utilaj/transport) → Preț pe 4 niveluri (referință → actualizat cu indicele INSSE CNS107D → ofertă furnizor → preț folosit) → Ofertare → Contract → Situații de lucrări → Decontare (cu garanție de bună execuție reținută automat), plus flux de aprobare pe stări, audit trail, alertare la depășire de preț/buget și card de investiție pe hartă.',
+    dece: 'Un program de devize izolat nu cunoaște proiectul. UrbanX leagă devizul de aceleași date GIS/cadastru/documentații deja generate de platformă, astfel încât devizul, contractul și execuția rămân o singură sursă de adevăr, nu fișiere separate.',
+    legal: 'HG 907/2016 (conținut-cadru, Anexa 7 deviz general, Anexa 8 deviz pe obiect) · formulare F1-F5 · indicii de cost INSSE/TEMPO seria CNS107D (an de bază 2021)',
+    output: [
+      { ico: '🧱', txt: 'Articole de deviz cu resurse (materiale/manoperă/utilaj/transport) și norme reutilizabile' },
+      { ico: '💶', txt: 'Preț pe 4 niveluri, versionat — referință/actualizat/ofertă/folosit, cu sursă și dată' },
+      { ico: '📈', txt: 'Actualizare automată a prețului cu indicele real INSSE CNS107D (extras periodic, fără cont)' },
+      { ico: '📑', txt: 'Contracte, situații de lucrări, decontare cu garanție de bună execuție reținută automat' },
+      { ico: '📄', txt: 'Export F1-F5 + Deviz pe obiect + Deviz general HG907 (ZIP)' },
+      { ico: '📊', txt: 'Card de investiție: valoare/executat/plătit/progres financiar' },
+    ],
+    nu: ['Bibliotecă de norme (RpS/C/TS) — se introduc de utilizator; licențierea unei baze complete e o decizie separată', 'Fișierele de relevee se atașează ca metadate+cantități manuale (fără parsing automat DWG/OCR)', 'Necesită persistență Supabase — rulați o dată js/urbanx-devize-pro-schema.sql în SQL Editor'],
+  },
   plati: {
     ico: '💳', label: 'Plăți taxe urbanistice', badge: 'recomandat', badgeLabel: 'Administrație · fiscal', color: '34,197,94',
     fn: 'window.Plati&&window.Plati.openPanel&&window.Plati.openPanel()',
