@@ -141,6 +141,42 @@
       stdBtn.onclick = function () { DP.creazaCategoriiStandard(obiect.id, ['arhitectura', 'instalatii']).then(function () { renderCategorii(); }); };
       pane.appendChild(stdBtn);
 
+      var importBox = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap' });
+      var importBtn = el('button', { style: ST.btn + ';background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '📥 Importă din proiectarea UrbanX (relevee)');
+      var importOut = el('span', { style: 'font-size:11px;color:#94a3b8' });
+      importBtn.onclick = function () {
+        importOut.textContent = 'Se importă din geometria proiectului activ…';
+        DP.importDinProiectareUrbanX(obiect.id).then(function (r) {
+          if (r.error) { importOut.textContent = '⚠ ' + r.error; return; }
+          importOut.textContent = '✅ ' + r.articole_create + ' articole create (cantități reale din SC=' + Math.round(r.sc) + 'mp/SDA=' + Math.round(r.sda) + 'mp) în ' + r.categorii_create + ' categorii.';
+          renderCategorii();
+        });
+      };
+      importBox.appendChild(importBtn); importBox.appendChild(importOut);
+      pane.appendChild(importBox);
+
+      var csvBox = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap' });
+      csvBox.appendChild(el('span', { style: 'font-size:11px;color:#94a3b8' }, 'sau CSV articole (cod;denumire;um;cantitate;pretunitar) → categoria selectată:'));
+      var csvFile = el('input', { type: 'file', accept: '.csv,text/csv', style: 'font-size:11px' });
+      var csvOut = el('span', { style: 'font-size:11px;color:#94a3b8' });
+      csvFile.onchange = function () {
+        var f = csvFile.files && csvFile.files[0]; if (!f) return;
+        var catActiva = (State._lastCategorii || [])[0];
+        var reader = new FileReader();
+        reader.onload = function () {
+          csvOut.textContent = 'Se importă…';
+          // categoria țintă = prima categorie a obiectului curent (sau creează una implicită)
+          DP.listCategorii(obiect.id).then(function (cats) {
+            var target = cats[0];
+            var p = target ? Promise.resolve(target) : DP.createCategorie(obiect.id, { denumire: 'Import CSV', ordine: 0 });
+            return p.then(function (cat) { return DP.importCSVArticole(cat.id, reader.result); });
+          }).then(function (r) { csvOut.textContent = '✅ ' + r.imported + ' articole importate din CSV.'; renderCategorii(); });
+        };
+        reader.readAsText(f, 'utf-8');
+      };
+      csvBox.appendChild(csvFile); csvBox.appendChild(csvOut);
+      pane.appendChild(csvBox);
+
       var catWrap = el('div'); pane.appendChild(catWrap);
       var devizBtn = el('button', { style: ST.btn + ';margin-top:10px' }, '🧮 Calculează deviz pe obiect');
       var devizOut = el('div', { style: 'margin-top:10px' });
@@ -211,6 +247,22 @@
     var addBtn = el('button', { style: ST.btn + ';margin-top:8px' }, '+ Resursă');
     addBtn.onclick = function () { if (!rDen.value.trim()) return; DP.createResursa({ denumire: rDen.value.trim(), um: rUm.value || 'buc', categorie: rCat.value }).then(function () { panePreturi(pane); }); };
     addBox.appendChild(addBtn); pane.appendChild(addBox);
+
+    var csvBox = el('div', { style: ST.card });
+    csvBox.appendChild(el('div', { style: ST.label }, 'Import bază de prețuri externă (CSV: cod;denumire;um;categorie;pret)'));
+    var csvFile = el('input', { type: 'file', accept: '.csv,text/csv' });
+    var csvOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px' });
+    csvFile.onchange = function () {
+      var f = csvFile.files && csvFile.files[0]; if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        csvOut.textContent = 'Se importă…';
+        DP.importCSVResurse(reader.result).then(function (r) { csvOut.textContent = '✅ ' + r.imported + ' resurse importate (preț de referință setat automat unde era prezent).'; panePreturi(pane); });
+      };
+      reader.readAsText(f, 'utf-8');
+    };
+    csvBox.appendChild(csvFile); csvBox.appendChild(csvOut);
+    pane.appendChild(csvBox);
 
     var insBox = el('div', { style: ST.card });
     insBox.appendChild(el('div', { style: ST.label }, 'Indice INSSE — CNS107D (indici de cost în construcții)'));

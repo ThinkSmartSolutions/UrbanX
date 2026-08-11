@@ -189,6 +189,34 @@
     subsol_parcare: 600,   // €/mp SC subsol
   };
 
+  // Prețuri unitare materiale (surse publicații specialitate 2024) — module-level, reutilizate
+  // și de modulul Devize & Cost Management (js/urbanx-devize-pro.js → importDinProiectareUrbanX).
+  window._rvPreturiMateriale = {
+    beton_radier: 180, beton_stalpi: 200, beton_plansee: 190, armatura: 1.2,
+    bca_pereti_ext: 220, bca_pereti_int: 160, eps_fatada: 35, tencuiala_ext: 45,
+    sarpanta_lemn: 120, tigla: 55, termoiz_sarpanta: 28,
+    membrana_terasa: 35, termoiz_terasa: 30, strat_protectie: 25,
+    tamplarie_pvc_ferestre: 280, tamplarie_usi_ext: 2500, tamplarie_usi_int: 350,
+    pardoseala_gresie: 42, pardoseala_parchet: 38, faianta: 45,
+    tencuiala_int: 18, vopsea_int: 8,
+    instalatii_san: 85, instalatii_el: 75, hvac: 65,
+    impermeabilizare_subsol: 55, drenaj: 120,
+  };
+  window._rvCategoriiMateriale = {
+    beton: 'STRUCTURĂ — BETON + ARMĂTURĂ',
+    bca: 'ZIDĂRIE + TERMOIZOLAȚIE',
+    sarpanta: 'ACOPERIȘ — ȘARPANTĂ',
+    membrana: 'ACOPERIȘ — TERASĂ',
+    tamplarie: 'TÂMPLĂRIE',
+    pardoseala: 'FINISAJE INTERIOARE',
+    faianta: 'FINISAJE INTERIOARE',
+    tencuiala_int: 'FINISAJE INTERIOARE',
+    vopsea_int: 'FINISAJE INTERIOARE',
+    instalatii: 'INSTALAȚII (abonament/mp)',
+    impermeabilizare: 'SUBSOL',
+    drenaj: 'SUBSOL',
+  };
+
   // Coeficienți pentru categorii HG 907/2016 (% din valoare construcție)
   const COEF_HG907 = {
     studii:         0.005, // Cap.1 — studii, expertize, topografie
@@ -439,18 +467,11 @@
   // 2. EXTRAS DE MATERIALE
   // ═══════════════════════════════════════════════════════════════════════
 
-  window._rvExportExtras = function () {
-    const b = window._RV?.building, P = window._RV?.parcelParams;
-    if (!b || !P) { alert('Generați releveele mai întâi.'); return; }
-    if (typeof ss === 'function') ss('⏳ Generez extras de materiale…');
-
-    const _jsPDF = window.jspdf?.jsPDF || window.jsPDF;
-    if (!_jsPDF) { return; }
-
-    const pdf = new _jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const PW = 210, PH = 297;
-    const S2 = s => String(s || '').replace(/[^\x20-\x7E\u00C0-\u024F]/g, ' ').trim();
-
+  // ─── Calculul cantităților din geometria REALĂ a clădirii — sursă unică ────
+  // Reutilizat de Extras Materiale (PDF, mai jos) ȚI de modulul Devize & Cost
+  // Management (js/urbanx-devize-pro.js → importDinProiectareUrbanX). Formulele
+  // NU se duplică în 2 locuri — orice modificare aici se reflectă automat în ambele.
+  window._rvComputeQuantitati = function (b, P) {
     const sc = b.scArea || b.bW * b.bD;
     const sda = b.sdaTotal || sc * b.niv;
     const niv = b.niv || 1;
@@ -459,7 +480,6 @@
     const subsolSC = (b.subsolNiv || 0) * sc;
     const perimetru = 2 * (bW + bD);
 
-    // Calculul cantităților
     const Q = {
       // STRUCTURĂ
       beton_radier:     { q: (sc + subsolSC) * 0.30, u: 'm³', desc: 'Beton armat C30/37 — radier + substructură' },
@@ -513,6 +533,22 @@
         drenaj:                   { q: perimetru, u: 'ml', desc: 'Sistem drenaj perimetral + strat drenant' },
       } : {}),
     };
+    return { Q, sc, sda, niv, bW, bD, hNiv, subsolSC, perimetru };
+  };
+
+  window._rvExportExtras = function () {
+    const b = window._RV?.building, P = window._RV?.parcelParams;
+    if (!b || !P) { alert('Generați releveele mai întâi.'); return; }
+    if (typeof ss === 'function') ss('⏳ Generez extras de materiale…');
+
+    const _jsPDF = window.jspdf?.jsPDF || window.jsPDF;
+    if (!_jsPDF) { return; }
+
+    const pdf = new _jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const PW = 210, PH = 297;
+    const S2 = s => String(s || '').replace(/[^\x20-\x7E\u00C0-\u024F]/g, ' ').trim();
+
+    const { Q, sc, sda } = window._rvComputeQuantitati(b, P);
 
     // ── Header ──────────────────────────────────────────────────────────
     pdf.setFillColor(15, 23, 42); pdf.rect(0, 0, PW, 18, 'F');
@@ -537,37 +573,13 @@
     ['Material / Lucrare', 'Cantitate', 'U.M.', 'Preț unit. (€)', 'Total (€)'].forEach((h, i) => pdf.text(h, cx[i], y));
     y += 4;
 
-    // Prețuri unitare materiale (surse publicații specialitate 2024)
-    const PRET_MAT = {
-      beton_radier: 180, beton_stalpi: 200, beton_plansee: 190, armatura: 1.2,
-      bca_pereti_ext: 220, bca_pereti_int: 160, eps_fatada: 35, tencuiala_ext: 45,
-      sarpanta_lemn: 120, tigla: 55, termoiz_sarpanta: 28,
-      membrana_terasa: 35, termoiz_terasa: 30, strat_protectie: 25,
-      tamplarie_pvc_ferestre: 280, tamplarie_usi_ext: 2500, tamplarie_usi_int: 350,
-      pardoseala_gresie: 42, pardoseala_parchet: 38, faianta: 45,
-      tencuiala_int: 18, vopsea_int: 8,
-      instalatii_san: 85, instalatii_el: 75, hvac: 65,
-      impermeabilizare_subsol: 55, drenaj: 120,
-    };
+    // Prețuri unitare materiale — module-level (window._rvPreturiMateriale), reutilizate de Devize
+    const PRET_MAT = window._rvPreturiMateriale;
+    const CATEGORIES = window._rvCategoriiMateriale;
 
     let grandTotal = 0;
     let rowBg2 = false;
     let lastCategory = '';
-
-    const CATEGORIES = {
-      beton: 'STRUCTURĂ — BETON + ARMĂTURĂ',
-      bca: 'ZIDĂRIE + TERMOIZOLAȚIE',
-      sarpanta: 'ACOPERIȘ — ȘARPANTĂ',
-      membrana: 'ACOPERIȘ — TERASĂ',
-      tamplarie: 'TÂMPLĂRIE',
-      pardoseala: 'FINISAJE INTERIOARE',
-      faianta: 'FINISAJE INTERIOARE',
-      tencuiala_int: 'FINISAJE INTERIOARE',
-      vopsea_int: 'FINISAJE INTERIOARE',
-      instalatii: 'INSTALAȚII (abonament/mp)',
-      impermeabilizare: 'SUBSOL',
-      drenaj: 'SUBSOL',
-    };
 
     Object.entries(Q).forEach(([key, row]) => {
       // Header categorie

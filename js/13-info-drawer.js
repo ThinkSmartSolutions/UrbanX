@@ -498,14 +498,16 @@ const RAPORT_INFO = {
     dece: 'Un program de devize izolat nu cunoaște proiectul. UrbanX leagă devizul de aceleași date GIS/cadastru/documentații deja generate de platformă, astfel încât devizul, contractul și execuția rămân o singură sursă de adevăr, nu fișiere separate.',
     legal: 'HG 907/2016 (conținut-cadru, Anexa 7 deviz general, Anexa 8 deviz pe obiect) · formulare F1-F5 · indicii de cost INSSE/TEMPO seria CNS107D (an de bază 2021)',
     output: [
+      { ico: '📥', txt: 'Import automat din proiectarea UrbanX (AEDIS/Relevee) — articole+cantități REALE din geometria clădirii (SC/SDA/perimetru), cu preț de referință real (surse INS/MDLPA) deja setat' },
+      { ico: '📎', txt: 'Import fișier (CSV) pentru o bază de prețuri sau listă de articole externă — nu depinde exclusiv de introducere manuală' },
       { ico: '🧱', txt: 'Articole de deviz cu resurse (materiale/manoperă/utilaj/transport) și norme reutilizabile' },
       { ico: '💶', txt: 'Preț pe 4 niveluri, versionat — referință/actualizat/ofertă/folosit, cu sursă și dată' },
-      { ico: '📈', txt: 'Actualizare automată a prețului cu indicele real INSSE CNS107D (extras periodic, fără cont)' },
+      { ico: '📈', txt: 'Actualizare automată a prețului cu indicele real INSSE CNS107D (extras periodic, fără cont — verificat funcțional)' },
       { ico: '📑', txt: 'Contracte, situații de lucrări, decontare cu garanție de bună execuție reținută automat' },
       { ico: '📄', txt: 'Export F1-F5 + Deviz pe obiect + Deviz general HG907 (ZIP)' },
       { ico: '📊', txt: 'Card de investiție: valoare/executat/plătit/progres financiar' },
     ],
-    nu: ['Bibliotecă de norme (RpS/C/TS) — se introduc de utilizator; licențierea unei baze complete e o decizie separată', 'Fișierele de relevee se atașează ca metadate+cantități manuale (fără parsing automat DWG/OCR)', 'Necesită persistență Supabase — rulați o dată js/urbanx-devize-pro-schema.sql în SQL Editor'],
+    nu: ['Bibliotecă de norme complete (RpS/C/TS, 82 indicatori istorici) — licențierea unei baze comerciale complete e o decizie separată; azi se importă din proiectarea proprie sau din fișier extern, nu o listă exhaustivă de norme românești', 'Fișierele de relevee se atașează ca metadate+cantități (fără parsing automat DWG/OCR)', 'Necesită persistență Supabase — rulați o dată js/urbanx-devize-pro-schema.sql în SQL Editor'],
   },
   plati: {
     ico: '💳', label: 'Plăți taxe urbanistice', badge: 'recomandat', badgeLabel: 'Administrație · fiscal', color: '34,197,94',

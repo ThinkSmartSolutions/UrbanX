@@ -208,6 +208,108 @@
   // ══════════════════════════════════════════════════════════════════════════
   // 5. ARTICOLE DE DEVIZ + CALCUL COST (secțiunile 1, 3, 3bis, 4)
   // ══════════════════════════════════════════════════════════════════════════
+
+  // ── IMPORT AUTOMAT DIN PROIECTAREA UrbanX (AEDIS/Relevee) — date REALE, live ──
+  // Nu depinde de o bază de norme populată manual: citește geometria REALĂ a
+  // clădirii deja generată în modulul de relevee (window._RV.building/parcelParams),
+  // calculează cantitățile cu FORMULELE DEJA EXISTENTE (js/15-relevee-deviz.js →
+  // window._rvComputeQuantitati, sursă unică — nu se duplică) și prețurile de
+  // referință deja încorporate (window._rvPreturiMateriale, surse INS/MDLPA).
+  // Fiecare linie devine: 1 resursă + 1 normă-wrapper (1:1, consum=1) + 1 articol —
+  // astfel prețul rămâne LIV actualizabil (indice CNS107D, ofertă furnizor) prin
+  // motorul de preț pe 4 niveluri, nu îngheață o valoare fixă la import.
+  function importDinProiectareUrbanX(obiectId) {
+    var RV = G._RV;
+    if (!RV || !RV.building || !RV.parcelParams || typeof G._rvComputeQuantitati !== 'function') {
+      return Promise.resolve({ error: 'Niciun proiect AEDIS/Relevee activ pe hartă. Deschide un proiect (AEDIS → Generează relevee) înainte de import.' });
+    }
+    var calc = G._rvComputeQuantitati(RV.building, RV.parcelParams);
+    var Q = calc.Q || {};
+    var PRET_MAT = G._rvPreturiMateriale || {};
+    var CATEG_MAP = G._rvCategoriiMateriale || {};
+    var cursEur = (G.UXDevize && G.UXDevize.PRETURI && G.UXDevize.PRETURI._meta && G.UXDevize.PRETURI._meta.curs_eur) || 5.05;
+
+    var keys = Object.keys(Q);
+    var grupePeCategorie = {};
+    keys.forEach(function (k) {
+      var catKey = Object.keys(CATEG_MAP).filter(function (ck) { return k.indexOf(ck) === 0; })[0];
+      var den = CATEG_MAP[catKey] || 'ALTE LUCRĂRI (import relevee)';
+      (grupePeCategorie[den] = grupePeCategorie[den] || []).push(k);
+    });
+    var catDenumiri = Object.keys(grupePeCategorie);
+
+    return listCategorii(obiectId).then(function (existente) {
+      var existenteByName = {}; existente.forEach(function (c) { existenteByName[c.denumire] = c; });
+      return Promise.all(catDenumiri.map(function (den, i) {
+        return existenteByName[den] || createCategorie(obiectId, { denumire: den, ordine: i });
+      }));
+    }).then(function (categorii) {
+      // procesare SECVENȚIALĂ (nu paralel) — evită supraîncărcarea Supabase la import mare
+      var totalCreat = 0;
+      return categorii.reduce(function (chain, cat, i) {
+        var den = catDenumiri[i];
+        var ks = grupePeCategorie[den];
+        return chain.then(function () {
+          return ks.reduce(function (inner, k) {
+            return inner.then(function () {
+              var row = Q[k];
+              var pretEur = PRET_MAT[k] || 0;
+              var pretRon = Math.round(pretEur * cursEur * 100) / 100;
+              return createResursa({ cod: k, denumire: row.desc, um: row.u, categorie: 'material' }).then(function (res) {
+                return creazaNorma({ cod_norma: k, denumire: row.desc, um: row.u, domeniu: 'constructii', sursa: 'proiectare_urbanx' },
+                  [{ resursa_id: res.id, tip: 'material', consum_unitar: 1, um: row.u }]).then(function (norma) {
+                  return (pretRon ? setPretReferinta(res.id, pretRon, 'Import automat din proiectarea UrbanX (relevee) — sursă INS/MDLPA, ' + pretEur + ' €/' + row.u + ' × curs ' + cursEur).then(function () { return alegePretFolosit(res.id, 'referinta'); }) : Promise.resolve())
+                    .then(function () {
+                      return createArticol(cat.id, { norma_id: norma.id, cod: k, denumire: row.desc, um: row.u, cantitate: Math.round((row.q || 0) * 100) / 100, sursa_cantitate: 'proiectat' });
+                    });
+                });
+              }).then(function () { totalCreat++; });
+            });
+          }, Promise.resolve());
+        });
+      }, Promise.resolve()).then(function () {
+        logAudit({ entitate: 'obiect', entitate_id: obiectId, camp_modificat: 'import_relevee', valoare_noua: totalCreat + ' articole', motiv: 'Import automat din proiectarea UrbanX (geometrie reală + preț referință INS/MDLPA)' });
+        return { success: true, articole_create: totalCreat, categorii_create: catDenumiri.length, sc: calc.sc, sda: calc.sda };
+      });
+    });
+  }
+
+  // ── IMPORT FIȘIER (CSV) — bază de prețuri/articole externă (secțiunea 7, "oferte furnizor") ──
+  function _parseCSV(text) {
+    var sep = text.indexOf(';') > -1 ? ';' : ',';
+    var linii = String(text || '').split(/\r?\n/).filter(function (l) { return l.trim().length; });
+    if (!linii.length) return [];
+    var head = linii[0].split(sep).map(function (h) { return h.trim().toLowerCase(); });
+    return linii.slice(1).map(function (l) {
+      var cel = l.split(sep), o = {};
+      head.forEach(function (h, i) { o[h] = (cel[i] || '').trim(); });
+      return o;
+    });
+  }
+  function _num(s) { var n = parseFloat(String(s || '0').replace(',', '.')); return isNaN(n) ? 0 : n; }
+  // coloane așteptate: cod;denumire;um;categorie;pret (referință) — o resursă+preț per rând
+  function importCSVResurse(csvText) {
+    var rows = _parseCSV(csvText).filter(function (r) { return r.denumire; });
+    return rows.reduce(function (chain, r) {
+      return chain.then(function (acc) {
+        return createResursa({ cod: r.cod, denumire: r.denumire, um: r.um || 'buc', categorie: r.categorie || 'material' }).then(function (res) {
+          var pret = _num(r.pret || r.pretreferinta || r['preț'] || 0);
+          if (!pret) { acc.push(res); return acc; }
+          return setPretReferinta(res.id, pret, 'Import CSV — bază de prețuri externă').then(function () { return alegePretFolosit(res.id, 'referinta'); }).then(function () { acc.push(res); return acc; });
+        });
+      });
+    }, Promise.resolve([])).then(function (created) { return { imported: created.length }; });
+  }
+  // coloane așteptate: cod;denumire;um;cantitate;pretunitar — un articol liber per rând, direct într-o categorie
+  function importCSVArticole(categorieId, csvText) {
+    var rows = _parseCSV(csvText).filter(function (r) { return r.denumire; });
+    return rows.reduce(function (chain, r) {
+      return chain.then(function (acc) {
+        return createArticol(categorieId, { cod: r.cod, denumire: r.denumire, um: r.um || 'buc', cantitate: _num(r.cantitate), pret_unitar_manual: _num(r.pretunitar || r.pret || r['preț unitar']), sursa_cantitate: 'manual' }).then(function (a) { acc.push(a); return acc; });
+      });
+    }, Promise.resolve([])).then(function (created) { return { imported: created.length }; });
+  }
+
   function listArticole(categorieId) { return sbSelect('deviz_articole', [{ col: 'categorie_id', val: categorieId }]); }
   function createArticol(categorieId, a) {
     var row = {
@@ -610,6 +712,7 @@
     // articole + calcul
     listArticole: listArticole, createArticol: createArticol, updateArticol: updateArticol, deleteArticol: deleteArticol,
     costArticol: costArticol, computeDevizObiect: computeDevizObiect, computeDevizGeneral: computeDevizGeneral,
+    importDinProiectareUrbanX: importDinProiectareUrbanX, importCSVResurse: importCSVResurse, importCSVArticole: importCSVArticole,
     // relevee
     listRelevee: listRelevee, addRelevee: addRelevee, uploadReleveeFile: uploadReleveeFile, comparaProiectatVsRelevat: comparaProiectatVsRelevat,
     // furnizori/contracte/situații/decontare/garanții
