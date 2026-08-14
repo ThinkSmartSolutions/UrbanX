@@ -34,7 +34,7 @@
     var body = el('div', { style: ST.body }); m.appendChild(body);
 
     var TABS = [
-      ['proiecte', '📁 Proiecte'], ['articole', '🧱 Obiecte & Articole'], ['preturi', '💶 Prețuri'],
+      ['proiecte', '📁 Proiecte'], ['articole', '🧱 Obiecte & Articole'], ['relevee', '📐 Relevee (upload)'], ['preturi', '💶 Prețuri'],
       ['contracte', '📑 Furnizori & Contracte'], ['situatii', '🧾 Situații de lucrări'],
       ['rapoarte', '📄 Rapoarte (F1-F5)'], ['audit', '🕓 Audit & Alerte']
     ];
@@ -51,7 +51,7 @@
     }
     function renderPane() {
       pane.innerHTML = '<div style="color:#64748b;font-size:12px">Se încarcă…</div>';
-      var fn = { proiecte: paneProiecte, articole: paneArticole, preturi: panePreturi, contracte: paneContracte, situatii: paneSituatii, rapoarte: paneRapoarte, audit: paneAudit }[State.tab];
+      var fn = { proiecte: paneProiecte, articole: paneArticole, relevee: paneRelevee, preturi: panePreturi, contracte: paneContracte, situatii: paneSituatii, rapoarte: paneRapoarte, audit: paneAudit }[State.tab];
       if (fn) fn(pane); else pane.innerHTML = '';
     }
     renderTabs(); renderPane();
@@ -229,6 +229,106 @@
         });
       }
       renderCategorii();
+    });
+  }
+
+  // ── TAB: Relevee (upload — parsing real CSV/DXF/PDF/imagine, secțiunea 3bis) ────────────
+  function paneRelevee(pane) {
+    var DP = G.UXDevizePro, PR = G.UXDevizeRelevee;
+    if (!State.proiectId) { pane.innerHTML = '<div style="color:#fbbf24;font-size:12px">⚠ Selectează un proiect mai întâi.</div>'; return; }
+    if (!PR) { pane.innerHTML = '<div style="color:#ef4444;font-size:12px">Modulul de parsing relevee (urbanx-devize-relevee-parse.js) nu e încărcat.</div>'; return; }
+    pane.innerHTML = '';
+    pane.appendChild(el('div', { style: ST.label }, 'Încarcă relevee (măsurătoare/ridicare) pe un nivel'));
+    pane.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' },
+      'Formate reale: <b>CSV</b> (nivel;denumire;suprafata;um) · <b>DXF</b> (poligoane reale, arie exactă) · ' +
+      '<b>PDF cu text</b> (extragere reală) · <b>PDF scanat/imagine</b> (OCR — încredere scăzută, verifică fiecare rând) · ' +
+      '<b>DWG</b> nu se poate citi direct — convertește la DXF întâi.'));
+
+    var grid = el('div', { style: 'display:grid;grid-template-columns:1fr 2fr;gap:6px;margin-bottom:8px' });
+    var nivelInp = el('input', { style: ST.inp, placeholder: 'Nivel (ex. parter, etaj_1, subsol)', value: 'parter' });
+    var fileInp = el('input', { type: 'file', accept: '.csv,.dxf,.pdf,.jpg,.jpeg,.png,.dwg', style: ST.inp });
+    grid.appendChild(nivelInp); grid.appendChild(fileInp);
+    pane.appendChild(grid);
+
+    var progresOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' });
+    var reviewWrap = el('div');
+    pane.appendChild(progresOut); pane.appendChild(reviewWrap);
+
+    fileInp.onchange = function () {
+      var f = fileInp.files && fileInp.files[0]; if (!f) return;
+      reviewWrap.innerHTML = '';
+      progresOut.textContent = '⏳ Se citește „' + f.name + '"…';
+      PR.parseFisier(f, function (pct) { progresOut.textContent = '⏳ OCR în curs… ' + pct + '%'; }).then(function (r) {
+        if (!r.candidati.length) { progresOut.innerHTML = '⚠ Niciun candidat identificat în fișier. Verifică formatul (vezi exemplele de mai sus) sau introdu articolele manual.'; return; }
+        progresOut.innerHTML = '✅ ' + r.candidati.length + ' candidați identificați' + (r.poligoane_gasite != null ? (' din ' + r.poligoane_gasite + ' poligoane DXF') : '') + '. Revizuiește și bifează ce vrei să imporți:';
+        renderReview(r, f);
+      }).catch(function (e) {
+        progresOut.innerHTML = '⚠ ' + (e && e.message || 'Eroare la citirea fișierului.');
+      });
+    };
+
+    function renderReview(r, file) {
+      reviewWrap.innerHTML = '';
+      var incredereColor = { ridicata: '#34d399', medie: '#fbbf24', scazuta: '#f87171' };
+      var incredereLabel = { ridicata: 'geometrie/CSV reală', medie: 'text extras din PDF', scazuta: 'OCR — verifică atent' };
+      var tabel = el('div', { style: 'max-height:320px;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px' });
+      r.candidati.forEach(function (c, i) {
+        var row = el('div', { style: 'display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px' });
+        var chk = el('input', { type: 'checkbox' }); chk.checked = !!c.selectat; chk.onchange = function () { c.selectat = chk.checked; };
+        row.appendChild(chk);
+        row.appendChild(el('span', { style: 'flex:1' }, esc(c.denumire)));
+        row.appendChild(el('span', { style: 'width:70px;text-align:right' }, c.cantitate + ' ' + esc(c.um)));
+        row.appendChild(el('span', { style: 'color:' + (incredereColor[c.incredere] || '#94a3b8') + ';width:140px;font-size:10px' }, incredereLabel[c.incredere] || c.incredere));
+        tabel.appendChild(row);
+      });
+      reviewWrap.appendChild(tabel);
+
+      var confirmRow = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-top:10px' });
+      var catSel = el('select', { style: ST.inp + ';max-width:260px' });
+      DP.listObiecte(State.proiectId).then(function (obiecte) {
+        return Promise.all(obiecte.map(function (o) { return DP.listCategorii(o.id).then(function (cats) { return cats.map(function (c) { return { obiect: o, cat: c }; }); }); }));
+      }).then(function (arr) {
+        var flat = [].concat.apply([], arr);
+        if (!flat.length) { catSel.appendChild(el('option', { value: '' }, '(fără categorii — creează întâi un obiect/categorie în tab Articole)')); return; }
+        flat.forEach(function (x) { catSel.appendChild(el('option', { value: x.cat.id }, x.obiect.denumire + ' → ' + x.cat.denumire)); });
+      });
+      confirmRow.appendChild(el('span', { style: 'font-size:11px;color:#94a3b8' }, 'Importă în categoria:'));
+      confirmRow.appendChild(catSel);
+      var importBtn = el('button', { style: ST.btn }, '✅ Importă selectate ca articole (relevat)');
+      confirmRow.appendChild(importBtn);
+      reviewWrap.appendChild(confirmRow);
+
+      var doneOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px' });
+      reviewWrap.appendChild(doneOut);
+
+      importBtn.onclick = function () {
+        var selectate = r.candidati.filter(function (c) { return c.selectat; });
+        if (!selectate.length) { doneOut.textContent = '⚠ Niciun rând bifat.'; return; }
+        if (!catSel.value) { doneOut.textContent = '⚠ Selectează o categorie țintă (creează întâi un obiect/categorie în tab „Obiecte & Articole").'; return; }
+        doneOut.textContent = 'Se importă…';
+        DP.addRelevee(State.proiectId, { nivel_nume: nivelInp.value.trim() || 'parter', fisier_nume: file.name, tip_fisier: (file.name.split('.').pop() || '').toLowerCase(), autor: null })
+          .then(function (relevee) {
+            return selectate.reduce(function (chain, c) {
+              return chain.then(function () {
+                return DP.createArticol(catSel.value, { denumire: c.denumire, um: c.um, cantitate: c.cantitate, sursa_cantitate: 'relevat', relevee_id: relevee.id });
+              });
+            }, Promise.resolve());
+          }).then(function () {
+            doneOut.innerHTML = '✅ ' + selectate.length + ' articole importate (sursă: relevat, nivel „' + (nivelInp.value.trim() || 'parter') + '").';
+          });
+      };
+    }
+
+    // ── Relevee deja încărcate pe proiect ────────────────────────────────
+    var listOut = el('div', { style: 'margin-top:16px' }); pane.appendChild(listOut);
+    listOut.appendChild(el('div', { style: ST.label }, 'Fișiere relevee încărcate pe acest proiect'));
+    var listBody = el('div'); listOut.appendChild(listBody);
+    DP.listRelevee(State.proiectId).then(function (releveuri) {
+      listBody.innerHTML = releveuri.length ? '' : '<div style="color:#64748b;font-size:12px">Niciun fișier încărcat încă.</div>';
+      releveuri.forEach(function (rv) {
+        listBody.appendChild(el('div', { style: 'font-size:11px;color:#cbd5e1;padding:3px 0' },
+          '📎 ' + esc(rv.fisier_nume || '—') + ' · nivel ' + esc(rv.nivel_nume) + ' · ' + esc(rv.tip_fisier || '') + ' · ' + (rv.data_masurare || '')));
+      });
     });
   }
 

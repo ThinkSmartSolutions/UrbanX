@@ -499,6 +499,7 @@ const RAPORT_INFO = {
     legal: 'HG 907/2016 (conținut-cadru, Anexa 7 deviz general, Anexa 8 deviz pe obiect) · formulare F1-F5 · indicii de cost INSSE/TEMPO seria CNS107D (an de bază 2021)',
     output: [
       { ico: '📥', txt: 'Import automat din proiectarea UrbanX (AEDIS/Relevee) — articole+cantități REALE din geometria clădirii (SC/SDA/perimetru), cu preț de referință real (surse INS/MDLPA) deja setat' },
+      { ico: '📐', txt: 'Parsing REAL de relevee încărcate: CSV (nivel/încăpere/suprafață), DXF (arie exactă din poligoane reale), PDF cu text (extragere reală), PDF scanat/imagine (OCR) — candidații se revizuiesc/bifează înainte de import, nu se acceptă orbește' },
       { ico: '📎', txt: 'Import fișier (CSV) pentru o bază de prețuri sau listă de articole externă — nu depinde exclusiv de introducere manuală' },
       { ico: '🧱', txt: 'Articole de deviz cu resurse (materiale/manoperă/utilaj/transport) și norme reutilizabile' },
       { ico: '💶', txt: 'Preț pe 4 niveluri, versionat — referință/actualizat/ofertă/folosit, cu sursă și dată' },
@@ -507,7 +508,7 @@ const RAPORT_INFO = {
       { ico: '📄', txt: 'Export F1-F5 + Deviz pe obiect + Deviz general HG907 (ZIP)' },
       { ico: '📊', txt: 'Card de investiție: valoare/executat/plătit/progres financiar' },
     ],
-    nu: ['Bibliotecă de norme complete (RpS/C/TS, 82 indicatori istorici) — licențierea unei baze comerciale complete e o decizie separată; azi se importă din proiectarea proprie sau din fișier extern, nu o listă exhaustivă de norme românești', 'Fișierele de relevee se atașează ca metadate+cantități (fără parsing automat DWG/OCR)', 'Necesită persistență Supabase — rulați o dată js/urbanx-devize-pro-schema.sql în SQL Editor'],
+    nu: ['Bibliotecă de norme complete (RpS/C/TS, 82 indicatori istorici) — licențierea unei baze comerciale complete e o decizie separată; azi se importă din proiectarea proprie sau din fișier extern, nu o listă exhaustivă de norme românești', 'DWG (binar, proprietar Autodesk) nu se poate citi direct — convertiți la DXF întâi (mesaj clar în aplicație)', 'OCR pe imagini/PDF scanate = încredere scăzută prin natura tehnologiei — candidații apar nebifați implicit, necesită confirmare rând cu rând', 'Necesită persistență Supabase — rulați o dată js/urbanx-devize-pro-schema.sql în SQL Editor'],
   },
   plati: {
     ico: '💳', label: 'Plăți taxe urbanistice', badge: 'recomandat', badgeLabel: 'Administrație · fiscal', color: '34,197,94',

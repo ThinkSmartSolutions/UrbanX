@@ -169,5 +169,7 @@
     ov.appendChild(wrap); document.body.appendChild(ov);
   }
 
-  G.UXIngest = { parseDXF: parseDXF, extractCU: extractCU, extractGeo: extractGeo, open: open };
+  // expus și pt modulul Devize & Cost Management (relevee — extragere text din PDF, aceeași
+  // înfășurare pdf.js deja verificată aici) — NU se duplică wiring-ul CDN/worker în alt fișier.
+  G.UXIngest = { parseDXF: parseDXF, extractCU: extractCU, extractGeo: extractGeo, open: open, extractTextFromFile: _extrageTextDinFisier };
 })(window);
