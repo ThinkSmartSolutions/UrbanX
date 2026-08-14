@@ -25,40 +25,67 @@
   function uuid() { try { return crypto.randomUUID(); } catch (e) { return 'id' + Date.now() + '_' + Math.random().toString(36).slice(2, 10); } }
   function nowIso() { return new Date().toISOString(); }
 
-  // Coadă locală pt operații care nu au putut ajunge la Supabase (offline/eroare) —
-  // sincronizată manual sau la următorul apel reușit. Suportă cerința 5bis (offline șantier).
+  // Coadă locală pt operații care nu au putut ajunge la Supabase (offline/eroare/schema
+  // încă nerulată) — sincronizată la reconectare. Suportă cerința 5bis (offline șantier).
   var QKEY = 'ux_devize_offline_queue_v1';
   function queueGet() { try { return JSON.parse(localStorage.getItem(QKEY) || '[]'); } catch (e) { return []; } }
   function queueSet(a) { try { localStorage.setItem(QKEY, JSON.stringify(a)); } catch (e) {} }
   function queuePush(op) { var a = queueGet(); a.push(Object.assign({ ts: Date.now() }, op)); queueSet(a); }
 
+  // OGLINDĂ LOCALĂ (cache pe tabel) — fără ea, sbSelect ar întoarce mereu [] cât timp
+  // Supabase e indisponibil sau schema nu a fost încă rulată, deși sbInsert ACCEPTĂ scrierea
+  // (o pune în coadă). Rezultat fără oglindă: un proiect/articol creat DISPARE la următorul
+  // re-render al UI-ului. Cu oglinda, citirile rămân corecte local până la sincronizare.
+  var MKEY = 'ux_devize_local_mirror_v1';
+  function mirrorGet() { try { return JSON.parse(localStorage.getItem(MKEY) || '{}'); } catch (e) { return {}; } }
+  function mirrorSet(m) { try { localStorage.setItem(MKEY, JSON.stringify(m)); } catch (e) {} }
+  function mirrorUpsert(table, row) { var m = mirrorGet(); var a = m[table] || []; var i = a.findIndex(function (r) { return r.id === row.id; }); if (i >= 0) a[i] = Object.assign({}, a[i], row); else a.push(row); m[table] = a; mirrorSet(m); }
+  function mirrorRemove(table, id) { var m = mirrorGet(); m[table] = (m[table] || []).filter(function (r) { return r.id !== id; }); mirrorSet(m); }
+  function mirrorRows(table, filters) {
+    var rows = (mirrorGet()[table] || []);
+    (filters || []).forEach(function (f) { if (!f.op || f.op === 'eq') rows = rows.filter(function (r) { return r[f.col] === f.val; }); });
+    return rows;
+  }
+
   // wrapper generic peste supabase-js: table+method, cu fallback la coadă offline pt scrieri
+  // + oglindă locală (mereu actualizată, indiferent dacă scrierea a mers direct sau a intrat în coadă)
   function sbInsert(table, row) {
+    mirrorUpsert(table, row);
     var s = sb();
     if (!s) { queuePush({ op: 'insert', table: table, row: row }); return Promise.resolve(Object.assign({ _offline: true }, row)); }
     return s.from(table).insert(row).select().then(function (res) {
       if (res.error) { queuePush({ op: 'insert', table: table, row: row }); return Object.assign({ _offline: true, _error: res.error.message }, row); }
-      return (res.data && res.data[0]) || row;
+      var saved = (res.data && res.data[0]) || row; mirrorUpsert(table, saved); return saved;
     }).catch(function (e) { queuePush({ op: 'insert', table: table, row: row }); return Object.assign({ _offline: true, _error: e.message }, row); });
   }
   function sbUpdate(table, id, patch) {
+    mirrorUpsert(table, Object.assign({ id: id }, patch));
     var s = sb();
     if (!s) { queuePush({ op: 'update', table: table, id: id, patch: patch }); return Promise.resolve(Object.assign({ id: id, _offline: true }, patch)); }
     return s.from(table).update(patch).eq('id', id).select().then(function (res) {
       if (res.error) { queuePush({ op: 'update', table: table, id: id, patch: patch }); return Object.assign({ id: id, _offline: true }, patch); }
-      return (res.data && res.data[0]) || Object.assign({ id: id }, patch);
+      var saved = (res.data && res.data[0]) || Object.assign({ id: id }, patch); mirrorUpsert(table, saved); return saved;
     }).catch(function () { queuePush({ op: 'update', table: table, id: id, patch: patch }); return Object.assign({ id: id, _offline: true }, patch); });
   }
   function sbDelete(table, id) {
+    mirrorRemove(table, id);
     var s = sb();
     if (!s) { queuePush({ op: 'delete', table: table, id: id }); return Promise.resolve({ id: id, _offline: true }); }
     return s.from(table)['delete']().eq('id', id).then(function (res) { return res.error ? { id: id, _error: res.error.message } : { id: id }; }).catch(function (e) { return { id: id, _error: e.message }; });
   }
+  // citire: interoghează Supabase (dacă disponibil) + COMBINĂ cu oglinda locală, deduplicat pe
+  // id (varianta din Supabase câștigă la conflict, fiind sursa autoritativă odată sincronizată)
   function sbSelect(table, filters) {
-    var s = sb(); if (!s) return Promise.resolve([]);
+    var local = mirrorRows(table, filters);
+    var s = sb();
+    if (!s) return Promise.resolve(local);
     var q = s.from(table).select('*');
     (filters || []).forEach(function (f) { q = q[f.op || 'eq'](f.col, f.val); });
-    return q.then(function (res) { return res.error ? [] : (res.data || []); }).catch(function () { return []; });
+    return q.then(function (res) {
+      var remote = res.error ? [] : (res.data || []);
+      var byId = {}; local.forEach(function (r) { byId[r.id] = r; }); remote.forEach(function (r) { byId[r.id] = r; });
+      return Object.keys(byId).map(function (k) { return byId[k]; });
+    }).catch(function () { return local; });
   }
   function syncOfflineQueue() {
     var s = sb(); if (!s) return Promise.resolve(0);
