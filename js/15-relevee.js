@@ -6127,11 +6127,14 @@ async function _rvOpen(){
     });
     document.title='WIRED-OK|RV';
   },800);
-  // CSS nuclear: doar modala primește click-uri, tot restul ignorat
+  // CSS nuclear: doar modala primește click-uri, tot restul ignorat.
+  // Excludem explicit și #uxdp-overlay (modalul Devize & Cost Management, js/urbanx-devize-pro-ui.js) —
+  // altfel Devize rămâne vizibil deasupra (z-index câștigă) dar neclickabil (pointer-events:none!important
+  // blochează orice element care nu e #rv-modal), bug găsit prin test live cu click real (CDP Input).
   if(!document.getElementById('rv-pe-override')){
     const s=document.createElement('style');
     s.id='rv-pe-override';
-    s.textContent='*:not(#rv-modal):not(#rv-modal *){pointer-events:none!important}';
+    s.textContent='*:not(#rv-modal):not(#rv-modal *):not(#uxdp-overlay):not(#uxdp-overlay *){pointer-events:none!important}';
     document.head.appendChild(s);
   }
   _RV.open=true;

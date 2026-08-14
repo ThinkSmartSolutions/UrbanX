@@ -10,7 +10,17 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function lei(n) { return Math.round(n || 0).toLocaleString('ro-RO'); }
   var ST = {
-    overlay: 'position:fixed;inset:0;background:rgba(2,6,16,.72);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)',
+    // z-index MAXIM (2147483647 — 2^31-1, valoarea absolută maximă suportată) — găsit prin test live
+    // că js/15-relevee.js (_rvOpen, linia ~6088) forțează exact ACEASTĂ valoare pe #rv-modal când
+    // panoul de Planșe rămâne deschis, învingând orice z-index mai mic (1000010 nu era suficient).
+    // La egalitate de z-index, ordinea din DOM decide — elementul adăugat ULTIMUL (Devize, deschis
+    // după Planșe) câștigă corect, exact comportamentul așteptat pt un modal deschis mai recent.
+    // pointer-events:auto EXPLICIT e obligatoriu (nu doar z-index): _rvOpen injectează o regulă
+    // globală `*{pointer-events:none!important}` cu excepție doar pt #rv-modal — id-ul nostru
+    // #uxdp-overlay e exceptat explicit acolo, dar pointer-events se MOȘTENEȘTE, iar <body> (părinte)
+    // rămâne blocat de acea regulă; fără o valoare proprie declarată aici, overlay-ul moștenea 'none'
+    // de la body și rămânea vizibil dar total neclickabil — găsit prin test live cu click real (CDP).
+    overlay: 'position:fixed;inset:0;background:rgba(2,6,16,.72);z-index:2147483647;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);pointer-events:auto',
     modal: 'background:#0b1424;color:#e6edf7;width:min(920px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(56,189,148,.4);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:system-ui,sans-serif',
     head: 'padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0b1424;z-index:2',
     body: 'padding:16px 20px',
@@ -25,7 +35,8 @@
   var State = { proiectId: null, obiectId: null, tab: 'proiecte' };
 
   function openPanel() {
-    var ov = el('div', { style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+    var old = document.getElementById('uxdp-overlay'); if (old) old.remove();
+    var ov = el('div', { id: 'uxdp-overlay', style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
     var m = el('div', { style: ST.modal });
     var head = el('div', { style: ST.head });
     head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">💰 UrbanX Devize & Cost Management</div><div style="font-size:11px;color:#94a3b8">Proiect → Obiecte → Articole → Resurse → Prețuri → Ofertare → Contract → Situații de lucrări → Decontare</div>'));
