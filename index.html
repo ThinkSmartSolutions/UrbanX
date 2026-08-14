@@ -1390,12 +1390,16 @@ document.addEventListener('click', function(){
   </div>
   <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">🏘 Proiectare (parcelă / ansamblu) <span class="fa-cv">▼</span></button>
   <div class="fa-body" style="display:none">
-    <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
-    <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
-    <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">📐 Planșe & Proiect preliminar PAC</button>
+    <div style="padding:4px 8px;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.04em">Secvență normală (o clădire obișnuită)</div>
+    <button class="fa-i" style="color:#e8b341;font-weight:700" onclick="(typeof aedisOpen==='function'?aedisOpen():ss?.('AEDIS se inițializează'));_closeAllMenus()">1️⃣ ⚡ Generează volum 3D (Urban3D/AEDIS)</button>
+    <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateRelevee==='function'?generateRelevee():ss?.('Planșe se inițializează'));_closeAllMenus()">2️⃣ 📐 Planșe & Proiect preliminar PAC</button>
+    <button class="fa-i ux-doc-gen-btn" style="color:#c4b5fd" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));_closeAllMenus()">3️⃣ 📑 Generator Documentații Tehnice (DTAC/PTh)</button>
+    <div style="padding:6px 8px 2px;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Obiecte speciale (înlocuiesc pasul 1️⃣ de mai sus)</div>
     <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaHala?proiecteazaHala():ss?.('Se inițializează'));_closeAllMenus()">🏭 Proiectează hală industrială (3D)</button>
     <button class="fa-i" style="color:#94a3b8" onclick="(window.proiecteazaSkid?proiecteazaSkid():ss?.('Se inițializează'));_closeAllMenus()">🛢 Proiectează SKID GPL (3D)</button>
-    <button class="fa-i ux-doc-gen-btn" style="color:#c4b5fd" onclick="(window.UXDoc&&UXDoc.openPanel?UXDoc.openPanel():ss?.('Se inițializează'));_closeAllMenus()">📑 Generator Documentații Tehnice</button>
+    <div style="padding:6px 8px 2px;font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.04em;border-top:1px solid rgba(255,255,255,.06);margin-top:4px">Altele</div>
+    <button id="btnLotizare" class="fa-i" style="color:#a78bfa" onclick="toggleLotizare();_closeAllMenus()">🏘 Plan de lotizare (generare loturi)</button>
+    <button class="fa-i" style="color:#a78bfa" onclick="(window.Ansamblu&&Ansamblu.openWizard?Ansamblu.openWizard():ss?.('Ansamblu se inițializează'));_closeAllMenus()">🏘️ Masterplan ansamblu (lotizare ghidată)</button>
     <button class="fa-i" style="color:#e2e8f0" onclick="(typeof generateMemoriu==='function'?generateMemoriu():ss?.('Memoriu se inițializează'));_closeAllMenus()">🏗 Memoriu tehnic avize</button>
   </div>
   <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">💰 Investiție pe parcelă <span class="fa-cv">▼</span></button>
@@ -1404,6 +1408,7 @@ document.addEventListener('click', function(){
     <button class="fa-i" style="color:#86efac" onclick="(window.Invest&&Invest.openPanel?Invest.openPanel():ss?.('Investment se inițializează'));_closeAllMenus()">📊 Investment Score</button>
     <button class="fa-i" style="color:#86efac" onclick="(window.Portfolio&&Portfolio.openPanel?Portfolio.openPanel():ss?.('Portfolio se inițializează'));_closeAllMenus()">🗂 Portfolio Due Diligence</button>
     <button class="fa-i" style="color:#86efac" onclick="(window.LVC&&LVC.openPanel?LVC.openPanel():ss?.('LVC se inițializează'));_closeAllMenus()">📈 Land Value Capture</button>
+    <button class="fa-i" style="color:#0d9488;font-weight:700" onclick="(window.UXDevizePro&&UXDevizePro.openPanel?UXDevizePro.openPanel():ss?.('Devize se inițializează'));_closeAllMenus()">💰 Devize & Cost Management</button>
   </div>
   <button class="fa-gh" onclick="var b=this.nextElementSibling,o=b.style.display==='none';b.style.display=o?'block':'none';this.querySelector('.fa-cv').textContent=o?'▲':'▼'">📋 Avizare <span class="fa-cv">▼</span></button>
   <div class="fa-body" style="display:none">
