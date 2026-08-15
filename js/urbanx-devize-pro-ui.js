@@ -20,16 +20,19 @@
     // #uxdp-overlay e exceptat explicit acolo, dar pointer-events se MOȘTENEȘTE, iar <body> (părinte)
     // rămâne blocat de acea regulă; fără o valoare proprie declarată aici, overlay-ul moștenea 'none'
     // de la body și rămânea vizibil dar total neclickabil — găsit prin test live cu click real (CDP).
+    // Culori UrbanX (aceleași folosite pe login/logo — #16AECB albastru brand, #D4AF37 auriu accent),
+    // NU teal generic — consecvent cu restul platformei și cu documentele Word exportate (vezi
+    // urbanx-devize-docx.js, paleta UX).
     overlay: 'position:fixed;inset:0;background:rgba(2,6,16,.72);z-index:2147483647;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);pointer-events:auto',
-    modal: 'background:#0b1424;color:#e6edf7;width:min(920px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(56,189,148,.4);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:system-ui,sans-serif',
-    head: 'padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0b1424;z-index:2',
+    modal: 'background:#0b1424;color:#e6edf7;width:min(920px,96vw);max-height:92vh;overflow:auto;border:1px solid rgba(22,174,203,.4);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:system-ui,sans-serif',
+    head: 'padding:16px 20px;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#0b1424;z-index:2',
     body: 'padding:16px 20px',
     inp: 'background:#0a1120;border:1px solid rgba(255,255,255,.14);color:#e6edf7;border-radius:8px;padding:7px 9px;font-size:13px;width:100%;box-sizing:border-box',
-    btn: 'background:linear-gradient(180deg,#0d9488,#0f766e);color:#fff;border:0;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:13px',
+    btn: 'background:linear-gradient(180deg,#16aecb,#0e8aa3);color:#fff;border:0;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:13px',
     ghost: 'background:rgba(255,255,255,.06);color:#cbd5e1;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:11px',
-    label: 'font-size:11px;color:#5eead4;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px;font-weight:700',
+    label: 'font-size:11px;color:#16aecb;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px;font-weight:700',
     tab: 'background:transparent;color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11px;font-weight:700',
-    tabOn: 'background:rgba(13,148,136,.22);color:#5eead4;border:1px solid rgba(13,148,136,.5);border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11px;font-weight:700',
+    tabOn: 'background:rgba(22,174,203,.20);color:#5cd2e8;border:1px solid rgba(22,174,203,.55);border-radius:7px;padding:6px 11px;cursor:pointer;font-size:11px;font-weight:700',
     card: 'background:#0a1120;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-bottom:10px'
   };
   var State = { proiectId: null, obiectId: null, tab: 'proiecte' };
@@ -76,16 +79,22 @@
     var newBox = el('div', { style: ST.card });
     newBox.appendChild(el('div', { style: ST.label }, 'Proiect de investiție nou'));
     var grid = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px' });
-    var nume = el('input', { style: ST.inp, placeholder: 'Denumire investiție' });
+    var nume = el('input', { style: ST.inp, placeholder: 'Denumire investiție (Obiectiv)' });
     var uat = el('input', { style: ST.inp, placeholder: 'UAT key (opțional, ex RO-IS-01)' });
     var sursaSel = el('select', { style: ST.inp });
     [['buget_local', 'Buget local'], ['buget_stat', 'Buget de stat'], ['fonduri_ue', 'Fonduri europene'], ['mixt', 'Mixt']].forEach(function (o) { sursaSel.appendChild(el('option', { value: o[0] }, o[1])); });
     grid.appendChild(nume); grid.appendChild(uat); grid.appendChild(sursaSel);
     newBox.appendChild(grid);
+    // Beneficiar/Proiectant — obligatorii pe antetul real F1-F3 (tipar devize.ro/ISDP)
+    var grid2 = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px' });
+    var benefInp = el('input', { style: ST.inp, placeholder: 'Beneficiar (ex. SC Exemplu SRL / Primăria...)' });
+    var proiectantInp = el('input', { style: ST.inp, placeholder: 'Proiectant (ex. SC Birou Arhitectură SRL)' });
+    grid2.appendChild(benefInp); grid2.appendChild(proiectantInp);
+    newBox.appendChild(grid2);
     var addBtn = el('button', { style: ST.btn + ';margin-top:10px' }, '+ Creează proiect');
     addBtn.onclick = function () {
       if (!nume.value.trim()) return;
-      DP.createProiect({ nume: nume.value.trim(), uat_key: uat.value.trim() || null, sursa_finantare: sursaSel.value }).then(function () { paneProiecte(pane); });
+      DP.createProiect({ nume: nume.value.trim(), uat_key: uat.value.trim() || null, sursa_finantare: sursaSel.value, beneficiar: benefInp.value.trim() || null, proiectant: proiectantInp.value.trim() || null }).then(function () { paneProiecte(pane); });
     };
     newBox.appendChild(addBtn);
     pane.appendChild(newBox);
@@ -99,6 +108,7 @@
         var card = el('div', { style: ST.card + (State.proiectId === p.id ? ';border-color:rgba(94,234,212,.6)' : '') });
         card.appendChild(el('div', { style: 'display:flex;justify-content:space-between;align-items:center' },
           '<b>' + esc(p.nume) + '</b><span style="font-size:10px;color:#94a3b8">' + esc(p.sursa_finantare || '') + (p.uat_key ? (' · ' + esc(p.uat_key)) : '') + '</span>'));
+        if (p.beneficiar || p.proiectant) card.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:2px' }, (p.beneficiar ? 'Beneficiar: ' + esc(p.beneficiar) : '') + (p.beneficiar && p.proiectant ? ' · ' : '') + (p.proiectant ? 'Proiectant: ' + esc(p.proiectant) : '')));
         var actions = el('div', { style: 'display:flex;gap:6px;margin-top:8px;flex-wrap:wrap' });
         var selBtn = el('button', { style: ST.ghost }, State.proiectId === p.id ? '✓ Selectat' : 'Selectează');
         selBtn.onclick = function () { State.proiectId = p.id; State.obiectId = null; paneProiecte(pane); };
@@ -131,11 +141,17 @@
     pane.innerHTML = '<div style="color:#64748b;font-size:12px">Se încarcă…</div>';
     DP.listObiecte(State.proiectId).then(function (obiecte) {
       pane.innerHTML = '';
-      var addObBox = el('div', { style: 'display:flex;gap:6px;margin-bottom:10px' });
+      var addObBox = el('div', { style: 'display:grid;grid-template-columns:2fr 1.4fr auto;gap:6px;margin-bottom:6px' });
       var obNume = el('input', { style: ST.inp, placeholder: 'Denumire obiect nou (ex. OBIECT 01 - CONSTRUCȚIE)' });
+      var obStadiu = el('input', { style: ST.inp, placeholder: 'Stadiul fizic (ex. ARHITECTURA, ALEI PIETONALE...)', list: 'ux-stadii-fizice' });
       var obBtn = el('button', { style: ST.btn }, '+ Obiect');
-      obBtn.onclick = function () { if (!obNume.value.trim()) return; DP.createObiect(State.proiectId, { denumire: obNume.value.trim(), cod: String(obiecte.length + 1).padStart(2, '0') }).then(function () { paneArticole(pane); }); };
-      addObBox.appendChild(obNume); addObBox.appendChild(obBtn); pane.appendChild(addObBox);
+      obBtn.onclick = function () { if (!obNume.value.trim()) return; DP.createObiect(State.proiectId, { denumire: obNume.value.trim(), cod: String(obiecte.length + 1).padStart(2, '0'), stadiu_fizic: obStadiu.value.trim() || null }).then(function () { paneArticole(pane); }); };
+      addObBox.appendChild(obNume); addObBox.appendChild(obStadiu); addObBox.appendChild(obBtn); pane.appendChild(addObBox);
+      if (!document.getElementById('ux-stadii-fizice')) {
+        var dl = el('datalist', { id: 'ux-stadii-fizice' });
+        ['ARHITECTURA', 'STRUCTURĂ / REZISTENȚĂ', 'INSTALAȚII', 'AMENAJĂRI EXTERIOARE / ALEI PIETONALE', 'ORGANIZARE DE ȘANTIER'].forEach(function (s) { dl.appendChild(el('option', { value: s })); });
+        document.body.appendChild(dl);
+      }
 
       if (!obiecte.length) { pane.appendChild(el('div', { style: 'color:#64748b;font-size:12px' }, 'Niciun obiect. Creează primul obiect de mai sus.')); return; }
       var obSel = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px' });
@@ -147,6 +163,36 @@
       pane.appendChild(obSel);
       if (!State.obiectId) { State.obiectId = obiecte[0].id; }
       var obiect = obiecte.filter(function (o) { return o.id === State.obiectId; })[0] || obiecte[0];
+
+      // ── Setări deviz pe obiect (= stadiu fizic): CAM legal + indirecte/profit editabile + durată ──
+      var setWrap = el('div', { style: ST.card + ';margin-bottom:10px' });
+      setWrap.appendChild(el('div', { style: ST.label }, '⚙️ Setări deviz — ' + esc(obiect.stadiu_fizic || obiect.denumire)));
+      var setGrid = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px;align-items:end;font-size:11px' });
+      function campNr(label, val, hint) {
+        var wrap = el('div');
+        wrap.appendChild(el('div', { style: 'color:#94a3b8;margin-bottom:3px' }, label + (hint ? ' <span style="color:#64748b">(' + hint + ')</span>' : '')));
+        var inp = el('input', { style: ST.inp, type: 'number', step: '0.01', value: val });
+        wrap.appendChild(inp);
+        return { wrap: wrap, inp: inp };
+      }
+      var cAlte = campNr('Alte chelt. directe %', obiect.alte_cheltuieli_directe_pct != null ? obiect.alte_cheltuieli_directe_pct : 0);
+      var cCam = campNr('CAM %', obiect.cam_pct != null ? obiect.cam_pct : 2.25, 'legal, Cod Fiscal');
+      var cInd = campNr('Chelt. indirecte %', obiect.cheltuieli_indirecte_pct != null ? obiect.cheltuieli_indirecte_pct : 10, 'editabil');
+      var cProf = campNr('Profit %', obiect.profit_pct != null ? obiect.profit_pct : 8, 'editabil');
+      var cDurata = campNr('Durată execuție (zile)', obiect.durata_zile_lucratoare || '', 'pt. FTE manoperă');
+      [cAlte, cCam, cInd, cProf, cDurata].forEach(function (c) { setGrid.appendChild(c.wrap); });
+      setWrap.appendChild(setGrid);
+      var setBtn = el('button', { style: ST.ghost + ';margin-top:8px' }, '💾 Salvează setările');
+      var setOut = el('span', { style: 'font-size:11px;color:#94a3b8;margin-left:8px' });
+      setBtn.onclick = function () {
+        DP.updateObiect(obiect.id, {
+          alte_cheltuieli_directe_pct: +cAlte.inp.value || 0, cam_pct: +cCam.inp.value || 0,
+          cheltuieli_indirecte_pct: +cInd.inp.value || 0, profit_pct: +cProf.inp.value || 0,
+          durata_zile_lucratoare: cDurata.inp.value ? +cDurata.inp.value : null
+        }).then(function () { setOut.textContent = '✅ salvat'; });
+      };
+      setWrap.appendChild(setBtn); setWrap.appendChild(setOut);
+      pane.appendChild(setWrap);
 
       var stdWrap = el('div', { style: 'margin-bottom:10px' });
       var stdLbl = el('div', { style: ST.label }, 'Categorii standard de adăugat (bifează domeniile — acoperă și structură/rezistență, nu doar arhitectură)');
@@ -340,10 +386,31 @@
       });
     };
 
-    function renderReview(r, file) {
-      reviewWrap.innerHTML = '';
+    // ── Antemăsurătoare pe cameră (Excel real de proiectant — format pivot, altul decât CSV simplu) ──
+    pane.appendChild(el('div', { style: ST.label + ';margin-top:16px' }, 'sau Antemăsurătoare pe cameră (Excel: Nr/Destinație/Suprafață + o coloană per tip element)'));
+    pane.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:6px' },
+      'Citește tabelul pivot pe cameră (însumează fiecare tip de element — zidărie, ferestre, uși, tavane — pe toate camerele) ȘI orice sub-tabel „NR CRT / ACTIVITATE / UM / CANTITATE" pe stadiu fizic (ex. amenajări exterioare). Cantitățile din tabelul pivot sunt <b>estimate cu încredere medie</b> (UM asumat mp) — verifică-le înainte de import; cele din sub-tabelele cu activități au UM explicit din fișier, încredere ridicată.'));
+    var antemFileInp = el('input', { type: 'file', accept: '.xlsx,.xls', style: ST.inp });
+    pane.appendChild(antemFileInp);
+    var antemOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin:8px 0' });
+    var antemReviewWrap = el('div');
+    pane.appendChild(antemOut); pane.appendChild(antemReviewWrap);
+    antemFileInp.onchange = function () {
+      var f = antemFileInp.files && antemFileInp.files[0]; if (!f) return;
+      antemReviewWrap.innerHTML = '';
+      antemOut.textContent = '⏳ Se citește antemăsurătoarea „' + f.name + '"…';
+      PR.parseAntemasuratoareXLSX(f).then(function (r) {
+        if (!r.candidati.length) { antemOut.innerHTML = '⚠ Niciun candidat identificat — verifică dacă fișierul are un rând de antet cu „Destinație" (tabel pe cameră) sau „NR CRT/ACTIVITATE/UM/CANTITATE" (tabel activități).'; return; }
+        antemOut.innerHTML = '✅ ' + r.candidati.length + ' candidați identificați din antemăsurătoare. Revizuiește și bifează ce vrei să imporți:';
+        renderReview(r, f, antemReviewWrap);
+      }).catch(function (e) { antemOut.innerHTML = '⚠ ' + (e && e.message || 'Eroare la citirea fișierului.'); });
+    };
+
+    function renderReview(r, file, targetWrap) {
+      targetWrap = targetWrap || reviewWrap;
+      targetWrap.innerHTML = '';
       var incredereColor = { ridicata: '#34d399', medie: '#fbbf24', scazuta: '#f87171' };
-      var incredereLabel = { ridicata: 'geometrie/CSV reală', medie: 'text extras din PDF', scazuta: 'OCR — verifică atent' };
+      var incredereLabel = { ridicata: 'geometrie/CSV/tabel activități — reală', medie: 'estimat/extras (verifică)', scazuta: 'OCR — verifică atent' };
       var tabel = el('div', { style: 'max-height:320px;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px' });
       r.candidati.forEach(function (c, i) {
         var row = el('div', { style: 'display:flex;align-items:center;gap:8px;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px' });
@@ -354,7 +421,7 @@
         row.appendChild(el('span', { style: 'color:' + (incredereColor[c.incredere] || '#94a3b8') + ';width:140px;font-size:10px' }, incredereLabel[c.incredere] || c.incredere));
         tabel.appendChild(row);
       });
-      reviewWrap.appendChild(tabel);
+      targetWrap.appendChild(tabel);
 
       var confirmRow = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-top:10px' });
       var catSel = el('select', { style: ST.inp + ';max-width:260px' });
@@ -369,10 +436,10 @@
       confirmRow.appendChild(catSel);
       var importBtn = el('button', { style: ST.btn }, '✅ Importă selectate ca articole (relevat)');
       confirmRow.appendChild(importBtn);
-      reviewWrap.appendChild(confirmRow);
+      targetWrap.appendChild(confirmRow);
 
       var doneOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px' });
-      reviewWrap.appendChild(doneOut);
+      targetWrap.appendChild(doneOut);
 
       importBtn.onclick = function () {
         var selectate = r.candidati.filter(function (c) { return c.selectat; });

@@ -171,6 +171,97 @@
     return xlsxToCSV(file).then(parseCSVRelevee);
   }
 
+  // ── 6. Antemăsurătoare pe cameră (Excel real de proiectant) ──────────────────────────
+  // Tipar real observat: (a) un tabel PIVOT pe cameră — coloane Nr/Destinație/Suprafață/
+  // Perimetru/Înălțime urmate de o coloană PER TIP DE ELEMENT (ZIDĂRIE GVP 30, FERESTRE EXT
+  // PVC, TAVAN GIPS CARTON...) cu suprafața (mp) acelui element în camera respectivă — se
+  // însumează pe coloană → o cantitate per tip de element, peste toate camerele; (b) sub-
+  // tabele FLATE, per stadiu fizic (ex. "ALEI PIETONALE - BETON ARMAT"), cu antet NR CRT/
+  // ACTIVITATE/UM/CANTITATE — acestea au deja UM+cantitate explicite, încredere ridicată.
+  // Regex, NU listă exactă — antetele reale au sufixe de unitate ("Suprafata - mp", "Perimetru - m ")
+  // care nu se potriveau niciodată exact cu o listă de cuvinte simple (bug găsit testând fișierul real).
+  var RE_COLOANA_METADATA_CAMERA = /^(nr\.?\/?no\.?|destinatie|destinație|suprafata|suprafață|perimetru|inaltime|înălțime)\b/i;
+  function parseAntemasuratoareXLSX(file) {
+    return _asteaptaScript(function () { return !!G.XLSX; }, XLSX_CDN, 25000).then(function () {
+      return file.arrayBuffer();
+    }).then(function (buf) {
+      var wb = G.XLSX.read(buf, { type: 'array' });
+      var foaie = wb.Sheets[wb.SheetNames[0]];
+      var randuri = G.XLSX.utils.sheet_to_json(foaie, { header: 1, raw: true, defval: null });
+      var candidati = [];
+
+      // (a) tabel pivot pe cameră: caut rândul de antet (conține "destinatie"/"destinație")
+      var idxAntetCamera = -1;
+      for (var i = 0; i < randuri.length; i++) {
+        var r = randuri[i];
+        if (r.some(function (c) { return /destinatie|destinație/i.test(_celToText(c)); })) { idxAntetCamera = i; break; }
+      }
+      if (idxAntetCamera >= 0) {
+        var antet = randuri[idxAntetCamera].map(_celToText);
+        var suprafataColIdx = antet.findIndex(function (h) { return /suprafata|suprafață/i.test(h); });
+        var coloaneElement = []; // {idx, denumire}
+        antet.forEach(function (h, idx) {
+          if (!h || RE_COLOANA_METADATA_CAMERA.test(h.trim())) return;
+          coloaneElement.push({ idx: idx, denumire: h.trim() });
+        });
+        var sumeElement = {}; // denumire -> total mp
+        var sumePardoseliPereteTavan = { pardoseli: {}, pereti: {}, tavane: {} };
+        var COL_PARDOSELI = antet.findIndex(function (h) { return /^pardoseli/i.test(h); });
+        var COL_PERETI = antet.findIndex(function (h) { return /finisaj\s*perete|finisaj\s*pereti/i.test(h); });
+        var COL_TAVANE = antet.findIndex(function (h) { return /finisaj\s*tavan/i.test(h); });
+        for (var ri = idxAntetCamera + 1; ri < randuri.length; ri++) {
+          var row = randuri[ri];
+          if (!row || !row.length || row.every(function (c) { return c == null || c === ''; })) break; // secțiune terminată
+          var suprafataCamera = suprafataColIdx >= 0 ? parseFloat(row[suprafataColIdx]) || 0 : 0;
+          coloaneElement.forEach(function (c) {
+            var v = row[c.idx];
+            if (typeof v === 'number' && v > 0) sumeElement[c.denumire] = (sumeElement[c.denumire] || 0) + v;
+          });
+          if (COL_PARDOSELI >= 0 && row[COL_PARDOSELI]) { var pk = _celToText(row[COL_PARDOSELI]); sumePardoseliPereteTavan.pardoseli[pk] = (sumePardoseliPereteTavan.pardoseli[pk] || 0) + suprafataCamera; }
+          if (COL_TAVANE >= 0 && row[COL_TAVANE]) { var tk = _celToText(row[COL_TAVANE]); sumePardoseliPereteTavan.tavane[tk] = (sumePardoseliPereteTavan.tavane[tk] || 0) + suprafataCamera; }
+        }
+        Object.keys(sumeElement).forEach(function (den) {
+          candidati.push({ denumire: den, cantitate: Math.round(sumeElement[den] * 1000) / 1000, um: 'mp', sursa: 'antemăsurătoare — tabel pe cameră (însumat)', incredere: 'medie', selectat: true });
+        });
+        Object.keys(sumePardoseliPereteTavan.pardoseli).forEach(function (den) {
+          candidati.push({ denumire: 'Pardoseală: ' + den, cantitate: Math.round(sumePardoseliPereteTavan.pardoseli[den] * 1000) / 1000, um: 'mp', sursa: 'antemăsurătoare — grupat după tip pardoseală', incredere: 'medie', selectat: true });
+        });
+        Object.keys(sumePardoseliPereteTavan.tavane).forEach(function (den) {
+          candidati.push({ denumire: 'Tavan: ' + den, cantitate: Math.round(sumePardoseliPereteTavan.tavane[den] * 1000) / 1000, um: 'mp', sursa: 'antemăsurătoare — grupat după tip tavan', incredere: 'medie', selectat: true });
+        });
+      }
+
+      // (b) sub-tabele flate pe stadiu fizic: antet "NR CRT / ACTIVITATE / UM / CANTITATE"
+      for (var k = 0; k < randuri.length; k++) {
+        var rk = randuri[k].map(_celToText);
+        var areNrCrt = rk.some(function (c) { return /^nr\s*crt/i.test(c); });
+        var areActivitate = rk.some(function (c) { return /^activitate/i.test(c); });
+        var areUm = rk.some(function (c) { return /^um$/i.test(c); });
+        var areCant = rk.some(function (c) { return /^cantitate/i.test(c); });
+        if (!(areNrCrt && areActivitate && areUm && areCant)) continue;
+        var idxActivitate = rk.findIndex(function (c) { return /^activitate/i.test(c); });
+        var idxUm = rk.findIndex(function (c) { return /^um$/i.test(c); });
+        var idxCant = rk.findIndex(function (c) { return /^cantitate/i.test(c); });
+        // titlul secțiunii (stadiul fizic) e de obicei 1-2 rânduri mai sus, coloana cu text
+        var titluStadiu = '';
+        for (var back = k - 1; back >= Math.max(0, k - 3); back--) {
+          var textRand = randuri[back].find(function (c) { return typeof c === 'string' && c.trim().length > 3; });
+          if (textRand) { titluStadiu = textRand.trim(); break; }
+        }
+        for (var m = k + 1; m < randuri.length; m++) {
+          var rowM = randuri[m];
+          if (!rowM || !rowM.length || rowM.every(function (c) { return c == null || c === ''; })) break;
+          var denumireM = _celToText(rowM[idxActivitate]);
+          var cantitateM = parseFloat(rowM[idxCant]);
+          if (!denumireM || !cantitateM) continue;
+          candidati.push({ denumire: (titluStadiu ? titluStadiu + ' — ' : '') + denumireM, cantitate: cantitateM, um: _celToText(rowM[idxUm]).toLowerCase() || 'buc', sursa: 'antemăsurătoare — tabel activități' + (titluStadiu ? ' (' + titluStadiu + ')' : ''), incredere: 'ridicata', selectat: true });
+        }
+      }
+
+      return { niveluri: [], candidati: candidati, poligoane_gasite: null };
+    });
+  }
+
   // ── Dispecer după extensie ────────────────────────────────────────────────
   function parseFisier(file, onProgress) {
     var ext = (file.name || '').split('.').pop().toLowerCase();
@@ -191,7 +282,7 @@
   G.UXDevizeRelevee = {
     parseCSVRelevee: parseCSVRelevee, parseDXFRelevee: parseDXFRelevee, parseTextPDF: parseTextPDF,
     parseImagineOCR: parseImagineOCR, parseFisier: parseFisier, extrageCandidati: extrageCandidati,
-    xlsxToCSV: xlsxToCSV, parseXLSXRelevee: parseXLSXRelevee
+    xlsxToCSV: xlsxToCSV, parseXLSXRelevee: parseXLSXRelevee, parseAntemasuratoareXLSX: parseAntemasuratoareXLSX
   };
   console.log('[UXDevizeRelevee] parsing real relevee (CSV/XLSX/DXF/PDF text/OCR imagine) — window.UXDevizeRelevee');
 })(window);

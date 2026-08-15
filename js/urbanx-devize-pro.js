@@ -109,14 +109,25 @@
   function listProiecte() { return sbSelect('deviz_proiecte').then(function (a) { return a.sort(function (x, y) { return new Date(y.created_at) - new Date(x.created_at); }); }); }
   function getProiect(id) { return sbSelect('deviz_proiecte', [{ col: 'id', val: id }]).then(function (a) { return a[0] || null; }); }
   function createProiect(p) {
-    var row = { id: uuid(), nume: p.nume || 'Proiect nou', uat_key: p.uat_key || null, sursa_finantare: p.sursa_finantare || 'buget_local', status: 'activ', parcel_centroid: p.parcel_centroid || null, created_by: userEmail(), created_at: nowIso(), updated_at: nowIso() };
+    var row = { id: uuid(), nume: p.nume || 'Proiect nou', uat_key: p.uat_key || null, sursa_finantare: p.sursa_finantare || 'buget_local', status: 'activ', parcel_centroid: p.parcel_centroid || null, beneficiar: p.beneficiar || null, proiectant: p.proiectant || null, created_by: userEmail(), created_at: nowIso(), updated_at: nowIso() };
     return sbInsert('deviz_proiecte', row).then(function (r) { logAudit({ entitate: 'proiect', entitate_id: row.id, camp_modificat: '(creare)', valoare_noua: row.nume }); return r; });
   }
   function updateProiect(id, patch) { return sbUpdate('deviz_proiecte', id, Object.assign({ updated_at: nowIso() }, patch)); }
 
   function listObiecte(proiectId) { return sbSelect('deviz_obiecte', [{ col: 'proiect_id', val: proiectId }]).then(function (a) { return a.sort(function (x, y) { return (x.ordine || 0) - (y.ordine || 0); }); }); }
+  // stadiu_fizic — tiparul real F3 (devize.ro/ISDP): un "obiect" corespunde de fapt unui STADIU FIZIC
+  // (ex. ARHITECTURA, ALEI PIETONALE, ORGANIZARE DE ȘANTIER) — fiecare cu propriul F3 + subsol de
+  // cheltuieli. cam_pct = 2.25% legal (Codul Fiscal, contribuție asiguratorie pentru muncă, pe
+  // manoperă) — NU se editează normal. cheltuieli_indirecte_pct/profit_pct NU sunt fixate legal —
+  // sunt decizii de antreprenor, valori implicite orientative, editabile.
   function createObiect(proiectId, o) {
-    var row = { id: uuid(), proiect_id: proiectId, cod: o.cod || '', denumire: o.denumire || 'Obiect', ordine: o.ordine || 0, created_at: nowIso() };
+    var row = {
+      id: uuid(), proiect_id: proiectId, cod: o.cod || '', denumire: o.denumire || 'Obiect', ordine: o.ordine || 0,
+      stadiu_fizic: o.stadiu_fizic || null, alte_cheltuieli_directe_pct: o.alte_cheltuieli_directe_pct != null ? +o.alte_cheltuieli_directe_pct : 0,
+      cam_pct: o.cam_pct != null ? +o.cam_pct : 2.25, cheltuieli_indirecte_pct: o.cheltuieli_indirecte_pct != null ? +o.cheltuieli_indirecte_pct : 10,
+      profit_pct: o.profit_pct != null ? +o.profit_pct : 8, durata_zile_lucratoare: o.durata_zile_lucratoare != null ? +o.durata_zile_lucratoare : null,
+      created_at: nowIso()
+    };
     return sbInsert('deviz_obiecte', row);
   }
   function listCategorii(obiectId) { return sbSelect('deviz_categorii', [{ col: 'obiect_id', val: obiectId }]).then(function (a) { return a.sort(function (x, y) { return (x.ordine || 0) - (y.ordine || 0); }); }); }
@@ -391,9 +402,15 @@
     });
   }
 
-  // Deviz pe obiect (Anexa 8 HG907/2016) — categorii → articole → cost
+  function getObiect(id) { return sbSelect('deviz_obiecte', [{ col: 'id', val: id }]).then(function (a) { return a[0] || null; }); }
+  function updateObiect(id, patch) { return sbUpdate('deviz_obiecte', id, patch); }
+
+  // Deviz pe obiect (Anexa 8 HG907/2016) — categorii → articole → cost, PLUS subsolul real de
+  // cheltuieli (tiparul F3 devize.ro/ISDP): Cheltuieli directe → Alte cheltuieli directe → CAM
+  // (2.25% legal pe manoperă, Codul Fiscal) → Cheltuieli indirecte → Profit → TOTAL GENERAL.
   function computeDevizObiect(obiectId) {
-    return listCategorii(obiectId).then(function (categorii) {
+    return Promise.all([listCategorii(obiectId), getObiect(obiectId)]).then(function (r) {
+      var categorii = r[0], obiect = r[1] || {};
       return Promise.all(categorii.map(function (cat) {
         return listArticole(cat.id).then(function (articole) {
           return Promise.all(articole.map(function (a) { return costArticol(a).then(function (c) { return Object.assign({ articol: a }, c); }); }))
@@ -404,7 +421,32 @@
         });
       })).then(function (cats) {
         var total = cats.reduce(function (s, c) { return s + c.subtotal; }, 0);
-        return { obiect_id: obiectId, categorii: cats, total: total };
+        var pe4 = { materiale: 0, manopera: 0, utilaj: 0, transport: 0 };
+        cats.forEach(function (c) { c.articole.forEach(function (a) { pe4.materiale += a.materiale; pe4.manopera += a.manopera; pe4.utilaj += a.utilaj; pe4.transport += a.transport; }); });
+        var altePct = obiect.alte_cheltuieli_directe_pct != null ? +obiect.alte_cheltuieli_directe_pct : 0;
+        var camPct = obiect.cam_pct != null ? +obiect.cam_pct : 2.25;
+        var indPct = obiect.cheltuieli_indirecte_pct != null ? +obiect.cheltuieli_indirecte_pct : 10;
+        var profPct = obiect.profit_pct != null ? +obiect.profit_pct : 8;
+        var cotaTva = (G.UXDevize && G.UXDevize.PRETURI && G.UXDevize.PRETURI._meta && G.UXDevize.PRETURI._meta.cota_tva) || 0.21;
+        var cheltuieliDirecte = total;
+        var alteCheltuieliDirecte = cheltuieliDirecte * altePct / 100;
+        var cam = pe4.manopera * camPct / 100; // CAM se aplică STRICT pe manoperă, conform legii
+        var bazaIndirecte = cheltuieliDirecte + alteCheltuieliDirecte + cam;
+        var cheltuieliIndirecte = bazaIndirecte * indPct / 100;
+        var bazaProfit = bazaIndirecte + cheltuieliIndirecte;
+        var profit = bazaProfit * profPct / 100;
+        var totalGeneralFaraTva = bazaProfit + profit;
+        var tva = totalGeneralFaraTva * cotaTva;
+        var totalGeneral = totalGeneralFaraTva + tva;
+        return {
+          obiect_id: obiectId, categorii: cats, total: total, pe4: pe4,
+          subsol: {
+            altePct: altePct, camPct: camPct, indPct: indPct, profPct: profPct, cotaTva: cotaTva,
+            cheltuieliDirecte: cheltuieliDirecte, alteCheltuieliDirecte: alteCheltuieliDirecte, cam: cam,
+            cheltuieliIndirecte: cheltuieliIndirecte, profit: profit, totalGeneralFaraTva: totalGeneralFaraTva,
+            tva: tva, totalGeneral: totalGeneral
+          }
+        };
       });
     });
   }
@@ -629,98 +671,51 @@
   // Reutilizează G.UXDocBuilder.docHtml (același stil vizual ca restul platformei)
   // ══════════════════════════════════════════════════════════════════════════
   function _esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  // celulă cu HTML propriu (ex. bold) marcată explicit ca sigură — restul cerulelor rămân escapate
+  // normal (protecție XSS pe denumiri introduse de utilizator, care pot conține caractere < / >).
+  function _safe(html) { return { __safe: true, html: html }; }
+  function _cellHtml(c) { return (c && typeof c === 'object' && c.__safe) ? c.html : _esc(c); }
   function _tbl(rows, head) {
-    var h = head ? ('<tr>' + head.map(function (c) { return '<th>' + _esc(c) + '</th>'; }).join('') + '</tr>') : '';
-    var b = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + _esc(c) + '</td>'; }).join('') + '</tr>'; }).join('');
+    var h = head ? ('<tr>' + head.map(function (c) { return '<th>' + _cellHtml(c) + '</th>'; }).join('') + '</tr>') : '';
+    var b = rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + _cellHtml(c) + '</td>'; }).join('') + '</tr>'; }).join('');
     return '<table>' + h + b + '</table>';
   }
   function _lei(n) { return Math.round(n || 0).toLocaleString('ro-RO'); }
 
+  // Tiparul REAL F3 (devize.ro/ISDP): rând articol cu Material/Manoperă/Transport/Utilaj ca 4
+  // coloane separate (nu subsecțiune) + subsol Cheltuieli directe→Alte→CAM→Indirecte→Profit→TVA.
   function htmlDevizObiect(devizObiect, obiect) {
-    var rows = [];
+    var rows = []; var nrCap = 0;
     devizObiect.categorii.forEach(function (cat) {
-      rows.push(['', '<b>' + _esc(cat.categorie.denumire) + '</b>', '', '']);
-      cat.articole.forEach(function (c) {
-        rows.push([c.articol.cod || '', c.articol.denumire, c.articol.cantitate + ' ' + c.articol.um, _lei(c.total)]);
+      nrCap++;
+      rows.push([_safe('<b>' + nrCap + '</b>'), _safe('<b>' + _esc(cat.categorie.denumire.toUpperCase()) + '</b>'), '', '', '', '', '', '', '', '']);
+      cat.articole.forEach(function (c, i) {
+        var pretUnitar = c.total / (c.articol.cantitate || 1);
+        rows.push([nrCap + '.' + (i + 1), (c.articol.cod ? c.articol.cod + ' — ' : '') + c.articol.denumire, c.articol.um, c.articol.cantitate,
+        _lei(pretUnitar), _lei(c.materiale), _lei(c.manopera), _lei(c.transport), _lei(c.utilaj), _lei(c.total)]);
       });
-      rows.push(['', '<b>Subtotal ' + _esc(cat.categorie.denumire) + '</b>', '', '<b>' + _lei(cat.subtotal) + '</b>']);
+      rows.push(['', _safe('<b>Subtotal ' + _esc(cat.categorie.denumire) + '</b>'), '', '', '', '', '', '', '', _safe('<b>' + _lei(cat.subtotal) + ' lei</b>')]);
     });
-    return '<p style="text-align:center;font-weight:bold">DEVIZ PE OBIECT ' + _esc(obiect.cod || '') + ' — ' + _esc(obiect.denumire) + '</p>' +
-      '<p style="font-size:10pt">conform HG 907/2016, Anexa nr. 8</p>' +
-      _tbl(rows, ['Cod', 'Denumire', 'Cantitate', 'Valoare (lei)']) +
-      '<p><b>TOTAL OBIECT: ' + _lei(devizObiect.total) + ' lei</b> (fără TVA)</p>';
+    var s = devizObiect.subsol;
+    var footRows = [
+      ['Cheltuieli directe', '', _lei(devizObiect.pe4.materiale), _lei(devizObiect.pe4.manopera), _lei(devizObiect.pe4.utilaj), _lei(devizObiect.pe4.transport), _lei(s.cheltuieliDirecte)],
+      ['Alte cheltuieli directe', s.altePct + '%', '', '', '', '', _lei(s.alteCheltuieliDirecte)],
+      ['Contribuție asiguratorie pentru muncă (CAM)', s.camPct + '% (legal, pe manoperă)', '', '', '', '', _lei(s.cam)],
+      ['Cheltuieli indirecte', s.indPct + '% (orientativ, editabil)', '', '', '', '', _lei(s.cheltuieliIndirecte)],
+      ['Profit', s.profPct + '% (orientativ, editabil)', '', '', '', '', _lei(s.profit)],
+      [_safe('<b>TOTAL GENERAL (fără TVA)</b>'), '', '', '', '', '', _safe('<b>' + _lei(s.totalGeneralFaraTva) + '</b>')],
+      ['TVA', Math.round(s.cotaTva * 100) + '%', '', '', '', '', _lei(s.tva)],
+      [_safe('<b>TOTAL GENERAL</b>'), '', '', '', '', '', _safe('<b>' + _lei(s.totalGeneral) + ' lei</b>')]
+    ];
+    return '<p style="text-align:center;font-weight:bold">DEVIZ PE OBIECT ' + _esc(obiect.cod || '') + ' — ' + _esc(obiect.denumire) + (obiect.stadiu_fizic ? ' · Stadiul fizic: ' + _esc(obiect.stadiu_fizic) : '') + '</p>' +
+      '<p style="font-size:10pt">conform HG 907/2016, Anexa nr. 8 — F3 Listă cu cantități de lucrări pe categorii</p>' +
+      _tbl(rows, ['Nr', 'Capitolul de lucrări', 'UM', 'Cant.', 'Preț unitar', 'Material', 'Manoperă', 'Transport', 'Utilaj', 'TOTAL']) +
+      '<br>' + _tbl(footRows, ['', 'procent', 'material', 'manoperă', 'utilaj', 'transport', 'total']);
   }
 
-  // F1 — Centralizatorul cheltuielilor pe obiectiv
-  function htmlF1(proiect, devizeObiecte) {
-    var rows = devizeObiecte.map(function (d, i) { return [(i + 1), d.obiect_denumire || ('Obiect ' + (i + 1)), _lei(d.total)]; });
-    var total = devizeObiecte.reduce(function (s, d) { return s + d.total; }, 0);
-    rows.push(['', '<b>TOTAL</b>', '<b>' + _lei(total) + '</b>']);
-    return '<p style="text-align:center;font-weight:bold">FORMULARUL F1 — Centralizatorul cheltuielilor pe obiectiv</p>' +
-      '<p style="font-size:10pt">Obiectiv: ' + _esc(proiect.nume) + '</p>' + _tbl(rows, ['Nr.', 'Obiect', 'Valoare (lei)']);
-  }
-  // F2 — Centralizatorul cheltuielilor pe categorii de lucrări (pt un obiect dat)
-  function htmlF2(obiect, devizObiect) {
-    var rows = devizObiect.categorii.map(function (c, i) { return [(i + 1), c.categorie.denumire, _lei(c.subtotal)]; });
-    return '<p style="text-align:center;font-weight:bold">FORMULARUL F2 — Centralizator pe categorii de lucrări</p>' +
-      '<p style="font-size:10pt">Obiect: ' + _esc(obiect.denumire) + '</p>' + _tbl(rows, ['Nr.', 'Categorie', 'Valoare (lei)']);
-  }
-  // F3 — Lista cu cantități de lucrări
-  function htmlF3(obiect, devizObiect) {
-    var rows = [];
-    devizObiect.categorii.forEach(function (cat) { cat.articole.forEach(function (c) { rows.push([c.articol.cod || '', c.articol.denumire, c.articol.um, c.articol.cantitate, _lei(c.total / (c.articol.cantitate || 1)), _lei(c.total)]); }); });
-    return '<p style="text-align:center;font-weight:bold">FORMULARUL F3 — Lista cu cantități de lucrări</p>' +
-      '<p style="font-size:10pt">Obiect: ' + _esc(obiect.denumire) + '</p>' + _tbl(rows, ['Cod', 'Denumire', 'UM', 'Cantitate', 'Preț unitar', 'Valoare']);
-  }
-  // F4 — Utilaje/echipamente (extras din resursele de tip utilaj ale articolelor)
-  function htmlF4(obiect, devizObiect) {
-    var util = {};
-    devizObiect.categorii.forEach(function (cat) { cat.articole.forEach(function (c) { (c.detaliu || []).filter(function (d) { return d.tip === 'utilaj'; }).forEach(function (d) { util[d.resursa_id] = (util[d.resursa_id] || 0) + d.valoare; }); }); });
-    var rows = Object.keys(util).map(function (k, i) { return [(i + 1), k, _lei(util[k])]; });
-    return '<p style="text-align:center;font-weight:bold">FORMULARUL F4 — Utilaje, echipamente tehnologice</p>' +
-      '<p style="font-size:10pt">Obiect: ' + _esc(obiect.denumire) + '</p>' + (rows.length ? _tbl(rows, ['Nr.', 'Resursă (id)', 'Valoare (lei)']) : '<p>Nicio resursă de tip utilaj identificată în articolele acestui obiect.</p>');
-  }
-  // F5 — Fișe tehnice (placeholder structurat — se completează per echipament)
-  function htmlF5(obiect) {
-    return '<p style="text-align:center;font-weight:bold">FORMULARUL F5 — Fișe tehnice utilaje/echipamente</p>' +
-      '<p style="font-size:10pt">Obiect: ' + _esc(obiect.denumire) + '</p>' +
-      '<p>Fișa tehnică se completează per echipament (producător, model, parametri, garanție) — secțiune de editare disponibilă în modulul Devize.</p>';
-  }
-
-  function generateDocumenteF1F5(proiectId) {
-    return getProiect(proiectId).then(function (proiect) {
-      return listObiecte(proiectId).then(function (obiecte) {
-        return Promise.all(obiecte.map(function (o) { return computeDevizObiect(o.id).then(function (d) { return { obiect: o, devizObiect: Object.assign({ obiect_denumire: o.denumire }, d) }; }); }))
-          .then(function (perechi) {
-            var docs = [];
-            docs.push({ cat: 'Devize', file: 'F1_Centralizator_obiectiv.doc', html: G.UXDocBuilder.docHtml({ titlu: 'FORMULARUL F1', subtitlu: 'Centralizatorul cheltuielilor pe obiectiv', proiect: proiect.nume }, [{ h: null, html: htmlF1(proiect, perechi.map(function (p) { return p.devizObiect; })) }]) });
-            perechi.forEach(function (p) {
-              var suf = '_' + (p.obiect.cod || p.obiect.denumire).replace(/[^a-zA-Z0-9]+/g, '_');
-              docs.push({ cat: 'Devize', file: 'DevizObiect' + suf + '.doc', html: G.UXDocBuilder.docHtml({ titlu: 'DEVIZ PE OBIECT', subtitlu: p.obiect.denumire, proiect: proiect.nume }, [{ h: null, html: htmlDevizObiect(p.devizObiect, p.obiect) }]) });
-              docs.push({ cat: 'Devize', file: 'F2' + suf + '.doc', html: G.UXDocBuilder.docHtml({ titlu: 'FORMULARUL F2', subtitlu: p.obiect.denumire, proiect: proiect.nume }, [{ h: null, html: htmlF2(p.obiect, p.devizObiect) }]) });
-              docs.push({ cat: 'Devize', file: 'F3' + suf + '.doc', html: G.UXDocBuilder.docHtml({ titlu: 'FORMULARUL F3', subtitlu: p.obiect.denumire, proiect: proiect.nume }, [{ h: null, html: htmlF3(p.obiect, p.devizObiect) }]) });
-              docs.push({ cat: 'Devize', file: 'F4' + suf + '.doc', html: G.UXDocBuilder.docHtml({ titlu: 'FORMULARUL F4', subtitlu: p.obiect.denumire, proiect: proiect.nume }, [{ h: null, html: htmlF4(p.obiect, p.devizObiect) }]) });
-              docs.push({ cat: 'Devize', file: 'F5' + suf + '.doc', html: G.UXDocBuilder.docHtml({ titlu: 'FORMULARUL F5', subtitlu: p.obiect.denumire, proiect: proiect.nume }, [{ h: null, html: htmlF5(p.obiect) }]) });
-            });
-            return computeDevizGeneral(proiectId, { Sc: 0 }).then(function (dg) {
-              if (dg.deviz_general) docs.push({ cat: 'Devize', file: 'Deviz_general_HG907.doc', html: G.UXDocBuilder.docHtml({ titlu: 'DEVIZ GENERAL', subtitlu: 'conform HG 907/2016 · Cap.4.1 din ' + (dg.sursa_c41 === 'articole_reale' ? 'articole reale' : 'estimare'), proiect: proiect.nume }, [{ h: null, html: G.UXDevize.devizGeneralHtml({ deviz: { c41: dg.suma_articole_c41 } }) }]) });
-              return docs;
-            });
-          });
-      });
-    });
-  }
-  function exportProiectDocx(proiectId) {
-    return generateDocumenteF1F5(proiectId).then(function (docs) {
-      if (typeof JSZip === 'undefined') { docs.forEach(function (d) { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿', d.html], { type: 'application/msword' })); a.download = d.file; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1200); }); return docs.length; }
-      var zip = new JSZip();
-      docs.forEach(function (d) { zip.file(d.file, new Blob(['﻿', d.html], { type: 'application/msword' })); });
-      return zip.generateAsync({ type: 'blob' }).then(function (blob) {
-        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Devize_' + Date.now() + '.zip'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-        return docs.length;
-      });
-    });
-  }
+  // NOTĂ: F1-F5 + Deviz general ca fișiere Word REALE (.docx, OOXML) se generează acum în
+  // js/urbanx-devize-docx.js (window.UXDevizeDocx) — vechile htmlF1-F5/generateDocumenteF1F5/
+  // exportProiectDocx (HTML salvat cu extensie .doc) au fost eliminate (superseded, cod mort).
 
   // ══════════════════════════════════════════════════════════════════════════
   // API PUBLIC
@@ -728,7 +723,7 @@
   G.UXDevizePro = {
     // proiecte/obiecte/categorii
     listProiecte: listProiecte, getProiect: getProiect, createProiect: createProiect, updateProiect: updateProiect,
-    listObiecte: listObiecte, createObiect: createObiect, listCategorii: listCategorii, createCategorie: createCategorie,
+    listObiecte: listObiecte, createObiect: createObiect, getObiect: getObiect, updateObiect: updateObiect, listCategorii: listCategorii, createCategorie: createCategorie,
     creazaCategoriiStandard: creazaCategoriiStandard, CATEGORII_STD: CATEGORII_STD, CATEGORII_STD_LABELS: CATEGORII_STD_LABELS,
     // resurse/norme
     listResurse: listResurse, createResursa: createResursa, listNorme: listNorme, normaResurse: normaResurse, creazaNorma: creazaNorma,
@@ -757,9 +752,8 @@
     verificaAlertaPret: verificaAlertaPret, verificaAlertaBuget: verificaAlertaBuget, listAlerte: listAlerte, marcheazaAlertaVazuta: marcheazaAlertaVazuta,
     // GIS
     cardInvestitie: cardInvestitie,
-    // export documente
-    htmlDevizObiect: htmlDevizObiect, htmlF1: htmlF1, htmlF2: htmlF2, htmlF3: htmlF3, htmlF4: htmlF4, htmlF5: htmlF5,
-    generateDocumenteF1F5: generateDocumenteF1F5, exportProiectDocx: exportProiectDocx,
+    // export documente (preview HTML on-screen; export Word real .docx e în window.UXDevizeDocx)
+    htmlDevizObiect: htmlDevizObiect,
     // offline queue
     syncOfflineQueue: syncOfflineQueue, offlineQueueSize: function () { return queueGet().length; }
   };
