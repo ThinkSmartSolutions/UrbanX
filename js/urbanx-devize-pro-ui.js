@@ -148,9 +148,27 @@
       if (!State.obiectId) { State.obiectId = obiecte[0].id; }
       var obiect = obiecte.filter(function (o) { return o.id === State.obiectId; })[0] || obiecte[0];
 
-      var stdBtn = el('button', { style: ST.ghost + ';margin-bottom:10px' }, '+ Categorii standard (ARHITECTURĂ+INSTALAȚII)');
-      stdBtn.onclick = function () { DP.creazaCategoriiStandard(obiect.id, ['arhitectura', 'instalatii']).then(function () { renderCategorii(); }); };
-      pane.appendChild(stdBtn);
+      var stdWrap = el('div', { style: 'margin-bottom:10px' });
+      var stdLbl = el('div', { style: ST.label }, 'Categorii standard de adăugat (bifează domeniile — acoperă și structură/rezistență, nu doar arhitectură)');
+      stdWrap.appendChild(stdLbl);
+      var stdBoxes = el('div', { style: 'display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px;font-size:11px;color:#cbd5e1' });
+      var domeniiChecks = {};
+      Object.keys(DP.CATEGORII_STD).forEach(function (d) {
+        var chk = el('input', { type: 'checkbox' }); chk.checked = (d === 'arhitectura' || d === 'instalatii');
+        domeniiChecks[d] = chk;
+        var lab = el('label', { style: 'display:flex;align-items:center;gap:4px;cursor:pointer' });
+        lab.appendChild(chk); lab.appendChild(document.createTextNode((DP.CATEGORII_STD_LABELS && DP.CATEGORII_STD_LABELS[d]) || d));
+        stdBoxes.appendChild(lab);
+      });
+      stdWrap.appendChild(stdBoxes);
+      var stdBtn = el('button', { style: ST.ghost }, '+ Creează categoriile bifate');
+      stdBtn.onclick = function () {
+        var domenii = Object.keys(domeniiChecks).filter(function (d) { return domeniiChecks[d].checked; });
+        if (!domenii.length) return;
+        DP.creazaCategoriiStandard(obiect.id, domenii).then(function () { renderCategorii(); });
+      };
+      stdWrap.appendChild(stdBtn);
+      pane.appendChild(stdWrap);
 
       var importBox = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap' });
       var importBtn = el('button', { style: ST.btn + ';background:linear-gradient(180deg,#2563eb,#1d4ed8)' }, '📥 Importă din proiectarea UrbanX (relevee)');
@@ -167,23 +185,25 @@
       pane.appendChild(importBox);
 
       var csvBox = el('div', { style: 'display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap' });
-      csvBox.appendChild(el('span', { style: 'font-size:11px;color:#94a3b8' }, 'sau CSV articole (cod;denumire;um;cantitate;pretunitar) → categoria selectată:'));
-      var csvFile = el('input', { type: 'file', accept: '.csv,text/csv', style: 'font-size:11px' });
+      csvBox.appendChild(el('span', { style: 'font-size:11px;color:#94a3b8' }, 'sau CSV/Excel articole (cod;denumire;um;cantitate;pretunitar) → categoria selectată:'));
+      var csvFile = el('input', { type: 'file', accept: '.csv,text/csv,.xlsx,.xls', style: 'font-size:11px' });
       var csvOut = el('span', { style: 'font-size:11px;color:#94a3b8' });
       csvFile.onchange = function () {
         var f = csvFile.files && csvFile.files[0]; if (!f) return;
-        var catActiva = (State._lastCategorii || [])[0];
-        var reader = new FileReader();
-        reader.onload = function () {
-          csvOut.textContent = 'Se importă…';
+        var esteExcel = /\.(xlsx|xls)$/i.test(f.name || '');
+        csvOut.textContent = esteExcel ? '⏳ Se citește Excel…' : 'Se importă…';
+        var textPromise = esteExcel
+          ? (G.UXDevizeRelevee ? G.UXDevizeRelevee.xlsxToCSV(f) : Promise.reject(new Error('Modulul de citire Excel (urbanx-devize-relevee-parse.js) nu e încărcat.')))
+          : f.text();
+        textPromise.then(function (csvText) {
           // categoria țintă = prima categorie a obiectului curent (sau creează una implicită)
-          DP.listCategorii(obiect.id).then(function (cats) {
+          return DP.listCategorii(obiect.id).then(function (cats) {
             var target = cats[0];
-            var p = target ? Promise.resolve(target) : DP.createCategorie(obiect.id, { denumire: 'Import CSV', ordine: 0 });
-            return p.then(function (cat) { return DP.importCSVArticole(cat.id, reader.result); });
-          }).then(function (r) { csvOut.textContent = '✅ ' + r.imported + ' articole importate din CSV.'; renderCategorii(); });
-        };
-        reader.readAsText(f, 'utf-8');
+            var p = target ? Promise.resolve(target) : DP.createCategorie(obiect.id, { denumire: 'Import CSV/Excel', ordine: 0 });
+            return p.then(function (cat) { return DP.importCSVArticole(cat.id, csvText); });
+          });
+        }).then(function (r) { csvOut.textContent = '✅ ' + r.imported + ' articole importate' + (esteExcel ? ' din Excel.' : ' din CSV.'); renderCategorii(); })
+          .catch(function (e) { csvOut.textContent = '⚠ ' + (e && e.message || 'Eroare la citirea fișierului.'); });
       };
       csvBox.appendChild(csvFile); csvBox.appendChild(csvOut);
       pane.appendChild(csvBox);
@@ -213,12 +233,34 @@
               DP.listArticole(cat.id).then(function (articole) {
                 artWrap.innerHTML = '';
                 articole.forEach(function (a) {
-                  var row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)' });
-                  row.appendChild(el('span', null, esc(a.cod || '') + ' ' + esc(a.denumire) + ' <span style="color:#64748b">· ' + a.cantitate + ' ' + esc(a.um) + ' · ' + esc(a.sursa_cantitate) + '</span>'));
+                  var row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:6px' });
+                  var lbl = el('span', null, esc(a.cod || '') + ' ' + esc(a.denumire) + ' <span style="color:#64748b">· ' + a.cantitate + ' ' + esc(a.um) + ' · ' + esc(a.sursa_cantitate) + (a.norma_id ? ' · normat' : (a.pret_unitar_manual != null ? ' · preț liber ' + a.pret_unitar_manual + ' lei/' + esc(a.um) : '')) + '</span>');
+                  var btns = el('div', { style: 'display:flex;gap:4px;flex-shrink:0' });
+                  var edit = el('button', { style: ST.ghost }, '✏️');
                   var del = el('button', { style: ST.ghost }, '🗑');
-                  del.onclick = function () { DP.deleteArticol(a.id).then(renderArt); };
-                  row.appendChild(del);
+                  del.onclick = function () { if (confirm('Ștergi articolul „' + a.denumire + '"?')) DP.deleteArticol(a.id).then(renderArt); };
+                  btns.appendChild(edit); btns.appendChild(del);
+                  row.appendChild(lbl); row.appendChild(btns);
                   artWrap.appendChild(row);
+
+                  edit.onclick = function () {
+                    var form = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto auto;gap:5px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(94,234,212,.05)' });
+                    var eDen = el('input', { style: ST.inp, value: a.denumire || '' });
+                    var eUm = el('input', { style: ST.inp, value: a.um || '' });
+                    var eCant = el('input', { style: ST.inp, type: 'number', value: a.cantitate || 0 });
+                    var ePret = el('input', { style: ST.inp, type: 'number', placeholder: a.norma_id ? 'articol normat — fără preț liber' : 'Preț unitar (lei)', value: a.pret_unitar_manual != null ? a.pret_unitar_manual : '' });
+                    if (a.norma_id) ePret.disabled = true;
+                    var save = el('button', { style: ST.btn }, '💾');
+                    var cancel = el('button', { style: ST.ghost }, '✕');
+                    save.onclick = function () {
+                      var patch = { denumire: eDen.value.trim() || a.denumire, um: eUm.value.trim() || a.um, cantitate: +eCant.value || 0, sursa_cantitate: 'manual' };
+                      if (!a.norma_id) patch.pret_unitar_manual = ePret.value !== '' ? +ePret.value : null;
+                      DP.updateArticol(a.id, patch, 'editare manuală din tab Obiecte & Articole').then(renderArt);
+                    };
+                    cancel.onclick = function () { form.remove(); row.style.display = ''; };
+                    form.appendChild(eDen); form.appendChild(eUm); form.appendChild(eCant); form.appendChild(ePret); form.appendChild(save); form.appendChild(cancel);
+                    row.style.display = 'none'; row.insertAdjacentElement('afterend', form);
+                  };
                 });
               });
             }
@@ -251,13 +293,13 @@
     pane.innerHTML = '';
     pane.appendChild(el('div', { style: ST.label }, 'Încarcă relevee (măsurătoare/ridicare) pe un nivel'));
     pane.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' },
-      'Formate reale: <b>CSV</b> (nivel;denumire;suprafata;um) · <b>DXF</b> (poligoane reale, arie exactă) · ' +
+      'Formate reale: <b>CSV</b> (nivel;denumire;suprafata;um) · <b>Excel .xlsx/.xls</b> (aceleași coloane, primul rând = antet) · <b>DXF</b> (poligoane reale, arie exactă) · ' +
       '<b>PDF cu text</b> (extragere reală) · <b>PDF scanat/imagine</b> (OCR — încredere scăzută, verifică fiecare rând) · ' +
-      '<b>DWG</b> nu se poate citi direct — convertește la DXF întâi.'));
+      '<b>DWG</b> nu se poate citi direct — convertește la DXF întâi. <i>Word (.docx) nu e încă suportat.</i>'));
 
     var grid = el('div', { style: 'display:grid;grid-template-columns:1fr 2fr;gap:6px;margin-bottom:8px' });
     var nivelInp = el('input', { style: ST.inp, placeholder: 'Nivel (ex. parter, etaj_1, subsol)', value: 'parter' });
-    var fileInp = el('input', { type: 'file', accept: '.csv,.dxf,.pdf,.jpg,.jpeg,.png,.dwg', style: ST.inp });
+    var fileInp = el('input', { type: 'file', accept: '.csv,.xlsx,.xls,.dxf,.pdf,.jpg,.jpeg,.png,.dwg', style: ST.inp });
     grid.appendChild(nivelInp); grid.appendChild(fileInp);
     pane.appendChild(grid);
 

@@ -152,10 +152,30 @@
     });
   }
 
+  // ── 5. Excel (.xlsx/.xls) — SheetJS, încărcat la cerere (lazy, ca Tesseract) ──
+  var XLSX_CDN = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  function _celToText(v) { return v == null ? '' : String(v).trim(); }
+  // Convertește PRIMA foaie a unui .xlsx/.xls în text CSV (';'-separat) — reutilizabil de orice importator CSV existent
+  // (parseCSVRelevee mai sus, sau importCSVArticole din urbanx-devize-pro.js), fără să duplicăm logica de parsare.
+  function xlsxToCSV(file) {
+    return _asteaptaScript(function () { return !!G.XLSX; }, XLSX_CDN, 25000).then(function () {
+      return file.arrayBuffer();
+    }).then(function (buf) {
+      var wb = G.XLSX.read(buf, { type: 'array' });
+      var foaie = wb.Sheets[wb.SheetNames[0]];
+      var randuri = G.XLSX.utils.sheet_to_json(foaie, { header: 1, raw: false, defval: '' });
+      return randuri.map(function (r) { return r.map(_celToText).join(';'); }).filter(function (l) { return l.replace(/;/g, '').trim().length; }).join('\n');
+    });
+  }
+  function parseXLSXRelevee(file) {
+    return xlsxToCSV(file).then(parseCSVRelevee);
+  }
+
   // ── Dispecer după extensie ────────────────────────────────────────────────
   function parseFisier(file, onProgress) {
     var ext = (file.name || '').split('.').pop().toLowerCase();
     if (ext === 'csv') return file.text().then(parseCSVRelevee);
+    if (ext === 'xlsx' || ext === 'xls') return parseXLSXRelevee(file);
     if (ext === 'dxf') return file.text().then(parseDXFRelevee);
     if (ext === 'dwg') return Promise.reject(new Error('Formatul DWG e binar/proprietar Autodesk — nu poate fi citit direct în browser. Convertește la DXF (ex. ODA File Converter, gratuit) și încarcă fișierul .dxf — se citește real, cu poligoane și arii exacte.'));
     if (ext === 'pdf') {
@@ -165,12 +185,13 @@
       }).catch(function () { return parseImagineOCR(file, onProgress); });
     }
     if (/\.(jpg|jpeg|png|webp|tif|tiff)$/i.test(file.name || '')) return parseImagineOCR(file, onProgress);
-    return Promise.reject(new Error('Format neacceptat: .' + ext + ' (acceptate: csv, dxf, pdf, jpg/png/webp — DWG se convertește întâi la DXF).'));
+    return Promise.reject(new Error('Format neacceptat: .' + ext + ' (acceptate: csv, xlsx/xls, dxf, pdf, jpg/png/webp — DWG se convertește întâi la DXF).'));
   }
 
   G.UXDevizeRelevee = {
     parseCSVRelevee: parseCSVRelevee, parseDXFRelevee: parseDXFRelevee, parseTextPDF: parseTextPDF,
-    parseImagineOCR: parseImagineOCR, parseFisier: parseFisier, extrageCandidati: extrageCandidati
+    parseImagineOCR: parseImagineOCR, parseFisier: parseFisier, extrageCandidati: extrageCandidati,
+    xlsxToCSV: xlsxToCSV, parseXLSXRelevee: parseXLSXRelevee
   };
-  console.log('[UXDevizeRelevee] parsing real relevee (CSV/DXF/PDF text/OCR imagine) — window.UXDevizeRelevee');
+  console.log('[UXDevizeRelevee] parsing real relevee (CSV/XLSX/DXF/PDF text/OCR imagine) — window.UXDevizeRelevee');
 })(window);

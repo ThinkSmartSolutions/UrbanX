@@ -127,9 +127,10 @@
   // Categoriile-tip standard din specificație (ARHITECTURĂ/INSTALAȚII/CONSTRUCȚII SPECIALE)
   var CATEGORII_STD = {
     arhitectura: ['Terasamente', 'Fundații', 'Beton', 'Cofraje', 'Armături', 'Zidării', 'Tencuieli', 'Gleturi', 'Zugrăveli', 'Pardoseli', 'Fațade', 'Tâmplărie', 'Acoperișuri'],
-    instalatii: ['Sanitare', 'Termice', 'HVAC', 'Electrice', 'Curenți slabi', 'PSI', 'Fotovoltaice'],
+    instalatii: ['Sanitare', 'Termice', 'HVAC', 'Pompe de căldură', 'Electrice', 'Curenți slabi', 'PSI', 'Fotovoltaice', 'Panouri solare termice'],
     constructii_speciale: ['Drumuri', 'Rețele apă', 'Canalizare', 'Alimentare energie', 'Iluminat', 'Amenajări exterioare']
   };
+  var CATEGORII_STD_LABELS = { arhitectura: 'Arhitectură + Structură (terasamente→acoperiș)', instalatii: 'Instalații (sanitare/termice/electrice/PV)', constructii_speciale: 'Amenajări exterioare & rețele (drumuri/utilități)' };
   function creazaCategoriiStandard(obiectId, domenii) {
     domenii = domenii || ['arhitectura', 'instalatii'];
     var lista = []; domenii.forEach(function (d) { (CATEGORII_STD[d] || []).forEach(function (den) { lista.push(den); }); });
@@ -728,7 +729,7 @@
     // proiecte/obiecte/categorii
     listProiecte: listProiecte, getProiect: getProiect, createProiect: createProiect, updateProiect: updateProiect,
     listObiecte: listObiecte, createObiect: createObiect, listCategorii: listCategorii, createCategorie: createCategorie,
-    creazaCategoriiStandard: creazaCategoriiStandard, CATEGORII_STD: CATEGORII_STD,
+    creazaCategoriiStandard: creazaCategoriiStandard, CATEGORII_STD: CATEGORII_STD, CATEGORII_STD_LABELS: CATEGORII_STD_LABELS,
     // resurse/norme
     listResurse: listResurse, createResursa: createResursa, listNorme: listNorme, normaResurse: normaResurse, creazaNorma: creazaNorma,
     // prețuri (4 niveluri)
