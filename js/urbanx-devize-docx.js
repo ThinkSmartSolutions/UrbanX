@@ -29,6 +29,9 @@
   function _asteaptaDocx() { return _asteaptaScript(function () { return !!(G.docx && G.docx.Document); }, DOCX_CDN, 25000); }
 
   function lei(n) { return Math.round(n || 0).toLocaleString('ro-RO'); }
+  // pt consum_unitar (ore/UM, kg/UM etc.) — valori adesea sub 1 (ex. 0,02 ore macara/mp);
+  // lei() rotunjește la întreg și le arată eronat ca „0” — aici păstrăm până la 3 zecimale reale.
+  function zec(n) { return (Math.round((n || 0) * 1000) / 1000).toLocaleString('ro-RO', { maximumFractionDigits: 3 }); }
 
   // ── helpere de construcție Word real (Paragraph/Table), pattern comun brand ──
   function _brandHeader(docx) {
@@ -132,7 +135,7 @@
               f3Sectiuni.push(new docx.Paragraph({ heading: docx.HeadingLevel.HEADING_2, spacing: { before: 300 }, text: 'Detaliere pe resurse (manoperă/utilaj/materiale/transport) — articole pe normă' }));
               detaliiNormate.forEach(function (dn) {
                 f3Sectiuni.push(new docx.Paragraph({ spacing: { before: 150 }, children: [new docx.TextRun({ text: dn.articol.denumire + ' (' + dn.articol.cantitate + ' ' + dn.articol.um + ')', bold: true })] }));
-                var rows = dn.linii.map(function (l) { return [l.tip, l.denumire, lei(l.consum_unitar) + ' ' + l.um + '/UM', lei(l.cantitate_totala) + ' ' + l.um, { v: lei(l.valoare) + ' lei', right: true }]; });
+                var rows = dn.linii.map(function (l) { return [l.tip, l.denumire, zec(l.consum_unitar) + ' ' + l.um + '/UM', zec(l.cantitate_totala) + ' ' + l.um, { v: lei(l.valoare) + ' lei', right: true }]; });
                 f3Sectiuni.push(_tabel(docx, ['Tip resursă', 'Denumire', 'Consum unitar', 'Cantitate totală', 'Valoare'], rows, [14, 36, 18, 16, 16]));
               });
             }
@@ -153,7 +156,7 @@
                 });
               });
             });
-            var f4Rows = Object.keys(util).map(function (k, i) { var u = util[k]; return [String(i + 1), u.denumire, lei(u.ore) + ' ' + u.um, { v: lei(u.valoare) + ' lei', right: true }]; });
+            var f4Rows = Object.keys(util).map(function (k, i) { var u = util[k]; return [String(i + 1), u.denumire, zec(u.ore) + ' ' + u.um, { v: lei(u.valoare) + ' lei', right: true }]; });
             files.push({ name: _numeFisier('F4' + suf), doc: _doc(docx, _brandHeader(docx).concat(
               _titlu(docx, 'FORMULARUL F4', 'Utilaje, echipamente tehnologice · ' + p.obiect.denumire),
               f4Rows.length ? [_tabel(docx, ['Nr.', 'Utilaj/echipament', 'Ore totale', 'Valoare'], f4Rows, [8, 44, 24, 24])] : [new docx.Paragraph('Nicio resursă de tip utilaj identificată în articolele acestui obiect (articolele curente au preț liber, nu sunt pe normă).')]
