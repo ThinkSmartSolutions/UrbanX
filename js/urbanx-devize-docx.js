@@ -7,8 +7,10 @@
  * directe → CAM (2.25% legal) → Cheltuieli indirecte → Profit → TOTAL GENERAL.
  * Fișiere .docx GENUINE (OOXML) cu biblioteca `docx` (docx.js), încărcată lazy
  * de la CDN — același pattern ca Tesseract.js (OCR) și SheetJS (Excel).
- * Culori UrbanX: albastru brand #16AECB (logo/titlu platformă) + auriu accent
- * #D4AF37 (disclaimer/logo) — NU culori inventate.
+ * Culori UrbanX: auriu #D4AF37 (accentul REAL folosit de motorul de documente
+ * al platformei, js/tci-strategic-doc.js — verificat, NU inventat) + bleumarin
+ * închis #1C263A pt text — albastrul din login-ul web-app-ului NU se folosește
+ * pe documentele generate, e o suprafață diferită (UI, nu document).
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -31,7 +33,13 @@
   function _asteaptaDocx() { return _asteaptaScript(function () { return !!(G.docx && G.docx.Document); }, DOCX_CDN, 25000); }
 
   // ── Paleta UrbanX (aceeași folosită în platformă — logo/titlu, NU inventată) ──
-  var UX = { BLUE: '16AECB', BLUE_TINT: 'E3F5F9', GOLD: 'D4AF37', GOLD_TINT: 'FBF3DD', DARK: '0E162A', GRI: '5A6476' };
+  // Paletă UrbanX REALĂ pt documente — verificată în js/tci-strategic-doc.js (motorul _makeStratDoc,
+  // folosit pt toate rapoartele generate din Teritoriu): ACCENT implicit = [212,175,55] (auriu, hex
+  // D4AF37), INK = [28,38,58] (bleumarin închis text), SUB/MUT = gri-albastrui. Verificat live: un PDF
+  // generat cu _makeStratDoc conține operatorii de culoare reali "0.588 0.471 0.157 rg" = RGB(150,120,40)
+  // (variantă închisă a auriului, pe disclaimer) — albastrul (#16AECB) NU apare in motorul de documente,
+  // e doar accentul din login/UI-ul web-app-ului, o suprafață diferită. Corectat aici (era invers).
+  var UX = { GOLD: 'D4AF37', GOLD_DARK: '966E28', GOLD_TINT: 'FBF3DD', INK: '1C263A', GRI: '5A6476' };
 
   function lei(n) { return Math.round(n || 0).toLocaleString('ro-RO'); }
   // consum_unitar/ore — valori adesea sub 1 (ex. 0,02 ore macara/mp); lei() rotunjește la
@@ -40,7 +48,7 @@
 
   function _brandHeader(docx, titluDoc) {
     return [
-      new docx.Paragraph({ children: [new docx.TextRun({ text: 'UrbanX', bold: true, size: 24, color: UX.BLUE }), new docx.TextRun({ text: '  Devize & Cost Management', bold: true, size: 18, color: UX.DARK })], spacing: { after: 40 } }),
+      new docx.Paragraph({ children: [new docx.TextRun({ text: 'UrbanX', bold: true, size: 24, color: UX.GOLD }), new docx.TextRun({ text: '  Devize & Cost Management', bold: true, size: 18, color: UX.INK })], spacing: { after: 40 } }),
       new docx.Paragraph({ border: { bottom: { color: UX.GOLD, space: 4, style: docx.BorderStyle.SINGLE, size: 6 } }, children: [new docx.TextRun({ text: '' })], spacing: { after: 160 } }),
       new docx.Paragraph({ text: titluDoc, heading: docx.HeadingLevel.HEADING_1, alignment: docx.AlignmentType.CENTER })
     ];
@@ -69,7 +77,7 @@
   var BORD = { style: 'single', size: 2, color: 'B9C2CE' };
   function _borders(docx) { return { top: BORD, bottom: BORD, left: BORD, right: BORD, insideHorizontal: BORD, insideVertical: BORD }; }
   function _tabel(docx, head, rows, widths, fontSize) {
-    var headRow = new docx.TableRow({ children: head.map(function (h, i) { return _cell(docx, h, { bold: true, shade: UX.BLUE_TINT, color: UX.DARK, width: widths ? widths[i] : undefined, center: true, size: fontSize || 16 }); }), tableHeader: true });
+    var headRow = new docx.TableRow({ children: head.map(function (h, i) { return _cell(docx, h, { bold: true, shade: UX.GOLD_TINT, color: UX.INK, width: widths ? widths[i] : undefined, center: true, size: fontSize || 16 }); }), tableHeader: true });
     var dataRows = rows.map(function (r) {
       return new docx.TableRow({ children: r.map(function (c, i) { return _cell(docx, c && c.v != null ? c.v : c, { bold: c && c.bold, right: c && c.right, shade: c && c.shade, width: widths ? widths[i] : undefined, size: fontSize || 18 }); }) });
     });
@@ -249,7 +257,7 @@
       var fara = key != null ? val[key] : null;
       var t = fara != null ? Math.round(fara * tva) : null;
       var cu = fara != null ? fara + t : null;
-      var opt = { bold: lvl >= 2, shade: lvl === 0 ? UX.BLUE_TINT : lvl === 3 ? UX.GOLD_TINT : lvl === 2 ? 'F0F0F0' : undefined };
+      var opt = { bold: lvl >= 2, shade: lvl === 3 ? UX.GOLD_TINT : (lvl === 0 || lvl === 2) ? 'F0F0F0' : undefined };
       return [cod, den, fara != null ? Object.assign({ v: lei(fara), right: true }, opt) : '', t != null ? Object.assign({ v: lei(t), right: true }, opt) : '', cu != null ? Object.assign({ v: lei(cu), right: true }, opt) : ''];
     });
     var totalCu = val.total + Math.round(val.total * tva);
@@ -257,7 +265,7 @@
       _antet(docx, proiect, null),
       [new docx.Paragraph({ spacing: { before: 100, after: 150 }, children: [new docx.TextRun({ text: 'conform HG 907/2016, Anexa nr. 7 · sursă cap.4.1: ' + (devizGen.sursa_c41 === 'articole_reale' ? 'articole reale din deviz' : 'estimare top-down'), italics: true, size: 16 })] }),
       _tabel(docx, ['Nr. crt.', 'Denumirea capitolelor și subcapitolelor', 'Fără TVA', 'TVA', 'Cu TVA'], rows, [8, 50, 14, 12, 16]),
-      new docx.Paragraph({ spacing: { before: 200 }, children: [new docx.TextRun({ text: 'TOTAL GENERAL cu TVA: ' + lei(totalCu) + ' lei (≈ ' + lei(Math.round(totalCu / devizGen.deviz_general.curs)) + ' euro)', bold: true, color: UX.BLUE })] })],
+      new docx.Paragraph({ spacing: { before: 200 }, children: [new docx.TextRun({ text: 'TOTAL GENERAL cu TVA: ' + lei(totalCu) + ' lei (≈ ' + lei(Math.round(totalCu / devizGen.deviz_general.curs)) + ' euro)', bold: true, color: UX.GOLD })] })],
       _semnaturaProiectant(docx)
     );
   }
