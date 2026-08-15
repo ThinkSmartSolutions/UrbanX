@@ -62,15 +62,16 @@
       width: opts.width ? { size: opts.width, type: docx.WidthType.PERCENTAGE } : undefined,
       shading: opts.shade ? { fill: opts.shade } : undefined,
       verticalAlign: docx.VerticalAlign.CENTER,
-      children: [new docx.Paragraph({ alignment: opts.right ? docx.AlignmentType.RIGHT : (opts.center ? docx.AlignmentType.CENTER : docx.AlignmentType.LEFT), children: [new docx.TextRun({ text: String(text == null ? '' : text), bold: !!opts.bold, color: opts.color })] })]
+      margins: { top: 40, bottom: 40, left: 60, right: 60 },
+      children: [new docx.Paragraph({ alignment: opts.right ? docx.AlignmentType.RIGHT : (opts.center ? docx.AlignmentType.CENTER : docx.AlignmentType.LEFT), children: [new docx.TextRun({ text: String(text == null ? '' : text), bold: !!opts.bold, color: opts.color, size: opts.size })] })]
     });
   }
   var BORD = { style: 'single', size: 2, color: 'B9C2CE' };
   function _borders(docx) { return { top: BORD, bottom: BORD, left: BORD, right: BORD, insideHorizontal: BORD, insideVertical: BORD }; }
-  function _tabel(docx, head, rows, widths) {
-    var headRow = new docx.TableRow({ children: head.map(function (h, i) { return _cell(docx, h, { bold: true, shade: UX.BLUE_TINT, color: UX.DARK, width: widths ? widths[i] : undefined, center: true }); }), tableHeader: true });
+  function _tabel(docx, head, rows, widths, fontSize) {
+    var headRow = new docx.TableRow({ children: head.map(function (h, i) { return _cell(docx, h, { bold: true, shade: UX.BLUE_TINT, color: UX.DARK, width: widths ? widths[i] : undefined, center: true, size: fontSize || 16 }); }), tableHeader: true });
     var dataRows = rows.map(function (r) {
-      return new docx.TableRow({ children: r.map(function (c, i) { return _cell(docx, c && c.v != null ? c.v : c, { bold: c && c.bold, right: c && c.right, shade: c && c.shade, width: widths ? widths[i] : undefined }); }) });
+      return new docx.TableRow({ children: r.map(function (c, i) { return _cell(docx, c && c.v != null ? c.v : c, { bold: c && c.bold, right: c && c.right, shade: c && c.shade, width: widths ? widths[i] : undefined, size: fontSize || 18 }); }) });
     });
     return new docx.Table({ width: { size: 100, type: docx.WidthType.PERCENTAGE }, borders: _borders(docx), rows: [headRow].concat(dataRows) });
   }
@@ -107,7 +108,7 @@
         { v: lei(pretUnitar), right: true }, { v: lei(c.materiale), right: true }, { v: lei(c.manopera), right: true }, { v: lei(c.transport), right: true }, { v: lei(c.utilaj), right: true }, { v: lei(c.total), right: true, bold: true }]);
       });
     });
-    var tabelPrincipal = _tabel(docx, ['Nr', 'Capitolul de lucrări', 'UM', 'Cant.', 'Preț unitar', 'Material', 'Manoperă', 'Transport', 'Utilaj', 'TOTAL'], rows, [5, 27, 7, 8, 11, 10, 10, 8, 8, 13]);
+    var tabelPrincipal = _tabel(docx, ['Nr', 'Capitolul de lucrări', 'UM', 'Cant.', 'Preț unitar', 'Material', 'Manoperă', 'Transport', 'Utilaj', 'TOTAL'], rows, [4, 36, 6, 8, 9, 9, 9, 7, 7, 9], 16);
     return _brandHeader(docx, 'F3 — Listă cu cantități de lucrări pe categorii de lucrări').concat(
       _antet(docx, proiect, obiect),
       [new docx.Paragraph({ spacing: { before: 200, after: 100 }, children: [new docx.TextRun({ text: '- lei -', italics: true })] }), tabelPrincipal,
@@ -136,41 +137,109 @@
     );
   }
 
-  // ── Necesar manoperă și utilaje — "ore normate, utilaje, muncitori, numărul lor, ore, preț/oră" ──
-  // ÎNLOCUIEȘTE F4 (care arăta doar utilaje, cu ID-uri brute de resursă) — arată explicit AMBELE
-  // tipuri de resursă (manoperă + utilaj) cu nume real, ore totale, preț/oră curent, valoare, și
-  // — dacă obiectul are o durată de execuție setată — echivalentul de forță de muncă (FTE).
-  function _paginaNecesarResurse(docx, proiect, obiect, devizObiect, resurseMap) {
+  // ── C6-C9 — extrase de resurse (HG907/2016): C6 materiale, C7 manoperă, C8 utilaje de
+  // șantier (ore de funcționare — DIFERIT de F4/dotări, bunuri de capital), C9 transport.
+  // Agregă TOATE resursele de un TIP dat, folosite în articolele pe normă ale obiectului.
+  function _agregaResursePeTip(devizObiect, resurseMap, tip) {
     var agregat = {};
     devizObiect.categorii.forEach(function (cat) {
       cat.articole.forEach(function (c) {
         (c.detaliu || []).forEach(function (d) {
-          if (d.tip !== 'manopera' && d.tip !== 'utilaj') return;
-          var key = d.tip + '|' + d.resursa_id;
-          if (!agregat[key]) agregat[key] = { tip: d.tip, denumire: (resurseMap[d.resursa_id] || {}).denumire || d.resursa_id, um: (resurseMap[d.resursa_id] || {}).um || 'ore', oreTotale: 0, valoare: 0, pretOra: d.pret_unitar };
-          agregat[key].oreTotale += (+d.consum_unitar || 0) * (+c.articol.cantitate || 0);
+          if (d.tip !== tip) return;
+          var key = d.resursa_id;
+          var r = resurseMap[d.resursa_id] || {};
+          if (!agregat[key]) agregat[key] = { denumire: r.denumire || d.resursa_id, um: r.um || '', cantitateTotala: 0, valoare: 0, pretUnitar: d.pret_unitar };
+          agregat[key].cantitateTotala += (+d.consum_unitar || 0) * (+c.articol.cantitate || 0);
           agregat[key].valoare += d.valoare;
         });
       });
     });
-    var durata = +obiect.durata_zile_lucratoare || 0;
-    var manopera = [], utilaj = [];
-    Object.keys(agregat).forEach(function (k) { (agregat[k].tip === 'manopera' ? manopera : utilaj).push(agregat[k]); });
-    function randuri(lista) {
-      return lista.map(function (u, i) {
-        var fte = durata > 0 ? u.oreTotale / (durata * 8) : null;
-        return [String(i + 1), u.denumire, zec(u.oreTotale) + ' ore', lei(u.pretOra) + ' lei/oră', fte != null ? zec(fte) + ' pers./echip.' : '—', { v: lei(u.valoare) + ' lei', right: true }];
+    return Object.keys(agregat).map(function (k) { return agregat[k]; });
+  }
+  function _paginaExtrasResurse(docx, proiect, obiect, devizObiect, resurseMap, cod, titluTip, tip, durata) {
+    var lista = _agregaResursePeTip(devizObiect, resurseMap, tip);
+    var rows = lista.map(function (u, i) {
+      var fte = (durata > 0 && (tip === 'manopera' || tip === 'utilaj')) ? u.cantitateTotala / (durata * 8) : null;
+      var row = [String(i + 1), u.denumire, u.um, zec(u.cantitateTotala), lei(u.pretUnitar), { v: lei(u.valoare) + ' lei', right: true }];
+      if (fte != null) row.push(zec(fte) + ' pers./echip.');
+      return row;
+    });
+    var head = ['Nr.', 'Denumire resursă', 'UM', 'Cantitate totală', 'Preț unitar', 'Valoare'];
+    var widths = [6, 34, 10, 16, 14, 20];
+    if (tip === 'manopera' || tip === 'utilaj') { head.push(durata > 0 ? 'Echivalent normă întreagă (FTE)' : 'FTE (setați durata pe obiect)'); widths = [6, 28, 8, 14, 12, 16, 16]; }
+    var sectiuni = [lista.length ? _tabel(docx, head, rows, widths) : new docx.Paragraph('Niciun articol pe normă cu resursă de acest tip în acest obiect (articolele curente au preț liber).')];
+    if (!durata && (tip === 'manopera' || tip === 'utilaj')) sectiuni.push(new docx.Paragraph({ spacing: { before: 150 }, children: [new docx.TextRun({ text: 'Notă: setați „Durata execuției" pe obiect (tab Obiecte & Articole → Setări deviz) pentru echivalentul de personal/utilaje (FTE).', italics: true, size: 15, color: UX.GRI })] }));
+    return _brandHeader(docx, cod + ' — ' + titluTip).concat(_antet(docx, proiect, obiect), [new docx.Paragraph({ spacing: { before: 200 } })], sectiuni, _semnaturaProiectant(docx));
+  }
+
+  // ── F4 real (HG907 Anexa 8): utilaje/echipamente tehnologice + dotări CUMPĂRATE pt investiție
+  // (bunuri de capital, Cap.4.3/4.4) — NU utilajele de șantier din C8. Sursă: js/urbanx-devize-pro-
+  // schema-v3.sql (tabel deviz_dotari), introduse manual de proiectant (platforma nu proiectează
+  // echipamente tehnologice).
+  function _paginaF4Dotari(docx, proiect, obiect, dotari) {
+    var rows = dotari.map(function (d, i) {
+      var v = (+d.cantitate || 0) * (+d.pret_unitar || 0);
+      return [String(i + 1), (d.cod ? d.cod + ' — ' : '') + d.denumire, d.um, zec(d.cantitate), lei(d.pret_unitar), { v: lei(v) + ' lei', right: true }, d.necesita_montaj !== false ? '4.3' : '4.4', d.furnizor || '—'];
+    });
+    var total = dotari.reduce(function (s, d) { return s + (+d.cantitate || 0) * (+d.pret_unitar || 0); }, 0);
+    var sectiuni = dotari.length
+      ? [_tabel(docx, ['Nr.', 'Denumire', 'UM', 'Cantitate', 'Preț unitar', 'Valoare', 'Cap.', 'Furnizor'], rows, [5, 26, 8, 10, 12, 14, 7, 18]),
+      new docx.Paragraph({ spacing: { before: 150 }, children: [new docx.TextRun({ text: 'TOTAL DOTĂRI: ' + lei(total) + ' lei', bold: true })] })]
+      : [new docx.Paragraph('Nicio dotare/echipament tehnologic introdus încă pentru acest obiect (tab Obiecte & Articole → secțiunea „🔧 Dotări").')];
+    return _brandHeader(docx, 'F4 — Lista cu cantitățile de utilaje și echipamente tehnologice, inclusiv dotări').concat(_antet(docx, proiect, obiect), [new docx.Paragraph({ spacing: { before: 200 } })], sectiuni, _semnaturaProiectant(docx));
+  }
+
+  // ── F5 real: fișă tehnică per dotare (producător/model/parametri/garanție) — din datele reale
+  // introduse la fiecare dotare, nu placeholder generic.
+  function _paginaF5FiseTehnice(docx, proiect, obiect, dotari) {
+    var sectiuni = [];
+    if (!dotari.length) {
+      sectiuni.push(new docx.Paragraph('Nicio dotare/echipament introdus încă — fișele tehnice se generează automat din datele completate la fiecare dotare (tab Obiecte & Articole → „🔧 Dotări").'));
+    } else {
+      dotari.forEach(function (d, i) {
+        sectiuni.push(new docx.Paragraph({ heading: docx.HeadingLevel.HEADING_2, spacing: { before: i ? 300 : 0 }, text: (i + 1) + '. ' + d.denumire }));
+        var rows = [
+          ['Producător', d.producator || 'Se completează de proiectant/furnizor'],
+          ['Model', d.model || '—'],
+          ['Parametri tehnici', d.parametri || 'Se completează de proiectant/furnizor'],
+          ['Garanție', d.garantie_luni ? d.garantie_luni + ' luni' : 'Se completează la contractare'],
+          ['UM / Cantitate', d.um + ' / ' + zec(d.cantitate)],
+          ['Furnizor', d.furnizor || 'Se stabilește prin achiziție']
+        ];
+        sectiuni.push(_tabel(docx, ['Câmp', 'Valoare'], rows, [30, 70]));
       });
     }
-    var sectiuni = [];
-    sectiuni.push(new docx.Paragraph({ heading: docx.HeadingLevel.HEADING_2, text: '👷 Manoperă — muncitori necesari' }));
-    sectiuni.push(manopera.length ? _tabel(docx, ['Nr.', 'Meserie / muncitor', 'Ore totale', 'Preț/oră', durata > 0 ? 'Echivalent normă întreagă' : 'Echiv. normă (setați durata)', 'Valoare'], randuri(manopera), [6, 30, 16, 14, 20, 14])
-      : new docx.Paragraph('Niciun articol pe normă cu resursă de manoperă în acest obiect (articolele curente au preț liber).'));
-    sectiuni.push(new docx.Paragraph({ heading: docx.HeadingLevel.HEADING_2, spacing: { before: 300 }, text: '🚜 Utilaje — echipamente necesare' }));
-    sectiuni.push(utilaj.length ? _tabel(docx, ['Nr.', 'Utilaj / echipament', 'Ore totale', 'Preț/oră', 'Nr. utilaje (dacă se rulează în paralel pe durată)', 'Valoare'], randuri(utilaj), [6, 30, 16, 14, 20, 14])
-      : new docx.Paragraph('Niciun articol pe normă cu resursă de utilaj în acest obiect.'));
-    if (!durata) sectiuni.push(new docx.Paragraph({ spacing: { before: 150 }, children: [new docx.TextRun({ text: 'Notă: setați „Durata execuției (zile lucrătoare)" pe obiect ca să vedeți echivalentul de personal/utilaje (normă întreagă) — fără durată, se arată doar orele totale.', italics: true, size: 15, color: UX.GRI })] }));
-    return _brandHeader(docx, 'Necesar manoperă și utilaje').concat(_antet(docx, proiect, obiect), [new docx.Paragraph({ spacing: { before: 200 } })], sectiuni, _semnaturaProiectant(docx));
+    return _brandHeader(docx, 'F5 — Fișele tehnice pentru utilaje/echipamente').concat(_antet(docx, proiect, obiect), [new docx.Paragraph({ spacing: { before: 200 } })], sectiuni, _semnaturaProiectant(docx));
+  }
+
+  // ── F6 (Anexa 10 HG907/2016) — Graficul general de realizare a investiției. Fără un modul de
+  // planificare (durată per articol/capitol), singura eșalonare defensibilă e LINIARĂ pe durata
+  // de execuție a obiectului — etichetat explicit ca implicit/editabil, nu ca plan real de șantier.
+  function _paginaF6Grafic(docx, proiect, perechi) {
+    var cuDurata = perechi.filter(function (p) { return +p.obiect.durata_zile_lucratoare > 0; });
+    if (!cuDurata.length) {
+      return _brandHeader(docx, 'F6 — Graficul general de realizare a investiției').concat(
+        _antet(docx, proiect, null),
+        [new docx.Paragraph({ spacing: { before: 200 }, children: [new docx.TextRun({ text: 'Niciun obiect nu are „Durata execuției" setată (tab Obiecte & Articole → Setări deviz) — graficul nu se poate genera fără o durată de referință.', italics: true })] })],
+        _semnaturaProiectant(docx)
+      );
+    }
+    var nrLuni = Math.max.apply(null, cuDurata.map(function (p) { return Math.ceil(+p.obiect.durata_zile_lucratoare / 30); }));
+    var head = ['Nr.', 'Obiect / Stadiu fizic', 'Valoare totală'].concat(Array.from({ length: nrLuni }, function (_, i) { return 'Luna ' + (i + 1); }));
+    var widths = [5, 25, 14].concat(Array.from({ length: nrLuni }, function () { return Math.round(56 / nrLuni); }));
+    var rows = perechi.map(function (p, i) {
+      var lunile = +p.obiect.durata_zile_lucratoare > 0 ? Math.ceil(+p.obiect.durata_zile_lucratoare / 30) : 0;
+      var valLuna = lunile > 0 ? p.devizObiect.total / lunile : 0;
+      var row = [String(i + 1), (p.obiect.cod ? p.obiect.cod + ' ' : '') + p.obiect.denumire, { v: lei(p.devizObiect.total) + ' lei', right: true }];
+      for (var l = 0; l < nrLuni; l++) row.push(l < lunile ? { v: lei(valLuna), right: true } : '—');
+      return row;
+    });
+    return _brandHeader(docx, 'F6 — Graficul general de realizare a investiției').concat(
+      _antet(docx, proiect, null),
+      [new docx.Paragraph({ spacing: { before: 100, after: 150 }, children: [new docx.TextRun({ text: 'Eșalonare implicită LINIARĂ pe durata de execuție declarată per obiect (' + nrLuni + ' luni) — de adaptat de proiectant/diriginte la graficul real de șantier, nu un plan definitiv.', italics: true, size: 15, color: UX.GRI })] }),
+      _tabel(docx, head, rows, widths)],
+      _semnaturaProiectant(docx)
+    );
   }
 
   function _paginaDevizGeneral(docx, proiect, devizGen) {
@@ -193,6 +262,8 @@
     );
   }
 
+  var TIP_COD = { materiale: ['C6', 'Lista cuprinzând consumurile de resurse materiale'], manopera: ['C7', 'Lista cuprinzând consumurile cu mâna de lucru'], utilaj: ['C8', 'Lista cuprinzând consumurile de ore de funcționare a utilajelor de construcții'], transport: ['C9', 'Lista cuprinzând consumurile privind transporturile'] };
+
   function generateDocumenteF1F5Docx(proiectId) {
     var DP = G.UXDevizePro;
     if (!DP) return Promise.reject(new Error('UXDevizePro nu e încărcat.'));
@@ -201,14 +272,23 @@
       return Promise.all([DP.getProiect(proiectId), DP.listObiecte(proiectId), DP.listResurse(), DP.computeDevizGeneral(proiectId)]).then(function (r) {
         var proiect = r[0], obiecte = r[1], resurse = r[2], devizGen = r[3];
         var resurseMap = {}; resurse.forEach(function (x) { resurseMap[x.id] = x; });
-        return Promise.all(obiecte.map(function (o) { return DP.computeDevizObiect(o.id).then(function (d) { return { obiect: o, devizObiect: d }; }); })).then(function (perechi) {
+        return Promise.all(obiecte.map(function (o) {
+          return Promise.all([DP.computeDevizObiect(o.id), DP.listDotari(o.id)]).then(function (rr) { return { obiect: o, devizObiect: rr[0], dotari: rr[1] }; });
+        })).then(function (perechi) {
           var files = [];
           files.push({ name: _numeFisier('F1_Centralizator_obiectiv'), doc: _doc(docx, _paginaF1(docx, proiect, perechi)) });
+          files.push({ name: _numeFisier('F6_Grafic_realizare_investitie'), doc: _doc(docx, _paginaF6Grafic(docx, proiect, perechi)) });
           perechi.forEach(function (p) {
             var suf = '_' + (p.obiect.cod || p.obiect.denumire);
-            files.push({ name: _numeFisier('F3' + suf), doc: _doc(docx, _paginaF3(docx, proiect, p.obiect, p.devizObiect)) });
+            var durata = +p.obiect.durata_zile_lucratoare || 0;
             files.push({ name: _numeFisier('F2' + suf), doc: _doc(docx, _paginaF2(docx, proiect, p.obiect, p.devizObiect)) });
-            files.push({ name: _numeFisier('NecesarResurse' + suf), doc: _doc(docx, _paginaNecesarResurse(docx, proiect, p.obiect, p.devizObiect, resurseMap)) });
+            files.push({ name: _numeFisier('F3' + suf), doc: _doc(docx, _paginaF3(docx, proiect, p.obiect, p.devizObiect)) });
+            files.push({ name: _numeFisier('F4' + suf), doc: _doc(docx, _paginaF4Dotari(docx, proiect, p.obiect, p.dotari)) });
+            files.push({ name: _numeFisier('F5' + suf), doc: _doc(docx, _paginaF5FiseTehnice(docx, proiect, p.obiect, p.dotari)) });
+            ['materiale', 'manopera', 'utilaj', 'transport'].forEach(function (tip) {
+              var cod = TIP_COD[tip][0], titlu = TIP_COD[tip][1];
+              files.push({ name: _numeFisier(cod + suf), doc: _doc(docx, _paginaExtrasResurse(docx, proiect, p.obiect, p.devizObiect, resurseMap, cod, titlu, tip, durata)) });
+            });
           });
           if (devizGen.deviz_general && G.UXDevize && G.UXDevize.STRUCT) {
             files.push({ name: _numeFisier('Deviz_general_HG907'), doc: _doc(docx, _paginaDevizGeneral(docx, proiect, devizGen)) });

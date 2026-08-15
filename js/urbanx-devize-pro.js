@@ -454,15 +454,50 @@
   // Deviz general — REUTILIZEAZĂ UXDevize.computeDeviz (Cap.1-7 HG907, deja existent),
   // dar suprascrie Cap.4.1 (c41) cu suma REALĂ pe articole când există, altfel fallback
   // pe vechiul estimator top-down (Sc × cost_mp_functiune) — extensie neinvazivă.
+  // ── Dotări / utilaje tehnologice cumpărate (F4 oficial, HG907 Anexa 8 — DIFERIT de
+  // resursele tip 'utilaj' din norme, care sunt utilaje de șantier/ore de funcționare,
+  // parte din Cap.4.1 C+M). Dotările sunt bunuri de capital: Cap.4.3 (necesită montaj)
+  // sau Cap.4.4 (nu necesită montaj), conform Anexa 7 HG907/2016.
+  function listDotari(obiectId) { return sbSelect('deviz_dotari', [{ col: 'obiect_id', val: obiectId }]).then(function (a) { return a.sort(function (x, y) { return (x.ordine || 0) - (y.ordine || 0); }); }); }
+  function createDotare(obiectId, d) {
+    var row = {
+      id: uuid(), obiect_id: obiectId, cod: d.cod || '', denumire: d.denumire, um: d.um || 'buc',
+      cantitate: +d.cantitate || 1, pret_unitar: +d.pret_unitar || 0, furnizor: d.furnizor || null,
+      necesita_montaj: d.necesita_montaj !== false, producator: d.producator || null, model: d.model || null,
+      parametri: d.parametri || null, garantie_luni: d.garantie_luni != null ? +d.garantie_luni : null,
+      ordine: d.ordine || 0, created_at: nowIso()
+    };
+    return sbInsert('deviz_dotari', row);
+  }
+  function updateDotare(id, patch) { return sbUpdate('deviz_dotari', id, patch); }
+  function deleteDotare(id) { return sbDelete('deviz_dotari', id); }
+  function computeValoareDotari(obiectId) {
+    return listDotari(obiectId).then(function (dotari) {
+      var cuMontaj = 0, faraMontaj = 0;
+      dotari.forEach(function (d) { var v = (+d.cantitate || 0) * (+d.pret_unitar || 0); if (d.necesita_montaj !== false) cuMontaj += v; else faraMontaj += v; });
+      return { dotari: dotari, cuMontaj: cuMontaj, faraMontaj: faraMontaj, total: cuMontaj + faraMontaj };
+    });
+  }
+
   function computeDevizGeneral(proiectId, Dparams) {
     return listObiecte(proiectId).then(function (obiecte) {
-      return Promise.all(obiecte.map(function (o) { return computeDevizObiect(o.id); }));
-    }).then(function (devizeObiecte) {
+      return Promise.all([Promise.all(obiecte.map(function (o) { return computeDevizObiect(o.id); })), Promise.all(obiecte.map(function (o) { return computeValoareDotari(o.id); }))]);
+    }).then(function (r) {
+      var devizeObiecte = r[0], dotariPeObiect = r[1];
       var sumaArticole = devizeObiecte.reduce(function (s, d) { return s + d.total; }, 0);
+      var sumaDotariMontaj = dotariPeObiect.reduce(function (s, d) { return s + d.cuMontaj; }, 0);
+      var sumaDotariFaraMontaj = dotariPeObiect.reduce(function (s, d) { return s + d.faraMontaj; }, 0);
       var D = Object.assign({}, Dparams || {});
-      if (sumaArticole > 0) D.deviz = Object.assign({}, D.deviz, { c41: Math.round(sumaArticole) });
+      D.deviz = Object.assign({}, D.deviz);
+      if (sumaArticole > 0) D.deviz.c41 = Math.round(sumaArticole);
+      if (sumaDotariMontaj > 0) D.deviz.c43 = Math.round(sumaDotariMontaj);
+      if (sumaDotariFaraMontaj > 0) D.deviz.c44 = Math.round(sumaDotariFaraMontaj);
       var dz = (G.UXDevize && G.UXDevize.computeDeviz) ? G.UXDevize.computeDeviz(D) : null;
-      return { proiect_id: proiectId, obiecte: devizeObiecte, suma_articole_c41: sumaArticole, deviz_general: dz, sursa_c41: sumaArticole > 0 ? 'articole_reale' : 'estimare_top_down' };
+      return {
+        proiect_id: proiectId, obiecte: devizeObiecte, dotari_pe_obiect: dotariPeObiect,
+        suma_articole_c41: sumaArticole, suma_dotari_c43: sumaDotariMontaj, suma_dotari_c44: sumaDotariFaraMontaj,
+        deviz_general: dz, sursa_c41: sumaArticole > 0 ? 'articole_reale' : 'estimare_top_down'
+      };
     });
   }
 
@@ -724,6 +759,7 @@
     // proiecte/obiecte/categorii
     listProiecte: listProiecte, getProiect: getProiect, createProiect: createProiect, updateProiect: updateProiect,
     listObiecte: listObiecte, createObiect: createObiect, getObiect: getObiect, updateObiect: updateObiect, listCategorii: listCategorii, createCategorie: createCategorie,
+    listDotari: listDotari, createDotare: createDotare, updateDotare: updateDotare, deleteDotare: deleteDotare, computeValoareDotari: computeValoareDotari,
     creazaCategoriiStandard: creazaCategoriiStandard, CATEGORII_STD: CATEGORII_STD, CATEGORII_STD_LABELS: CATEGORII_STD_LABELS,
     // resurse/norme
     listResurse: listResurse, createResursa: createResursa, listNorme: listNorme, normaResurse: normaResurse, creazaNorma: creazaNorma,

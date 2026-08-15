@@ -194,6 +194,62 @@
       setWrap.appendChild(setBtn); setWrap.appendChild(setOut);
       pane.appendChild(setWrap);
 
+      // ── Dotări / Echipamente tehnologice (F4 oficial — bunuri de capital cumpărate, Cap.4.3/4.4,
+      // DIFERIT de utilajele de șantier din norme — vezi js/urbanx-devize-pro-schema-v3.sql) ──
+      var dotWrap = el('div', { style: ST.card + ';margin-bottom:10px' });
+      dotWrap.appendChild(el('div', { style: ST.label }, '🔧 Dotări / Echipamente tehnologice (F4 — bunuri cumpărate pt investiție, nu utilaje de șantier)'));
+      var dotAddGrid = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.4fr auto;gap:5px;margin-bottom:6px' });
+      var dDen = el('input', { style: ST.inp, placeholder: 'Denumire (ex. Centrală termică, Lift)' });
+      var dUm = el('input', { style: ST.inp, placeholder: 'UM', value: 'buc' });
+      var dCant = el('input', { style: ST.inp, type: 'number', placeholder: 'Cantitate', value: '1' });
+      var dPret = el('input', { style: ST.inp, type: 'number', placeholder: 'Preț unitar (lei)' });
+      var dFurn = el('input', { style: ST.inp, placeholder: 'Furnizor (opțional)' });
+      var dMontajSel = el('select', { style: ST.inp });
+      dMontajSel.appendChild(el('option', { value: '1' }, 'necesită montaj (Cap.4.3)'));
+      dMontajSel.appendChild(el('option', { value: '0' }, 'nu necesită montaj (Cap.4.4)'));
+      var dotBtn = el('button', { style: ST.btn }, '+ Dotare');
+      dotAddGrid.appendChild(dDen); dotAddGrid.appendChild(dUm); dotAddGrid.appendChild(dCant); dotAddGrid.appendChild(dPret); dotAddGrid.appendChild(dMontajSel); dotAddGrid.appendChild(dotBtn);
+      var dotAddGrid2 = el('div', { style: 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:8px' });
+      var dProd = el('input', { style: ST.inp, placeholder: 'Producător (fișă tehnică F5)' });
+      var dModel = el('input', { style: ST.inp, placeholder: 'Model' });
+      var dParam = el('input', { style: ST.inp, placeholder: 'Parametri tehnici' });
+      var dGarantie = el('input', { style: ST.inp, type: 'number', placeholder: 'Garanție (luni)' });
+      dotAddGrid2.appendChild(dProd); dotAddGrid2.appendChild(dModel); dotAddGrid2.appendChild(dParam); dotAddGrid2.appendChild(dGarantie);
+      dotWrap.appendChild(dotAddGrid); dotWrap.appendChild(dotAddGrid2);
+      var dotListWrap = el('div'); dotWrap.appendChild(dotListWrap);
+      function renderDotari() {
+        dotListWrap.innerHTML = '<div style="color:#64748b;font-size:11px">Se încarcă…</div>';
+        DP.listDotari(obiect.id).then(function (dotari) {
+          dotListWrap.innerHTML = '';
+          if (!dotari.length) { dotListWrap.innerHTML = '<div style="color:#64748b;font-size:11px">Nicio dotare adăugată încă.</div>'; return; }
+          var total = 0;
+          dotari.forEach(function (d) {
+            var v = (+d.cantitate || 0) * (+d.pret_unitar || 0); total += v;
+            var row = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)' });
+            row.appendChild(el('span', null, esc(d.denumire) + ' <span style="color:#64748b">· ' + d.cantitate + ' ' + esc(d.um) + ' × ' + lei(d.pret_unitar) + ' lei = ' + lei(v) + ' lei · ' + (d.necesita_montaj !== false ? 'Cap.4.3' : 'Cap.4.4') + (d.furnizor ? ' · ' + esc(d.furnizor) : '') + '</span>'));
+            var del = el('button', { style: ST.ghost }, '🗑');
+            del.onclick = function () { if (confirm('Ștergi „' + d.denumire + '"?')) DP.deleteDotare(d.id).then(renderDotari); };
+            row.appendChild(del);
+            dotListWrap.appendChild(row);
+          });
+          dotListWrap.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px;font-weight:700' }, 'Total dotări: ' + lei(total) + ' lei'));
+        });
+      }
+      dotBtn.onclick = function () {
+        if (!dDen.value.trim()) return;
+        DP.createDotare(obiect.id, {
+          denumire: dDen.value.trim(), um: dUm.value.trim() || 'buc', cantitate: dCant.value || 1, pret_unitar: dPret.value || 0,
+          furnizor: dFurn.value.trim() || null, necesita_montaj: dMontajSel.value === '1',
+          producator: dProd.value.trim() || null, model: dModel.value.trim() || null, parametri: dParam.value.trim() || null,
+          garantie_luni: dGarantie.value || null
+        }).then(function () {
+          dDen.value = ''; dPret.value = ''; dFurn.value = ''; dProd.value = ''; dModel.value = ''; dParam.value = ''; dGarantie.value = '';
+          renderDotari();
+        });
+      };
+      renderDotari();
+      pane.appendChild(dotWrap);
+
       var stdWrap = el('div', { style: 'margin-bottom:10px' });
       var stdLbl = el('div', { style: ST.label }, 'Categorii standard de adăugat (bifează domeniile — acoperă și structură/rezistență, nu doar arhitectură)');
       stdWrap.appendChild(stdLbl);
