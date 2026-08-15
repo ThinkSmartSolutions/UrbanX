@@ -265,8 +265,28 @@
               });
             }
             renderArt();
-            var addArtRow = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:5px;margin-top:8px' });
-            var aDen = el('input', { style: ST.inp, placeholder: 'Denumire articol' });
+
+            // ── Adaugă articol PE NORMĂ (rețetă manoperă/utilaj/materiale — vezi tab Prețuri) ──
+            var normaRow = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:5px;margin-top:10px' });
+            var normaSel = el('select', { style: ST.inp });
+            normaSel.appendChild(el('option', { value: '' }, '— sau alege o normă (ore manoperă/utilaj incluse) —'));
+            DP.listNorme().then(function (norme) {
+              norme.forEach(function (n) { normaSel.appendChild(el('option', { value: n.id, 'data-den': n.denumire, 'data-um': n.um }, (n.cod_norma ? n.cod_norma + ' — ' : '') + n.denumire + ' (' + n.um + ')')); });
+            });
+            var nCantInp = el('input', { style: ST.inp, type: 'number', placeholder: 'Cantitate' });
+            var nUmOut = el('input', { style: ST.inp, placeholder: 'UM (din normă)', disabled: true });
+            normaSel.onchange = function () { var o = normaSel.options[normaSel.selectedIndex]; nUmOut.value = o.getAttribute('data-um') || ''; };
+            var normaBtn = el('button', { style: ST.btn }, '+ Articol pe normă');
+            normaBtn.onclick = function () {
+              if (!normaSel.value || !nCantInp.value) return;
+              var o = normaSel.options[normaSel.selectedIndex];
+              DP.createArticol(cat.id, { norma_id: normaSel.value, denumire: o.getAttribute('data-den'), um: o.getAttribute('data-um'), cantitate: nCantInp.value, sursa_cantitate: 'manual' }).then(function () { normaSel.value = ''; nCantInp.value = ''; nUmOut.value = ''; renderArt(); });
+            };
+            normaRow.appendChild(normaSel); normaRow.appendChild(nCantInp); normaRow.appendChild(nUmOut); normaRow.appendChild(normaBtn);
+            catCard.appendChild(normaRow);
+
+            var addArtRow = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:5px;margin-top:6px' });
+            var aDen = el('input', { style: ST.inp, placeholder: 'sau Denumire articol (preț liber)' });
             var aUm = el('input', { style: ST.inp, placeholder: 'UM' });
             var aCant = el('input', { style: ST.inp, type: 'number', placeholder: 'Cantitate' });
             var aPret = el('input', { style: ST.inp, type: 'number', placeholder: 'Preț unitar (dacă liber)' });
@@ -462,7 +482,82 @@
         card.appendChild(row2);
         listWrap.appendChild(card);
       });
+      _renderNormeSectiune(pane, DP, resurse);
     });
+  }
+
+  function _renderNormeSectiune(pane, DP, resurse) {
+    // ── Norme de deviz (rețetă: 1 UM normă = X ore manoperă + Y ore utilaj + Z materiale/transport) ──
+    // Fără asta, un articol are DOAR preț unitar liber (fără detaliere ore normate/utilaje) — normele
+    // sunt ce leagă efectiv "ore normate, utilaje, muncitori" (cerință explicită) de costul unui articol.
+    var normeBox = el('div', { style: ST.card + ';margin-top:14px' });
+    normeBox.appendChild(el('div', { style: ST.label }, '🧮 Normă de deviz nouă (rețetă manoperă/utilaj/materiale/transport pe unitate)'));
+    normeBox.appendChild(el('div', { style: 'font-size:11px;color:#94a3b8;margin-bottom:8px' },
+      'O normă = câte ore de manoperă, ore de utilaj și ce materiale consumă 1 unitate din articol (ex. 1 mp zidărie = 0,45 ore manoperă + 0,02 ore macara + 0,1 mc BCA). Odată creată, o poți alege la adăugarea unui articol — costul se calculează automat din normă × prețurile curente ale resurselor.'));
+    var nGrid = el('div', { style: 'display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:6px;margin-bottom:8px' });
+    var nCod = el('input', { style: ST.inp, placeholder: 'Cod normă (ex. CA07A)' });
+    var nDen = el('input', { style: ST.inp, placeholder: 'Denumire normă (ex. Zidărie BCA 25cm)' });
+    var nUm = el('input', { style: ST.inp, placeholder: 'UM (mp, mc, buc...)' });
+    var nDom = el('select', { style: ST.inp });
+    ['constructii', 'instalatii', 'structura', 'terasamente'].forEach(function (d) { nDom.appendChild(el('option', { value: d }, d)); });
+    nGrid.appendChild(nCod); nGrid.appendChild(nDen); nGrid.appendChild(nUm); nGrid.appendChild(nDom);
+    normeBox.appendChild(nGrid);
+
+    var linii = []; // {resursa_id, denumire, tip, consum_unitar, um}
+    var liniiWrap = el('div', { style: 'margin-bottom:8px' });
+    normeBox.appendChild(liniiWrap);
+    function renderLinii() {
+      liniiWrap.innerHTML = linii.length ? '' : '<div style="font-size:11px;color:#64748b">Nicio resursă adăugată încă în rețetă.</div>';
+      linii.forEach(function (l, i) {
+        var r = el('div', { style: 'display:flex;justify-content:space-between;font-size:11px;padding:2px 0' });
+        r.appendChild(el('span', null, esc(l.denumire) + ' <span style="color:#64748b">· ' + l.tip + ' · ' + l.consum_unitar + ' ' + esc(l.um) + '/UM normă</span>'));
+        var rm = el('button', { style: ST.ghost }, '✕');
+        rm.onclick = function () { linii.splice(i, 1); renderLinii(); };
+        r.appendChild(rm);
+        liniiWrap.appendChild(r);
+      });
+    }
+    renderLinii();
+
+    var addLinieGrid = el('div', { style: 'display:grid;grid-template-columns:2fr 1fr auto;gap:6px;margin-bottom:8px' });
+    var resSel = el('select', { style: ST.inp });
+    resSel.appendChild(el('option', { value: '' }, '— alege resursă (material/manoperă/utilaj/transport) —'));
+    (resurse || []).forEach(function (r) { resSel.appendChild(el('option', { value: r.id, 'data-tip': r.categorie, 'data-den': r.denumire, 'data-um': r.um }, r.denumire + ' (' + r.categorie + ', ' + r.um + ')')); });
+    var consumInp = el('input', { style: ST.inp, type: 'number', placeholder: 'Consum unitar (ex. ore/UM sau kg/UM)' });
+    var addLinieBtn = el('button', { style: ST.ghost }, '+ Adaugă în rețetă');
+    addLinieBtn.onclick = function () {
+      var opt = resSel.options[resSel.selectedIndex];
+      if (!resSel.value || !consumInp.value) return;
+      linii.push({ resursa_id: resSel.value, denumire: opt.getAttribute('data-den'), tip: opt.getAttribute('data-tip'), um: opt.getAttribute('data-um'), consum_unitar: +consumInp.value });
+      consumInp.value = ''; renderLinii();
+    };
+    addLinieGrid.appendChild(resSel); addLinieGrid.appendChild(consumInp); addLinieGrid.appendChild(addLinieBtn);
+    normeBox.appendChild(addLinieGrid);
+    if (!resurse.length) normeBox.appendChild(el('div', { style: 'font-size:11px;color:#fbbf24;margin-bottom:8px' }, '⚠ Creează întâi resurse mai sus (materiale/manoperă/utilaj/transport) — o normă e o rețetă din resurse existente.'));
+
+    var nOut = el('div', { style: 'font-size:11px;color:#94a3b8' });
+    var nBtn = el('button', { style: ST.btn });
+    nBtn.textContent = '✅ Creează norma';
+    nBtn.onclick = function () {
+      if (!nDen.value.trim() || !nUm.value.trim() || !linii.length) { nOut.textContent = '⚠ Completează denumire, UM și cel puțin o resursă în rețetă.'; return; }
+      nOut.textContent = 'Se creează…';
+      DP.creazaNorma({ cod_norma: nCod.value.trim(), denumire: nDen.value.trim(), um: nUm.value.trim(), domeniu: nDom.value, sursa: 'introdusa_user' }, linii)
+        .then(function () { nOut.textContent = '✅ Normă creată — acum o poți alege la adăugarea unui articol.'; nCod.value = ''; nDen.value = ''; nUm.value = ''; linii = []; renderLinii(); renderNormeList(); });
+    };
+    normeBox.appendChild(nOut); normeBox.appendChild(nBtn);
+    pane.appendChild(normeBox);
+
+    var normeListWrap = el('div', { style: 'margin-top:10px' }); pane.appendChild(normeListWrap);
+    function renderNormeList() {
+      normeListWrap.innerHTML = '<div style="color:#64748b;font-size:11px">Se încarcă normele existente…</div>';
+      DP.listNorme().then(function (norme) {
+        normeListWrap.innerHTML = '';
+        normeListWrap.appendChild(el('div', { style: ST.label }, 'Norme existente (' + norme.length + ')'));
+        if (!norme.length) { normeListWrap.appendChild(el('div', { style: 'font-size:11px;color:#64748b' }, 'Nicio normă creată încă.')); return; }
+        norme.forEach(function (n) { normeListWrap.appendChild(el('div', { style: 'font-size:11px;padding:2px 0' }, esc(n.cod_norma || '') + ' ' + esc(n.denumire) + ' <span style="color:#64748b">· ' + esc(n.um) + ' · ' + esc(n.domeniu) + '</span>')); });
+      });
+    }
+    renderNormeList();
   }
 
   // ── TAB: Furnizori & Contracte ───────────────────────────────────────────
@@ -577,10 +672,12 @@
     pane.innerHTML = '';
     pane.appendChild(el('div', { style: ST.label }, 'Documente generate (F1-F5 + Deviz pe obiect + Deviz general HG907)'));
     var out = el('div', { style: 'font-size:12px;margin-top:8px' }); pane.appendChild(out);
-    var btn = el('button', { style: ST.btn }, '⬇ Generează + exportă ZIP');
+    var btn = el('button', { style: ST.btn }, '⬇ Generează + exportă Word real (.docx) + ZIP');
     btn.onclick = function () {
-      out.innerHTML = 'Se generează documentele…';
-      DP.exportProiectDocx(State.proiectId).then(function (n) { out.innerHTML = '✅ ' + n + ' documente exportate.'; });
+      if (!G.UXDevizeDocx) { out.innerHTML = '⚠ Modulul de export Word (urbanx-devize-docx.js) nu e încărcat.'; return; }
+      out.innerHTML = '⏳ Se generează documentele Word (.docx)…';
+      G.UXDevizeDocx.exportProiectDocxReal(State.proiectId).then(function (n) { out.innerHTML = '✅ ' + n + ' documente Word (.docx) reale exportate (arhivă ZIP).'; })
+        .catch(function (e) { out.innerHTML = '⚠ ' + (e && e.message || 'Eroare la generarea Word.'); });
     };
     pane.appendChild(btn);
     var csvBtn = el('button', { style: ST.ghost + ';margin-left:8px' }, '📊 Export CSV deviz general (rapid)');

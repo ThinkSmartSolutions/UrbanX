@@ -135,6 +135,6 @@
     } catch (e) {}
   }
 
-  G.UXDevize = { computeDeviz: computeDeviz, devizGeneralHtml: devizGeneralHtml, loadPreturi: loadPreturi, savePreturi: savePreturi, devizToCSV: devizToCSV, exportDevizCSV: exportDevizCSV, get PRETURI() { return P; }, set PRETURI(x) { P = x; } };
+  G.UXDevize = { computeDeviz: computeDeviz, devizGeneralHtml: devizGeneralHtml, loadPreturi: loadPreturi, savePreturi: savePreturi, devizToCSV: devizToCSV, exportDevizCSV: exportDevizCSV, STRUCT: STRUCT, get PRETURI() { return P; }, set PRETURI(x) { P = x; } };
   console.log('[UXDevize] deviz general HG 907/2016 (standardizat, Cap.1–7) încărcat');
 })(window);
