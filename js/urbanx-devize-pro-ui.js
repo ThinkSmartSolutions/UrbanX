@@ -156,9 +156,38 @@
       if (!obiecte.length) { pane.appendChild(el('div', { style: 'color:#64748b;font-size:12px' }, 'Niciun obiect. Creează primul obiect de mai sus.')); return; }
       var obSel = el('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px' });
       obiecte.forEach(function (o) {
+        var wrap = el('div', { style: 'display:flex;align-items:center;gap:2px' });
         var b = el('button', { style: State.obiectId === o.id ? ST.tabOn : ST.tab }, esc(o.cod || '') + ' ' + esc(o.denumire));
         b.onclick = function () { State.obiectId = o.id; paneArticole(pane); };
-        obSel.appendChild(b);
+        var dup = el('button', { style: ST.ghost + ';padding:4px 6px;font-size:11px', title: 'Duplică acest obiect (pt. case/blocuri identice) — copiază categoriile, articolele și dotările' }, '⧉');
+        dup.onclick = function (ev) {
+          ev.stopPropagation();
+          var denumireNoua = prompt('Denumire obiect nou (ex. „' + o.denumire + ' — Casa 2"):', o.denumire + ' (copie)');
+          if (!denumireNoua) return;
+          var multStr = prompt('Multiplicator cantități (1 = identic; ex. 1 pt. o clădire suplimentară din aceeași categorie, nu multiplica un obiect deja centralizat):', '1');
+          if (multStr == null) return;
+          var mult = parseFloat(multStr.replace(',', '.')) || 1;
+          dup.disabled = true; dup.textContent = '⏳';
+          DP.duplicateObiect(o.id, { denumire: denumireNoua, multiplicator: mult, ordine: obiecte.length }).then(function (nou) {
+            State.obiectId = nou.id; paneArticole(pane);
+          }).catch(function (e) { alert('Eroare la duplicare: ' + (e && e.message || e)); dup.disabled = false; dup.textContent = '⧉'; });
+        };
+        wrap.appendChild(b); wrap.appendChild(dup);
+        var esteAdmin = !!(G.UXRoles && G.UXRoles.current && G.UXRoles.current() === 'SUPER_ADMIN');
+        if (esteAdmin) {
+          var del = el('button', { style: ST.ghost + ';padding:4px 6px;font-size:11px;color:#f87171', title: 'Șterge acest obiect definitiv (categorii+articole+dotări) — doar admin' }, '🗑');
+          del.onclick = function (ev) {
+            ev.stopPropagation();
+            if (!confirm('Ștergi definitiv obiectul „' + o.denumire + '" — inclusiv toate categoriile, articolele și dotările sale? Acțiunea NU poate fi anulată.')) return;
+            del.disabled = true;
+            DP.deleteObiect(o.id).then(function () {
+              if (State.obiectId === o.id) State.obiectId = null;
+              paneArticole(pane);
+            }).catch(function (e) { alert('Eroare la ștergere: ' + (e && e.message || e)); del.disabled = false; });
+          };
+          wrap.appendChild(del);
+        }
+        obSel.appendChild(wrap);
       });
       pane.appendChild(obSel);
       if (!State.obiectId) { State.obiectId = obiecte[0].id; }
@@ -806,6 +835,16 @@
     var csvBtn = el('button', { style: ST.ghost + ';margin-left:8px' }, '📊 Export CSV deviz general (rapid)');
     csvBtn.onclick = function () { if (G.UXDevize && G.UXDevize.exportDevizCSV) G.UXDevize.exportDevizCSV({}); };
     pane.appendChild(csvBtn);
+
+    var xlsxBtn = el('button', { style: ST.btn + ';margin-left:8px;background:#1D6F42', title: 'Workbook .xlsx real — o foaie per obiect (articole+subsol cu FORMULE) + o foaie Centralizator ce referențiază formulele fiecărui obiect. Modifici o cantitate/preț/procent în Excel → totalurile se recalculează singure.' }, '📗 Exportă Excel real (.xlsx) cu formule');
+    var xlsxOut = el('div', { style: 'font-size:11px;color:#94a3b8;margin-top:6px' });
+    xlsxBtn.onclick = function () {
+      if (!G.UXDevizeXlsx) { xlsxOut.textContent = '⚠ Modulul de export Excel (urbanx-devize-xlsx.js) nu e încărcat.'; return; }
+      xlsxOut.textContent = '⏳ Se generează workbook-ul Excel (cu formule)…';
+      G.UXDevizeXlsx.exportProiectXlsxReal(State.proiectId).then(function (r) { xlsxOut.textContent = '✅ ' + r.file + ' — deschide-l în Excel/LibreOffice: click pe orice sumă vezi formula ei în bara de formule.'; })
+        .catch(function (e) { xlsxOut.textContent = '⚠ ' + (e && e.message || 'Eroare la generarea Excel.'); });
+    };
+    pane.appendChild(xlsxBtn); pane.appendChild(xlsxOut);
   }
 
   // ── TAB: Audit & Alerte ───────────────────────────────────────────────────

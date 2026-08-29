@@ -26,7 +26,8 @@
     { key: 'Memorii avizatori', tie: null, hint: 'dosar + memoriu specific pt fiecare avizator bifat' },
     { key: 'Memoriu tehnic aviz de mediu (Ord. 863/2002)', tie: 'APM', hint: 'pentru avizul/acordul de mediu (APM)' },
     { key: 'Scoatere teren din circuitul agricol (Ord. 83/2018)', tie: null, hint: 'teren agricol extravilan (DADR/APIA)' },
-    { key: 'DALI — construcție existentă / intervenție', tie: null, hint: 'doar la intervenții pe construcție existentă' }
+    { key: 'DALI — construcție existentă / intervenție', tie: null, hint: 'doar la intervenții pe construcție existentă' },
+    { key: 'Studiu de fezabilitate (SF) — construcție nouă', tie: null, hint: 'pentru investiții de construcție nouă (fundamentare decizie de investiție, HG 907/2016 Anexa 3) — nu se bifează împreună cu DALI, sunt alternative' }
   ];
   var FAZE = [['DTAC', 'D.T.A.C. — extras pentru autorizare'], ['PTh', 'P.Th. + D.E. — proiect complet de execuție (include extrasul DTAC)']];
   var STRUCT = { metalica: 'Metalică (Eurocod 3)', beton: 'Beton armat monolit', prefabricat: 'Beton prefabricat', lemn: 'Lemn CLT/glulam', zidarie: 'Zidărie portantă', lsf: 'LSF (structură ușoară)', mixt: 'Mixt metal-beton' };

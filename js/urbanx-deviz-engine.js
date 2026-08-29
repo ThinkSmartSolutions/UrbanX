@@ -88,25 +88,63 @@
   ];
 
   function _lei(n) { return (n || 0).toLocaleString('ro-RO'); }
-  function devizGeneralHtml(D, v) {
-    var dz = computeDeviz(D); var val = dz.v, tva = dz.tva;
+  // Randează UN tabel STRUCT (cap.1-7) pt. un singur deviz (un imobil SAU centralizatul).
+  // nrCrt=true adaugă o coloană separată de numerotare secvențială (1,2,3...) pe lângă
+  // codul HG907 (1.1/1.2/...), cerută explicit pt. identificarea rândurilor fiecărui articol.
+  function _tabelDeviz(dz, opts) {
+    opts = opts || {};
+    var val = dz.v, tva = dz.tva, nr = 0;
     var rows = STRUCT.map(function (r) {
       var cod = r[0], den = r[1], key = r[2], lvl = r[3];
       var fara = key != null ? val[key] : null;
       var t = fara != null ? Math.round(fara * tva) : null;
       var cu = fara != null ? fara + t : null;
+      if (fara != null && lvl < 2) nr++;
       var bold = lvl >= 2 ? 'font-weight:bold;' : ''; var bg = lvl === 0 ? 'background:#DCE6F1;' : lvl === 3 ? 'background:#1F3864;color:#fff;' : lvl === 2 ? 'background:#F2F2F2;' : '';
-      return '<tr style="' + bold + bg + '"><td style="text-align:center">' + cod + '</td><td>' + den + '</td>' +
+      return '<tr style="' + bold + bg + '">' + (opts.nrCrt ? '<td style="text-align:center">' + (fara != null && lvl < 2 ? nr : '') + '</td>' : '') +
+        '<td style="text-align:center">' + cod + '</td><td>' + den + '</td>' +
         '<td style="text-align:right">' + (fara != null ? _lei(fara) : '') + '</td>' +
         '<td style="text-align:right">' + (t != null ? _lei(t) : '') + '</td>' +
         '<td style="text-align:right">' + (cu != null ? _lei(cu) : '') + '</td></tr>';
     }).join('');
     var totalCu = val.total + Math.round(val.total * tva);
-    return '<p style="text-align:center;font-weight:bold">DEVIZ GENERAL al obiectivului de investiție<br>' + (D.nume || '—') + '</p>' +
-      '<p style="text-indent:0;font-size:10pt">conform HG 907/2016, Anexa nr. 7 · prețuri la data de ' + ((P._meta && P._meta.actualizat) || '2026') + ', 1 euro = ' + dz.curs + ' lei · cotă TVA ' + Math.round(tva * 100) + '%</p>' +
-      '<table><tr><th style="width:8%">Nr. crt.</th><th>Denumirea capitolelor și subcapitolelor de cheltuieli</th><th style="width:16%">Valoare fără TVA (lei)</th><th style="width:14%">TVA (lei)</th><th style="width:16%">Valoare cu TVA (lei)</th></tr>' + rows + '</table>' +
-      '<p style="text-indent:0;margin-top:8pt"><b>TOTAL GENERAL cu TVA: ' + _lei(totalCu) + ' lei</b> (≈ ' + _lei(Math.round(totalCu / dz.curs)) + ' euro).</p>' +
-      '<p style="text-indent:0;font-size:10pt">Defalcarea pe surse de finanțare (buget local / buget de stat / alte surse) se completează de beneficiar. Cost construcții+instalații (cap. 4.1): ' + _lei(val.c41) + ' lei (' + _lei(dz.costMp) + ' lei/mp × ' + _lei(+D.Sc || 0) + ' mp).</p>' +
+    return '<table><tr>' + (opts.nrCrt ? '<th style="width:6%">Nr. crt.</th>' : '') + '<th style="width:8%">Cod</th><th>Denumirea capitolelor și subcapitolelor de cheltuieli</th><th style="width:16%">Valoare fără TVA (lei)</th><th style="width:14%">TVA (lei)</th><th style="width:16%">Valoare cu TVA (lei)</th></tr>' + rows + '</table>' +
+      '<p style="text-indent:0;margin-top:8pt"><b>TOTAL' + (opts.titluTotal ? ' — ' + opts.titluTotal : ' GENERAL') + ' cu TVA: ' + _lei(totalCu) + ' lei</b> (≈ ' + _lei(Math.round(totalCu / dz.curs)) + ' euro).</p>';
+  }
+  // D.imobile (opțional) — listă [{nume, Sc, cost_mp}] pt. proiecte cu mai multe clădiri (case/
+  // blocuri/corpuri). Cu D.imobile setat: se randează câte un deviz DETALIAT per imobil (cheltuieli
+  // proprii ale acelui imobil) + un deviz CENTRALIZAT cu suma tuturor. Fără D.imobile: comportament
+  // identic cu înainte (un singur imobil, cel din D.Sc) — nicio schimbare pt. proiectele existente.
+  function devizGeneralHtml(D, v) {
+    var tva = (P && P._meta && P._meta.cota_tva) || 0.21;
+    var imobile = Array.isArray(D.imobile) && D.imobile.length ? D.imobile : null;
+    var intro = '<p style="text-align:center;font-weight:bold">DEVIZ GENERAL al obiectivului de investiție<br>' + (D.nume || '—') + '</p>' +
+      '<p style="text-indent:0;font-size:10pt">conform HG 907/2016, Anexa nr. 7 · prețuri la data de ' + ((P._meta && P._meta.actualizat) || '2026') + ', 1 euro = ' + ((P._meta && P._meta.curs_eur) || 5.05) + ' lei · cotă TVA ' + Math.round(tva * 100) + '%</p>';
+    if (!imobile) {
+      var dz = computeDeviz(D);
+      return intro + _tabelDeviz(dz, { nrCrt: true }) +
+        '<p style="text-indent:0;font-size:10pt">Defalcarea pe surse de finanțare (buget local / buget de stat / alte surse) se completează de beneficiar. Cost construcții+instalații (cap. 4.1): ' + _lei(dz.v.c41) + ' lei (' + _lei(dz.costMp) + ' lei/mp × ' + _lei(+D.Sc || 0) + ' mp).</p>' +
+        '<p style="text-indent:0;font-size:9pt;color:#888">Valorile subcapitolelor neevaluate (utilaje, dotări, teren) se completează de proiectant/beneficiar; coeficienții (proiectare, diverse, organizare șantier, cote ISC/CSC) sunt orientativi și editabili din baza de prețuri UrbanX.</p>';
+    }
+    // Multi-imobil: un deviz per imobil (Sc propriu, cost/mp propriu dacă diferă) + centralizat (Sc însumat)
+    var dzPerImobil = imobile.map(function (im) { return { nume: im.nume || 'Imobil', dz: computeDeviz(Object.assign({}, D, { Sc: im.Sc, deviz: im.deviz })) }; });
+    var ScTotal = imobile.reduce(function (s, im) { return s + (+im.Sc || 0); }, 0);
+    var dzCentralizat = computeDeviz(Object.assign({}, D, { Sc: ScTotal }));
+    var secDetaliate = dzPerImobil.map(function (p, i) {
+      return '<p style="text-indent:0;font-weight:bold;margin-top:14pt">' + (i + 1) + '. Deviz detaliat — ' + (p.nume) + ' (Sc = ' + _lei(+imobile[i].Sc || 0) + ' mp)</p>' + _tabelDeviz(p.dz, { nrCrt: true, titluTotal: p.nume });
+    }).join('');
+    var rezumatRows = dzPerImobil.map(function (p, i) {
+      var cu = p.dz.v.total + Math.round(p.dz.v.total * p.dz.tva);
+      return '<tr><td style="text-align:center">' + (i + 1) + '</td><td>' + p.nume + '</td><td style="text-align:right">' + _lei(+imobile[i].Sc || 0) + '</td><td style="text-align:right">' + _lei(p.dz.v.total) + '</td><td style="text-align:right">' + _lei(cu) + '</td></tr>';
+    }).join('');
+    var totalCuCentralizat = dzCentralizat.v.total + Math.round(dzCentralizat.v.total * dzCentralizat.tva);
+    var secCentralizat = '<p style="text-indent:0;font-weight:bold;margin-top:16pt">DEVIZ GENERAL CENTRALIZAT — toate imobilele (' + imobile.length + ')</p>' +
+      '<table><tr><th style="width:6%">Nr.</th><th>Imobil</th><th style="width:14%">Sc (mp)</th><th style="width:18%">Valoare fără TVA (lei)</th><th style="width:18%">Valoare cu TVA (lei)</th></tr>' + rezumatRows +
+      '<tr style="font-weight:bold;background:#1F3864;color:#fff"><td></td><td>TOTAL CENTRALIZAT</td><td style="text-align:right">' + _lei(ScTotal) + '</td><td style="text-align:right">' + _lei(dzCentralizat.v.total) + '</td><td style="text-align:right">' + _lei(totalCuCentralizat) + '</td></tr></table>' +
+      '<p style="text-indent:0;margin-top:8pt"><b>TOTAL GENERAL CENTRALIZAT cu TVA: ' + _lei(totalCuCentralizat) + ' lei</b> (≈ ' + _lei(Math.round(totalCuCentralizat / dzCentralizat.curs)) + ' euro), calculat pe suprafața însumată a tuturor imobilelor (' + _lei(ScTotal) + ' mp), nu ca sumă a devizelor individuale rotunjite — pentru consistență cu Cap.5/7 (procentuale aplicate pe bază însumată).</p>';
+    return intro +
+      '<p style="text-indent:0;font-size:10pt">Proiect cu ' + imobile.length + ' imobile — se prezintă mai jos câte un deviz DETALIAT pentru fiecare imobil în parte, urmat de devizul CENTRALIZAT (suma tuturor).</p>' +
+      secDetaliate + secCentralizat +
       '<p style="text-indent:0;font-size:9pt;color:#888">Valorile subcapitolelor neevaluate (utilaje, dotări, teren) se completează de proiectant/beneficiar; coeficienții (proiectare, diverse, organizare șantier, cote ISC/CSC) sunt orientativi și editabili din baza de prețuri UrbanX.</p>';
   }
 

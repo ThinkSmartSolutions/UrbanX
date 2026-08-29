@@ -130,6 +130,66 @@
     };
     return sbInsert('deviz_obiecte', row);
   }
+  // Duplicare Obiect (imobil/corp/casă) — pt. proiecte cu mai multe imobile identice sau
+  // aproape identice (ex. 5 case tip P, 2 blocuri identice): clonează categoriile + articolele
+  // + dotările obiectului sursă într-un obiect nou, cu cantitățile *multiplicator (implicit 1,
+  // adică duplicat identic). Fiecare obiect rămâne independent (F1-F6 propriu) — vezi
+  // computeDevizGeneral, care le însumează pe toate la deviz general.
+  function duplicateObiect(obiectId, opts) {
+    opts = opts || {};
+    var mult = opts.multiplicator != null && +opts.multiplicator > 0 ? +opts.multiplicator : 1;
+    return getObiect(obiectId).then(function (sursa) {
+      if (!sursa) return Promise.reject(new Error('Obiectul sursă nu a fost găsit.'));
+      return createObiect(sursa.proiect_id, {
+        denumire: opts.denumire || (sursa.denumire + ' (copie)'), cod: opts.cod || sursa.cod,
+        stadiu_fizic: sursa.stadiu_fizic, alte_cheltuieli_directe_pct: sursa.alte_cheltuieli_directe_pct,
+        cam_pct: sursa.cam_pct, cheltuieli_indirecte_pct: sursa.cheltuieli_indirecte_pct,
+        profit_pct: sursa.profit_pct, durata_zile_lucratoare: sursa.durata_zile_lucratoare, ordine: opts.ordine
+      }).then(function (obiectNou) {
+        return Promise.all([listCategorii(obiectId), listDotari(obiectId)]).then(function (r) {
+          var categorii = r[0], dotari = r[1];
+          var categoriiChain = categorii.reduce(function (chain, cat) {
+            return chain.then(function () {
+              return createCategorie(obiectNou.id, { cod: cat.cod, denumire: cat.denumire, ordine: cat.ordine }).then(function (catNoua) {
+                return listArticole(cat.id).then(function (articole) {
+                  return Promise.all(articole.map(function (a) {
+                    return createArticol(catNoua.id, {
+                      norma_id: a.norma_id, cod: a.cod, denumire: a.denumire, um: a.um,
+                      cantitate: (+a.cantitate || 0) * mult, sursa_cantitate: a.sursa_cantitate,
+                      pret_unitar_manual: a.pret_unitar_manual
+                    });
+                  }));
+                });
+              });
+            });
+          }, Promise.resolve());
+          var dotariChain = Promise.all(dotari.map(function (d) {
+            return createDotare(obiectNou.id, {
+              cod: d.cod, denumire: d.denumire, um: d.um, cantitate: (+d.cantitate || 0) * mult,
+              pret_unitar: d.pret_unitar, furnizor: d.furnizor, necesita_montaj: d.necesita_montaj,
+              producator: d.producator, model: d.model, parametri: d.parametri, garantie_luni: d.garantie_luni, ordine: d.ordine
+            });
+          }));
+          return Promise.all([categoriiChain, dotariChain]).then(function () {
+            logAudit({ entitate: 'obiect', entitate_id: obiectNou.id, camp_modificat: '(duplicare)', valoare_noua: 'din „' + sursa.denumire + '"' + (mult !== 1 ? ', cantități ×' + mult : '') });
+            return obiectNou;
+          });
+        });
+      });
+    });
+  }
+  // Ștergere Obiect — DESTRUCTIVĂ (obiectul + toate categoriile/articolele/dotările sale, cascadă
+  // la nivel DB — vezi FK ON DELETE CASCADE în urbanx-devize-pro-schema.sql). Rezervată admin
+  // (verificată și în UI la nivel de buton, dar re-verificată aici ca ultimă barieră).
+  function deleteObiect(id) {
+    if (!(G.UXRoles && G.UXRoles.current && G.UXRoles.current() === 'SUPER_ADMIN')) return Promise.reject(new Error('Ștergerea unui obiect este rezervată contului admin.'));
+    return getObiect(id).then(function (o) {
+      return sbDelete('deviz_obiecte', id).then(function (r) {
+        logAudit({ entitate: 'obiect', entitate_id: id, camp_modificat: '(ștergere)', valoare_veche: o && o.denumire, valoare_noua: null, motiv: 'Șters de admin — cascadă categorii/articole/dotări' });
+        return r;
+      });
+    });
+  }
   function listCategorii(obiectId) { return sbSelect('deviz_categorii', [{ col: 'obiect_id', val: obiectId }]).then(function (a) { return a.sort(function (x, y) { return (x.ordine || 0) - (y.ordine || 0); }); }); }
   function createCategorie(obiectId, c) {
     var row = { id: uuid(), obiect_id: obiectId, cod: c.cod || '', denumire: c.denumire || 'Categorie', ordine: c.ordine || 0 };
@@ -758,7 +818,7 @@
   G.UXDevizePro = {
     // proiecte/obiecte/categorii
     listProiecte: listProiecte, getProiect: getProiect, createProiect: createProiect, updateProiect: updateProiect,
-    listObiecte: listObiecte, createObiect: createObiect, getObiect: getObiect, updateObiect: updateObiect, listCategorii: listCategorii, createCategorie: createCategorie,
+    listObiecte: listObiecte, createObiect: createObiect, duplicateObiect: duplicateObiect, deleteObiect: deleteObiect, getObiect: getObiect, updateObiect: updateObiect, listCategorii: listCategorii, createCategorie: createCategorie,
     listDotari: listDotari, createDotare: createDotare, updateDotare: updateDotare, deleteDotare: deleteDotare, computeValoareDotari: computeValoareDotari,
     creazaCategoriiStandard: creazaCategoriiStandard, CATEGORII_STD: CATEGORII_STD, CATEGORII_STD_LABELS: CATEGORII_STD_LABELS,
     // resurse/norme

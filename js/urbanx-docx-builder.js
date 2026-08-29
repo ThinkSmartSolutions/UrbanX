@@ -381,6 +381,92 @@
   function _lib(D, key) {
     try { var L = G.UXLibrary && G.UXLibrary[D.functiune]; return (L && L[key] && L[key].html) ? L[key].html : ''; } catch (e) { return ''; }
   }
+  // Anexe cu date REALE, calculate/extrase LIVE — comune DALI + SF (nu se dubleaza logica intre cele
+  // doua documente). Fiecare anexa apare DOAR daca D are campurile necesare (geo/audit/expertiza — din
+  // window.UXIngest) sau daca motoarele de deviz/CBA sunt incarcate (window.UXDevize/window.UXCBA);
+  // nimic fabricat pt. proiectele fara documente/date introduse inca — vezi florin-no-invent-unverified-data.
+  function _anexeSurseVii(D) {
+    var secsExtra = [];
+    var geoRows = [];
+    if (D.p_conv) geoRows.push(['Presiune convențională', D.p_conv + ' kPa']);
+    if (D.adancime_fundare) geoRows.push(['Adâncime de fundare recomandată', D.adancime_fundare + ' m']);
+    if (D.cat_geo) geoRows.push(['Categorie geotehnică', String(D.cat_geo)]);
+    if (D.nivel_apa) geoRows.push(['Nivelul apei subterane', D.nivel_apa]);
+    if (D.adancime_inghet) geoRows.push(['Adâncime de îngheț', D.adancime_inghet + ' m']);
+    if (D.tip_teren) geoRows.push(['Natura terenului de fundare', D.tip_teren]);
+    if (geoRows.length) secsExtra.push({ h: 'Anexă — date reale din studiul geotehnic încărcat', html: tbl(geoRows, ['Parametru', 'Valoare']) + (D.recomandare_fundare ? '<p><i>Recomandarea geotehnicianului:</i> ' + esc(D.recomandare_fundare) + '</p>' : '') });
+    var ae = D.audit_energetic;
+    if (ae && Object.keys(ae).length) {
+      var aeRows = [];
+      if (ae.clasa_energetica) aeRows.push(['Clasa energetică (situația existentă)', ae.clasa_energetica]);
+      if (ae.consum_specific_kwh_mp_an) aeRows.push(['Consum specific de energie', ae.consum_specific_kwh_mp_an + ' kWh/m²·an']);
+      if (ae.zona_climatica) aeRows.push(['Zonă climatică', ae.zona_climatica + (ae.te_calcul != null ? ' (Te = ' + ae.te_calcul + '°C)' : '')]);
+      if (ae.rm_pereti) aeRows.push(["R'm pereți exteriori (corectat)", ae.rm_pereti + ' m²K/W']);
+      if (ae.rm_acoperis) aeRows.push(["R'm acoperiș/terasă (corectat)", ae.rm_acoperis + ' m²K/W']);
+      if (ae.tip_tamplarie) aeRows.push(['Tâmplărie existentă', ae.tip_tamplarie]);
+      var aeHtml = (aeRows.length ? tbl(aeRows, ['Parametru', 'Valoare']) : '');
+      if (ae.masuri_recomandate && ae.masuri_recomandate.length) aeHtml += '<p><i>Măsuri identificate în auditul încărcat:</i></p><ul>' + ae.masuri_recomandate.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
+      aeHtml += '<p style="font-size:9pt;color:#888">Extras automat din documentul încărcat (§ Import documente sursă) — verifică față de raportul complet; nu înlocuiește auditul energetic semnat de auditorul atestat.</p>';
+      secsExtra.push({ h: 'Anexă — date reale din auditul energetic încărcat', html: aeHtml });
+    }
+    var et = D.expertiza_tehnica;
+    if (et && Object.keys(et).length) {
+      var etRows = [];
+      if (et.clasa_risc_seismic) etRows.push(['Clasa de risc seismic', et.clasa_risc_seismic]);
+      if (et.categorie_importanta) etRows.push(['Categoria de importanță', et.categorie_importanta]);
+      if (et.indicator_r3 != null) etRows.push(['Indicator de prioritate R1 (P100-3)', String(et.indicator_r3)]);
+      if (et.sistem_structural) etRows.push(['Sistem structural existent', et.sistem_structural]);
+      if (et.an_constructie) etRows.push(['An de construcție', String(et.an_constructie)]);
+      var etHtml = (etRows.length ? tbl(etRows, ['Parametru', 'Valoare']) : '');
+      if (et.degradari_constatate && et.degradari_constatate.length) etHtml += '<p><i>Degradări constatate în expertiză:</i></p><ul>' + et.degradari_constatate.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
+      if (et.recomandari_expert && et.recomandari_expert.length) etHtml += '<p><i>Recomandările expertului tehnic:</i></p><ul>' + et.recomandari_expert.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
+      etHtml += '<p style="font-size:9pt;color:#888">Extras automat din documentul încărcat (§ Import documente sursă) — nu înlocuiește expertiza tehnică semnată de expertul atestat MLPAT; verifică față de raportul complet.</p>';
+      secsExtra.push({ h: 'Anexă — concluziile expertizei tehnice încărcate', html: etHtml });
+    }
+    // Analiza cost-beneficiu (VAN/RIR) — calcul LIVE (window.UXCBA + window.UXDevize.computeDeviz),
+    // NU text static pastat o singura data (bug semnalat de Florin: cifrele nu se schimbau cand se
+    // schimba proiectul). Investitia vine din devizul general REAL al proiectului curent; fluxurile
+    // de exploatare (economie utilitati/intretinere/externalitati) sunt 0 implicit — se completeaza
+    // din auditul energetic definitiv/factura beneficiarului, NU se fabrica o cifra.
+    if (G.UXCBA && G.UXDevize) {
+      try {
+        var dzCba = G.UXDevize.computeDeviz(D);
+        var cursCba = dzCba.curs || 5.05;
+        var investCuTvaEur = (dzCba.v.total + Math.round(dzCba.v.total * dzCba.tva)) / cursCba;
+        var investFaraTvaEur = dzCba.v.total / cursCba;
+        var economieUtilCba = D.economie_anuala_utilitati_eur != null ? +D.economie_anuala_utilitati_eur : 0;
+        var costIntretCba = D.cost_intretinere_anuala_eur != null ? +D.cost_intretinere_anuala_eur : 0;
+        var externCba = D.externalitati_anuale_eur != null ? +D.externalitati_anuale_eur : 0;
+        var cba = G.UXCBA.analizaCostBeneficiu({
+          investitieCuTva: investCuTvaEur, investitieFaraTva: investFaraTvaEur,
+          aniReferinta: D.cba_ani_referinta, kFinanciar: D.cba_k_financiar, kEconomic: D.cba_k_economic,
+          economieAnualaUtilitati: economieUtilCba, costIntretinereAnuala: costIntretCba, externalitatiAnuale: externCba
+        });
+        var feur = function (x) { return (x == null ? '—' : Math.round(x).toLocaleString('ro-RO') + ' EUR'); };
+        var fpct = function (x) { return (x == null ? '—' : (x * 100).toFixed(2).replace('.', ',') + '%'); };
+        var cbaHtml = '<p style="font-size:9pt;color:#888">' + esc(cba.metodologie) + '. Investiția e calculată LIVE din devizul general al proiectului curent (§ Devize) — se actualizează automat dacă modifici Sc/funcțiunea/prețurile. Fluxurile de exploatare de mai jos ' + (economieUtilCba || costIntretCba || externCba ? 'sunt cele declarate în proiect' : 'NU au fost încă introduse (= 0 EUR/an) — completează câmpurile economie_anuala_utilitati_eur / cost_intretinere_anuala_eur / externalitati_anuale_eur din auditul energetic definitiv sau din factura de utilități a beneficiarului pentru un rezultat real') + '.</p>' +
+          tbl([
+            ['Investiție (cu TVA)', feur(cba.intrari.I0cuTva)],
+            ['Investiție (fără TVA)', feur(cba.intrari.I0faraTva)],
+            ['Perioadă de referință', cba.intrari.n + ' ani'],
+            ['Rata de actualizare financiară (k)', fpct(cba.intrari.kF)],
+            ['Flux net anual (financiar)', feur(cba.financiar.fluxNetAnual) + '/an'],
+            ['VANF/C', feur(cba.financiar.VAN)],
+            ['RIRF/C', cba.financiar.RIR != null ? fpct(cba.financiar.RIR) : 'nu există (flux fără schimbare de semn)'],
+            ['Raport B/C financiar', cba.financiar.raportBC != null ? cba.financiar.raportBC.toFixed(2) : '—'],
+            ['Concluzie financiară', cba.financiar.concluzie],
+            ['Rata de actualizare economică (k)', fpct(cba.intrari.kE)],
+            ['Flux net anual (economic)', feur(cba.economic.fluxNetAnual) + '/an'],
+            ['VANE/C', feur(cba.economic.VAN)],
+            ['RIRE/C', cba.economic.RIR != null ? fpct(cba.economic.RIR) : 'nu există (flux fără schimbare de semn)'],
+            ['Raport B/C economic', cba.economic.raportBC != null ? cba.economic.raportBC.toFixed(2) : '—'],
+            ['Concluzie economică', cba.economic.concluzie]
+          ], ['Indicator', 'Valoare']);
+        secsExtra.push({ h: 'Anexă — analiza cost-beneficiu (calcul live, HG 907/2016 + Doc. lucru nr.4 CE)', html: cbaHtml });
+      } catch (eCba) {}
+    }
+    return secsExtra;
+  }
   // Programul funcțional APLICAT de utilizator (din generatorul de program → „Aplică la proiect").
   // Se injectează în memorii ca document să reflecte spațiile REALE ale proiectului, nu doar exemplul din bibliotecă.
   function _programAplicatSec(D) {
@@ -2953,15 +3039,108 @@
       };
       var ti = TIPURI[tip] || TIPURI.reabilitare_termica;
       var deep = _lib(D, 'dali');
+      // Anexe cu date REALE (geo/audit energetic/expertiză tehnică/CBA), calculate LIVE — vezi _anexeSurseVii
+      // (comună cu SF, nu se duplică logica); apar DOAR dacă D are câmpurile necesare (nimic fabricat).
+      var secsExtra = _anexeSurseVii(D);
       var secs = deep ? [
         { h: null, html: deep }
-      ] : [
+      ].concat(secsExtra) : [
         { h: '1. Tipul intervenției', html: '<p>Intervenție asupra unei construcții existente — tip: <b>' + esc(ti.t) + '</b>. Se întocmește D.A.L.I. conform HG 907/2016. Normative aplicabile: ' + esc(ti.norma) + '.</p>' },
         { h: '2. Capitole specifice (HG 907/2016)', html: tbl(ti.cap.map(function (c, i) { return ['' + (i + 1), c]; }), ['Nr.', 'Capitol']) },
         { h: '3. Relația cu vecinătățile (construcție existentă)', html: '<p>Fiind vorba despre o construcție existentă, nu se pune problema modificării relației cu vecinătățile, aceasta fiind cea proiectată inițial sau rezultată din modificările realizate de-a lungul perioadei de exploatare, conform planșelor desenate.</p>' },
         { h: '4. Expertiză și verificare', html: '<p>Intervențiile la construcții existente se fundamentează pe expertiză tehnică (elaborată de expert atestat) și, după caz, audit energetic. Proiectul se verifică de verificatori atestați pe cerințele aplicabile (Legea 10/1995).</p>' }
       ];
       return { cat: 'Memorii Tehnice', file: 'DALI_constructie_existenta.doc', html: docHtml(_meta(D, 'D.A.L.I. — CONSTRUCȚIE EXISTENTĂ', esc(ti.t) + ' · HG 907/2016'), secs) };
+    },
+    // S.F. GENERIC — construcție NOUĂ, valabil pt. orice funcțiune (D.functiune), o singură clădire
+    // sau ansamblu (_cladiri_propuse), conform conținutului-cadru HG 907/2016 Anexa 3. Distinct de
+    // D.A.L.I. (Anexa 5/6 — intervenție pe construcție EXISTENTĂ, builder-ul de mai sus) — cele două
+    // NU se substituie: SF fundamentează decizia de investiție pt. un obiectiv nou, DALI pt. o
+    // intervenție pe un obiectiv existent. Nu confunda cu „Studiu de fezabilitate energetică (SF)"
+    // de mai jos, care e un calculator specializat DOAR pt. parcuri fotovoltaice (putere_dc_kwp).
+    'Studiu de fezabilitate (SF) — construcție nouă': function (D, v) {
+      var fnObj = (G.UXDoc.FUNCTIUNI[D.functiune] || {}); var ac = (v && v.calc) || {};
+      var nf = function (x) { return (x == null ? '—' : (+x).toLocaleString('ro-RO')); };
+      var labelFn = fnObj.label || D.functiune || 'construcție';
+      var cladiri = D._cladiri_propuse || [];
+      var esteAnsamblu = cladiri.length > 1;
+      var STR_ALT = { beton: 'metalică (cadre metalice + planșee mixte)', metalica: 'din beton armat (cadre/diafragme)', zidarie: 'din beton armat (cadre), cu posibilitate de compartimentare flexibilă', mixt: 'unitară din beton armat (fără componentă metalică)', usoara: 'din beton armat, cu anvelopă performantă termic' };
+      var structActuala = fnObj.struct || 'beton'; var structAlt = STR_ALT[structActuala] || 'alternativă din beton armat';
+      var deep = _lib(D, 'sf');
+      var secsExtra = _anexeSurseVii(D);
+      // Programul funcțional aplicat (dacă a fost confirmat de proiectant) — folosit ca dovadă a
+      // cererii/dimensionării la Cap. 2.4-2.5, nu doar declarat generic.
+      var progSec = _programAplicatSec(D);
+      if (progSec) secsExtra.push({ h: progSec.h, html: progSec.html });
+      var devizAnexa = '';
+      if (G.UXDevize) {
+        try {
+          var dzSf = G.UXDevize.computeDeviz(D); var cursSf = dzSf.curs || 5.05;
+          var totalFaraTva = dzSf.v.total, totalCuTva = totalFaraTva + Math.round(totalFaraTva * dzSf.tva);
+          devizAnexa = '<p>Devizul general complet (pe capitole 1-7, conform HG 907/2016 Anexa nr. 7) este generat separat de modulul „Devize & Cost Management" al platformei, cu aceleași date de intrare (Sc = ' + nf(D.Sc) + ' mp, funcțiune „' + esc(labelFn) + '"); valoarea totală rezultată este reluată aici ca intrare I0 pentru analiza financiară/economică de mai jos.</p>' +
+            tbl([['Valoare totală investiție (fără TVA)', nf(Math.round(totalFaraTva / cursSf)) + ' EUR (' + nf(totalFaraTva) + ' lei)'], ['Valoare totală investiție (cu TVA)', nf(Math.round(totalCuTva / cursSf)) + ' EUR (' + nf(totalCuTva) + ' lei)'], ['din care C+M', nf(dzSf.v.CM) + ' lei'], ['Curs de referință', '1 EUR = ' + cursSf + ' lei']], ['Indicator', 'Valoare']);
+        } catch (eDz) {}
+      }
+      var secs = deep ? [
+        { h: null, html: deep }
+      ].concat(secsExtra) : [
+        { h: '1. Informații generale privind obiectivul de investiții', html:
+          '<p><b>1.1 Denumirea obiectivului de investiții:</b> ' + esc(D.nume || ('Construire ' + labelFn)) + (D.uat ? ', ' + esc(D.uat) : '') + '.</p>' +
+          '<p><b>1.2 Ordonatorul principal de credite / investitorul:</b> ' + esc(D.investitor || D.beneficiar || '—') + '.</p>' +
+          '<p><b>1.3 Ordonatorul de credite (secundar/terțiar), după caz:</b> ' + esc(D.ordonator_secundar || '— (nu este cazul / se completează după caz)') + '.</p>' +
+          '<p><b>1.4 Beneficiarul investiției:</b> ' + esc(D.beneficiar || '—') + '.</p>' +
+          '<p><b>1.5 Elaboratorul studiului de fezabilitate:</b> ' + esc(D.proiectant || '—') + ', conform contractului de proiectare/cerințelor caietului de sarcini al achizitorului.</p>'
+        },
+        { h: '2. Situația existentă și necesitatea realizării obiectivului de investiții', html:
+          '<p><b>2.1 Concluziile studiului de prefezabilitate</b> (dacă a fost elaborat): se rețin scenariile analizate la nivel de prefezabilitate și motivele de excludere a variantelor neviabile; în lipsa unui studiu de prefezabilitate distinct, prezentul SF asumă integral analiza de oportunitate de la Cap. 3-5.</p>' +
+          '<p><b>2.2 Prezentarea contextului</b> — amplasamentul propus (' + esc(D.uat || 'localitate/UAT de completat') + (D.nrcad ? ', nr. cad. ' + esc(D.nrcad) : '') + ') se află într-o zonă ' + (fnObj.cat === 'medical' ? 'cu necesar confirmat de servicii medicale' : fnObj.cat === 'educatie' ? 'cu deficit de capacitate educațională' : 'cu potențial de dezvoltare pentru funcțiunea propusă') + ', conform documentației de urbanism aplicabile (PUG/PUZ, certificat de urbanism).</p>' +
+          '<p><b>2.3 Analiza situației existente și identificarea deficiențelor</b> — pe amplasament ' + (D.constructii_existente ? 'există construcții existente: ' + esc(D.constructii_existente) : 'nu există construcții (teren liber)') + '. Necesitatea investiției rezultă din lipsa/insuficiența ofertei actuale de „' + esc(labelFn) + '" în zona de deservire.</p>' +
+          '<p><b>2.4 Analiza cererii de bunuri și servicii</b>, inclusiv prognoze pe termen mediu și lung privind evoluția cererii — se fundamentează pe date demografice/socio-economice ale UAT (populație, dinamică, rată de ocupare, după caz), coroborate cu programul funcțional confirmat de beneficiar' + (progSec ? ' (vezi anexa „Programul funcțional aplicat")' : ' (de completat cu programul funcțional confirmat)') + '.</p>' +
+          '<p><b>2.5 Obiective preconizate a fi atinse prin realizarea investiției publice/private</b> — asigurarea unei capacități de „' + esc(labelFn) + '" dimensionate conform necesarului identificat, cu respectarea indicatorilor urbanistici admiși (POT max ' + (D.POT_max != null ? D.POT_max + '%' : '—') + ', CUT max ' + (D.CUT_max != null ? D.CUT_max : '—') + ') și a normativelor tehnice de specialitate aplicabile funcțiunii.</p>'
+        },
+        { h: '3. Identificarea, propunerea și prezentarea a minimum două scenarii/opțiuni tehnico-economice', html:
+          '<p>În conformitate cu HG 907/2016, se analizează minimum două scenarii/opțiuni tehnico-economice pentru realizarea obiectivului de investiții, diferențiate prin sistemul constructiv, respectiv prin gradul de acoperire a necesarului identificat la Cap. 2.4.</p>' +
+          tbl([
+            ['Scenariul 1 (recomandat, detaliat la Cap. 5)', 'Sistem constructiv ' + (structActuala === 'beton' ? 'din beton armat' : structActuala === 'metalica' ? 'metalic' : 'conform tabelului de funcțiuni') + ', regim de înălțime ' + (ac.regim_complet || ('P+' + Math.max(0, (D.niv_supraterane || 1) - 1))) + ', Sc = ' + nf(D.Sc) + ' mp'],
+            ['Scenariul 2 (variantă comparată)', 'Sistem constructiv ' + esc(structAlt) + ', la aceleași dimensiuni de bază (Sc ≈ ' + nf(D.Sc) + ' mp) — comparat pe criterii de cost de execuție, durată de realizare și mentenanță pe durata de exploatare']
+          ], ['Scenariu', 'Descriere sintetică']) +
+          '<p><b>3.1 Particularități ale amplasamentului</b> — Steren = ' + nf(D.Steren) + ' mp' + (D.p_conv ? ', presiune convențională a terenului de fundare ' + D.p_conv + ' kPa (vezi anexa geotehnică)' : ', condiții de fundare de confirmat prin studiu geotehnic') + '.</p>' +
+          '<p><b>3.2 Descrierea din punct de vedere tehnic, constructiv, funcțional-arhitectural și tehnologic</b> — ambele scenarii respectă același program funcțional (Cap. 2.4) și aceiași indicatori urbanistici maximi admiși; diferă sistemul structural și, implicit, costul de execuție și termenul de realizare.</p>' +
+          '<p><b>3.3 Costurile estimative ale investiției</b> — cuantificate detaliat pentru scenariul recomandat la Cap. 5.6 (devizul general); pentru scenariul 2, diferența de cost se datorează exclusiv sistemului constructiv alternativ și se cuantifică printr-o rulare separată a devizului general cu costul unitar/mp specific acelui sistem constructiv, la cererea investitorului.</p>' +
+          '<p><b>3.4 Studii de specialitate</b> necesare: studiu geotehnic, ridicare topografică, studiu de trafic/rețele (după caz, în funcție de amplasament), audit energetic preliminar (pt. clădiri cu consum energetic ridicat), expertiză tehnică (dacă există construcții existente pe amplasament, ca la Cap. 2.3).</p>' +
+          '<p><b>3.5 Grafic orientativ de realizare a investiției</b> — proiectare (3-6 luni) → avizare/autorizare (3-9 luni, funcție de complexitate) → execuție (' + (D.durata_executie_luni || '12-24') + ' luni, funcție de volumul de lucrări) → recepție și punere în funcțiune.</p>'
+        },
+        { h: '4. Analiza fiecărui scenariu/opțiuni tehnico-economice propus(e)', html:
+          '<p><b>4.1 Prezentarea cadrului de analiză</b> — analiza se realizează conform metodologiei HG 907/2016 și a Documentului de lucru nr. 4 al Comisiei Europene, cu perioadă de referință de ' + (D.cba_ani_referinta || 15) + ' ani.</p>' +
+          '<p><b>4.2 Analiza vulnerabilităților</b> cauzate de factori de risc — climatici (zonă seismică, zăpadă, vânt, conform Anexei „Parametri de calcul ai amplasamentului"), antropici (poziționare vs. rețele existente) și financiari (fluctuația prețurilor la materiale de construcție).</p>' +
+          '<p><b>4.3 Situația utilităților și analiza de consum</b> — se fundamentează pe consumurile estimate pentru funcțiunea „' + esc(labelFn) + '" la suprafața desfășurată propusă (Sd = ' + nf(D.Sd) + ' mp), cu racordare la rețelele publice existente în zonă sau extinderea acestora, după caz.</p>' +
+          '<p><b>4.4 Sustenabilitatea realizării obiectivului de investiții</b> — corelarea cu strategia de dezvoltare locală (SIDU/PUG), asumarea costurilor de operare pe termen lung de către beneficiar/ordonator de credite.</p>' +
+          '<p><b>4.5 Analiza cererii</b> — reia și detaliază Cap. 2.4, cu accent pe orizontul de proiectare (durata de viață economică a investiției).</p>' +
+          '<p><b>4.6 Analiza financiară, inclusiv calcularea indicatorilor de performanță financiară: fluxul cumulat, valoarea actualizată netă, rata internă de rentabilitate</b> — calculată LIVE (vezi Anexa „analiza cost-beneficiu, calcul live" la finalul documentului), pe baza devizului general al scenariului recomandat.</p>' +
+          '<p><b>4.7 Analiza economică, inclusiv calcularea indicatorilor de performanță economică: valoarea actualizată netă, rata internă de rentabilitate</b> — idem, componenta economică a aceleiași anexe (rata de actualizare CE 5,5%, cu monetizarea externalităților declarate).</p>' +
+          '<p><b>4.8 Analiza de senzitivitate</b> — variabilele critice sunt costul de execuție (±10-20%) și, pentru investiții cu venituri proprii, prețul de valorificare a serviciilor; recomandarea e testarea explicită a scenariului cu abatere +20% la cost și −10% la eventualele venituri proprii, pentru a confirma robustețea deciziei de investiție.</p>' +
+          '<p><b>4.9 Analiza de riscuri</b> — riscuri legislativ-administrative (întârziere avize/autorizații), tehnice (condiții geotehnice diferite de studiul preliminar), de piață (evoluția costului materialelor/manoperei) — fiecare cu măsură de atenuare asociată, monitorizată pe parcursul implementării.</p>'
+        },
+        { h: '5. Scenariul/Opțiunea tehnico-economic(ă) optim(ă), recomandat(ă)', html:
+          '<p><b>5.1-5.2 Comparația și selectarea scenariului</b> — Scenariul 1 (Cap. 3) este recomandat, fiind sistemul constructiv uzual pentru funcțiunea „' + esc(labelFn) + '" la dimensiunile propuse, cu cel mai bun raport cost/durată de execuție/mentenanță pe durata de exploatare.</p>' +
+          '<p><b>5.3 Descrierea scenariului recomandat</b> — ' + esc(_caracConstr(D, v || {})) + '</p>' +
+          '<p><b>5.4 Principalii indicatori tehnico-economici aferenți obiectivului de investiții:</b></p>' + (typeof _indicatoriTbl === 'function' ? _indicatoriTbl(D, v || { calc: ac }) : '') +
+          '<p><b>5.5 Prezentarea modului în care se asigură conformarea cu reglementările specifice funcțiunii propuse</b> — conform normativelor tehnice de specialitate aplicabile (structură, instalații, PSI, accesibilitate persoane cu dizabilități), detaliate în piesele scrise/desenate ale proiectului tehnic ulterior.</p>' +
+          '<p><b>5.6 Devizul general al obiectivului de investiții</b>, defalcat pe categorii de cheltuieli (HG 907/2016 Anexa nr. 7):</p>' + devizAnexa +
+          '<p><b>5.7 Eșalonarea investiției</b> — conform graficului orientativ de la Cap. 3.5; eșalonarea financiară pe ani bugetari se detaliază la faza de proiect tehnic, în funcție de sursa de finanțare confirmată.</p>' +
+          '<p><b>5.8 Urmărirea comportării în timp a investiției</b> — se asigură prin urmărire curentă (Legea 10/1995) pe durata de exploatare, cu verificări periodice ale elementelor de construcție și instalații, conform cărții tehnice a construcției.</p>'
+        },
+        { h: '6. Urbanism, acorduri și avize conforme necesare, precum și, după caz, măsuri de protecție a monumentelor istorice și de arheologie', html:
+          '<p>Se solicită certificatul de urbanism și avizele/acordurile prevăzute în acesta (rețele electrice, apă-canal, gaze, mediu, ISU/PSI, sănătate publică, după caz), precum și, dacă amplasamentul se află în zonă protejată/cu potențial arheologic, avizul autorității competente în domeniul patrimoniului cultural, conform Legii nr. 422/2001 și Ordonanței Guvernului nr. 43/2000, după caz.</p>'
+        },
+        { h: '7. Implementarea investiției', html:
+          '<p><b>7.1 Informații despre entitatea responsabilă cu implementarea investiției:</b> ' + esc(D.beneficiar || '—') + ', prin structura internă de implementare/UIP, după caz.</p>' +
+          '<p><b>7.2 Strategia de implementare</b> — cuprinde etapele de proiectare (P.Th.+D.E.), achiziție publică a execuției (dacă e cazul, conform Legii 98/2016), execuție, recepție la terminarea lucrărilor și recepție finală, conform graficului de la Cap. 3.5.</p>' +
+          '<p><b>7.3 Strategia de exploatare/operare și întreținere</b> — se asigură de beneficiar, cu costuri de operare estimate pe baza consumurilor de la Cap. 4.3, integrate în analiza financiară de la Cap. 4.6/4.7.</p>' +
+          '<p><b>7.4 Recomandări subsecvente</b> — elaborarea proiectului tehnic (P.Th.) și a caietelor de sarcini pe specialități (arhitectură, structură, instalații) pe baza indicatorilor confirmați la Cap. 5, cu reluarea datelor din studiul geotehnic definitiv, auditul energetic definitiv și, dacă este cazul, expertiza tehnică a construcțiilor existente de pe amplasament.</p>'
+        }
+      ];
+      return { cat: 'Memorii Tehnice', file: 'SF_' + (D.functiune || 'constructie') + '_' + (esteAnsamblu ? 'ansamblu' : 'obiectiv') + '.doc', html: docHtml(_meta(D, 'STUDIU DE FEZABILITATE (S.F.) — CONSTRUCȚIE NOUĂ', esc(labelFn) + ' · HG 907/2016, Anexa nr. 3'), secs) };
     },
     'Studiu de fezabilitate energetică (SF)': function (D, v) {
       var e = v && v.calc && v.calc.energie; if (!e || !e.putere_dc_kwp) return null; // doar pt funcțiuni de energie cu putere setată
