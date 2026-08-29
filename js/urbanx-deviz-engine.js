@@ -111,13 +111,23 @@
     return '<table><tr>' + (opts.nrCrt ? '<th style="width:6%">Nr. crt.</th>' : '') + '<th style="width:8%">Cod</th><th>Denumirea capitolelor și subcapitolelor de cheltuieli</th><th style="width:16%">Valoare fără TVA (lei)</th><th style="width:14%">TVA (lei)</th><th style="width:16%">Valoare cu TVA (lei)</th></tr>' + rows + '</table>' +
       '<p style="text-indent:0;margin-top:8pt"><b>TOTAL' + (opts.titluTotal ? ' — ' + opts.titluTotal : ' GENERAL') + ' cu TVA: ' + _lei(totalCu) + ' lei</b> (≈ ' + _lei(Math.round(totalCu / dz.curs)) + ' euro).</p>';
   }
-  // D.imobile (opțional) — listă [{nume, Sc, cost_mp}] pt. proiecte cu mai multe clădiri (case/
+  // D.imobile (opțional) — listă [{nume, Sc, cost_mp, deviz}] pt. proiecte cu mai multe clădiri (case/
   // blocuri/corpuri). Cu D.imobile setat: se randează câte un deviz DETALIAT per imobil (cheltuieli
   // proprii ale acelui imobil) + un deviz CENTRALIZAT cu suma tuturor. Fără D.imobile: comportament
   // identic cu înainte (un singur imobil, cel din D.Sc) — nicio schimbare pt. proiectele existente.
+  // Fără D.imobile explicit, se preia AUTOMAT din D.corpuri (secțiunea „Corpuri (multi-corp)" din
+  // formularul de documentații, urbanx-doc-ui.js — deja UI-editabilă, aceeași sursă folosită de
+  // autoCalc pt. Sc_total/Sd_total) — nu se duplică UI-ul, doar se reutilizează câmpul existent.
+  function _imobileDinD(D) {
+    if (Array.isArray(D.imobile) && D.imobile.length) return D.imobile;
+    if (Array.isArray(D.corpuri) && D.corpuri.filter(function (c) { return +c.Sc > 0; }).length > 1) {
+      return D.corpuri.filter(function (c) { return +c.Sc > 0; }).map(function (c, i) { return { nume: c.nume || ('Corp ' + (i + 1)), Sc: +c.Sc }; });
+    }
+    return null;
+  }
   function devizGeneralHtml(D, v) {
     var tva = (P && P._meta && P._meta.cota_tva) || 0.21;
-    var imobile = Array.isArray(D.imobile) && D.imobile.length ? D.imobile : null;
+    var imobile = _imobileDinD(D);
     var intro = '<p style="text-align:center;font-weight:bold">DEVIZ GENERAL al obiectivului de investiție<br>' + (D.nume || '—') + '</p>' +
       '<p style="text-indent:0;font-size:10pt">conform HG 907/2016, Anexa nr. 7 · prețuri la data de ' + ((P._meta && P._meta.actualizat) || '2026') + ', 1 euro = ' + ((P._meta && P._meta.curs_eur) || 5.05) + ' lei · cotă TVA ' + Math.round(tva * 100) + '%</p>';
     if (!imobile) {
@@ -127,7 +137,7 @@
         '<p style="text-indent:0;font-size:9pt;color:#888">Valorile subcapitolelor neevaluate (utilaje, dotări, teren) se completează de proiectant/beneficiar; coeficienții (proiectare, diverse, organizare șantier, cote ISC/CSC) sunt orientativi și editabili din baza de prețuri UrbanX.</p>';
     }
     // Multi-imobil: un deviz per imobil (Sc propriu, cost/mp propriu dacă diferă) + centralizat (Sc însumat)
-    var dzPerImobil = imobile.map(function (im) { return { nume: im.nume || 'Imobil', dz: computeDeviz(Object.assign({}, D, { Sc: im.Sc, deviz: im.deviz })) }; });
+    var dzPerImobil = imobile.map(function (im) { return { nume: im.nume || 'Imobil', dz: computeDeviz(Object.assign({}, D, { Sc: im.Sc }, im.deviz ? { deviz: im.deviz } : {})) }; });
     var ScTotal = imobile.reduce(function (s, im) { return s + (+im.Sc || 0); }, 0);
     var dzCentralizat = computeDeviz(Object.assign({}, D, { Sc: ScTotal }));
     var secDetaliate = dzPerImobil.map(function (p, i) {

@@ -193,6 +193,7 @@
       if (PROFIL === 'cladire') (function () {
         var sc = el('div', { style: 'margin-bottom:16px' });
         sc.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">5b</span>Corpuri (multi-corp) — opțional'));
+        sc.appendChild(el('div', { style: 'font-size:10.5px;color:#94a3b8;margin:-4px 0 8px' }, 'Cu 2+ corpuri completate (Sc &gt; 0), Devizul general (cap. 15) randează automat un deviz DETALIAT pe fiecare corp + un deviz CENTRALIZAT — nu mai e nevoie de introducere separată.'));
         var list = el('div', { id: 'uxdoc-corpuri' });
         D.corpuri = D.corpuri || [];
         function renderC() {
