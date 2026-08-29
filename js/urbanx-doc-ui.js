@@ -238,6 +238,20 @@
         fld('Desfumare oblig.', 'desfumare_oblig', 'auto'),
         fld('Sprinklere oblig.', 'sprinklere_oblig', 'auto'), fld('IDSI oblig.', 'idsi_oblig', 'auto'), fld('Lift oblig.', 'lift_oblig', 'auto')
       ].filter(Boolean)));
+      // Analiza cost-beneficiu (opțional) — intrările fluxului de exploatare pt. CBA (VAN/RIR), apar
+      // ca anexă în DALI/SF (_anexeSurseVii, urbanx-docx-builder.js). Fără ele, motorul rulează oricum
+      // cu flux=0 (onest: „nu au fost introduse încă"), dar concluzia arată mereu neviabil financiar —
+      // câmpurile de mai jos erau consumate de motor fără să existe vreun loc din care să fie completate
+      // (găsit la verificare live, 29 aug). Investiția NU se introduce aici — vine automat din Devizul
+      // general (§15) al proiectului curent.
+      form.appendChild(section('14', 'Analiză cost-beneficiu (VAN/RIR) — opțional, pt. DALI/SF', [
+        fld('Economie anuală utilități (EUR/an)', 'economie_anuala_utilitati_eur', 'manual', { type: 'number', ph: 'din auditul energetic sau factura beneficiarului' }),
+        fld('Cost întreținere/operare suplimentar (EUR/an)', 'cost_intretinere_anuala_eur', 'manual', { type: 'number', ph: 'ex: mentenanță echipamente noi' }),
+        fld('Externalități anuale monetizate (EUR/an)', 'externalitati_anuale_eur', 'manual', { type: 'number', ph: 'beneficii economico-sociale indirecte' }),
+        fld('Perioadă de referință (ani)', 'cba_ani_referinta', 'manual', { type: 'number', ph: 'implicit 15 (Ord. MDLPL 863/2008)' }),
+        fld('Rată actualizare financiară k', 'cba_k_financiar', 'manual', { type: 'number', ph: 'implicit 0.08 (fracție, nu %)' }),
+        fld('Rată actualizare economică k', 'cba_k_economic', 'manual', { type: 'number', ph: 'implicit 0.055 (fracție, Doc. lucru nr.4 CE)' })
+      ]));
       // avizatori
       var sa = el('div', { style: 'margin-bottom:16px' }); sa.appendChild(el('div', { style: 'font-size:13px;font-weight:700;color:#c4b5fd;margin-bottom:8px' }, '<span style="background:rgba(139,92,246,.2);border-radius:20px;padding:2px 9px;font-size:11px;margin-right:6px">13</span>Avizatori (din CU)'));
       var ga = el('div', { style: 'display:grid;grid-template-columns:repeat(3,1fr);gap:5px' }); D._avize = D._avize || {};
