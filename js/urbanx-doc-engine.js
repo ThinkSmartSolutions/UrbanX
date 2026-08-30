@@ -251,20 +251,57 @@
     else if (d.functiune === 'statie-transformare' && _totalPunctaj < 18) out.categorie_importanta = 'B — deosebită (corecție: infrastructură energetică critică — impact extins la întrerupere, risc ulei izolant — fără caracterul excepțional/exploziv al GPL/hidrogen sau al bateriilor la scară mare)';
     else if (esteVulnerabil && _totalPunctaj < 18) out.categorie_importanta = 'B — deosebită (corecție: exemplificare explicită metodologie MLPAT pt. persoane vulnerabile)';
     // Clasa de consecințe CC1-CC4 (Legea nr. 169/2026 — Codul amenajării teritoriului, urbanismului
-    // și construcțiilor, CATUC, M.Of. 661/10.08.2026, în vigoare din 25.08.2026) — înlocuiește
-    // categoria de importanță HG 766/1997 pt. proiectele demarate SUB noua lege. Nu există (la data
-    // scrierii) norme metodologice proprii de calcul al claselor CC1-4 — se folosește corespondența
-    // directă confirmată (CC1=D, CC2=C, CC3=B, CC4=A) aplicată peste scorul HG766 de mai sus, care
-    // rămâne singura metodologie de calcul publicată. Art. 582 alin. 1 CATUC: documentațiile/
-    // procedurile demarate ÎNAINTE de 25.08.2026 rămân sub legea veche (categoria de importanță
-    // HG766 e valabilă integral pt. acestea, fără corespondența CC). Vezi [[florin-no-invent-unverified-data]]:
-    // nu se inventează o metodologie proprie CC1-4 cât timp nu există publicată una oficială.
+    // și construcțiilor, CATUC, M.Of. 661/10.08.2026, în vigoare din 25.08.2026, art. 370) —
+    // ÎNLOCUIEȘTE categoria de importanță HG 766/1997 ca sistem de încadrare (art. 370 alin. 1).
+    // METODOLOGIA PRIMARĂ, obligatorie prin lege "până la data intrării în vigoare a metodologiei de
+    // încadrare în clase de consecințe" (art. 370 alin. 16), este un LOOKUP PE TIP DE CONSTRUCȚIE din
+    // Anexa nr. 6 la lege (text verificat direct din M.Of. 661/10.08.2026, pag. 185-189, nu presupus)
+    // — vezi _anexa6ClasaConsecinte() mai jos. Separat, art. 370 alin. 5 mai definește și o
+    // corespondență DIRECTĂ cu vechea categorie de importanță (CC1=D, CC2=C, CC3=B, CC4=A) — păstrată
+    // aici ca `_echivalentaHG766` pt. funcțiunile fără corespondent explicit în Anexa 6, și ca reper
+    // de comparație (rezultatele celor 2 metodologii pot diverge legitim — HG766 rămâne în vigoare ca
+    // regulament de sine stătător, art. 577 alin. 3 lit. c CATUC — nu se forțează alinierea lor).
+    // Art. 582 alin. 1 CATUC: procedurile demarate ÎNAINTE de 25.08.2026 rămân sub legea veche.
+    function _anexa6ClasaConsecinte(dd, capOc2) {
+      var fn2 = dd.functiune; var HH = +dd.H || 0; var lungimePod = +dd.lungime_pod_m || 0;
+      var MAP6 = {
+        'parc-fotovoltaic': { cc: 'CC1', motiv: '„Centrale electrice eoliene și fotovoltaice"' },
+        'agricol': { cc: 'CC1', motiv: '„Construcții agricole unde oamenii nu au acces în mod normal... depozite, silozuri, grajduri"' },
+        'locuinta-individuala': { cc: 'CC1', motiv: '„Locuințe unifamiliale cu regim de înălțime parter, parter și etaj"' },
+        'gradinita': { cc: 'CC3', motiv: '„Creșe, grădinițe sau alte spații similare de îngrijire a persoanelor"' },
+        'centru-social': { cc: 'CC3', motiv: 'asimilat cu „aziluri de bătrâni" (art. 370 alin. 17 — asimilare la cea mai apropiată clasă din Anexa 6, beneficiari vulnerabili, funcțiune fără mențiune explicită)' },
+        'skid': { cc: 'CC3', motiv: '„Construcții în care se depozitează explozivi, gaze toxice și alte substanțe periculoase"' },
+        'hala-industriala': { cc: 'CC2', motiv: '„Construcții industriale mari sau potențial periculoase prin natura activității și producției" (CC1 dacă e o hală mai mică)' },
+        'parcare': { cc: 'CC2', motiv: '„Parcaje supraterane multietajate, cu o capacitate de peste 500 de autovehicule, altele decât cele din CC4"' },
+        'infrastructura-drum': { cc: 'CC2', motiv: '„Drumuri" (CC3 dacă e autostradă/drum expres/drum național care deservește un obiectiv strategic)' },
+        'bess': { cc: 'CC2', motiv: 'asimilat cu „stații de producere și distribuție a energiei, altele decât cele din CC4" (art. 370 alin. 17 — „BESS" nu apare explicit în Anexa 6)' },
+        'statie-transformare': { cc: 'CC2', motiv: '„Stații de producere și distribuție a energiei, altele decât cele din CC4" — devine CC4 doar dacă alimentează direct o clădire/rețea din lista CC4 (spitale de urgență, IGSU etc.)' },
+        'spatiu-comercial': { cc: 'CC2', motiv: 'asimilat cu „centre comerciale — parter cu o capacitate de sub 1.000 de persoane"' }
+      };
+      if (MAP6[fn2]) return MAP6[fn2];
+      if (fn2 === 'sport') return capOc2 > 200 ? { cc: 'CC3', motiv: '„Săli de sport cu o capacitate de peste 200 de persoane" (capacitate introdusă: ' + capOc2 + ')' } : { cc: 'CC2', motiv: '„Clădiri socio-culturale și săli de sport cu mai puțin de 200 ocupanți" (capacitate introdusă: ' + (capOc2 || 'nesetată') + ')' };
+      if (fn2 === 'scoala') return capOc2 > 200 ? { cc: 'CC3', motiv: '„Școli, licee, universități... cu capacitate de peste 200 de persoane"' } : { cc: 'CC2', motiv: '„Școli, licee... cu capacitate de sub 200 de persoane"' };
+      if (fn2 === 'medical') return capOc2 > 100 ? { cc: 'CC3', motiv: '„Spitale și alte clădiri din sistemul de sănătate, altele decât CC4, cu capacitate de peste 100 de persoane"' } : { cc: 'CC2', motiv: '„Unități sanitare care nu se regăsesc în CC3 și CC4"' };
+      if (fn2 === 'mall') return capOc2 > 1000 ? { cc: 'CC3', motiv: '„Clădiri parter, parter și etaj, inclusiv de tip mall, cu mai mult de 1.000 de persoane"' } : { cc: 'CC2', motiv: '„Centre comerciale — parter cu o capacitate de sub 1.000 de persoane"' };
+      if (fn2 === 'pod') return lungimePod > 100 ? { cc: 'CC3', motiv: '„Poduri cu lungime peste 100 m"' } : { cc: 'CC2', motiv: '„Poduri cu lungimea sub 100 m" (CC1 dacă e „pod mic/podeț")' };
+      if (['birouri', 'bloc-locuinte', 'cladire-mixta', 'hotelier'].indexOf(fn2) >= 0) {
+        if (HH > 45 && capOc2 > 500) return { cc: 'CC4', motiv: '„Alte clădiri civile având înălțimea totală supraterană mai mare de 45 m și totodată, peste 500 de persoane"' };
+        if (capOc2 >= 300 && capOc2 <= 500) return { cc: 'CC3', motiv: '„Clădiri multietajate de locuit, de birouri și/sau cu funcțiuni comerciale, cu o capacitate cuprinsă între 300-500 de persoane"' };
+        if (HH > 45) return { cc: 'CC3', motiv: '„Alte clădiri civile, rezidențiale sau de birouri... cu înălțimea totală supraterană mai mare de 45 m, dar cu mai puțin de 500 de persoane"' };
+        return { cc: 'CC2', motiv: '„Clădiri multietajate de locuințe sau comerciale ori clădiri publice care nu se regăsesc în CC3 și CC4, cu o capacitate sub 300 de persoane"' };
+      }
+      return null; // functiune fara corespondent explicit in Anexa 6 — ramane doar echivalenta directa HG766 (art. 370 alin. 5)
+    }
     var _CC_MAP = { 'A': 'CC4', 'B': 'CC3', 'C': 'CC2', 'D': 'CC1' };
     var _catLetter = (out.categorie_importanta || '').charAt(0);
-    out.clasa_consecinte = _CC_MAP[_catLetter] || null;
+    var _echivalentaHG766 = _CC_MAP[_catLetter] || null;
+    var _anexa6Res = _anexa6ClasaConsecinte(d, capOc);
+    out.clasa_consecinte = _anexa6Res ? _anexa6Res.cc : _echivalentaHG766;
+    out.clasa_consecinte_echivalenta_hg766 = _echivalentaHG766;
     out.clasa_consecinte_detaliu = {
-      temei: 'Legea nr. 169/2026 (CATUC), M.Of. 661/10.08.2026, în vigoare din 25.08.2026',
-      corespondenta: 'CC1=D, CC2=C, CC3=B, CC4=A (corespondență directă; fără metodologie proprie CC1-4 publicată încă)',
+      temei: 'Legea nr. 169/2026 (CATUC), M.Of. 661/10.08.2026, în vigoare din 25.08.2026, art. 370',
+      sursa: _anexa6Res ? ('Anexa nr. 6 la CATUC (metodologie obligatorie, art. 370 alin. 16): ' + _anexa6Res.motiv) : 'echivalență directă din categoria de importanță HG766 (art. 370 alin. 5) — funcțiune fără corespondent explicit în Anexa 6',
+      corespondenta: 'Echivalența directă HG766↔CC (art. 370 alin. 5): CC1=D, CC2=C, CC3=B, CC4=A. ' + (_anexa6Res && _echivalentaHG766 !== _anexa6Res.cc ? 'ATENȚIE: rezultatul Anexei 6 (' + _anexa6Res.cc + ') diferă de echivalența directă din categoria HG766 (' + _echivalentaHG766 + ') — divergență legitimă (2 metodologii din 2 acte normative diferite, ambele valabile — HG766 rămâne în vigoare, art. 577 alin. 3 lit. c CATUC); Anexa 6 e cea obligatorie pt. proiecte noi.' : 'coincid pt. acest caz.'),
       tranzitie: 'Art. 582 alin. 1: proiectele demarate înainte de 25.08.2026 rămân sub Legea 50/1991 + HG 766/1997 (fără reîncadrare CC).',
       atentionare_p118: 'Normativul P118 (securitate la incendiu) folosește încă, la data scrierii, terminologia "categorie de importanță" — nu există corelare oficială publicată cu CC1-4; platforma NU aplică o corespondență auto-inventată în calculele SSI/P118, doar la nivelul acestui indicator general.'
     };

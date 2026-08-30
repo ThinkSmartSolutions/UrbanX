@@ -2138,7 +2138,8 @@
             '<tr style="background:#f0f0f0"><td style="border:1px solid #ccc;padding:3px" colspan="4"><b>Total punctaj</b></td><td style="border:1px solid #ccc;padding:3px;text-align:center"><b>' + det.total + '</b></td></tr></table>' +
             '<p style="font-size:8pt;color:#666">Scala p(i)/p(ii)/p(iii) (Tabelul 2, art. 18): 0=inexistent, 1=redus, 2=mediu, 4=apreciabil, 6=ridicat. k(n)=1 (fără caracter unic/monument). Punctajele sunt o estimare conservatoare din datele disponibile ale proiectului — proiectantul atestat confirmă/corectează fiecare criteriu (art. 7).</p>';
         }
-        var notaCatuc = ac.clasa_consecinte ? '<p style="font-size:8pt;color:#666"><b>Notă (Legea nr. 169/2026 — CATUC, în vigoare din 25.08.2026):</b> categoria de importanță de mai sus corespunde direct clasei de consecințe <b>' + esc(ac.clasa_consecinte) + '</b> (CC1=D, CC2=C, CC3=B, CC4=A), introdusă de noul Cod al amenajării teritoriului, urbanismului și construcțiilor. Această corespondență NU se aplică însă terminologiei din normativul P118 (securitate la incendiu), care folosește încă „categorie de importanță" — la data prezentului document nu există o corelare oficială publicată între P118 și clasele CC1-4, iar platforma nu o inventează; pragurile P118 din prezentul scenariu rămân încadrate pe categoria de importanță HG 766/1997. Pentru proiectele demarate înainte de 25.08.2026, se aplică integral regimul vechi (art. 582 alin. 1 CATUC), fără reîncadrare CC.</p>' : '';
+        var _ccDiverge = ac.clasa_consecinte_echivalenta_hg766 && ac.clasa_consecinte && ac.clasa_consecinte_echivalenta_hg766 !== ac.clasa_consecinte;
+        var notaCatuc = ac.clasa_consecinte ? '<p style="font-size:8pt;color:#666"><b>Notă (Legea nr. 169/2026 — CATUC, în vigoare din 25.08.2026, art. 370):</b> categoria de importanță HG766 de mai sus este ÎNLOCUITĂ, ca sistem de încadrare, de clasa de consecințe — proiectul de față se încadrează la <b>' + esc(ac.clasa_consecinte) + '</b>' + (ac.clasa_consecinte_detaliu && ac.clasa_consecinte_detaliu.sursa ? ' (' + esc(ac.clasa_consecinte_detaliu.sursa) + ')' : '') + '.' + (_ccDiverge ? ' <b>Atenție:</b> corespondența directă din categoria HG766 de mai sus ar indica ' + esc(ac.clasa_consecinte_echivalenta_hg766) + ', diferit de clasa reieșită din Anexa 6 — divergență legitimă (2 metodologii din 2 acte normative diferite, ambele valabile: HG766 rămâne în vigoare ca regulament de sine stătător — art. 577 alin. 3 lit. c CATUC — dar Anexa 6 la CATUC e metodologia obligatorie pt. proiecte noi, art. 370 alin. 16); se reține clasa din Anexa 6.' : '') + ' Această clasificare NU se aplică însă terminologiei din normativul P118 (securitate la incendiu), care folosește încă „categorie de importanță" — la data prezentului document nu există o corelare oficială publicată între P118 și clasele CC1-4, iar platforma nu o inventează; pragurile P118 din prezentul scenariu rămân încadrate pe categoria de importanță HG 766/1997 de mai sus. Pentru proiectele demarate înainte de 25.08.2026, se aplică integral regimul vechi (art. 582 alin. 1 CATUC), fără reîncadrare CC.</p>' : '';
         return '<p>Se stabilește conform ' + temei + '.</p>' + tabelPunctaj + '<p>Categorie de importanță rezultată: <b>' + esc(cat) + '</b> — conform art. 7 al Regulamentului, încadrarea finală rămâne responsabilitatea proiectantului, la cererea investitorului, și se înscrie în toate documentele tehnice ale construcției.</p>' + notaCatuc;
       })() },
       { h: '1.4.a. Tipul clădirii', html: (function () {
@@ -3034,8 +3035,8 @@
       var TIPURI = {
         reabilitare_termica: { t: 'Reabilitare termică', cap: ['Starea actuală (audit energetic)', 'Soluții de intervenție (izolare fațade + acoperiș + tâmplărie)', 'Indicatori energetici actuali vs. propuși (kWh/mp·an)', 'Reducerea emisiilor CO₂', 'Analiza cost-eficiență (lei/kWh economisit)', 'Certificat energetic ante/post'], norma: 'Legea 372/2005 · Ord. MDRT 2641/2012 · Mc 001/2006' },
         consolidare: { t: 'Consolidare structurală', cap: ['Expertiza tehnică (expert atestat MLPAT)', 'Clasa de risc seismic (Rs I → Rs IV)', 'Descrierea degradărilor și cauzelor', 'Soluția de consolidare propusă', 'Gradul de asigurare seismică post-intervenție (R3)'], norma: 'P100-3/2008 · P100-1/2013 · Legea 10/1995' },
-        schimbare_destinatie: { t: 'Schimbare de destinație', cap: ['Destinația actuală vs. propusă', 'Cerințe normative ale noii funcțiuni', 'Verificarea capacității structurale la noile încărcări', 'Adaptări (evacuare, PSI, accesibilitate, igienă)'], norma: 'Legea 50/1991 · Legea 10/1995' },
-        extindere: { t: 'Extindere', cap: ['Corp existent + corp nou (rost / conlucrare)', 'Racordarea structurală și funcțională', 'Indicatori rezultați (POT/CUT cumulat)'], norma: 'P100-1/2013 · Legea 50/1991' },
+        schimbare_destinatie: { t: 'Schimbare de destinație', cap: ['Destinația actuală vs. propusă', 'Cerințe normative ale noii funcțiuni', 'Verificarea capacității structurale la noile încărcări', 'Adaptări (evacuare, PSI, accesibilitate, igienă)'], norma: 'Legea 169/2026 (CATUC) · Legea 10/1995 (parțial, art. 10/41/45+ rămân în vigoare)' },
+        extindere: { t: 'Extindere', cap: ['Corp existent + corp nou (rost / conlucrare)', 'Racordarea structurală și funcțională', 'Indicatori rezultați (POT/CUT cumulat)'], norma: 'P100-1/2013 · Legea 169/2026 (CATUC)' },
         mansardare: { t: 'Mansardare', cap: ['Verificarea capacității structurii existente la suprasarcină', 'Soluția de șarpantă/planșeu', 'Încadrarea în regimul de înălțime admis'], norma: 'P100-1/2013 · C 107/2005' }
       };
       var ti = TIPURI[tip] || TIPURI.reabilitare_termica;
@@ -3252,10 +3253,12 @@
       ];
       return { cat: 'Memorii Tehnice', file: 'Cladire_mixta_separari.doc', html: docHtml(_meta(D, 'CLĂDIRE MIXTĂ — SEPARĂRI ÎNTRE FUNCȚIUNI', 'P118-1/2013 · separări la foc + accese'), secs) };
     },
-    // Sistematizare verticala — piesa scrisa distincta din Anexa 1 (Ord. 839/2009, Legea 50/1991):
-    // cote de nivel teren natural/proiectat, racordare cu vecinatatile/drumul, colectare-evacuare ape
-    // pluviale, lucrari de sustinere/rampe. Standard universal (nu optional ca DTAD) — vezi referinta
-    // Cresa Pogana: memoriu separat + planse ([[urbanx-master-backlog]] sectiunea A).
+    // Sistematizare verticala — piesa scrisa, componenta a proiectului de arhitectura/inginerie din
+    // continutul-cadru Anexa nr. 2 la Legea nr. 169/2026 (CATUC, M.Of. 661/10.08.2026, art. 264 alin. 3
+    // — inlocuieste fostul Anexa 1 la Ord. 839/2009/Legea 50/1991, ambele abrogate expres, art. 576
+    // alin. 3 CATUC): cote de nivel teren natural/proiectat, racordare cu vecinatatile/drumul,
+    // colectare-evacuare ape pluviale, lucrari de sustinere/rampe. Standard universal (nu optional ca
+    // DTAD) — vezi referinta Cresa Pogana: memoriu separat + planse ([[urbanx-master-backlog]] sect. A).
     'Sistematizare verticală': function (D, v) {
       var ac = v.calc || {};
       var st = +D.Steren || null; var sc = +D.Sc || null;
@@ -3264,7 +3267,7 @@
       var pantaTeren = D.panta_teren_pct;
       var areSustinere = pantaTeren != null && +pantaTeren > 15;
       var secs = [
-        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație stabilește soluția de sistematizare pe verticală a terenului aferent investiției „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", ' + esc(D.uat || '—') + ' — cotele de nivel proiectate, racordarea cu terenurile învecinate și cu drumul public, precum și modul de colectare și evacuare a apelor meteorice de pe amplasament, conform Legii 50/1991 (Anexa 1 la normele metodologice).</p>' },
+        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație stabilește soluția de sistematizare pe verticală a terenului aferent investiției „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", ' + esc(D.uat || '—') + ' — cotele de nivel proiectate, racordarea cu terenurile învecinate și cu drumul public, precum și modul de colectare și evacuare a apelor meteorice de pe amplasament, ca piesă a proiectului pentru autorizarea construirii, conform conținutului-cadru din Anexa nr. 2 la Legea nr. 169/2026 (CATUC, în vigoare din 25.08.2026).</p>' },
         { h: '2. Situația actuală a terenului', html: tbl([
           ['Suprafață teren', st ? (st.toLocaleString('ro-RO') + ' mp') : 'de precizat din ridicarea topografică'],
           ['Cotă teren natural (CTN), punct de referință', cotaTeren != null ? (cotaTeren + ' m (sistem de referință Marea Neagră 1975)') : 'de precizat din ridicarea topografică'],
@@ -3279,24 +3282,26 @@
         { h: '6. Circulații și accese', html: '<p>Circulațiile carosabile și pietonale de pe amplasament se sistematizează la cotele stabilite mai sus, cu pante longitudinale/transversale conforme (max. 5% longitudinal pentru circulații pietonale uzuale, cu excepția rampelor dedicate), asigurând scurgerea apelor și accesul continuu din drumul public până la intrările construcției.</p>' },
         { h: '7. Spații verzi și plantații', html: '<p>Spațiile verzi rămase după sistematizare se nivelează cu pante line (max. 1:2) spre zonele de colectare a apelor, cu pământ vegetal repus pe o grosime minimă de 20–30 cm pentru susținerea plantațiilor prevăzute în planul de situație/documentația de peisagistică, dacă există.</p>' }
       ];
-      return { cat: 'Piese Administrative', file: 'Sistematizare_verticala.doc', html: docHtml(_meta(D, 'MEMORIU DE SISTEMATIZARE PE VERTICALĂ', 'Legea 50/1991, Anexa 1'), secs) };
+      return { cat: 'Piese Administrative', file: 'Sistematizare_verticala.doc', html: docHtml(_meta(D, 'MEMORIU DE SISTEMATIZARE PE VERTICALĂ', 'Legea nr. 169/2026 (CATUC), art. 264, Anexa 2'), secs) };
     },
     'Memoriu DTOE (organizare execuție)': function (D, v) {
       var sc = +D.Sc || 0;
       var deep = _lib(D, 'dtoe');
-      if (deep) return { cat: 'Piese Administrative', file: 'Memoriu_DTOE.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI (D.T.O.E.)', 'Legea 50/1991, Anexa 1'), [{ h: null, html: deep }]) };
+      if (deep) return { cat: 'Piese Administrative', file: 'Memoriu_DTOE.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI (D.T.O.E.)', 'Legea nr. 169/2026 (CATUC), art. 264, Anexa 2'), [{ h: null, html: deep }]) };
       var secs = [
-        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație tehnică de organizare a execuției (D.T.O.E.) însoțește documentația pentru autorizarea executării lucrărilor la obiectivul „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", ' + esc(D.uat || '—') + '. Se întocmește conform Legii 50/1991 (Anexa 1) și stabilește măsurile de organizare a șantierului pe durata execuției.</p>' },
-        { h: '2. Componentele organizării de șantier', html: tbl([['Împrejmuire', 'gard opac perimetral H≥2,0 m, poartă acces auto/pietonal, panou de identificare a investiției (Legea 50/1991 art. 7)'], ['Accese și circulații', 'drum provizoriu, platformă de manevră/staționare, spălarea roților la ieșire'], ['Baracamente', 'birou șantier/pază, vestiar muncitori, grup sanitar ecologic, magazie materiale'], ['Depozitare materiale', 'platforme amenajate pe categorii; materiale sensibile la adăpost'], ['Utilități provizorii', 'branșament provizoriu energie și apă, tablou de șantier, evacuare ape'], ['Managementul deșeurilor', 'containere selective, evacuare cu operator autorizat (Legea 211/2011)']], ['Componentă', 'Descriere']) },
+        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație tehnică de organizare a execuției (D.T.O.E.) însoțește proiectul pentru autorizarea executării lucrărilor la obiectivul „' + esc((G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune) + '", ' + esc(D.uat || '—') + '. Se întocmește conform Legii nr. 169/2026 (CATUC, art. 264, conținut-cadru Anexa 2) și stabilește măsurile de organizare a șantierului pe durata execuției.</p>' },
+        { h: '2. Componentele organizării de șantier', html: tbl([['Împrejmuire', 'gard opac perimetral H≥2,0 m, poartă acces auto/pietonal, panou de identificare a investiției'], ['Accese și circulații', 'drum provizoriu, platformă de manevră/staționare, spălarea roților la ieșire'], ['Baracamente', 'birou șantier/pază, vestiar muncitori, grup sanitar ecologic, magazie materiale'], ['Depozitare materiale', 'platforme amenajate pe categorii; materiale sensibile la adăpost'], ['Utilități provizorii', 'branșament provizoriu energie și apă, tablou de șantier, evacuare ape'], ['Managementul deșeurilor', 'containere selective, evacuare cu operator autorizat (Legea 211/2011)']], ['Componentă', 'Descriere']) },
         { h: '3. Suprafața ocupată temporar', html: '<p>Organizarea de șantier se amplasează, de regulă, în incinta proprie (pe suprafața neconstruită, ' + (D.Steren && sc ? '≈ ' + Math.round((+D.Steren - sc)).toLocaleString('ro-RO') + ' mp disponibili' : 'de precizat') + '), fără ocuparea domeniului public. Ocuparea temporară a domeniului public (ex. racorduri în stradă) necesită autorizație de la administratorul domeniului public.</p>' },
         { h: '4. Securitate și sănătate în muncă (SSM)', html: '<p>Se respectă Legea 319/2006 și HG 300/2006 (cerințe minime SSM pe șantiere temporare/mobile): plan de securitate și sănătate (dacă se depășesc pragurile HG 300/2006), planul propriu al fiecărui executant, coordonator SSM desemnat, semnalizare de avertizare, echipament individual de protecție.</p>' },
         { h: '5. Apărarea împotriva incendiilor pe durata execuției', html: '<p>Se aplică măsurile de prevenire (Legea 307/2006, normativ C 300): permis de lucru cu foc, dotare PSI provizorie (stingătoare), căi de acces pentru intervenție, depozitarea controlată a materialelor combustibile.</p>' },
         { h: '6. Protecția vecinătăților și a mediului', html: '<p>Limitarea programului de lucru (ore de liniște), stropirea pentru reducerea prafului, protejarea arborilor menținuți, refacerea căilor de acces și a terenurilor afectate temporar la finalizarea lucrărilor.</p>' }
       ];
-      return { cat: 'Piese Administrative', file: 'Memoriu_DTOE.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI (D.T.O.E.)', 'Legea 50/1991, Anexa 1'), secs) };
+      return { cat: 'Piese Administrative', file: 'Memoriu_DTOE.doc', html: docHtml(_meta(D, 'MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI (D.T.O.E.)', 'Legea nr. 169/2026 (CATUC), art. 264, Anexa 2'), secs) };
     },
-    // D.T.A.D. — sora lui D.T.A.C. (Legea 50/1991, art. 3 alin. (1) lit. b): autorizatie DISTINCTA
-    // pt desfiintarea (demolarea/dezmembrarea/dezafectarea) unei constructii existente. Optional
+    // D.T.A.D. — sora lui D.T.A.C. (Legea 169/2026, CATUC, art. 302 — fost Legea 50/1991 art. 3 alin.
+    // (1) lit. b, abrogata): autorizatie DISTINCTA pt desfiintarea (demolarea/dezmembrarea/
+    // dezafectarea) unei constructii existente, continut-cadru Anexa nr. 5 la CATUC (art. 302 alin. 4).
+    // Optional
     // (D._docs, DOC_OPTIONAL_OFF in urbanx-doc-ui.js) — nu se aplica majoritatii proiectelor noi.
     'Documentație tehnică pentru autorizarea desființării (D.T.A.D.)': function (D, v) {
       var fn = (G.UXDoc.FUNCTIUNI[D.functiune] || {}).label || D.functiune;
@@ -3304,7 +3309,7 @@
       var anConstructie = D.an_constructie_existenta || null;
       var azbestRisc = anConstructie ? (+anConstructie < 2007) : null;
       var secs = [
-        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație tehnică pentru autorizarea executării lucrărilor de desființare (D.T.A.D.) are ca obiect demolarea/dezafectarea construcției existente de pe amplasamentul „' + esc(fn) + '", ' + esc(D.uat || '—') + esc(D.nrcad ? (', nr. cadastral ' + D.nrcad) : '') + ', în temeiul art. 3 alin. (1) lit. b) din Legea 50/1991 republicată (autorizarea executării lucrărilor de desființare este distinctă de cea de construire, chiar dacă terenul urmează a fi ulterior reconstruit).</p>' +
+        { h: '1. Obiectul documentației', html: '<p>Prezenta documentație tehnică pentru autorizarea executării lucrărilor de desființare (D.T.A.D.) are ca obiect demolarea/dezafectarea construcției existente de pe amplasamentul „' + esc(fn) + '", ' + esc(D.uat || '—') + esc(D.nrcad ? (', nr. cadastral ' + D.nrcad) : '') + ', în temeiul art. 302 din Legea nr. 169/2026 (CATUC), conținut-cadru Anexa nr. 5 (autorizația de desființare se emite distinct de cea de construire, deși în aceleași condiții — art. 302 alin. 1 —, chiar dacă terenul urmează a fi ulterior reconstruit, caz în care se poate emite o autorizație unică, art. 302 alin. 2).</p>' +
           '<p>Motivul desființării: ' + esc(D.motiv_desfiintare || 'construcție cu stare tehnică necorespunzătoare / neconformă cu destinația propusă a terenului — de detaliat de proiectant conform expertizei tehnice, dacă există') + '.</p>' },
         { h: '2. Descrierea construcției existente supuse desființării', html: tbl([
           ['Suprafață construită (Sc)', scExist ? (scExist + ' m²') : 'de precizat din releveul construcției existente'],
@@ -3324,10 +3329,10 @@
         { h: '7. Securitate și sănătate în muncă (SSM)', html: '<p>Se respectă Legea 319/2006 și HG 300/2006 (cerințe minime SSM pe șantiere temporare/mobile) — plan de securitate și sănătate, coordonator SSM desemnat, echipament individual de protecție, delimitarea și semnalizarea zonei de lucru; lucrările de demolare prezintă risc ridicat de accidentare (cădere de la înălțime, prăbușire necontrolată), motiv pentru care etapizarea demolării și distanțele de siguranță se stabilesc explicit în planul SSM al executantului.</p>' },
         { h: '8. Program de execuție a lucrărilor de desființare', html: '<p>Durata estimată a lucrărilor de desființare: ' + esc(D.durata_desfiintare_zile ? (D.durata_desfiintare_zile + ' zile lucrătoare') : 'de precizat de constructorul atestat, funcție de volumul construit și metoda de demolare adoptată') + '. Programul detaliat (zi cu zi/săptămână cu săptămână) se anexează la faza de execuție, corelat cu graficul general al investiției dacă desființarea precede o construcție nouă pe același amplasament.</p>' },
         { h: '9. Situația terenului după desființare', html: '<p>' + (D.tip_lucrare === 'CONSTRUCTIE_NOUA' || D._are_constructie_noua_dupa_desfiintare
-          ? 'Terenul rezultat după desființare și nivelare urmează a fi utilizat pentru construcția nouă descrisă în documentația D.T.A.C./P.Th. a acestui proiect — desființarea și construirea se corelează ca etape succesive ale aceleiași investiții, cu autorizații distincte conform art. 3 din Legea 50/1991.'
+          ? 'Terenul rezultat după desființare și nivelare urmează a fi utilizat pentru construcția nouă descrisă în documentația D.T.A.C./P.Th. a acestui proiect — desființarea și construirea se corelează ca etape succesive ale aceleiași investiții, cu autorizație unică sau distinctă, conform art. 302 din Legea nr. 169/2026 (CATUC).'
           : 'Terenul rezultat după desființare, nivelare și curățare rămâne liber de construcții, urmând regimul de utilizare stabilit prin certificatul de urbanism (verde/agricol/rezervă pentru investiție viitoare, după caz).') + '</p>' }
       ];
-      return { cat: 'Piese Administrative', file: 'Documentatie_desfiintare_DTAD.doc', html: docHtml(_meta(D, 'DOCUMENTAȚIE TEHNICĂ PENTRU AUTORIZAREA DESFIINȚĂRII (D.T.A.D.)', 'Legea 50/1991, art. 3 alin. (1) lit. b) + Anexa 1'), secs) };
+      return { cat: 'Piese Administrative', file: 'Documentatie_desfiintare_DTAD.doc', html: docHtml(_meta(D, 'DOCUMENTAȚIE TEHNICĂ PENTRU AUTORIZAREA DESFIINȚĂRII (D.T.A.D.)', 'Legea nr. 169/2026 (CATUC), art. 302, Anexa 5'), secs) };
     },
     'Borderou piese scrise și desenate': function (D, v) {
       var niv = Math.max(1, +D.niv_supraterane || 1);
@@ -3355,7 +3360,7 @@
       ];
       if (PR.length) secs.push({ h: 'C. Piese desenate — rezistență și instalații (PTh)', html: tbl(PR, ['Cod', 'Denumire planșă', 'Scara']) });
       secs.push({ h: 'D. Notă', html: '<p>Lista pieselor desenate este generată automat din regimul de înălțime (' + esc(D.regim || ('P+' + (niv - 1))) + ') și faza de proiectare. Fiecare planșă poartă cartuș conform Legii 50/1991, Anexa 1 (firmă/proiectant, nr. autorizație, titlu, scară, dată, semnături). Planurile se elaborează/finalizează de proiectant; planul funcțional schematic se poate genera din modelul de spații (SVG/PDF/DXF).</p>' });
-      return { cat: 'Piese Administrative', file: 'Borderou_piese.doc', html: docHtml(_meta(D, 'BORDEROU / OPIS PIESE', 'piese scrise și desenate — Legea 50/1991 Anexa 1'), secs) };
+      return { cat: 'Piese Administrative', file: 'Borderou_piese.doc', html: docHtml(_meta(D, 'BORDEROU / OPIS PIESE', 'piese scrise și desenate — Legea nr. 169/2026 (CATUC), Anexa 2'), secs) };
     },
     'Program funcțional (breviar spații)': function (D, v) {
       var sp = D._spatii || [];
@@ -3434,7 +3439,7 @@
         ['Verificator cerințele B/Cc/D/E', '', 'verificator atestat MDLPA', 'atestat nr. ___'],
         ['Verificator instalații (Is/It/Ie)', '', 'verificator atestat MDLPA', 'atestat nr. ___']
       ];
-      return { cat: 'Piese Administrative', file: 'Opis_lista_proiectanti.doc', html: docHtml(_meta(D, 'OPIS AL DOCUMENTAȚIEI ȘI LISTA DE SEMNĂTURI', 'piese scrise și desenate · colectiv de elaborare — Legea 50/1991, Anexa 1'), [
+      return { cat: 'Piese Administrative', file: 'Opis_lista_proiectanti.doc', html: docHtml(_meta(D, 'OPIS AL DOCUMENTAȚIEI ȘI LISTA DE SEMNĂTURI', 'piese scrise și desenate · colectiv de elaborare — Legea nr. 169/2026 (CATUC), Anexa 2'), [
         { h: 'A. Opis piese scrise', html: tbl(scriseRows, ['Cod', 'Denumirea piesei scrise', 'Nr. file']) },
         { h: 'B. Opis piese desenate', html: tbl(DES, ['Cod planșă', 'Denumirea planșei', 'Scara']) },
         { h: 'C. Colectiv de elaborare și lista de semnături', html:
@@ -3636,7 +3641,7 @@
         ['Urmărirea comportării în timp', 'responsabil desemnat (P130/1999)', '']
       ], ['Obligație', 'Cine răspunde', 'Nume și prenume']);
       var secs = [
-        { h: '1. Obiect și cadru legal', html: '<p>Cartea tehnică a construcției pentru obiectivul „' + esc(fnLabel) + '", ' + esc(ampl || '—') + ', se întocmește și se completează conform <b>Legii 10/1995</b> (calitatea în construcții), <b>HG 273/1994</b> (Regulamentul de recepție, modificat prin HG 343/2017) și <b>HG 766/1997 — Anexa 6</b> (Regulament privind conducerea și asigurarea calității / cartea tehnică). Cuprinde ansamblul documentelor privind proiectarea, execuția, recepția și urmărirea comportării în exploatare, grupate în secțiunile A–D.</p>' + tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Faza', isPth ? 'P.Th. + D.E.' : 'D.T.A.C.'], ['Categorie/clasă importanță (HG766) / Clasă consecințe (L.169/2026)', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—') + (ac.clasa_consecinte ? ' / ' + ac.clasa_consecinte : '')]], ['Element', 'Valoare']) },
+        { h: '1. Obiect și cadru legal', html: '<p>Cartea tehnică a construcției pentru obiectivul „' + esc(fnLabel) + '", ' + esc(ampl || '—') + ', se întocmește și se completează conform <b>Legii 10/1995</b> (calitatea în construcții — abrogată parțial de Legea 169/2026/CATUC, art. 576 alin. 3 lit. c: doar art. 1-9, 11-40, 42-44; restul articolelor, inclusiv cele privind cartea tehnică, rămân în vigoare), <b>HG 273/1994</b> (Regulamentul de recepție, modificat prin HG 343/2017 — rămâne în vigoare, art. 577 alin. 6 CATUC) și <b>HG 766/1997 — Anexele 2 și 4</b> (Regulamentul privind conducerea și asigurarea calității / Regulamentul privind urmărirea comportării în exploatare, intervenții în timp și postutilizarea construcțiilor — ambele rămân în vigoare, art. 577 alin. 3 CATUC). Cuprinde ansamblul documentelor privind proiectarea, execuția, recepția și urmărirea comportării în exploatare, grupate în secțiunile A–D.</p>' + tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Faza', isPth ? 'P.Th. + D.E.' : 'D.T.A.C.'], ['Categorie de importanță (HG766, art.577 CATUC) / Clasă seismică', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—')], ['Clasă de consecințe (CATUC, Anexa 6)', ac.clasa_consecinte || '—']], ['Element', 'Valoare']) },
         { h: '2. Structura cărții tehnice (borderou general)', html: '<p>Cartea tehnică se organizează în patru secțiuni și centralizatorul pieselor:</p>' + tbl([['A', 'Documentația privind proiectarea', '' + A.length + ' piese'], ['B', 'Documentația privind execuția', '' + B.length + ' piese'], ['C', 'Documentația privind recepția', '' + C.length + ' piese'], ['D', 'Documentația privind urmărirea comportării în exploatare și intervenții', '' + Dsec.length + ' piese']], ['Secț.', 'Conținut', 'Piese']) },
         { h: 'Secțiunea A — Documentația privind proiectarea', html: opisSec(A) },
         { h: 'Secțiunea B — Documentația privind execuția', html: opisSec(B) },
@@ -3722,7 +3727,7 @@
             '<p><b>Soluția tehnică:</b> se prezintă amenajarea accesului la drumul județean (raze de racordare, vizibilitate, semnalizare), încadrarea în zona drumului și măsurile de scurgere a apelor, corelat cu breviarul de parcaje asigurate în incintă.</p>';
           docs = ['Plan de situație cu accesul la drumul județean', 'Plan de încadrare în zonă', 'Proiect de semnalizare rutieră', 'Breviar parcaje'];
         } else if (/primar|\bpug\b|\bpuz\b|\bpud\b|oportunitate/.test(k)) {
-          emitent = 'Primăria / Consiliul Local — Aviz de oportunitate / aviz al arhitectului-șef (după caz)'; temei = 'Legea 350/2001 (urbanism), Legea 50/1991, RLU/PUG local';
+          emitent = 'Primăria / Consiliul Local — Aviz de oportunitate / aviz al arhitectului-șef (după caz)'; temei = 'Legea nr. 169/2026 (CATUC), RLU/PUG local';
           body = '<p>Se solicită <b>avizul autorității locale</b> privind conformarea la documentațiile de urbanism aprobate (PUG/PUZ/PUD) și, unde e cazul, avizul de oportunitate pentru elaborarea unui PUZ.</p>' +
             '<p><b>Soluția tehnică:</b> se demonstrează încadrarea funcțiunii în zona reglementată, respectarea indicatorilor urbanistici (POT ' + (ac.POT || 0) + '%, CUT ' + (ac.CUT || 0) + '), a regimului de înălțime și a retragerilor din RLU, integrarea în context și rezolvarea acceselor, parcajelor și spațiilor verzi.</p>';
           docs = ['Plan de situație și de încadrare conform RLU/PUG', 'Certificat de urbanism', 'Ilustrare urbanistică / volumetrie (după caz)', 'Bilanț teritorial (POT/CUT/verde/parcaje)'];
@@ -3770,16 +3775,16 @@
           ['Suprafață desfășurată (SD)', (D.Sd ? (+D.Sd).toLocaleString('ro-RO') + ' mp' : '—')],
           ['Regim de înălțime', 'P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + (D.H ? ' (H ' + D.H + ' m)' : '')],
           ['POT / CUT propuse', (ac.POT || 0) + '% / ' + (ac.CUT || 0)],
-          ['Categorie/clasă importanță (HG766) / Clasă consecințe (L.169/2026)', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—') + (ac.clasa_consecinte ? ' / ' + ac.clasa_consecinte : '')],
+          ['Categorie importanță (HG766) / clasă seismică / clasă consecințe (CATUC, Anexa 6)', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—') + ' / ' + (ac.clasa_consecinte || '—')],
           ['Risc/categorie incendiu', (String(ac.risc_incendiu || 'mediu')) + ' · Cat. ' + (D.psi || ac.psi_default || 'C')]
         ], ['Indicator', 'Valoare']);
         // MEMORIU COMPLET, structurat — identic ca schelet, DIFERIT ca fond (per emitent)
         var memoriu =
-          '<h3>1. Obiectul solicitării</h3><p>Prin prezenta se solicită avizul/acordul emis de <b>' + esc(emitent) + '</b> pentru obiectivul de investiții „' + esc(fnLabel) + '", amplasat în ' + esc(ampl || '—') + (D.nrCU ? ', conform Certificatului de Urbanism nr. ' + esc(D.nrCU) : ', conform Certificatului de Urbanism') + '. Avizul este solicitat prin CU și condiționează emiterea autorizației de construire (Legea 50/1991). Prezentul memoriu fundamentează tehnic solicitarea.</p>' +
+          '<h3>1. Obiectul solicitării</h3><p>Prin prezenta se solicită avizul/acordul emis de <b>' + esc(emitent) + '</b> pentru obiectivul de investiții „' + esc(fnLabel) + '", amplasat în ' + esc(ampl || '—') + (D.nrCU ? ', conform Certificatului de Urbanism nr. ' + esc(D.nrCU) : ', conform Certificatului de Urbanism') + '. Avizul este solicitat prin CU și condiționează emiterea autorizației de construire (Legea nr. 169/2026, CATUC, art. 264). Prezentul memoriu fundamentează tehnic solicitarea.</p>' +
           '<h3>2. Descrierea obiectivului</h3><p>' + esc(_caracConstr(D, v)) + '</p>' + indTbl +
           '<h3>3. Soluția tehnică relevantă pentru ' + esc(emitent.split('(')[0].split('—')[0].trim()) + '</h3>' + specHtml +
           '<h3>4. Măsuri de conformare și corelări</h3><p>Proiectul asigură conformarea la cerințele și restricțiile impuse de emitent prin Certificatul de Urbanism, precum și la reglementările tehnice specifice domeniului. Condițiile din avizul emis se însușesc obligatoriu în documentația tehnică pentru autorizarea executării lucrărilor (D.T.A.C.) și, după caz, în proiectul tehnic de execuție. Soluția este corelată interdisciplinar cu celelalte specialități (arhitectură, rezistență, instalații) și cu piesele desenate anexate.</p>' +
-          '<h3>5. Temei legal și normativ</h3><p>' + esc(temei) + '. Documentația respectă Legea 50/1991 (autorizarea executării lucrărilor de construcții), Legea 350/2001 (urbanism) și reglementările specifice emitentului.</p>';
+          '<h3>5. Temei legal și normativ</h3><p>' + esc(temei) + '. Documentația respectă Legea nr. 169/2026 (CATUC — autorizarea executării lucrărilor de construcții și amenajarea teritoriului, în vigoare din 25.08.2026, succesoare a Legilor 50/1991 și 350/2001, abrogate) și reglementările specifice emitentului.</p>';
         var html =
           tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Emitent aviz', esc(emitent)], ['Faza', faza]], ['Element', 'Conținut']) +
           memoriu +
