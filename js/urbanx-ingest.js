@@ -99,8 +99,9 @@
     if ((m = t.match(/zona\s*climatic[aă].{0,20}?\b(I{1,3}V?|IV|V)\b.{0,60}?T[eE][a-z]*\.?\s*=?\s*(-?\d{1,2})\s*°?C/i))) { o.zona_climatica = m[1]; o.te_calcul = +m[2]; }
     if ((m = t.match(/R\s*'?\s*m\.?\s*pere[țt]i(?:\s*exteriori)?.{0,20}?(\d(?:[.,]\d+)?)\s*m[²2]\s*K\s*\/\s*W/i))) o.rm_pereti = +m[1].replace(',', '.');
     if ((m = t.match(/R\s*'?\s*m\.?\s*(?:acoperi[șs]|terasa|plan[șs]eu\s*peste\s*ultimul\s*nivel).{0,20}?(\d(?:[.,]\d+)?)\s*m[²2]\s*K\s*\/\s*W/i))) o.rm_acoperis = +m[1].replace(',', '.');
-    // tampl[aă]ri + e/a — accepta si forma articulata "tamplaria" (subiect de propozitie), nu doar "tamplarie"
-    if ((m = t.match(/t[aâ]mpl[aă]ri[ea](?:\s*exterioar[aă])?.{0,50}?geam\s*(dublu|triplu|simplu)/i))) o.tip_tamplarie = 'geam ' + m[1];
+    // tampl[aă]ri + e/a — accepta si forma articulata "tamplaria" (subiect de propozitie), nu doar "tamplarie";
+    // accepta ambele ordini uzuale in romana — "geam dublu" SI "dublu geam" (ex. "PVC cu dublu geam")
+    if ((m = t.match(/t[aâ]mpl[aă]ri[ea](?:\s*exterioar[aă])?.{0,50}?(?:geam\s*(dublu|triplu|simplu)|(dublu|triplu|simplu)\s*geam)/i))) o.tip_tamplarie = 'geam ' + (m[1] || m[2]);
     // Recomandările auditorului — cuvinte-cheie tipice (diacritic/ASCII), se colectează propozițiile care le conțin
     var masuriKeywords = /termosistem|termoizola[țt]i[ei]|t[aâ]mpl[aă]rie\s*nou[aă]|pomp[aă]\s*de\s*c[aă]ldur[aă]|panouri\s*fotovoltaice|central[aă]\s*(?:termic[aă]\s*)?[îi]n\s*condensa[țt]ie|recuperator\s*de\s*c[aă]ldur[aă]/gi;
     var propozitii = t.split(/(?<=[.!?])\s+/);
