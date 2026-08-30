@@ -86,11 +86,11 @@ Structura de dosare recomandată (capitolul de prezentare + A/B/C/D) este detali
 | Planuri „as built" (layout mese, trasee cabluri DC/AC, priză, PT) | **Original** | Referință geometrică pentru mentenanță și intervenții |
 | Jurnalul evenimentelor, rapoarte de urmărire, log SCADA arhivat | **Original**, continuu | Piesă unică; istoricul de performanță și incidente |
 
-### 2.1 Corespondența secțiuni Anexa 6 ↔ capitole HG 273/1994
+### 2.1 Corespondența secțiuni Anexa 4 ↔ capitole HG 273/1994
 
-Enunțul temei cere structurarea pe **cele 3 capitole ale documentației de recepție** (HG 273/1994 Anexa): **A — proiectare**, **B — execuție**, **C — recepție + exploatare/urmărire**. Acestea coincid, ca materie, cu secțiunile A, B și (C+D) din Anexa 6 la HG 766/1997. Corespondența:
+Enunțul temei cere structurarea pe **cele 3 capitole ale documentației de recepție** (HG 273/1994 Anexa): **A — proiectare**, **B — execuție**, **C — recepție + exploatare/urmărire**. Acestea coincid, ca materie, cu secțiunile A, B și (C+D) din Anexa 4 la HG 766/1997. Corespondența:
 
-| Capitol HG 273/1994 (temă) | Secțiune Anexa 6 (HG 766/1997) | Conținut la parcul FV |
+| Capitol HG 273/1994 (temă) | Secțiune Anexa 4 (HG 766/1997) | Conținut la parcul FV |
 |---|---|---|
 | **A — Documentația privind proiectarea** | Secțiunea A | Temă, avize/acorduri (CU, mediu, ATR, Autorizație de înființare ANRE, utilități), SF, PT, DE, referate verificatori |
 | **B — Documentația privind execuția** | Secțiunea B | AC, PV faze determinante și lucrări ascunse, certificate/DoP, buletine (smulgere, I-V, izolație, priză, PRAM), jurnal de șantier, „as built" |
@@ -535,7 +535,7 @@ Răspunderea este **individualizată pe fapta fiecărui factor** (investitor, pr
 
 ### 8.1 Concluzii
 
-Cartea tehnică a unui parc fotovoltaic este documentul de referință pe întreaga durată de viață a Centralei Electrice Fotovoltaice (25–35 ani). Ea integrează, într-o structură unitară A–D (Anexa 6 la HG 766/1997), atât piesele clasice de construcții (proiectare verificată, PV de faze determinante și lucrări ascunse, buletine, „as built", recepție, urmărire P130/1999), cât și **piesele specifice de sector energetic** (ATR, Autorizația de înființare, Certificatul de racordare, Licența de producere, buletinele PRAM și I-V). Specificul FV impune un accent aparte pe: verificarea structurală la **vânt și smulgere** (secțiunea A), procesele-verbale de **lucrări ascunse** (piloți, cabluri DC/AC, priză — secțiunea B), **curbele I-V de referință** (baza garanției de performanță) și monitorizarea continuă a **KPI** (PR, disponibilitate, specific yield, degradare — secțiunea D). La final, postutilizarea are componentă proprie de **reciclare DEEE** și de **readucere reversibilă a terenului** la starea agricolă.
+Cartea tehnică a unui parc fotovoltaic este documentul de referință pe întreaga durată de viață a Centralei Electrice Fotovoltaice (25–35 ani). Ea integrează, într-o structură unitară A–D (Anexa 4 la HG 766/1997), atât piesele clasice de construcții (proiectare verificată, PV de faze determinante și lucrări ascunse, buletine, „as built", recepție, urmărire P130/1999), cât și **piesele specifice de sector energetic** (ATR, Autorizația de înființare, Certificatul de racordare, Licența de producere, buletinele PRAM și I-V). Specificul FV impune un accent aparte pe: verificarea structurală la **vânt și smulgere** (secțiunea A), procesele-verbale de **lucrări ascunse** (piloți, cabluri DC/AC, priză — secțiunea B), **curbele I-V de referință** (baza garanției de performanță) și monitorizarea continuă a **KPI** (PR, disponibilitate, specific yield, degradare — secțiunea D). La final, postutilizarea are componentă proprie de **reciclare DEEE** și de **readucere reversibilă a terenului** la starea agricolă.
 
 **Sinteza obligațiilor esențiale:**
 1. Cartea tehnică se **întocmește** de investitor (prin diriginte), pe secțiunile A–D, cu piesele energetice atașate;

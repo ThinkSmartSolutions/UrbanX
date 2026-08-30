@@ -11,7 +11,7 @@
   'use strict';
   G.UXLibrary = G.UXLibrary || {};
   G.UXLibrary._ready = G.UXLibrary._ready || {};
-  var VER = '20260830d';
+  var VER = '20260830e';
   var BASE = 'js/urbanx-library/functiuni/';
   // set standard de fișiere per funcțiune (aceleași chei ca la centru-social)
   var STD = {

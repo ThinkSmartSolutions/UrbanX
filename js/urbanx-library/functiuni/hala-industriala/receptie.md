@@ -12,7 +12,7 @@ Document întocmit de responsabilul tehnic cu execuția / dirigintele de șantie
 | **HG 273/1994** — Regulament de recepție a lucrărilor de construcții și instalații aferente | Procedura recepției la terminarea lucrărilor și a recepției finale | Structura comisiei, verificări, procese-verbale, situații de respingere/amânare (art. 8-16, 21-28) |
 | **HG 343/2017** — modifică și completează HG 273/1994 | Actualizare regulament recepție (comisie, roluri, ISC, garanții) | Componența comisiei RTL, prezența obligatorie a proiectantului și dirigintelui, referatele pe specialități, cartea tehnică ca precondiție |
 | **Normativ P130/1999** — Urmărirea comportării în timp a construcțiilor | Urmărire curentă și specială, parametri, periodicitate, responsabili | Cap. 7-9 din prezentul document — programul de urmărire |
-| **HG 766/1997** (Anexa 6) — Regulament privind urmărirea comportării în timp; **Anexa 3** — categorii de importanță | Cartea tehnică a construcției; categorii importanță; agrementul tehnic | Cap. 2 (cartea tehnică), încadrarea categoriei C |
+| **HG 766/1997** (Anexa 4) — Regulament privind urmărirea comportării în timp; **Anexa 3** — categorii de importanță | Cartea tehnică a construcției; categorii importanță; agrementul tehnic | Cap. 2 (cartea tehnică), încadrarea categoriei C |
 | **Legea nr. 169/2026** (CATUC), art. 264 — autorizarea executării lucrărilor | AC, PV recepție condiție pentru regularizare taxă și radiere | Anexă recepție (referire) |
 | **HG 925/1995** + **Ordin MLPAT 77/N/1996** | Verificarea proiectelor și expertizarea; verificatori atestați MLPAT/MDLPA | Faze determinante — proiect verificat pe cerințe |
 | **Ordin ISC 1370/2014** (Procedura faze determinante) | Stabilirea și convocarea fazelor determinante cu ISC | Cap. 4 — program faze determinante |
@@ -24,7 +24,7 @@ Document întocmit de responsabilul tehnic cu execuția / dirigintele de șantie
 
 ## 2. Cartea tehnică a construcției
 
-Conform **Legii 10/1995 art. 17-18** și **HG 766/1997 Anexa 6**, cartea tehnică se întocmește de investitor prin grija dirigintelui de șantier, se completează pe parcursul execuției și se predă proprietarului la recepția finală. Ea însoțește construcția pe toată durata de existență și se completează cu toate intervențiile ulterioare (reparații, consolidări, extinderi).
+Conform **Legii 10/1995 art. 17-18** și **HG 766/1997 Anexa 4**, cartea tehnică se întocmește de investitor prin grija dirigintelui de șantier, se completează pe parcursul execuției și se predă proprietarului la recepția finală. Ea însoțește construcția pe toată durata de existență și se completează cu toate intervențiile ulterioare (reparații, consolidări, extinderi).
 
 ### 2.1 Componență — secțiuni A÷D
 

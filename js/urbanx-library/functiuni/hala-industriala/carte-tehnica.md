@@ -73,13 +73,13 @@ Conform **Anexei 4 la HG 766/1997**, cartea tehnică a construcției se compune 
 - **Secțiunea C** — documentația privind **recepția**;
 - **Secțiunea D** — documentația privind **exploatarea, întreținerea, repararea și urmărirea comportării în timp**.
 
-**Principiul completitudinii:** cartea tehnică trebuie să permită reconstituirea integrală a construcției și a istoriei ei **exclusiv din piesele proprii**, fără a fi necesară consultarea unor arhive externe. O carte tehnică incompletă (lipsă „as built", lipsă referate de verificare, lipsă procese-verbale de faze determinante) nu își îndeplinește rolul și expune construcția la riscuri la orice intervenție viitoare. De aceea Anexa 6 impune atât o structură fixă (A–D), cât și instrumente de control al completitudinii (fișa sinteză, centralizatorul, borderourile pe dosare).
+**Principiul completitudinii:** cartea tehnică trebuie să permită reconstituirea integrală a construcției și a istoriei ei **exclusiv din piesele proprii**, fără a fi necesară consultarea unor arhive externe. O carte tehnică incompletă (lipsă „as built", lipsă referate de verificare, lipsă procese-verbale de faze determinante) nu își îndeplinește rolul și expune construcția la riscuri la orice intervenție viitoare. De aceea Anexa 4 impune atât o structură fixă (A–D), cât și instrumente de control al completitudinii (fișa sinteză, centralizatorul, borderourile pe dosare).
 
 Fiecare secțiune se organizează în **dosare** numerotate, iar piesele din fiecare dosar se înscriu într-un **borderou (centralizator)**. Piesele nu se rup din contextul lor; documentele originale se păstrează, iar acolo unde originalul rămâne la o altă autoritate (ex. autorizații), se păstrează copie conformă.
 
 **Logica ciclului de viață** care stă la baza împărțirii pe secțiuni este cronologică și funcțională: A răspunde la întrebarea *„cum a fost gândită construcția?"*, B la *„cum a fost realizată efectiv?"*, C la *„cum s-a atestat că este conformă și aptă de utilizare?"*, iar D la *„cum se comportă, se întreține, se repară și evoluează pe durata de existență?"*. Un cititor al cărții tehnice — expert, proiectant al unei intervenții, organ de control, cumpărător — trebuie să poată reconstitui, exclusiv din piesele cărții, întregul parcurs al construcției, de la titlul de proprietate asupra terenului până la ultima inspecție de urmărire.
 
-**Reguli generale de organizare** (Anexa 6):
+**Reguli generale de organizare** (Anexa 4):
 - piesele se ordonează pe secțiuni și, în interiorul secțiunii, pe dosare și pe categorii de lucrări/specialități;
 - fiecare dosar are un borderou propriu (opis) și paginație proprie;
 - documentele se păstrează cu integritatea lor (nu se extrag file individuale din procese-verbale sau din referate);

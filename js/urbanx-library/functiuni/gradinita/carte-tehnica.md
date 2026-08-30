@@ -1,6 +1,6 @@
 # Cartea Tehnică a Construcției — Conținut, Întocmire, Completare, Păstrare și Urmărirea Comportării în Timp
 
-*Document metodologic generic, aplicabil oricărei construcții. Întocmit de responsabilul tehnic / consultant în managementul calității în construcții, în conformitate cu Legea 10/1995 (republicată), HG 766/1997 — Anexa 6, HG 273/1994 (modificată prin HG 343/2017), Normativul P130/1999 și HG 907/2016.*
+*Document metodologic generic, aplicabil oricărei construcții. Întocmit de responsabilul tehnic / consultant în managementul calității în construcții, în conformitate cu Legea 10/1995 (republicată), HG 766/1997 — Anexa 4, HG 273/1994 (modificată prin HG 343/2017), Normativul P130/1999 și HG 907/2016.*
 
 > **Precizare de rang.** Prezentul document tratează **regimul juridic și metodologic** al Cărții tehnice a construcției — obiect distinct de studiile de recepție pe faze, de caietele de sarcini sau de memoriile tehnice pe specialități. Este un document-cadru cu conținut **generic**: regulamentul este identic pentru orice funcțiune (hală, locuință, clădire de birouri, dotare publică, infrastructură). Exemplificările se dau la nivel de principiu, nu pe o construcție anume.
 
@@ -12,7 +12,7 @@
 
 **Cartea tehnică a construcției** reprezintă ansamblul organizat al documentelor tehnice, economice și juridice referitoare la o construcție, întocmit pe parcursul proiectării, execuției și recepției acesteia și completat pe întreaga durată de existență a construcției, inclusiv în faza de postutilizare. Ea constituie **documentul oficial de referință** privind proiectarea, execuția, recepția, exploatarea, întreținerea, repararea și urmărirea comportării în timp a construcției.
 
-Cartea tehnică se definește și se reglementează prin **Regulamentul privind urmărirea comportării în exploatare, intervențiile în timp și postutilizarea construcțiilor**, aprobat ca **Anexa nr. 6 la HG nr. 766/1997**, coroborat cu **Legea nr. 10/1995** privind calitatea în construcții.
+Cartea tehnică se definește și se reglementează prin **Regulamentul privind urmărirea comportării în exploatare, intervențiile în timp și postutilizarea construcțiilor**, aprobat ca **Anexa nr. 4 la HG nr. 766/1997**, coroborat cu **Legea nr. 10/1995** privind calitatea în construcții.
 
 ### 1.2 Rol funcțional
 
@@ -31,14 +31,14 @@ Prin aceste funcții, cartea tehnică depășește statutul de simplă „arhiv�
 | Act normativ | Obiect | Incidența asupra Cărții tehnice |
 |---|---|---|
 | **Legea nr. 10/1995** privind calitatea în construcții (republicată 2016) | Sistemul calității în construcții; cele 7 cerințe fundamentale; obligațiile și răspunderile factorilor; recepția și urmărirea comportării în timp | Instituie obligația întocmirii, păstrării și predării cărții tehnice; stabilește urmărirea comportării în timp ca componentă a sistemului calității; prevede sancțiuni pentru neîntocmire/nepăstrare (cap. privind obligații și răspunderi + cap. privind contravenții) |
-| **HG nr. 766/1997** — pentru aprobarea unor regulamente privind calitatea în construcții | Aprobă, între altele, **Anexa 3** (categorii de importanță) și **Anexa 6** (urmărirea comportării, intervenții, postutilizare) | **Anexa 6** este actul care reglementează detaliat **componența, întocmirea, completarea și păstrarea cărții tehnice** (secțiunile A–D, fișa sinteză, centralizatorul, jurnalul evenimentelor) |
+| **HG nr. 766/1997** — pentru aprobarea unor regulamente privind calitatea în construcții | Aprobă, între altele, **Anexa 3** (categorii de importanță) și **Anexa 4** (urmărirea comportării, intervenții, postutilizare) | **Anexa 4** este actul care reglementează detaliat **componența, întocmirea, completarea și păstrarea cărții tehnice** (secțiunile A–D, fișa sinteză, centralizatorul, jurnalul evenimentelor) |
 | **HG nr. 273/1994** — Regulament de recepție a lucrărilor de construcții și instalații aferente | Procedura recepției la terminarea lucrărilor (RTL) și a recepției finale (RF) | Cartea tehnică se predă/verifică la recepție; recepția finală se face după perioada de garanție, pe baza urmăririi comportării consemnate în cartea tehnică |
 | **HG nr. 343/2017** — modifică și completează HG 273/1994 | Actualizarea regulamentului de recepție (componența comisiei, rolul proiectantului și dirigintelui, referate, ISC) | Predarea cărții tehnice către proprietar este condiție a recepției; comisia consemnează existența și starea acesteia |
 | **Normativ P130/1999** — Normativ privind comportarea în timp a construcțiilor | Urmărirea curentă și urmărirea specială; parametri, periodicitate, responsabili, program de urmărire | Detaliază conținutul **secțiunii D** a cărții tehnice; stabilește obligația programului de urmărire și consemnarea în jurnalul evenimentelor |
 | **HG nr. 907/2016** privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice | Conținutul studiilor de fezabilitate, DALI, proiectului tehnic (PT), detaliilor de execuție (DE) | Documentațiile de proiectare astfel elaborate constituie piesele **secțiunii A** a cărții tehnice |
 | **Legea nr. 169/2026** (CATUC) — art. 264 (autorizarea construirii, Anexa nr. 2), art. 302 (autorizarea desființării, Anexa nr. 5) | Autorizația de construire / desființare; recepția ca precondiție | Autorizația de construire și procesul-verbal de recepție sunt piese ale cărții tehnice (secțiunile A–B–C); autorizația de desființare — la postutilizare |
 
-> **Regulă de fidelitate.** Numerotarea exactă a articolelor din Legea 10/1995 a fost modificată prin republicare; în text se face trimitere la **materia** reglementată (obligații, urmărire, recepție, contravenții) și la **actul/anexa/capitolul** de referință. Detaliile procedurale privind componența cărții tehnice sunt cele din **Anexa 6 la HG 766/1997**, care este textul de bază pentru acest document.
+> **Regulă de fidelitate.** Numerotarea exactă a articolelor din Legea 10/1995 a fost modificată prin republicare; în text se face trimitere la **materia** reglementată (obligații, urmărire, recepție, contravenții) și la **actul/anexa/capitolul** de referință. Detaliile procedurale privind componența cărții tehnice sunt cele din **Anexa 4 la HG 766/1997**, care este textul de bază pentru acest document.
 
 ### 1.4 Poziția Cărții tehnice în sistemul calității în construcții
 
@@ -73,13 +73,13 @@ Conform **Anexei 6 la HG 766/1997**, cartea tehnică a construcției se compune 
 - **Secțiunea C** — documentația privind **recepția**;
 - **Secțiunea D** — documentația privind **exploatarea, întreținerea, repararea și urmărirea comportării în timp**.
 
-**Principiul completitudinii:** cartea tehnică trebuie să permită reconstituirea integrală a construcției și a istoriei ei **exclusiv din piesele proprii**, fără a fi necesară consultarea unor arhive externe. O carte tehnică incompletă (lipsă „as built", lipsă referate de verificare, lipsă procese-verbale de faze determinante) nu își îndeplinește rolul și expune construcția la riscuri la orice intervenție viitoare. De aceea Anexa 6 impune atât o structură fixă (A–D), cât și instrumente de control al completitudinii (fișa sinteză, centralizatorul, borderourile pe dosare).
+**Principiul completitudinii:** cartea tehnică trebuie să permită reconstituirea integrală a construcției și a istoriei ei **exclusiv din piesele proprii**, fără a fi necesară consultarea unor arhive externe. O carte tehnică incompletă (lipsă „as built", lipsă referate de verificare, lipsă procese-verbale de faze determinante) nu își îndeplinește rolul și expune construcția la riscuri la orice intervenție viitoare. De aceea Anexa 4 impune atât o structură fixă (A–D), cât și instrumente de control al completitudinii (fișa sinteză, centralizatorul, borderourile pe dosare).
 
 Fiecare secțiune se organizează în **dosare** numerotate, iar piesele din fiecare dosar se înscriu într-un **borderou (centralizator)**. Piesele nu se rup din contextul lor; documentele originale se păstrează, iar acolo unde originalul rămâne la o altă autoritate (ex. autorizații), se păstrează copie conformă.
 
 **Logica ciclului de viață** care stă la baza împărțirii pe secțiuni este cronologică și funcțională: A răspunde la întrebarea *„cum a fost gândită construcția?"*, B la *„cum a fost realizată efectiv?"*, C la *„cum s-a atestat că este conformă și aptă de utilizare?"*, iar D la *„cum se comportă, se întreține, se repară și evoluează pe durata de existență?"*. Un cititor al cărții tehnice — expert, proiectant al unei intervenții, organ de control, cumpărător — trebuie să poată reconstitui, exclusiv din piesele cărții, întregul parcurs al construcției, de la titlul de proprietate asupra terenului până la ultima inspecție de urmărire.
 
-**Reguli generale de organizare** (Anexa 6):
+**Reguli generale de organizare** (Anexa 4):
 - piesele se ordonează pe secțiuni și, în interiorul secțiunii, pe dosare și pe categorii de lucrări/specialități;
 - fiecare dosar are un borderou propriu (opis) și paginație proprie;
 - documentele se păstrează cu integritatea lor (nu se extrag file individuale din procese-verbale sau din referate);
@@ -440,7 +440,7 @@ Datele de urmărire nu se colectează pentru arhivare, ci pentru **decizie**: ev
 
 ## 8. Intervenții în timp (reparații, consolidări, modificări)
 
-Intervențiile asupra construcției existente — **reparații capitale, consolidări, modernizări, extinderi, schimbări de destinație** — sunt reglementate de Legea 10/1995 și de Anexa 6 la HG 766/1997 și se supun unui regim strict:
+Intervențiile asupra construcției existente — **reparații capitale, consolidări, modernizări, extinderi, schimbări de destinație** — sunt reglementate de Legea 10/1995 și de HG 766/1997 (Anexa 4) și se supun unui regim strict:
 
 - **Fundamentare**: orice intervenție care afectează cerințele fundamentale (în special rezistența mecanică și stabilitatea, securitatea la incendiu) se face pe baza unei **expertize tehnice** întocmite de expert atestat și a unui **proiect de intervenție** verificat de verificator de proiecte atestat pe cerințele afectate;
 - **Autorizare**: intervențiile care intră sub incidența Legii nr. 169/2026 (CATUC) se execută în baza **autorizației de construire**;
@@ -469,7 +469,7 @@ La orice intervenție se aplică din nou **întregul sistem al calității**: pr
 
 ## 9. Postutilizarea construcției
 
-Postutilizarea (dezafectarea, demolarea/desființarea și valorificarea materialelor) este reglementată tot de **Anexa 6 la HG 766/1997** și de Legea 10/1995. Elemente și documente:
+Postutilizarea (dezafectarea, demolarea/desființarea și valorificarea materialelor) este reglementată tot de **HG 766/1997 (Anexa 4)** și de Legea 10/1995. Elemente și documente:
 
 - Postutilizarea se declanșează când construcția și-a încheiat durata de utilizare / este dezafectată / prezintă riscuri;
 - Se fundamentează, după caz, pe **expertiză tehnică** privind starea și pe un **proiect de desființare**;
@@ -480,7 +480,7 @@ Postutilizarea (dezafectarea, demolarea/desființarea și valorificarea material
 
 ### 9.1 Etapele postutilizării
 
-Anexa 6 la HG 766/1997 tratează postutilizarea ca ultimă etapă a ciclului de viață, structurată în general astfel:
+Anexa 4 la HG 766/1997 tratează postutilizarea ca ultimă etapă a ciclului de viață, structurată în general astfel:
 1. **Declanșarea** — decizia de dezafectare, fundamentată tehnic (expertiză privind starea și riscurile) și economic;
 2. **Pregătirea** — proiectul de desființare (organizarea lucrărilor, ordinea demontării/demolării, măsuri de siguranță, plan de gestiune a deșeurilor), autorizația de desființare, dezafectarea utilităților;
 3. **Dezafectarea și desființarea propriu-zisă** — cu asigurarea securității muncii și a vecinătăților;
