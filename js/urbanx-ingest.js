@@ -92,12 +92,15 @@
   function extractAuditEnergetic(text) {
     var t = String(text || '').replace(/\s+/g, ' '); var o = {};
     var m;
-    if ((m = t.match(/clas[aă]\s*energetic[aă].{0,20}?\b([A-G])\b/i))) o.clasa_energetica = m[1].toUpperCase();
-    if ((m = t.match(/consum(?:ul)?\s*specific.{0,50}?(\d+(?:[.,]\d+)?)\s*kWh\s*\/?\s*m[²2]\s*\/?\s*an/i))) o.consum_specific_kwh_mp_an = +m[1].replace(',', '.');
-    if ((m = t.match(/zona\s*climatic[aă].{0,15}?\b(I{1,3}V?|IV|V)\b.{0,20}?T[eE][a-z]*\.?\s*=?\s*(-?\d{1,2})\s*°?C/i))) { o.zona_climatica = m[1]; o.te_calcul = +m[2]; }
+    // clasa energetica: cautare CASE-SENSITIVE a literei in fereastra ancorei — la fel ca la categoria de
+    // importanta (extractExpertiza) — altfel articolul romanesc "a" ("energetica A cladirii") se confunda cu clasa A.
+    if ((m = t.match(/clas[aă]\s*energetic[aă][^.]{0,60}/i))) { var mmCE = m[0].match(/\b([A-G]\+?)\b(?!\w)/); if (mmCE) o.clasa_energetica = mmCE[1].toUpperCase(); }
+    if ((m = t.match(/consum(?:ul)?\s*specific.{0,50}?(\d+(?:[.,]\d+)?)\s*kWh\s*\/?\s*(?:m[²2]|mp)\s*\/?\s*an/i))) o.consum_specific_kwh_mp_an = +m[1].replace(',', '.');
+    if ((m = t.match(/zona\s*climatic[aă].{0,20}?\b(I{1,3}V?|IV|V)\b.{0,60}?T[eE][a-z]*\.?\s*=?\s*(-?\d{1,2})\s*°?C/i))) { o.zona_climatica = m[1]; o.te_calcul = +m[2]; }
     if ((m = t.match(/R\s*'?\s*m\.?\s*pere[țt]i(?:\s*exteriori)?.{0,20}?(\d(?:[.,]\d+)?)\s*m[²2]\s*K\s*\/\s*W/i))) o.rm_pereti = +m[1].replace(',', '.');
     if ((m = t.match(/R\s*'?\s*m\.?\s*(?:acoperi[șs]|terasa|plan[șs]eu\s*peste\s*ultimul\s*nivel).{0,20}?(\d(?:[.,]\d+)?)\s*m[²2]\s*K\s*\/\s*W/i))) o.rm_acoperis = +m[1].replace(',', '.');
-    if ((m = t.match(/t[aâ]mpl[aă]rie(?:\s*exterioar[aă])?.{0,25}?geam\s*(dublu|triplu|simplu)/i))) o.tip_tamplarie = 'geam ' + m[1];
+    // tampl[aă]ri + e/a — accepta si forma articulata "tamplaria" (subiect de propozitie), nu doar "tamplarie"
+    if ((m = t.match(/t[aâ]mpl[aă]ri[ea](?:\s*exterioar[aă])?.{0,50}?geam\s*(dublu|triplu|simplu)/i))) o.tip_tamplarie = 'geam ' + m[1];
     // Recomandările auditorului — cuvinte-cheie tipice (diacritic/ASCII), se colectează propozițiile care le conțin
     var masuriKeywords = /termosistem|termoizola[țt]i[ei]|t[aâ]mpl[aă]rie\s*nou[aă]|pomp[aă]\s*de\s*c[aă]ldur[aă]|panouri\s*fotovoltaice|central[aă]\s*(?:termic[aă]\s*)?[îi]n\s*condensa[țt]ie|recuperator\s*de\s*c[aă]ldur[aă]/gi;
     var propozitii = t.split(/(?<=[.!?])\s+/);
@@ -117,16 +120,20 @@
     var t = String(text || '').replace(/\s+/g, ' '); var o = {};
     var m;
     if ((m = t.match(/clas[aă]\s*de\s*risc\s*seismic.{0,20}?\b(R[sS]?\s*[IV]{1,3}|[IV]{1,3})\b/i))) o.clasa_risc_seismic = m[1].toUpperCase().replace(/\s+/g, '');
-    if ((m = t.match(/(?:categoria|clasa)\s*de\s*important[aă][^.]{0,40}/i))) {
+    if ((m = t.match(/(?:categoria|clasa)\s*de\s*importan[țt][aă][^.]{0,60}/i))) {
       // fereastra gasita case-insensitive (ancora); litera de categorie (A-D) se cauta case-SENSITIVE
       // in interiorul ferestrei, ca sa nu se confunde cu articolul "a" din romana ("importanta A constructiei")
       var mmLit = m[0].match(/\b([A-D])\b(?!\w)/);
       if (mmLit) o.categorie_importanta = mmLit[1];
       else { var mmTxt = m[0].match(/\b(excep[țt]ional[aă]|deosebit[aă]|normal[aă]|redus[aă])\b/i); if (mmTxt) o.categorie_importanta = mmTxt[1]; }
     }
-    if ((m = t.match(/(?:indicator|grad)\s*(?:de\s*)?(?:asigurare\s*seismic[aă]|prioritate)\s*R\s*3?.{0,20}?(\d(?:[.,]\d+)?)/i))) o.indicator_r3 = +m[1].replace(',', '.');
+    // gol intre "prioritate" si litera R — textul real spune des "prioritate DE INTERVENTIE R1", nu "prioritate R3" direct;
+    // valoarea trebuie sa aiba zecimale (indicatorul R1/R2/R3 e mereu un coeficient subunitar) ca sa nu prinda
+    // gresit un numar intreg din vecinatate (ex. anul normativului "P100-3/2019" citat langa indicator)
+    if ((m = t.match(/(?:indicator(?:ul)?|grad(?:ul)?)\s*(?:de\s*)?(?:asigurare\s*seismic[aă]|prioritate(?:\s*de\s*interven[țt]ie)?)\s*.{0,15}?R\s*[123]?\s*.{0,40}?(\d(?:[.,]\d+))/i))) o.indicator_r3 = +m[1].replace(',', '.');
     if ((m = t.match(/an(?:ul)?\s*(?:de\s*)?(?:construc[țt]ie|edificare|punere\s*[îi]n\s*func[țt]iune).{0,40}?(\d{4})/i))) o.an_constructie = +m[1];
-    if ((m = t.match(/sistem(?:ul)?\s*(?:constructiv|structural).{0,30}?(cadre\s*(?:din\s*)?beton\s*armat|zid[aă]rie\s*(?:portant[aă])?|structur[aă]\s*metalic[aă]|panouri\s*mari|diafragme)/i))) o.sistem_structural = m[1];
+    else if ((m = t.match(/construit[aăe]?.{0,20}?an(?:ul)?\s+(\d{4})/i))) o.an_constructie = +m[1];
+    if ((m = t.match(/sistem(?:ul)?\s*(?:constructiv|structural).{0,30}?(cadre\s*(?:din\s*|de\s*)?beton\s*armat|zid[aă]rie\s*(?:portant[aă])?|structur[aă]\s*metalic[aă]|panouri\s*mari|diafragme)/i))) o.sistem_structural = m[1];
     // Concluzia expertului — de regulă o propoziție care conține "se recomandă"/"expertul recomandă" + o soluție
     var propExp = t.split(/(?<=[.!?])\s+/);
     var recomandariKeywords = /se\s*recomand[aă]|expertul\s*recomand[aă]|solu[țt]ia\s*(?:de\s*)?interven[țt]ie|necesit[aă]\s*consolidare|necesit[aă]\s*interven[țt]ii/i;
