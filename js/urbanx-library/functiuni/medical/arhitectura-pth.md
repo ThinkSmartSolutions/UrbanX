@@ -6,7 +6,7 @@ Spre deosebire de o clădire civilă curentă, detaliile de execuție ale unui s
 
 Cadru normativ de referință pentru detaliere — **exclusiv cel deja citat la faza DTAC** (memoriul general cap. 1.3 și memoriul de arhitectură cap. 1.5), completat, doar acolo unde execuția o cere, cu standarde SR EN strict tehnice de punere în operă/materiale, fără a introduce niciun normativ funcțional nou:
 
-- Legea 50/1991 (+ Ord. 839/2009), Legea 10/1995, HG 907/2016, HG 766/1997, HG 273/1994;
+- Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 766/1997, HG 273/1994;
 - **NP 015-1997** (proiectarea și verificarea construcțiilor spitalicești), **Ordinul MS 914/2006** (autorizare sanitară + circuite septic/aseptic), **OMS 1096/2016** (circuite de sterilizare/IAAM), **OMS 119/2014** (igiena mediului de viață), **Legea 95/2006** (reforma sănătății);
 - **Legea 185/2017** (ANMCS — asigurarea calității în sănătate);
 - **Legea 111/1996** + **NSR-06 CNCAN** (securitate radiologică), normele **CNCAN** pentru ecranarea la radiații ionizante;

@@ -35,7 +35,7 @@ Aceste date determină aplicabilitatea concretă a cerințelor: categoria de imp
 | **P130/1999** | Normativ privind comportarea în timp a construcțiilor | Baza programului de urmărire curentă/specială; conținut program, praguri, jurnal evenimente |
 | **HG nr. 925/1995** | Verificarea și expertizarea tehnică a proiectelor, execuției și construcțiilor | Verificarea proiectului pe cerințele A–F de verificatori atestați MDLPA |
 | **Ordinul MLPAT 31/N/1995** | Îndrumător privind conținutul-cadru al Cărții Tehnice | Structura pe capitolele A/B/C/D a Cărții Tehnice |
-| **Legea nr. 50/1991** (republicată) | Autorizarea executării lucrărilor de construcții | Obligația recepției la finalizare + regularizare taxă + intabulare |
+| **Legea nr. 169/2026** (CATUC) | Autorizarea executării lucrărilor de construcții | Obligația recepției la finalizare + regularizare taxă + intabulare |
 | **P100-1/2013** | Cod de proiectare seismică | Verificări structurale, drift admisibil (SLS/ULS), praguri deformații monitorizate |
 | **P118-1/2/3** | Securitate la incendiu (construcții, instalații, detecție/semnalizare) | Gradul de rezistență la foc; probe funcționale PSI; autorizația ISU |
 | **NP 074/2014** | Documentații geotehnice pentru construcții | Categoria geotehnică, recepția terenului de fundare |

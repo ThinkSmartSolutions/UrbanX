@@ -5,7 +5,7 @@
 
 ## 0. Preambul, obiectul documentației și metodologia memoriului
 
-Prezentul memoriu tehnic de arhitectură constituie piesa scrisă principală a proiectului pentru autorizarea executării lucrărilor de construire (**DTAC**), întocmit în conformitate cu **Legea nr. 50/1991** privind autorizarea executării lucrărilor de construcții, republicată, cu modificările ulterioare (inclusiv **Ord. 839/2009** pentru normele metodologice), și cu **Anexa nr. 1** la aceasta, care stabilește conținutul-cadru al documentațiilor tehnice pentru obținerea autorizației. Documentul descrie soluția de arhitectură a unei **clădiri mixte** cu regim de înălțime **S+P+5E**, în care parterul și mezaninul găzduiesc funcțiuni de **comerț și servicii** deschise publicului, iar cele cinci etaje curente găzduiesc **locuințe colective**, cu un subsol comun de parcare, boxe și spații tehnice.
+Prezentul memoriu tehnic de arhitectură constituie piesa scrisă principală a proiectului pentru autorizarea executării lucrărilor de construire (**DTAC**), întocmit în conformitate cu **Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), **art. 264**, conținut-cadru **Anexa nr. 2** la lege. Documentul descrie soluția de arhitectură a unei **clădiri mixte** cu regim de înălțime **S+P+5E**, în care parterul și mezaninul găzduiesc funcțiuni de **comerț și servicii** deschise publicului, iar cele cinci etaje curente găzduiesc **locuințe colective**, cu un subsol comun de parcare, boxe și spații tehnice.
 
 Clădirea mixtă nu este o simplă suprapunere de funcțiuni independente într-un singur volum — este un tip arhitectural cu logică proprie, în care compatibilitatea dintre comerț (funcțiune publică, cu program prelungit, aflux variabil, zgomot și mirosuri specifice) și locuire (funcțiune privată, cu program de odihnă, cerințe stricte de intimitate și liniște) trebuie **demonstrată**, nu presupusă. Memoriul de față tratează exact această demonstrație: cum se separă cele două lumi funcționale în interiorul aceluiași corp de clădire, păstrând totodată eficiența economică a soluției (structură și subsol comune, front comercial activ la stradă, densitate rezidențială rezonabilă la etaj).
 
@@ -54,7 +54,7 @@ Clasificarea în **clasa II de importanță seismică** — și nu clasa III, uz
 
 | Domeniu | Act normativ / standard |
 |---|---|
-| Autorizare, calitate | Legea nr. 50/1991 (+ Anexa 1, + Ord. 839/2009), Legea nr. 10/1995, Legea nr. 114/1996 (Legea locuinței) + Anexa 1 |
+| Autorizare, calitate | Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, Legea nr. 10/1995, Legea nr. 114/1996 (Legea locuinței) + Anexa 1 |
 | Proiectare locuințe | **NP 057-2002** — Normativ privind proiectarea clădirilor de locuințe |
 | Proiectare clădiri publice/comerciale, aflux persoane | **NP 068-02** |
 | Accesibilitate PMR | **NP 051/2012** (revizuit), Legea nr. 448/2006 |
@@ -782,7 +782,7 @@ Prezentul memoriu se completează obligatoriu cu următoarele piese desenate, pa
 
 | Domeniu | Acte normative de referință |
 |---|---|
-| Autorizare și calitate | Legea 50/1991 (+Anexa 1, +Ord. 839/2009), Legea 10/1995, Legea 114/1996 (+Anexa 1) |
+| Autorizare și calitate | Legea 169/2026 (CATUC), art. 264, Anexa 2, Legea 10/1995, Legea 114/1996 (+Anexa 1) |
 | Categorii de importanță | HG 907/2016, HG 766/1997 |
 | Proiectare locuințe | NP 057-2002 |
 | Proiectare clădiri cu aflux de public | NP 068-02 |

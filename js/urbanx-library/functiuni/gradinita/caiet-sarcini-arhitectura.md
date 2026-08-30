@@ -16,7 +16,7 @@ Prezentul caiet de sarcini este parte integrantă a Proiectului Tehnic și are c
 |---|---|
 | Legea 10/1995 (rep.) | Calitatea în construcții |
 | HG 907/2016 | Conținutul-cadru al documentației tehnico-economice |
-| Legea 50/1991 (rep.) | Autorizarea executării lucrărilor de construcții |
+| Legea nr. 169/2026 (CATUC) | Autorizarea executării lucrărilor de construcții, art. 264, Anexa nr. 2 |
 | NP 011-1997 | Proiectarea clădirilor de învățământ preșcolar |
 | OMS 119/2014 | Norme de igienă — colectivități de copii |
 | Regulamentul (CE) nr. 852/2004, GP 063/2001 | Igiena produselor alimentare, proiectarea bucătăriilor |

@@ -6,7 +6,7 @@
 
 ## 0. Preambul, obiectul documentației și metodologia parametrică a memoriului
 
-Prezentul memoriu tehnic de arhitectură constituie piesa scrisă principală a proiectului pentru autorizarea executării lucrărilor de construire (faza **DTAC**), întocmit în conformitate cu **Legea nr. 50/1991** privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, și cu **Anexa nr. 1** la aceasta, care stabilește conținutul-cadru al documentației tehnice. Obiectul documentației îl constituie o **centrală electrică fotovoltaică (CEF / parc FV) la sol**, realizată din **module fotovoltaice montate pe structuri fixe de tip „mesă" în configurație 2V (două module pe verticală, portret)**, orientate spre sud, cu racordare la Sistemul Energetic Național (SEN) printr-un **post/stație de transformare de medie tensiune (0,4/20 kV sau 0,4/MT)** și o **linie electrică de racord**.
+Prezentul memoriu tehnic de arhitectură constituie piesa scrisă principală a proiectului pentru autorizarea executării lucrărilor de construire (faza **DTAC**), întocmit în conformitate cu **Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), **art. 264**, și cu **Anexa nr. 2** la aceasta, care stabilește conținutul-cadru al documentației tehnice. Obiectul documentației îl constituie o **centrală electrică fotovoltaică (CEF / parc FV) la sol**, realizată din **module fotovoltaice montate pe structuri fixe de tip „mesă" în configurație 2V (două module pe verticală, portret)**, orientate spre sud, cu racordare la Sistemul Energetic Național (SEN) printr-un **post/stație de transformare de medie tensiune (0,4/20 kV sau 0,4/MT)** și o **linie electrică de racord**.
 
 **Caracterul PARAMETRIC al memoriului.** Puterea instalată a centralei **NU este o valoare fixă**, ci un **parametru de intrare variabil**, stabilit de utilizator/beneficiar în funcție de tema de proiectare, de suprafața de teren disponibilă și de avizul tehnic de racordare (ATR) emis de operatorul de distribuție. Biblioteca UrbanX tratează întreg spectrul de puteri uzuale — de la **P_DC = 500 kWp** (proiecte mici, autoconsum industrial, comunitate energetică) până la **P_DC = 50 MWp** (parcuri utilitare mari). În consecință, **toate mărimile care depind de putere se exprimă prin FORMULE parametrice** funcție de P_DC (numărul de module, numărul de mese, suprafața de teren necesară, numărul de rânduri, densitatea de putere, producția), iar **mărimile geometrice independente de putere** (unghiul de înclinare β, distanța anti-umbrire pitch, GCR, garda la sol, înălțimea structurii) se determină o singură dată, din latitudine și din geometria mesei, și rămân **invariante la scalarea puterii**.
 
@@ -105,7 +105,7 @@ Câmpul de module și structurile de montaj sunt tratate ca **instalații/constr
 
 | Domeniu | Act normativ / standard |
 |---|---|
-| Autorizare, calitate | Legea nr. 50/1991 (+ Anexa 1), Legea nr. 10/1995, Legea nr. 350/2001 (amenajarea teritoriului și urbanism) |
+| Autorizare, calitate, urbanism | Legea nr. 169/2026 (CATUC) — art. 264, Anexa nr. 2; Legea nr. 10/1995 |
 | Urbanism | HG nr. 525/1996 (RGU), PUZ/PUG local, certificat de urbanism, avize |
 | Energie (regenerabile) | Legea nr. 220/2008 (E-SRE), Legea nr. 123/2012 (energiei electrice), Ord. ANRE |
 | Racordare la rețea | Ord. ANRE nr. 59/2013 (regulament racordare), ATR operator distribuție, norme tehnice de racordare |
@@ -189,8 +189,7 @@ Se documentează sintetic (fără a dubla studiul de producție): iradiere globa
 
 Realizarea unui parc FV la sol presupune, ca regulă, o **documentație de urbanism aprobată** care să reglementeze funcțiunea de „producere de energie" pe teren. Cadrul:
 
-- **Legea nr. 350/2001** privind amenajarea teritoriului și urbanismul — **art. 32** impune elaborarea și aprobarea unui **Plan Urbanistic Zonal (PUZ)** atunci când PUG-ul în vigoare **nu prevede** funcțiunea de producere a energiei pe teren, când se solicită introducerea în intravilan a unor terenuri sau când sunt necesare modificări ale reglementărilor urbanistice (POT/CUT, funcțiuni admise, retrageri). Pentru terenuri extravilane agricole, PUZ-ul reglementează schimbarea de destinație și condițiile de amplasare.
-- **Ord. MDRAP nr. 233/2016** — norme de aplicare a Legii nr. 350/2001, stabilind **conținutul-cadru al PUZ**: piese scrise (memoriu general, regulament local aferent PUZ) și piese desenate la scări reglementate — **1:25.000** (încadrare în teritoriu), **1:5.000** (situația existentă/analiza), **1:2.000** (reglementări urbanistice, mobilare). Memoriul de arhitectură DTAC se corelează cu reglementările stabilite prin PUZ-ul aprobat.
+- **Legea nr. 169/2026** (CATUC) impune elaborarea și aprobarea unui **Plan Urbanistic Zonal (PUZ)** atunci când PUG-ul în vigoare **nu prevede** funcțiunea de producere a energiei pe teren, când se solicită introducerea în intravilan a unor terenuri sau când sunt necesare modificări ale reglementărilor urbanistice (POT/CUT, funcțiuni admise, retrageri). Pentru terenuri extravilane agricole, PUZ-ul reglementează schimbarea de destinație și condițiile de amplasare. Conținutul-cadru al PUZ — piese scrise (memoriu general, regulament local aferent PUZ) și piese desenate la scări reglementate: **1:25.000** (încadrare în teritoriu), **1:5.000** (situația existentă/analiza), **1:2.000** (reglementări urbanistice, mobilare) — rămâne cel practicat curent; memoriul de arhitectură DTAC se corelează cu reglementările stabilite prin PUZ-ul aprobat.
 - **Scoaterea din circuitul agricol** (pentru suprafețele efectiv construite/afectate, când e cerută): **Legea nr. 18/1991** (fondul funciar), **art. 92** — procedura de scoatere din circuitul agricol; **Legea nr. 17/2014** — condiții pentru terenuri agricole extravilane. Necesită **studiu pedologic (OSPA)** de încadrare pe clase de calitate (I–V) și plata **taxei de scoatere din circuitul agricol** conform **HG nr. 1132/2008** (Anexa cu tarife pe clase de calitate — clasele superioare I–II sunt taxate/protejate mai sever, orientând amplasarea spre terenuri de clasă inferioară/neproductive). Caracterul reversibil al fundării (piloți) limitează suprafața efectiv scoasă din circuit la platforme/drumuri/PT.
 
 Aceste proceduri sunt **anterioare/concomitente DTAC** și condiționează certificatul de urbanism; memoriul de arhitectură le menționează ca temei, dezvoltarea lor aparținând documentației de urbanism și celei funciare.
@@ -603,7 +602,7 @@ Semnalistica de securitate este **obligatorie** într-un obiectiv cu instalații
 - **La stringuri/cutii de joncțiune**: etichetare „**TENSIUNE CONTINUĂ PERICULOASĂ — MODULELE SUNT SUB TENSIUNE LA LUMINĂ**" — particularitate FV critică: modulele produc tensiune DC cât timp există lumină, chiar cu invertoarele oprite (avertisment esențial pentru intervenția ISU și mentenanță).
 - **Marcaje de circulație**: sensuri și limite pe drumurile de incintă, marcaj poziții PT/invertoare, **numerotarea blocurilor de mese** (esențială la parcuri mari pentru localizarea defectelor în mentenanță).
 - **Semnalistică de urgență**: puncte de prim-ajutor, stingătoare (la PT și cabină), plan de evacuare, indicatoare ISU.
-- **Panou de identificare a obiectivului** la intrare (denumire, beneficiar, proiectant, autorizație de construire), conform Legii nr. 50/1991.
+- **Panou de identificare a obiectivului** la intrare (denumire, beneficiar, proiectant, autorizație de construire), conform Legii nr. 169/2026 (CATUC), art. 264.
 
 Toate marcajele și avertizările se detaliază pe **planul de situație** și pe planurile electrice (memoriul de instalații).
 
@@ -717,10 +716,8 @@ Sistemul de monitorizare (SCADA) — găzduit în cabina de comandă (cap. 5) �
 
 | Cod | Titlu | Aplicare în memoriu |
 |---|---|---|
-| Legea nr. 50/1991 | Autorizarea executării lucrărilor de construcții | conținut DTAC, panou identificare, autorizare |
+| Legea nr. 169/2026 (CATUC) | Codul amenajării teritoriului, urbanismului și construcțiilor — art. 264, Anexa nr. 2 | conținut DTAC, panou identificare, autorizare, încadrare urbanistică, PUZ/PUG |
 | Legea nr. 10/1995 | Calitatea în construcții | cele 7 cerințe fundamentale (cap. 13.1 concluzii) |
-| Legea nr. 350/2001 | Amenajarea teritoriului și urbanismul (art. 32 — PUZ) | încadrare urbanistică, PUZ/PUG |
-| Ord. MDRAP nr. 233/2016 | Norme aplicare L350 — conținut PUZ (scări 1:25000/1:5000/1:2000) | documentație de urbanism |
 | Legea nr. 18/1991 | Fondul funciar (art. 92 — scoatere din circuit agricol) | schimbare destinație teren |
 | Legea nr. 17/2014 | Vânzare/circulație terenuri agricole extravilane | condiții amplasare extravilan |
 | HG nr. 1132/2008 | Taxe de scoatere din circuitul agricol (clase I–V) | studiu pedologic OSPA, taxă |
@@ -848,7 +845,7 @@ Tabelul distinge net mărimile **invariante la putere** (geometria celulei-tip) 
 
 ### 13.2. Cele trei componente (regula UrbanX)
 
-- **ANALITICĂ** — memoriul fundamentează **parametric**, prin formule și temei normativ, fiecare decizie: N_mod = P_DC/P_mod (3.604 în exemplu), β = 30° (β_opt ≈ φ−(5–10°)), α_s = 20,55° (formula solstițiului), pitch = 12,0 m (formula anti-umbrire b + h/tan α_s), GCR = 0,38 (L/D_pitch), S_teren = N_mod·A_mod/GCR + servicii, densitate ~0,91 MWp/ha, producție E_an = P_DC·PSH_POA·PR. Sursele: CR 0/1-1-3/1-1-4, P100-1/2013, I7/2011, NP 051, OMS 119/2014, OUG 5/2015, Legea 50/1991 și 10/1995.
+- **ANALITICĂ** — memoriul fundamentează **parametric**, prin formule și temei normativ, fiecare decizie: N_mod = P_DC/P_mod (3.604 în exemplu), β = 30° (β_opt ≈ φ−(5–10°)), α_s = 20,55° (formula solstițiului), pitch = 12,0 m (formula anti-umbrire b + h/tan α_s), GCR = 0,38 (L/D_pitch), S_teren = N_mod·A_mod/GCR + servicii, densitate ~0,91 MWp/ha, producție E_an = P_DC·PSH_POA·PR. Sursele: CR 0/1-1-3/1-1-4, P100-1/2013, I7/2011, NP 051, OMS 119/2014, OUG 5/2015, Legea nr. 169/2026 (CATUC) și Legea 10/1995.
 - **GRAFICĂ** — soluția este integral **reprezentată pe planșe** (cap. 9): plan de încadrare, plan de situație cu trama meselor (scalat la putere), **secțiune caracteristică cu geometria anti-umbrire — piesa care exprimă celula-tip invariantă** (β, h, b, D_umbra, pitch), planuri PT/cabină/împrejmuire/peisaj. Trama și bilanțul se citesc grafic pe A-02.
 - **PREDICTIVĂ** — memoriul proiectează **orizontul de exploatare** (25–30 ani) cu producție anuală (scalată cu P_DC) și degradare a modulelor (~0,5%/an), scenariul de mentenanță (cosire/pășunat, curățare, înlocuire invertoare la 10–15 ani), și **planul de dezafectare cu refacerea terenului** — o proiecție cu strategie, nu declin pasiv: la finalul ciclului terenul revine reversibil la folosința agricolă, cu sol refăcut și biodiversitate ameliorată.
 

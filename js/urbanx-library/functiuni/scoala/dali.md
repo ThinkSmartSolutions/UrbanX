@@ -35,7 +35,7 @@ Persoană juridică autorizată, cu colectiv de elaborare pluridisciplinar (arhi
 
 ### 2.1. Prezentarea contextului: politici, strategii, legislație, acorduri relevante, structuri instituționale și financiare
 
-Investiția se încadrează în strategia națională de reabilitare a infrastructurii educaționale (Componenta C15 — Educație a PNRR, respectiv Programul Operațional Regional/Programul Național de Dezvoltare Locală, după caz), care condiționează finanțarea nerambursabilă a clădirilor de învățământ de atingerea standardului energetic nZEB și de asigurarea cerinței de rezistență seismică minimă corespunzătoare clasei de importanță II (P100-1/2013), pentru clădiri cu funcțiune de educație. Investiția este corelată și cu Strategia de Dezvoltare Locală a Unității Administrativ-Teritoriale, care identifică infrastructura educațională ca prioritate de investiție pe orizontul de programare curent, precum și cu Planul Urbanistic General aprobat, care nu instituie restricții suplimentare față de funcțiunea existentă de învățământ pe acest amplasament. Cadrul legal aplicabil: Legea nr. 10/1995 (calitatea în construcții), Legea nr. 372/2005 (performanța energetică a clădirilor) și Mc 001/2006, P100-3/2019 (evaluarea seismică a construcțiilor existente), NP 010-1997 (proiectarea clădirilor de învățământ preuniversitar), Legea nr. 198/2023 (învățământul preuniversitar, inclusiv rețeaua școlară) și Legea nr. 350/2001 (amenajarea teritoriului și urbanismul), sub incidența căreia se stabilesc indicatorii urbanistici maximali admiși pe acest amplasament (secțiunea 3.3).
+Investiția se încadrează în strategia națională de reabilitare a infrastructurii educaționale (Componenta C15 — Educație a PNRR, respectiv Programul Operațional Regional/Programul Național de Dezvoltare Locală, după caz), care condiționează finanțarea nerambursabilă a clădirilor de învățământ de atingerea standardului energetic nZEB și de asigurarea cerinței de rezistență seismică minimă corespunzătoare clasei de importanță II (P100-1/2013), pentru clădiri cu funcțiune de educație. Investiția este corelată și cu Strategia de Dezvoltare Locală a Unității Administrativ-Teritoriale, care identifică infrastructura educațională ca prioritate de investiție pe orizontul de programare curent, precum și cu Planul Urbanistic General aprobat, care nu instituie restricții suplimentare față de funcțiunea existentă de învățământ pe acest amplasament. Cadrul legal aplicabil: Legea nr. 10/1995 (calitatea în construcții), Legea nr. 372/2005 (performanța energetică a clădirilor) și Mc 001/2006, P100-3/2019 (evaluarea seismică a construcțiilor existente), NP 010-1997 (proiectarea clădirilor de învățământ preuniversitar), Legea nr. 198/2023 (învățământul preuniversitar, inclusiv rețeaua școlară) și Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), sub incidența căreia se stabilesc indicatorii urbanistici maximali admiși pe acest amplasament (secțiunea 3.3).
 
 ### 2.2. Analiza situației existente și identificarea necesităților și a deficiențelor
 
@@ -227,11 +227,11 @@ Buget local, cu completare din fonduri externe nerambursabile (PNRR — Componen
 
 | Aviz / acord | Emitent | Temei legal |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz sanitar | Direcția de Sănătate Publică (DSP) | Ord. MS nr. 119/2014 |
 | Aviz de securitate la incendiu | Inspectoratul pentru Situații de Urgență (ISU) | P118-1/2013 |
 | Aviz conform rețea școlară | Inspectoratul Școlar Județean/Ministerul Educației | Legea nr. 198/2023 |
-| Autorizație de construire | Autoritatea emitentă a certificatului de urbanism | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă a certificatului de urbanism | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ---
 

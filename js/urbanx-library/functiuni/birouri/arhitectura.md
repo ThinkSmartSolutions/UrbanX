@@ -2,7 +2,7 @@
 
 ## IMOBIL DE BIROURI CLASA A — REGIM 2S+P+6E
 
-*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții (republicată, cu modificările ulterioare) și Ordinul M.D.R.L. nr. 839/2009 (Norme metodologice de aplicare), conținutul-cadru al pieselor scrise fiind cel prevăzut în anexa nr. 1 la Legea 50/1991.*
+*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, conținutul-cadru al pieselor scrise fiind cel prevăzut în Anexa nr. 2 la lege.*
 
 ---
 
@@ -88,7 +88,7 @@ Tema formulată de beneficiar impune o clădire de birouri „**core & shell**" 
 
 Documentația respectă următoarele acte normative și standarde (listă neexhaustivă, în vigoare la data proiectării):
 
-- **Legea nr. 50/1991** — autorizarea executării lucrărilor de construcții (republicată), cu Normele metodologice aprobate prin **Ordinul M.D.R.L. nr. 839/2009**;
+- **Legea nr. 169/2026** (CATUC) — autorizarea executării lucrărilor de construcții, art. 264, conținut-cadru Anexa nr. 2;
 - **Legea nr. 10/1995** — calitatea în construcții (republicată), cu cele șase cerințe fundamentale;
 - **P118-1/2013, P118-2/2013, P118-3/2015** — securitatea la incendiu a construcțiilor (rezistență, instalații de stingere, detecție/semnalizare);
 - **NP 051/2012 (revizuit)** — adaptarea construcțiilor și spațiilor urbane la nevoile individuale ale persoanelor cu handicap, coroborat cu **Legea nr. 448/2006** (protecția persoanelor cu handicap);
@@ -1368,7 +1368,7 @@ Deșeurile rezultate din execuție (pământ excavat, deșeuri de construcție) 
 
 ## 29. CONCLUZII
 
-Imobilul de birouri **2S+P+6E clasa A** este proiectat conform Legii 50/1991 (+ Ord. 839/2009), Legii 10/1995, P118-1/2013, NP 051/2012, OMS 119/2014, C107, Legii 372/2005, C125/2013 și standardului BOMA 2017, cu următoarele caracteristici de sinteză:
+Imobilul de birouri **2S+P+6E clasa A** este proiectat conform Legii nr. 169/2026 (CATUC), Legii 10/1995, P118-1/2013, NP 051/2012, OMS 119/2014, C107, Legii 372/2005, C125/2013 și standardului BOMA 2017, cu următoarele caracteristici de sinteză:
 
 1. **Eficiența spațiului**: Usable/GFA = **67,3%**, loss factor = **12,9%** (performant pentru clasa A), modulare 1,35 / 1,50 m;
 2. **Densitate și confort**: 10 mp/persoană → **~548 de persoane**; WWR 55–65% cu protecție solară diferențiată pe orientări; DF ≥ 2%, iluminat ≥ 500 lx, UGR ≤ 19;
@@ -1456,4 +1456,4 @@ Realizarea unei clădiri de birouri clasa A performante depinde de coordonarea r
 
 ### 31.3. Responsabilitatea proiectantului
 
-Proiectul se elaborează de arhitect cu drept de semnătură (OAR) și se verifică tehnic de verificatori atestați MDLPA pe exigențele A–F (Legea 10/1995). Autorizarea se emite pe baza documentației complete și a avizelor / acordurilor solicitate prin certificatul de urbanism, în condițiile Legii 50/1991.
+Proiectul se elaborează de arhitect cu drept de semnătură (OAR) și se verifică tehnic de verificatori atestați MDLPA pe exigențele A–F (Legea 10/1995). Autorizarea se emite pe baza documentației complete și a avizelor / acordurilor solicitate prin certificatul de urbanism, în condițiile Legii nr. 169/2026 (CATUC).

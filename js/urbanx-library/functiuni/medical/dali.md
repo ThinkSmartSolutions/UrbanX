@@ -126,11 +126,11 @@ Se recomandă **Varianta 2 — Consolidare și extindere completă**, singura ca
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz de reglementare sanitară a proiectului | Ministerul Sănătății/DSP | Ordinul MS nr. 1030/2009 |
 | Aviz securitate la incendiu | ISU | P118-1/2013 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Autorizație sanitară de funcționare (post-recepție) | DSP | Ordinul MS nr. 914/2006 |
 
 ### 7.2. Concluzii

@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Modernizare drum/stradă colectoare, km 0+000 ÷ 1+000
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, P130/1999, Normativul AND 547 (recepția lucrărilor de drumuri). Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), P130/1999, Normativul AND 547 (recepția lucrărilor de drumuri). Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul (
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții, recepția ca componentă | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire | Conformitatea execuției |
 | 4 | AND 547 | Recepția lucrărilor de drumuri și poduri | Verificări specifice infrastructurii rutiere |
 | 5 | P130/1999 | Urmărirea comportării în timp | Program de urmărire post-recepție |
 | 6 | OG nr. 43/1997 | Regimul drumurilor | Predarea către administratorul drumului |

@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Locuință individuală unifamilială, regim P+1E
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică — la nivel proporțional categoriei de importanță D.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică — la nivel proporțional categoriei de importanță D.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul (
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire | Conformitatea execuției |
 | 4 | Legea nr. 372/2005 | Performanța energetică | Certificat energetic — obligatoriu la recepție |
 
 ### 1.3. Cele două faze ale recepției

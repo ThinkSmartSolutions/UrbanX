@@ -10,7 +10,7 @@
 
 > **PRINCIPIU DE PROIECTARE — PARAMETRIZAREA.** Prezentul memoriu este redactat **parametric**: dimensionarea *unității elementare* (stringul DC — numărul de module în serie, tensiunile, curentul) este **independentă de puterea totală a parcului** și rezultă exclusiv din caracteristicile modulului, din fereastra de tensiune a invertorului și din temperaturile de calcul. Toate mărimile de *ansamblu* (număr de stringuri, număr de invertoare, putere AC, putere și număr de transformatoare, secțiunile magistralelor MT, nivelul de tensiune al racordului) **scalează cu P_DC** prin formule explicite. Un **exemplu numeric complet la P_DC = 2.000 kWp** este dezvoltat separat și **etichetat ca atare** — el ilustrează metoda, nu fixează puterea. Tabelele conțin **coloane-formulă** pentru recalcularea la orice putere aleasă de utilizator.
 
-**Faza de proiectare:** D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), conform Legii 50/1991 republicată și Ordinului M.D.R.L. 839/2009. Prezentul memoriu dezvoltă, la nivel de faza D.T.A.C., breviare de calcul specifice fazelor următoare (P.Th. / D.E. / proiect de racordare avizat de operatorul de distribuție — OD), pentru a fundamenta soluția electrică, dimensionarea echipamentelor, spațiile tehnice, culoarele de cabluri și interfața cu rețeaua.
+**Faza de proiectare:** D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2. Prezentul memoriu dezvoltă, la nivel de faza D.T.A.C., breviare de calcul specifice fazelor următoare (P.Th. / D.E. / proiect de racordare avizat de operatorul de distribuție — OD), pentru a fundamenta soluția electrică, dimensionarea echipamentelor, spațiile tehnice, culoarele de cabluri și interfața cu rețeaua.
 
 **Titular / Beneficiar:** _(se completează)_ — producător de energie electrică din surse regenerabile (SRE), în regimul de autorizare / licențiere ANRE aplicabil puterii instalate.
 
@@ -56,7 +56,7 @@
 | **Ord. ANRE 82/2022** | Regulament autoconsum / prosumatori (dacă aplicabil) |
 | **P118-1/1999, P118-3/2015** | Securitate la incendiu construcții + detectare-semnalizare |
 | **Legea 123/2012** | Legea energiei electrice și a gazelor naturale |
-| **Legea 50/1991, Legea 10/1995** | Autorizarea construirii; calitatea în construcții |
+| **Legea nr. 169/2026 (CATUC), Legea 10/1995** | Autorizarea construirii (art. 264, Anexa nr. 2); calitatea în construcții |
 
 ---
 

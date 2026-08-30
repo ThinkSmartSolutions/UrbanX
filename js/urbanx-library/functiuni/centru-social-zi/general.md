@@ -7,7 +7,7 @@
 
 # PARTEA 1 — MEMORIU GENERAL (Date generale DTAC)
 
-*Întocmit conform Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, și Anexei nr. 1, pct. 2.1 „Piese scrise" — Memoriu general.*
+*Întocmit conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, și Anexei nr. 2, pct. 2.1 „Piese scrise" — Memoriu general.*
 
 ## 1. Date de identificare
 
@@ -15,7 +15,7 @@
 
 **Denumire obiectiv:** „Construire Centru Social de Zi pentru persoane vârstnice și persoane adulte cu dizabilități" — construcție nouă, cu funcțiune de servicii sociale fără cazare (centru de zi), încadrat conform Nomenclatorului instituțiilor de asistență socială aprobat prin HG nr. 867/2015, cod serviciu social 8810 CZ-V-I (centru de zi de asistență și recuperare) și în acord cu Legea nr. 292/2011 a asistenței sociale.
 
-**Faza de proiectare:** D.T.A.C. — Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire, întocmită în conformitate cu Legea nr. 50/1991 (republicată) și Anexa nr. 1 la aceasta. Documentația este elaborată pe baza proiectului tehnic (P.Th.) și a temei de proiectare aprobate de beneficiar, și corespunde soluției din Certificatul de Urbanism și avizele solicitate.
+**Faza de proiectare:** D.T.A.C. — Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire, întocmită în conformitate cu Legea nr. 169/2026 (CATUC), art. 264, și Anexa nr. 2 la aceasta. Documentația este elaborată pe baza proiectului tehnic (P.Th.) și a temei de proiectare aprobate de beneficiar, și corespunde soluției din Certificatul de Urbanism și avizele solicitate.
 
 ### 1.2. Amplasamentul
 
@@ -45,7 +45,7 @@ Specialiști verificatori atestați M.D.L.P.A. pentru cerințele esențiale (A1,
 
 ## 2. Regimul juridic, economic și tehnic al terenului (extras din Certificatul de Urbanism)
 
-*Datele de mai jos se preiau integral și fără modificare din Certificatul de Urbanism nr. ___ / ____, emis de autoritatea administrației publice locale competente, în temeiul Legii nr. 50/1991 și al Legii nr. 350/2001 privind amenajarea teritoriului și urbanismul.*
+*Datele de mai jos se preiau integral și fără modificare din Certificatul de Urbanism nr. ___ / ____, emis de autoritatea administrației publice locale competente, în temeiul Legii nr. 169/2026 (CATUC).*
 
 ### 2.1. Regimul juridic
 
@@ -110,7 +110,7 @@ Lucrările cuprind: fundații, structură de rezistență, închideri și compar
 
 ## 4. Încadrarea în reglementările urbanistice
 
-Soluția propusă respectă integral reglementările din Certificatul de Urbanism și din PUG-ul/UTR-ul aplicabil, precum și prevederile HG nr. 525/1996 (RGU) și ale Legii nr. 350/2001:
+Soluția propusă respectă integral reglementările din Certificatul de Urbanism și din PUG-ul/UTR-ul aplicabil, precum și prevederile HG nr. 525/1996 (RGU) și ale Legii nr. 169/2026 (CATUC):
 
 - **POT propus: 30,00% < 40% admis** → conform.
 - **CUT propus: 0,90 < 1,20 admis** → conform.
@@ -184,7 +184,7 @@ Se respectă **C 107** (normativ termotehnic), **Legea nr. 372/2005** (performan
 Trasarea în plan și pe verticală se execută de către un topograf/expert cadastru pe baza planului de trasare din PTh, raportat la punctele de reper (borne) și la limitele de proprietate din documentația cadastrală. Se materializează axele principale ale construcției și cotele ±0,00 (raportat la cota terenului sistematizat și la reperul de nivelment). Trasarea se consemnează în proces-verbal de trasare (fază determinantă).
 
 ### 8.2. Organizarea de șantier
-Organizarea de execuție se amenajează în incintă, pe suprafața proprietății, cu împrejmuire de protecție, panou de identificare a investiției (conform Legii 50/1991, art. 7), acces controlat, spații pentru depozitarea materialelor, container birou/vestiar și grup sanitar ecologic, punct de colectare selectivă a deșeurilor. Se respectă:
+Organizarea de execuție se amenajează în incintă, pe suprafața proprietății, cu împrejmuire de protecție, panou de identificare a investiției (conform Legii nr. 169/2026 — CATUC), acces controlat, spații pentru depozitarea materialelor, container birou/vestiar și grup sanitar ecologic, punct de colectare selectivă a deșeurilor. Se respectă:
 - **HG nr. 300/2006** — cerințe minime de securitate și sănătate pentru șantierele temporare (Plan de SSM, coordonator SSM);
 - **HG nr. 856/2002** — evidența gestiunii deșeurilor;
 - Măsuri de limitare a prafului, zgomotului și a afectării circulației publice.
@@ -213,7 +213,7 @@ Conform Certificatului de Urbanism, se obțin (după caz) următoarele avize/aco
 
 # PARTEA 2 — MEMORIU DE AMENAJĂRI EXTERIOARE ȘI SISTEMATIZARE VERTICALĂ
 
-*Întocmit ca parte a DTAC, cuprinzând soluțiile de amenajare a incintei, sistematizarea pe verticală și racordurile la utilități, în corelare cu planul de situație (Anexa 1, Legea 50/1991).*
+*Întocmit ca parte a DTAC, cuprinzând soluțiile de amenajare a incintei, sistematizarea pe verticală și racordurile la utilități, în corelare cu planul de situație (Anexa nr. 2, Legea nr. 169/2026 — CATUC).*
 
 ## 1. Sistematizarea verticală a terenului
 
@@ -347,7 +347,7 @@ Toate branșamentele se poziționează grupat, pe cât posibil, într-un culoar 
 
 ---
 
-*Prezentul memoriu se completează cu piesele desenate ale DTAC (plan de încadrare în zonă, plan de situație cu sistematizarea verticală și amenajările exterioare, planuri, secțiuni, fațade), cu memoriile pe specialități (rezistență, instalații) și cu documentațiile pentru avize, conform Anexei nr. 1 la Legea nr. 50/1991.*
+*Prezentul memoriu se completează cu piesele desenate ale DTAC (plan de încadrare în zonă, plan de situație cu sistematizarea verticală și amenajările exterioare, planuri, secțiuni, fațade), cu memoriile pe specialități (rezistență, instalații) și cu documentațiile pentru avize, conform Anexei nr. 2 la Legea nr. 169/2026 (CATUC).*
 
 ---
 
@@ -355,7 +355,7 @@ Am redactat conținutul complet solicitat, în două părți, cu adâncime de me
 
 - **Partea 1 (Memoriu general)** acoperă toate cele 9 puncte cerute, cu tabel de indici caracteristici ai investiției (bilanț teritorial închis la 100%) și tratarea individuală a celor 6 cerințe esențiale A–F din Legea 10/1995, fiecare cu normativele tehnice specifice (P 100-1, CR 0, P 118-1/2/3, C 107, C 125, Mc 001, NP 051/2012 etc.).
 - **Partea 2 (Amenajări exterioare)** acoperă cele 6 puncte, cu cuantificări (pante, lățimi alei, dimensiuni parcaje PMR 3,50×5,00 m, procent spații verzi 25% > 20% Legea 24/2007, adâncimi branșamente).
-- **Normativele citate sunt reale** și corect atribuite: Legea 50/1991 + Anexa 1, Legea 10/1995, HG 525/1996 RGU, Legea 350/2001, Legea 292/2011, NP 051/2012, Legea 24/2007, Ordin MS 119/2014, plus completări coerente (P 100-1/2013, HG 766/1997, HG 300/2006, SR 8591, NP 133/2013). Nu am inventat normative.
+- **Normativele citate sunt reale** și corect atribuite: Legea nr. 169/2026 (CATUC) + Anexa nr. 2, Legea 10/1995, HG 525/1996 RGU, Legea 292/2011, NP 051/2012, Legea 24/2007, Ordin MS 119/2014, plus completări coerente (P 100-1/2013, HG 766/1997, HG 300/2006, SR 8591, NP 133/2013). Nu am inventat normative.
 - **Câmpurile variabile** (date cadastrale, nr. CU, beneficiar, proiectant) sunt marcate cu *(conform CF/CU)* pentru a fi completate la depunere — un memoriu real nu poate inventa aceste date de identificare.
 - Încadrarea în asistență socială (cod 8810 CZ-V-I, HG 867/2015, Legea 197/2012) și clasa II de importanță seismică (`γI,e = 1,2`, justificată de persoane cu mobilitate redusă) sunt corelate specific cu funcțiunea de centru de zi.
 
@@ -378,8 +378,8 @@ Temeiurile principale sunt:
 | Legea nr. 17/2000 privind asistența socială a persoanelor vârstnice (r) | Măsuri de asistență socială specifice vârstnicilor; grile de evaluare a nevoilor | Fundamentează tipul de beneficiar (persoană vârstnică în sensul legii — 65+ ani, cu autonomie parțial păstrată) și pachetul de servicii |
 | Legea nr. 197/2012 privind asigurarea calității în domeniul serviciilor sociale | Licențierea serviciilor sociale, standardele minime obligatorii, controlul calității | Impune licențierea serviciului (licență de funcționare) pe baza îndeplinirii standardelor minime — condiție de operare |
 | Ordinul MMJS nr. 29/2019 | Standardele minime de calitate pentru serviciile sociale de zi destinate persoanelor vârstnice (Anexa specifică — centre de zi de asistență și recuperare) | Sursa directă a cerințelor de spații, dotări, accesibilitate, servicii și personal — parametrizează programul arhitectural |
-| Legea nr. 50/1991 (r2) privind autorizarea executării lucrărilor de construcții | Regimul autorizării; conținutul-cadru al DTAC (Anexa nr. 1) | Cadrul procedural al prezentei documentații |
-| Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul | Documentații de urbanism, certificat de urbanism, avizare | Verificarea conformității urbanistice |
+| Legea nr. 169/2026 (CATUC), art. 264 | Regimul autorizării; conținutul-cadru al DTAC (Anexa nr. 2) | Cadrul procedural al prezentei documentații |
+| Legea nr. 169/2026 (CATUC) | Documentații de urbanism, certificat de urbanism, avizare | Verificarea conformității urbanistice |
 | Legea nr. 10/1995 (r) privind calitatea în construcții | Cele 6 cerințe fundamentale, sistemul calității | Cadrul de calitate al construcției |
 | Legea nr. 448/2006 (r) privind protecția și promovarea drepturilor persoanelor cu handicap | Accesibilizarea mediului fizic; adaptare rezonabilă | Cerințe obligatorii de accesibilitate — critice pentru beneficiar vârstnic |
 
@@ -541,7 +541,7 @@ Aceste măsuri se corelează cu Legea 448/2006 și cu NP 051-2012 (normativ priv
 
 ## 10. LISTA AVIZELOR ȘI ACORDURILOR NECESARE
 
-Avizele și acordurile se solicită conform mențiunilor din certificatul de urbanism și în temeiul Legii 50/1991 (art. 7) și al legislației sectoriale. Tabelul centralizator:
+Avizele și acordurile se solicită conform mențiunilor din certificatul de urbanism și în temeiul Legii nr. 169/2026 (CATUC) și al legislației sectoriale. Tabelul centralizator:
 
 | Nr. | Aviz / Acord | Emitent | Temei legal | Ce fundamentează |
 |---|---|---|---|---|
@@ -562,9 +562,9 @@ Avizele și acordurile se solicită conform mențiunilor din certificatul de urb
 
 ---
 
-## 11. OPISUL DOCUMENTAȚIEI DTAC (LEGEA 50/1991, ANEXA NR. 1)
+## 11. OPISUL DOCUMENTAȚIEI DTAC (LEGEA NR. 169/2026 — CATUC, ANEXA NR. 2)
 
-Documentația tehnică pentru autorizarea executării lucrărilor de construire (DTAC) se întocmește conform conținutului-cadru din Anexa nr. 1 la Legea 50/1991 și cuprinde piese scrise și piese desenate. Opisul complet:
+Documentația tehnică pentru autorizarea executării lucrărilor de construire (DTAC) se întocmește conform conținutului-cadru din Anexa nr. 2 la Legea nr. 169/2026 (CATUC) și cuprinde piese scrise și piese desenate. Opisul complet:
 
 ### 11.1. Piese scrise
 
@@ -750,7 +750,7 @@ Confortul termic ridicat nu este doar o cerință de eficiență, ci și una fun
 
 ## 16. ORGANIZAREA DE ȘANTIER (PRINCIPII D.T.O.E.)
 
-Documentația tehnică de organizare a execuției (D.T.O.E.) se elaborează conform Legii 50/1991 (Anexa nr. 1) și însoțește DTAC. Principiile de organizare:
+Documentația tehnică de organizare a execuției (D.T.O.E.) se elaborează conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, și însoțește DTAC. Principiile de organizare:
 
 ### 16.1. Componentele organizării de șantier
 
@@ -782,7 +782,7 @@ Organizarea de șantier se amplasează, de regulă, în incinta proprie a invest
 ---
 
 
-Ancorare legală acoperită integral: Legea 50/1991 (r2) + Anexa 1, Legea 350/2001, HG 907/2016 (deviz + faze), Legea 292/2011 și Legea 17/2000 (serviciul social), Ord. MMJS 29/2019 (standarde minime pe module), Legea 197/2012 (licențiere/calitate), Legea 10/1995 (cele 6 cerințe A-F), Legea 448/2006 + NP 051 (accesibilitate), OUG 195/2005 + Legea 292/2018 (mediu), standarde de cost MDLPA, plus normative conexe (P100, C107, P118, NP 074, HG 766/1997, HG 343/2017, HG 300/2006).
+Ancorare legală acoperită integral: Legea nr. 169/2026 (CATUC) + Anexa nr. 2, HG 907/2016 (deviz + faze), Legea 292/2011 și Legea 17/2000 (serviciul social), Ord. MMJS 29/2019 (standarde minime pe module), Legea 197/2012 (licențiere/calitate), Legea 10/1995 (cele 6 cerințe A-F), Legea 448/2006 + NP 051 (accesibilitate), OUG 195/2005 + Legea 292/2018 (mediu), standarde de cost MDLPA, plus normative conexe (P100, C107, P118, NP 074, HG 766/1997, HG 343/2017, HG 300/2006).
 
 Structură: 13 tabele markdown (opis piese scrise/desenate, conformare urbanistică punct-cu-punct, cerințe esențiale, standarde vs. soluție, avize, deviz HG 907, grafic execuție etc.), toate cu diacritice corecte. Valorile numerice concrete (POT/CUT/retrageri exacte) sunt marcate ca de completat din RLU/CU aplicabil — corect metodologic, întrucât depind de amplasamentul real.
 
@@ -1383,7 +1383,7 @@ Investiția este, în concluzie, **fezabilă tehnic, justificată economic, resp
 | Act normativ | Obiect / relevanță pentru proiect |
 |--------------|-----------------------------------|
 | Legea 10/1995 (rep.) | Calitatea în construcții — cele 6 cerințe fundamentale; stă la baza proiectării și recepției |
-| Legea 50/1991 (rep.) | Autorizarea executării lucrărilor de construcții — cadrul DTAC |
+| Legea nr. 169/2026 (CATUC) | Autorizarea executării lucrărilor de construcții — cadrul DTAC, art. 264, Anexa nr. 2 |
 | Legea 197/2012 | Asigurarea calității serviciilor sociale — temeiul licențierii serviciului |
 | HG 118/2014 | Norme de aplicare a Legii 197/2012 — proceduri de acreditare/licențiere |
 | HG 867/2015 | Nomenclatorul serviciilor sociale — încadrarea 8810 CZ-V-I |

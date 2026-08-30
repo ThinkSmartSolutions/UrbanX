@@ -358,15 +358,15 @@ Se recomandă **Varianta 2 — Maximală**, motivat prin: (a) gradul de asigurar
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie/Consiliu Județean | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie/Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU | HG nr. 571/2016, P118 |
 | Avize utilități (apă, canal, electric, gaz) | Operatori | — |
 | Verificare proiect cerințe A1, B1, C, D, E | Verificatori atestați | Legea nr. 10/1995 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 12.2. Concluzii
 
 Documentația de Avizare a Lucrărilor de Intervenții demonstrează **fezabilitatea tehnică și oportunitatea comercială** a repoziționării imobilului de birouri existent. Construcția, deși cu deficiențe structurale specifice epocii de edificare (1982) și performanță energetică complet depășită, poate fi adusă la parametri de siguranță și competitivitate de piață prin lucrări de **consolidare structurală (Rs IV, R3 = 0,95), reabilitare termică performantă (clasă A/nZEB), flexibilizare funcțională, extindere lobby și supraetajare cu spații Clasa A**.
 
-Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC, PT, DE), cu respectarea integrală a normativelor: HG nr. 907/2016, P100-3/2019, P100-1/2013, Legea nr. 10/1995, Legea nr. 372/2005, Mc 001, Legea nr. 50/1991 și NP 051/2012.
+Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC, PT, DE), cu respectarea integrală a normativelor: HG nr. 907/2016, P100-3/2019, P100-1/2013, Legea nr. 10/1995, Legea nr. 372/2005, Mc 001, Legea nr. 169/2026 (CATUC) și NP 051/2012.

@@ -104,10 +104,10 @@ Se recomandă **Varianta 2 — Extindere și modernizare completă**, care valor
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism (actualizat pentru extindere) | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism (actualizat pentru extindere) | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz de circulație (studiu de trafic actualizat) | Poliția Rutieră/administrator drum | STAS 10144 |
 | Aviz securitate la incendiu (scenariu actualizat) | ISU | P118-1/2013, NP 068-2002 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

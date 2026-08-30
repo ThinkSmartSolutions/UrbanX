@@ -2,7 +2,7 @@
 
 ## HOTEL 4 STELE — REGIM S+P+6E, 100 CAMERE
 
-*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții (republicată, cu modificările ulterioare) și Ordinul M.D.R.L. nr. 839/2009 (Norme metodologice de aplicare), conținutul-cadru al pieselor scrise fiind cel prevăzut în anexa nr. 1 la Legea 50/1991. Prezentul memoriu tratează exclusiv componenta de arhitectură a documentației; datele de identificare a investiției, încadrarea urbanistică, necesitatea și oportunitatea investiției și cadrul legal general se detaliază în memoriul tehnic general, care rămâne piesa de referință pentru acele capitole și nu se reproduce aici.*
+*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, conținutul-cadru al pieselor scrise fiind cel prevăzut în Anexa nr. 2 la lege. Prezentul memoriu tratează exclusiv componenta de arhitectură a documentației; datele de identificare a investiției, încadrarea urbanistică, necesitatea și oportunitatea investiției și cadrul legal general se detaliază în memoriul tehnic general, care rămâne piesa de referință pentru acele capitole și nu se reproduce aici.*
 
 ---
 

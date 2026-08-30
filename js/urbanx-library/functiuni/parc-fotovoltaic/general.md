@@ -1,5 +1,5 @@
 # MEMORIU TEHNIC GENERAL — PARC FOTOVOLTAIC (CENTRALĂ ELECTRICĂ FOTOVOLTAICĂ)
-## Faza D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire) — Legea nr. 50/1991, Anexa nr. 1
+## Faza D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire) — Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2
 
 > **NOTĂ METODOLOGICĂ — DOCUMENT PARAMETRIC.** Prezentul memoriu este redactat **parametric/metodologic**: puterea instalată în curent continuu **P_DC este o variabilă de proiect** stabilită de investitor (poate fi 500 kWp, 1 MWp, 2 MWp, 5 MWp, 50 MWp etc.). Toate mărimile derivate (număr de module, suprafață de teren, putere AC, putere post de transformare, energie anuală, CO₂ evitat, CAPEX/OPEX) se calculează din P_DC prin **formulele de dimensionare și scalare** prezentate în fiecare capitol. Pentru claritate, se dau **exemple numerice etichetate explicit „Exemplu de calcul pentru P_DC = 2 MWp"**, dar acestea NU sunt o ipoteză fixă a proiectului — cititorul recalculează, cu aceleași formule, pentru puterea proiectului său. Tabelele conțin coloană cu **formula de calcul**, tocmai pentru a permite recalcularea la orice putere.
 
@@ -11,7 +11,7 @@
 
 **Construire parc fotovoltaic (Centrală Electrică Fotovoltaică — CEF) cu putere instalată în curent continuu P_DC [kWp] (variabilă de proiect), racordare la Sistemul Energetic Național prin post de transformare 0,4/20 kV și lucrări conexe de infrastructură** (drumuri interioare, împrejmuire, platforme tehnologice, rețele electrice interioare, sistem de securitate și monitorizare).
 
-Obiectivul se încadrează, din punct de vedere al clasificării CAEN, în activitatea principală **CAEN 3511 — Producția de energie electrică**, iar din punct de vedere al Legii nr. 50/1991 în categoria **construcțiilor și instalațiilor tehnico-edilitare** cu caracter industrial-energetic. Este important de subliniat, încă din denumire, natura hibridă a obiectivului: din perspectiva dreptului construcțiilor este un ansamblu de „construcții și instalații" ce necesită autorizare de construire (Legea nr. 50/1991), iar din perspectiva dreptului energiei este o „capacitate de producere a energiei electrice" ce necesită autorizare de înființare și, ulterior, licență de exploatare comercială emise de ANRE (Legea nr. 123/2012). Cele două regimuri se suprapun procedural și trebuie corelate: autorizația de construire nu poate fi emisă fără ATR (care fixează soluția de racordare), iar autorizația de înființare ANRE presupune existența terenului și a soluției tehnice. Prezentul memoriu tratează exclusiv componenta de autorizare a construirii (DTAC), dar semnalează, acolo unde este relevant, interfața cu procedurile ANRE și de mediu.
+Obiectivul se încadrează, din punct de vedere al clasificării CAEN, în activitatea principală **CAEN 3511 — Producția de energie electrică**, iar din punct de vedere al Legii nr. 169/2026 (CATUC) în categoria **construcțiilor și instalațiilor tehnico-edilitare** cu caracter industrial-energetic. Este important de subliniat, încă din denumire, natura hibridă a obiectivului: din perspectiva dreptului construcțiilor este un ansamblu de „construcții și instalații" ce necesită autorizare de construire (Legea nr. 169/2026, CATUC, art. 264), iar din perspectiva dreptului energiei este o „capacitate de producere a energiei electrice" ce necesită autorizare de înființare și, ulterior, licență de exploatare comercială emise de ANRE (Legea nr. 123/2012). Cele două regimuri se suprapun procedural și trebuie corelate: autorizația de construire nu poate fi emisă fără ATR (care fixează soluția de racordare), iar autorizația de înființare ANRE presupune existența terenului și a soluției tehnice. Prezentul memoriu tratează exclusiv componenta de autorizare a construirii (DTAC), dar semnalează, acolo unde este relevant, interfața cu procedurile ANRE și de mediu.
 
 **Încadrarea în categoria de importanță și clasa de risc** (Legea nr. 10/1995, HG nr. 766/1997 și normativul P100-1): structurile de susținere a modulelor, posturile de transformare, stațiile de invertoare și clădirea de pază (dacă există) se încadrează, de regulă, în **categoria de importanță „C" — construcții de importanță normală**, iar drumurile interioare și împrejmuirea în categoria „D" — construcții de importanță redusă. Din punct de vedere seismic (P100-1/2013, tabelul 4.2), ansamblul se încadrează în **clasa de importanță-expunere III (coeficient γI = 1,0)**. Trebuie remarcat că, la mesele fotovoltaice fixe, elemente ușoare cu suprafață mare expusă, **acțiunea vântului (SR EN 1991-1-4) este de regulă mai defavorabilă decât acțiunea seismică**, dat fiind că masa proprie redusă conduce la forțe seismice mici (forța seismică de bază Fb = γI × Sd(T1) × m × λ, proporțională cu masa m), în timp ce presiunea dinamică a vântului acționează pe o arie colectoare mare. Verificarea seismică rămâne totuși obligatorie pentru posturile de transformare, containerele de invertoare și ancorajele acestora, unde masele sunt semnificative.
 
@@ -43,7 +43,7 @@ Terenul se alege relativ plan, cu pantă medie < 5%, expunere favorabilă (desch
 
 - **Titular / investitor:** [Denumire societate] S.R.L. / S.A., CUI [_______], J[__]/[____]/[____], cu sediul în [_______].
 - **Reprezentant legal:** [Nume, funcție].
-- **Calitatea față de teren:** proprietar / titular al dreptului de superficie / concesionar (conform art. 6 alin. (1) din Legea nr. 50/1991, cu dovada titlului asupra imobilului).
+- **Calitatea față de teren:** proprietar / titular al dreptului de superficie / concesionar (conform Legii nr. 169/2026 — CATUC, cu dovada titlului asupra imobilului).
 
 ### 1.4. Proiectantul
 
@@ -54,13 +54,13 @@ Terenul se alege relativ plan, cu pantă medie < 5%, expunere favorabilă (desch
 
 ### 1.5. Faza de proiectare
 
-Prezentul memoriu constituie parte a documentației **D.T.A.C.** (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), fază reglementată de **Legea nr. 50/1991** privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, și de **Ordinul MDRAP nr. 839/2009** (Norme metodologice de aplicare). Conținutul-cadru al documentației este cel prevăzut în **Anexa nr. 1** la Legea nr. 50/1991.
+Prezentul memoriu constituie parte a documentației **D.T.A.C.** (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), fază reglementată de **Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), **art. 264**. Conținutul-cadru al documentației este cel prevăzut în **Anexa nr. 2** la lege.
 
 DTAC se elaborează pe baza documentației tehnico-economice aprobate (S.F. — Studiu de Fezabilitate / D.A.L.I. după caz, conform HG nr. 907/2016), a Certificatului de Urbanism și a avizelor/acordurilor solicitate prin acesta, și precede fazele de **Proiect Tehnic (P.Th.)** și **Detalii de Execuție (D.E.)**.
 
 ### 1.6. Autorizația de construire — cadrul procedural
 
-Autorizația de Construire (A.C.) se emite de autoritatea administrației publice locale competente (Primar / Președinte Consiliu Județean, după caz), în baza DTAC și a documentelor prevăzute la art. 7 din Legea nr. 50/1991. Pentru CEF, avizele determinante uzuale sunt: **Aviz Tehnic de Racordare (ATR)** de la operatorul de distribuție (DSO), aviz de mediu (clasarea notificării / decizia etapei de încadrare a APM), avize utilități, aviz de gospodărire a apelor (dacă e cazul), aviz Direcția pentru Agricultură (scoatere temporară/definitivă din circuitul agricol), aviz Ministerul Apărării / STS / servicii dacă amplasamentul este în zonă de servitute aeronautică sau militară.
+Autorizația de Construire (A.C.) se emite de autoritatea administrației publice locale competente (Primar / Președinte Consiliu Județean, după caz), în baza DTAC și a documentelor prevăzute de Legea nr. 169/2026 (CATUC), art. 264. Pentru CEF, avizele determinante uzuale sunt: **Aviz Tehnic de Racordare (ATR)** de la operatorul de distribuție (DSO), aviz de mediu (clasarea notificării / decizia etapei de încadrare a APM), avize utilități, aviz de gospodărire a apelor (dacă e cazul), aviz Direcția pentru Agricultură (scoatere temporară/definitivă din circuitul agricol), aviz Ministerul Apărării / STS / servicii dacă amplasamentul este în zonă de servitute aeronautică sau militară.
 
 **Succesiunea procedurală completă** (de la teren la punerea în funcțiune) urmează, de regulă, următorii pași, corelați între cele trei regimuri (urbanism/construcții, energie, mediu):
 
@@ -438,7 +438,7 @@ Regula scalează: chiar la puteri mari, construcțiile efective rămân o fracț
 
 **CUT:** CUT = A_desfășurată / S_teren; construcțiile fiind parter (P), A_desfășurată ≈ A_construită → CUT ≈ **0,02–0,05**.
 
-**De ce sunt mici:** funcțiunea fotovoltaică este **extensivă și cu grad redus de construire** — ocupă mult teren pentru colectarea radiației, dar „construiește" foarte puțin. Aceasta o diferențiază radical de industria clasică (hale) și susține **reversibilitatea**. Documentația de urbanism (**PUZ Parc Fotovoltaic**, conform Legii nr. 350/2001) stabilește POT/CUT admise; pentru energie ele sunt caracteristic reduse (POT ≤ 5–10%, CUT ≤ 0,1, regim P, retrageri ≥ 5,0 m + perdea vegetală).
+**De ce sunt mici:** funcțiunea fotovoltaică este **extensivă și cu grad redus de construire** — ocupă mult teren pentru colectarea radiației, dar „construiește" foarte puțin. Aceasta o diferențiază radical de industria clasică (hale) și susține **reversibilitatea**. Documentația de urbanism (**PUZ Parc Fotovoltaic**, conform Legii nr. 169/2026 — CATUC) stabilește POT/CUT admise; pentru energie ele sunt caracteristic reduse (POT ≤ 5–10%, CUT ≤ 0,1, regim P, retrageri ≥ 5,0 m + perdea vegetală).
 
 > **Rang superior ≠ rang inferior:** PUZ Parc Fotovoltaic (rang superior — reglementare de zonă) ≠ DTAC (rang inferior — autorizare punctuală pe amplasament). Sunt documente diferite ca scop și conținut.
 
@@ -473,9 +473,8 @@ Cadrul legal-administrativ constituie substanța memoriului general la o CEF, î
 
 ### 6.1. Legislație primară — construcții și autorizare
 
-- **Legea nr. 50/1991** privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare — cadrul autorizației de construire; conținutul-cadru al DTAC este cel din **Anexa nr. 1**; documentele necesare emiterii A.C. sunt cele de la **art. 7**; dovada dreptului asupra imobilului — **art. 6 alin. (1)**. **Ordinul MDRAP nr. 839/2009** — Norme metodologice de aplicare.
-- **Legea nr. 10/1995** privind calitatea în construcții, republicată — cele **6 cerințe fundamentale (art. 5)**: A (rezistență mecanică și stabilitate), B (securitate la incendiu), C (igienă, sănătate și mediu înconjurător), D (siguranță și accesibilitate în exploatare), E (protecție împotriva zgomotului), F (economie de energie și izolare termică); obligativitatea **verificării tehnice** a proiectelor de către verificatori atestați (**art. 13, art. 22**); **HG nr. 925/1995** — regulament de verificare și expertizare tehnică.
-- **Legea nr. 350/2001** privind amenajarea teritoriului și urbanismul, cu modificările ulterioare — documentațiile de urbanism (PUG, PUZ, PUD) și avizul arhitectului-șef. **Art. 32** stabilește că, atunci când reglementările în vigoare (PUG/RLU) nu permit realizarea investiției (situație uzuală pentru CEF în extravilan pe teren arabil), este obligatorie **elaborarea și aprobarea unui PUZ**, precedat de aviz de oportunitate. **Ordinul MDRAP nr. 233/2016** aprobă normele metodologice și conținutul-cadru al documentațiilor PUZ.
+- **Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026) — cadrul unificat al autorizației de construire și al documentațiilor de urbanism. Cadrul autorizației de construire: **art. 264**; conținutul-cadru al DTAC este cel din **Anexa nr. 2** la lege; dovada dreptului asupra imobilului este cerință generală a documentației, fără a mai fi condiționată de un articol distinct din legea veche (abrogată). Documentațiile de urbanism (PUG, PUZ, PUD) și avizul arhitectului-șef rămân reglementate de aceeași lege: atunci când reglementările în vigoare (PUG/RLU) nu permit realizarea investiției (situație uzuală pentru CEF în extravilan pe teren arabil), este obligatorie **elaborarea și aprobarea unui PUZ**, precedat de aviz de oportunitate.
+- **Legea nr. 10/1995** privind calitatea în construcții — cele **6 cerințe fundamentale**: A (rezistență mecanică și stabilitate), B (securitate la incendiu), C (igienă, sănătate și mediu înconjurător), D (siguranță și accesibilitate în exploatare), E (protecție împotriva zgomotului), F (economie de energie și izolare termică); obligativitatea **verificării tehnice** a proiectelor de către verificatori atestați; **HG nr. 925/1995** — regulament de verificare și expertizare tehnică. *(Legea nr. 10/1995 a fost parțial abrogată de Legea nr. 169/2026 — CATUC, pentru art. 1-9, 11-40 și 42-44; articolele exacte care fundamentează cele de mai sus nu au fost verificate punctual față de acest interval, se recomandă citarea generică a legii, fără număr de articol, până la clarificare.)*
 - **HG nr. 907/2016** privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice (nota de fundamentare, S.F., D.A.L.I., P.Th., devizul general) — standard de conținut pentru fazele economice și tehnice, corelate cu DTAC.
 
 ### 6.1bis. Cele șase cerințe fundamentale (Legea nr. 10/1995) aplicate la CEF
@@ -560,7 +559,7 @@ Autorizarea unei CEF parcurge, în paralel și în serie, trei filiere procedura
 ### 6bis.1. Etapele principale ale fluxului
 
 1. **Certificat de Urbanism (CU) pentru construire** — emis de Primărie/Consiliul Județean; stabilește regimul juridic/economic/tehnic și lista de avize.
-2. **PUZ „Parc Fotovoltaic"** — dacă PUG/RLU nu permite funcțiunea (Legea nr. 350/2001, art. 32); avizat de: Consiliul Județean, APM (aviz de mediu SEA), DSP, ISU, ANIF, ANAR, Direcția Agricolă, Direcția de Cultură (patrimoniu/arheologie), CFR, CNAIR, operatori de rețele electrice/gaz, după caz; aprobat prin HCL.
+2. **PUZ „Parc Fotovoltaic"** — dacă PUG/RLU nu permite funcțiunea (Legea nr. 169/2026, CATUC); avizat de: Consiliul Județean, APM (aviz de mediu SEA), DSP, ISU, ANIF, ANAR, Direcția Agricolă, Direcția de Cultură (patrimoniu/arheologie), CFR, CNAIR, operatori de rețele electrice/gaz, după caz; aprobat prin HCL.
 3. **Studiu de Soluție + ATR** — de la operatorul de distribuție (procedura Ord. ANRE nr. 59/2013); fixează punctul, soluția și capacitatea de racordare.
 4. **Scoaterea din circuitul agricol** — pe baza **studiului pedologic (OSPA)**, cu plata **taxei** (HG nr. 1132/2008, diferențiată pe clasele I–V, Legea nr. 18/1991 art. 92) și **avizul ANIF** dacă terenul e în amenajări funciare.
 5. **Procedura de mediu (EIA)** — notificare → screening → (eventual) scoping → **RIM** → **consultare publică (min. 45 zile)** → CAT → **Acord de Mediu**; **Evaluare Adecvată** (OUG nr. 57/2007) dacă e în/lângă Natura 2000.
@@ -573,8 +572,8 @@ Autorizarea unei CEF parcurge, în paralel și în serie, trei filiere procedura
 
 | Aviz / Autorizație | Emitent | Temei legal | Termen orientativ |
 |---|---|---|---|
-| Certificat de Urbanism (construire) | Primărie / Consiliul Județean | Legea nr. 50/1991 (art. 6), Legea nr. 350/2001 | 15–30 zile |
-| Aviz de oportunitate + PUZ | Arhitect-șef / Consiliul Județean / CL | Legea nr. 350/2001 (art. 32), Ord. MDRAP nr. 233/2016 | 6–12 luni |
+| Certificat de Urbanism (construire) | Primărie / Consiliul Județean | Legea nr. 169/2026 (CATUC) | 15–30 zile |
+| Aviz de oportunitate + PUZ | Arhitect-șef / Consiliul Județean / CL | Legea nr. 169/2026 (CATUC) | 6–12 luni |
 | Aviz de mediu pentru PUZ (SEA) | APM | HG nr. 1076/2004 | 2–4 luni |
 | Studiu de Soluție + ATR | Operator de Distribuție (DSO) | Ord. ANRE nr. 59/2013 | 30–90 zile |
 | Tarif de racordare | ANRE / DSO | Ord. ANRE nr. 11/2023 | odată cu ATR |
@@ -594,7 +593,7 @@ Autorizarea unei CEF parcurge, în paralel și în serie, trei filiere procedura
 | Aviz Transgaz | Transgaz | zonă de protecție cca. 20 m conducte gaz | 30 zile |
 | Aviz Direcția de Cultură (arheologie) | Direcția Județeană pentru Cultură | Legea nr. 422/2001 (patrimoniu) | 30 zile |
 | Autorizație de înființare | ANRE | Legea nr. 123/2012 | 30–60 zile |
-| **Autorizație de Construire** | **Primărie / Consiliul Județean** | **Legea nr. 50/1991 (art. 7)** | **30 zile** |
+| **Autorizație de Construire** | **Primărie / Consiliul Județean** | **Legea nr. 169/2026 (CATUC), art. 264** | **30 zile** |
 | Licență de producere | ANRE | Legea nr. 123/2012 | după PIF |
 
 *Termenele sunt orientative (termene legale maxime sau uzuale); durata reală depinde de completitudinea documentației și de complexitatea amplasamentului. Tabelul rămâne valabil pentru orice putere; unele avize (ex. EIA completă, autorizație de înființare) devin obligatorii doar peste anumite praguri.*
@@ -714,7 +713,7 @@ Ciclul de viață proiectat este de **25–30 de ani**, la finalul căruia obiec
 3. **Demontarea structurilor de susținere** (oțel zincat — reciclabil integral ca fier vechi) și **extragerea piloților** din sol.
 4. **Dezafectarea posturilor de transformare și a racordului** (LES 20 kV), cu tratarea uleiului de transformator ca deșeu periculos, dacă e cazul.
 5. **Decopertarea platformelor și drumurilor** balastate și **readucerea terenului la categoria de folosință agricolă** anterioară (afânare, refacerea stratului fertil, reînsămânțare).
-6. **Obținerea autorizației de desființare** (Legea nr. 50/1991) și recepția lucrărilor de readucere la starea inițială.
+6. **Obținerea autorizației de desființare** (Legea nr. 169/2026 — CATUC, art. 302, Anexa nr. 5) și recepția lucrărilor de readucere la starea inițială.
 
 **Garanția financiară de decomisionare** — fond de garantare, scrisoare de garanție bancară sau poliță — se constituie pentru a asigura acoperirea costului de dezafectare independent de situația economică a operatorului la finalul vieții. Ordinul de mărime al costului net de dezafectare este de **cca. 20.000–50.000 EUR/MWp** (din care se scade valoarea reziduală a materialelor reciclabile), echivalent cu ~3–5% din CAPEX. Reversibilitatea completă a ocupării terenului — trăsătură distinctivă a CEF pe piloți față de industria clasică pe fundații de beton — este argumentul de mediu central care justifică amplasarea temporară pe teren agricol.
 
@@ -760,13 +759,13 @@ Un investitor poate dezvolta parcul **în etape** (pe tronsoane), în funcție d
 
 ### 9.5. Decomisionare (sfârșit de viață)
 
-Conform 8.3: demontare, valorificare materiale (DEEE + fier vechi), extragere piloți, readucere teren la starea agricolă, cu garanție financiară de decomisionare și **autorizație de desființare** (Legea nr. 50/1991) la finalul ciclului de viață.
+Conform 8.3: demontare, valorificare materiale (DEEE + fier vechi), extragere piloți, readucere teren la starea agricolă, cu garanție financiară de decomisionare și **autorizație de desființare** (Legea nr. 169/2026 — CATUC, art. 302, Anexa nr. 5) la finalul ciclului de viață.
 
 ---
 
 ## 10. CONCLUZII
 
-Investiția „Parc fotovoltaic P_DC [kWp]" (putere variabilă, stabilită de investitor) este **fundamentată tehnic, viabilă economic și favorabilă din punct de vedere al mediului**, respectând integral cadrul legal și normativ aplicabil (Legea nr. 50/1991, Legea nr. 10/1995, Legea nr. 123/2012, Legea nr. 220/2008, HG nr. 907/2016, Ord. ANRE de racordare, Codul Tehnic RED, Regulamentul RfG (UE) 2016/631, NTE 401/2003, Eurocodurile, I7/2011, standardele IEC 61215/61730/62446/62548/62109/62305, SR HD 60364-7-712, Legea nr. 211/2011 și regimul DEEE).
+Investiția „Parc fotovoltaic P_DC [kWp]" (putere variabilă, stabilită de investitor) este **fundamentată tehnic, viabilă economic și favorabilă din punct de vedere al mediului**, respectând integral cadrul legal și normativ aplicabil (Legea nr. 169/2026 — CATUC, Legea nr. 10/1995, Legea nr. 123/2012, Legea nr. 220/2008, HG nr. 907/2016, Ord. ANRE de racordare, Codul Tehnic RED, Regulamentul RfG (UE) 2016/631, NTE 401/2003, Eurocodurile, I7/2011, standardele IEC 61215/61730/62446/62548/62109/62305, SR HD 60364-7-712, Legea nr. 211/2011 și regimul DEEE).
 
 Fiind un **document parametric**, memoriul se aplică la orice putere: mărimile derivate se obțin din P_DC prin formulele din capitolele 4, 5 și 7 (N = P_DC/P_modul; P_AC = P_DC/ILR; S_PT ≈ P_AC; S_teren ≈ P_DC/ρ; E = P_DC×PSH×PR; CO₂ = E×f). Exemplul de calcul pentru P_DC = 2 MWp este ilustrativ și **nu constituie ipoteza fixă a proiectului**.
 
@@ -782,7 +781,7 @@ DTAC cuprinde piesele desenate corelate cu memoriul: **plan de încadrare**, **p
 
 Cu degradare 0,50%/an, producția scade prin E_k = E_1 × (1 − d)^(k−1). *Exemplu 2 MWp:* de la 2.378 MWh (an 1) la 2.109 MWh (an 25) — retenție 88,7%; cumulat ≈ 55.885 MWh la 25 ani / ≈ 66.394 MWh la 30 ani; CO₂ evitat ≈ 713 t/an (≈ 16.766 t/25 ani). LCOE actualizat 45–55 EUR/MWh și payback ~8–10 ani susțin bancabilitatea. La finalul vieții, terenul se readuce integral la starea agricolă (reversibilitate), cu valorificare DEEE (≥ 80–85%) și garanție financiară de decomisionare.
 
-**În concluzie**, obiectivul răspunde direct țintelor PNIESC și RED III de creștere a ponderii surselor regenerabile, contribuie la securitatea și decarbonizarea aprovizionării cu energie, are impact de mediu pozitiv net și ocupare reversibilă a terenului, și se propune spre **autorizare** conform Legii nr. 50/1991, la scara de putere stabilită de investitor. Se solicită emiterea **Autorizației de Construire** pe baza prezentei documentații D.T.A.C.
+**În concluzie**, obiectivul răspunde direct țintelor PNIESC și RED III de creștere a ponderii surselor regenerabile, contribuie la securitatea și decarbonizarea aprovizionării cu energie, are impact de mediu pozitiv net și ocupare reversibilă a terenului, și se propune spre **autorizare** conform Legii nr. 169/2026 (CATUC), la scara de putere stabilită de investitor. Se solicită emiterea **Autorizației de Construire** pe baza prezentei documentații D.T.A.C.
 
 ---
 

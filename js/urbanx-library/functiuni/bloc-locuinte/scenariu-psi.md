@@ -9,7 +9,7 @@
 - Normativul P118-2/2013 — Normativ privind securitatea la incendiu a construcțiilor. Partea a II-a — Instalații de stingere
 - Normativul P118-3/2015 — Normativ privind securitatea la incendiu a construcțiilor. Partea a III-a — Instalații de detectare, semnalizare și avertizare incendiu
 - HG nr. 571/2016 pentru aprobarea categoriilor de construcții și amenajări care se supun avizării/autorizării privind securitatea la incendiu
-- Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată
+- Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, privind autorizarea executării lucrărilor de construcții
 
 **Statut document:** Piesă scrisă componentă a documentației tehnice de securitate la incendiu (Sc.SI), întocmită în vederea obținerii avizului/autorizației de securitate la incendiu.
 

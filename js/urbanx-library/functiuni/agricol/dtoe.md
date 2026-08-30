@@ -35,8 +35,7 @@ DTOE reglementează, pe toată durata execuției fermei:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare (Anexa 2) | Cap. 1, 3 |
-| **Ordin MDRAP 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026** (CATUC) | AC; organizarea de execuție ca piesă a conținutului-cadru, art. 264, Anexa nr. 2 | Cap. 1, 3, structura documentației |
 | **HG 300/2006** | Cerințe minime SSM pentru șantiere temporare/mobile | **Cap. 5 — act central**, cu accent pe montajul silozului la înălțime |
 | **HG 1146/2006** | Utilizarea echipamentelor de muncă (macarale, platforme de montaj siloz) | Cap. 4, 5 |
 | **C 300/1994** | Prevenirea și stingerea incendiilor pe durata execuției | Cap. 5 |

@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Sistem de stocare a energiei în baterii (BESS), 25 MW / 50 MWh
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, Legii nr. 123/2012, reglementărilor ANRE, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), Legii nr. 123/2012, reglementărilor ANRE, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul d
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire | Conformitatea execuției |
 | 4 | Legea nr. 307/2006 + Ordinul MAI nr. 129/2016 | Autorizarea ISU pentru instalații cu risc mare | BESS — risc mare, thermal runaway |
 | 5 | Legea nr. 123/2012, reglementări ANRE | Racordarea la rețea, licențierea stocării | ATR, licența de stocare — condiții de PIF comercial |
 | 6 | NFPA 855, UL 9540A | Distanțe de siguranță, testare propagare termică | Verificare la recepție |

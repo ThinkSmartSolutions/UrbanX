@@ -16,7 +16,7 @@ Prezentul caiet de sarcini este parte integrantă a Proiectului Tehnic și are c
 |---|---|
 | Legea 10/1995 (rep.) | Calitatea în construcții — cele 6+1 cerințe fundamentale |
 | HG 907/2016 | Conținutul-cadru al documentației tehnico-economice (faze SF/DALI/PTh/DE) |
-| Legea 50/1991 (rep.) | Autorizarea executării lucrărilor de construcții |
+| Legea nr. 169/2026 (CATUC) | Autorizarea executării lucrărilor de construcții, art. 264 |
 | HG 766/1997 | Regulamente privind calitatea; categoria de importanță „C" (normală) pentru acest obiectiv |
 | Regulament recepție HG 343/2017 | Recepția lucrărilor de construcții și instalații |
 | C 56/2002 | Verificarea calității și recepția lucrărilor de construcții — normativ-cadru pe faze |

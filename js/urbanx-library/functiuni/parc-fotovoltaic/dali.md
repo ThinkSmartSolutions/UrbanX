@@ -210,13 +210,13 @@ Se recomandă **Varianta 2 — Repowering + extindere maximală**, motivat prin:
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism (pentru zona de extindere) | Primărie/Consiliu Județean | Legea nr. 50/1991 |
+| Certificat de urbanism (pentru zona de extindere) | Primărie/Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | ATR modificat/suplimentar | Operator de Distribuție (OD) | Ord. ANRE nr. 59/2013 |
 | Actualizare autorizație de înființare / licență exploatare | ANRE | Legea nr. 123/2012 |
 | Decizia etapei de încadrare (pentru suprafața de extindere) | APM | Legea nr. 292/2018 |
 | Scoatere din circuit agricol (suprafața de extindere) | Direcția Agricolă | Legea nr. 18/1991 |
 | Verificare proiect cerința A1 (structuri reutilizate/noi) | Verificator tehnic atestat | Legea nr. 10/1995 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Plan de gestionare DEEE (echipamente înlocuite) | Operator autorizat de reciclare | Legea nr. 249/2015 |
 
 ### 8.2. Concluzii

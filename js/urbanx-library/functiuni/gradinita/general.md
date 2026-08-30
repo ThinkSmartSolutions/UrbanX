@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — CREȘĂ / GRĂDINIȚĂ CU PROGRAM PRELUNGIT, REGIM P+1, 90 DE COPII (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.), întocmită conform Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, Anexa nr. 1. Prezentul memoriu general tratează o unitate de educație timpurie de tip creșă/grădiniță cu program prelungit, clădire nouă, regim de înălțime P+1, capacitate 90 de copii organizați în 4-5 grupe de vârstă, cu bloc alimentar propriu, cabinet medical și izolator, amenajări exterioare (spații de joacă, spații verzi, împrejmuire) și racorduri la utilități. Memoriul de față sintetizează soluția de ansamblu, încadrarea investiției și interfața dintre specialități; el **nu dublează** conținutul memoriilor de specialitate — arhitectură, rezistență (structură), instalații — care detaliază, fiecare pe domeniul propriu, soluțiile constructive, breviarele de calcul și schemele tehnice. Cititorul care caută alcătuirea exactă a pereților, planurile cotate, breviarul de calcul al structurii sau schemele instalațiilor este trimis către memoriile dedicate; prezentul document răspunde la întrebarea „ce se construiește, de ce, în ce condiții legale și cu ce indicatori", nu la „cum se detaliază tehnic fiecare element".
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținut-cadru Anexa nr. 2. Prezentul memoriu general tratează o unitate de educație timpurie de tip creșă/grădiniță cu program prelungit, clădire nouă, regim de înălțime P+1, capacitate 90 de copii organizați în 4-5 grupe de vârstă, cu bloc alimentar propriu, cabinet medical și izolator, amenajări exterioare (spații de joacă, spații verzi, împrejmuire) și racorduri la utilități. Memoriul de față sintetizează soluția de ansamblu, încadrarea investiției și interfața dintre specialități; el **nu dublează** conținutul memoriilor de specialitate — arhitectură, rezistență (structură), instalații — care detaliază, fiecare pe domeniul propriu, soluțiile constructive, breviarele de calcul și schemele tehnice. Cititorul care caută alcătuirea exactă a pereților, planurile cotate, breviarul de calcul al structurii sau schemele instalațiilor este trimis către memoriile dedicate; prezentul document răspunde la întrebarea „ce se construiește, de ce, în ce condiții legale și cu ce indicatori", nu la „cum se detaliază tehnic fiecare element".
 
 ---
 
@@ -10,7 +10,7 @@
 
 **Construire creșă/grădiniță cu program prelungit, regim de înălțime P+1, capacitate 90 de copii (4-5 grupe), împreună cu amenajări exterioare, sistematizare verticală, împrejmuire, racorduri la utilități și organizare de șantier.**
 
-Faza de proiectare este **D.T.A.C. — Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire**, întocmită în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, Anexa nr. 1, care stabilește conținutul-cadru al documentației necesare emiterii Autorizației de Construire de către autoritatea publică locală competentă. Alegerea acestei faze de proiectare nu este opțională: pentru orice lucrare de construire nouă, indiferent de sursa de finanțare (publică sau privată), Autorizația de Construire este actul administrativ obligatoriu care precede legal începerea lucrărilor, iar D.T.A.C. este documentația tehnică minimă și completă cerută pentru evaluarea acesteia de către autoritate.
+Faza de proiectare este **D.T.A.C. — Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire**, întocmită în conformitate cu Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, care stabilește conținutul-cadru al documentației necesare emiterii Autorizației de Construire de către autoritatea publică locală competentă. Alegerea acestei faze de proiectare nu este opțională: pentru orice lucrare de construire nouă, indiferent de sursa de finanțare (publică sau privată), Autorizația de Construire este actul administrativ obligatoriu care precede legal începerea lucrărilor, iar D.T.A.C. este documentația tehnică minimă și completă cerută pentru evaluarea acesteia de către autoritate.
 
 Prezentul memoriu constituie **Memoriul tehnic general** al documentației și sintetizează soluția de ansamblu, coordonând piesele scrise și desenate ale tuturor specialităților implicate. Rolul memoriului general într-o documentație multidisciplinară este acela de a asigura coerența informației: fiecare specialist (arhitect, inginer structurist, inginer de instalații) elaborează piese proprii, cu un nivel de detaliu tehnic specific domeniului, dar toate trebuie să pornească de la aceleași date de temă, aceiași indicatori urbanistici și aceeași încadrare tehnică a construcției. Memoriul general este documentul care fixează aceste date comune și explică logica de ansamblu a proiectului, evitând contradicțiile care ar putea apărea dacă fiecare specialitate ar interpreta independent tema de proiectare. Detalierea pe specialități se regăsește în memoriile tehnice dedicate (arhitectură, rezistență, instalații), care nu sunt reluate aici, ci referențiate ori de câte ori este relevant.
 
@@ -21,8 +21,8 @@ O clădire destinată educației timpurii a copiilor mici — de la câteva luni
 | Element | Date |
 |---|---|
 | Denumire obiectiv | Creșă/grădiniță P+1, 90 copii, 4-5 grupe |
-| Faza de proiectare | D.T.A.C. (Legea 50/1991, Anexa 1) |
-| Categoria de importanță | **C** — normală (HG 766/1997) |
+| Faza de proiectare | D.T.A.C. (Legea nr. 169/2026 — CATUC, art. 264, Anexa nr. 2) |
+| Categoria de importanță | **C** — normală (HG 766/1997); CATUC introduce, distinct, clasa de consecințe **CC3** (Anexa nr. 6 — „creșe, grădinițe sau alte spații similare de îngrijire a persoanelor"), calculată automat de platformă |
 | Clasa de importanță seismică | **II** (P100-1/2013, tab. 4.2 — dotări colectivități de copii) |
 | Grad de rezistență la foc | **II** (P118-1/2013) |
 | Regim de înălțime | P+1 (parter + 1 etaj) |
@@ -51,7 +51,7 @@ Alegerea amplasamentului pentru o unitate de educație timpurie nu este o decizi
 
 ### 1.5. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991, Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), Anexa nr. 2, din:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (coordonator + specialități);
@@ -84,7 +84,7 @@ Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv,
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate | Legea 50/1991 (republicată), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
+| Autorizare / calitate | Legea nr. 169/2026 (CATUC — autorizare și urbanism, art. 264, Anexa nr. 2), Legea 10/1995, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
 | Educație timpurie | **HG nr. 1252/2012** (Metodologia de organizare și funcționare a creșelor și a altor unități de educație timpurie antepreșcolară), Legea educației naționale nr. 1/2011, Ordinele MEN privind rețeaua școlară și planul de școlarizare |
 | Proiectare clădiri de învățământ | **NP 011-1997** (Normativ pentru proiectarea clădirilor de învățământ preșcolar) |
 | Sănătate / igienă | **OMS nr. 119/2014** (Normele de igienă și sănătate publică privind mediul de viață al populației, cu secțiunile dedicate colectivităților de copii), Legea 95/2006 |
@@ -456,7 +456,7 @@ Cele trei avize cu caracter obligatoriu și condiționant pentru această funcț
 
 ### 11.1. Etapele HG 907/2016 și autorizarea
 
-La finanțare publică, investiția parcurge etapele HG 907/2016: Notă conceptuală + Temă de proiectare → Studiu de Fezabilitate (SF) → **D.T.A.C. (prezenta fază)** → Proiect Tehnic + Detalii de Execuție (PT+DE) → Execuție + Recepție. D.T.A.C. se depune, împreună cu avizele obținute în baza Certificatului de Urbanism (cap. 10), pentru obținerea Autorizației de Construire (Legea 50/1991). Așa cum s-a arătat la capitolul 2.3, fundamentarea demografică și avizul conform al Inspectoratului Școlar (cap. 10.3) se recomandă a fi demarate încă din etapa Notei conceptuale/Temei de proiectare, pentru a evita blocaje ulterioare.
+La finanțare publică, investiția parcurge etapele HG 907/2016: Notă conceptuală + Temă de proiectare → Studiu de Fezabilitate (SF) → **D.T.A.C. (prezenta fază)** → Proiect Tehnic + Detalii de Execuție (PT+DE) → Execuție + Recepție. D.T.A.C. se depune, împreună cu avizele obținute în baza Certificatului de Urbanism (cap. 10), pentru obținerea Autorizației de Construire (Legea nr. 169/2026 — CATUC, art. 264). Așa cum s-a arătat la capitolul 2.3, fundamentarea demografică și avizul conform al Inspectoratului Școlar (cap. 10.3) se recomandă a fi demarate încă din etapa Notei conceptuale/Temei de proiectare, pentru a evita blocaje ulterioare.
 
 ### 11.2. Devizul general — sinteză (HG 907/2016)
 
@@ -517,7 +517,7 @@ Prezentul memoriu general prezintă soluția de ansamblu, încadrarea investiți
 
 ### 12.4. Etapele următoare
 
-După verificarea proiectului pe cerințele aplicabile de către verificatori atestați MDLPA și obținerea avizelor din Certificatul de Urbanism — cu atenție prioritară la avizele DSP, ISU și Inspectoratul Școlar/MEN, obligatorii și condiționante pentru această funcțiune (cap. 10) —, documentația D.T.A.C. îndeplinește condițiile pentru emiterea Autorizației de Construire. Proiectul se dezvoltă ulterior în fazele de Proiect Tehnic (PT) și Detalii de Execuție (DE), urmate de execuție, cu programul de control al calității pe faze determinante, și de recepția la terminarea lucrărilor, condiționată, pentru punerea efectivă în funcțiune ca unitate de educație timpurie, de obținerea avizului sanitar de funcționare și a autorizației de securitate la incendiu de funcționare. Se propune emiterea Autorizației de Construire pe baza documentației D.T.A.C. complete conform Legii 50/1991, Anexa 1.
+După verificarea proiectului pe cerințele aplicabile de către verificatori atestați MDLPA și obținerea avizelor din Certificatul de Urbanism — cu atenție prioritară la avizele DSP, ISU și Inspectoratul Școlar/MEN, obligatorii și condiționante pentru această funcțiune (cap. 10) —, documentația D.T.A.C. îndeplinește condițiile pentru emiterea Autorizației de Construire. Proiectul se dezvoltă ulterior în fazele de Proiect Tehnic (PT) și Detalii de Execuție (DE), urmate de execuție, cu programul de control al calității pe faze determinante, și de recepția la terminarea lucrărilor, condiționată, pentru punerea efectivă în funcțiune ca unitate de educație timpurie, de obținerea avizului sanitar de funcționare și a autorizației de securitate la incendiu de funcționare. Se propune emiterea Autorizației de Construire pe baza documentației D.T.A.C. complete conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2.
 
 ### 12.5. Sinteza finală — de ce această soluție tehnică este cea corectă pentru tema dată
 

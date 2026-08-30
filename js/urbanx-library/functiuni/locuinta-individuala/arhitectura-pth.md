@@ -24,7 +24,7 @@ Detaliile de execuție (cap. PTh-A.2) sunt redactate la scările uzuale 1:5, 1:1
 | Domeniu | Act normativ | Rol la faza PTh |
 |---|---|---|
 | Calitate în construcții | Legea 10/1995 | Cerințe fundamentale — se detaliază prin proceduri de control (PTh-A.9) |
-| Autorizare | Legea 50/1991 + Ord. MDRT 839/2009 | Conformitatea PTh cu autorizația emisă pe baza DTAC |
+| Autorizare | Legea nr. 169/2026 (CATUC) | Conformitatea PTh cu autorizația emisă pe baza DTAC |
 | Suprafețe locuibile | Legea 114/1996, Anexa 1 | Referință pentru fișele de finisaje (PTh-A.4) — nu se recalculează |
 | Siguranță în exploatare | NP 068/2002 | Balustrade, praguri, pante, muchii — cap. PTh-A.2, PTh-A.8 |
 | Igienă | OMS 119/2014 | Iluminat/ventilare naturală — verificat prin tâmplărie (PTh-A.3) |

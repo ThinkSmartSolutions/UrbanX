@@ -106,10 +106,10 @@ Se recomandă **Varianta 2 — Modernizare completă cu extindere**, care rezolv
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Verificare ISCIR la punerea în funcțiune a noului rezervor | ISCIR | PT C7/PT C4 |
 | Aviz securitate la incendiu (actualizat) | ISU | HG nr. 571/2016 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

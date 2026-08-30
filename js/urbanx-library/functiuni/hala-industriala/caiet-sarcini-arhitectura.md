@@ -21,7 +21,7 @@ Execuția și recepția lucrărilor de arhitectură se conformează, fără a se
 | Act normativ | Obiect | Incidență |
 |---|---|---|
 | **Legea 10/1995** (rep. 2016) | Calitatea în construcții — cele 7 cerințe fundamentale | Cadru general al calității pe toate capitolele |
-| **Ordinul MDRL 839/2009** | Norme metodologice Legea 50/1991 (conținut DTAC/DTOE) | Corelarea execuției cu documentația autorizată |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | Conținut-cadru DTAC/DTOE | Corelarea execuției cu documentația autorizată |
 | **HG 766/1997** (Anexa 5, 6) | Regulamente calitate; agremente tehnice; carte tehnică | Trasabilitate, agremente, verificări |
 | **C 56/2002** | Normativ pentru verificarea calității lucrărilor de construcții și instalații | Verificări pe faze de execuție — cap. finisaje, izolații |
 | **NP 042/2000** | Iluminatul natural | Luminatoare, ferestre — arie vitrată |

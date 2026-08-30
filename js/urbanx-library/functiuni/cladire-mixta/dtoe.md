@@ -33,8 +33,7 @@ DTOE reglementează, pe toată durata execuției clădirii mixte:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare | Cap. 1, 3 |
-| **Ordin MDRT 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026 (CATUC)**, art. 264, Anexa nr. 2 | AC; organizarea de execuție ca lucrare (piesă componentă a conținutului-cadru) | Cap. 1, 3 |
 | **HG 300/2006** | SSM pe șantiere temporare/mobile | Cap. 4 |
 | **NE 012-1/2007, NE 012-2/2010** | Execuția lucrărilor din beton — relevant la planșeul de transfer | Cap. 3 |
 | **C 300/1994** | PSI pe durata execuției | Cap. 4 |

@@ -5,7 +5,7 @@ Prezentul supliment de fază PTh (Proiect Tehnic de execuție) dezvoltă, la niv
 Spre deosebire de o clădire civilă curentă, detaliile de execuție ale unui centru comercial regional trebuie să răspundă unor condiții specifice de scară și de exploatare pe care niciun detaliu-tip generic nu le acoperă: suprafețe vitrate de mari dimensiuni (curtain wall la intrare, la atrium și la vitrinele de galerie, toate guvernate de SR EN 13830), un rost seismic de 200 mm care traversează toate cele trei niveluri suprateran plus subsolul și care trebuie tratat identic în structură, în anvelopă, în pardoseală și în compartimentarea la foc, o galerie comercială de trafic pietonal foarte intens pe câmpuri de pardoseală de sute de metri liniari, un luminator zenital de atrium care este simultan element de anvelopă, element structural și componentă a sistemului de desfumare SHEVS, și o rețea de culoare tehnice de serviciu care trebuie compartimentată la foc față de galeria publică pe toată lungimea ei. Numerotarea detaliilor (D01…D13) corespunde plotelor din piesele desenate PTh-A ale prezentei documentații.
 
 Cadru normativ de referință pentru detaliere:
-- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut-cadru documentații), Legea 50/1991;
+- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut-cadru documentații), Legea nr. 169/2026 (CATUC);
 - **NP 068-2002** (proiectarea clădirilor și a sălilor aglomerate) — normă critică, care condiționează geometria galeriei, a atriumului și a compartimentărilor tratate în detaliile de mai jos;
 - P118-1/2013, P118-2/2013, P118-3/2015 (securitate la incendiu — rezistență la foc, instalații de stingere, detecție/alarmare);
 - **SR EN 13830** (pereți cortină — proiectare, execuție, performanțe);

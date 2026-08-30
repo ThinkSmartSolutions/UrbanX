@@ -17,7 +17,7 @@
 | Cod unic de înregistrare (CUI) | Se completează |
 | Reprezentant legal | Se completează (nume, funcție) |
 | Persoană de contact | Se completează (telefon, e-mail) |
-| Calitatea față de teren | Proprietar / titular al dreptului de superficie / concesionar, conform art. 6 alin. (1) din Legea nr. 50/1991 |
+| Calitatea față de teren | Proprietar / titular al dreptului de superficie / concesionar, conform Legii nr. 169/2026 (CATUC) |
 
 ### 1.2. Denumirea proiectului
 
@@ -45,7 +45,7 @@
 
 ### 1.5. Încadrarea în planul de urbanism
 
-Fiind, în cazul uzual, un amplasament extravilan pe teren cu categorie de folosință agricolă, funcțiunea „producere de energie electrică din surse regenerabile" nu este de regulă admisă direct prin PUG/RLU existent, motiv pentru care se parcurge, conform art. 32 din Legea nr. 350/2001, elaborarea și aprobarea unui **Plan Urbanistic Zonal „Parc Fotovoltaic"**, precedat de aviz de oportunitate. PUZ-ul este, la rândul lui, supus unei **evaluări de mediu strategice (SEA)**, conform HG nr. 1076/2004 — procedură distinctă (rang superior, de plan) de procedura de evaluare a impactului aplicabilă proiectului însuși (rang inferior, de investiție punctuală), tratată la cap. 4 din prezentul memoriu.
+Fiind, în cazul uzual, un amplasament extravilan pe teren cu categorie de folosință agricolă, funcțiunea „producere de energie electrică din surse regenerabile" nu este de regulă admisă direct prin PUG/RLU existent, motiv pentru care se parcurge, conform Legii nr. 169/2026 (CATUC), elaborarea și aprobarea unui **Plan Urbanistic Zonal „Parc Fotovoltaic"**, precedat de aviz de oportunitate. PUZ-ul este, la rândul lui, supus unei **evaluări de mediu strategice (SEA)**, conform HG nr. 1076/2004 — procedură distinctă (rang superior, de plan) de procedura de evaluare a impactului aplicabilă proiectului însuși (rang inferior, de investiție punctuală), tratată la cap. 4 din prezentul memoriu.
 
 | Indicator urbanistic (raportat la construcțiile permanente — PT, cabine, nu la mesele FV) | Valoare orientativă |
 |---|---|

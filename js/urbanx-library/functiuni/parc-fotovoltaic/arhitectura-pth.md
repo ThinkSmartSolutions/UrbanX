@@ -847,7 +847,7 @@ Pas japonez (dale prefabricate punctuale) la traversarea rigolelor de drenaj din
 
 ### D30 — Detaliu fixare panou de identificare a obiectivului la intrare (sc. 1:20)
 
-Structură metalică autoportantă (2 stâlpi + panou 800×1.200 mm), fundație punctuală de beton, amplasată vizibil lângă poarta principală, cu datele obiectivului conform Legii nr. 50/1991 (denumire, beneficiar, proiectant, nr. autorizație de construire).
+Structură metalică autoportantă (2 stâlpi + panou 800×1.200 mm), fundație punctuală de beton, amplasată vizibil lângă poarta principală, cu datele obiectivului conform Legii nr. 169/2026 (CATUC), art. 264 (denumire, beneficiar, proiectant, nr. autorizație de construire).
 
 ### PTh-A.20.1 Sinteza planșelor de execuție (arhitectură/amenajare)
 
@@ -1103,7 +1103,7 @@ Organizarea de șantier respectă **Legea nr. 319/2006** și **HG nr. 300/2006**
 
 ### PTh-A.25.3 Semnalizare provizorie de șantier
 
-Panouri de identificare a șantierului (conform Legii nr. 50/1991), semnalizare rutieră provizorie la accesul din drumul public, delimitare cu bandă/gard provizoriu a zonelor de lucru active, distincte de semnalistica definitivă tratată la PTh-A.14.
+Panouri de identificare a șantierului (conform Legii nr. 169/2026 — CATUC), semnalizare rutieră provizorie la accesul din drumul public, delimitare cu bandă/gard provizoriu a zonelor de lucru active, distincte de semnalistica definitivă tratată la PTh-A.14.
 
 ---
 

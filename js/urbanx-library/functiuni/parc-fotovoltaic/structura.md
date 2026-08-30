@@ -2,7 +2,7 @@
 
 ## 0. Preambul și scop al memoriului
 
-Prezentul memoriu tehnic de rezistență acoperă structura de rezistență a unui parc fotovoltaic (centrală electrică fotovoltaică — CEF). Documentul se elaborează pentru faza **DTAC** (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), în conformitate cu Legea 50/1991 (republicată) și cu conținutul-cadru al proiectelor de autorizare, și fundamentează cerința fundamentală **A — Rezistență mecanică și stabilitate** din Legea 10/1995 privind calitatea în construcții.
+Prezentul memoriu tehnic de rezistență acoperă structura de rezistență a unui parc fotovoltaic (centrală electrică fotovoltaică — CEF). Documentul se elaborează pentru faza **DTAC** (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire), în conformitate cu Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, și fundamentează cerința fundamentală **A — Rezistență mecanică și stabilitate** din Legea 10/1995 privind calitatea în construcții.
 
 > **PRINCIPIU DE DIMENSIONARE — PARAMETRIC ÎN RAPORT CU PUTEREA.** Puterea instalată a unui parc FV este o mărime variabilă, stabilită de investitor/proiectant în funcție de amplasament (tipic **între 500 kWp și 50 MWp**). Elementul esențial al proiectării de rezistență este că **acțiunile determinante (vântul și zăpada) sunt independente de puterea totală a parcului**: ele se exercită **pe unitatea de suprafață captatoare (kN/m²)** și, prin urmare, **pe structura unitară repetitivă** — o **masă tip** și un **pilot tip**. În consecință, prezentul memoriu **dimensionează structura unitară** (masa tip + pilotul tip + fundația tip), pe baza formulelor Eurocod și a unui exemplu de calcul valabil pentru **orice putere**, iar **numărul total** de mese, piloți și posturi de transformare **scalează liniar cu puterea instalată** (v. §1.6 — Relații de scalare). Valoarea de **2.000 kWp (2 MWp)** este utilizată în text **exclusiv ca ilustrare** a numărului total de componente, nu ca ipoteză de dimensionare a suportului. Un parc de 500 kWp și unul de 50 MWp au **aceeași masă tip și același pilot tip** (pentru același amplasament, aceeași înclinare, același modul) — diferă doar numărul lor.
 
@@ -21,7 +21,7 @@ Metoda de calcul este metoda **stărilor limită** (SLU — stări limită ultim
 
 | Domeniu | Normativ / standard |
 |---|---|
-| Calitate, autorizare | Legea 10/1995, Legea 50/1991, HG 766/1997, HG 907/2016 |
+| Calitate, autorizare | Legea 10/1995, Legea nr. 169/2026 (CATUC), HG 766/1997, HG 907/2016 |
 | Bazele proiectării | SR EN 1990:2004/A1 + NA (Eurocod 0) |
 | Acțiuni — permanente/utile | SR EN 1991-1-1 + NA |
 | Acțiuni — zăpadă | SR EN 1991-1-3; **CR 1-1-3/2012** |

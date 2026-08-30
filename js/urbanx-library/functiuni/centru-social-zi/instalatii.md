@@ -1099,7 +1099,7 @@ Clădire publică nouă → obligatoriu **nZEB (nearly Zero Energy Building)**: 
 
 ---
 
-## K. PIESE DESENATE — INSTALAȚII (Legea 50/1991, Anexa 1)
+## K. PIESE DESENATE — INSTALAȚII (Legea nr. 169/2026 — CATUC, Anexa nr. 2)
 
 Conținutul minim al pieselor desenate de instalații, pe specialități:
 

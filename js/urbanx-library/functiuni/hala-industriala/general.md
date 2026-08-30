@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — HALĂ INDUSTRIALĂ / LOGISTICĂ (DTAC)
 
-> **Faza:** D.T.A.C. — Documentație tehnică pentru autorizarea executării lucrărilor de construire (Legea 50/1991, republicată, **Anexa nr. 1**, secțiunea I).
+> **Faza:** D.T.A.C. — Documentație tehnică pentru autorizarea executării lucrărilor de construire (Legea nr. 169/2026 — Codul amenajării teritoriului, urbanismului și construcțiilor, CATUC, în vigoare din 25.08.2026 —, art. 264, conținut-cadru **Anexa nr. 2**, secțiunea I).
 > **Piesă:** Memoriu tehnic general (piesă scrisă de sinteză a proiectului). Sintetizează întreaga investiție și integrează, prin trimitere, memoriile de specialitate (arhitectură — `arhitectura.md`, rezistență — `structura.md`, instalații — `instalatii.md`). Prezentul memoriu **nu reia** breviarele de calcul, detaliile constructive și dimensionările din memoriile de specialitate, ci le sintetizează și acoperă componentele generale, urbanistice, economice și de organizare care nu intră în sfera acestora.
 
 ---
@@ -12,9 +12,9 @@
 | Element | Date |
 |---|---|
 | **Denumirea obiectivului** | „Construire hală industrială/logistică cu corp administrativ, sistematizarea incintei, racorduri utilități și împrejmuire" |
-| **Faza de proiectare** | D.T.A.C. + P.O.E. (proiect pentru organizarea execuției), conform Legii 50/1991 Anexa 1 |
+| **Faza de proiectare** | D.T.A.C. + P.O.E. (proiect pentru organizarea execuției), conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2 |
 | **Beneficiar / investitor** | *(se completează — persoană juridică)*; sediu social, CUI, reprezentant legal |
-| **Calitatea asupra imobilului** | proprietar / titular al unui drept real (concesiune, superficie) — dovada dreptului conform art. 1 alin. (3) și art. 3 din Legea 50/1991 |
+| **Calitatea asupra imobilului** | proprietar / titular al unui drept real (concesiune, superficie) — dovada dreptului conform Legii nr. 169/2026 (CATUC) |
 
 ### 1.2. Amplasamentul
 
@@ -37,7 +37,7 @@
 | **Verificatori tehnici** | atestați MDLPA pe cerințele A–F (v. §12) |
 | **Elaborator scenariu securitate la incendiu** | expert/proiectant atestat IGSU |
 
-Documentația este întocmită la faza D.T.A.C. în conformitate cu conținutul-cadru din **Legea 50/1991, Anexa 1**, și cu **Legea 10/1995** privind calitatea în construcții. Prezentul memoriu general are rolul de a prezenta sintetic soluția de ansamblu, indicatorii, încadrarea urbanistică, avizele necesare și măsurile obligatorii, cu trimitere la piesele desenate și la memoriile de specialitate.
+Documentația este întocmită la faza D.T.A.C. în conformitate cu conținutul-cadru din **Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2**, și cu **Legea 10/1995** privind calitatea în construcții. Prezentul memoriu general are rolul de a prezenta sintetic soluția de ansamblu, indicatorii, încadrarea urbanistică, avizele necesare și măsurile obligatorii, cu trimitere la piesele desenate și la memoriile de specialitate.
 
 ### 1.4. Rolul și limitele memoriului general în cadrul documentației
 
@@ -49,7 +49,7 @@ Această delimitare asigură că fiecare livrabil are un scop distinct: memoriul
 
 ### 1.5. Componența documentației D.T.A.C.
 
-Conform conținutului-cadru din Legea 50/1991 (Anexa 1), documentația tehnică pentru autorizarea executării lucrărilor de construire cuprinde piese scrise și piese desenate, structurate astfel:
+Conform conținutului-cadru din Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, documentația tehnică pentru autorizarea executării lucrărilor de construire cuprinde piese scrise și piese desenate, structurate astfel:
 
 | Categorie | Conținut |
 |---|---|
@@ -61,7 +61,7 @@ Conform conținutului-cadru din Legea 50/1991 (Anexa 1), documentația tehnică 
 
 Prezentul memoriu general se corelează cu toate aceste piese și trimite la cele de specialitate pentru detaliile care nu fac obiectul sintezei generale.
 
-Autorizația de construire se emite de autoritatea administrației publice locale, pe baza documentației D.T.A.C. verificate, a certificatului de urbanism, a avizelor/acordurilor solicitate prin acesta și a dovezii dreptului asupra imobilului. Termenul de valabilitate al autorizației și termenul de începere/finalizare a lucrărilor se stabilesc conform Legii 50/1991. Începerea execuției se anunță autorității emitente și inspectoratului de stat în construcții. Orice modificare a soluției autorizate care depășește limitele admise impune obținerea unei autorizații modificatoare. Aceste aspecte procedurale, deși nu fac obiectul proiectării propriu-zise, sunt esențiale pentru derularea legală a investiției și se au în vedere la planificarea acesteia.
+Autorizația de construire se emite de autoritatea administrației publice locale, pe baza documentației D.T.A.C. verificate, a certificatului de urbanism, a avizelor/acordurilor solicitate prin acesta și a dovezii dreptului asupra imobilului. Termenul de valabilitate al autorizației și termenul de începere/finalizare a lucrărilor se stabilesc conform Legii nr. 169/2026 (CATUC). Începerea execuției se anunță autorității emitente și inspectoratului de stat în construcții. Orice modificare a soluției autorizate care depășește limitele admise impune obținerea unei autorizații modificatoare. Aceste aspecte procedurale, deși nu fac obiectul proiectării propriu-zise, sunt esențiale pentru derularea legală a investiției și se au în vedere la planificarea acesteia.
 
 ---
 
@@ -140,11 +140,11 @@ Oportunitatea se justifică prin conjuncția mai multor condiții favorabile: ex
 
 Din punct de vedere economic, terenul are, prin PUG/PUZ, destinația de zonă de unități industriale/logistice, ceea ce îl face compatibil cu investiția și îi conferă o valoare de piață corelată cu potențialul de dezvoltare permis (POT/CUT). Nu există interdicții definitive de construire; eventualele interdicții temporare (de exemplu, până la aprobarea unui PUZ) se ridică prin parcurgerea procedurii de urbanism corespunzătoare. Obligațiile fiscale (impozit pe teren și, ulterior, pe clădire) și taxele aferente autorizării (taxa de autorizare de 1% din valoarea autorizată, cotele ISC) se au în vedere în fundamentarea economică a investiției.
 
-Terenul este liber de construcții sau conține construcții ce se desființează în baza unei autorizații de desființare separate (după caz). Se respectă condițiile din **Legea 50/1991** privind dreptul de a construi.
+Terenul este liber de construcții sau conține construcții ce se desființează în baza unei autorizații de desființare separate (după caz). Se respectă condițiile din **Legea nr. 169/2026 (CATUC)** privind dreptul de a construi.
 
 Regimul juridic, economic și tehnic al terenului constituie fundamentul legal al investiției și se prezintă distinct pentru a demonstra că sunt îndeplinite toate condițiile prealabile autorizării: existența unui drept care conferă dreptul de a construi, compatibilitatea destinației terenului cu funcțiunea propusă și încadrarea în reglementările urbanistice. Aceste elemente se documentează prin extrasul de carte funciară, planul de amplasament și delimitare, certificatul de urbanism și, după caz, actele privind schimbarea categoriei de folosință.
 
-Dreptul de a executa lucrări de construire se dovedește, conform art. 1 alin. (3) din Legea 50/1991, printr-un act care atestă un drept real principal (proprietate, superficie, concesiune, folosință) sau, în cazuri limitate, un drept de creanță cu acordul proprietarului. Pentru investiția de față se prezintă extrasul de carte funciară actualizat, care confirmă intabularea dreptului și evidențiază eventualele sarcini. În situația în care asupra imobilului sunt înscrise servituți (de trecere, de vedere, de rețele edilitare) sau zone de protecție ale rețelelor magistrale ori ale drumurilor, amplasarea construcției și a rețelelor de incintă se face cu respectarea acestor culoare, aspect verificat pe planul de situație și confirmat prin avizele deținătorilor de rețele.
+Dreptul de a executa lucrări de construire se dovedește, conform Legii nr. 169/2026 (CATUC), printr-un act care atestă un drept real principal (proprietate, superficie, concesiune, folosință) sau, în cazuri limitate, un drept de creanță cu acordul proprietarului. Pentru investiția de față se prezintă extrasul de carte funciară actualizat, care confirmă intabularea dreptului și evidențiază eventualele sarcini. În situația în care asupra imobilului sunt înscrise servituți (de trecere, de vedere, de rețele edilitare) sau zone de protecție ale rețelelor magistrale ori ale drumurilor, amplasarea construcției și a rețelelor de incintă se face cu respectarea acestor culoare, aspect verificat pe planul de situație și confirmat prin avizele deținătorilor de rețele.
 
 În cazul particular al terenurilor cu categorie de folosință agricolă din intravilan sau extravilan, scoaterea definitivă din circuitul agricol se realizează în temeiul **Legii 18/1991** (fondul funciar) și a normelor metodologice aferente, prin decizia autorității competente (direcția pentru agricultură județeană), cu achitarea tarifului legal calculat în funcție de clasa de calitate a solului și de suprafață. Dovada scoaterii din circuitul agricol constituie o condiție prealabilă pentru emiterea autorizației de construire atunci când este aplicabilă și se atașează documentației.
 
@@ -154,12 +154,12 @@ Dreptul de a executa lucrări de construire se dovedește, conform art. 1 alin. 
 |---|---|
 | **Folosința actuală** | teren liber / neproductiv / agricol (după caz) |
 | **Destinația stabilită prin PUG/PUZ** | zonă unități industriale, depozitare, logistică (UTR de tip industrial) |
-| **Reglementări fiscale** | impozit pe teren/clădiri conform Codului fiscal; taxa de autorizare = 1% din valoarea autorizată (Legea 50/1991) |
+| **Reglementări fiscale** | impozit pe teren/clădiri conform Codului fiscal; taxa de autorizare = 1% din valoarea autorizată (Legea nr. 169/2026 — CATUC) |
 | **Interdicții/servituți economice** | fără interdicție definitivă de construire; se respectă condițiile PUZ (dacă e impus) |
 
 ### 3.3. Regimul tehnic (din Certificatul de Urbanism)
 
-Regimul tehnic decurge din **Certificatul de Urbanism** emis în baza documentațiilor de urbanism aprobate și a **Legii 350/2001** privind amenajarea teritoriului și urbanismul. Elementele-cheie sunt:
+Regimul tehnic decurge din **Certificatul de Urbanism** emis în baza documentațiilor de urbanism aprobate și a **Legii nr. 169/2026 (CATUC)** privind amenajarea teritoriului, urbanismul și construcțiile. Elementele-cheie sunt:
 
 | Element regim tehnic | Prevedere CU |
 |---|---|
@@ -174,7 +174,7 @@ Regimul tehnic decurge din **Certificatul de Urbanism** emis în baza documenta�
 
 Se respectă toate condițiile impuse prin CU și avizele solicitate prin acesta.
 
-Certificatul de urbanism nu conferă dreptul de a construi, ci reprezintă actul de informare prin care autoritatea aduce la cunoștință regimul juridic, economic și tehnic al imobilului, precum și lista avizelor și acordurilor necesare. Regimul tehnic astfel comunicat constituie cadrul obligatoriu în care se dezvoltă soluția: funcțiunea propusă (hală industrială/logistică) trebuie să se încadreze în funcțiunile admise ale UTR-ului, indicatorii propuși trebuie să se situeze sub plafoanele reglementate, iar retragerile și accesele trebuie să respecte prescripțiile RLU. Verificarea acestei conformități se face explicit în capitolul de încadrare urbanistică (§4), prin compararea directă a valorilor propuse cu cele reglementate. Atunci când RLU sau CU condiționează autorizarea de elaborarea și aprobarea prealabilă a unui Plan Urbanistic Zonal, acesta se întocmește separat, conform Legii 350/2001, iar prezenta documentație de autorizare se raportează la reglementările aprobate prin PUZ.
+Certificatul de urbanism nu conferă dreptul de a construi, ci reprezintă actul de informare prin care autoritatea aduce la cunoștință regimul juridic, economic și tehnic al imobilului, precum și lista avizelor și acordurilor necesare. Regimul tehnic astfel comunicat constituie cadrul obligatoriu în care se dezvoltă soluția: funcțiunea propusă (hală industrială/logistică) trebuie să se încadreze în funcțiunile admise ale UTR-ului, indicatorii propuși trebuie să se situeze sub plafoanele reglementate, iar retragerile și accesele trebuie să respecte prescripțiile RLU. Verificarea acestei conformități se face explicit în capitolul de încadrare urbanistică (§4), prin compararea directă a valorilor propuse cu cele reglementate. Atunci când RLU sau CU condiționează autorizarea de elaborarea și aprobarea prealabilă a unui Plan Urbanistic Zonal, acesta se întocmește separat, conform Legii nr. 169/2026 (CATUC), iar prezenta documentație de autorizare se raportează la reglementările aprobate prin PUZ.
 
 ---
 
@@ -182,9 +182,9 @@ Certificatul de urbanism nu conferă dreptul de a construi, ci reprezintă actul
 
 ### 4.1. Documentațiile de urbanism aplicabile
 
-Amplasamentul se află în intravilanul UAT, într-o zonă reglementată prin **PUG și RLU** (eventual detaliată prin **PUZ**) ca zonă de unități industriale/logistice. Încadrarea respectă **Legea 350/2001** și RLU aferent. Unitatea teritorială de referință (UTR) este de tip industrial, cu funcțiune dominantă de producție/depozitare.
+Amplasamentul se află în intravilanul UAT, într-o zonă reglementată prin **PUG și RLU** (eventual detaliată prin **PUZ**) ca zonă de unități industriale/logistice. Încadrarea respectă **Legea nr. 169/2026 (CATUC)** și RLU aferent. Unitatea teritorială de referință (UTR) este de tip industrial, cu funcțiune dominantă de producție/depozitare.
 
-Legea 350/2001 stabilește ierarhia documentațiilor de urbanism (PATN, PATJ, PUG, PUZ, PUD) și principiul conformării investițiilor la reglementările aprobate. Pentru amplasamentul de față, cadrul de referință este PUG-ul și RLU-ul localității, care alocă zonei funcțiunea industrială și stabilesc indicatorii maximi (POT, CUT), regimul de înălțime, retragerile și procentul minim de spații verzi. Funcțiunea propusă — hală industrială/logistică cu corp administrativ aferent — se încadrează în categoria funcțiunilor admise ale UTR-ului industrial, activitatea administrativă fiind o funcțiune complementară, subordonată funcțiunii dominante de producție/depozitare. Dacă RLU condiționează autorizarea de aprobarea unui PUZ (de exemplu, pentru parcelări mari sau pentru stabilirea detaliată a regimului de înălțime și a circulațiilor), acesta se elaborează și se aprobă în prealabil, iar documentația de autorizare se raportează la reglementările PUZ.
+Legea nr. 169/2026 (CATUC) stabilește ierarhia documentațiilor de urbanism (PATN, PATJ, PUG, PUZ, PUD) și principiul conformării investițiilor la reglementările aprobate. Pentru amplasamentul de față, cadrul de referință este PUG-ul și RLU-ul localității, care alocă zonei funcțiunea industrială și stabilesc indicatorii maximi (POT, CUT), regimul de înălțime, retragerile și procentul minim de spații verzi. Funcțiunea propusă — hală industrială/logistică cu corp administrativ aferent — se încadrează în categoria funcțiunilor admise ale UTR-ului industrial, activitatea administrativă fiind o funcțiune complementară, subordonată funcțiunii dominante de producție/depozitare. Dacă RLU condiționează autorizarea de aprobarea unui PUZ (de exemplu, pentru parcelări mari sau pentru stabilirea detaliată a regimului de înălțime și a circulațiilor), acesta se elaborează și se aprobă în prealabil, iar documentația de autorizare se raportează la reglementările PUZ.
 
 ### 4.2. Indicatori urbanistici — propus vs. reglementat
 
@@ -509,7 +509,7 @@ Lista avizelor și acordurilor necesare autorizării se stabilește prin Certifi
 
 | Aviz / acord | Emitent | Temei legal / obiect |
 |---|---|---|
-| Certificat de Urbanism | Primărie / Consiliu Județean | Legea 50/1991, Legea 350/2001 |
+| Certificat de Urbanism | Primărie / Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU (IGSU) | Legea 307/2006, HG 571/2016, P118 — obligatoriu pentru hale >600 mp/parcaje/depozite |
 | Aviz sanitar | DSP | condiții de igienă (grupuri, vestiare, apă) |
 | Acord de mediu / clasare | APM | OUG 195/2005, Legea 292/2018 (evaluare impact, după caz) |
@@ -694,7 +694,7 @@ Gestionarea proactivă a acestor riscuri, prin măsuri integrate în proiectare 
 
 ### 16.5. Precizări finale
 
-Dimensionările finale (elementele structurale, hidraulica de stingere, desfumarea, breviarul pardoselii, devizul pe cantități) se stabilesc la faza **PT + DE**, pe baza studiului geotehnic complet și a scenariului de securitate la incendiu avizat ISU. Prezentul memoriu general sintetizează investiția și se completează cu memoriile de specialitate (arhitectură, rezistență, instalații), cu piesele desenate și cu piesele economice, conform Legii 50/1991 (Anexa 1) și Legii 10/1995.
+Dimensionările finale (elementele structurale, hidraulica de stingere, desfumarea, breviarul pardoselii, devizul pe cantități) se stabilesc la faza **PT + DE**, pe baza studiului geotehnic complet și a scenariului de securitate la incendiu avizat ISU. Prezentul memoriu general sintetizează investiția și se completează cu memoriile de specialitate (arhitectură, rezistență, instalații), cu piesele desenate și cu piesele economice, conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, și Legii 10/1995.
 
 Faza D.T.A.C. stabilește soluția de principiu și permite obținerea autorizației de construire; ea nu se substituie fazei de proiect tehnic și detalii de execuție (PT+DE), în care se realizează dimensionările definitive, detaliile constructive și antemăsurătorile pe baza cărora se contractează și se execută lucrarea. Trecerea de la principiu (DTAC) la detaliu (PT+DE) se face fără modificarea concepției de ansamblu autorizate; eventualele modificări care depășesc limitele autorizației impun reautorizarea. Prin această structurare, prezentul memoriu general asigură coerența și trasabilitatea de la faza de autorizare până la execuție.
 
@@ -702,6 +702,6 @@ Faza D.T.A.C. stabilește soluția de principiu și permite obținerea autoriza�
 
 ### Cadru normativ de referință
 
-Legea 50/1991 (autorizare, Anexa 1) · Legea 10/1995 (calitate, cerințe A–F) · Legea 350/2001 (urbanism) · HG 907/2016 (documentații tehnico-economice, deviz general) · HG 766/1997 (categorii de importanță) · HG 525/1996 (RGU, parcaje) · HG 300/2006 (SSM șantiere) · Legea 319/2006 (SSM) · Legea 307/2006 + HG 571/2016 (apărare împotriva incendiilor, avizare/autorizare) · OUG 195/2005 + Legea 292/2018 (mediu) · Legea 211/2011 (deșeuri) · Legea 107/1996 (ape) · Legea 481/2004 (protecție civilă) · Legea 18/1991 (fond funciar, scoatere din circuitul agricol) · **Ordin 839/2009** (norme metodologice Legea 50/1991) · CR 0/2012, CR 1-1-3 (zăpadă), CR 1-1-4 (vânt), P100-1/2013 (seism) · SR EN 1990–1999 (Eurocoduri; EN 1993 — oțel) · NP 074/2022 (geotehnic) · NP 042/2000 (pardoseli) · P118-1/2/3 (securitate incendiu) · NP 061 (iluminat) · NP 051 (accesibilitate) · NTPA-001/002 (ape uzate) · I5/I7/I9/I13 (instalații) · STAS 6054 (adâncime îngheț) · C107/Mc 001 (termotehnică).
+Legea nr. 169/2026 — CATUC (autorizare, art. 264, Anexa nr. 2; urbanism) · Legea 10/1995 (calitate, cerințe A–F) · HG 907/2016 (documentații tehnico-economice, deviz general) · HG 766/1997 (categorii de importanță) · HG 525/1996 (RGU, parcaje) · HG 300/2006 (SSM șantiere) · Legea 319/2006 (SSM) · Legea 307/2006 + HG 571/2016 (apărare împotriva incendiilor, avizare/autorizare) · OUG 195/2005 + Legea 292/2018 (mediu) · Legea 211/2011 (deșeuri) · Legea 107/1996 (ape) · Legea 481/2004 (protecție civilă) · Legea 18/1991 (fond funciar, scoatere din circuitul agricol) · CR 0/2012, CR 1-1-3 (zăpadă), CR 1-1-4 (vânt), P100-1/2013 (seism) · SR EN 1990–1999 (Eurocoduri; EN 1993 — oțel) · NP 074/2022 (geotehnic) · NP 042/2000 (pardoseli) · P118-1/2/3 (securitate incendiu) · NP 061 (iluminat) · NP 051 (accesibilitate) · NTPA-001/002 (ape uzate) · I5/I7/I9/I13 (instalații) · STAS 6054 (adâncime îngheț) · C107/Mc 001 (termotehnică).
 
 *Notă: NP 010 (proiectare construcții pentru învățământ) NU se aplică halelor industriale; referințele corecte sunt EN 1993 + NP 042 + P118.*

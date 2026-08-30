@@ -2,7 +2,7 @@
 
 **Structură de beton armat, sistem dual (cadre + nucleu central rigidizant), planșee dală groasă (flat slab), infrastructură radier general.**
 
-> Prezentul memoriu constituie piesa scrisă de rezistență a documentației tehnice pentru autorizarea executării lucrărilor de construire (DTAC), întocmit conform Legii nr. 10/1995 privind calitatea în construcții (republicată), a HG nr. 907/2016 privind conținutul-cadru al documentațiilor tehnico-economice și a Ordinului MDRAP nr. 839/2009 (Normele metodologice de aplicare a Legii nr. 50/1991). Nivelul de detaliere corespunde fazei DTAC, cu prefigurarea soluțiilor care se dezvoltă și se verifică integral la fazele PT+DE pe model spațial cu elemente finite. Toate valorile numerice de mai jos sunt calcule de predimensionare/verificare lucrate manual pentru justificarea soluției; ele nu se substituie calculului automat de proiect tehnic.
+> Prezentul memoriu constituie piesa scrisă de rezistență a documentației tehnice pentru autorizarea executării lucrărilor de construire (DTAC), întocmit conform Legii nr. 10/1995 privind calitatea în construcții (republicată), a HG nr. 907/2016 privind conținutul-cadru al documentațiilor tehnico-economice și a Legii nr. 169/2026 (CATUC), art. 264, conținut-cadru Anexa nr. 2. Nivelul de detaliere corespunde fazei DTAC, cu prefigurarea soluțiilor care se dezvoltă și se verifică integral la fazele PT+DE pe model spațial cu elemente finite. Toate valorile numerice de mai jos sunt calcule de predimensionare/verificare lucrate manual pentru justificarea soluției; ele nu se substituie calculului automat de proiect tehnic.
 
 ---
 

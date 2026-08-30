@@ -478,7 +478,7 @@ Se solicită certificatul de urbanism și avizele/acordurile prevăzute în aces
 
 ### 6.0A. Necesitatea Planului Urbanistic Zonal (PUZ)
 
-Conform **Legii nr. 350/2001, art. 32**, elaborarea și aprobarea unui Plan Urbanistic Zonal este necesară atunci când PUG-ul în vigoare nu prevede funcțiunea de „producere a energiei" pe teren, când se solicită introducerea în intravilan a terenului sau când sunt necesare modificări ale reglementărilor urbanistice existente — situație care se aplică marii majorități a parcurilor fotovoltaice pe teren extravilan agricol. PUZ-ul, elaborat conform **Ord. MDRAP nr. 233/2016** (conținut-cadru: memoriu general + regulament local aferent, piese desenate la scările 1:25.000/1:5.000/1:2.000), precede sau se derulează concomitent cu prezentul S.F. și stabilește definitiv indicatorii tehnici de amplasare.
+Conform **Legii nr. 169/2026 (CATUC)**, elaborarea și aprobarea unui Plan Urbanistic Zonal este necesară atunci când PUG-ul în vigoare nu prevede funcțiunea de „producere a energiei" pe teren, când se solicită introducerea în intravilan a terenului sau când sunt necesare modificări ale reglementărilor urbanistice existente — situație care se aplică marii majorități a parcurilor fotovoltaice pe teren extravilan agricol. PUZ-ul — conținut-cadru: memoriu general + regulament local aferent, piese desenate la scările 1:25.000/1:5.000/1:2.000 — precede sau se derulează concomitent cu prezentul S.F. și stabilește definitiv indicatorii tehnici de amplasare.
 
 ### 6.0B. Scoaterea din circuitul agricol
 

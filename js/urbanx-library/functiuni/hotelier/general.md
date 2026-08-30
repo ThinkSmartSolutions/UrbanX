@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — UNITATE HOTELIERĂ 4 STELE, REGIM S+P+6E (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 republicată, Anexa nr. 1, și Ordinului MDRT nr. 839/2009 (Norme metodologice). Prezentul memoriu general tratează o unitate hotelieră de 4 stele, cu regim de înălțime S+P+6E, ~100 de camere, funcțiuni publice (recepție, restaurant, săli de conferință, SPA/wellness) și parcaj subteran. Memoriul se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținut-cadru Anexa nr. 2. Prezentul memoriu general tratează o unitate hotelieră de 4 stele, cu regim de înălțime S+P+6E, ~100 de camere, funcțiuni publice (recepție, restaurant, săli de conferință, SPA/wellness) și parcaj subteran. Memoriul se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
 
 ---
 
@@ -26,7 +26,7 @@ Datele de identificare cadastrală (număr cadastral, carte funciară), numele e
 
 ### 1.2. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, din:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (coordonator + specialități);
@@ -60,7 +60,7 @@ Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv,
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate | Legea 50/1991 (+ Ord. 839/2009), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
+| Autorizare / calitate | Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
 | Turism / clasificare | **Ordinul ANT nr. 65/2013** (Norme metodologice privind clasificarea structurilor de primire turistice), **HG nr. 1267/2010** (procedura de eliberare a certificatelor de clasificare, licențelor și brevetelor de turism), OG 58/1998 (activitatea de turism) |
 | Structură / seism | P100-1/2013, CR 0/2012, CR 1-1-3/2012, CR 1-1-4/2012, CR 2-1-1.1/2013, CR 6/2013, SR EN 1990–1999 (Eurocoduri), SR EN 1992 (beton), NP 074/2014, NP 112/2014 |
 | Securitate la incendiu | P118-1/2013, P118-2/2013, P118-3/2015, NP 086/2005, Legea 307/2006, HG 571/2016, Ord. MAI 129/2016, SR EN 12845, SR EN 54-16/24 |
@@ -72,7 +72,7 @@ Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv,
 | SSM | Legea 319/2006, HG 300/2006 |
 | Urmărire în timp | P130/1999 |
 
-Cadrul normativ al unei unități hoteliere se distinge de cel al unei clădiri de birouri sau de locuit prin prezența unui palier suplimentar de reglementare — cel al legislației turistice (Ordinul ANT nr. 65/2013 și HG nr. 1267/2010) — care nu condiționează autorizarea construirii (Autorizația de Construire se emite conform Legii 50/1991, indiferent de categoria de clasificare vizată), dar condiționează punerea în exploatare comercială sub denumirea de „hotel 4 stele”: fără certificatul de clasificare, unitatea nu poate funcționa legal ca structură de primire turistică de o anumită categorie. Prezentul proiect este conceput de la faza DTAC astfel încât soluțiile tehnice (suprafețe minime de cameră, dotări, accesibilitate, climatizare, insonorizare) să satisfacă integral criteriile categoriei 4 stele, evitând riscul de neconformare la verificarea post-execuție.
+Cadrul normativ al unei unități hoteliere se distinge de cel al unei clădiri de birouri sau de locuit prin prezența unui palier suplimentar de reglementare — cel al legislației turistice (Ordinul ANT nr. 65/2013 și HG nr. 1267/2010) — care nu condiționează autorizarea construirii (Autorizația de Construire se emite conform Legii nr. 169/2026 (CATUC), art. 264, indiferent de categoria de clasificare vizată), dar condiționează punerea în exploatare comercială sub denumirea de „hotel 4 stele”: fără certificatul de clasificare, unitatea nu poate funcționa legal ca structură de primire turistică de o anumită categorie. Prezentul proiect este conceput de la faza DTAC astfel încât soluțiile tehnice (suprafețe minime de cameră, dotări, accesibilitate, climatizare, insonorizare) să satisfacă integral criteriile categoriei 4 stele, evitând riscul de neconformare la verificarea post-execuție.
 
 ### 1.4. Categoria de importanță (HG 766/1997)
 
@@ -172,7 +172,7 @@ Regimul tehnic din Certificatul de Urbanism reprezintă cadrul obligatoriu de pr
 - **POT propus = Ac / S_teren = 2.300 / 4.200 = 54,8%** ≤ 60% reglementat.
 - **CUT propus = Acd / S_teren = 12.020 / 4.200 = 2,86** ≤ 3,00 reglementat.
 
-Aria construită desfășurată de 12.020 mp (subsol 2.100 + parter 2.300 + etaj 1: 1.900 + etajele 2-6: 5 × 1.144 = 5.720) include, în verificarea de mai sus, și suprafața desfășurată subterană (parcaj + spații tehnice + spălătorie + depozite, ~2.100 mp), deși aceasta nu ar fi obligatoriu de introdus în calculul CUT conform Legii nr. 350/2001 art. 32 și RGU, dat fiind că nu depășește conturul construcției supraterane și are destinație tehnică/parcare/depozitare. Abordarea este deliberat conservatoare (acoperitoare): chiar și incluzând integral subsolul, CUT rezultat (2,86) rămâne sub maximul de 3,00 reglementat — dacă s-ar exclude subsolul, conform interpretării permisive a legii, CUT calculat exclusiv pe Acd suprateran (9.920 mp) ar fi și mai favorabil (2,36).
+Aria construită desfășurată de 12.020 mp (subsol 2.100 + parter 2.300 + etaj 1: 1.900 + etajele 2-6: 5 × 1.144 = 5.720) include, în verificarea de mai sus, și suprafața desfășurată subterană (parcaj + spații tehnice + spălătorie + depozite, ~2.100 mp), deși aceasta nu ar fi obligatoriu de introdus în calculul CUT conform Legii nr. 169/2026 (CATUC) și RGU, dat fiind că nu depășește conturul construcției supraterane și are destinație tehnică/parcare/depozitare. Abordarea este deliberat conservatoare (acoperitoare): chiar și incluzând integral subsolul, CUT rezultat (2,86) rămâne sub maximul de 3,00 reglementat — dacă s-ar exclude subsolul, conform interpretării permisive a legii, CUT calculat exclusiv pe Acd suprateran (9.920 mp) ar fi și mai favorabil (2,36).
 
 ### 4.3. Configurația podium + turn și justificarea retragerilor
 
@@ -408,7 +408,7 @@ Cablare structurată, Wi-Fi de mare densitate (cerință a categoriei 4 stele), 
 
 Clasificarea structurilor de primire turistică cu funcțiuni de cazare este reglementată, la nivel procedural, de **HG nr. 1267/2010** privind eliberarea certificatelor de clasificare, a licențelor și brevetelor de turism, care stabilește cadrul instituțional (autoritatea competentă, comisiile de evaluare, procedura de solicitare, valabilitatea și obligativitatea afișării certificatului la recepție, precum și sancțiunile pentru funcționarea fără clasificare sau cu o categorie neconformă), și, la nivel tehnic, de **Ordinul ANT nr. 65/2013** pentru aprobarea Normelor metodologice privind clasificarea structurilor de primire turistice, care detaliază criteriile tehnice de dotare, echipare și servicii pe fiecare tip de structură (hotel, apart-hotel, motel, hostel, pensiune, vilă turistică etc.) și pe fiecare categorie (o stea/o floare — cinci stele/cinci flori).
 
-Este esențial de reținut, pentru coerența întregii documentații DTAC, că certificatul de clasificare **nu condiționează emiterea Autorizației de Construire** — aceasta se emite conform Legii nr. 50/1991, indiferent de categoria turistică vizată — ci condiționează exclusiv **exploatarea comercială** a unității sub denumirea și categoria declarate. Certificatul se solicită și se obține **după recepția lucrărilor**, pe baza constatării in-situ, de către comisia de evaluare, a conformării construcției finalizate și dotate cu criteriile tehnice ale categoriei vizate. Riscul practic al oricărei investiții hoteliere este acela de a finaliza execuția fără a fi integrat de la faza de proiectare toate criteriile categoriei-țintă, situație care conduce fie la o reclasificare la o categorie inferioară celei preconizate (cu impact comercial direct asupra tarifelor practicabile), fie la lucrări corective costisitoare post-execuție. Din acest motiv, prezentul proiect integrează încă din faza DTAC toate criteriile tehnice ale categoriei de 4 stele, verificate punctual la cap. 8.3.
+Este esențial de reținut, pentru coerența întregii documentații DTAC, că certificatul de clasificare **nu condiționează emiterea Autorizației de Construire** — aceasta se emite conform Legii nr. 169/2026 (CATUC), art. 264, indiferent de categoria turistică vizată — ci condiționează exclusiv **exploatarea comercială** a unității sub denumirea și categoria declarate. Certificatul se solicită și se obține **după recepția lucrărilor**, pe baza constatării in-situ, de către comisia de evaluare, a conformării construcției finalizate și dotate cu criteriile tehnice ale categoriei vizate. Riscul practic al oricărei investiții hoteliere este acela de a finaliza execuția fără a fi integrat de la faza de proiectare toate criteriile categoriei-țintă, situație care conduce fie la o reclasificare la o categorie inferioară celei preconizate (cu impact comercial direct asupra tarifelor practicabile), fie la lucrări corective costisitoare post-execuție. Din acest motiv, prezentul proiect integrează încă din faza DTAC toate criteriile tehnice ale categoriei de 4 stele, verificate punctual la cap. 8.3.
 
 ### 8.2. Tipurile de structuri de primire turistică (Ordinul ANT nr. 65/2013)
 
@@ -631,10 +631,10 @@ Fluxul tehnologic urmărește logica firească a realizării unui ansamblu podiu
 
 | Aviz / Acord | Emitent | Temei legal |
 |---|---|---|
-| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea 50/1991, avize CU |
+| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea nr. 169/2026 (CATUC), avize CU |
 | Aviz de racordare energie electrică (ATR) | operator distribuție energie | Legea 123/2012, Ord. ANRE |
 | Aviz gaze naturale (dacă e cazul) | operator distribuție gaze | Legea 123/2012 |
-| Aviz telecomunicații | operator telecom | Legea 50/1991 |
+| Aviz telecomunicații | operator telecom | Legea nr. 169/2026 (CATUC) |
 | Aviz de securitate la incendiu | IGSU / ISU județean | HG 571/2016, Legea 307/2006 |
 | Aviz de sănătate publică | DSP | OMS 119/2014, Legea 95/2006 |
 | Aviz sanitar-veterinar (bucătărie, dacă solicitat) | DSVSA | legislație sanitar-veterinară |
@@ -751,7 +751,7 @@ Eșalonarea se optimizează prin suprapunerea parțială a activităților care 
 
 ## 19. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995 (CERINȚELE A-F)
 
-Unitatea hotelieră de 4 stele, regim S+P+6E, ~100 de camere, cu restaurant, săli de conferință și SPA/wellness, răspunde integral cadrului legal (Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016) și se încadrează urbanistic (POT 54,8% ≤ 60%, CUT 2,86 ≤ 3,00, H atic 23,80 m ≤ 25,00 m, spații verzi 21,5% ≥ 20%, parcare 116 locuri ≥ 112 necesare), conform verificării detaliate la cap. 4.
+Unitatea hotelieră de 4 stele, regim S+P+6E, ~100 de camere, cu restaurant, săli de conferință și SPA/wellness, răspunde integral cadrului legal (Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016) și se încadrează urbanistic (POT 54,8% ≤ 60%, CUT 2,86 ≤ 3,00, H atic 23,80 m ≤ 25,00 m, spații verzi 21,5% ≥ 20%, parcare 116 locuri ≥ 112 necesare), conform verificării detaliate la cap. 4.
 
 Soluția propusă echilibrează cerințele funcționale (separarea fluxurilor oaspete/personal, program de camere dimensionat pe criteriile de clasificare, funcțiuni publice generatoare de venit), tehnice (structură dual/cu pereți predominanți care rezolvă transferul de încărcări generat de configurația podium+turn, anvelopă și instalații performante, securitate la incendiu dimensionată la profilul de risc specific cazării), urbanistice (conformare la regimul tehnic, integrare în vecinătăți, însorire) și comerciale (conformitatea integrală cu grila categoriei de 4 stele, cap. 8). Partiul podium+turn asigură funcțiuni publice flexibile la parter și camere eficiente și repetitive pe etajele de cazare; structura dual cu elemente de transfer dimensionate la suprarezistență oferă rezistență, rigiditate și evitarea mecanismului de nivel flexibil la acțiuni seismice; anvelopa performantă și instalațiile cu recuperare de căldură și surse regenerabile conduc la clasa energetică A și la costuri de exploatare reduse — esențiale pentru o clădire cu funcționare continuă.
 

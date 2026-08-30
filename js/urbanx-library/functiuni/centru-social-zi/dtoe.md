@@ -1,14 +1,14 @@
 # MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI LUCRĂRILOR (D.T.O.E.)
 
-*Întocmit conform Legii nr. 50/1991 (Anexa 1, secțiunea D.T.O.E.), HG 300/2006, Legii 319/2006, Legii 307/2006 + C300, Legii 211/2011, Legii 10/1995.*
+*Întocmit conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2 (secțiunea D.T.O.E.), HG 300/2006, Legii 319/2006, Legii 307/2006 + C300, Legii 211/2011, Legii 10/1995.*
 
 ## 1. Date generale și obiectul DTOE
 
 ### 1.1. Obiectul documentației
 
-Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E. — Documentația Tehnică pentru Organizarea Execuției lucrărilor) este întocmit în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, Anexa nr. 1 — „Conținutul-cadru al documentației tehnice — D.T. pentru autorizarea executării lucrărilor de construcții", secțiunea D.T.O.E. Documentația reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului de investiții „Centru social de zi pentru persoane vârstnice", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
+Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E. — Documentația Tehnică pentru Organizarea Execuției lucrărilor) este întocmit în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, Anexa nr. 2 — „Conținutul-cadru al documentației tehnice pentru autorizarea executării lucrărilor de construcții", secțiunea D.T.O.E. Documentația reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului de investiții „Centru social de zi pentru persoane vârstnice", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
 
-Organizarea de șantier propusă se realizează integral în incinta proprietății beneficiarului (fără ocupare temporară de domeniu public), motiv pentru care nu este necesară o autorizație de construire distinctă pentru organizarea de execuție, aceasta fiind cuprinsă în autorizația de construire a obiectivului de bază, conform art. 3 alin. (1) lit. a) din Legea nr. 50/1991 coroborat cu prevederile Normelor metodologice de aplicare (Ordinul MDRL nr. 839/2009, cu modificările ulterioare).
+Organizarea de șantier propusă se realizează integral în incinta proprietății beneficiarului (fără ocupare temporară de domeniu public), motiv pentru care nu este necesară o autorizație de construire distinctă pentru organizarea de execuție, aceasta fiind cuprinsă în autorizația de construire a obiectivului de bază, conform Legii nr. 169/2026 (CATUC), art. 264.
 
 Documentația se corelează obligatoriu cu:
 - Planul de Securitate și Sănătate întocmit conform Hotărârii Guvernului nr. 300/2006 privind cerințele minime de securitate și sănătate pentru șantierele temporare sau mobile;
@@ -75,11 +75,11 @@ Etapele E4–E7 se suprapun parțial (execuție pe fluxuri paralele între parte
 
 | Document | Emitent / bază legală | Rol în începerea execuției |
 |---|---|---|
-| Autorizație de construire | Autoritatea administrației publice locale — Legea 50/1991 | Actul care permite execuția |
+| Autorizație de construire | Autoritatea administrației publice locale — Legea nr. 169/2026 (CATUC), art. 264 | Actul care permite execuția |
 | Program de urmărire a calității (P.C.C.Q.) vizat ISC | Proiectant + verificator, viza ISC — Legea 10/1995 | Stabilește fazele determinante |
 | Declarația prealabilă ITM | Beneficiar — H.G. 300/2006 art. 47 | Notificarea deschiderii șantierului |
 | Ordinul de începere a lucrărilor | Beneficiar/diriginte de șantier | Consemnat în cartea tehnică |
-| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea 50/1991 art. 7 | Obligatorie cu 5 zile înainte |
+| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea nr. 169/2026 (CATUC) | Obligatorie cu 5 zile înainte |
 | Contracte cu operatori autorizați deșeuri | Antreprenor — Legea 211/2011 | Condiție pentru evacuarea deșeurilor |
 | Autorizațiile ISCIR mijloace de ridicare | Deținător utilaj | Condiție pentru utilizarea macaralei |
 
@@ -91,7 +91,7 @@ Organizarea de șantier (O.S.) se amplasează integral în incinta terenului ben
 
 Perimetrul șantierului se împrejmuiește pe toată durata execuției cu panouri metalice de gard mobil (tip Heras), înălțime minimă 2,00 m, montate pe suporți din beton prefabricat, cu prindere între panouri prin cleme. Pe latura dinspre stradă și dinspre vecinătățile locuite, panourile se dublează cu plasă/prelabă opacă antipraf pentru limitarea împrăștierii prafului și pentru delimitarea vizuală a zonei periculoase. La accese se prevăd porți metalice culisante/batante de 4,00–6,00 m lățime pentru accesul auto și o portiță de 1,00 m pentru accesul pietonal al personalului.
 
-Pe împrejmuire se montează, conform H.G. nr. 971/2006: panou de identificare a șantierului (Legea nr. 50/1991, art. 7 alin. (8)); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare „Obligatoriu casca de protecție", „Obligatoriu încălțăminte de protecție", „Atenție, utilaje în lucru"; panouri cu numărul de telefon de urgență (112) și date de contact ale coordonatorului SSM.
+Pe împrejmuire se montează, conform H.G. nr. 971/2006: panou de identificare a șantierului (Legea nr. 169/2026 — CATUC); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare „Obligatoriu casca de protecție", „Obligatoriu încălțăminte de protecție", „Atenție, utilaje în lucru"; panouri cu numărul de telefon de urgență (112) și date de contact ale coordonatorului SSM.
 
 ### 2.2. Accesele în șantier
 
@@ -372,4 +372,4 @@ Conform H.G. nr. 971/2006: la accese — indicatoare de interdicție și de obli
 
 Regulament de ordine interioară afișat la intrare; pontajul personalului și al vizitatorilor cu instructaj la acces; program de lucru declarat, cu respectarea orelor de liniște; responsabilizarea subantreprenorilor prin planurile proprii SSM/PSI coordonate de coordonatorul SSM; verificarea periodică a împrejmuirii, semnalizării, dotărilor PSI și a instalațiilor provizorii, consemnată în registrele de șantier.
 
-*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 50/1991, Anexa 1.*
+*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2.*

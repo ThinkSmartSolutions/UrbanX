@@ -1,13 +1,13 @@
 # MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI LUCRĂRILOR (D.T.O.E.)
 ## Imobil de locuințe colective S+P+8E — ~40 apartamente, parcaje sol + subsol
 
-*Întocmit conform Legii nr. 50/1991 (Anexa 1, secțiunea D.T.O.E.), HG nr. 300/2006, Legii nr. 319/2006, Legii nr. 307/2006 + Normativul C300, Legii nr. 211/2011, Legii nr. 10/1995. Documentul detaliază, la nivelul cerut de faza D.T.A.C., sinteza organizării execuției prezentată în `general.md` (cap. 13) — fără a o dubla — și se corelează cu piesele de rezistență (`structura.md`), arhitectură (`arhitectura.md`) și instalații (`instalatii.md`).*
+*Întocmit conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2 (secțiunea D.T.O.E.), HG nr. 300/2006, Legii nr. 319/2006, Legii nr. 307/2006 + Normativul C300, Legii nr. 211/2011, Legii nr. 10/1995. Documentul detaliază, la nivelul cerut de faza D.T.A.C., sinteza organizării execuției prezentată în `general.md` (cap. 13) — fără a o dubla — și se corelează cu piesele de rezistență (`structura.md`), arhitectură (`arhitectura.md`) și instalații (`instalatii.md`).*
 
 ## 1. Date generale și obiectul DTOE
 
 ### 1.1. Obiectul documentației
 
-Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E.) este întocmit în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, cu modificările și completările ulterioare, Anexa nr. 1 — „Conținutul-cadru al documentației tehnice — D.T. pentru autorizarea executării lucrărilor de construcții", secțiunea D.T.O.E. Documentația reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului de investiții „Imobil de locuințe colective S+P+8E", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
+Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E.) este întocmit în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, Anexa nr. 2 — conținutul-cadru al documentației tehnice pentru autorizarea executării lucrărilor de construcții, secțiunea D.T.O.E. Documentația reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului de investiții „Imobil de locuințe colective S+P+8E", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
 
 Spre deosebire de o clădire de mici dimensiuni, execuția unui bloc de nouă niveluri supraterane cu subsol (regim S+P+8E, arie desfășurată totală ~5.200 mp) implică o organizare de șantier de amploare, cu lucrări de excavație adâncă sub nivelul hidrostatic, un ciclu tehnologic repetitiv pe nouă niveluri, un mijloc de ridicare fix de mare capacitate (macara turn) și o durată de execuție semnificativ mai lungă decât la o clădire scundă. Prezentul D.T.O.E. dimensionează organizarea de șantier și succesiunea lucrărilor la această scară reală.
 
@@ -98,11 +98,11 @@ Vârful de efectiv se atinge în etapa de structură (cca. **42 de persoane**, l
 
 | Document | Emitent / bază legală | Rol în începerea execuției |
 |---|---|---|
-| Autorizație de construire | Autoritatea administrației publice locale — Legea 50/1991 | Actul care permite execuția |
+| Autorizație de construire | Autoritatea administrației publice locale — Legea nr. 169/2026 (CATUC), art. 264 | Actul care permite execuția |
 | Program de urmărire a calității (P.C.C.Q.) vizat ISC | Proiectant + verificator, viza ISC — Legea 10/1995 | Stabilește fazele determinante (natura terenului, armarea radierului, armarea pe fiecare planșeu) |
 | Declarația prealabilă ITM | Beneficiar — H.G. 300/2006 art. 47 | Notificarea deschiderii șantierului |
 | Ordinul de începere a lucrărilor | Beneficiar/diriginte de șantier | Consemnat în cartea tehnică |
-| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea 50/1991 art. 7 | Obligatorie cu 5 zile înainte |
+| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea nr. 169/2026 (CATUC) | Obligatorie cu 5 zile înainte |
 | Contracte cu operatori autorizați deșeuri | Antreprenor — Legea 211/2011 | Condiție pentru evacuarea deșeurilor |
 | Autorizația ISCIR a macaralei turn | Deținător utilaj / firmă montatoare | Condiție pentru montarea și punerea în funcțiune a macaralei |
 | Proiectul tehnologic de execuție a infrastructurii (sprijiniri, epuisment) | Proiectant execuție/geotehnician | Condiție pentru începerea excavației sub nivelul hidrostatic |
@@ -116,7 +116,7 @@ Organizarea de șantier (O.S.) se amplasează, în cea mai mare parte, în incin
 
 Perimetrul șantierului se împrejmuiește pe toată durata execuției cu panouri metalice de gard mobil (tip Heras), înălțime minimă 2,00 m, montate pe suporți din beton prefabricat, cu prindere între panouri prin cleme. Pe latura dinspre stradă și dinspre vecinătățile locuite, panourile se dublează cu plasă/prelată opacă antipraf, pentru limitarea împrăștierii prafului (relevantă mai ales pe durata excavației și a turnărilor repetate de beton) și pentru delimitarea vizuală a zonei periculoase (raza de acțiune a macaralei turn). La accese se prevăd porți metalice culisante/batante de 5,00–6,00 m lățime pentru accesul auto (dimensionate pentru autobetoniere și trailer-ul macaralei la montaj) și o portiță de 1,00 m pentru accesul pietonal al personalului.
 
-Pe împrejmuire se montează, conform H.G. nr. 971/2006: panoul de identificare a șantierului (Legea nr. 50/1991, art. 7 alin. (8)); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare „Obligatoriu casca de protecție", „Obligatoriu încălțăminte de protecție", „Atenție, macara în funcțiune — pericol de cădere a sarcinii"; panouri cu numărul de telefon de urgență (112) și datele de contact ale coordonatorului SSM. Pe latura dinspre macaraua turn se marchează suplimentar limita razei de acțiune maxime, vizibilă atât din interior, cât și — dacă survolează parțial limita de proprietate în regim controlat — din exterior.
+Pe împrejmuire se montează, conform H.G. nr. 971/2006: panoul de identificare a șantierului (Legea nr. 169/2026 — CATUC); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare „Obligatoriu casca de protecție", „Obligatoriu încălțăminte de protecție", „Atenție, macara în funcțiune — pericol de cădere a sarcinii"; panouri cu numărul de telefon de urgență (112) și datele de contact ale coordonatorului SSM. Pe latura dinspre macaraua turn se marchează suplimentar limita razei de acțiune maxime, vizibilă atât din interior, cât și — dacă survolează parțial limita de proprietate în regim controlat — din exterior.
 
 ### 2.2. Accesele în șantier
 
@@ -434,4 +434,4 @@ Regulament de ordine interioară afișat la intrare; pontajul personalului și a
 
 ---
 
-*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu proiectul tehnologic de execuție a infrastructurii (sprijiniri, epuisment), cu fișa tehnică și proiectul de montaj al macaralei turn, cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 50/1991, Anexa 1. La finalizarea lucrărilor, recepția la terminarea lucrărilor și constituirea cărții tehnice se tratează conform `carte-tehnica.md`, la care prezentul memoriu trimite fără a-l dubla.*
+*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu proiectul tehnologic de execuție a infrastructurii (sprijiniri, epuisment), cu fișa tehnică și proiectul de montaj al macaralei turn, cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2. La finalizarea lucrărilor, recepția la terminarea lucrărilor și constituirea cărții tehnice se tratează conform `carte-tehnica.md`, la care prezentul memoriu trimite fără a-l dubla.*

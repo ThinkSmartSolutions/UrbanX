@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — SPITAL PRIVAT / CLINICĂ MULTIFUNCȚIONALĂ (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, Anexa nr. 1, și Ordinului MDRT nr. 839/2009 pentru aprobarea Normelor metodologice de aplicare a Legii nr. 50/1991. Prezentul memoriu general se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic și cu piesele desenate, fără a le dubla conținutul. Investiția analizată este un **spital privat / clinică multifuncțională**, cu spitalizare continuă, ambulatoriu integrat, bloc operator, terapie intensivă, imagistică medicală și laborator de analize, regim de înălțime **S+P+4E**.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), conținut-cadru Anexa nr. 2 la lege. Prezentul memoriu general se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic și cu piesele desenate, fără a le dubla conținutul. Investiția analizată este un **spital privat / clinică multifuncțională**, cu spitalizare continuă, ambulatoriu integrat, bloc operator, terapie intensivă, imagistică medicală și laborator de analize, regim de înălțime **S+P+4E**.
 
 ---
 
@@ -31,7 +31,7 @@ Spre deosebire de o clădire civilă obișnuită, unitatea sanitară cu paturi a
 
 ### 1.2. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, din:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (coordonator + specialități, inclusiv consultant de echipamente medicale, dacă e cazul);
@@ -65,7 +65,7 @@ Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv,
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate în construcții | Legea 50/1991 (+ Ord. 839/2009), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
+| Autorizare / calitate în construcții | Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
 | Sănătate publică / spitale | **Legea 95/2006** (privind reforma în domeniul sănătății), **NP 015-1997** (normativ privind proiectarea spitalelor), **Ordinul MS 914/2006** (norme privind autorizarea sanitară + circuite septic/aseptic), **OMS 1096/2016** (norme de supraveghere, prevenire și limitare a infecțiilor asociate asistenței medicale — IAAM), **Ordinul MS 1030/2009** (proceduri de reglementare sanitară a proiectelor de investiții), **OMS 119/2014** (norme de igienă și sănătate publică privind mediul de viață) |
 | Calitatea serviciilor medicale / acreditare | **Legea 185/2017** privind asigurarea calității în sistemul de sănătate (înființarea ANMCS), standardele de acreditare ANMCS |
 | Radiații ionizante (CT) | **Legea 111/1996** republicată (activități nucleare), **Normele de securitate radiologică NSR-06** (CNCAN), autorizarea CNCAN a practicilor cu surse de radiații ionizante |
@@ -196,7 +196,7 @@ Regimul tehnic din Certificatul de Urbanism reprezintă cadrul obligatoriu de pr
 - **CUT propus (suprateran) = Sd_suprateran / S_teren = 8.900 / 5.500 = 1,62**, unde Sd_suprateran = parter (2.200) + etajul 1 (2.200) + etajele 2–4 (3 × 1.500 = 4.500) = 8.900 mp.
 - **CUT propus (lectură conservatoare, incl. subsol) = Acd_total / S_teren = 11.100 / 5.500 = 2,02**, sub plafonul superior de 2,4 al intervalului de referință.
 
-Conform Legii nr. 350/2001 art. 32 și practicii RLU, suprafața desfășurată subterană cu destinație tehnică și de parcare nu se include, de regulă, în calculul CUT dacă nu depășește conturul construcției supraterane. Subsolul propus (2.200 mp) are exact amprenta corpului de bază suprateran (parter + etajul 1, tot 2.200 mp fiecare) și nu o depășește, astfel încât CUT-ul de referință pentru avizare este cel calculat pe suprafața suprateran (1,62); valoarea de 2,02, care include convențional și subsolul, este prezentată ca lectură conservatoare/de rezervă, pentru situația în care autoritatea locală solicită o verificare care include integral suprafața desfășurată. Ambele valori se situează confortabil sub plafoanele reglementate de referință.
+Conform Legii nr. 169/2026 (CATUC) și practicii RLU, suprafața desfășurată subterană cu destinație tehnică și de parcare nu se include, de regulă, în calculul CUT dacă nu depășește conturul construcției supraterane. Subsolul propus (2.200 mp) are exact amprenta corpului de bază suprateran (parter + etajul 1, tot 2.200 mp fiecare) și nu o depășește, astfel încât CUT-ul de referință pentru avizare este cel calculat pe suprafața suprateran (1,62); valoarea de 2,02, care include convențional și subsolul, este prezentată ca lectură conservatoare/de rezervă, pentru situația în care autoritatea locală solicită o verificare care include integral suprafața desfășurată. Ambele valori se situează confortabil sub plafoanele reglementate de referință.
 
 ### 4.3. Însorire și retrageri — cerință amplificată la funcțiunea de sănătate
 
@@ -568,10 +568,10 @@ Fluxul tehnologic urmărește logica firească a realizării unei construcții m
 
 | Aviz / Acord | Emitent | Temei legal |
 |---|---|---|
-| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea 50/1991, avize CU |
+| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea nr. 169/2026 (CATUC), avize CU |
 | Aviz de racordare energie electrică (ATR) | operator distribuție energie | Legea 123/2012, Ord. ANRE |
 | Aviz gaze naturale (dacă e cazul) | operator distribuție gaze | Legea 123/2012 |
-| Aviz telecomunicații | operator telecom | Legea 50/1991 |
+| Aviz telecomunicații | operator telecom | Legea nr. 169/2026 (CATUC) |
 | Aviz de securitate la incendiu | IGSU / ISU județean | HG 571/2016, Legea 307/2006 |
 | **Aviz de reglementare sanitară a proiectului** | **Direcția de Sănătate Publică (DSP)** | **Ordinul MS 1030/2009** |
 | **Aviz de conformitate/autorizare (unitate cu paturi)** | **Ministerul Sănătății** | **Legea 95/2006, Ordinul MS 914/2006** |
@@ -729,7 +729,7 @@ Menținerea acreditării ANMCS pe durata exploatării presupune un program conti
 
 ## 18. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995 (CERINȚELE A–F)
 
-Spitalul privat / clinica multifuncțională, regim S+P+4E, cu 90 de paturi (80 spitalizare + 10 ATI), bloc operator cu 4 săli, imagistică (CT + RMN) și laborator de analize, răspunde integral cadrului legal general de construcții (Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016) și cadrului normativ specific sănătății (Legea 95/2006, NP 015-1997, Ordinul MS 914/2006, OMS 1096/2016, OMS 119/2014), și se încadrează urbanistic cu marjă confortabilă (POT 40,0% ≤ 50–60% de referință, CUT suprateran 1,62 ≤ 2,0–2,4 de referință, spații verzi 25% ≥ 20–30% de referință, parcare ~50 locuri asigurate ≥ necesarul calculat).
+Spitalul privat / clinica multifuncțională, regim S+P+4E, cu 90 de paturi (80 spitalizare + 10 ATI), bloc operator cu 4 săli, imagistică (CT + RMN) și laborator de analize, răspunde integral cadrului legal general de construcții (Legea nr. 169/2026 — CATUC, Legea 10/1995, HG 907/2016) și cadrului normativ specific sănătății (Legea 95/2006, NP 015-1997, Ordinul MS 914/2006, OMS 1096/2016, OMS 119/2014), și se încadrează urbanistic cu marjă confortabilă (POT 40,0% ≤ 50–60% de referință, CUT suprateran 1,62 ≤ 2,0–2,4 de referință, spații verzi 25% ≥ 20–30% de referință, parcare ~50 locuri asigurate ≥ necesarul calculat).
 
 Soluția propusă echilibrează cerințele funcționale specifice unei unități sanitare (separarea rigidă a circuitelor septic/aseptic, concentrarea funcțiunilor critice pe un singur nivel pentru minimizarea timpului de transfer al pacientului), cerințele tehnice amplificate (structură dimensionată pentru clasa de importanță și expunere seismică I — γI,e = 1,4, justificată prin necesitatea funcționării neîntrerupte post-seism a funcțiunilor vitale; grad de rezistență la foc I, cu evacuare orizontală pe compartimente pentru pacienți imobilizați; redundanță completă a utilităților vitale), cerințele urbanistice (conformare la regimul tehnic, integrare în vecinătăți, însorire a saloanelor) și cerințele de calitate și siguranță a actului medical (compatibilitate cu standardele de acreditare ANMCS, cap. 17). Configurația volumetrică „podium + turn de îngrijire" (corp de bază 2.200 mp la subsol/parter/etajul 1 + corp de spitalizare retras la 1.500 mp/etaj pe etajele 2–4) materializează coerent zonarea funcțională pe verticală, de la fluxul intens și tehnic (bază) la îngrijirea continuă, liniștită și însorită (turn).
 

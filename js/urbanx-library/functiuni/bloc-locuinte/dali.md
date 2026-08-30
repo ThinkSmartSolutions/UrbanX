@@ -298,11 +298,11 @@ Se recomandă, **condiționat de rezultatul verificării pragului de clădire î
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
 | Hotărârea Adunării Generale a Asociației de Proprietari | Asociația de proprietari | Legea nr. 230/2007 (acord minim 2/3 din proprietari pentru lucrări majore) |
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu (dacă e cazul, la mansardare) | ISU | P118-1/2013 |
 | Verificare proiect cerințe A1, C | Verificatori atestați | Legea nr. 10/1995 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Aprobare finanțare Program Național | UAT / Ministerul Dezvoltării | OUG nr. 18/2009 |
 
 ### 12.2. Concluzii

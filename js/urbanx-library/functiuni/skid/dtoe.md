@@ -33,8 +33,7 @@ DTOE reglementează, pe toată durata execuției stației:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare | Cap. 1, 3 |
-| **Ordin MDRAP 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | AC; organizarea de execuție ca lucrare, conținut-cadru DTOE/POE | Cap. 1, 3; structura documentației |
 | **ISCIR PT C7** | Prescripție tehnică recipiente GPL | Cap. 2 — montaj și punere în funcțiune |
 | **HG 300/2006** | SSM pe șantiere temporare/mobile | Cap. 3 |
 | **HG 245/2016, HG 1058/2006** | ATEX | Cap. 3 — execuție în zone potențial explozive |

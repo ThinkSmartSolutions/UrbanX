@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — CLĂDIRE DE BIROURI CLASA A (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 republicată, Anexa nr. 1, și Ordinului MDRT nr. 839/2009 (Norme metodologice). Prezentul memoriu general se corelează cu memoriile de specialitate, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, conținut-cadru Anexa nr. 2. Prezentul memoriu general se corelează cu memoriile de specialitate, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
 
 ---
 
@@ -25,7 +25,7 @@ Datele de identificare cadastrală (număr cadastral, carte funciară), numele e
 
 ### 1.2. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), Anexa nr. 2, din:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (coordonator + specialități);
@@ -58,7 +58,7 @@ Proiectarea se realizează cu respectarea următorului cadru normativ (selectiv,
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate | Legea 50/1991 (+ Ord. 839/2009), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
+| Autorizare / calitate | Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 925/1995, HG 766/1997, HG 273/1994 |
 | Structură / seism | P100-1/2013, CR 0/2012, CR 1-1-3/2012, CR 1-1-4/2012, CR 2-1-1.1/2013, CR 6/2013, SR EN 1990–1999 (Eurocoduri), SR EN 1992 (beton), NP 074/2014, NP 112/2014 |
 | Securitate la incendiu | P118-1/2013, P118-2/2013, P118-3/2015, NP 086/2005, Legea 307/2006, HG 571/2016, Ord. MAI 129/2016 |
 | Termic / energie | C107, Legea 372/2005 + Mc001, SR EN 16798-1 |
@@ -165,7 +165,7 @@ Regimul tehnic din Certificatul de Urbanism reprezintă cadrul obligatoriu de pr
 - **POT propus = Sc / S_teren = 900 / 2.500 = 36,0%** ≤ 50% reglementat.
 - **CUT propus = Sd_suprateran / S_teren = 7.250 / 2.500 = 2,90** ≤ 3,60 reglementat.
 
-Suprafața desfășurată subterană (parcaj + tehnic) nu intră, de regulă, în calculul CUT conform Legii nr. 350/2001 art. 32 și RGU, dacă nu depășește conturul construcției supraterane și are destinație tehnică/parcare. Se respectă această condiție.
+Suprafața desfășurată subterană (parcaj + tehnic) nu intră, de regulă, în calculul CUT conform Legii nr. 169/2026 (CATUC) și RGU, dacă nu depășește conturul construcției supraterane și are destinație tehnică/parcare. Se respectă această condiție.
 
 ### 4.3. Însorire și retrageri
 
@@ -567,10 +567,10 @@ Fluxul tehnologic urmărește logica firească a realizării unei clădiri multi
 
 | Aviz / Acord | Emitent | Temei legal |
 |---|---|---|
-| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea 50/1991, avize CU |
+| Aviz alimentare cu apă și canalizare | operator apă-canal | Legea nr. 169/2026 (CATUC), avize CU |
 | Aviz de racordare energie electrică (ATR) | operator distribuție energie | Legea 123/2012, Ord. ANRE |
 | Aviz gaze naturale (dacă e cazul) | operator distribuție gaze | Legea 123/2012 |
-| Aviz telecomunicații | operator telecom | Legea 50/1991 |
+| Aviz telecomunicații | operator telecom | Legea nr. 169/2026 (CATUC) |
 | Aviz de securitate la incendiu | IGSU / ISU județean | HG 571/2016, Legea 307/2006 |
 | Aviz de sănătate publică | DSP | OMS 119/2014, Legea 95/2006 |
 | Acord de mediu / clasare | APM | Legea 292/2018, OUG 195/2005 |
@@ -708,7 +708,7 @@ Strategia ESG a clădirii vizează: reducerea consumurilor operaționale și a a
 
 ## 18. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995 (CERINȚELE A–F)
 
-Imobilul de birouri clasa A regim S+P+6E răspunde integral cadrului legal (Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016) și se încadrează urbanistic (POT 36% ≤ 50%, CUT 2,90 ≤ 3,60, spații verzi 22% ≥ 20%, parcare 108 ≥ 105).
+Imobilul de birouri clasa A regim S+P+6E răspunde integral cadrului legal (Legea nr. 169/2026 — CATUC, Legea 10/1995, HG 907/2016) și se încadrează urbanistic (POT 36% ≤ 50%, CUT 2,90 ≤ 3,60, spații verzi 22% ≥ 20%, parcare 108 ≥ 105).
 
 Soluția propusă echilibrează cerințele funcționale (flexibilitate, eficiența spațiului, confort clasa A), tehnice (structură dual robustă, anvelopă și instalații performante, securitate la incendiu), urbanistice (conformare la regimul tehnic, integrare în vecinătăți, însorire) și de sustenabilitate (nZEB, certificare, ESG). Partiul compact cu nucleu central asigură plăci de birou libere, evacuare pe două direcții și trasee scurte de instalații; structura dual (cadre + nucleu de b.a.) oferă rezistență, rigiditate și ductilitate la acțiuni seismice și de vânt; anvelopa performantă și instalațiile cu recuperare de căldură și surse regenerabile conduc la clasa energetică A și la costuri de exploatare reduse.
 

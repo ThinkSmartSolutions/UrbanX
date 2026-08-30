@@ -106,10 +106,10 @@ Se recomandă **Varianta 2 — Dezvoltare completă**, conformă planului de eta
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism (dacă modificări de amprentă) | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism (dacă modificări de amprentă) | Primărie | Legea nr. 169/2026 (CATUC) |
 | Actualizare ATR/avize ANRE | Operator de rețea/ANRE | Reglementări ANRE |
 | Aviz securitate la incendiu (actualizat) | ISU | HG nr. 571/2016 |
-| Autorizație de construire (dacă necesară pentru modificări) | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire (dacă necesară pentru modificări) | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — BLOC DE LOCUINȚE COLECTIVE S+P+8E (D.T.A.C.)
 
-*Piesă scrisă principală a Documentației Tehnice pentru Autorizarea executării lucrărilor de Construire (D.T.A.C.), întocmită de proiectantul de specialitate arhitectură, în calitate de coordonator al colectivului de proiectare, în conformitate cu Legea nr. 50/1991 (republicată) — Anexa nr. 1, Legea nr. 10/1995 privind calitatea în construcții, Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, Legea nr. 114/1996 a locuinței (cu Anexa nr. 1 — exigențe minimale), HG nr. 907/2016 privind conținutul-cadru al documentațiilor tehnico-economice, HG nr. 525/1996 (Regulamentul General de Urbanism) și NP 057/2002 (proiectarea clădirilor de locuințe).*
+*Piesă scrisă principală a Documentației Tehnice pentru Autorizarea executării lucrărilor de Construire (D.T.A.C.), întocmită de proiectantul de specialitate arhitectură, în calitate de coordonator al colectivului de proiectare, în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, conținut-cadru Anexa nr. 2, Legea nr. 10/1995 privind calitatea în construcții, Legea nr. 114/1996 a locuinței (cu Anexa nr. 1 — exigențe minimale), HG nr. 907/2016 privind conținutul-cadru al documentațiilor tehnico-economice, HG nr. 525/1996 (Regulamentul General de Urbanism) și NP 057/2002 (proiectarea clădirilor de locuințe).*
 
 > **Precizare de rang și de scop.** Prezentul document este **memoriul general** al obiectivului — piesa care descrie unitar investiția, o încadrează urbanistic și juridic, sintetizează soluțiile pe toate specialitățile și demonstrează conformitatea cu cerințele fundamentale. El **nu dublează** memoriile tehnice pe specialități (arhitectură, rezistență, instalații), ci le corelează și trimite la ele pentru detaliul de calcul și de alcătuire. Nivelul de analiză este cel al **ansamblului construit pe parcela dată** (studiu de rang inferior — punctual, pe lot), distinct de studiile teritoriale (PUZ/PUG, strategii de dezvoltare) care privesc zona sau UAT-ul.
 
@@ -30,7 +30,7 @@
 
 ### 1.2 Componența documentației D.T.A.C.
 
-Documentația de față se structurează conform **Legii nr. 50/1991, Anexa nr. 1**, în piese scrise și piese desenate, întocmite pe specialități și semnate de proiectanții cu drept de semnătură:
+Documentația de față se structurează conform **Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2**, în piese scrise și piese desenate, întocmite pe specialități și semnate de proiectanții cu drept de semnătură:
 
 **A. Piese scrise:**
 
@@ -67,13 +67,13 @@ Distincția de rang este, de asemenea, esențială. Prezentul obiectiv se situea
 
 ### 2.1 Necesitatea și oportunitatea investiției
 
-Investiția răspunde cererii de locuințe urbane într-o zonă echipată edilitar din intravilan, prin **densificare controlată** — soluție care valorifică infrastructura existentă (rețele de apă, canalizare, energie electrică, gaze naturale, telecomunicații, drum public) și evită extinderea intravilanului pe terenuri agricole periurbane. Regimul S+P+8E permite un raport favorabil între numărul de unități locative livrate și amprenta la sol ocupată, cu eliberarea unei suprafețe însemnate pentru spații verzi și parcaje, în acord cu principiile de dezvoltare urbană durabilă (Legea nr. 350/2001) și cu Regulamentul General de Urbanism (HG nr. 525/1996).
+Investiția răspunde cererii de locuințe urbane într-o zonă echipată edilitar din intravilan, prin **densificare controlată** — soluție care valorifică infrastructura existentă (rețele de apă, canalizare, energie electrică, gaze naturale, telecomunicații, drum public) și evită extinderea intravilanului pe terenuri agricole periurbane. Regimul S+P+8E permite un raport favorabil între numărul de unități locative livrate și amprenta la sol ocupată, cu eliberarea unei suprafețe însemnate pentru spații verzi și parcaje, în acord cu principiile de dezvoltare urbană durabilă (Legea nr. 169/2026 — CATUC) și cu Regulamentul General de Urbanism (HG nr. 525/1996).
 
 Oportunitatea decurge din: (a) existența unui teren cu regim juridic clar, liber de sarcini incompatibile, cu acces direct la drum public; (b) încadrarea amplasamentului într-o Unitate Teritorială de Referință (UTR) destinată **locuirii colective de densitate medie-mare**, care admite regimul de înălțime propus; (c) proximitatea dotărilor de interes public (transport, comerț, învățământ, sănătate), care asigură calitatea locuirii; (d) compatibilitatea cu vecinătățile predominant rezidențiale.
 
 Alegerea regimului de înălțime S+P+8E — și nu a unui regim mai scund — este o decizie de temă justificată economic și urbanistic. La un teren dat, regimul mai înalt permite livrarea unui număr mai mare de unități locative pe aceeași amprentă, ceea ce (i) reduce costul terenului repartizat pe apartament, (ii) eliberează o cotă mai mare din parcelă pentru spații verzi, parcaje și amenajări (POT scade la ~21,7 % față de un plafon de 40 %), și (iii) valorifică capacitatea de portanță a infrastructurii edilitare existente. În același timp, regimul se menține **sub pragul de clădire înaltă** (28 m), evitând saltul de cost și de complexitate normativă pe care l-ar impune încadrarea la clădire înaltă (P118-1) — un optim între densitate și cost de conformare.
 
-Investiția produce, indirect, și efecte urbane pozitive: aduce locuitori într-o zonă echipată (susținând comerțul și serviciile de proximitate), completează un front construit, și contribuie la oferta de locuințe într-o piață tensionată. Toate aceste efecte se realizează fără consum de teren agricol și fără extinderea rețelelor edilitare pe distanțe mari — expresie concretă a principiului densificării controlate a intravilanului, promovat de Legea 350/2001 și de politicile de dezvoltare urbană durabilă.
+Investiția produce, indirect, și efecte urbane pozitive: aduce locuitori într-o zonă echipată (susținând comerțul și serviciile de proximitate), completează un front construit, și contribuie la oferta de locuințe într-o piață tensionată. Toate aceste efecte se realizează fără consum de teren agricol și fără extinderea rețelelor edilitare pe distanțe mari — expresie concretă a principiului densificării controlate a intravilanului, promovat de Legea nr. 169/2026 (CATUC) și de politicile de dezvoltare urbană durabilă.
 
 ### 2.2 Tema de proiectare
 
@@ -93,9 +93,9 @@ Tema stabilește, așadar, atât obiective **cantitative** (numărul și structu
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / conținut documentație | Legea 50/1991 (rep.) + Anexa 1; HG 907/2016 |
-| Calitate în construcții | Legea 10/1995 (rep.); HG 766/1997 (Anexele 3 și 6) |
-| Urbanism | Legea 350/2001; HG 525/1996 (RGU); PUG/RLU local |
+| Autorizare / conținut documentație | Legea nr. 169/2026 (CATUC), art. 264, Anexa 2; HG 907/2016 |
+| Calitate în construcții | Legea 10/1995 (parțial abrogată de Legea 169/2026/CATUC — art. 1-9, 11-40, 42-44; restul rămân în vigoare); HG 766/1997 (Anexele 3 și 6) |
+| Urbanism | Legea nr. 169/2026 (CATUC); HG 525/1996 (RGU); PUG/RLU local |
 | Locuință | Legea 114/1996 + Anexa 1; NP 057/2002 |
 | Igienă / însorire | OMS 119/2014; RGU |
 | Accesibilitate PMR | NP 051/2012; Legea 448/2006 |
@@ -106,7 +106,7 @@ Tema stabilește, așadar, atât obiective **cantitative** (numărul și structu
 | Acustică | C125/2013 |
 | Protecție civilă (ALA) | HG 862/2016; Legea 481/2004; normele tehnice de aplicare |
 
-Acest cadru normativ nu este o listă de referințe formale, ci **sistemul de reguli** pe care soluția trebuie să le satisfacă simultan, pe toate specialitățile. Actele se ierarhizează: legile (50/1991, 10/1995, 350/2001, 114/1996, 372/2005) stabilesc principiile și obligațiile; hotărârile de guvern (907/2016, 525/1996, 766/1997, 862/2016) detaliază proceduri și conținuturi-cadru; normativele și normele tehnice (P100, P118, C107, C125, NP 057, I9/I13/I5/I7 etc.) fixează cerințele cantitative de proiectare. Proiectantul general are răspunderea de a asigura că toate aceste niveluri sunt respectate coerent și că eventualele actualizări ale reglementărilor (frecvente în domeniul construcțiilor) sunt integrate la data proiectării. Trimiterile din prezentul memoriu la actele-cheie (Legea 50/1991, Legea 10/1995, Legea 350/2001, HG 907/2016, HG 525/1996, NP 057/2002) marchează reperele obligatorii ale documentației DTAC pentru această funcțiune.
+Acest cadru normativ nu este o listă de referințe formale, ci **sistemul de reguli** pe care soluția trebuie să le satisfacă simultan, pe toate specialitățile. Actele se ierarhizează: legile (Legea nr. 169/2026 — CATUC, 10/1995, 114/1996, 372/2005) stabilesc principiile și obligațiile; hotărârile de guvern (907/2016, 525/1996, 766/1997, 862/2016) detaliază proceduri și conținuturi-cadru; normativele și normele tehnice (P100, P118, C107, C125, NP 057, I9/I13/I5/I7 etc.) fixează cerințele cantitative de proiectare. Proiectantul general are răspunderea de a asigura că toate aceste niveluri sunt respectate coerent și că eventualele actualizări ale reglementărilor (frecvente în domeniul construcțiilor) sunt integrate la data proiectării. Trimiterile din prezentul memoriu la actele-cheie (Legea nr. 169/2026 — CATUC, Legea 10/1995, HG 907/2016, HG 525/1996, NP 057/2002) marchează reperele obligatorii ale documentației DTAC pentru această funcțiune.
 
 ---
 
@@ -126,7 +126,7 @@ Verificarea regimului juridic este primul filtru al admisibilității investiți
 
 - **Folosința actuală:** teren liber (sau cu construcții ce se desființează în baza autorizației de desființare, după caz);
 - **Destinația stabilită prin PUG/RLU:** **zonă de locuințe colective** (UTR de locuire colectivă);
-- **Reglementări fiscale:** zona de impozitare și taxele locale conform hotărârilor consiliului local; taxa de autorizare (0,5% din valoarea de investiție pentru locuințe, conform Legii 50/1991) se regularizează la recepție.
+- **Reglementări fiscale:** zona de impozitare și taxele locale conform hotărârilor consiliului local; taxa de autorizare (0,5% din valoarea de investiție pentru locuințe, conform Legii nr. 169/2026 — CATUC) se regularizează la recepție.
 
 Regimul economic are relevanță atât pentru fundamentarea investiției (valoarea terenului și potențialul edificabil determină rentabilitatea proiectului), cât și pentru obligațiile fiscale asociate autorizării și exploatării. Taxa de autorizare se calculează inițial pe valoarea declarată a investiției și se **regularizează la recepția lucrărilor**, pe baza valorii reale rezultate din devizul final — de aceea evaluarea corectă a devizului general (cap. 14) are și o miză fiscală. Destinația de locuire colectivă stabilită prin PUG/RLU condiționează, la rândul ei, funcțiunea admisă (nu se poate edifica o funcțiune interzisă în UTR) și indicatorii aplicabili. Odată edificat și recepționat, imobilul intră în regimul de impozitare a clădirilor rezidențiale, iar apartamentele se individualizează cadastral pentru înscriere în Cartea Funciară și pentru tranzacționare.
 
@@ -525,7 +525,7 @@ Avizele și acordurile se obțin conform solicitărilor din Certificatul de Urba
 
 | Nr. | Aviz / acord | Emitent | Temei legal |
 |---|---|---|---|
-| 1 | Certificat de Urbanism | Primărie / Consiliul Județean | Legea 50/1991, Legea 350/2001 |
+| 1 | Certificat de Urbanism | Primărie / Consiliul Județean | Legea nr. 169/2026 (CATUC) |
 | 2 | Aviz securitate la incendiu | Inspectoratul pentru Situații de Urgență (ISU) | Legea 307/2006; HG 571/2016; P118 |
 | 3 | Aviz/autorizație protecție civilă (ALA) | ISU — protecție civilă | Legea 481/2004; HG 862/2016 |
 | 4 | Acord/decizie de mediu | Agenția pentru Protecția Mediului (APM) | Legea 292/2018; OUG 195/2005 |
@@ -558,7 +558,7 @@ Verificarea tehnică se materializează în **referate de verificare** semnate d
 
 Deși organizarea de execuție se dezvoltă complet la faza de execuție (proiect de organizare de șantier), memoriul general prezintă principiile care condiționează amplasarea și logistica, întrucât ele au implicații urbanistice (ocupare temporară a domeniului public, accese, împrejmuire) și de siguranță (vecinătăți, excavații). Organizarea execuției se detaliază în planul de organizare (piesă desenată) și în planul propriu SSM al executantului; sinteza principiilor:
 
-- **Împrejmuirea șantierului** pe tot perimetrul, cu panou de identificare a investiției (Legea 50/1991) și accese controlate;
+- **Împrejmuirea șantierului** pe tot perimetrul, cu panou de identificare a investiției (Legea nr. 169/2026 — CATUC) și accese controlate;
 - **Excavația subsolului** cu sprijiniri (taluzare/palplanșe/piloți secanți în funcție de vecinătăți și de nivelul hidrostatic) și **epuizment** provizoriu al apei subterane; monitorizarea deplasărilor la vecini;
 - **Fluxul de materiale și utilaje**: platformă de acces betonată, zonă de depozitare, macara turn cu zonă de acțiune delimitată (fără survol al domeniului public/vecinilor fără măsuri), betonare cu autopompă;
 - **Faze determinante** de control al calității (Legea 10/1995, ISC): natura terenului de fundare, cofrajul/armarea radierului, armarea pereților structurali pe niveluri, planșee — cu participarea proiectantului, dirigintelui de șantier și, unde e cazul, ISC;
@@ -618,7 +618,7 @@ Concluziile memoriului general sintetizează demonstrația desfășurată în ca
 
 ### 16.1 Sinteza conformității
 
-Imobilul de locuințe colective **S+P+8E, ~40 apartamente**, cu parcaje la sol și subsol, boxe, adăpost ALA, lift și accesibilitate PMR integrală, este proiectat în conformitate cu întregul cadru normativ aplicabil (Legea 50/1991 Anexa 1, Legea 10/1995, Legea 350/2001, HG 907/2016, HG 525/1996, NP 057/2002, Legea 114/1996 Anexa 1, OMS 119/2014, P100-1/2013, P118-1/2/3, C107, C125, HG 862/2016). Soluția:
+Imobilul de locuințe colective **S+P+8E, ~40 apartamente**, cu parcaje la sol și subsol, boxe, adăpost ALA, lift și accesibilitate PMR integrală, este proiectat în conformitate cu întregul cadru normativ aplicabil (Legea nr. 169/2026 — CATUC, art. 264, Anexa 2, Legea 10/1995, HG 907/2016, HG 525/1996, NP 057/2002, Legea 114/1996 Anexa 1, OMS 119/2014, P100-1/2013, P118-1/2/3, C107, C125, HG 862/2016). Soluția:
 
 - **se încadrează în indicatorii urbanistici** reglementați (POT ~21,7 % < 40 %; CUT ~1,95 < 2,5; regim S+P+8E; H ~26,50 m < 28 m; retrageri și spații verzi conforme);
 - **respectă exigențele minimale de locuit** (Legea 114 Anexa 1, NP 057), cu suprafețe utile depășind minimele cu 12–20 %;
@@ -645,7 +645,7 @@ Conformitatea afirmată în tabelul de la 16.2 nu se sprijină pe declarații, c
 
 ### 16.4 Precizare finală
 
-Prezentul memoriu general se citește **coroborat** cu piesele desenate, cu memoriile de specialitate (`arhitectura.md`, `structura.md`, `instalatii.md`), cu studiile și breviarele-suport (geotehnic, însorire, termotehnic, acustic, scenariu de securitate la incendiu, proiect ALA), cu avizele și cu referatele de verificare tehnică. Ansamblul acestor piese constituie **documentația D.T.A.C. completă**, în baza căreia autoritatea competentă poate emite **autorizația de construire**, conform Legii nr. 50/1991. Detaliile de execuție și breviarele complete de calcul se dezvoltă la faza **Proiect Tehnic (P.Th.) + Detalii de Execuție (DE)**, iar comportarea în timp și cartea tehnică se tratează conform `carte-tehnica.md`.
+Prezentul memoriu general se citește **coroborat** cu piesele desenate, cu memoriile de specialitate (`arhitectura.md`, `structura.md`, `instalatii.md`), cu studiile și breviarele-suport (geotehnic, însorire, termotehnic, acustic, scenariu de securitate la incendiu, proiect ALA), cu avizele și cu referatele de verificare tehnică. Ansamblul acestor piese constituie **documentația D.T.A.C. completă**, în baza căreia autoritatea competentă poate emite **autorizația de construire**, conform Legii nr. 169/2026 (CATUC), art. 264. Detaliile de execuție și breviarele complete de calcul se dezvoltă la faza **Proiect Tehnic (P.Th.) + Detalii de Execuție (DE)**, iar comportarea în timp și cartea tehnică se tratează conform `carte-tehnica.md`.
 
 Se subliniază, în încheiere, caracterul **estimativ și de ipoteză** al valorilor numerice concrete folosite pe parcursul memoriului (suprafață teren, indicatori exacți, vecinătăți, parametri geotehnici, valori de deviz): ele au rol ilustrativ și metodologic, arătând cum se structurează și se demonstrează soluția, și se **înlocuiesc la depunere** cu datele reale ale amplasamentului (extras CF actualizat, Certificat de Urbanism, ridicare topografică, studiu geotehnic pe amplasament, oferte de preț). Metoda de verificare și de demonstrare a conformității rămâne însă identică. Astfel constituit, obiectivul „Imobil de locuințe colective S+P+8E, ~40 apartamente" răspunde temei de proiectare, se încadrează în reglementările urbanistice, satisface cele șase cerințe fundamentale de calitate și este apt de autorizare — o investiție necesară, oportună și fezabilă, care contribuie la dezvoltarea urbană durabilă a localității.
 

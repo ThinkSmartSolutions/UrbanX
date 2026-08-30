@@ -60,7 +60,7 @@ Aceste valori se regăsesc, reluate și verificate, la fiecare capitol de calcul
 
 **Cadrul legal general al lucrărilor la drumuri publice:**
 - **Legea 10/1995** (r) privind calitatea în construcții
-- **Legea 50/1991** (r) privind autorizarea executării lucrărilor de construcții
+- **Legea nr. 169/2026** (CATUC), art. 264 — autorizarea executării lucrărilor de construire
 - **OG 43/1997** (r) privind regimul drumurilor
 - **OUG 195/2002** (r) privind circulația pe drumurile publice, cu regulamentul de aplicare
 

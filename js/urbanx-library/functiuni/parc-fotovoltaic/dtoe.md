@@ -47,8 +47,7 @@ DTOE reglementează, pe toată durata execuției parcului FV:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare (Anexa 2); panou identificare; refacerea terenului | Cap. 1, 3, 13 |
-| **Ordin MDRT 839/2009** | Norme metodologice — conținut DTOE/POE, taxa organizare, refacerea la finalizare | Structura documentației |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | AC; conținutul-cadru DTOE/POE (organizarea de execuție ca lucrare); panou identificare; refacerea terenului la finalizare | Cap. 1, 3, 13; structura documentației |
 | **Legea 10/1995** (rep.) | Cele 7 cerințe fundamentale; sistemul calității; jurnal de șantier | Cap. 6, 8, corelare carte tehnică |
 | **Legea 123/2012** energiei electrice + **regulamente ANRE** | Racordarea la rețea (ATR/aviz de racordare), autorizare de înființare CEF, licențiere | Cap. 6.7, 6.8 (racord/PIF) |
 | **Ordin ANRE 59/2013 (rep.)** — regulament racordare | ATR, contract de racordare, faze de racordare, PIF-uri parțiale | Cap. 6.7, 7 |
@@ -439,7 +438,7 @@ Alimentarea utilajelor pe zonă impermeabilizată/cuvă de retenție; kit de int
 
 ## 13. Semnalizarea șantierului și panoul de identificare a investiției
 
-### 13.1 Panoul de identificare a investiției (obligatoriu — Legea 50/1991)
+### 13.1 Panoul de identificare a investiției (obligatoriu — Legea nr. 169/2026, CATUC, art. 264)
 
 Panou amplasat la accesul principal, cu: denumirea investiției (parc FV, putere), beneficiar, proiectant, executant, RTE, dirigintele de șantier, nr. și data AC, autoritatea emitentă, termen de execuție. Menținut lizibil pe toată durata.
 
@@ -454,7 +453,7 @@ Semnalizare de securitate (avertizare/interdicție/obligație), balizarea șanț
 | Notificare/aviz | Către | Temei | Moment |
 |---|---|---|---|
 | **Declarație prealabilă** | ITM | HG 300/2006 | Înainte de începerea lucrărilor (afișată pe șantier) |
-| **Comunicare începere lucrări** | ISC + emitent AC | Legea 50/1991, Legea 10/1995 | Înainte de începere |
+| **Comunicare începere lucrări** | ISC + emitent AC | Legea nr. 169/2026 (CATUC), Legea 10/1995 | Înainte de începere |
 | **Notificare / aviz** | ISU | Legea 307/2006 | Organizare / hot-work, după caz |
 | **Coordonare racordare / manevre** | OD | Ordin ANRE 59/2013 | La F8-F10-F12 |
 | **Autorizație de înființare / licență** | ANRE | Legea 123/2012 | După praguri de putere, la PIF |
@@ -479,7 +478,7 @@ Semnalizare de securitate (avertizare/interdicție/obligație), balizarea șanț
 
 ## 16. Dezafectarea organizării și refacerea amplasamentului
 
-La finalizare: demontarea împrejmuirii provizorii, evacuarea containerelor, utilajelor și deșeurilor, dezafectarea utilităților provizorii, **refacerea solului** (nivelare, așternerea solului vegetal stocat, **însămânțare cu iarbă/specii adaptate** — practică curentă la parcurile FV, care păstrează funcția de sol și reduc praful/eroziunea sub module), refacerea drumurilor publice afectate. Se întocmește **proces-verbal de refacere a amplasamentului** (cerință Ordin MDRT 839/2009).
+La finalizare: demontarea împrejmuirii provizorii, evacuarea containerelor, utilajelor și deșeurilor, dezafectarea utilităților provizorii, **refacerea solului** (nivelare, așternerea solului vegetal stocat, **însămânțare cu iarbă/specii adaptate** — practică curentă la parcurile FV, care păstrează funcția de sol și reduc praful/eroziunea sub module), refacerea drumurilor publice afectate. Se întocmește **proces-verbal de refacere a amplasamentului**, cerință a conținutului-cadru DTOE (Legea nr. 169/2026 — CATUC, Anexa nr. 2).
 
 ---
 

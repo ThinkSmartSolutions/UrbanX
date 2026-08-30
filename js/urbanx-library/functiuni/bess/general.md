@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — BESS (SISTEM DE STOCARE A ENERGIEI ÎN BATERII), 25 MW / 50 MWh (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 republicată, Anexa nr. 1, pentru un sistem de stocare a energiei electrice în baterii (Battery Energy Storage System — BESS), cu putere instalată **25 MW** și capacitate energetică **50 MWh**, realizat în soluție containerizată, montat la sol, adiacent unui parc fotovoltaic existent sau proiectat, cu racord la Sistemul Energetic Național (SEN). Memoriul se corelează cu memoriile de specialitate (structură, instalații electrice de curenți tari, automatizări/SCADA), cu scenariul/raportul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică, cu raportul de testare la propagarea fenomenului de „thermal runaway” (UL 9540A) și cu piesele desenate, fără a le dubla conținutul. Datele numerice prezentate au caracter de referință pentru configurația 25 MW/50 MWh tratată; ele se ajustează, la nevoie, la parametrii exacți ai echipamentului contractat și ai amplasamentului real, fără a modifica principiile de proiectare și structura documentației.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținut-cadru Anexa nr. 2, pentru un sistem de stocare a energiei electrice în baterii (Battery Energy Storage System — BESS), cu putere instalată **25 MW** și capacitate energetică **50 MWh**, realizat în soluție containerizată, montat la sol, adiacent unui parc fotovoltaic existent sau proiectat, cu racord la Sistemul Energetic Național (SEN). Memoriul se corelează cu memoriile de specialitate (structură, instalații electrice de curenți tari, automatizări/SCADA), cu scenariul/raportul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică, cu raportul de testare la propagarea fenomenului de „thermal runaway” (UL 9540A) și cu piesele desenate, fără a le dubla conținutul. Datele numerice prezentate au caracter de referință pentru configurația 25 MW/50 MWh tratată; ele se ajustează, la nevoie, la parametrii exacți ai echipamentului contractat și ai amplasamentului real, fără a modifica principiile de proiectare și structura documentației.
 
 ---
 
@@ -29,7 +29,7 @@ Datele de identificare cadastrală (număr cadastral, carte funciară), denumire
 
 ### 1.2. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), Anexa nr. 2, din:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (coordonator + specialități: structură, electric MT/JT, automatizări, PSI);
@@ -64,9 +64,9 @@ Proiectarea și autorizarea instalației se realizează cu respectarea următoru
 
 | Domeniu | Acte normative principale | Ce reglementează |
 |---|---|---|
-| Autorizare construcții | **Legea nr. 50/1991** republicată, cu normele metodologice de aplicare | Procedura de autorizare a executării lucrărilor de construcții; conținutul documentației DTAC (Anexa 1) |
+| Autorizare construcții | **Legea nr. 169/2026** (CATUC), art. 264 | Procedura de autorizare a executării lucrărilor de construcții; conținutul documentației DTAC (Anexa nr. 2) |
 | Calitatea în construcții | **Legea nr. 10/1995** republicată | Cele șase cerințe fundamentale (A-F), obligațiile participanților, verificarea și expertizarea tehnică |
-| Urbanism și amenajarea teritoriului | **Legea nr. 350/2001** | Documentațiile de urbanism (PUG, PUZ, PUD), regulamentele locale de urbanism, procedura de aprobare |
+| Urbanism și amenajarea teritoriului | **Legea nr. 169/2026** (CATUC) | Documentațiile de urbanism (PUG, PUZ, PUD), regulamentele locale de urbanism, procedura de aprobare |
 | Devize și indicatori tehnico-economici | **HG nr. 907/2016** | Structura devizului general, conținutul-cadru al documentațiilor tehnico-economice pe faze |
 | Categorii de importanță | **HG nr. 766/1997** | Metodologia de stabilire a categoriei de importanță a construcțiilor (categoriile A-D) |
 | Regimul de calitate în amplasarea construcțiilor | **HG nr. 273/1994** | Recepția lucrărilor de construcții |
@@ -80,7 +80,7 @@ Proiectarea și autorizarea instalației se realizează cu respectarea următoru
 | Securitate și sănătate în muncă | **Legea nr. 319/2006**, **HG nr. 300/2006** | Cerințe SSM la execuție și exploatare, în special pentru manipularea echipamentelor electrice de medie tensiune și a bateriilor |
 | Urmărirea comportării în timp | **P130/1999** | Programul de urmărire a comportării structurilor pe durata exploatării |
 
-Cadrul normativ românesc aplicabil unei instalații BESS se distinge structural de cel al unei clădiri civile obișnuite prin dubla sa natură: pe de o parte, ansamblul rămâne o „construcție” în sensul Legii nr. 50/1991 (platforme, fundații, eventual cabină tehnică), supusă integral regimului de autorizare, cerințelor fundamentale ale Legii nr. 10/1995 și metodologiei de încadrare pe categorii de importanță a HG nr. 766/1997; pe de altă parte, este o instalație tehnologică din sectorul energetic, supusă Legii energiei electrice, Codului Rețelei și reglementărilor ANRE, care condiționează nu autorizarea construirii, ci punerea sub tensiune și funcționarea comercială (analog modului în care, la o unitate hotelieră, certificatul de clasificare turistică nu condiționează Autorizația de Construire, ci exploatarea comercială). Proiectul de față este structurat astfel încât ambele paliere de reglementare — construcții și energie — să fie satisfăcute integral și corelat, fără ca vreunul să fie tratat ca secundar.
+Cadrul normativ românesc aplicabil unei instalații BESS se distinge structural de cel al unei clădiri civile obișnuite prin dubla sa natură: pe de o parte, ansamblul rămâne o „construcție” în sensul Legii nr. 169/2026 (CATUC) (platforme, fundații, eventual cabină tehnică), supusă integral regimului de autorizare, cerințelor fundamentale ale Legii nr. 10/1995 și metodologiei de încadrare pe categorii de importanță a HG nr. 766/1997 (rămasă în vigoare ca act de sine stătător, alături de clasa de consecințe CC1-CC4 introdusă separat de CATUC — Anexa nr. 6, calculată automat de platformă din datele reale ale proiectului); pe de altă parte, este o instalație tehnologică din sectorul energetic, supusă Legii energiei electrice, Codului Rețelei și reglementărilor ANRE, care condiționează nu autorizarea construirii, ci punerea sub tensiune și funcționarea comercială (analog modului în care, la o unitate hotelieră, certificatul de clasificare turistică nu condiționează Autorizația de Construire, ci exploatarea comercială). Proiectul de față este structurat astfel încât ambele paliere de reglementare — construcții și energie — să fie satisfăcute integral și corelat, fără ca vreunul să fie tratat ca secundar.
 
 ### 1.4. Cadrul normativ european — piața de energie, baterii, tranziție energetică
 
@@ -278,7 +278,7 @@ Chimia **LFP** este adoptată pentru configurația de proiect de 25 MW/50 MWh pe
 
 ### 6.1. Documentația de urbanism aplicabilă — necesitatea PUZ
 
-Amplasamentul, situat tipic în extravilan sau într-o zonă cu funcțiune tehnico-industrială energetică, se reglementează, conform Legii nr. 350/2001, prin **Plan Urbanistic Zonal (PUZ)** dedicat sau prin regulamentul local de urbanism (RLU) aferent zonei, atunci când documentația de urbanism de rang superior (PUG) prevede deja o zonă compatibilă cu funcțiunea de producere/stocare a energiei. Necesitatea unui PUZ dedicat derivă, de regulă, din caracterul specific al funcțiunii — o instalație tehnologică fără precedent tipologic în reglementările generice ale PUG — și din necesitatea de a stabili, la nivel de detaliu, indicatorii urbanistici specifici (POT, CUT, regim de înălțime redus, distanțe de siguranță), diferiți fundamental de cei ai unei construcții civile obișnuite.
+Amplasamentul, situat tipic în extravilan sau într-o zonă cu funcțiune tehnico-industrială energetică, se reglementează, conform Legii nr. 169/2026 (CATUC), prin **Plan Urbanistic Zonal (PUZ)** dedicat sau prin regulamentul local de urbanism (RLU) aferent zonei, atunci când documentația de urbanism de rang superior (PUG) prevede deja o zonă compatibilă cu funcțiunea de producere/stocare a energiei. Necesitatea unui PUZ dedicat derivă, de regulă, din caracterul specific al funcțiunii — o instalație tehnologică fără precedent tipologic în reglementările generice ale PUG — și din necesitatea de a stabili, la nivel de detaliu, indicatorii urbanistici specifici (POT, CUT, regim de înălțime redus, distanțe de siguranță), diferiți fundamental de cei ai unei construcții civile obișnuite.
 
 ### 6.2. Logica indicatorilor urbanistici specifici unei instalații BESS
 

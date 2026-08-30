@@ -113,10 +113,10 @@ Se recomandă **Varianta 2 — Modernizare completă**, singura care asigură co
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz sanitar-veterinar | ANSVSA | Normele de biosecuritate |
 | Aviz/autorizație de mediu | APM | OUG nr. 195/2005, Directiva Nitrați |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

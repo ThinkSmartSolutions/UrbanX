@@ -24,7 +24,7 @@ Proiectarea structurală s-a realizat cu respectarea următoarelor acte normativ
 **Legislație:**
 - **Legea nr. 10/1995** privind calitatea în construcții, republicată — cerința fundamentală **A: rezistență mecanică și stabilitate**;
 - **HG nr. 907/2016** privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice;
-- **Legea nr. 50/1991** privind autorizarea executării lucrărilor de construcții, republicată.
+- **Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, privind autorizarea executării lucrărilor de construcții.
 
 **Bazele proiectării și acțiuni (Eurocoduri și coduri naționale):**
 - **SR EN 1990:2004 + A1:2006 + NA:2006** — Bazele proiectării structurilor;
@@ -1208,7 +1208,7 @@ Pentru destinația de centru social (circulație, activități sociale), frecven
 
 ---
 
-## 20. PIESE DESENATE DE REZISTENȚĂ (LEGEA 50/1991, ANEXA 1)
+## 20. PIESE DESENATE DE REZISTENȚĂ (LEGEA NR. 169/2026 — CATUC, ANEXA NR. 2)
 
 Documentația tehnică de rezistență (faza DTAC + PTh) cuprinde următoarele planșe, la scări corespunzătoare:
 

@@ -26,11 +26,11 @@ Titularul investiției (beneficiarul) se completează în piesele scrise general
 
 ### c) Elaboratorul proiectului
 
-Proiectul de arhitectură se elaborează de un proiectant de specialitate cu drept de semnătură (arhitect cu drept de semnătură OAR sau, după caz, conductor arhitect/urbanist, în limitele competențelor legale), în colaborare cu proiectanții de structură și instalații, conform Legii nr. 50/1991 și Legii nr. 10/1995. Colectivul de elaborare, cu numele și calitatea fiecărui semnatar, se regăsește în borderoul pieselor scrise al documentației complete.
+Proiectul de arhitectură se elaborează de un proiectant de specialitate cu drept de semnătură (arhitect cu drept de semnătură OAR sau, după caz, conductor arhitect/urbanist, în limitele competențelor legale), în colaborare cu proiectanții de structură și instalații, conform Legii nr. 169/2026 (CATUC) și Legii nr. 10/1995. Colectivul de elaborare, cu numele și calitatea fiecărui semnatar, se regăsește în borderoul pieselor scrise al documentației complete.
 
 ### d) Faza de proiectare
 
-Prezentul caiet de sarcini corespunde fazei de Proiect Tehnic de execuție (P.Th.) și Detalii de execuție (D.E.), conform conținutului-cadru din HG 907/2016, Anexa nr. 1 la Legea nr. 50/1991 — caietele de sarcini pe specialități nu fac parte din documentația de autorizare (D.T.A.C.), ci din documentația de execuție, elaborată după obținerea autorizației de construire, cu rol de a detalia condițiile tehnice de execuție pentru fiecare categorie de lucrare.
+Prezentul caiet de sarcini corespunde fazei de Proiect Tehnic de execuție (P.Th.) și Detalii de execuție (D.E.), conform conținutului-cadru din HG 907/2016 și Anexei nr. 2 la Legea nr. 169/2026 (CATUC) — caietele de sarcini pe specialități nu fac parte din documentația de autorizare (D.T.A.C.), ci din documentația de execuție, elaborată după obținerea autorizației de construire, cu rol de a detalia condițiile tehnice de execuție pentru fiecare categorie de lucrare.
 
 ### e) Număr proiect
 
@@ -76,13 +76,12 @@ Execuția lucrărilor de arhitectură se realizează cu respectarea următoarelo
 | Normativ / Standard | Domeniu de aplicare |
 |---|---|
 | Legea nr. 10/1995 privind calitatea în construcții | Cerințe fundamentale, responsabilități, recepție |
-| Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții | Faze de proiectare, conținut-cadru |
+| Legea nr. 169/2026 (CATUC), art. 264 | Faze de proiectare, conținut-cadru (Anexa nr. 2) |
 | HG nr. 907/2016 | Conținutul-cadru al documentațiilor tehnico-economice |
 | Normativ I 7 | Instalații electrice (interfața cu arhitectura — poziții tablouri, goluri) |
 | P118-1/2025 | Securitate la incendiu — pereți/uși rezistente la foc, compartimentare |
 | P118/2-2013 | Securitate la incendiu — instalații de stingere (interfața cu arhitectura la poziționarea hidranților) |
 | NP 068-02 | Normativ privind proiectarea clădirilor pentru accesibilitatea persoanelor cu handicap |
-| Ordinul MDRAP nr. 839/2009 | Norme metodologice de aplicare a Legii 50/1991 |
 | C 107/2005 (toate părțile) | Normativ privind calculul termotehnic al elementelor de construcție |
 | STAS 6472/2 | Parametrii climatici exteriori pentru calculul termotehnic |
 | SR EN 13501-1 | Clasificarea la reacția la foc a produselor de construcție |

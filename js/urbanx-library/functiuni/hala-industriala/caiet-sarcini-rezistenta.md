@@ -31,7 +31,7 @@ Execuția, controlul și recepția se conformează cel puțin următoarelor docu
 | Cadru legal | **Legea 10/1995** (rep.) | Calitatea în construcții — cerințe fundamentale, faze determinante, responsabilități |
 | Cadru legal | **HG 766/1997** | Regulamente calitate; categorii de importanță (Ordin MLPAT 31/N/1995) |
 | Cadru legal | **HG 343/2017** | Recepția lucrărilor de construcții și instalații |
-| Control de stat | **Legea 50/1991**; regulament **ISC** | Control de stat, faze determinante, program de urmărire |
+| Control de stat | **Legea nr. 169/2026** (CATUC); regulament **ISC** | Control de stat, faze determinante, program de urmărire |
 | Acțiuni / seismic | **P100-1/2013** | Cod de proiectare seismică (prevederi de detaliere/execuție ductilă, clase CD) |
 | Beton — execuție | **NE 012-2:2010** (CP 012/1) | Producerea și executarea lucrărilor din beton, beton armat și precomprimat — Partea 2 |
 | Beton — specificație | **SR EN 206:2014 + A2:2021** | Beton — specificație, performanță, producție, conformitate |

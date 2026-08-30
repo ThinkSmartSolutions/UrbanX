@@ -57,7 +57,7 @@ Structura capitolelor prezentului supliment:
 |---|---|---|
 | Calitate în construcții | Legea 10/1995 | Cerințe fundamentale — se detaliază prin proceduri de control (PTh-R.6) |
 | Conținut documentații tehnico-economice | HG 907/2016 | Structura pieselor scrise/desenate PTh |
-| Autorizare | Legea 50/1991 + Ord. MDRT 839/2009 | Conformitatea PTh cu autorizația emisă pe baza DTAC |
+| Autorizare | Legea nr. 169/2026 (CATUC) | Conformitatea PTh cu autorizația emisă pe baza DTAC |
 | Execuția construcțiilor din beton, beton armat și beton precomprimat | SR EN 13670 + CP 012/1-2007 | Toleranțe, cofrare, armare, betonare, decofrare |
 | Producerea și executarea lucrărilor din beton | NE 012-1/2007, NE 012-2/2010 | Compoziție beton, transport, punere în operă, tratare |
 | Proiectarea structurilor de beton | SR EN 1992-1-1/NA | Ancoraje, înnădiri, acoperiri, procente minime de armare |

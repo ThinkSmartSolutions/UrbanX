@@ -132,11 +132,11 @@ Se recomandă **Varianta 2 — Consolidare structurală completă**, motivat pri
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC), certificat de urbanism tip (d) — construire/desființare de lucrări inginerești |
 | Aviz administrator drum superior (dacă racord la rețea de rang superior) | CNAIR/Consiliul Județean | OG nr. 43/1997 |
 | Aviz de gospodărire a apelor (pentru podeț) | ANAR | Legea apelor nr. 107/1996 |
 | Avize utilități (rețele traversate/adiacente) | Operatori | — |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

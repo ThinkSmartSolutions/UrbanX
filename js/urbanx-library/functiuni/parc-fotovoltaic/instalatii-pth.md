@@ -748,7 +748,7 @@ Cadrul normativ aplicat cumulat de DTAC (§0.1, reluat integral) și de prezentu
 | Aparataj și echipamente | SR EN IEC 61439-1/-2, SR EN IEC 62271-200, SR EN 60076, SR EN 60529, SR EN 61537/50085 |
 | Racordare la rețea | Reg. (UE) 2016/631, Ord. ANRE 208/2018, Ord. ANRE 59/2013+235/2019, Ord. ANRE 11/2023, Ord. ANRE 20/2004, Ord. ANRE 82/2022 |
 | Securitate la incendiu | P118-1/1999, P118-3/2015 (detaliate în `scenariu-psi.md`) |
-| Calitate în construcții | Legea 10/1995, HG 907/2016, C56-2002, Legea 50/1991 |
+| Calitate în construcții | Legea 10/1995, HG 907/2016, C56-2002, Legea nr. 169/2026 (CATUC) |
 
 ---
 

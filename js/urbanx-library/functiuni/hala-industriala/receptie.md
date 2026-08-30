@@ -13,7 +13,7 @@ Document întocmit de responsabilul tehnic cu execuția / dirigintele de șantie
 | **HG 343/2017** — modifică și completează HG 273/1994 | Actualizare regulament recepție (comisie, roluri, ISC, garanții) | Componența comisiei RTL, prezența obligatorie a proiectantului și dirigintelui, referatele pe specialități, cartea tehnică ca precondiție |
 | **Normativ P130/1999** — Urmărirea comportării în timp a construcțiilor | Urmărire curentă și specială, parametri, periodicitate, responsabili | Cap. 7-9 din prezentul document — programul de urmărire |
 | **HG 766/1997** (Anexa 6) — Regulament privind urmărirea comportării în timp; **Anexa 3** — categorii de importanță | Cartea tehnică a construcției; categorii importanță; agrementul tehnic | Cap. 2 (cartea tehnică), încadrarea categoriei C |
-| **Legea 50/1991** (rep.) — autorizarea executării lucrărilor | AC, PV recepție condiție pentru regularizare taxă și radiere | Anexă recepție (referire) |
+| **Legea nr. 169/2026** (CATUC), art. 264 — autorizarea executării lucrărilor | AC, PV recepție condiție pentru regularizare taxă și radiere | Anexă recepție (referire) |
 | **HG 925/1995** + **Ordin MLPAT 77/N/1996** | Verificarea proiectelor și expertizarea; verificatori atestați MLPAT/MDLPA | Faze determinante — proiect verificat pe cerințe |
 | **Ordin ISC 1370/2014** (Procedura faze determinante) | Stabilirea și convocarea fazelor determinante cu ISC | Cap. 4 — program faze determinante |
 | **SR EN 1090-2** + **SR EN ISO 3834** | Execuția structurilor de oțel, clasa de execuție EXC2, calificarea sudorilor | PCCVI structură metalică (suduri, buloane, montaj) |

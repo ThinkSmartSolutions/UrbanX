@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — LOCUINȚĂ INDIVIDUALĂ P+1E (DTAC)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată și actualizată, Anexa nr. 1, și Ordinului MDRT nr. 839/2009 pentru aprobarea Normelor metodologice de aplicare a Legii nr. 50/1991. Prezentul memoriu general tratează o **locuință individuală unifamilială, regim de înălțime P+1E**, cu tema-program tipică unei familii de 4-5 persoane, pe un teren propriu intravilan cu suprafață uzuală între 500 și 700 mp. Memoriul se corelează cu memoriile de specialitate (arhitectură, rezistență, instalații), cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, sintetizând soluția de ansamblu fără a dubla conținutul acestora — detaliile de calcul structural, breviarele de rezistență și dimensionările exacte de instalații se regăsesc în documentele de specialitate dedicate.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (DTAC), întocmită conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținut-cadru Anexa nr. 2 la lege. Prezentul memoriu general tratează o **locuință individuală unifamilială, regim de înălțime P+1E**, cu tema-program tipică unei familii de 4-5 persoane, pe un teren propriu intravilan cu suprafață uzuală între 500 și 700 mp. Memoriul se corelează cu memoriile de specialitate (arhitectură, rezistență, instalații), cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, sintetizând soluția de ansamblu fără a dubla conținutul acestora — detaliile de calcul structural, breviarele de rezistență și dimensionările exacte de instalații se regăsesc în documentele de specialitate dedicate.
 
 ---
 
@@ -26,7 +26,7 @@ Datele de identificare cadastrală (număr cadastral, carte funciară), numele e
 
 ### 1.2. Componența documentației DTAC
 
-Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 50/1991 Anexa nr. 1 și Ordinului MDRT nr. 839/2009, din piese scrise, piese desenate și avizele/acordurile solicitate prin Certificatul de Urbanism. Pentru o locuință unifamilială, componența este simplificată față de o clădire cu funcțiune publică sau de birouri, dar respectă integral structura reglementată:
+Documentația tehnică pentru autorizarea construirii se compune, conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2, din piese scrise, piese desenate și avizele/acordurile solicitate prin Certificatul de Urbanism. Pentru o locuință unifamilială, componența este simplificată față de o clădire cu funcțiune publică sau de birouri, dar respectă integral structura reglementată:
 
 **A. Piese scrise:**
 - Lista și semnăturile proiectanților (arhitect + inginer de rezistență + ingineri de instalații, după caz);
@@ -58,7 +58,7 @@ Proiectarea unei locuințe individuale unifamiliale se realizează cu respectare
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate | Legea 50/1991 (+ Ord. MDRT 839/2009), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 925/1995, HG 766/1997 |
+| Autorizare / calitate | Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 925/1995, HG 766/1997 |
 | Suprafețe minime locuințe | **Legea 114/1996 — Legea locuinței, Anexa nr. 1** (suprafețe minime pe categorii de încăperi) |
 | Performanță energetică | **Legea 372/2005** (performanța energetică a clădirilor) + Metodologia Mc001, C107 (protecție termică) |
 | Structură / seism | **P100-1/2013** (proiectare seismică), CR 0/2012 (bazele proiectării structurilor), CR 1-1-3/2012 (acțiunea zăpezii), CR 1-1-4/2012 (acțiunea vântului), **CR 6/2013** (proiectarea clădirilor cu pereți structurali de zidărie), NP 112/2014 (proiectarea fundațiilor de suprafață), SR EN 1990–1999 (Eurocoduri), **SR EN 1992** (structuri de beton), **SR EN 1996** (structuri de zidărie — EC6) |
@@ -662,7 +662,7 @@ Ponderea principală (uzual 75-85% din valoarea investiției) revine capitolului
 
 ## 18. CONCLUZII ȘI CONFORMITATEA CU LEGEA 10/1995 (CERINȚELE A-F)
 
-Locuința individuală unifamilială, regim de înălțime P+1E, cu suprafață utilă de referință ~150 mp și suprafață construită desfășurată de ~190 mp, pe un teren de 500-700 mp, răspunde integral cadrului legal aplicabil (Legea 50/1991, Legea 10/1995, Legea 114/1996 Anexa 1, Legea 372/2005, HG 907/2016) și se încadrează urbanistic cu marjă amplă sub plafoanele reglementate (POT 19,0% ≤ 35-40%, CUT ~0,38 ≤ 0,9-1,2, spații verzi ~66% ≥ 20-30%, parcare 2 locuri asigurate integral pe lot).
+Locuința individuală unifamilială, regim de înălțime P+1E, cu suprafață utilă de referință ~150 mp și suprafață construită desfășurată de ~190 mp, pe un teren de 500-700 mp, răspunde integral cadrului legal aplicabil (Legea nr. 169/2026 — CATUC, Legea 10/1995, Legea 114/1996 Anexa 1, Legea 372/2005, HG 907/2016) și se încadrează urbanistic cu marjă amplă sub plafoanele reglementate (POT 19,0% ≤ 35-40%, CUT ~0,38 ≤ 0,9-1,2, spații verzi ~66% ≥ 20-30%, parcare 2 locuri asigurate integral pe lot).
 
 Soluția propusă echilibrează cerințele funcționale (zonare zi/noapte, suprafețe generoase peste minimul Legii 114/1996), tehnice (structură validată la P+1E — zidărie portantă confinată conform CR 6/2013 sau cadre de beton armat, ambele analizate comparativ la cap. 7), urbanistice (conformare integrală la regimul tehnic, retrageri, retragere sanitară a fosei septice conform OMS 119/2014) și de performanță energetică (standard nZEB obligatoriu, cu anvelopă performantă, pompă de căldură, sistem fotovoltaic și ventilare cu recuperare de căldură). Tratarea comparativă a celor patru tipuri de locuință individuală (izolată, cuplată, înșiruită, duplex) la cap. 3 asigură transpozabilitatea soluției la configurațiile alternative frecvent întâlnite în practica de proiectare, cu identificarea punctuală a adaptărilor necesare (rezistență la foc și izolare fonică a peretelui calcan/planșeului de separare).
 

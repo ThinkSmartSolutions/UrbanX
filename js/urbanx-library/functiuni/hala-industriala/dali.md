@@ -324,13 +324,13 @@ Se recomandă **Varianta 2 — Maximală**, motivat prin: (a) eliminarea integra
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie / Consiliu Județean | Legea 50/1991 |
+| Certificat de urbanism | Primărie / Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu (scenariu actualizat) | ISU | Legea 307/2006, HG 571/2016, P118-1/2/3 |
 | Act de reglementare de mediu (revalidare/actualizare, dacă e cazul) | APM | OUG 195/2005, Legea 292/2018 |
 | Avize utilități (apă, canal, electric, gaz) — completare pentru extindere | Operatori | — |
 | Verificare proiect cerințe A1, B, C, D, F | Verificatori atestați | Legea 10/1995 |
 | Referat verificare expertiză tehnică | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Autorizație de securitate la incendiu (la recepție) | ISU | Ordinul MAI 129/2016 |
 
 ### 12.2. Concluzii
@@ -339,4 +339,4 @@ Documentația de Avizare a Lucrărilor de Intervenții demonstrează **fezabilit
 
 Lucrările propuse — **consolidare structurală (Rs IV, R3 = 0,95), conformare integrală la P118 (anvelopă A2-s1,d0, protecție la foc a structurii, sprinklere ESFR, IDSAI modernizată), reabilitare termică performantă (clasă B) și extindere modulară cu 2 travee (+480 mp)** — aduc obiectivul la parametrii tehnici și de siguranță descriși în memoriul tehnic general și în scenariul de securitate la incendiu de referință ale aceleiași documentații.
 
-Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC pentru extindere, PT, DE), cu respectarea integrală a normativelor: HG 907/2016, P100-3/2019, P100-1/2013, SR EN 1993-1-2, Legea 10/1995, Legea 372/2005, Mc 001, P118-1/2/3, SR EN 12845, NP 042/2000, Legea 50/1991 și NP 051/2012.
+Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC pentru extindere, PT, DE), cu respectarea integrală a normativelor: HG 907/2016, P100-3/2019, P100-1/2013, SR EN 1993-1-2, Legea 10/1995, Legea 372/2005, Mc 001, P118-1/2/3, SR EN 12845, NP 042/2000, Legea nr. 169/2026 (CATUC) și NP 051/2012.

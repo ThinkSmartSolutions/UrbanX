@@ -2,7 +2,7 @@
 
 ## LOCUINȚĂ UNIFAMILIALĂ IZOLATĂ — REGIM P+1E
 
-*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții (republicată, cu modificările ulterioare) și Ordinul M.D.R.L. nr. 839/2009 (Norme metodologice de aplicare), conținutul-cadru al pieselor scrise fiind cel prevăzut în anexa nr. 1 la Legea 50/1991.*
+*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținutul-cadru al pieselor scrise fiind cel prevăzut în anexa nr. 2 la lege.*
 
 ---
 
@@ -95,7 +95,7 @@ Ambele încadrări (categoria D și clasa III) sunt determinante pentru nivelul 
 
 Documentația respectă următoarele acte normative și standarde (listă neexhaustivă, în vigoare la data proiectării):
 
-- **Legea nr. 50/1991** — autorizarea executării lucrărilor de construcții (republicată), cu Normele metodologice aprobate prin **Ordinul M.D.R.L. nr. 839/2009**;
+- **Legea nr. 169/2026** (CATUC) — autorizarea executării lucrărilor de construcții, art. 264, conținut-cadru Anexa nr. 2;
 - **Legea nr. 10/1995** — calitatea în construcții (republicată), cu cele șapte cerințe fundamentale (A–F, inclusiv economia de energie);
 - **Legea nr. 114/1996** — Legea locuinței (republicată), **Anexa 1** — suprafețe minime funcționale ale încăperilor de locuit;
 - **NP 057-2002** — Normativ pentru proiectarea și executarea locuințelor;

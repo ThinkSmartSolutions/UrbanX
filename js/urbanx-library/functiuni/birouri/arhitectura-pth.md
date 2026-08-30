@@ -25,7 +25,7 @@ Documentul urmărește, la fiecare detaliu, aceeași structură de prezentare ad
 
 Cadrul normativ de referință pentru detaliere, suplimentar față de cel enunțat integral în DTAC (`arhitectura.md` §1.5):
 
-- **Legea nr. 10/1995** (calitatea în construcții), **HG nr. 907/2016** (conținut-cadru documentații tehnico-economice), **Legea nr. 50/1991**, **HG nr. 273/1994** (regulament de recepție a lucrărilor);
+- **Legea nr. 10/1995** (calitatea în construcții), **HG nr. 907/2016** (conținut-cadru documentații tehnico-economice), **Legea nr. 169/2026** (CATUC), **HG nr. 273/1994** (regulament de recepție a lucrărilor);
 - **P118-1/2013, P118-2/2013, P118-3/2015** — securitatea la incendiu (rezistență, instalații de stingere, detecție/semnalizare), aplicate la nivel de detaliu de execuție (firestopping, uși EI, compartimentări);
 - **SR EN 13830** — pereți cortină (proiectare, execuție, performanțe declarate ca sistem);
 - **SR EN 12207 / 12208 / 12210 / 12154 / 12179** — clasificări de performanță pentru ferestre și pereți cortină (permeabilitate la aer, etanșeitate la apă, rezistență la vânt, infiltrații);

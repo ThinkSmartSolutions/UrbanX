@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Unitate hotelieră 4 stele, regim S+P+6E, ~100 camere
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, Ordinului ANT nr. 65/2013, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), Ordinului ANT nr. 65/2013, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul d
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire | Conformitatea execuției |
 | 4 | Legea nr. 307/2006 + HG nr. 571/2016 | Autorizarea ISU | Categoria B, ocupare continuă |
 | 5 | Ordinul ANT nr. 65/2013, HG nr. 1267/2010 | Clasificarea turistică | Certificat de clasificare — condiție de exploatare comercială |
 | 6 | OMS nr. 119/2014 | Norme de igienă | Aviz DSP — cazare și alimentație publică |

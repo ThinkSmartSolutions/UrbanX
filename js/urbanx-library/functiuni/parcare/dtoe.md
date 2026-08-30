@@ -39,8 +39,7 @@ DTOE reglementează, pe toată durata execuției parcării:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare (Anexa 2) | Cap. 1, 3, 12 |
-| **Ordin MDRT 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026** (CATUC) | AC; organizarea de execuție ca lucrare — piesă componentă a Anexei nr. 2, art. 264 | Cap. 1, 3, 12 |
 | **Legea 10/1995** (rep.) | Cele 7 cerințe fundamentale; categoria de importanță B — control sporit | Cap. 6, corelare carte tehnică |
 | **HG 300/2006** | Cerințe minime SSM pentru șantiere temporare/mobile; coordonator SSM | **Cap. 8 — act central**, cu accent pe lucrul la excavații adânci |
 | **NP 120/2014** | Sprijiniri provizorii ale săpăturilor | Cap. 4 — excavare adâncă subsol |

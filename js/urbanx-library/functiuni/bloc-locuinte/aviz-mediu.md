@@ -62,7 +62,7 @@ Proiectul respectă prevederile Certificatului de Urbanism și solicită avizele
 
 Proiectul urmărește realizarea unui **imobil de locuințe colective** (bloc de apartamente), cu regim de înălțime **S+P+8E**, destinat locuirii permanente, cu parcaj colectiv distribuit la subsol și la sol. Investiția răspunde cererii de locuințe urbane într-o zonă echipată edilitar din intravilan, prin densificare controlată — soluție care valorifică rețelele existente (apă, canalizare, energie electrică, gaze naturale) și evită extinderea intravilanului pe terenuri agricole periurbane.
 
-Necesitatea decurge din cererea susținută de locuințe în piața rezidențială urbană, din oportunitatea de a valorifica un teren cu regim juridic clar și acces la utilități, și din politica de dezvoltare urbană durabilă (Legea nr. 350/2001, HG nr. 525/1996), care încurajează densificarea intravilanului deja echipat în locul extinderii pe terenuri neechipate.
+Necesitatea decurge din cererea susținută de locuințe în piața rezidențială urbană, din oportunitatea de a valorifica un teren cu regim juridic clar și acces la utilități, și din politica de dezvoltare urbană durabilă (Legea nr. 169/2026 — CATUC, HG nr. 525/1996), care încurajează densificarea intravilanului deja echipat în locul extinderii pe terenuri neechipate.
 
 ### 2.2. Capacitatea și programul de funcționare
 
@@ -186,7 +186,7 @@ Context urban construit, în UTR de locuire colectivă unde există fond constru
 | Legea nr. 104/2011 | Calitatea aerului |
 | STAS 10009/2017; Ord. MS nr. 119/2014 | Zgomot — limite admisibile |
 | HG nr. 804/2007 (SEVESO III, Legea 59/2016) | Accidente majore cu substanțe periculoase |
-| Legea nr. 50/1991 Anexa 1, Legea nr. 10/1995, Legea nr. 350/2001 | Autorizarea construcțiilor, calitatea în construcții, amenajarea teritoriului |
+| Legea nr. 169/2026 (CATUC), art. 264, Anexa 2, Legea nr. 10/1995 | Autorizarea construcțiilor, calitatea în construcții, amenajarea teritoriului |
 | Legea nr. 114/1996 Anexa 1 | Exigențe minimale ale locuinței |
 | STAS 1478-90 | Alimentarea cu apă la construcții civile — bază de calcul necesar apă |
 

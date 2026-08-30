@@ -16,7 +16,7 @@ Prezentul caiet de sarcini este parte integrantă a Proiectului Tehnic și are c
 |---|---|
 | Legea 10/1995 (rep.) | Calitatea în construcții — cele 6+1 cerințe fundamentale |
 | HG 907/2016 | Conținutul-cadru al documentației tehnico-economice |
-| Legea 50/1991 (rep.) | Autorizarea executării lucrărilor de construcții |
+| Legea nr. 169/2026 (CATUC), art. 264, Anexa 2 | Autorizarea executării lucrărilor de construcții |
 | Legea 114/1996 + Anexa 1 | Legea locuinței — exigențe minimale de suprafață și dotare |
 | NP 057/2002 | Proiectarea clădirilor de locuințe |
 | HG 766/1997 | Categoria de importanță „C" (normală) |

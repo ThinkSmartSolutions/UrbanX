@@ -2,7 +2,7 @@
 
 **Sistem rutier suplu, dimensionat analitic pe metoda deformațiilor admisibile (NP 116-2004), pe fundație de terasamente compactate, cu verificare comparativă la structură rigidă (PD 177-2001) și verificare la fenomenul de îngheț-dezgheț (STAS 1709).**
 
-> Prezentul memoriu constituie piesa scrisă de structură rutieră și terasamente a documentației tehnice pentru autorizarea executării lucrărilor de construire (DTAC) a unei lucrări de modernizare a unui drum public existent, pe o lungime de aproximativ **1,00 km**, întocmit conform Legii nr. 10/1995 privind calitatea în construcții (republicată), a Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții și a Ordonanței Guvernului nr. 43/1997 privind regimul drumurilor. Nivelul de detaliere corespunde fazei DTAC, cu prefigurarea și justificarea soluției de structură rutieră; breviarul complet de calcul (rulare integrală a programului de calcul multistrat pe toate secțiunile caracteristice, planuri de execuție cu profile transversale tip, detalii de rosturi și de scurgere) se dezvoltă la fazele PT + DE. Toate valorile numerice de mai jos sunt calcule de predimensionare/verificare, lucrate pentru justificarea soluției adoptate; ele nu se substituie calculului de proiect tehnic și nici verificării tehnice atestate. Prezentul document tratează exclusiv rezistența mecanică și stabilitatea structurii rutiere și a terasamentelor (cerința fundamentală A, componentele A4 și Af) — geometria drumului (trasee în plan, profil longitudinal, profiluri transversale tip), scurgerea apelor (rigole, podețe, șanțuri), siguranța circulației (semnalizare orizontală/verticală, parapeți) și studiul de trafic detaliat pe categorii de vehicule sunt tratate în memoriul general și în piesele desenate ale aceleiași documentații — documente care nu se dublează aici.
+> Prezentul memoriu constituie piesa scrisă de structură rutieră și terasamente a documentației tehnice pentru autorizarea executării lucrărilor de construire (DTAC) a unei lucrări de modernizare a unui drum public existent, pe o lungime de aproximativ **1,00 km**, întocmit conform Legii nr. 10/1995 privind calitatea în construcții (republicată), a Legii nr. 169/2026 (CATUC), art. 264, și a Ordonanței Guvernului nr. 43/1997 privind regimul drumurilor. Nivelul de detaliere corespunde fazei DTAC, cu prefigurarea și justificarea soluției de structură rutieră; breviarul complet de calcul (rulare integrală a programului de calcul multistrat pe toate secțiunile caracteristice, planuri de execuție cu profile transversale tip, detalii de rosturi și de scurgere) se dezvoltă la fazele PT + DE. Toate valorile numerice de mai jos sunt calcule de predimensionare/verificare, lucrate pentru justificarea soluției adoptate; ele nu se substituie calculului de proiect tehnic și nici verificării tehnice atestate. Prezentul document tratează exclusiv rezistența mecanică și stabilitatea structurii rutiere și a terasamentelor (cerința fundamentală A, componentele A4 și Af) — geometria drumului (trasee în plan, profil longitudinal, profiluri transversale tip), scurgerea apelor (rigole, podețe, șanțuri), siguranța circulației (semnalizare orizontală/verticală, parapeți) și studiul de trafic detaliat pe categorii de vehicule sunt tratate în memoriul general și în piesele desenate ale aceleiași documentații — documente care nu se dublează aici.
 
 ---
 
@@ -46,7 +46,7 @@ Prezentul memoriu se limitează strict la **cerința fundamentală A** — rezis
 ### 1.4. Cadrul normativ de referință
 
 - **Legea nr. 10/1995** — calitatea în construcții (republicată); cerința fundamentală **A — rezistență mecanică și stabilitate**.
-- **Legea nr. 50/1991** — autorizarea executării lucrărilor de construcții (republicată, cu modificările ulterioare).
+- **Legea nr. 169/2026** (CATUC) — art. 264, autorizarea executării lucrărilor de construire.
 - **OG nr. 43/1997** — regimul drumurilor (republicată).
 - **HG nr. 766/1997** — stabilirea categoriilor de importanță a construcțiilor.
 - **NP 116-2004** — Normativ pentru dimensionarea structurilor rutiere suple și semirigide (metoda analitică a deformațiilor admisibile) — normativul director al cap. 5-6 al prezentului memoriu.
@@ -537,7 +537,7 @@ Documentația se completează, pentru autorizare integrală, cu piesele conexe m
 | Normativ | Titlu / obiect | Utilizat în |
 |---|---|---|
 | Legea 10/1995 | Calitatea în construcții — cerința A | cap. 1, 12 |
-| Legea 50/1991 | Autorizarea executării lucrărilor de construcții | cap. 1.4 |
+| Legea nr. 169/2026 (CATUC), art. 264 | Autorizarea executării lucrărilor de construire | cap. 1.4 |
 | OG 43/1997 | Regimul drumurilor | cap. 1.4 |
 | HG 766/1997 | Categoriile de importanță a construcțiilor | cap. 1.4, 2 |
 | NP 116-2004 | Dimensionarea structurilor rutiere suple/semirigide — metoda analitică a deformațiilor admisibile | cap. 5, 6.1, 11, 12 (dominant) |

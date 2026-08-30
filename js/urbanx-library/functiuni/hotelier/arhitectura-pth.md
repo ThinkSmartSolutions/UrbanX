@@ -4,7 +4,7 @@ Prezentul document dezvoltă, la nivel de **Proiect Tehnic de execuție (PTh)**,
 
 Cadru normativ de referință pentru prezentul supliment de execuție (suplimentar față de cel citat integral în memoriul general și în memoriul de arhitectură DTAC):
 
-- **Legea 10/1995** (calitatea în construcții) și **Legea 50/1991**, Anexa 1 (conținut-cadru DTAC/PTh), **HG 907/2016** (conținut-cadru documentații tehnico-economice);
+- **Legea 10/1995** (calitatea în construcții) și **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 (conținut-cadru DTAC/PTh), **HG 907/2016** (conținut-cadru documentații tehnico-economice);
 - **HG 273/1994** (regulamentul de recepție a lucrărilor de construcții);
 - **C107/2005** (părțile 1-6, calcul termotehnic) și **Ordinul 2641/2017** (cerințe minime de performanță energetică);
 - **NP 040-2002** (proiectare, execuție, exploatare hidroizolații), **NP 064-2002** (terase necirculabile), **C112-1986** (hidroizolații bituminoase);

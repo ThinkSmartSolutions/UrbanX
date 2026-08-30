@@ -119,10 +119,10 @@ Se recomandă **Varianta 2 — Repoziționare completă la 4 stele**, motivat pr
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU | P118-1/2013 |
 | Aviz sanitar (DSP) | DSP | OMS nr. 119/2014 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Certificat de clasificare turistică (post-recepție) | ANT | Ordinul ANT nr. 65/2013 |
 
 ### 6.2. Concluzii

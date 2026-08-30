@@ -63,7 +63,7 @@ Fiecare detaliu de execuție (D01...D12) este tratat, în capitolele următoare,
 | Semnalizare verticală — proiectare | **SR 1848-1** | clasificare, simboluri, reguli de amplasare a indicatoarelor |
 | Semnalizare orizontală | **SR 1848-7** | marcaje rutiere — geometrie, culoare, materiale |
 | Regim juridic drumuri | **OG 43/1997** (r) | zonele drumului, regimul de acces, autorizarea lucrărilor în zona drumului |
-| Autorizare | **Legea 50/1991** (r), Ordinul MDRT 839/2009 | conținutul documentației tehnice de autorizare |
+| Autorizare | **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | conținutul documentației tehnice de autorizare |
 | Calitate | **Legea 10/1995** (r) | cerințele fundamentale A-G, aplicate diferențiat elementelor tratate aici (D, C, B) |
 | Circulație | **OUG 195/2002** (r), HG 1391/2006 | regimul indicatoarelor și marcajelor, regulamentul de aplicare |
 | Execuție construcții | **SR EN 13670** | toleranțe generale de execuție (aplicabile fundațiilor de beton ale stâlpilor și bordurilor) |

@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Pod rutier peste râu, 3 deschideri
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, AND 522 (urmărirea comportării în timp a podurilor). Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), AND 522 (urmărirea comportării în timp a podurilor). Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul d
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC) | Autorizația de construire | Conformitatea execuției |
 | 4 | AND 522 | Urmărirea comportării în timp a podurilor | Program de urmărire specifică — obligatoriu la categoria B |
 | 5 | SR EN 1990 | Bazele proiectării — durata de exploatare 100 ani | Criteriu de recepție a durabilității |
 | 6 | Legea apelor nr. 107/1996 | Regimul apelor | Avizul ANAR condiționează punerea în funcțiune |

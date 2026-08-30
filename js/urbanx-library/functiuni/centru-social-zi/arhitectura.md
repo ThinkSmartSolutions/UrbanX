@@ -2,9 +2,9 @@
 
 ### 1.1. Date de identificare a investiției
 
-Prezentul memoriu tehnic de arhitectură este întocmit pentru obiectivul de investiție **„Centru Social de Zi"**, serviciu social de zi destinat asistenței sociale, categorie de servicii reglementată prin Legea nr. 292/2011 a asistenței sociale (cu modificările și completările ulterioare). Faza de proiectare este **DTAC (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire)**, dezvoltată la nivel de detaliere corespunzător și fazei PTh (Proiect Tehnic), în vederea depunerii pentru obținerea Autorizației de Construire în temeiul Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată.
+Prezentul memoriu tehnic de arhitectură este întocmit pentru obiectivul de investiție **„Centru Social de Zi"**, serviciu social de zi destinat asistenței sociale, categorie de servicii reglementată prin Legea nr. 292/2011 a asistenței sociale (cu modificările și completările ulterioare). Faza de proiectare este **DTAC (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire)**, dezvoltată la nivel de detaliere corespunzător și fazei PTh (Proiect Tehnic), în vederea depunerii pentru obținerea Autorizației de Construire în temeiul Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264.
 
-Documentația respectă conținutul-cadru al proiectului pentru autorizarea executării lucrărilor de construire stabilit prin Anexa nr. 1 la Legea nr. 50/1991, precum și cerințele fundamentale aplicabile construcțiilor prevăzute de Legea nr. 10/1995 privind calitatea în construcții, republicată (cerințele esențiale A–F).
+Documentația respectă conținutul-cadru al proiectului pentru autorizarea executării lucrărilor de construire stabilit prin Anexa nr. 2 la Legea nr. 169/2026 (CATUC), precum și cerințele fundamentale aplicabile construcțiilor prevăzute de Legea nr. 10/1995 privind calitatea în construcții (cerințele esențiale A–F).
 
 Funcțiunea proiectată este aceea de **centru de zi** — serviciu social fără cazare, care asigură beneficiarilor asistență, îngrijire pe timpul zilei, socializare, recuperare și consiliere, cu întoarcerea acestora la domiciliu la sfârșitul programului zilnic. Prin natura activității, clădirea se încadrează în categoria clădirilor civile cu funcțiune de asistență socială, proiectate cu respectarea NP 011-1997 „Normativ privind proiectarea, realizarea și exploatarea construcțiilor pentru grădinițe de copii" (aplicat prin analogie pentru spațiile cu utilizatori de vârstă mică) și, în principal, a standardelor minime de calitate specifice serviciilor sociale de zi.
 
@@ -678,7 +678,7 @@ Ocuparea maxima simultana teoretica insumata este de 117 persoane, insa scenariu
 
 ### 18.1. Definitii si metoda
 
-Suprafetele s-au calculat conform **STAS 4908-85** (arii si volume conventionale) si a **Anexei la Legea 50/1991** pentru arie construita si arie desfasurata:
+Suprafetele s-au calculat conform **STAS 4908-85** (arii si volume conventionale) si a **Anexei nr. 2 la Legea nr. 169/2026 (CATUC)** pentru arie construita si arie desfasurata:
 
 - **Su (suprafata utila)** = suma ariilor utile ale tuturor incaperilor, masurate intre fetele finite ale peretilor, exclusiv suprafata ocupata de pereti;
 - **Sc (suprafata construita la sol / amprenta)** = aria sectiunii orizontale la nivelul soclului, la cota ±0,00, incluzand grosimea peretilor exteriori;
@@ -1010,11 +1010,11 @@ Se prevad materiale cu emisii reduse de compusi organici volatili (vopsele si ad
 
 ---
 
-## 25. PLAN DE SITUATIE, SISTEMATIZARE SI CONTINUTUL PIESELOR DESENATE (Legea 50/1991, Anexa 1)
+## 25. PLAN DE SITUATIE, SISTEMATIZARE SI CONTINUTUL PIESELOR DESENATE (Legea nr. 169/2026 — CATUC, Anexa nr. 2)
 
 ### 25.1. Continutul planurilor de arhitectura
 
-Documentatia de arhitectura, faza DTAC + PTh, cuprinde piesele desenate conform continutului-cadru al **Anexei 1 la Legea 50/1991** si al **HG 907/2016** (continut proiect tehnic). Fiecare plansa poarta indicativ, scara, titlu, cartus si legenda.
+Documentatia de arhitectura, faza DTAC + PTh, cuprinde piesele desenate conform continutului-cadru al **Anexei nr. 2 la Legea nr. 169/2026 (CATUC)** si al **HG 907/2016** (continut proiect tehnic). Fiecare plansa poarta indicativ, scara, titlu, cartus si legenda.
 
 | Cod | Denumire plansa | Scara | Continut principal |
 |----|----|----|----|

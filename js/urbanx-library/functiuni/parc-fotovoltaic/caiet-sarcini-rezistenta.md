@@ -14,7 +14,7 @@ Prezentul caiet acoperă strict **cerința fundamentală A — Rezistență meca
 
 | Domeniu | Normativ / standard de referință |
 |---|---|
-| Calitatea în construcții / autorizare | Legea 10/1995 (rep.); Legea 50/1991 (rep.); HG 766/1997; HG 907/2016 |
+| Calitatea în construcții / autorizare | Legea 10/1995; Legea nr. 169/2026 (CATUC), art. 264; HG 766/1997; HG 907/2016 |
 | Bazele proiectării structurale | SR EN 1990:2004/A1:2006 + NA (Eurocod 0); **CR 0-2012** |
 | Acțiuni permanente și utile | SR EN 1991-1-1 + NA |
 | Acțiuni din zăpadă | SR EN 1991-1-3 + NA; **CR 1-1-3/2012** |

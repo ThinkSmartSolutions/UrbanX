@@ -42,7 +42,7 @@ Cadrul normativ complet al obiectivului este cel enumerat la DTAC §1.4 (I7-2011
 | **Legea nr. 64/2008** și **colecția PT C ISCIR** | funcționarea în siguranță a recipientelor sub presiune — aplicabilă cilindrilor de agent de stingere gazos/aerosol, dacă produsul presiune×volum depășește pragul de exceptare |
 | **PT R1-2010 (ISCIR)** | autorizarea macaralei/utilajului de ridicare folosit la manevrarea containerelor (~35 t/unitate) |
 | **C56-2002** | verificarea calității execuției lucrărilor de construcții-montaj (aplicabil platformelor/fundațiilor containerelor și PT) |
-| **Legea nr. 50/1991, Anexa nr. 1** | conținutul-cadru al documentației tehnice, aplicabil deopotrivă fazelor DTAC și P.Th. |
+| **Legea nr. 169/2026 (CATUC), Anexa nr. 2** | conținutul-cadru al documentației tehnice, aplicabil deopotrivă fazelor DTAC și P.Th. |
 
 ---
 
@@ -884,7 +884,7 @@ Cadrul normativ aplicat cumulat de DTAC (§1.4, reluat integral) și de prezentu
 | Recipiente sub presiune | Legea nr. 64/2008, colecția PT C ISCIR |
 | Utilaje de ridicare | PT R1-2010 (ISCIR) |
 | Racordare la rețea | Reg. (UE) 2016/631 (RfG), Cod RET/Cod RED, ordine ANRE de racordare/licențiere |
-| Calitate în construcții | Legea nr. 50/1991 Anexa 1, Legea nr. 10/1995, HG nr. 907/2016, C56-2002 |
+| Calitate în construcții | Legea nr. 169/2026 (CATUC) Anexa nr. 2, Legea nr. 10/1995, HG nr. 907/2016, C56-2002 |
 
 ---
 

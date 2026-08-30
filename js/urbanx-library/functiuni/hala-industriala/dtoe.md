@@ -2,7 +2,7 @@
 
 Documentație de organizare a execuției (DTOE / POE) întocmită de inginerul responsabil cu organizarea de șantier pentru **hală industrială parter înalt cu structură METALICĂ** (cadre transversale L = 24,00 m, travee 6,00 m, lungime 60,00 m, H streașină 9,50 m, H coamă ~10,70 m, pod rulant Q = 8 t opțional, mezanin birouri ~150 mp, placă industrială din beton armat C30/37 pe pat elastic). Suprafață construită hală ≈ 1.440 mp; regim de înălțime parter (P) + mezanin parțial.
 
-DTOE fundamentează **autorizarea executării organizării de execuție**, ca lucrare distinctă sau înscrisă în autorizația de construire, conform **Legii 50/1991 (rep. 2004) art. 3 și Anexa 2 („organizarea de execuție" — lucrare provizorie)** și a **Normelor metodologice aprobate prin Ordinul MDRT 839/2009**. Documentul stabilește incinta, dotările, tehnologia, eșalonarea, măsurile SSM/PSI/mediu și managementul traficului pe durata execuției.
+DTOE fundamentează **autorizarea executării organizării de execuție**, ca lucrare distinctă sau înscrisă în autorizația de construire, conform **Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2 („organizarea de execuție" — lucrare provizorie)**. Documentul stabilește incinta, dotările, tehnologia, eșalonarea, măsurile SSM/PSI/mediu și managementul traficului pe durata execuției.
 
 > **Corelare:** DTOE nu reia memoriile de arhitectură, structură (rezistență), instalații sau scenariul de securitate la incendiu ale halei — le folosește ca documentație-suport (soluții tehnice, cantități, greutăți de montaj) pentru dimensionarea organizării. Cartea tehnică (secțiunea B — execuție) preia din DTOE planul de organizare, jurnalul de șantier și planul SSM.
 
@@ -42,8 +42,7 @@ DTOE reglementează, pe toată perioada de execuție:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep. 2004) — autorizarea executării lucrărilor de construcții | AC; organizarea de execuție ca lucrare (Anexa 2); panoul de identificare; refacerea terenului | Cap. 1 (temei), cap. 3 (incintă provizorie), cap. 13 (panou) |
-| **Ordin MDRT 839/2009** — Norme metodologice de aplicare a Legii 50/1991 | Conținutul DTOE/POE, taxa organizare, refacerea la finalizare | Structura documentației; obligația refacerii amplasamentului |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 — autorizarea executării lucrărilor de construcții | AC; organizarea de execuție ca lucrare (Anexa nr. 2); panoul de identificare; refacerea terenului; conținutul DTOE/POE, taxa organizare, refacerea la finalizare | Cap. 1 (temei), cap. 3 (incintă provizorie), cap. 13 (panou); structura documentației; obligația refacerii amplasamentului |
 | **Legea 10/1995** (rep. 2016) — calitatea în construcții | Cele 7 cerințe fundamentale; sistemul calității; jurnalul de șantier | Cap. 6 (tehnologie), cap. 8 (trasabilitate), corelare carte tehnică |
 | **HG 300/2006** — cerințe minime de SSM pentru șantiere temporare sau mobile | Plan de securitate și sănătate; coordonator SSM proiectare/execuție; declarație prealabilă ITM; registru de coordonare | Cap. 9 integral — este actul central pentru SSM pe șantier |
 | **Legea 319/2006** — securitatea și sănătatea în muncă | Obligații angajator/lucrători; evaluarea riscurilor; instruire; EIP | Cap. 9 (plan de prevenire și protecție, instructaje) |
@@ -87,7 +86,7 @@ Transportul agabaritic (grinzi/stâlpi metalici de 12–24 m) se planifică cu *
 
 ### 3.1 Incinta și împrejmuirea
 
-Incinta de organizare se amplasează integral în interiorul parcelei, adiacent halei, astfel încât să nu obtureze fronturile de lucru și raza de acțiune a macaralei. **Împrejmuirea provizorie** este obligatorie pe tot perimetrul de lucru (Legea 50/1991 — protejarea circulației și vecinătăților): panouri opace metalice/mesh H = 2,00 m pe fundații prefabricate din beton, cu **plasă/prelată de protecție anti-praf** pe latura spre drumul public și spre vecini. Lungime împrejmuire ≈ 300 m. La porți — bariere și pază.
+Incinta de organizare se amplasează integral în interiorul parcelei, adiacent halei, astfel încât să nu obtureze fronturile de lucru și raza de acțiune a macaralei. **Împrejmuirea provizorie** este obligatorie pe tot perimetrul de lucru (Legea nr. 169/2026 — CATUC — protejarea circulației și vecinătăților): panouri opace metalice/mesh H = 2,00 m pe fundații prefabricate din beton, cu **plasă/prelată de protecție anti-praf** pe latura spre drumul public și spre vecini. Lungime împrejmuire ≈ 300 m. La porți — bariere și pază.
 
 ### 3.2 Zonarea funcțională a incintei
 
@@ -232,7 +231,7 @@ Execuția respectă principiul **succesiunii tehnologice** și al fronturilor de
 7. **Placa industrială** — pat elastic (balast compactat + strat de rupere capilaritate), armare (plasă/fibre), rosturi, turnare beton C30/37, elicopterizare/durificare, tăiere rosturi de contracție.
 8. **Instalații** — electrice (iluminat, forță, curenți slabi), sanitare, HVAC/ventilare, **instalații PSI** (hidranți interiori/exteriori, sprinklere dacă e cazul — conform scenariului PSI); probe și verificări (presiune, izolație, PRAM).
 9. **Finisaje** — mezanin birouri (pardoseli, pereți gips-carton, tâmplărie, finisaje), zugrăveli, pardoseală hală (eventuale vopsele epoxidice/marcaje).
-10. **Sistematizare verticală și refacere amplasament** — platforme carosabile, alei, spații verzi, împrejmuire definitivă, racorduri definitive; **dezafectarea organizării de șantier** și aducerea terenului la starea din autorizație (Legea 50/1991, Ordin 839/2009).
+10. **Sistematizare verticală și refacere amplasament** — platforme carosabile, alei, spații verzi, împrejmuire definitivă, racorduri definitive; **dezafectarea organizării de șantier** și aducerea terenului la starea din autorizație (Legea nr. 169/2026 — CATUC).
 
 ### 6.2 Fluxuri
 
@@ -421,7 +420,7 @@ Colectare **selectivă** în containere codate; evidență prin registru (HG 856
 - **Ape:** interzisă deversarea de ape uzate/betonate în sol sau canalizare pluvială; spălarea tobei betonierei numai în bașă/decantor dedicat; rampă spălare roți cu decantor; carburanții pe cuvă de retenție.
 - **Zgomot:** utilaje conforme (marcaj CE, nivel garantat); program de lucru respectând limitele de zgomot pentru vecinătăți (evitarea nopții / weekend în zone locuite).
 - **Praf:** stropirea drumurilor și platformelor pe timp uscat; acoperirea benelor la transport; plasă anti-praf pe împrejmuire; curățarea roților la ieșire.
-- **Sol:** stratul vegetal decapat se depozitează separat pentru refacerea spațiilor verzi la final (Ordin 839/2009 — refacerea amplasamentului).
+- **Sol:** stratul vegetal decapat se depozitează separat pentru refacerea spațiilor verzi la final (Legea nr. 169/2026 — CATUC — refacerea amplasamentului).
 
 ### 11.3 Estimarea cantităților de deșeuri și evidența
 
@@ -446,7 +445,7 @@ Alimentarea utilajelor cu carburant se face pe suprafață impermeabilizată, cu
 
 ## 12. Managementul traficului și protecția circulației publice
 
-Gestionarea circulației respectă **OUG 195/2002** (circulația pe drumurile publice), **SR 1848** (semnalizare rutieră) și obligațiile Legii 50/1991 privind protecția circulației publice.
+Gestionarea circulației respectă **OUG 195/2002** (circulația pe drumurile publice), **SR 1848** (semnalizare rutieră) și obligațiile Legii nr. 169/2026 (CATUC) privind protecția circulației publice.
 
 - **Accesul la/din șantier** se semnalizează cu indicatoare temporare („Ieșire autovehicule din șantier", „Atenție — lucrări", limitare de viteză) pe drumul public, avizate de administratorul drumului și poliția rutieră.
 - **Transportul agabaritic** (grinzi 24 m) se face cu **autorizație de transport special**, pe rute și ore aprobate, cu vehicul-pilot/însoțire dacă este cazul.
@@ -472,9 +471,9 @@ Se stabilesc **puncte de așteptare** în afara carosabilului public pentru vehi
 
 ## 13. Semnalizarea șantierului și panoul de identificare a investiției
 
-### 13.1 Panoul de identificare a investiției (obligatoriu — Legea 50/1991)
+### 13.1 Panoul de identificare a investiției (obligatoriu — Legea nr. 169/2026, CATUC)
 
-Se amplasează **la loc vizibil, la limita drumului public**, pe toată durata execuției. Conform anexei la Normele metodologice (Ordin MDRT 839/2009), panoul conține **minim**:
+Se amplasează **la loc vizibil, la limita drumului public**, pe toată durata execuției. Conform conținutului-cadru din Legea nr. 169/2026 (CATUC), Anexa nr. 2, panoul conține **minim**:
 
 | Câmp obligatoriu | Conținut |
 |---|---|
@@ -527,7 +526,7 @@ Cheltuielile de organizare de șantier se cuprind în devizul general (**HG 907/
 | Dezafectare + refacere amplasament | 0,3 – 0,6 % |
 | **Total estimativ organizare de șantier** | **≈ 2,0 – 4,0 % din C+M** (uzual ~2,5 %) |
 
-Pentru hale industriale, cu suprafețe mari de platformă și logistică de montaj metalic simplă, procentul se situează frecvent în intervalul **2,0 – 3,0 % din valoarea C+M**. Valoarea exactă se stabilește prin **antemăsurătoare și deviz de organizare** anexat, corelat cu taxa de autorizare a organizării de execuție (Legea 50/1991 — cotă din valoarea lucrărilor de organizare).
+Pentru hale industriale, cu suprafețe mari de platformă și logistică de montaj metalic simplă, procentul se situează frecvent în intervalul **2,0 – 3,0 % din valoarea C+M**. Valoarea exactă se stabilește prin **antemăsurătoare și deviz de organizare** anexat, corelat cu taxa de autorizare a organizării de execuție (Legea nr. 169/2026 — CATUC — cotă din valoarea lucrărilor de organizare).
 
 ---
 
@@ -537,7 +536,7 @@ Pe durata organizării și execuției se generează și se păstrează la punctu
 
 | Document | Rol | Cadru |
 |---|---|---|
-| Ordin de începere a lucrărilor + comunicare la ISC și ITM | Deschiderea șantierului | Legea 10/1995; Legea 50/1991 |
+| Ordin de începere a lucrărilor + comunicare la ISC și ITM | Deschiderea șantierului | Legea 10/1995; Legea nr. 169/2026 (CATUC) |
 | PV de predare-primire a amplasamentului + bornă de nivelment | Preluarea terenului de la investitor | Legea 10/1995 |
 | PV de trasare a lucrărilor | Fixarea axelor/cotelor | — |
 | Declarația prealabilă la ITM | Notificarea deschiderii șantierului | HG 300/2006, Anexa 3 |
@@ -554,7 +553,7 @@ Pe durata organizării și execuției se generează și se păstrează la punctu
 
 ## 16. Dezafectarea organizării și refacerea amplasamentului
 
-La finalizarea lucrărilor de bază, organizarea de execuție se **dezafectează integral**, obligație expresă din Legea 50/1991 și Ordinul MDRT 839/2009 (lucrările provizorii de organizare se desființează, iar terenul se aduce la starea prevăzută în autorizație). Etapele:
+La finalizarea lucrărilor de bază, organizarea de execuție se **dezafectează integral**, obligație expresă din Legea nr. 169/2026 (CATUC) (lucrările provizorii de organizare se desființează, iar terenul se aduce la starea prevăzută în autorizație). Etapele:
 
 1. demontarea și evacuarea containerelor, WC-urilor ecologice, împrejmuirii provizorii și a semnalizării de șantier;
 2. desființarea platformelor și drumurilor provizorii care nu devin definitive; decopertarea și evacuarea materialelor de balastare;
@@ -593,4 +592,4 @@ Investitorul asigură prezența dirigintelui pe toată durata execuției și con
 - **Anexa 5** — Devizul de organizare de șantier (antemăsurătoare + valoare).
 - **Anexa 6** — Diagramele de sarcină ale macaralei și fișele ISCIR ale utilajelor.
 
-> **Notă finală:** DTOE se corelează cu proiectul de bază (arhitectură, structură, instalații, scenariu PSI) și cu graficul de execuție al antreprenorului. La finalizarea lucrărilor, organizarea de execuție se dezafectează integral, iar amplasamentul se aduce la starea prevăzută în autorizația de construire, conform Legii 50/1991 și Ordinului MDRT 839/2009. Documentele generate pe parcurs (jurnal de șantier, PV-uri, registre SSM/deșeuri, buletine PRAM) intră în cartea tehnică a construcției.
+> **Notă finală:** DTOE se corelează cu proiectul de bază (arhitectură, structură, instalații, scenariu PSI) și cu graficul de execuție al antreprenorului. La finalizarea lucrărilor, organizarea de execuție se dezafectează integral, iar amplasamentul se aduce la starea prevăzută în autorizația de construire, conform Legii nr. 169/2026 (CATUC). Documentele generate pe parcurs (jurnal de șantier, PV-uri, registre SSM/deșeuri, buletine PRAM) intră în cartea tehnică a construcției.

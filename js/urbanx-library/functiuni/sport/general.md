@@ -1,6 +1,6 @@
 # MEMORIU TEHNIC GENERAL — SALĂ DE SPORT POLIVALENTĂ COMPETIȚIONALĂ, CU TRIBUNE (D.T.A.C.)
 
-> Documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.), întocmită conform Legii nr. 50/1991 republicată — Anexa nr. 1, și Ordinului MDRT nr. 839/2009 (Norme metodologice de aplicare). Prezentul memoriu general tratează o **sală de sport polivalentă competițională**, cu teren de joc multidisciplinar (marcaje suprapuse pentru handbal, baschet, volei, futsal), tribune omologate pentru **2.000 de spectatori** (1.500 de locuri fixe și 500 de locuri telescopice/mobile) — exemplu de referință pentru dimensionare, detaliat la cap. 1.1A, capacitatea reală a proiectului fiind cea confirmată de beneficiar —, vestiare, anexe administrativ-tehnice și circulațiile aferente. Funcțiunea este de cultură fizică și sport, cu profil de **sală aglomerată** (NP 068-2002), profil care condiționează, de la primele decizii de concepție, atât structura de rezistență (deschidere liberă de 30-36 m fără stâlpi intermediari), cât și securitatea la incendiu (evacuare calculată, avizare obligatorie ISU) și confortul interior (acustică, iluminat sportiv). Memoriul se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
+> Documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.), întocmită conform **Legii nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC, în vigoare din 25.08.2026), art. 264, conținut-cadru **Anexa nr. 2** la lege. Prezentul memoriu general tratează o **sală de sport polivalentă competițională**, cu teren de joc multidisciplinar (marcaje suprapuse pentru handbal, baschet, volei, futsal), tribune omologate pentru **2.000 de spectatori** (1.500 de locuri fixe și 500 de locuri telescopice/mobile) — exemplu de referință pentru dimensionare, detaliat la cap. 1.1A, capacitatea reală a proiectului fiind cea confirmată de beneficiar —, vestiare, anexe administrativ-tehnice și circulațiile aferente. Funcțiunea este de cultură fizică și sport, cu profil de **sală aglomerată** (NP 068-2002), profil care condiționează, de la primele decizii de concepție, atât structura de rezistență (deschidere liberă de 30-36 m fără stâlpi intermediari), cât și securitatea la incendiu (evacuare calculată, avizare obligatorie ISU) și confortul interior (acustică, iluminat sportiv). Memoriul se corelează cu memoriile de specialitate (arhitectură, structură, instalații), cu scenariul de securitate la incendiu, cu studiul geotehnic, cu ridicarea topografică și cu piesele desenate, fără a le dubla conținutul.
 
 > **Precizare de rang și de scop.** Documentul de față este memoriul general al unei investiții **pe o parcelă determinată** — cu cifre concrete de proiect (suprafețe, indicatori, capacitate de spectatori, număr de vestiare, locuri de parcare) — și nu se confundă cu documentațiile de rang teritorial (PUZ, PUG, strategii sportive/de agrement la nivel de UAT), care reglementează zona sau rețeaua de dotări sportive a unei localități, nu o soluție edificată punctual. Reglementările teritoriale (POT, CUT, regim de înălțime, retrageri) sunt preluate ca dat obligatoriu, nu propuse de prezentul proiect.
 
@@ -39,7 +39,7 @@ Sălile de sport polivalente competiționale se realizează, în marea majoritat
 
 ### 1.3. Faza de proiectare — D.T.A.C.
 
-Prezentul memoriu corespunde fazei de **documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.)**, reglementată de Legea nr. 50/1991 republicată (Anexa nr. 1) și de Ordinul MDRT nr. 839/2009. Conținutul documentației D.T.A.C. — piese scrise și piese desenate — este detaliat la cap. 2; el precedă fazele ulterioare de Proiect Tehnic (PTh) și Detalii de Execuție (DE), la care se dezvoltă integral breviarele de calcul structural (predimensionarea fermelor metalice de la cap. 7.3 devine, la PTh, un calcul complet la stare limită ultimă și la stare limită de serviciu), listele de cantități și devizul general definitiv (cap. 12).
+Prezentul memoriu corespunde fazei de **documentație tehnică pentru autorizarea executării lucrărilor de construire (D.T.A.C.)**, reglementată de Legea nr. 169/2026 (CATUC), art. 264, conținut-cadru Anexa nr. 2. Conținutul documentației D.T.A.C. — piese scrise și piese desenate — este detaliat la cap. 2; el precedă fazele ulterioare de Proiect Tehnic (PTh) și Detalii de Execuție (DE), la care se dezvoltă integral breviarele de calcul structural (predimensionarea fermelor metalice de la cap. 7.3 devine, la PTh, un calcul complet la stare limită ultimă și la stare limită de serviciu), listele de cantități și devizul general definitiv (cap. 12).
 
 ### 1.4. Categoria de importanță B — motivarea încadrării
 
@@ -67,7 +67,7 @@ Deși prezentul memoriu tratează o investiție punctuală, pe o parcelă determ
 
 ### 2.1. Piese scrise
 
-Documentația tehnică pentru autorizarea construirii unei săli de sport polivalente se compune, conform Legii nr. 50/1991 Anexa 1, din:
+Documentația tehnică pentru autorizarea construirii unei săli de sport polivalente se compune, conform Legii nr. 169/2026 (CATUC), Anexa nr. 2, din:
 
 1. Lista și semnăturile proiectanților (coordonator + specialități);
 2. Memoriul general (prezentul document);
@@ -101,9 +101,9 @@ Coordonarea între specialități este esențială la o sală de sport competiț
 
 ## 3. Cadrul normativ complet
 
-### 3.1. Legea 50/1991 și Legea 10/1995 — cele șase cerințe fundamentale
+### 3.1. Legea 169/2026 (CATUC) și Legea 10/1995 — cele șase cerințe fundamentale
 
-**Legea nr. 50/1991** republicată, privind autorizarea executării lucrărilor de construcții, reglementează procedura și conținutul documentației (Anexa 1) necesare obținerii Autorizației de Construire, aplicabilă oricărei construcții, inclusiv sălilor de sport. **Legea nr. 10/1995** privind calitatea în construcții, împreună cu Regulamentul de verificare și expertizare tehnică (HG 925/1995), instituie cele șase cerințe fundamentale de calitate (A — rezistență mecanică și stabilitate, B — securitate la incendiu, C — igienă, sănătate și mediu, D — siguranță și accesibilitate în exploatare, E — protecție împotriva zgomotului, F — economie de energie și izolare termică), fiecare verificată de verificatori de proiecte atestați MDLPA (cap. 13.7). La o sală de sport polivalentă competițională, cerințele A (deschiderea liberă mare, cap. 7.2-7.3), B (sala aglomerată, cap. 8) și D (siguranța tribunelor, balustrade, evacuare) primesc o pondere de exigență superioară celei uzuale la o construcție civilă obișnuită, tocmai din profilul de risc discutat la cap. 1.4-1.6.
+**Legea nr. 169/2026** (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, reglementează procedura și conținutul documentației (Anexa nr. 2) necesare obținerii Autorizației de Construire, aplicabilă oricărei construcții, inclusiv sălilor de sport. **Legea nr. 10/1995** privind calitatea în construcții, împreună cu Regulamentul de verificare și expertizare tehnică (HG 925/1995), instituie cele șase cerințe fundamentale de calitate (A — rezistență mecanică și stabilitate, B — securitate la incendiu, C — igienă, sănătate și mediu, D — siguranță și accesibilitate în exploatare, E — protecție împotriva zgomotului, F — economie de energie și izolare termică), fiecare verificată de verificatori de proiecte atestați MDLPA (cap. 13.7). La o sală de sport polivalentă competițională, cerințele A (deschiderea liberă mare, cap. 7.2-7.3), B (sala aglomerată, cap. 8) și D (siguranța tribunelor, balustrade, evacuare) primesc o pondere de exigență superioară celei uzuale la o construcție civilă obișnuită, tocmai din profilul de risc discutat la cap. 1.4-1.6.
 
 ### 3.2. HG 907/2016 — conținutul-cadru al documentațiilor tehnico-economice
 
@@ -155,7 +155,7 @@ Pentru facilitarea corelării între specialități (cap. 2.4), se sintetizează
 
 | Domeniu | Acte normative principale |
 |---|---|
-| Autorizare / calitate | Legea 50/1991 (+ Ord. 839/2009), Legea 10/1995, Legea 350/2001, HG 907/2016, HG 766/1997, HG 372/2005, HG 525/1996, HG 925/1995 |
+| Autorizare / calitate | Legea nr. 169/2026 (CATUC), Legea 10/1995, HG 907/2016, HG 766/1997, HG 372/2005, HG 525/1996, HG 925/1995 |
 | Structură / seism / acțiuni climatice | P100-1/2013, CR 0/2012, CR 1-1-3/2012 (zăpadă), CR 1-1-4/2012 (vânt), SR EN 1990-1999/1993/1994, NP 074/2014 |
 | Săli de sport (specific) | **NP 065-2002** |
 | Aglomerări de persoane | **NP 068-2002** |

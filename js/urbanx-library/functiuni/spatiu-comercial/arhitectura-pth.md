@@ -3,7 +3,7 @@
 Prezentul supliment de fază PTh dezvoltă, la nivel de execuție, detaliile de arhitectură ale spațiului comercial — supermarket alimentar cu autoservire, regim de înălțime **P+1E parțial** (parterul comercial complet + mezanin parțial de back-office), sală de vânzare netă **1.500 mp**, teren **6.500 mp**, Ac **2.180 mp**, Ad **2.510 mp** — în completarea fazei DTAC (memoriul de arhitectură al aceleiași documentații). Detaliile sunt redactate la scările 1:5 și 1:10, cotate integral, cu indicarea materialelor, a stratificațiilor și a punctelor de etanșare. Numerotarea detaliilor (D01…D12) corespunde plotelor din piesele desenate PTh-A. Spre deosebire de suplimentul PTh al unei clădiri civile obișnuite, jumătate din detaliile de mai jos tratează interfețe specifice comerțului alimentar cu autoservire — vitrina mare de fațadă, ușa secțională a dock-ului, compartimentarea camerelor frigorifice — care nu au corespondent la o clădire de locuit sau de birouri și care condiționează direct funcționarea comercială și lanțul de frig descrise la memoriul DTAC (cap. 3-9).
 
 Cadru normativ de referință pentru detaliere:
-- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut cadru documentații), Ordinul MDRT 839/2009;
+- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut cadru documentații), Legea nr. 169/2026 (CATUC);
 - C107 toate părțile (termotehnica), Mc 001 (calcul higrotermic), Ordinul 2641/2017 (cerințe minime performanță energetică);
 - NP 040-2002 (proiectare, execuție, exploatare hidroizolații), NP 064-2002 (terase necirculabile), C112-1986 (hidroizolații bituminoase);
 - SR EN 14351-1 (ferestre și uși pietonale exterioare), SR EN 1279 (vitraj izolant), SR EN 13830 (pereți cortină);

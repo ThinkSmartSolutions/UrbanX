@@ -36,7 +36,7 @@ Prin aceste funcții, cartea tehnică depășește statutul de simplă „arhiv�
 | **HG nr. 343/2017** — modifică și completează HG 273/1994 | Actualizarea regulamentului de recepție (componența comisiei, rolul proiectantului și dirigintelui, referate, ISC) | Predarea cărții tehnice către proprietar este condiție a recepției; comisia consemnează existența și starea acesteia |
 | **Normativ P130/1999** — Normativ privind comportarea în timp a construcțiilor | Urmărirea curentă și urmărirea specială; parametri, periodicitate, responsabili, program de urmărire | Detaliază conținutul **secțiunii D** a cărții tehnice; stabilește obligația programului de urmărire și consemnarea în jurnalul evenimentelor |
 | **HG nr. 907/2016** privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice | Conținutul studiilor de fezabilitate, DALI, proiectului tehnic (PT), detaliilor de execuție (DE) | Documentațiile de proiectare astfel elaborate constituie piesele **secțiunii A** a cărții tehnice |
-| **Legea nr. 50/1991** (rep.) privind autorizarea executării lucrărilor de construcții | Autorizația de construire / desființare; regularizarea taxei; recepția ca precondiție | Autorizația de construire și procesul-verbal de recepție sunt piese ale cărții tehnice (secțiunile A–B–C); autorizația de desființare — la postutilizare |
+| **Legea nr. 169/2026** (CATUC) — Codul amenajării teritoriului, urbanismului și construcțiilor | Autorizația de construire (art. 264, Anexa nr. 2) / desființare (art. 302, Anexa nr. 5); regularizarea taxei; recepția ca precondiție | Autorizația de construire și procesul-verbal de recepție sunt piese ale cărții tehnice (secțiunile A–B–C); autorizația de desființare — la postutilizare |
 
 > **Regulă de fidelitate.** Numerotarea exactă a articolelor din Legea 10/1995 a fost modificată prin republicare; în text se face trimitere la **materia** reglementată (obligații, urmărire, recepție, contravenții) și la **actul/anexa/capitolul** de referință. Detaliile procedurale privind componența cărții tehnice sunt cele din **Anexa 6 la HG 766/1997**, care este textul de bază pentru acest document.
 
@@ -443,7 +443,7 @@ Datele de urmărire nu se colectează pentru arhivare, ci pentru **decizie**: ev
 Intervențiile asupra construcției existente — **reparații capitale, consolidări, modernizări, extinderi, schimbări de destinație** — sunt reglementate de Legea 10/1995 și de Anexa 6 la HG 766/1997 și se supun unui regim strict:
 
 - **Fundamentare**: orice intervenție care afectează cerințele fundamentale (în special rezistența mecanică și stabilitatea, securitatea la incendiu) se face pe baza unei **expertize tehnice** întocmite de expert atestat și a unui **proiect de intervenție** verificat de verificator de proiecte atestat pe cerințele afectate;
-- **Autorizare**: intervențiile care intră sub incidența Legii 50/1991 se execută în baza **autorizației de construire**;
+- **Autorizare**: intervențiile care intră sub incidența Legii nr. 169/2026 (CATUC), art. 264, se execută în baza **autorizației de construire**;
 - **Execuție și recepție**: intervenția se execută cu respectarea sistemului calității (diriginte, RTE, controale pe faze, faze determinante după caz) și se **recepționează** cu proces-verbal;
 - **Înregistrare în cartea tehnică**: expertiza, proiectul de intervenție, autorizația, documentele de execuție și PV de recepție ale intervenției se **depun în secțiunea D**, iar evenimentul se **consemnează în jurnalul evenimentelor**; planurile se actualizează („as built" post-intervenție);
 - La **schimbarea destinației** sau a încărcărilor de exploatare, se reevaluează încadrarea (categorie/clasă de importanță) și conformarea la cerințele fundamentale, cu consemnare în cartea tehnică.
@@ -455,11 +455,11 @@ Intervențiile nu se pot realiza „în afara" cărții tehnice: cartea tehnică
 | Tip de intervenție | Expertiză tehnică | Proiect verificat | Autorizație de construire | Recepție | Înregistrare în cartea tehnică |
 |---|---|---|---|---|---|
 | Întreținere / reparații curente | Nu (de regulă) | Nu | Nu (de regulă) | — | Jurnal evenimente + fișe |
-| Reparații capitale | Da, dacă afectează cerințele | Da, pe cerințele afectate | Da, dacă intră sub Legea 50/1991 | Da | Secțiunea D, integral |
+| Reparații capitale | Da, dacă afectează cerințele | Da, pe cerințele afectate | Da, dacă intră sub Legea nr. 169/2026 (CATUC) | Da | Secțiunea D, integral |
 | Consolidare | Da (obligatoriu) | Da | Da | Da | Secțiunea D + „as built" post-intervenție |
 | Modernizare / reabilitare | Da, dacă afectează cerințele | Da | Da | Da | Secțiunea D + actualizare planuri |
 | Extindere / supraetajare | Da | Da | Da | Da | Secțiunea D + revizuire fișă sinteză |
-| Schimbare de destinație | Da (reevaluare încadrare) | Da, dacă modifică soluțiile | Da, dacă intră sub Legea 50/1991 | Da | Secțiunea D + reevaluare categorie/clasă |
+| Schimbare de destinație | Da (reevaluare încadrare) | Da, dacă modifică soluțiile | Da, dacă intră sub Legea nr. 169/2026 (CATUC) | Da | Secțiunea D + reevaluare categorie/clasă |
 
 ### 8.2 Continuitatea răspunderii la intervenții
 
@@ -473,7 +473,7 @@ Postutilizarea (dezafectarea, demolarea/desființarea și valorificarea material
 
 - Postutilizarea se declanșează când construcția și-a încheiat durata de utilizare / este dezafectată / prezintă riscuri;
 - Se fundamentează, după caz, pe **expertiză tehnică** privind starea și pe un **proiect de desființare**;
-- Desființarea se autorizează prin **autorizație de desființare** (Legea 50/1991);
+- Desființarea se autorizează prin **autorizație de desființare** (Legea nr. 169/2026 — CATUC, art. 302, Anexa nr. 5);
 - Se asigură **protecția și securitatea** pe durata lucrărilor, precum și **gestiunea deșeurilor** din construcții și desființări (sortare, valorificare, eliminare conform reglementărilor de mediu);
 - Documentele de postutilizare (expertiză, proiect de desființare, autorizație, PV de recepție a desființării, evidența deșeurilor) se **depun în secțiunea D** / se atașează cărții tehnice, care se **arhivează** conform reglementărilor după finalizare;
 - Se actualizează situația cadastrală (radiere din cartea funciară a construcției desființate).

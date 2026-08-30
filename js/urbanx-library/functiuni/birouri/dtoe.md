@@ -1,14 +1,14 @@
 # MEMORIU TEHNIC — ORGANIZAREA EXECUȚIEI LUCRĂRILOR (D.T.O.E.)
 
-*Întocmit conform Legii nr. 50/1991 (Anexa 1, secțiunea D.T.O.E.), HG 300/2006, Legii 319/2006, Legii 307/2006 + C300, Legii 211/2011, Legii 10/1995.*
+*Întocmit conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2 — secțiunea D.T.O.E., HG 300/2006, Legii 319/2006, Legii 307/2006 + C300, Legii 211/2011, Legii 10/1995.*
 
 ## 1. Date generale și obiectul DTOE
 
 ### 1.1. Obiectul documentației
 
-Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E.) este întocmit conform Legii nr. 50/1991 privind autorizarea executării lucrărilor de construcții, republicată, Anexa nr. 1 — secțiunea D.T.O.E., și reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului „Imobil de birouri clasa A, regim de înălțime S+P+6E, cu parcaj subteran", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
+Prezentul Memoriu Tehnic de Organizare a Execuției (D.T.O.E.) este întocmit conform Legii nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), art. 264, Anexa nr. 2 — secțiunea D.T.O.E., și reglementează modul de organizare, dotare, desfășurare și coordonare a lucrărilor de execuție aferente obiectivului „Imobil de birouri clasa A, regim de înălțime S+P+6E, cu parcaj subteran", pe întreaga durată a șantierului, de la predarea amplasamentului până la recepția la terminarea lucrărilor.
 
-Spre deosebire de o construcție de mici dimensiuni amplasată pe o parcelă generoasă, un imobil de birouri clasa A de regim S+P+6E, cu subsol de parcaj pe toată amprenta (~900 mp) și volum construit de cca. 28.000 mc, ridicat pe o parcelă de referință de ~2.500 mp în zonă urbană cu funcțiune mixtă/servicii, presupune o organizare de șantier **constrânsă spațial**: suprafața liberă rămasă după amprenta construcției (~1.600 mp, din care se scad retragerile și zonele de siguranță) este adesea insuficientă pentru amplasarea integrală a baracamentelor, a depozitelor și a razei de acțiune a mijloacelor de ridicare, motiv pentru care prezentul DTOE tratează explicit și varianta de **ocupare temporară a domeniului public adiacent** (trotuar, o bandă de circulație), condiționată de obținerea autorizației de ocupare a domeniului public emisă de administrația publică locală, conform art. 3 alin. (2) din Legea nr. 50/1991 și regulamentelor locale de ocupare a domeniului public.
+Spre deosebire de o construcție de mici dimensiuni amplasată pe o parcelă generoasă, un imobil de birouri clasa A de regim S+P+6E, cu subsol de parcaj pe toată amprenta (~900 mp) și volum construit de cca. 28.000 mc, ridicat pe o parcelă de referință de ~2.500 mp în zonă urbană cu funcțiune mixtă/servicii, presupune o organizare de șantier **constrânsă spațial**: suprafața liberă rămasă după amprenta construcției (~1.600 mp, din care se scad retragerile și zonele de siguranță) este adesea insuficientă pentru amplasarea integrală a baracamentelor, a depozitelor și a razei de acțiune a mijloacelor de ridicare, motiv pentru care prezentul DTOE tratează explicit și varianta de **ocupare temporară a domeniului public adiacent** (trotuar, o bandă de circulație), condiționată de obținerea autorizației de ocupare a domeniului public emisă de administrația publică locală, conform Legii nr. 169/2026 (CATUC) și regulamentelor locale de ocupare a domeniului public.
 
 Documentația se corelează obligatoriu cu:
 - Planul de Securitate și Sănătate întocmit conform H.G. nr. 300/2006 privind cerințele minime de securitate și sănătate pentru șantierele temporare sau mobile;
@@ -79,12 +79,12 @@ Volumul de peste 25.000 om-zile și efectivele de vârf (peste 45 de lucrători 
 
 | Document | Emitent / bază legală | Rol în începerea execuției |
 |---|---|---|
-| Autorizație de construire | Autoritatea administrației publice locale — Legea 50/1991 | Actul care permite execuția |
+| Autorizație de construire | Autoritatea administrației publice locale — Legea nr. 169/2026 (CATUC), art. 264 | Actul care permite execuția |
 | Autorizație de ocupare temporară a domeniului public (dacă e cazul) | Administrația publică locală | Condiție pentru macara, containere, depozite pe trotuar/bandă de circulație |
 | Program de urmărire a calității (P.C.C.Q.) vizat ISC | Proiectant + verificator, viza ISC — Legea 10/1995 | Stabilește fazele determinante |
 | Declarația prealabilă ITM | Beneficiar — H.G. 300/2006 art. 47 | Notificarea deschiderii șantierului |
 | Ordinul de începere a lucrărilor | Beneficiar/diriginte de șantier | Consemnat în cartea tehnică |
-| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea 50/1991 art. 7 | Obligatorie cu 5 zile înainte |
+| Comunicarea începerii lucrărilor către ISC | Beneficiar — Legea nr. 169/2026 (CATUC) | Obligatorie cu 5 zile înainte |
 | Contracte cu operatori autorizați deșeuri | Antreprenor — Legea 211/2011 | Condiție pentru evacuarea deșeurilor |
 | Autorizațiile ISCIR mijloace de ridicare (macara turn) | Deținător utilaj | Condiție pentru utilizarea macaralei |
 | Avizul ISU pentru documentația DTAC (pre-execuție) | ISU — HG 571/2016 | Condiție premergătoare Autorizației de construire |
@@ -97,7 +97,7 @@ Organizarea de șantier (O.S.) se amplasează prioritar în incinta terenului be
 
 Perimetrul șantierului se împrejmuiește pe toată durata execuției cu panouri metalice de gard mobil (tip Heras), înălțime minimă 2,00 m, montate pe suporți din beton prefabricat, cu prindere între panouri prin cleme. Pe latura dinspre stradă și dinspre eventualele clădiri învecinate ocupate, panourile se dublează cu plasă/prelată opacă antipraf. La accese se prevăd porți metalice culisante/batante de minimum 4,00–6,00 m lățime pentru accesul auto (utilaje, autobetoniere) și o portiță de 1,00 m pentru accesul pietonal al personalului, separată de fluxul utilajelor.
 
-Pe împrejmuire se montează, conform H.G. nr. 971/2006: panoul de identificare a șantierului (Legea nr. 50/1991, art. 7 alin. (8)); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare de protecție a muncii; panouri cu numărul de telefon de urgență (112) și date de contact ale coordonatorului SSM; unde șantierul ocupă domeniul public, semnalizare rutieră temporară conformă (limitare viteză, deviere pietoni pe trotuarul opus, dacă e cazul).
+Pe împrejmuire se montează, conform H.G. nr. 971/2006: panoul de identificare a șantierului (Legea nr. 169/2026 — CATUC); indicatoare „Șantier în lucru — Acces interzis persoanelor neautorizate"; indicatoare de protecție a muncii; panouri cu numărul de telefon de urgență (112) și date de contact ale coordonatorului SSM; unde șantierul ocupă domeniul public, semnalizare rutieră temporară conformă (limitare viteză, deviere pietoni pe trotuarul opus, dacă e cazul).
 
 ### 2.2. Accesele în șantier
 
@@ -378,4 +378,4 @@ Conform H.G. nr. 971/2006: la accese — indicatoare de interdicție și de obli
 
 Regulament de ordine interioară afișat la intrare; pontajul personalului și al vizitatorilor cu instructaj la acces; program de lucru declarat, cu respectarea orelor de liniște; responsabilizarea subantreprenorilor (numeroși, dată fiind complexitatea specialităților unei clădiri de birouri clasa A — structură, fațadă cortină, HVAC, curenți slabi, lifturi) prin planurile proprii SSM/PSI coordonate de coordonatorul SSM; verificarea periodică a împrejmuirii, semnalizării, dotărilor PSI și a instalațiilor provizorii, consemnată în registrele de șantier.
 
-*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 50/1991, Anexa 1.*
+*Prezentul D.T.O.E. se completează cu planșa de organizare a execuției, cu Planul de Securitate și Sănătate (H.G. nr. 300/2006), cu programul de urmărire a calității și cu graficul detaliat de execuție, făcând parte integrantă din documentația pentru autorizare conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2.*

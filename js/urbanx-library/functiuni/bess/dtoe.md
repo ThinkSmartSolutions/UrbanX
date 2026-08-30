@@ -35,8 +35,7 @@ DTOE reglementează, pe toată durata execuției instalației:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare | Cap. 1, 3 |
-| **Ordin MDRAP 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | AC; organizarea de execuție ca lucrare; conținut-cadru DTOE/POE | Cap. 1, 3; structura documentației |
 | **HG 300/2006** | SSM pe șantiere temporare/mobile | **Cap. 4 — act central**, cu accent pe lucrul electric MT și manipularea bateriilor |
 | **HG 1146/2006** | Utilizarea echipamentelor de muncă (macarale, transport agabaritic) | Cap. 3, 4 |
 | **C 300/1994** | Prevenirea și stingerea incendiilor pe durata execuției | Cap. 4 — risc specific baterii litiu-ion |

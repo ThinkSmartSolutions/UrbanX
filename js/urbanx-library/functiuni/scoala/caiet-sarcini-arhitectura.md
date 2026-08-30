@@ -66,7 +66,7 @@ Prezentul caiet de sarcini de arhitectură se coordonează obligatoriu cu caietu
 | SR EN ISO 12944 | Protecția anticorozivă a structurilor de oțel prin sisteme de vopsire |
 | C 300/1994 | Normativ de prevenire și stingere a incendiilor pe durata execuției |
 | HG nr. 343/2017 | Recepția lucrărilor de construcții și instalații aferente acestora |
-| Legea nr. 50/1991 (republicată) | Autorizarea executării lucrărilor de construcții |
+| Legea nr. 169/2026 (CATUC) | Autorizarea executării lucrărilor de construcții |
 | Legea nr. 211/2011 (republicată) | Regimul deșeurilor |
 | Legea nr. 319/2006, HG nr. 300/2006 | Securitatea și sănătatea în muncă pe șantiere |
 | SR EN 12004 | Adezivi pentru plăci ceramice — cerințe, evaluare, clasificare |

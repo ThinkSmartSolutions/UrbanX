@@ -103,11 +103,11 @@ Se recomandă **Varianta 2 — Extindere completă**, care aliniază spațiul la
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU | P118-1/2013 |
 | Aviz sanitar-veterinar | DSVSA | Norme comercializare alimente |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

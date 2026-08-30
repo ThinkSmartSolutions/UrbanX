@@ -343,17 +343,17 @@ Se recomandă **Varianta 2 — Maximală**, motivat prin: (a) atingerea unui gra
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie / Consiliu Județean | Legea 50/1991 |
+| Certificat de urbanism | Primărie / Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU | HG 571/2016, P118 |
 | Aviz sanitar | DSP | Ord. MS 119/2014 |
 | Avize utilități (apă, canal, electric, gaz) | Operatori | — |
 | Verificare proiect cerințe A1, B1, C, D, E | Verificatori atestați | Legea 10/1995 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 | Licențiere serviciu social | MMSS / AJPIS | Legea 197/2012, Ord. 29/2019 |
 
 ### 12.2. Concluzii
 
 Documentația de Avizare a Lucrărilor de Intervenții demonstrează **fezabilitatea tehnică și oportunitatea** reconversiei imobilului existent într-un Centru Social de Zi pentru persoane vârstnice. Construcția existentă, deși cu deficiențe structurale și energetice specifice epocii de edificare (1974), poate fi adusă la parametri de siguranță și confort corespunzători noii funcțiuni prin lucrări de **consolidare structurală (Rs IV, R3 = 0,92), reabilitare termică performantă (clasă B, nZEB), schimbare de destinație cu adaptări de accesibilitate și PSI, extindere parter și mansardare**.
 
-Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC, PT, DE), cu respectarea integrală a normativelor: HG 907/2016, P100-3/2019, P100-1/2013, Legea 10/1995, Legea 372/2005, Mc 001, Ord. MDRT 2641/2012, Legea 50/1991 și NP 051/2012.
+Se recomandă aprobarea **Variantei 2 — Maximală** și trecerea la fazele următoare de proiectare (DTAC, PT, DE), cu respectarea integrală a normativelor: HG 907/2016, P100-3/2019, P100-1/2013, Legea 10/1995, Legea 372/2005, Mc 001, Ord. MDRT 2641/2012, Legea nr. 169/2026 (CATUC) și NP 051/2012.

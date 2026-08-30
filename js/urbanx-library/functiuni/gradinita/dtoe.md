@@ -2,7 +2,7 @@
 
 Documentație de organizare a execuției (DTOE / POE) întocmită pentru **construire creșă/grădiniță cu program prelungit, regim de înălțime P+1, capacitate 90 de copii (4-5 grupe)**, clădire nouă cu structură din cadre de beton armat/zidărie confinată, amenajări exterioare (spații de joacă separate pe grupe de vârstă, spații verzi, împrejmuire securizată), racorduri la utilități și organizare de șantier. Suprafață construită (Sc) ≈ 700 mp, suprafață desfășurată (Sd) ≈ 1.240 mp, teren ≈ 3.200 mp.
 
-DTOE fundamentează **autorizarea executării organizării de execuție**, ca lucrare provizorie înscrisă în autorizația de construire, conform **Legii 50/1991 (rep.) art. 3 și Anexa 2** și a **Normelor metodologice aprobate prin Ordinul MDRT 839/2009**. Documentul stabilește incinta de organizare, dotările, tehnologia, eșalonarea, măsurile SSM/PSI/mediu și, cu o pondere superioară celei uzuale la o construcție civilă obișnuită, **managementul relației cu vecinătățile** — o cerință de proiectare a organizării de șantier impusă direct de natura beneficiarilor finali ai construcției (copii preșcolari și antepreșcolari) și de vulnerabilitatea oricărei funcțiuni similare aflate eventual în vecinătate.
+DTOE fundamentează **autorizarea executării organizării de execuție**, ca lucrare provizorie înscrisă în autorizația de construire, conform **Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2**. Documentul stabilește incinta de organizare, dotările, tehnologia, eșalonarea, măsurile SSM/PSI/mediu și, cu o pondere superioară celei uzuale la o construcție civilă obișnuită, **managementul relației cu vecinătățile** — o cerință de proiectare a organizării de șantier impusă direct de natura beneficiarilor finali ai construcției (copii preșcolari și antepreșcolari) și de vulnerabilitatea oricărei funcțiuni similare aflate eventual în vecinătate.
 
 > **Corelare:** DTOE nu reia memoriile de arhitectură, structură (rezistență), instalații sau scenariul de securitate la incendiu ale creșei/grădiniței — le folosește ca documentație-suport (soluții tehnice, cantități, cote) pentru dimensionarea organizării. Cartea tehnică (secțiunea B — execuție) preia din DTOE planul de organizare, jurnalul de șantier și planul SSM. Prezentul document nu reia nici conținutul memoriului general (cap. 2.2-2.3 — context social, finanțare) sau al scenariului de securitate la incendiu (evacuare, compartimentare) — este trimis la acestea ori de câte ori este relevant pentru organizarea execuției.
 
@@ -48,7 +48,7 @@ Deși dimensiunea construcției (P+1, Sc ≈ 700 mp) este modestă comparativ cu
 
 **Prima consecință** privește **protecția populației vulnerabile din vecinătate pe durata execuției**: dacă în proximitatea imediată a șantierului funcționează o altă creșă, grădiniță sau școală primară, programul de lucru, nivelul de zgomot admis, traseele de transport al materialelor și orele de livrare trebuie corelate explicit cu programul de funcționare al acelei unități (ore de sosire/plecare a copiilor, intervale de somn de amiază, recreații în curte), pentru a evita atât perturbarea actului educațional al unității vecine, cât și, mai grav, orice risc de siguranță generat de suprapunerea fluxurilor de transport greu de șantier cu fluxurile pietonale de copii însoțiți de părinți pe același tronson de stradă.
 
-**A doua consecință** privește **securizarea perimetrului șantierului împotriva accesului copiilor din zonă**: un șantier de construcții reprezintă, prin natura sa (excavații deschise, materiale depozitate, utilaje în mișcare, structuri neterminate), un pericol semnificativ pentru orice copil care ar reuși să pătrundă neautorizat în incintă — risc amplificat de proximitatea rezidențială tipică amplasamentelor de creșe/grădinițe, unde copiii din zonă circulă frecvent, nesupravegheați sau parțial supravegheați, pe trotuarele și spațiile publice adiacente. Din acest motiv, împrejmuirea provizorie de șantier (cap. 3.1) și controlul accesului (cap. 3.1, cap. 12) sunt tratate în prezentul document cu un standard superior celui minim reglementat generic de Legea 50/1991, standard justificat de profilul de risc specific al vecinătății.
+**A doua consecință** privește **securizarea perimetrului șantierului împotriva accesului copiilor din zonă**: un șantier de construcții reprezintă, prin natura sa (excavații deschise, materiale depozitate, utilaje în mișcare, structuri neterminate), un pericol semnificativ pentru orice copil care ar reuși să pătrundă neautorizat în incintă — risc amplificat de proximitatea rezidențială tipică amplasamentelor de creșe/grădinițe, unde copiii din zonă circulă frecvent, nesupravegheați sau parțial supravegheați, pe trotuarele și spațiile publice adiacente. Din acest motiv, împrejmuirea provizorie de șantier (cap. 3.1) și controlul accesului (cap. 3.1, cap. 12) sunt tratate în prezentul document cu un standard superior celui minim reglementat generic de Legea nr. 169/2026 (CATUC), standard justificat de profilul de risc specific al vecinătății.
 
 Aceste două consecințe traversează, sub o formă sau alta, întregul prezent document — de la amplasarea incintei (cap. 3), la programul de lucru (cap. 6, cap. 12), la protecția mediului (cap. 11) și la managementul traficului (cap. 12) — și constituie diferența de fond dintre DTOE-ul unei clădiri civile obișnuite și DTOE-ul unei unități de educație timpurie.
 
@@ -56,8 +56,7 @@ Aceste două consecințe traversează, sub o formă sau alta, întregul prezent 
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) — autorizarea executării lucrărilor de construcții | AC; organizarea de execuție ca lucrare (Anexa 2); panoul de identificare; refacerea terenului | Cap. 1 (temei), cap. 3 (incintă provizorie), cap. 13 (panou) |
-| **Ordin MDRT 839/2009** — Norme metodologice de aplicare a Legii 50/1991 | Conținutul DTOE/POE, taxa organizare, refacerea la finalizare | Structura documentației; obligația refacerii amplasamentului |
+| **Legea nr. 169/2026** (CATUC) — autorizarea executării lucrărilor de construcții | AC; organizarea de execuție ca piesă a conținutului-cadru, art. 264, Anexa nr. 2; panoul de identificare; refacerea terenului | Cap. 1 (temei), cap. 3 (incintă provizorie), cap. 13 (panou), structura documentației |
 | **Legea 10/1995** (rep.) — calitatea în construcții | Cele 7 cerințe fundamentale; sistemul calității; jurnalul de șantier | Cap. 6 (tehnologie), corelare carte tehnică |
 | **HG 300/2006** — cerințe minime de SSM pentru șantiere temporare sau mobile | Plan de securitate și sănătate; coordonator SSM proiectare/execuție; declarație prealabilă ITM; registru de coordonare | Cap. 9 integral |
 | **Legea 319/2006** — securitatea și sănătatea în muncă | Obligații angajator/lucrători; evaluarea riscurilor; instruire; EIP | Cap. 9 |
@@ -113,7 +112,7 @@ Spre deosebire de o organizare de șantier industrială, la o clădire civilă d
 
 ### 3.1 Incinta și împrejmuirea — standard sporit de securizare
 
-Incinta de organizare se amplasează integral în interiorul parcelei, adiacent construcției, astfel încât să nu obtureze fronturile de lucru. **Împrejmuirea provizorie** este obligatorie pe tot perimetrul de lucru (Legea 50/1991), cu o rigoare de execuție superioară minimului uzual, justificată de riscul specific descris la capitolul 1.3: panouri opace metalice/mesh **H = 2,00 m**, fără goluri, fisuri sau puncte de escaladare accesibile unui copil, montate pe fundații prefabricate din beton, cu **plasă/prelată de protecție anti-praf** pe latura spre drumul public și spre vecini. Lungime împrejmuire orientativă, funcție de perimetrul incintei de organizare ≈ 180-220 m (variază cu configurația concretă a terenului de 3.200 mp).
+Incinta de organizare se amplasează integral în interiorul parcelei, adiacent construcției, astfel încât să nu obtureze fronturile de lucru. **Împrejmuirea provizorie** este obligatorie pe tot perimetrul de lucru (Legea nr. 169/2026 — CATUC), cu o rigoare de execuție superioară minimului uzual, justificată de riscul specific descris la capitolul 1.3: panouri opace metalice/mesh **H = 2,00 m**, fără goluri, fisuri sau puncte de escaladare accesibile unui copil, montate pe fundații prefabricate din beton, cu **plasă/prelată de protecție anti-praf** pe latura spre drumul public și spre vecini. Lungime împrejmuire orientativă, funcție de perimetrul incintei de organizare ≈ 180-220 m (variază cu configurația concretă a terenului de 3.200 mp).
 
 La porți se instituie obligatoriu **pază/control acces pe toată durata programului de lucru**, cu mecanisme de închidere sigure (lacăt/zăvor la înălțime și cu complexitate de manevrare inaccesibile copiilor) și interdicție fermă de a lăsa porțile deschise sau nesupravegheate, chiar și pentru intervale scurte de timp — o regulă de disciplină de șantier cu relevanță practică directă, dat fiind că exact aceste intervale scurte de poartă deschisă nesupravegheată reprezintă, în experiența generală a organizării de șantiere în zone rezidențiale, punctul de risc cel mai frecvent pentru pătrunderea accidentală a unui copil din zonă. Panourile de semnalizare de avertizare („Șantier — Acces Interzis", „Pericol", cu pictograme） se montează la intervale regulate pe tot perimetrul vizibil dinspre exterior, la o înălțime și cu o dimensiune a pictogramelor accesibile inclusiv percepției copiilor din zonă, nu doar adulților.
 
@@ -356,7 +355,7 @@ Fiecare lot de material intră cu document de calitate (certificat beton, certif
 | 4 | **Electrocutare** (instalații provizorii) | PRAM la punerea sub tensiune și periodic; diferențial 30 mA; tablouri închise | HG 1146/2006 |
 | 5 | **Coliziuni om-utilaj** (circulație internă) | Separarea fluxurilor; alei pietonale marcate; avertizoare de mers înapoi | HG 1091/2006; HG 971/2006 |
 | 6 | **Zgomot/vibrații, praf** | EIP antifonic; stropire anti-praf; rotația sarcinilor | Legea 319/2006 |
-| 7 | **Acces neautorizat al persoanelor din exterior (inclusiv copii din zonă)** | Pază la porți, împrejmuire fără puncte de escaladare, mecanisme de închidere sigure, semnalizare clară (cap. 3.1, cap. 12) | Legea 50/1991; bună practică specifică |
+| 7 | **Acces neautorizat al persoanelor din exterior (inclusiv copii din zonă)** | Pază la porți, împrejmuire fără puncte de escaladare, mecanisme de închidere sigure, semnalizare clară (cap. 3.1, cap. 12) | Legea nr. 169/2026 (CATUC); bună practică specifică |
 
 ### 9.3 Echipament individual de protecție (EIP) — HG 1048/2006
 
@@ -448,7 +447,7 @@ Acest capitol tratează, cu detaliere superioară celei uzuale la o clădire civ
 
 ### 12.1 Managementul traficului general
 
-Gestionarea circulației respectă **OUG 195/2002**, **SR 1848** și Legea 50/1991 privind protecția circulației publice.
+Gestionarea circulației respectă **OUG 195/2002**, **SR 1848** și Legea nr. 169/2026 (CATUC), care reglementează organizarea de execuție ca piesă a autorizației de construire.
 
 - Accesul la/din șantier se semnalizează cu indicatoare temporare pe drumul public, avizate de administratorul drumului și poliția rutieră.
 - Transporturile grele (autobetoniere, camioane cu materiale) se programează pentru a nu suprasolicita drumul public în orele de vârf ale traficului local.
@@ -484,9 +483,9 @@ Se stabilesc puncte de așteptare în afara carosabilului public pentru vehicule
 
 ## 13. Semnalizarea șantierului și panoul de identificare a investiției
 
-### 13.1 Panoul de identificare a investiției (obligatoriu — Legea 50/1991)
+### 13.1 Panoul de identificare a investiției (obligatoriu — Legea nr. 169/2026, CATUC)
 
-Se amplasează la loc vizibil, la limita drumului public, pe toată durata execuției. Conform Ordinului MDRT 839/2009, panoul conține minim:
+Se amplasează la loc vizibil, la limita drumului public, pe toată durata execuției. Conform Legii nr. 169/2026 (CATUC), panoul conține minim:
 
 | Câmp obligatoriu | Conținut |
 |---|---|
@@ -549,7 +548,7 @@ Pe durata organizării și execuției se generează și se păstrează la punctu
 
 | Document | Rol | Cadru |
 |---|---|---|
-| Ordin de începere a lucrărilor + comunicare la ISC și ITM | Deschiderea șantierului | Legea 10/1995; Legea 50/1991 |
+| Ordin de începere a lucrărilor + comunicare la ISC și ITM | Deschiderea șantierului | Legea 10/1995; Legea nr. 169/2026 (CATUC) |
 | PV de predare-primire a amplasamentului + bornă de nivelment | Preluarea terenului de la investitor | Legea 10/1995 |
 | PV de trasare a lucrărilor | Fixarea axelor/cotelor | — |
 | Declarația prealabilă la ITM | Notificarea deschiderii șantierului | HG 300/2006, Anexa 3 |
@@ -565,7 +564,7 @@ Pe durata organizării și execuției se generează și se păstrează la punctu
 
 ## 16. Dezafectarea organizării și refacerea amplasamentului
 
-La finalizarea lucrărilor de bază, organizarea de execuție se **dezafectează integral** (Legea 50/1991, Ordinul MDRT 839/2009). Etapele:
+La finalizarea lucrărilor de bază, organizarea de execuție se **dezafectează integral** (Legea nr. 169/2026 — CATUC). Etapele:
 
 1. demontarea și evacuarea containerelor, WC-urilor ecologice, împrejmuirii provizorii și a semnalizării de șantier;
 2. desființarea platformelor și drumurilor provizorii care nu devin definitive;

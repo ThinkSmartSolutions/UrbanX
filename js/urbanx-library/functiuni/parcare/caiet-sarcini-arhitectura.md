@@ -14,7 +14,7 @@
 |---|---|
 | Legea 10/1995 (rep.) | Calitatea în construcții |
 | HG 907/2016 | Conținutul-cadru al documentației tehnico-economice |
-| Legea 50/1991 (rep.) | Autorizarea executării lucrărilor de construcții |
+| Legea nr. 169/2026 (CATUC) | Autorizarea executării lucrărilor de construcții |
 | STAS 10144 | Elemente geometrice — rampe, raze de viraj |
 | NP 051/2012 | Accesibilitate PMR — locuri de parcare adaptate |
 | P 118-1/2/3 | Securitate la incendiu — regim închis |

@@ -33,8 +33,7 @@ DTOE reglementează, pe toată durata execuției supermarketului:
 
 | Act normativ | Obiect | Incidență în DTOE |
 |---|---|---|
-| **Legea 50/1991** (rep.) | AC; organizarea de execuție ca lucrare | Cap. 1, 3 |
-| **Ordin MDRAP 839/2009** | Norme metodologice — conținut DTOE/POE | Structura documentației |
+| **Legea nr. 169/2026** (CATUC) | AC; organizarea de execuție ca lucrare; conținut-cadru DTOE/POE (art. 264, Anexa nr. 2) | Cap. 1, 3; structura documentației |
 | **HG 300/2006** | SSM pe șantiere temporare/mobile | Cap. 3 |
 | **HG 1146/2006** | Utilizarea echipamentelor de muncă (macarale, structuri metalice) | Cap. 2 |
 

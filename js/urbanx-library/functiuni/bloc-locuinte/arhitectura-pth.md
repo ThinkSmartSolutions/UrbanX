@@ -8,7 +8,7 @@ Nivelul de detaliere al prezentului supliment corespunde cerinței HG 907/2016, 
 
 | Domeniu | Act normativ / standard |
 |---|---|
-| Autorizare, calitate, conținut-cadru | Legea nr. 50/1991 (rep.) + Anexa 1; Legea nr. 10/1995; HG nr. 907/2016 |
+| Autorizare, calitate, conținut-cadru | Legea nr. 169/2026 (CATUC), art. 264, Anexa 2; Legea nr. 10/1995; HG nr. 907/2016 |
 | Proiectarea clădirilor de locuințe | NP 057/2002; Legea nr. 114/1996 + Anexa 1 |
 | Termotehnică, energie, nZEB | C107/2005 (părțile 0–5); Mc 001/2006; Legea nr. 372/2005; Ordinul 2641/2017 |
 | Hidroizolații | NP 040-2002 (execuție hidroizolații); NP 064-2002 (terase necirculabile); C112-1986; SR EN 13707 (membrane bituminoase); SR EN 13956 (membrane sintetice) |

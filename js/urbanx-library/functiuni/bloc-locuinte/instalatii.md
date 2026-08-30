@@ -8,7 +8,7 @@
 
 **Denumire obiectiv:** Bloc de locuințe colective cu regim de înălțime S+P+8E, cca. 40 apartamente, subsol tehnic + parcaj auto, spații comune (case de scări, ascensor, holuri, terasă circulabilă tehnic).
 
-**Faza de proiectare:** D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire) conform Legii 50/1991 și Ordinului 839/2009. Prezentul memoriu detaliază la nivel de faza D.T.A.C. cu breviare de calcul specifice fazei P.Th./D.E. pentru a permite dimensionarea corectă a branșamentelor și a spațiilor tehnice.
+**Faza de proiectare:** D.T.A.C. (Documentație Tehnică pentru Autorizarea executării lucrărilor de Construire) conform Legii nr. 169/2026 (CATUC), art. 264, Anexa nr. 2. Prezentul memoriu detaliază la nivel de faza D.T.A.C. cu breviare de calcul specifice fazei P.Th./D.E. pentru a permite dimensionarea corectă a branșamentelor și a spațiilor tehnice.
 
 **Specialități tratate:** instalații sanitare (apă rece, apă caldă de consum, canalizare menajeră și pluvială), instalații termice (încălzire, sursă termică), instalații de gaze naturale, instalații de ventilare, instalații electrice (curenți tari), instalații de protecție (priză de pământ, paratrăsnet, echipotențializare), instalații de curenți slabi, instalații de stingere a incendiilor, desfumare, transport pe verticală (ascensor), eficiență energetică nZEB.
 

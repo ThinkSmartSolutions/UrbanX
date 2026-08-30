@@ -145,12 +145,12 @@ Se recomandă **Varianta 2 — Consolidare + extindere completă**, singura care
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz securitate la incendiu | ISU | P118-1/2013 (regim închis, categoria B) |
 | Aviz Poliția Rutieră / administrator drum (accese) | Poliția Rutieră | STAS 10144 |
 | Verificare proiect cerințe A1, C | Verificatori atestați | Legea nr. 10/1995 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 8.2. Concluzii
 

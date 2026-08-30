@@ -70,7 +70,7 @@ Caietul de sarcini tratează, pe categorii distincte de lucrări (fiecare cu spe
 | **Codul de măsurare a energiei electrice (ANRE)** | Grupuri de măsurare, clase de exactitate |
 | **Legea 10/1995** | Calitatea în construcții — recepția lucrărilor |
 | **HG 273/1994** | Regulament de recepție a lucrărilor de construcții și instalații aferente |
-| **Legea 50/1991, Legea 123/2012** | Autorizarea construirii; Legea energiei electrice |
+| **Legea nr. 169/2026 (CATUC), Legea 123/2012** | Autorizarea construirii (art. 264, Anexa nr. 2); Legea energiei electrice |
 
 Ori de câte ori un standard este citat, se aplică **ediția în vigoare la data execuției**, inclusiv amendamentele. În caz de contradicție între documente, ordinea de prevalență este: (1) legislație și reglementări ANRE/ISC obligatorii; (2) avize și condiții din ATR/contract de racordare al OD; (3) prezentul caiet de sarcini; (4) planșele; (5) standardele de produs. Executantul semnalează în scris orice neconcordanță **înainte** de punerea în operă.
 

@@ -32,7 +32,7 @@ Nu este, de regulă, cazul la o investiție agrozootehnică privată; devine rel
 
 ### 1.4. Beneficiarul investiției
 
-Se completează conform actele de proprietate asupra terenului sau, dacă terenul este arendat/concesionat, conform contractul care conferă dreptul de construire pe amplasament (art. 1 alin. 3 și art. 3 din Legea 50/1991 admit autorizarea construirii și în baza unui drept real de folosință, nu doar a proprietății depline).
+Se completează conform actele de proprietate asupra terenului sau, dacă terenul este arendat/concesionat, conform contractul care conferă dreptul de construire pe amplasament (Legea nr. 169/2026 — CATUC — admite autorizarea construirii și în baza unui drept real de folosință, nu doar a proprietății depline).
 
 ### 1.4B. Verificarea situației cadastrale a terenului
 

@@ -250,13 +250,13 @@ Se recomandă **Varianta 2 — Maximală**, singura eligibilă pentru finanțare
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie | Legea nr. 169/2026 (CATUC) |
 | Aviz sanitar | DSP | OMS nr. 119/2014 |
 | Aviz securitate la incendiu | ISU | HG nr. 571/2016, P118 |
 | Aviz conform rețea școlară | Inspectoratul Școlar Județean/MEN | Legea educației naționale nr. 1/2011 |
 | Verificare proiect cerințe A1, C, D | Verificatori atestați | Legea nr. 10/1995 |
 | Referat verificare expertiză | Expert tehnic atestat | P100-3/2019 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 12.2. Concluzii
 

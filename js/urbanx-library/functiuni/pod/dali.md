@@ -117,11 +117,11 @@ Se recomandă **Varianta 2 — Înlocuire integrală**, singura care rezolvă si
 
 | Aviz / acord | Emitent | Temei |
 |---|---|---|
-| Certificat de urbanism | Primărie/Consiliu Județean | Legea nr. 50/1991 |
+| Certificat de urbanism | Primărie/Consiliu Județean | Legea nr. 169/2026 (CATUC) |
 | Aviz de gospodărire a apelor | Administrația Bazinală de Apă (ANAR) | Legea apelor nr. 107/1996 |
 | Aviz administrator drum superior (dacă e cazul) | CNAIR/Consiliul Județean | OG nr. 43/1997 |
 | Verificare proiect cerințe A1, Af | Verificatori atestați | Legea nr. 10/1995 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 5.2. Concluzii
 

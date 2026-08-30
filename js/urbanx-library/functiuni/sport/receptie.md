@@ -1,7 +1,7 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 ## Sală de sport polivalentă competițională, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile)
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, NP 068-2002, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), NP 068-2002, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -15,7 +15,7 @@ Recepția lucrărilor de construcții reprezintă actul prin care investitorul d
 |----|--------------|------------------------|---------------------------|
 | 1 | Legea nr. 10/1995 (rep.) | Calitatea în construcții | Cadru general |
 | 2 | HG nr. 273/1994 + HG nr. 343/2017 | Procedura de recepție | Reglementare de bază |
-| 3 | Legea nr. 50/1991 (rep.) | Autorizația de construire | Conformitatea execuției |
+| 3 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire | Conformitatea execuției |
 | 4 | Legea nr. 307/2006 + HG nr. 571/2016 | Autorizarea ISU | Categoria B, sală aglomerată |
 | 5 | NP 068-2002 | Săli aglomerate | Verificare evacuare la recepție |
 | 6 | P130/1999 | Urmărirea comportării în timp | Categoria B |

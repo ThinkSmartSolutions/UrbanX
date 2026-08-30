@@ -2,7 +2,7 @@
 
 ## SPITAL PRIVAT / CLINICĂ MULTIFUNCȚIONALĂ CU SPITALIZARE CONTINUĂ — REGIM S+P+4E
 
-*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții (republicată, cu modificările ulterioare) și Ordinul M.D.R.L. nr. 839/2009 (Normele metodologice de aplicare), conținutul-cadru al pieselor scrise fiind cel prevăzut în anexa nr. 1 la Legea 50/1991, particularizat pentru construcții cu funcțiune de sănătate conform Ordinului M.S. nr. 914/2006 și NP 015-1997.*
+*Documentație tehnică pentru obținerea autorizației de construire (D.T.A.C.), întocmită în conformitate cu Legea nr. 169/2026 (Codul amenajării teritoriului, urbanismului și construcțiilor — CATUC), conținutul-cadru al pieselor scrise fiind cel prevăzut în Anexa nr. 2 la lege, particularizat pentru construcții cu funcțiune de sănătate conform Ordinului M.S. nr. 914/2006 și NP 015-1997.*
 
 ---
 
@@ -101,7 +101,7 @@ Tema de proiectare formulată de beneficiar (un operator privat de servicii medi
 
 Documentația respectă următoarele acte normative și standarde (listă neexhaustivă, în vigoare la data proiectării):
 
-- **Legea nr. 50/1991** — autorizarea executării lucrărilor de construcții (republicată), cu Normele metodologice aprobate prin **Ordinul M.D.R.L. nr. 839/2009**;
+- **Legea nr. 169/2026** (CATUC) — autorizarea executării lucrărilor de construcții, art. 264, conținut-cadru Anexa nr. 2;
 - **Legea nr. 10/1995** — calitatea în construcții (republicată), cu cele șapte cerințe fundamentale (A–F, inclusiv economia de energie);
 - **NP 015-1997** — Normativ privind proiectarea și verificarea construcțiilor spitalicești și a altor unități sanitare;
 - **Ordinul M.S. nr. 914/2006** — norme privind condițiile pe care trebuie să le îndeplinească un spital în vederea obținerii autorizației sanitare de funcționare, cu accent pe circuitele funcționale (Anexa privind circuitele);

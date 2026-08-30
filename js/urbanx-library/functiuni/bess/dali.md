@@ -109,7 +109,7 @@ Se recomandă **Varianta 2 — Extindere completă**, motivat prin valorificarea
 | ATR modificat/suplimentar | Operator de rețea | Reglementări ANRE |
 | Actualizare licență ANRE de stocare | ANRE | Legea nr. 123/2012 |
 | Aviz securitate la incendiu (actualizat pentru configurația mixtă) | ISU | Ordinul MAI nr. 129/2016 |
-| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 50/1991 |
+| Autorizație de construire | Autoritatea emitentă CU | Legea nr. 169/2026 (CATUC), art. 264 |
 
 ### 6.2. Concluzii
 

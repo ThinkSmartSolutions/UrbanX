@@ -1,6 +1,6 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
 
-*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
+*Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 169/2026 (CATUC), P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 
 ## 1. Cadru legal și obiectul recepției
 
@@ -17,7 +17,7 @@ Pentru obiectivul de investiții „Creșă/grădiniță cu program prelungit" �
 | 1 | Legea nr. 10/1995 privind calitatea în construcții (republicată) | Sistemul calității, obligațiile factorilor, recepția ca componentă | Cadru general — art. 21 lit. g) |
 | 2 | HG nr. 273/1994 (Regulamentul de recepție) | Procedura detaliată a recepției | Reglementarea de bază |
 | 3 | HG nr. 343/2017 (modificare HG 273/1994) | Două faze de recepție, comisie, condiții | Formă în vigoare |
-| 4 | Legea nr. 50/1991 (republicată) | Autorizația de construire, conformitatea execuției | Se verifică respectarea AC |
+| 4 | Legea nr. 169/2026 (CATUC), art. 264 | Autorizația de construire, conformitatea execuției | Se verifică respectarea AC |
 | 5 | HG nr. 925/1995 și Ord. MLPAT 77/N/1996 | Verificarea proiectelor și a execuției | Rolul verificatorului și dirigintelui |
 | 6 | Legea nr. 307/2006 + HG nr. 571/2016 | Categorii de construcții supuse autorizării ISU | Creșă/grădiniță — supusă autorizării ISU |
 | 7 | P130/1999 | Urmărirea comportării în timp | Program de urmărire post-recepție |

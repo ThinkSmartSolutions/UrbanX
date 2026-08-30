@@ -147,8 +147,8 @@ La o clădire mixtă comercial-rezidențială existentă, cele mai frecvente tip
 |---|---|---|
 | Reabilitare termică | Izolarea termică a anvelopei (fațade, terasă/acoperiș, tâmplărie), cu îmbunătățirea clasei energetice | Legea 372/2005, Ord. MDRT 2641/2012 |
 | Consolidare structurală | Intervenție pe elementele de rezistență pentru creșterea gradului de asigurare seismică | P100-3/2008 sau P100-3/2019, Legea 10/1995 |
-| Schimbare parțială de destinație | Reconfigurarea funcțională a unor spații (de exemplu, transformarea unui spațiu comercial în altă destinație comercială cu cerințe normative diferite) | Legea 50/1991, Legea 10/1995 |
-| Extindere/supraetajare | Adăugarea unui nivel suplimentar de apartamente, cu verificarea capacității structurii existente la suprasarcina rezultată | P100-1/2013, Legea 50/1991 |
+| Schimbare parțială de destinație | Reconfigurarea funcțională a unor spații (de exemplu, transformarea unui spațiu comercial în altă destinație comercială cu cerințe normative diferite) | Legea 169/2026 (CATUC), Legea 10/1995 |
+| Extindere/supraetajare | Adăugarea unui nivel suplimentar de apartamente, cu verificarea capacității structurii existente la suprasarcina rezultată | P100-1/2013, Legea 169/2026 (CATUC) |
 
 ### 3.1. Soluțiile tehnice pe specialități
 
@@ -537,7 +537,7 @@ Dacă la data elaborării prezentului D.A.L.I. expertiza tehnică/auditul energe
 | Cămășuire | Tehnică de consolidare structurală prin adăugarea unui strat de beton armat suplimentar în jurul unui element existent (stâlp/grindă) |
 | FRP | Fibre polimerice armate (Fiber Reinforced Polymer), utilizate pentru consolidarea locală a elementelor de beton armat |
 | Releveu | Măsurătoarea exactă pe teren a geometriei/stării unei construcții existente, ca bază pentru proiectarea intervenției |
-| Intrare în legalitate | Procedura de autorizare ulterioară a unor lucrări executate fără autorizație, conform Legii 50/1991 |
+| Intrare în legalitate | Procedura de autorizare ulterioară a unor lucrări executate fără autorizație, conform Legii nr. 169/2026 (CATUC) |
 | Rs (clasă de risc seismic) | Încadrarea construcțiilor existente în clase de risc seismic I-IV, conform metodologia P100-3, funcție de probabilitatea de prăbușire la cutremurul de proiectare |
 | Cvorum legal | Numărul minim de voturi ale proprietarilor necesar pentru aprobarea unei decizii privind părțile comune ale clădirii, conform Legea 196/2018 |
 

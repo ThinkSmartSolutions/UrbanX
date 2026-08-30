@@ -10,7 +10,7 @@ Nivelul de detaliere al prezentului supliment corespunde cerinței HG 907/2016, 
 
 | Domeniu | Act normativ / standard |
 |---|---|
-| Autorizare, calitate, conținut-cadru | Legea nr. 50/1991 (rep.) + Anexa 1; Legea nr. 10/1995; HG nr. 907/2016 |
+| Autorizare, calitate, conținut-cadru | Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2; Legea nr. 10/1995; HG nr. 907/2016 |
 | Proiectarea clădirilor de locuințe | NP 057/2002; Legea nr. 114/1996 + Anexa 1 |
 | Proiectarea clădirilor cu aflux de public (comercial) | NP 068-02 |
 | Termotehnică, energie, nZEB | C107/2005 (părțile 0–5); Mc 001/2006; Legea nr. 372/2005 |
@@ -810,7 +810,7 @@ Registrul se anexează cărții tehnice (PTh-A.9) la finalizarea lucrărilor, ca
 
 | Domeniu | Normativ / standard | Capitole de aplicare în prezentul document |
 |---|---|---|
-| Autorizare, calitate | Legea 50/1991 + Anexa 1, Ord. 839/2009, Legea 10/1995, HG 907/2016 | PTh-A.1 |
+| Autorizare, calitate | Legea 169/2026 (CATUC), Legea 10/1995, HG 907/2016 | PTh-A.1 |
 | Locuințe | NP 057/2002, Legea 114/1996 + Anexa 1 | PTh-A.3.2, PTh-A.4.5-4.9 |
 | Clădiri cu aflux de public (comercial) | NP 068-02 | PTh-A.2 (D10), PTh-A.3.1, PTh-A.4.2-4.4 |
 | Termotehnică, nZEB | C107 (0-5), Mc 001, Legea 372/2005 | D06, D11, D13-D14, FT-01 |

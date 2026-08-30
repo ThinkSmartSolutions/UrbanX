@@ -5,7 +5,7 @@ Prezentul supliment de fază PTh dezvoltă, la nivel de execuție, detaliile de 
 Prezentul document NU repetă conceptul funcțional-spațial (tratat integral în memoriul DTAC de arhitectură), NU repetă breviarul de calcul structural al fermei metalice de 48 m sau al tribunelor de beton armat (tratat în suplimentul PTh de rezistență) și NU repetă breviarele de instalații (tratat în suplimentul PTh de instalații) — se concentrează exclusiv pe soluțiile de execuție specifice arhitecturii unei săli de sport de mare deschidere, cu aglomerare de persoane.
 
 Cadru normativ de referință pentru detaliere:
-- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut cadru documentații), Legea 50/1991 + Ordinul MDRT 839/2009;
+- Legea 10/1995 (calitatea în construcții), HG 907/2016 (conținut cadru documentații), Legea nr. 169/2026 (CATUC), art. 264, Anexa nr. 2;
 - **NP 065-2002** (proiectarea sălilor de sport — dimensiuni teren, înălțimi libere, pardoseli sportive);
 - **NP 068-2002** (aglomerări de persoane — evacuare, compartimentare, distanțe, siguranță în exploatare);
 - **SR EN 14904** (pardoseli pentru sălile de sport — absorbție de șoc, deformare, frecare, reflexie, rulare minge);

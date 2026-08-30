@@ -25,7 +25,7 @@ Execuția și recepția lucrărilor din prezentul caiet se conformează, fără 
 | Act normativ / standard | Obiect | Incidență în prezentul caiet |
 |---|---|---|
 | **Legea 10/1995** (rep. 2016) | Calitatea în construcții — cele 7 cerințe fundamentale | Cadru general al calității pe toate capitolele |
-| **Legea 50/1991** + Ord. MDRL 839/2009 | Autorizarea și conținutul DTAC/DTOE | Corelarea execuției cu documentația autorizată |
+| **Legea nr. 169/2026** (CATUC), art. 264, Anexa nr. 2 | Autorizarea și conținutul DTAC/DTOE | Corelarea execuției cu documentația autorizată |
 | **HG 766/1997** (Anexa 5, 6) | Regulamente de calitate; agremente; carte tehnică | Trasabilitate, agremente, verificări |
 | **HG 273/1994** | Recepția lucrărilor de construcții și instalații | Corelare recepții parțiale (cadru — nedublat) |
 | **C 56/2002** | Verificarea calității lucrărilor de construcții | Verificări pe faze — finisaje, izolații, drumuri |
