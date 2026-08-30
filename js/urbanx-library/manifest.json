@@ -15,7 +15,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "bess": [
     "arhitectura",
@@ -33,7 +34,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "birouri": [
     "arhitectura",
@@ -70,7 +72,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "centru-social-zi": [
     "arhitectura",
@@ -88,7 +91,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "cladire-mixta": [
     "arhitectura",
@@ -125,7 +129,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "hala-industriala": [
     "arhitectura",
@@ -143,7 +148,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "hotelier": [
     "arhitectura",
@@ -161,7 +167,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "infrastructura-drum": [
     "arhitectura",
@@ -179,7 +186,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "locuinta-individuala": [
     "arhitectura",
@@ -197,7 +205,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "mall": [
     "arhitectura",
@@ -215,7 +224,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "medical": [
     "arhitectura",
@@ -233,7 +243,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "parc-fotovoltaic": [
     "arhitectura",
@@ -251,7 +262,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "parcare": [
     "arhitectura",
@@ -269,7 +281,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "pod": [
     "arhitectura",
@@ -287,7 +300,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "scoala": [
     "arhitectura",
@@ -305,7 +319,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "skid": [
     "arhitectura",
@@ -323,7 +338,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "spatiu-comercial": [
     "arhitectura",
@@ -341,7 +357,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "sport": [
     "arhitectura",
@@ -359,7 +376,8 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ],
   "statie-transformare": [
     "arhitectura",
@@ -377,6 +395,7 @@
     "aviz_mediu",
     "dali",
     "receptie",
-    "carte_tehnica"
+    "carte_tehnica",
+    "sf"
   ]
 }

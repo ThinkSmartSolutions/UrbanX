@@ -12,7 +12,7 @@
   var FILES = { arhitectura: 'arhitectura.md', structura: 'structura.md', instalatii: 'instalatii.md', general: 'general.md',
     caiet_arh: 'caiet-sarcini-arhitectura.md', caiet_str: 'caiet-sarcini-rezistenta.md', caiet_inst: 'caiet-sarcini-instalatii.md',
     arh_pth: 'arhitectura-pth.md', str_pth: 'structura-pth.md', inst_pth: 'instalatii-pth.md',
-    scenariu_psi: 'scenariu-psi.md', dtoe: 'dtoe.md', aviz_mediu: 'aviz-mediu.md', dali: 'dali.md', receptie: 'receptie.md' };
+    scenariu_psi: 'scenariu-psi.md', dtoe: 'dtoe.md', aviz_mediu: 'aviz-mediu.md', dali: 'dali.md', sf: 'sf.md', receptie: 'receptie.md', carte_tehnica: 'carte-tehnica.md' };
 
   // ── Curăță notația LaTeX (formule $$...$$) în text lizibil pt Word/PDF ─────
   function _delatex(s) {
@@ -70,7 +70,7 @@
   var content = {}; var loaded = 0, total = Object.keys(FILES).length;
   var readyResolve; var readyP = new Promise(function (r) { readyResolve = r; });
   Object.keys(FILES).forEach(function (key) {
-    fetch(BASE + FILES[key] + '?v=20260704u').then(function (r) { return r.ok ? r.text() : ''; }).then(function (md) {
+    fetch(BASE + FILES[key] + '?v=20260830a').then(function (r) { return r.ok ? r.text() : ''; }).then(function (md) {
       content[key] = { md: md, html: mdToHtml(md), pages_est: Math.round(md.length / 3000) };
     }).catch(function () { content[key] = { md: '', html: '', pages_est: 0 }; }).then(function () {
       loaded++; if (loaded >= total) { G.UXLibrary['centru-social'] = content; readyResolve(content); console.log('[UXLibrary] centru-social încărcat: ' + Object.keys(content).map(function (k) { return k + '~' + content[k].pages_est + 'p'; }).join(', ')); }
