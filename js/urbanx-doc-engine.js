@@ -213,6 +213,13 @@
     var riscPct = riscMap.hasOwnProperty(out.risc_incendiu) ? riscMap[out.risc_incendiu] : 2;
     var CATEG_ENERGIE_STRATEGICA = ['bess', 'skid', 'statie-transformare'];
     var esteEnergieStrategica = CATEG_ENERGIE_STRATEGICA.indexOf(d.functiune) >= 0;
+    // 'statie-transformare' e tratată separat de bess/skid la pragul de corecție (vezi mai jos,
+    // după calculul punctajului): riscul unei substații electrice (transformatoare cu ulei izolant)
+    // e important, dar nu la nivelul de pericol exploziv al GPL/hidrogen (skid) sau al unui incendiu
+    // de baterii la scară mare (bess) — corespunde categoriei B (nu A), coerent cu justificarea pe
+    // cele 6 criterii HG766 deja detaliată în biblioteca de conținut (functiuni/statie-transformare/
+    // general.md cap. 1.5). Găsit 30 aug: motorul forța A pt. toate 3, în contradicție cu propriul
+    // memoriu general.md (B) și cu arhitectura.md (C) — reconciliat aici pe varianta cea mai motivată.
     var esteAglomerarePublica = ['mall', 'spatiu-comercial', 'sport', 'scoala', 'gradinita', 'hotelier', 'medical'].indexOf(d.functiune) >= 0;
     var esteIndustrialEnergie = ['hala-industriala', 'bess', 'skid', 'statie-transformare'].indexOf(d.functiune) >= 0;
     function _pctCap(prag1, prag2, prag3) { return capOc >= prag3 ? 6 : capOc >= prag2 ? 4 : capOc >= prag1 ? 2 : capOc > 0 ? 1 : 0; }
@@ -240,8 +247,27 @@
     // Corecție de siguranță: funcțiunile cu exemplificare explicită A/B în practica MLPAT (energie
     // strategică, medical/vulnerabil) nu coboară sub pragul lor consacrat chiar dacă punctajul
     // estimat conservator ar ieși marginal mai mic — proiectantul poate desigur recalcula exact.
-    if (esteEnergieStrategica && _totalPunctaj < 30) out.categorie_importanta = 'A — excepțională (corecție: exemplificare explicită metodologie MLPAT pt. energie strategică)';
+    if (esteEnergieStrategica && d.functiune !== 'statie-transformare' && _totalPunctaj < 30) out.categorie_importanta = 'A — excepțională (corecție: exemplificare explicită metodologie MLPAT pt. energie strategică)';
+    else if (d.functiune === 'statie-transformare' && _totalPunctaj < 18) out.categorie_importanta = 'B — deosebită (corecție: infrastructură energetică critică — impact extins la întrerupere, risc ulei izolant — fără caracterul excepțional/exploziv al GPL/hidrogen sau al bateriilor la scară mare)';
     else if (esteVulnerabil && _totalPunctaj < 18) out.categorie_importanta = 'B — deosebită (corecție: exemplificare explicită metodologie MLPAT pt. persoane vulnerabile)';
+    // Clasa de consecințe CC1-CC4 (Legea nr. 169/2026 — Codul amenajării teritoriului, urbanismului
+    // și construcțiilor, CATUC, M.Of. 661/10.08.2026, în vigoare din 25.08.2026) — înlocuiește
+    // categoria de importanță HG 766/1997 pt. proiectele demarate SUB noua lege. Nu există (la data
+    // scrierii) norme metodologice proprii de calcul al claselor CC1-4 — se folosește corespondența
+    // directă confirmată (CC1=D, CC2=C, CC3=B, CC4=A) aplicată peste scorul HG766 de mai sus, care
+    // rămâne singura metodologie de calcul publicată. Art. 582 alin. 1 CATUC: documentațiile/
+    // procedurile demarate ÎNAINTE de 25.08.2026 rămân sub legea veche (categoria de importanță
+    // HG766 e valabilă integral pt. acestea, fără corespondența CC). Vezi [[florin-no-invent-unverified-data]]:
+    // nu se inventează o metodologie proprie CC1-4 cât timp nu există publicată una oficială.
+    var _CC_MAP = { 'A': 'CC4', 'B': 'CC3', 'C': 'CC2', 'D': 'CC1' };
+    var _catLetter = (out.categorie_importanta || '').charAt(0);
+    out.clasa_consecinte = _CC_MAP[_catLetter] || null;
+    out.clasa_consecinte_detaliu = {
+      temei: 'Legea nr. 169/2026 (CATUC), M.Of. 661/10.08.2026, în vigoare din 25.08.2026',
+      corespondenta: 'CC1=D, CC2=C, CC3=B, CC4=A (corespondență directă; fără metodologie proprie CC1-4 publicată încă)',
+      tranzitie: 'Art. 582 alin. 1: proiectele demarate înainte de 25.08.2026 rămân sub Legea 50/1991 + HG 766/1997 (fără reîncadrare CC).',
+      atentionare_p118: 'Normativul P118 (securitate la incendiu) folosește încă, la data scrierii, terminologia "categorie de importanță" — nu există corelare oficială publicată cu CC1-4; platforma NU aplică o corespondență auto-inventată în calculele SSI/P118, doar la nivelul acestui indicator general.'
+    };
     // Factor de comportare q (funcție de sistemul structural)
     var qmap = { metalica: 4.0, beton: 3.0, prefabricat: 3.0, mixt: 3.0, zidarie: 2.5, lemn: 2.5, lsf: 2.0, usoara: 1.5 };
     out.factor_q = qmap[(d.struct || fn.struct)] || 3.0;

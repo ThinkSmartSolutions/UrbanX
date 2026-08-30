@@ -1,7 +1,7 @@
 ---
 
 # CAIET DE SARCINI — SPECIALITATEA ARHITECTURĂ
-## Sală de sport polivalentă competițională, cu tribune ~800-1.200 spectatori
+## Sală de sport polivalentă competițională, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile)
 ### Faza: Proiect Tehnic de execuție (PTh) — HG 907/2016
 
 ---

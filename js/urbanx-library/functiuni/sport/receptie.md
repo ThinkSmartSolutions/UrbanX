@@ -1,5 +1,5 @@
 # RECEPȚIA LUCRĂRILOR DE CONSTRUCȚII
-## Sală de sport polivalentă competițională, cu tribune ~800-1.200 spectatori
+## Sală de sport polivalentă competițională, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile)
 
 *Întocmit conform HG nr. 273/1994 (modificat prin HG nr. 343/2017), Legii nr. 10/1995, Legii nr. 50/1991, NP 068-2002, P130/1999. Cuprinde: recepția la terminarea lucrărilor + recepția finală + cartea tehnică + urmărirea comportării în timp.*
 

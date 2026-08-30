@@ -178,6 +178,13 @@
         var bb = bilant();
         D._spatii = state.rows; D.__prog = { tip: state.tip, params: state.params };
         D.Sc = bb.sc; D.Sd = bb.sd; if (bb.niv) D.niv_supraterane = bb.niv;
+        // Capacitate de public (ex. tribune sală de sport, parametrul 'spectatori' din tipologie) ->
+        // D.capacitate_persoane, care alimentează motorul real (categorie de importanță/clasă de
+        // consecințe, hidranți, desfumare — js/urbanx-doc-engine.js + js/25-ssi-normative.js). Fără
+        // acest pod, un utilizator care seta 4.000 de locuri în programul funcțional vedea calculul
+        // de categorie/evacuare rulând tot cu 0/nesetat. Precedență manuală: nu suprascrie o valoare
+        // deja introdusă explicit de proiectant în formularul general de documentații.
+        if (state.params && (+state.params.spectatori > 0) && !D.capacitate_persoane) D.capacitate_persoane = +state.params.spectatori;
         if (G.ss) G.ss('✓ Program funcțional aplicat: ' + (state.rows || []).length + ' spații, Sd ' + bb.sd + ' mp — propagat în indicatori/deviz.');
         ov.remove(); if (typeof onApply === 'function') onApply(D);
       };

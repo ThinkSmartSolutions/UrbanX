@@ -356,7 +356,7 @@
     var da = function (b) { return b ? 'DA' : 'nu'; };
     var risc = (ac.risc_incendiu || 'mediu').replace('foarte_mare', 'foarte mare');
     return tbl([
-      ['Categorie de importanță (HG 766/1997)', (ac.categorie_importanta || '—')],
+      ['Categorie de importanță (HG 766/1997) / Clasă de consecințe (Legea 169/2026, CATUC)', (ac.categorie_importanta || '—') + (ac.clasa_consecinte ? ' / ' + ac.clasa_consecinte : '')],
       ['Clasă de importanță seismică (P100-1/2013)', (ac.clasa_importanta || '—')],
       ['Factor de importanță γI', (ac.gamma_I != null ? ac.gamma_I.toFixed(2) : '1.00')],
       ['Factor de comportare q', (ac.factor_q != null ? ac.factor_q.toFixed(1) : '3.0')],
@@ -2138,7 +2138,8 @@
             '<tr style="background:#f0f0f0"><td style="border:1px solid #ccc;padding:3px" colspan="4"><b>Total punctaj</b></td><td style="border:1px solid #ccc;padding:3px;text-align:center"><b>' + det.total + '</b></td></tr></table>' +
             '<p style="font-size:8pt;color:#666">Scala p(i)/p(ii)/p(iii) (Tabelul 2, art. 18): 0=inexistent, 1=redus, 2=mediu, 4=apreciabil, 6=ridicat. k(n)=1 (fără caracter unic/monument). Punctajele sunt o estimare conservatoare din datele disponibile ale proiectului — proiectantul atestat confirmă/corectează fiecare criteriu (art. 7).</p>';
         }
-        return '<p>Se stabilește conform ' + temei + '.</p>' + tabelPunctaj + '<p>Categorie de importanță rezultată: <b>' + esc(cat) + '</b> — conform art. 7 al Regulamentului, încadrarea finală rămâne responsabilitatea proiectantului, la cererea investitorului, și se înscrie în toate documentele tehnice ale construcției.</p>';
+        var notaCatuc = ac.clasa_consecinte ? '<p style="font-size:8pt;color:#666"><b>Notă (Legea nr. 169/2026 — CATUC, în vigoare din 25.08.2026):</b> categoria de importanță de mai sus corespunde direct clasei de consecințe <b>' + esc(ac.clasa_consecinte) + '</b> (CC1=D, CC2=C, CC3=B, CC4=A), introdusă de noul Cod al amenajării teritoriului, urbanismului și construcțiilor. Această corespondență NU se aplică însă terminologiei din normativul P118 (securitate la incendiu), care folosește încă „categorie de importanță" — la data prezentului document nu există o corelare oficială publicată între P118 și clasele CC1-4, iar platforma nu o inventează; pragurile P118 din prezentul scenariu rămân încadrate pe categoria de importanță HG 766/1997. Pentru proiectele demarate înainte de 25.08.2026, se aplică integral regimul vechi (art. 582 alin. 1 CATUC), fără reîncadrare CC.</p>' : '';
+        return '<p>Se stabilește conform ' + temei + '.</p>' + tabelPunctaj + '<p>Categorie de importanță rezultată: <b>' + esc(cat) + '</b> — conform art. 7 al Regulamentului, încadrarea finală rămâne responsabilitatea proiectantului, la cererea investitorului, și se înscrie în toate documentele tehnice ale construcției.</p>' + notaCatuc;
       })() },
       { h: '1.4.a. Tipul clădirii', html: (function () {
         var esteResidentialIndiv = D.functiune === 'locuinta-individuala';
@@ -2943,7 +2944,7 @@
       var deep = _lib(D, 'structura'); if (deep && (D.faza === 'PTh' || D.faza === 'PTh+DE' || D.faza === 'PT')) deep += _lib(D, 'str_pth');
       var secs = deep ? _withProgram([
         { h: null, html: deep },
-        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997)', esc(v.calc.categorie_importanta || '—')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) },
+        { h: 'Anexă — parametri de calcul ai amplasamentului', html: tbl([['Sistem structural', esc(D.struct || 'metalică')], ['Fundare', esc(D.fundare || 'după studiul geotehnic')], ['Categorie de importanță (HG 766/1997) / Clasă de consecințe (Legea 169/2026)', esc(v.calc.categorie_importanta || '—') + (v.calc.clasa_consecinte ? ' / ' + v.calc.clasa_consecinte : '')], ['Clasă de importanță seismică (P100-1)', esc(v.calc.clasa_importanta || '—') + ', γI = ' + (v.calc.gamma_I != null ? v.calc.gamma_I.toFixed(2) : '1.00')], ['Factor de comportare q', (v.calc.factor_q != null ? v.calc.factor_q.toFixed(1) : '3.0')], ['Zonă seismică (P100-1/2013)', 'a_g = ' + v.calc.seismic.ag + 'g, T_c = ' + v.calc.seismic.Tc + ' s'], ['Zăpadă (CR 1-1-3/2012)', v.calc.clima.sk + ' kN/m²'], ['Temperatura exterioară de calcul', v.calc.clima.Te + ' °C'], ['Adâncime de îngheț (STAS 6054)', (v.calc.adancime_inghet_m || 0.9).toFixed(2) + ' m']], ['Parametru', 'Valoare']) },
         { h: 'Forța seismică de bază — estimare preliminară (calcul real, Art. 4.5.3.2.2 P100-1/2013)', html: _seismicFbSec(D, v) },
         { h: 'Încărcarea din zăpadă pe acoperiș — calcul real (Art. 4.1, relația 4.1, CR 1-1-3/2012)', html: _zapadaSec(D, v) },
         { h: 'Presiunea de calcul a vântului — calcul real (Art. 2.4, CR 1-1-4/2012)', html: _vantSec(D, v) }
@@ -3635,7 +3636,7 @@
         ['Urmărirea comportării în timp', 'responsabil desemnat (P130/1999)', '']
       ], ['Obligație', 'Cine răspunde', 'Nume și prenume']);
       var secs = [
-        { h: '1. Obiect și cadru legal', html: '<p>Cartea tehnică a construcției pentru obiectivul „' + esc(fnLabel) + '", ' + esc(ampl || '—') + ', se întocmește și se completează conform <b>Legii 10/1995</b> (calitatea în construcții), <b>HG 273/1994</b> (Regulamentul de recepție, modificat prin HG 343/2017) și <b>HG 766/1997 — Anexa 6</b> (Regulament privind conducerea și asigurarea calității / cartea tehnică). Cuprinde ansamblul documentelor privind proiectarea, execuția, recepția și urmărirea comportării în exploatare, grupate în secțiunile A–D.</p>' + tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Faza', isPth ? 'P.Th. + D.E.' : 'D.T.A.C.'], ['Categorie/clasă importanță', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—')]], ['Element', 'Valoare']) },
+        { h: '1. Obiect și cadru legal', html: '<p>Cartea tehnică a construcției pentru obiectivul „' + esc(fnLabel) + '", ' + esc(ampl || '—') + ', se întocmește și se completează conform <b>Legii 10/1995</b> (calitatea în construcții), <b>HG 273/1994</b> (Regulamentul de recepție, modificat prin HG 343/2017) și <b>HG 766/1997 — Anexa 6</b> (Regulament privind conducerea și asigurarea calității / cartea tehnică). Cuprinde ansamblul documentelor privind proiectarea, execuția, recepția și urmărirea comportării în exploatare, grupate în secțiunile A–D.</p>' + tbl([['Obiectiv', esc(fnLabel)], ['Beneficiar', esc(D.beneficiar || '—')], ['Amplasament', esc(ampl || '—')], ['Faza', isPth ? 'P.Th. + D.E.' : 'D.T.A.C.'], ['Categorie/clasă importanță (HG766) / Clasă consecințe (L.169/2026)', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—') + (ac.clasa_consecinte ? ' / ' + ac.clasa_consecinte : '')]], ['Element', 'Valoare']) },
         { h: '2. Structura cărții tehnice (borderou general)', html: '<p>Cartea tehnică se organizează în patru secțiuni și centralizatorul pieselor:</p>' + tbl([['A', 'Documentația privind proiectarea', '' + A.length + ' piese'], ['B', 'Documentația privind execuția', '' + B.length + ' piese'], ['C', 'Documentația privind recepția', '' + C.length + ' piese'], ['D', 'Documentația privind urmărirea comportării în exploatare și intervenții', '' + Dsec.length + ' piese']], ['Secț.', 'Conținut', 'Piese']) },
         { h: 'Secțiunea A — Documentația privind proiectarea', html: opisSec(A) },
         { h: 'Secțiunea B — Documentația privind execuția', html: opisSec(B) },
@@ -3769,7 +3770,7 @@
           ['Suprafață desfășurată (SD)', (D.Sd ? (+D.Sd).toLocaleString('ro-RO') + ' mp' : '—')],
           ['Regim de înălțime', 'P+' + Math.max(0, (D.niv_supraterane || 1) - 1) + (D.H ? ' (H ' + D.H + ' m)' : '')],
           ['POT / CUT propuse', (ac.POT || 0) + '% / ' + (ac.CUT || 0)],
-          ['Categorie/clasă importanță', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—')],
+          ['Categorie/clasă importanță (HG766) / Clasă consecințe (L.169/2026)', (ac.categorie_importanta || '—') + ' / ' + (ac.clasa_importanta || '—') + (ac.clasa_consecinte ? ' / ' + ac.clasa_consecinte : '')],
           ['Risc/categorie incendiu', (String(ac.risc_incendiu || 'mediu')) + ' · Cat. ' + (D.psi || ac.psi_default || 'C')]
         ], ['Indicator', 'Valoare']);
         // MEMORIU COMPLET, structurat — identic ca schelet, DIFERIT ca fond (per emitent)

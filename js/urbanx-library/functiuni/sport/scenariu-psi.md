@@ -1,5 +1,5 @@
 # SCENARIU DE SECURITATE LA INCENDIU
-## Sală de sport polivalentă competițională, cu tribune ~800-1.200 spectatori
+## Sală de sport polivalentă competițională, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile)
 
 *Întocmit conform P118-1/2013, P118-2/2013, P118-3/2015, NP 068-2002 (săli aglomerate), Legii nr. 307/2006, HG nr. 571/2016. Elaborat de expert/proiectant atestat IGSU.*
 
@@ -7,7 +7,7 @@
 
 | Element | Date |
 |---|---|
-| Denumire | Sală de sport polivalentă competițională, tribune 800-1.200 spectatori |
+| Denumire | Sală de sport polivalentă competițională, tribune 2.000 spectatori (1.500 fixe + 500 telescopice) |
 | Categoria de importanță | **B** — aglomerare de persoane + utilitate publică |
 | Clasa de importanță seismică | **II** (γI,e = 1,20) |
 | Grad de rezistență la foc | II, cu tendință spre I la sala de joc/tribune |
@@ -15,7 +15,7 @@
 
 ## 2. Calculul aglomerării de persoane
 
-Capacitatea de tribune (800-1.200 spectatori permanent, extensibilă la ~2.000 la evenimente speciale) plus sportivii, oficialii și personalul generează o aglomerare care încadrează construcția drept **sală aglomerată** conform NP 068-2002, cu toate consecințele asupra dimensionării evacuării (fluxuri, lățimi, timpi) — cerință tratată cu rigoare superioară celei aplicate unei clădiri civile obișnuite.
+Capacitatea de tribune (2.000 de spectatori — 1.500 fixe + 500 telescopice/mobile, exemplu de referință; capacitatea reală a proiectului se confirmă de beneficiar) plus sportivii, oficialii și personalul generează o aglomerare care încadrează construcția drept **sală aglomerată** conform NP 068-2002, cu toate consecințele asupra dimensionării evacuării (fluxuri, lățimi, timpi) — cerință tratată cu rigoare superioară celei aplicate unei clădiri civile obișnuite.
 
 ## 3. Structura de rezistență și rezistența la foc
 

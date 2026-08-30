@@ -1,6 +1,6 @@
 # MEMORIU DE PREZENTARE PENTRU OBȚINEREA ACTULUI DE REGLEMENTARE DE MEDIU
 
-*Întocmit conform Ordinului MAPM nr. 863/2002 (conținut-cadru), Legii nr. 292/2018 (evaluarea impactului asupra mediului), OUG nr. 195/2005 (protecția mediului). Aplicabil unei săli de sport polivalente competiționale, cu tribune ~800-1.200 spectatori.*
+*Întocmit conform Ordinului MAPM nr. 863/2002 (conținut-cadru), Legii nr. 292/2018 (evaluarea impactului asupra mediului), OUG nr. 195/2005 (protecția mediului). Aplicabil unei săli de sport polivalente competiționale, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile) — exemplu de referință pentru dimensionare.*
 
 ## 1. Date de identificare
 
@@ -25,13 +25,13 @@
 
 ### 2.1. Scopul și necesitatea investiției
 
-Proiectul urmărește realizarea unei săli de sport polivalente, destinată educației fizice școlare, sportului de masă și competițiilor oficiale omologate, cu tribune pentru ~800-1.200 de spectatori.
+Proiectul urmărește realizarea unei săli de sport polivalente, destinată educației fizice școlare, sportului de masă și competițiilor oficiale omologate, cu tribune pentru 2.000 de spectatori (1.500 locuri fixe și 500 telescopice/mobile — exemplu de referință; capacitatea reală se confirmă de beneficiar).
 
 ### 2.2. Caracteristici tehnice
 
 | Element | Valoare |
 |---|---|
-| Capacitate tribune | 800-1.200 (extensibil la ~2.000 la evenimente speciale) |
+| Capacitate tribune | 2.000 (1.500 fixe + 500 telescopice/mobile) — exemplu de referință |
 | Categoria de importanță | B |
 
 ## 3. Surse de poluanți și protecția factorilor de mediu

@@ -1,6 +1,6 @@
 # DTOE — Proiectul de Organizare a Execuției Lucrărilor — Sală de Sport Polivalentă Competițională
 
-Documentație / Proiect de Organizare a Execuției (DTOE/POE), faza **PTh**, întocmită pentru realizarea unei **săli de sport polivalente competiționale**, cu tribune ~800-1.200 spectatori, structură de deschidere mare (30-36 m).
+Documentație / Proiect de Organizare a Execuției (DTOE/POE), faza **PTh**, întocmită pentru realizarea unei **săli de sport polivalente competiționale**, cu tribune 2.000 spectatori (1.500 fixe + 500 telescopice/mobile — exemplu de referință), structură de deschidere mare (30-36 m).
 
 > **Corelare (fără duplicare).** DTOE **nu reia** memoriile de arhitectură, structură (fermele metalice, tribunele) sau instalații ale sălii de sport. Le folosește **ca documentație-suport** pentru dimensionarea organizării de execuție.
 
@@ -12,7 +12,7 @@ Documentație / Proiect de Organizare a Execuției (DTOE/POE), faza **PTh**, în
 
 | Element | Valoare / descriere |
 |---|---|
-| Denumire investiție | Sală de sport polivalentă competițională, tribune 800-1.200 locuri |
+| Denumire investiție | Sală de sport polivalentă competițională, tribune 2.000 locuri (1.500 fixe + 500 telescopice) |
 | Obiect DTOE | Organizarea execuției (incintă provizorie + montaj ferme metalice + execuție tribune + eșalonare + SSM/PSI/mediu) |
 | Beneficiar / Investitor | UAT / CNI / club-federație sportivă |
 | Categoria de importanță | **B** |

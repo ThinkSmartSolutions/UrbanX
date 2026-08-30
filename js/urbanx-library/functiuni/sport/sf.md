@@ -1,5 +1,5 @@
 # STUDIU DE FEZABILITATE (S.F.) — CONSTRUCȚIE NOUĂ
-## Sală de sport polivalentă competițională, cu tribune (~800-1.200 spectatori), vestiare și anexe administrativ-tehnice
+## Sală de sport polivalentă competițională, cu tribune (2.000 spectatori — 1.500 fixe + 500 telescopice/mobile), vestiare și anexe administrativ-tehnice
 ### HG 907/2016, Anexa nr. 3
 
 ---
@@ -8,7 +8,7 @@
 
 ### 1.1. Denumirea obiectivului de investiții
 
-Se completează conform Tema de proiectare aprobată de investitor — construire sală de sport polivalentă competițională, cu teren de joc multidisciplinar (marcaje suprapuse pentru handbal, baschet, volei, futsal), tribune omologate pentru o capacitate de proiect de **~800-1.200 de spectatori** (extensibilă la evenimente speciale), vestiare, anexe administrativ-tehnice și amenajări exterioare (accese diferențiate, parcaje, spații verzi), pe un amplasament confirmat, în zonă cu destinație instituții și servicii publice — sport/agrement (IS), conform PUG/PUZ și certificatului de urbanism.
+Se completează conform Tema de proiectare aprobată de investitor — construire sală de sport polivalentă competițională, cu teren de joc multidisciplinar (marcaje suprapuse pentru handbal, baschet, volei, futsal), tribune omologate pentru o capacitate de proiect de **2.000 de spectatori** (1.500 de locuri fixe și 500 de locuri telescopice/mobile — exemplu de referință pentru dimensionare, a se vedea nota de parametrizare de la cap. 3.2.1), vestiare, anexe administrativ-tehnice și amenajări exterioare (accese diferențiate, parcaje, spații verzi), pe un amplasament confirmat, în zonă cu destinație instituții și servicii publice — sport/agrement (IS), conform PUG/PUZ și certificatului de urbanism.
 
 ### 1.1D. Nota privind unicitatea denumirii obiectivului
 
@@ -156,10 +156,10 @@ Programul funcțional propus (funcțiune de instituții și servicii publice —
 
 ### 3.0. Sinteza celor două scenarii
 
-| Criteriu | Scenariul 1 — sală polivalentă competițională, tribune ~1.000 locuri, deschidere structurală 30-36 m | Scenariul 2 — sală de competiție mică, tribune ~300-500 locuri, fără marcaje suprapuse complete |
+| Criteriu | Scenariul 1 — sală polivalentă competițională, tribune ~2.000 locuri (1.500 fixe + 500 telescopice), deschidere structurală 30-36 m | Scenariul 2 — sală de competiție mică, tribune ~300-500 locuri, fără marcaje suprapuse complete |
 |---|---|---|
 | Teren de joc | 40×20 m, cu marcaje suprapuse handbal/baschet/volei/futsal | 40×20 m, marcaj unic pe disciplina dominantă |
-| Tribune | ~800-1.200 locuri, omologabile pentru competiții de rang superior | ~300-500 locuri, fără vocație de omologare la nivel național |
+| Tribune | ~2.000 locuri (1.500 fixe + 500 telescopice), omologabile pentru competiții de rang superior | ~300-500 locuri, fără vocație de omologare la nivel național |
 | Cost de execuție | Superior (deschidere de mare anvergură, tribune extinse, dotări de omologare) | Inferior, dar cu limitare structurală a vocației competițională |
 | Grad de utilizare comunitară | Ridicat — servește simultan școli, cluburi și populație generală, plus evenimente non-sportive | Redus — nu poate găzdui evenimente de anvergură sau competiții cu difuzare |
 | Potențial de venituri proprii (dacă investitor privat) | Superior — bilete la evenimente de anvergură, chirie de spații conexe | Redus — venituri limitate la abonamente/închiriere ore |
@@ -188,6 +188,8 @@ Ambele scenarii respectă principiul de bază al separării fluxurilor (spectato
 ### 3.2.1. Flexibilitatea funcțională — marcaje suprapuse și tribune telescopice
 
 Configurația structurală (deschiderea liberă, fără stâlpi intermediari care ar întrerupe vizibilitatea) se proiectează pentru a permite marcaje suprapuse pe mai multe discipline sportive de sală, precum și, dacă tema o solicită, o parte a tribunelor de tip telescopic/retractabil, care permit eliberarea parțială a spațiului pentru configurații de antrenament sau evenimente cu public redus — flexibilitate care maximizează gradul de utilizare pe termen lung al investiției.
+
+**Notă de parametrizare a capacității.** Cifrele de mai sus — 2.000 de spectatori (1.500 locuri fixe + 500 telescopice/mobile), teren de 12.000 mp, Sc 3.900 mp, deschidere structurală 48 m — reprezintă un **exemplu de referință** pentru dimensionare, detaliat integral în memoriul de arhitectură DTAC (`arhitectura.md`). Proiectul REAL se dimensionează după capacitatea confirmată de beneficiar (parametrul „Nr. spectatori" din formularul de program funcțional al platformei, implicit 1.500, dar liber setabil, de exemplu 4.000 pentru o arenă mai mare). La o capacitate diferită de exemplul de referință: (a) Sc/Sd și indicatorii urbanistici POT/CUT se recalculează automat din suprafața reală introdusă de proiect (deja parametric); (b) categoria de importanță/clasa de consecințe (CC1-4, conform Legii nr. 169/2026 — CATUC) și obligativitățile P118 (hidranți, desfumare, paratrăsnet) se recalculează automat din capacitatea reală introdusă (deja parametric, cablat în motorul platformei); (c) deschiderea structurală exactă și configurația tribunelor (nr. rânduri, gradene, vomitorii) NU se calculează automat de platformă — la o capacitate semnificativ diferită de exemplul de referință (de exemplu 4.000 față de 2.000), acestea rămân o decizie de redimensionare de competența inginerului structurist/arhitectului, pe baza geometriei reale a terenului și a configurației dorite (tribună pe un nivel vs. dublu nivel), nu o formulă mecanică generică a platformei.
 
 ### 3.2.2. Iluminatul natural controlat și acustica — decizii de arhitectură cu impact direct asupra costului
 
@@ -357,18 +359,18 @@ Amplasamentul se dotează cu locuri de parcare PMR (minimum 4% din total, confor
 
 ### 5.1-5.2. Comparația și selectarea scenariului
 
-Scenariul 1 (sală polivalentă competițională, tribune ~800-1.200 locuri, deschidere 30-36 m) este, de regulă, recomandat atunci când analiza necesarului comunitar (cap. 2.2-2.4) și, dacă e cazul, obiectivul de omologare competițională (cap. 2.3.1) justifică anvergura investiției, iar bugetul/finanțarea disponibilă (cap. 5.7.1) acoperă costul complet — decizia finală se confirmă prin compararea costurilor complete (cap. 3.3) și a indicatorilor financiari/economici (cap. 4.6-4.7) ai celor două scenarii, calculați cu datele reale ale amplasamentului.
+Scenariul 1 (sală polivalentă competițională, tribune ~2.000 locuri — 1.500 fixe + 500 telescopice, deschidere 30-36 m) este, de regulă, recomandat atunci când analiza necesarului comunitar (cap. 2.2-2.4) și, dacă e cazul, obiectivul de omologare competițională (cap. 2.3.1) justifică anvergura investiției, iar bugetul/finanțarea disponibilă (cap. 5.7.1) acoperă costul complet — decizia finală se confirmă prin compararea costurilor complete (cap. 3.3) și a indicatorilor financiari/economici (cap. 4.6-4.7) ai celor două scenarii, calculați cu datele reale ale amplasamentului.
 
 ### 5.3. Descrierea scenariului recomandat
 
-Scenariul recomandat constă într-o sală de sport cu regim de înălțime **P înalt (sala de joc) + tribune + mezanin anexe** (corp administrativ-tehnic parțial etajat), teren de joc de 40×20 m cu marcaje suprapuse multidisciplinare, structură de rezistență cu ferme metalice de deschidere liberă 30-36 m pentru sala de joc și structură de beton armat pentru tribunele de ~800-1.200 de locuri — categoria de importanță **B** (construcție cu funcțiuni de utilitate publică și aglomerări de persoane), clasa de importanță-expunere seismică **II** (γI,e = 1,20) și gradul de rezistență la foc **II**, cu tendință spre **I** la elementele structurale critice ale sălii aglomerate, conform justificării de principiu detaliate în memoriul general (cap. 1.4-1.6).
+Scenariul recomandat constă într-o sală de sport cu regim de înălțime **P înalt (sala de joc) + tribune + mezanin anexe** (corp administrativ-tehnic parțial etajat), teren de joc de 40×20 m cu marcaje suprapuse multidisciplinare, structură de rezistență cu ferme metalice de deschidere liberă 30-36 m pentru sala de joc și structură de beton armat pentru tribunele de ~2.000 de locuri (1.500 fixe + 500 telescopice) — categoria de importanță **B** (construcție cu funcțiuni de utilitate publică și aglomerări de persoane), clasa de importanță-expunere seismică **II** (γI,e = 1,20) și gradul de rezistență la foc **II**, cu tendință spre **I** la elementele structurale critice ale sălii aglomerate, conform justificării de principiu detaliate în memoriul general (cap. 1.4-1.6).
 
 ### 5.3.1. Programul funcțional detaliat al scenariului recomandat
 
 | Zonă | Funcțiune | Suprafață orientativă (funcție de Sc/Sd confirmate) |
 |---|---|---|
 | Sala de joc | Teren 40×20 m cu marcaje suprapuse, bandă de siguranță perimetrală | Conform dimensiunilor normate NP 065-2002 |
-| Tribune | ~800-1.200 locuri, cu locuri dedicate PMR | Conform capacității confirmate |
+| Tribune | ~2.000 locuri (1.500 fixe + 500 telescopice), cu locuri dedicate PMR | Conform capacității confirmate |
 | Vestiare și anexe sportive | Vestiare sportivi/oficiali, cabinet medical/arbitraj, depozit echipament sportiv | Conform programului funcțional detaliat de arhitectură |
 | Zona administrativ-tehnică | Birouri, cameră de comandă tehnică, spații tehnice (centrală termică, tablou electric) | Conform mezaninului de anexe |
 
