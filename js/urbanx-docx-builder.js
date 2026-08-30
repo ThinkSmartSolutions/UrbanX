@@ -3255,7 +3255,7 @@
     },
     // Sistematizare verticala — piesa scrisa, componenta a proiectului de arhitectura/inginerie din
     // continutul-cadru Anexa nr. 2 la Legea nr. 169/2026 (CATUC, M.Of. 661/10.08.2026, art. 264 alin. 3
-    // — inlocuieste fostul Anexa 1 la Ord. 839/2009/Legea 50/1991, ambele abrogate expres, art. 576
+    // — inlocuieste fostul Anexa 1 la Legea 169/2026 (CATUC) (norme Legea 169/2026 (CATUC), abrogata), ambele abrogate expres, art. 576
     // alin. 3 CATUC): cote de nivel teren natural/proiectat, racordare cu vecinatatile/drumul,
     // colectare-evacuare ape pluviale, lucrari de sustinere/rampe. Standard universal (nu optional ca
     // DTAD) — vezi referinta Cresa Pogana: memoriu separat + planse ([[urbanx-master-backlog]] sect. A).
@@ -3359,7 +3359,7 @@
         { h: 'B. Piese desenate — arhitectură', html: tbl(PD.map(function (r) { return r; }), ['Cod', 'Denumire planșă', 'Scara']) },
       ];
       if (PR.length) secs.push({ h: 'C. Piese desenate — rezistență și instalații (PTh)', html: tbl(PR, ['Cod', 'Denumire planșă', 'Scara']) });
-      secs.push({ h: 'D. Notă', html: '<p>Lista pieselor desenate este generată automat din regimul de înălțime (' + esc(D.regim || ('P+' + (niv - 1))) + ') și faza de proiectare. Fiecare planșă poartă cartuș conform Legii 50/1991, Anexa 1 (firmă/proiectant, nr. autorizație, titlu, scară, dată, semnături). Planurile se elaborează/finalizează de proiectant; planul funcțional schematic se poate genera din modelul de spații (SVG/PDF/DXF).</p>' });
+      secs.push({ h: 'D. Notă', html: '<p>Lista pieselor desenate este generată automat din regimul de înălțime (' + esc(D.regim || ('P+' + (niv - 1))) + ') și faza de proiectare. Fiecare planșă poartă cartuș conform Legea 169/2026 (CATUC), Anexa 1 (firmă/proiectant, nr. autorizație, titlu, scară, dată, semnături). Planurile se elaborează/finalizează de proiectant; planul funcțional schematic se poate genera din modelul de spații (SVG/PDF/DXF).</p>' });
       return { cat: 'Piese Administrative', file: 'Borderou_piese.doc', html: docHtml(_meta(D, 'BORDEROU / OPIS PIESE', 'piese scrise și desenate — Legea nr. 169/2026 (CATUC), Anexa 2'), secs) };
     },
     'Program funcțional (breviar spații)': function (D, v) {

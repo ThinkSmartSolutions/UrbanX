@@ -5984,7 +5984,7 @@ function _rvDNAGetSolutii(b, P, potOk, cutOk, solarIssues, isuOk, roomsOk, parcS
         'Reducere amprentă edificiu prin repoziționare față de limitele parcelei',
         'Soluție cu mai multe niveluri (crește CUT, reduce SC)',
         'Etajare progresivă — etajele superioare retrase față de amprentă',
-        'Consultați PUG pentru derogări conf. art. 22 Legea 350/2001',
+        'Consultați PUG pentru derogări conf. art. 22 Legea 169/2026 (CATUC)',
       ]
     });
   }
@@ -6411,7 +6411,7 @@ async function _rvExportPDF(){
       pdf.setFillColor(240,244,250);pdf.rect(0,H-7,W,7,'F');
       pdf.setDrawColor(...C.gray2);pdf.setLineWidth(0.2);pdf.line(0,H-7,W,H-7);
       pdf.setTextColor(120,135,155);pdf.setFontSize(5.5);pdf.setFont('helvetica','italic');
-      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR: '+S2(P.utr)+' · '+S2(P.fn)+' · UrbanX TSS·FG · Document orientativ — nu înlocuiește proiectul tehnic conf. Legii 50/1991',W/2,H-2,{align:'center'});
+      pdf.text('Nr.cad. '+S2(P.nrCad)+' · UTR: '+S2(P.utr)+' · '+S2(P.fn)+' · UrbanX TSS·FG · Document orientativ — nu înlocuiește proiectul tehnic conf. Legea 169/2026 (CATUC)',W/2,H-2,{align:'center'});
     };
     const secTitle=(txt,y,col)=>{
       const c=col||C.dark2;
@@ -6898,7 +6898,7 @@ async function _rvExportPDF(){
     // Title
     pdf.setTextColor(245,248,255);pdf.setFont('helvetica','bold');pdf.setFontSize(22);pdf.text('MEMORIU TEHNIC PRELIMINAR',14,H*0.44);
     pdf.setTextColor(245,248,255);pdf.setFont('helvetica','normal');pdf.setFontSize(11);pdf.text('Orientativ — Pre-proiectare · Verificare normative',14,H*0.46+10);
-    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);pdf.text('Conf. Legii 50/1991 · NP 057/2002 · OMS 119/2014 · P118/2013 · C107/2022',14,H*0.46+18);
+    pdf.setTextColor(...C.gold);pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);pdf.text('Conf. Legea 169/2026 (CATUC) · NP 057/2002 · OMS 119/2014 · P118/2013 · C107/2022',14,H*0.46+18);
     pdf.setFillColor(45,70,120);pdf.rect(14,H*0.46+13,120,0.6,'F');
     // Info grid bottom
     const infoItems=[
@@ -6916,7 +6916,7 @@ async function _rvExportPDF(){
       pdf.setTextColor(220,232,248);pdf.setFont('helvetica','bold');pdf.setFontSize(7.5);pdf.text(S2(String(v)),ix+(iColW-3)/2,iy+11,{align:'center'});
     });
     pdf.setTextColor(100,120,150);pdf.setFont('helvetica','italic');pdf.setFontSize(5.5);
-    pdf.text('Document orientativ · generat de UrbanX Relevee Instant · nu înlocuiește proiectul tehnic conf. Legii 50/1991 · UrbanX TSS·FG',W/2,H-3,{align:'center'});
+    pdf.text('Document orientativ · generat de UrbanX Relevee Instant · nu înlocuiește proiectul tehnic conf. Legea 169/2026 (CATUC) · UrbanX TSS·FG',W/2,H-3,{align:'center'});
 
     // ══════════════════════════════════════════════════════════════════
     // PAG 2 — PLAN DE SITUAȚIE + CONTEXT URBAN 3D
@@ -7017,7 +7017,7 @@ async function _rvExportPDF(){
     pdf.setFillColor(...C.blue);pdf.rect(cx3,r3y,2,22,'F');
     pdf.setTextColor(...C.blue);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('SCOP DOCUMENT',cx3+5,r3y+5);
     pdf.setTextColor(20,45,90);pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);
-    const scopTxt='Prezentul releveu orientativ a fost generat automat de platforma UrbanX în scop de PRE-PROIECTARE — pentru evaluarea fezabilității urbanistice a parcelei nr. '+P.nrCad+' și estimarea funcționalității propuse. NU înlocuiește releveul elaborat de arhitect autorizat OAR la fazele DTAC / PT / PAC conf. Legii 50/1991.';
+    const scopTxt='Prezentul releveu orientativ a fost generat automat de platforma UrbanX în scop de PRE-PROIECTARE — pentru evaluarea fezabilității urbanistice a parcelei nr. '+P.nrCad+' și estimarea funcționalității propuse. NU înlocuiește releveul elaborat de arhitect autorizat OAR la fazele DTAC / PT / PAC conf. Legea 169/2026 (CATUC).';
     const sl=pdf.splitTextToSize(S2(scopTxt),rw3-7);
     sl.slice(0,4).forEach((l,li)=>pdf.text(l,cx3+5,r3y+10+li*3));
     r3y+=26;
@@ -7400,7 +7400,7 @@ async function _rvExportPDF(){
       ['DIN 277 (DE)','Netto-Grundfläche',RN(DIN277_NGF,1)+' m²','NGF: suprafata neta totala (NF1+NF2+VF1+VF2)'],
       ['ANCPI (RO)','Suprafață utilă (SU)',RN(ANCPI_SU,1)+' m²','Suprafata incaperilor principale — fara pereti, hol comun, bai/wc sub 1.2m'],
       ['ANCPI (RO)','Suprafață construită (SC)',RN(ANCPI_SC,1)+' m²','Amprenta la sol (contur exterior) — cf. L7/1996 si ANCPI norme 2023'],
-      ['ANCPI (RO)','Suprafață desfașurată (SDA)',RN(b.sdaTotal,1)+' m²','Suma SC per toate nivelurile — folosita la autorizare L50/1991'],
+      ['ANCPI (RO)','Suprafață desfașurată (SDA)',RN(b.sdaTotal,1)+' m²','Suma SC per toate nivelurile — folosita la autorizare Legea 169/2026 (CATUC)'],
     ];
 
     const bW_=[25,35,22,halfW-2-25-35-22];

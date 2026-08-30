@@ -388,14 +388,14 @@ async function generateStudiuIluminat(){
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 3. RAPORT PRE-AUTORIZARE (REPA) — Checklist complet AC
-// Sursa: Legea 50/1991 + HG 907/2016 + Ord. 839/2009 + Ghid MLPDA 2023
+// Sursa: Legea 169/2026 (CATUC) + HG 907/2016 + Legea 169/2026 (CATUC) + Ghid MLPDA 2023
 // ═══════════════════════════════════════════════════════════════════════════
 async function generateREPA(){
   const ap=S.parcels[S.activeParcel??0];
   if(!ap?.geo?.geometry){ss('Selectați o parcelă.');return;}
   ss('Se generează Raport Pre-Autorizare...');
   const d=_initStudyPdf('Raport de Evaluare Prealabilă Autorizare (REPA)',
-    'Checklist AC · Legea 50/1991 · HG 907/2016 · Ord. 839/2009',10);
+    'Checklist AC · Legea 169/2026 (CATUC) · HG 907/2016 · Legea 169/2026 (CATUC)',10);
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,BLUE,LIGHT,RED,GREEN,ORANGE,
     S2,dateStr,nrcad,utr,area,lat,lon,params,uat,judet,
     hdr,ftr,sec,body,tblRow,kv,addImg,cover,newPage,checkY,concluzii,sign}=d;
@@ -469,11 +469,11 @@ async function generateREPA(){
   ].forEach(r=>{cy=tblRow(r,cy,false,[40,32,32,22,W-28-40-32-32-22]);cy=checkY(cy,12,'IND.',3);});
 
   // PAG 4 — Lista avize necesare
-  cy=newPage('3. AVIZE ȘI ACORDURI NECESARE — Legea 50/1991 art.7',4);
+  cy=newPage('3. AVIZE ȘI ACORDURI NECESARE — Legea 169/2026 (CATUC)',4);
   cy=addImg(caps.imgDist||caps.img2D,14,cy,W-28,60,'FIG. 2 — Amplasament față de rețele tehnice');
   cy=sec('3.1. AVIZE OBLIGATORII — DETERMINATE AUTOMAT',cy);cy+=3;
   cy=body('Avizele necesare sunt determinate pe baza amplasamentului, funcțiunii și înălțimii propuse, '+
-    'conform Legii 50/1991 art.7, Ord. 839/2009 și normativelor specifice.',14,cy);cy+=4;
+    'conform Legea 169/2026 (CATUC), Legea 169/2026 (CATUC) și normativelor specifice.',14,cy);cy+=4;
   const avize=[
     [aeroport&&ols?.distPrag_m<15000?'⚠ OBLIGATORIU':'Verificare','Aviz AACR',
      'aacr.ro','dacă H>45m sau lângă aeroport','30 zile','—'],
@@ -511,13 +511,13 @@ async function generateREPA(){
   cy=newPage('5. CALENDAR AUTORIZARE — CU → DTAC → AC → EXECUȚIE',6);
   cy=sec('5.1. DIAGRAMA GANTT ORIENTATIVĂ — ETAPE AUTORIZARE',cy);cy+=3;
   const etape=[
-    ['1','Obținere CU (Certificat de Urbanism)','Primărie',15,'Conf. Legii 50/1991 art.6'],
+    ['1','Obținere CU (Certificat de Urbanism)','Primărie',15,'Conf. Legea 169/2026 (CATUC)'],
     ['2','Elaborare studii prealabile (geotehnică etc.)','Proiectanți',30,'NP 074/2014'],
-    ['3','Obținere avize prealabile (APĂ,EL,GAZ,ISU,AACR)','Proiectanți+Benef.',60,'Ord. 839/2009'],
+    ['3','Obținere avize prealabile (APĂ,EL,GAZ,ISU,AACR)','Proiectanți+Benef.',60,'Legea 169/2026 (CATUC)'],
     ['4','Elaborare DTAC (Documentație Tehnică AC)','Arhitect+Ing.',45,'HG 907/2016'],
     ['5','Depunere DTAC + taxă timbru arhitectură','Beneficiar',1,'Ord. 1558/2017'],
-    ['6','Analiză și emitere AC (Autorizație de Construire)','Primărie',30,'L50/1991 art.7'],
-    ['7','Declarare începere lucrări','Beneficiar',5,'L50/1991 art.11'],
+    ['6','Analiză și emitere AC (Autorizație de Construire)','Primărie',30,'Legea 169/2026 (CATUC)'],
+    ['7','Declarare începere lucrări','Beneficiar',5,'Legea 169/2026 (CATUC)'],
     ['8','Execuție construcție','Constructor autorizat',niv*3+' luni','—'],
     ['9','Recepție la terminarea lucrărilor','Comisie+ISC','1-3','L 10/1995'],
     ['10','Intabulare în Cartea Funciară','OCPI','20','Legea 7/1996'],
@@ -538,9 +538,9 @@ async function generateREPA(){
   const RON=ctx.curs||5.05;
   cy=tblRow(['Element','Cost estimat EUR','Cost estimat RON','Baza'],
     cy,true,[80,30,30,W-28-80-30-30]);
-  [['Taxă CU (1-5% din taxa AC)','50-200',Math.round(125*RON),'L50/1991 art.6'],
+  [['Taxă CU (1-5% din taxa AC)','50-200',Math.round(125*RON),'Legea 169/2026 (CATUC)'],
    ['Timbru arhitectură (0.05-0.1% din val.)',Math.round(sda*400*0.0008),Math.round(sda*400*0.0008*RON),'Ord. 1558/2017'],
-   ['Taxă AC (0.5-1% valoare lucrări)',Math.round(sda*400*0.005),Math.round(sda*400*0.005*RON),'L50/1991'],
+   ['Taxă AC (0.5-1% valoare lucrări)',Math.round(sda*400*0.005),Math.round(sda*400*0.005*RON),'Legea 169/2026 (CATUC)'],
    ['Onorarii proiect arhitectură (1.5-3% val.)',Math.round(sda*400*0.02),Math.round(sda*400*0.02*RON),'RGU + contract'],
    ['Onorarii proiecte instalații','800-2500',Math.round(1500*RON),'Contract'],
    ['Studiu geotehnic','800-2500',Math.round(1500*RON),'NP 074/2014'],
@@ -566,9 +566,9 @@ async function generateREPA(){
   cy=newPage('8. BAZE LEGALE',9);
   cy=sec('8.1. CADRU LEGISLATIV AUTORIZARE CONSTRUIRE',cy);cy+=3;
   cy=tblRow(['Act normativ','Titlu prescurtat','Rol'],cy,true,[35,120,W-28-35-120]);
-  [['Legea 50/1991','Autorizarea executării lucrărilor de construcții','Cadru general AC'],
+  [['Legea 169/2026 (CATUC)','Autorizarea executării lucrărilor de construcții','Cadru general AC'],
    ['HG 907/2016','Conținut-cadru documentații tehnico-economice','DTAC + PT'],
-   ['Ord. 839/2009','Instrucțiuni tehnice de aplicare L50/1991','Procedura avize'],
+   ['Legea 169/2026 (CATUC)','Instrucțiuni tehnice de aplicare Legea 169/2026 (CATUC)','Procedura avize'],
    ['Legea 184/2001','Exercitarea profesiei de arhitect','Drept de semnătură'],
    ['Legea 10/1995','Calitatea în construcții','Cerințe + recepție'],
    ['HG 273/1994','Regulament recepție lucrări','Recepție + punere în funcțiune'],

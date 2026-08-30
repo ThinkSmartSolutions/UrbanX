@@ -6,7 +6,7 @@
 // folosind Claude API (claude-sonnet-4-20250514).
 //
 // INPUT: datele complete ale UAT-ului (demografic, economic, risc, zonificare)
-// OUTPUT: text juridic coerent, structurat pe capitolele din Legea 350/2001
+// OUTPUT: text juridic coerent, structurat pe capitolele din Legea 169/2026 (CATUC)
 //
 // CAPITOLE GENERATE:
 // §1.1 — Introducere și context teritorial
@@ -33,7 +33,7 @@ G._AIUrbanNarrative = {
 
   // ── Prompt system complet ─────────────────────────────────────────────
   SYSTEM_PROMPT: `Esti un urbanist atestat roman cu experienta in elaborarea documentatiilor de urbanism
-conform Legii 350/2001 si Ordinului 233/2016. Generezi texte de memoriu justificativ
+conform Legea 169/2026 (CATUC). Generezi texte de memoriu justificativ
 profesionale, precise si citate academic.
 
 REGULI STRICTE:
@@ -116,7 +116,7 @@ Scrie 2 paragrafe (total 150-200 cuvinte) care sa cuprinda:
 - Pozitia geografica si administrativ-teritoriala a UAT-ului
 - Importanta in cadrul regiunii si al tarii
 - Scopul documentatiei de urbanism
-- Baza legala (Legea 350/2001, Ord. 233/2016)
+- Baza legala (Legea 169/2026 (CATUC), Legea 169/2026 (CATUC))
 Raspunde DOAR cu textul sectiunii, fara titlu, fara comentarii.`,
 
       demographic: `Genereaza sectiunea §1.2 SITUATIA DEMOGRAFICA ACTUALA SI TENDINTE pentru memoriul justificativ.
@@ -208,7 +208,7 @@ Raspunde DOAR cu textul sectiunii, fara titlu, fara comentarii.`,
     var idx = (window._UrbanIndices && _UrbanIndices.compute) ? (function(){try{return _UrbanIndices.compute(pr,city);}catch(e){return [];}})() : [];
     var uh = (idx.find(function(i){return i.key==='uhi';})||{}).value;
     var T = {
-      intro: 'Municipiul '+(city.name||'')+', situat in judetul '+jud+', reprezinta un pol urban cu o populatie de '+N(pop)+' locuitori (Recensamant INS 2021). Documentatia de urbanism fundamenteaza dezvoltarea spatiala integrata pe orizontul 2025-2055, in acord cu Legea 350/2001, strategia teritoriala nationala si obiectivele de dezvoltare durabila (SDG 11). Prezentul memoriu sintetizeaza diagnoza multidisciplinara si directiile strategice propuse.',
+      intro: 'Municipiul '+(city.name||'')+', situat in judetul '+jud+', reprezinta un pol urban cu o populatie de '+N(pop)+' locuitori (Recensamant INS 2021). Documentatia de urbanism fundamenteaza dezvoltarea spatiala integrata pe orizontul 2025-2055, in acord cu Legea 169/2026 (CATUC), strategia teritoriala nationala si obiectivele de dezvoltare durabila (SDG 11). Prezentul memoriu sintetizeaza diagnoza multidisciplinara si directiile strategice propuse.',
       demographic: 'Populatia actuala este de '+N(pop)+' locuitori, cu o rata anuala de '+(r>=0?'+':'')+r.toFixed(2)+'%. Proiectia pentru 2055 (scenariu tendential) indica cca. '+N(pop55)+' locuitori. Structura pe varste reflecta tendinta nationala de imbatranire, cu implicatii directe asupra serviciilor publice, locuirii si fortei de munca. Retentia tinerilor si atragerea de noi rezidenti sunt conditii pentru viabilitatea pe termen lung.',
       economic: 'PIB-ul estimat este de '+N(pib)+' EUR/locuitor, reprezentand '+((pr.pctUE)||Math.round(pib/366))+'% din media UE27. Convergenta economica este motorul principal al valorii imobiliare si al atractivitatii investitionale. Diversificarea economica (servicii, industrie, educatie, IT) reduce vulnerabilitatea la socuri externe si sustine o crestere echilibrata.',
       risks: 'Profilul de risc cuprinde hazardul seismic (acceleratie de proiectare '+((pr.ag)||0.2)+'g, conform P100-1/2013), riscul de inundatii (conform ANAR PGRA) si efectele schimbarilor climatice (insula de caldura urbana, evenimente extreme). Consolidarea fondului construit vulnerabil (finantare PNRR C10) si masurile de adaptare climatica sunt prioritati de siguranta publica.',
@@ -422,7 +422,7 @@ SURSE: INSE Rec.2021 · Eurostat NUTS3 2022 · BNR IPI 2024 · ANCPI CON101A 202
             🤖 AI NARRATIVE GENERATOR
           </div>
           <div style="font-size:7px;color:rgba(148,163,184,.4)">
-            Claude AI · Memoriu justificativ urbanistic · Legea 350/2001
+            Claude AI · Memoriu justificativ urbanistic · Legea 169/2026 (CATUC)
           </div>
         </div>
         <button onclick="document.getElementById('ai-narrative-panel').style.display='none'"
@@ -532,7 +532,7 @@ G._AInarrativePDFPatch = {
         pdf.setFillColor(8,14,40); pdf.roundedRect(14,y,W-28,10,2,2,'F');
         pdf.setTextColor(100,120,150); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
         pdf.text('Text generat cu Claude AI (Anthropic) bazat pe datele INSE·Eurostat·BNR·INFP·ANAR.', 17, y+4.5);
-        pdf.text('Necesita validare si asumare de catre un urbanist atestat RUR conform Legii 350/2001.', 17, y+8.5);
+        pdf.text('Necesita validare si asumare de catre un urbanist atestat RUR conform Legea 169/2026 (CATUC).', 17, y+8.5);
       };
     }
     console.log('[AI Narrative] ✅ Patch PDF aplicat');

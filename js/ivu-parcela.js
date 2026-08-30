@@ -44,7 +44,7 @@
   var RESTRICTII = [
     { id: 'r_lmi_a', cat: 'Patrimoniu', name: 'LMI clasa A — monument de interes național', amp: 25, legal: 'Legea 422/2001' },
     { id: 'r_lmi_b', cat: 'Patrimoniu', name: 'LMI clasa B — monument de interes local', amp: 15, legal: 'Legea 422/2001' },
-    { id: 'r_zcp', cat: 'Patrimoniu', name: 'Zonă construită protejată (ZCP)', amp: 12, legal: 'Legea 350/2001' },
+    { id: 'r_zcp', cat: 'Patrimoniu', name: 'Zonă construită protejată (ZCP)', amp: 12, legal: 'Legea 169/2026 (CATUC)' },
     { id: 'r_n2000', cat: 'Mediu', name: 'Sit Natura 2000 (SCI/SPA)', amp: 30, legal: 'OUG 57/2007' },
     { id: 'r_arii', cat: 'Mediu', name: 'Arie naturală protejată', amp: 25, legal: 'OUG 57/2007' },
     { id: 'r_fond_forestier', cat: 'Mediu', name: 'Fond forestier național', amp: 20, legal: 'Legea 46/2008' },

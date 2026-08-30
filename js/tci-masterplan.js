@@ -163,7 +163,7 @@ G._TCIMasterplanPDF = {
     this._pg9_benchmark(ctx);
     this._pg10_recommendations(ctx);
     this._pg11_monitoring(ctx);
-    // ── Pagini noi conform Legea 350/2001 + Ord. 233/2016 ──────────────────
+    // ── Pagini noi conform Legea 169/2026 (CATUC) + Legea 169/2026 (CATUC) ──────────────────
     this._pg13_infrastructure(ctx);
     this._pg14_environment(ctx);
     this._pg15_zones_proposals(ctx);
@@ -264,11 +264,11 @@ G._TCIMasterplanPDF = {
     const _disc = _isCom
       ? ['Acest document este generat ALGORITMIC din date publice si reprezinta un CADRU ORIENTATIV de pre-analiza',
          'la scara de COMUNA. NU constituie si NU substituie un Masterplan / PUG / Strategie de Dezvoltare Locala',
-         'elaborate de proiectant atestat RUR si aprobate de Consiliul Local conform Legii 350/2001.',
+         'elaborate de proiectant atestat RUR si aprobate de Consiliul Local conform Legea 169/2026 (CATUC).',
          'Cifrele sunt estimari ce necesita validare profesionala, anchete de teren si avize de specialitate.']
       : ['Acest document este generat ALGORITMIC din date publice si reprezinta un instrument de PRE-ANALIZA',
          'si comunicare. NU constituie si NU substituie un Masterplan / PMUD / PUG elaborat de proiectant',
-         'atestat RUR, validat MDLPA si aprobat conform Legii 350/2001 si Ordinului 233/2016.',
+         'atestat RUR, validat MDLPA si aprobat conform Legea 169/2026 (CATUC).',
          'Cifrele sunt orientative si necesita validare profesionala, modelare de trafic si anchete de teren.'];
     pdf.setTextColor(245,225,225); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.6);
     _disc.forEach((ln,i)=>{ pdf.text(S2(ln), W/2, 211+i*7.5, {align:'center', maxWidth:W-34}); });
@@ -838,7 +838,7 @@ G._TCIMasterplanPDF = {
       ['NP 057/2002 locuire', 'SU min per cameră aplicabil oricărui proiect rezidențial', 'Obligatoriu AC'],
       ['Legea 372/2005 NZEB', 'Clădiri noi = Nearly Zero Energy Building obligatoriu', 'Certificat energetic clasa A'],
       ['NP 051/2012 PMR', 'Accesibilitate obligatorie P+2E+, parcaje PMR min 4%', 'Legea 448/2006'],
-      ['Legea 50/1991', 'Autorizație de construire obligatorie · CU → AC · Recepție', 'Aplicabil integral'],
+      ['Legea 169/2026 (CATUC)', 'Autorizație de construire obligatorie · CU → AC · Recepție', 'Aplicabil integral'],
     ];
     y = this._tbl(pdf,W,y, rows_norm, ['Normativ','Aplicabilitate','Consecință']);
 
@@ -918,7 +918,7 @@ G._TCIMasterplanPDF = {
     pdf.text('De ce prezentam metodologia in detaliu?', 20, y+6);
     pdf.setTextColor(180,195,220); pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5);
     const intro1 = S2l('Fiecare cifra din acest document are o formula, o sursa si un interval declarat de incertitudine. Transparenta metodologica permite oricui sa verifice, conteste fundamentat si actualizeze periodic datele.');
-    const intro2 = S2l('Conform Ord. 233/2016 si Legii 350/2001, metodologia este parte obligatorie din memoriul justificativ al oricarei documentatii de urbanism.');
+    const intro2 = S2l('Conform Legea 169/2026 (CATUC) si Legea 169/2026 (CATUC), metodologia este parte obligatorie din memoriul justificativ al oricarei documentatii de urbanism.');
     pdf.text(intro1, 20, y+13, {maxWidth: W-40});
     y += 22;
     pdf.setFillColor(4,10,28); pdf.rect(14,y,W-28,6,'F');
@@ -944,7 +944,7 @@ G._TCIMasterplanPDF = {
         fml: 'P(t) = P\u2080 \xd7 (1 + r)\u1d57   |   r calibrat INSE 2011\u20132021',
         pentru_cine: S2l('Pentru primari, investitori si urbanisti: raspunde la "cati oameni vor locui in ' + (city.name||'acest oras') + ' in 2055?" — cifra esentiala pentru a dimensiona corect scolile, spitalele, transportul si necesarul de locuinte.'),
         wh: S2l('Proiecteaza populatia pe orice orizont de timp pe baza ratei reale de crestere calibrate pe recensamintele INSE 2011 si 2021 per UAT. Incorporeaza structura pe varste (copii, adulti, varstnici) si tendintele de migratie.'),
-        wy: S2l('Legea 350/2001 art.25 impune proiectia demografica in orice PUG. Fara ea, dimensionarea scolilor, spitalelor si transportului devine imposibila. Standardul ONU/Eurostat — utilizat in EUROPOP2023 si toate proiectiile nationale INSE.'),
+        wy: S2l('Legea 169/2026 (CATUC) impune proiectia demografica in orice PUG. Fara ea, dimensionarea scolilor, spitalelor si transportului devine imposibila. Standardul ONU/Eurostat — utilizat in EUROPOP2023 si toate proiectiile nationale INSE.'),
         rezultat_acum: S2l('Aplicat: ' + (city.name||'UAT') + ', P\u2080=' + Number(pop0).toLocaleString('ro-RO') + ', r=' + (r>=0?'+':'') + r.toFixed(2) + '%/an'),
         ct: S2l('\xb18% la 10 ani \xb7 \xb118% la 30 ani \xb7 \xb125% la 34 ani (declarat explicit)'),
         sr: S2l('UN DESA (2019) World Population Prospects \xb7 INSE Recensamant 2011+2021 \xb7 Eurostat EUROPOP2023'),
@@ -1148,11 +1148,11 @@ G._TCIMasterplanPDF = {
 
     const disclaimerLines = [
       '1.  Document generat AUTOMAT de platforma UrbanX TSS\xb7FG pe baza datelor publice (INSE, Eurostat, BNR, ANCPI, INFP, ANAR, OSM) si a modelelor descrise mai sus.',
-      '2.  NU inlocuieste documentatiile PUG/PUZ/PUD elaborate conform Legii 350/2001 si NU poate fi substituit unui studiu de specialitate avizat.',
+      '2.  NU inlocuieste documentatiile PUG/PUZ/PUD elaborate conform Legea 169/2026 (CATUC) si NU poate fi substituit unui studiu de specialitate avizat.',
       '3.  NU constituie act de autoritate administrativa si NU poate fi temei legal pentru emiterea unui Autorizatii de Construire sau Certificat de Urbanism.',
       '4.  Valorile numerice sunt ESTIMARI ORIENTATIVE. Intervalele de incertitudine sunt declarate explicit per indicator. Erori de ±15-25% sunt posibile.',
       '5.  Utilizarea acestui document in decizii investitionale, juridice sau administrative se face pe raspunderea exclusiva a utilizatorului.',
-      '6.  OBLIGATORIU: verificarea si asumarea concluziilor de catre un urbanist atestat RUR conform Legii 350/2001 si Legii 184/2001.',
+      '6.  OBLIGATORIU: verificarea si asumarea concluziilor de catre un urbanist atestat RUR conform Legea 169/2026 (CATUC) si Legii 184/2001.',
     ];
 
     disclaimerLines.forEach((line,i) => {
@@ -1481,7 +1481,7 @@ G._TCIMasterplanPDF = {
   },
 
   // ═════════════════════════════════════════════════════════════════════
-  // PAGINI NOI — conform Legea 350/2001 + Ord. 233/2016 + HG 907/2016
+  // PAGINI NOI — conform Legea 169/2026 (CATUC) + Legea 169/2026 (CATUC) + HG 907/2016
   // ═════════════════════════════════════════════════════════════════════
 
   // PG 13: Infrastructură tehnico-edilitară
@@ -1674,7 +1674,7 @@ G._TCIMasterplanPDF = {
       if(zoneResult?.metro?.length > 0) {
         y+=4;
         y=this._section(pdf,W,y,'14.2 Zone Metropolitane — Comune Periurbane cu Crestere Rapida');
-        y=this._note(pdf,W,y,S2l('Comunele periurbane din zona metropolitana au rate de crestere superioare municipiului. Necesita coordonare PUG/PUZ cu UAT-ul principal conform Legii 350/2001 art. 46.'),[239,68,68]);
+        y=this._note(pdf,W,y,S2l('Comunele periurbane din zona metropolitana au rate de crestere superioare municipiului. Necesita coordonare PUG/PUZ cu UAT-ul principal conform Legea 169/2026 (CATUC).'),[239,68,68]);
         const metroRows = zoneResult.metro.slice(0,5).map(m=>[
           S2l(m.name||'—'),
           Nl(m.pop2021||0),
@@ -1713,7 +1713,7 @@ G._TCIMasterplanPDF = {
     ];
     this._tbl(pdf,W,y,ext,['Scenariu','Expansiune (ha)','Descriere'],[55,35,100]);
 
-    this._pgFooter(pdf,W,H,today,14,'Legea 350/2001 · HG 525/1996 RGU · Ord. 233/2016 · OSM Overpass · Copernicus GHSL · Model UrbanX 2026');
+    this._pgFooter(pdf,W,H,today,14,'Legea 169/2026 (CATUC) · HG 525/1996 RGU · Legea 169/2026 (CATUC) · OSM Overpass · Copernicus GHSL · Model UrbanX 2026');
   },
 
   // PG 16: Finanțare și surse de fonduri
@@ -1825,7 +1825,7 @@ G._TCIMasterplanPDF = {
       y+=15;
     });
 
-    this._pgFooter(pdf,W,H,today,16,'Legea 350/2001 art.46 · Ord. 233/2016 · HG 907/2016 · PNRR 2021 · EPBD 2024 · Green Deal European');
+    this._pgFooter(pdf,W,H,today,16,'Legea 169/2026 (CATUC) · Legea 169/2026 (CATUC) · HG 907/2016 · PNRR 2021 · EPBD 2024 · Green Deal European');
   },
 
   // PG 18: Patrimoniu cultural și zone protejate
@@ -1840,7 +1840,7 @@ G._TCIMasterplanPDF = {
     y=this._section(pdf,W,y,'17.1 Cadrul Legal');
     const legal=[
       ['Legea 422/2001','Protejarea monumentelor istorice · Clasă A (valoare națională) și B (locală)'],
-      ['Legea 350/2001','Art. 31: Zone construite protejate în PUG · Studiu istoric obligatoriu'],
+      ['Legea 169/2026 (CATUC)','Art. 31: Zone construite protejate în PUG · Studiu istoric obligatoriu'],
       ['Ord. 2314/2004','Norme metodologice de clasare și inventariere monumente'],
       ['HG 1430/2003','Metodologie avizare intervenții la monumente · Aviz Ministerul Culturii'],
       ['Convenția Granada (1985)','Protecția patrimoniului arhitectural european · Ratificată România 1997'],
@@ -1931,12 +1931,12 @@ G._TCIMasterplanPDF = {
 
     y=this._section(pdf,W,y,'19.1 Legislație Urbanistică Aplicabilă');
     const laws=[
-      ['Legea 350/2001','Legea amenajării teritoriului și urbanismului (republicată) — baza PUG/PUZ/PUD'],
+      ['Legea 169/2026 (CATUC)','Legea amenajării teritoriului și urbanismului (republicată) — baza PUG/PUZ/PUD'],
       ['PATJ','Planul de Amenajare a Teritoriului Județean — cadrul spatial judetean, obligatoriu pentru PUG'],
       ['PATN','Planul de Amenajare a Teritoriului National — 6 sectiuni (apa, riscuri, zone protejate, reteaua de localitati, transporturi, turism)'],
-      ['Legea 50/1991','Autorizarea construcțiilor — procedura AC, documentații, sancțiuni'],
+      ['Legea 169/2026 (CATUC)','Autorizarea construcțiilor — procedura AC, documentații, sancțiuni'],
       ['HG 525/1996','Regulamentul General de Urbanism (RGU) — parametri urbanistici de bază'],
-      ['Ord. 233/2016','Norme metodologice de aplicare a Legii 350/2001 — conținut documentații'],
+      ['Legea 169/2026 (CATUC)','Norme metodologice de aplicare a Legea 169/2026 (CATUC) — conținut documentații'],
       ['HG 907/2016','Etapele și conținutul documentațiilor SF, DALI, PT'],
       ['Legea 372/2005','Performanță energetică a clădirilor — NZEB obligatoriu clădiri noi 2021'],
       ['Legea 260/2008','Asigurarea obligatorie a locuințelor — PAD — zone de risc seismic'],
@@ -1983,7 +1983,7 @@ G._TCIMasterplanPDF = {
       y+=6;
     });
 
-    this._pgFooter(pdf,W,H,today,19,'Legea 350/2001 · Ord. 233/2016 · HG 525/1996 · Glossar urbanistic UrbanX TSS·FG 2026');
+    this._pgFooter(pdf,W,H,today,19,'Legea 169/2026 (CATUC) · Legea 169/2026 (CATUC) · HG 525/1996 · Glossar urbanistic UrbanX TSS·FG 2026');
   },
 
   // ── Pagina 21: Accesibilitate + Walkability + Monte Carlo ─────────────
@@ -2815,7 +2815,7 @@ G._TCIMasterplanPDF = {
     }
     y+=2; pdf.setTextColor(120,130,150); pdf.setFont('helvetica','italic'); pdf.setFontSize(6.5);
     _pdfText(pdf,S2('POT = Procent de Ocupare a Terenului · CUT = Coeficient de Utilizare a Terenului · SV = procent minim spatii verzi. Valorile sunt cele din RLU/PUG in vigoare ('+keys.length+' subzone). Retragerile fata de limite si conditiile detaliate sunt in fisa fiecarei subzone (drawer info parcela).'),14,y+2,{maxWidth:W-28,lineHeight:3.4});
-    this._pgFooter(pdf,W,H,today,'B3','RLU aferent · '+keys.length+' subzone · Legea 350/2001 · HG 525/1996 (RGU)');
+    this._pgFooter(pdf,W,H,today,'B3','RLU aferent · '+keys.length+' subzone · Legea 169/2026 (CATUC) · HG 525/1996 (RGU)');
   },
 
   // ── PROFILE STRADALE TIP (sectiuni schematice) ──────────────────────────
@@ -3155,7 +3155,7 @@ G._TCIPmudPDF = {
     y=MP._section(pdf,W,y,'Cadru Metodologic & Legal');
     pdf.setTextColor(60,70,90); pdf.setFont('helvetica','normal'); pdf.setFontSize(8);
     [['Cadru EU','Liniile directoare SUMP (ELTIS) · Pactul Verde European · Directiva calitate aer 2008/50/CE'],
-     ['Cadru national','Ghid MDLPA elaborare PMUD · Legea 350/2001 (urbanism) · Strategia Nationala de Mobilitate'],
+     ['Cadru national','Ghid MDLPA elaborare PMUD · Legea 169/2026 (CATUC) (urbanism) · Strategia Nationala de Mobilitate'],
      ['Date utilizate','INS TEMPO (populatie, motorizare) · Eurostat · OpenStreetMap (retea) · OpenAQ (calitate aer) · operatori TP locali'],
      ['Model','Cerere de transport in 4 etape · analiza izocrone (accesibilitate) · analiza cost-beneficiu scenarii'],
      ['Limitari','Document de fundamentare (pre-PMUD). PMUD final necesita recensamant de trafic, anchete de mobilitate si model calibrat de consultant atestat.']

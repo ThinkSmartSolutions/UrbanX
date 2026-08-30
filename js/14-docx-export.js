@@ -9,7 +9,7 @@ const _STUDII_EXTRA = {
     pagini:12, norma:'P118-1/2015',
     ce_analizeaza:'Verifică dacă clădirea propusă respectă normele de securitate la incendiu conform P118-1/2015 și P118-2/2013. Calculează categoria de pericol de incendiu, gradul de rezistență la foc necesar, dimensionează căile de evacuare și determină dacă este obligatoriu avizul ISU Moldova înainte de Autorizația de Construire.',
     de_ce:'Orice clădire cu înălțime mai mare de 8m sau suprafață desfășurată mai mare de 600mp necesită obținerea Avizului de Securitate la Incendiu de la ISU Moldova înainte de emiterea Autorizației de Construire. Construirea fără acest aviz atrage oprirea lucrărilor și aplicarea de amenzi contravenționale.',
-    baza_legala:['P118-1/2015 — Normativ privind securitatea la incendiu a construcțiilor','P118-2/2013 — Normativ privind securitatea la incendiu a instalațiilor de stingere','Legea nr. 307/2006 privind apărarea împotriva incendiilor','Ordinul MAI nr. 163/2007 — Norme generale de apărare împotriva incendiilor','Legea nr. 50/1991 art. 7 — Autorizația de Construire cu aviz ISU'],
+    baza_legala:['P118-1/2015 — Normativ privind securitatea la incendiu a construcțiilor','P118-2/2013 — Normativ privind securitatea la incendiu a instalațiilor de stingere','Legea nr. 307/2006 privind apărarea împotriva incendiilor','Ordinul MAI nr. 163/2007 — Norme generale de apărare împotriva incendiilor','Legea 169/2026 (CATUC) — Autorizația de Construire cu aviz ISU'],
     ce_primesti:[
       {ico:'🏗', txt:'Clasificarea clădirii: categorie pericol incendiu (A-E) și grad de rezistență la foc (I-V)'},
       {ico:'🚒', txt:'Căi de acces ISU: lățime min. 3.5m (1 vehicul) / 5.5m (2 vehicule), distanță max. 80m'},
@@ -32,10 +32,10 @@ const _STUDII_EXTRA = {
   amplasament: {
     ico:'🗺', titlu:'Studiu de Amplasament & Teritoriu',
     badge:'DOCUMENT FUNDAMENT', badgeColor:'#818cf8',
-    pagini:12, norma:'Legea 350/2001',
+    pagini:12, norma:'Legea 169/2026 (CATUC)',
     ce_analizeaza:'Analizează amplasamentul în 12 domenii tehnice integrate: indicatori PUG, situație juridică, infrastructură edilitară, patrimoniu LMI, servituți, mobilitate, seismicitate, însorire, vânt, zgomot, geotehnică, impact mediu și estimare financiară. Constituie documentul fundament pe baza căruia se elaborează toate studiile de specialitate ulterioare.',
     de_ce:'Studiul de Amplasament este documentul de referință recomandat înainte de elaborarea oricărei documentații de autorizare. Centralizează toate informațiile tehnice relevante despre amplasament și determină automat lista studiilor obligatorii și avizelor necesare, economisind timp și evitând surprize în procesul de autorizare.',
-    baza_legala:['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul','HG nr. 525/1996 — Regulamentul General de Urbanism','P100-1/2013 — Cod de proiectare seismică (zonare seismică, ag, Tc)','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 074/2014 — Normativ privind cercetarea geotehnică','HG 930/2016 + Legea 233/2016 — Avizare construcții în zone aeronautice','Legea nr. 422/2001 privind protejarea monumentelor istorice'],
+    baza_legala:['Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul','HG nr. 525/1996 — Regulamentul General de Urbanism','P100-1/2013 — Cod de proiectare seismică (zonare seismică, ag, Tc)','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 074/2014 — Normativ privind cercetarea geotehnică','HG 930/2016 + Legea 233/2016 — Avizare construcții în zone aeronautice','Legea nr. 422/2001 privind protejarea monumentelor istorice'],
     ce_primesti:[
       {ico:'📐', txt:'Indicatori PUG complet: POT/CUT/H/SV/Pk/retrageri + bilanț suprafețe'},
       {ico:'⚖️', txt:'Situație juridică cadastrală: CF, servituți, acces, sarcini'},
@@ -66,7 +66,7 @@ const _STUDII_EXTRA = {
     pagini:15, norma:'HG 907/2016',
     ce_analizeaza:'Analizează viabilitatea economică a investiției imobiliare prin calcule financiare cu parametri personalizabili: preț construcție, preț teren, chirie de referință, preț vânzare și rată de ocupare. Compară 3 variante tehnice (conservatoare/recomandat/maxim), calculează randamentul brut, payback-ul și profitul estimat la vânzare. Exportabil în format PDF și Word (.doc) editabil.',
     de_ce:'Studiul de Fezabilitate / DALI (Documentație de Avizare a Lucrărilor de Intervenție) este obligatoriu conform HG 907/2016 pentru proiectele cu finanțare publică. Pentru investițiile private, constituie instrumentul esențial de decizie: validează sau infirmă oportunitatea economică a investiției înainte de cheltuielile de proiectare.',
-    baza_legala:['HG nr. 907/2016 — Etapele elaborării documentațiilor tehnico-economice','Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții','Legea nr. 350/2001 — Amenajarea teritoriului și urbanismul','NP 074/2014 — Normativ privind cercetarea geotehnică','P100-1/2013 — Cod de proiectare seismică','OMS 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 051/2012 rev. — Normativ privind parcajele'],
+    baza_legala:['HG nr. 907/2016 — Etapele elaborării documentațiilor tehnico-economice','Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții','Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul','NP 074/2014 — Normativ privind cercetarea geotehnică','P100-1/2013 — Cod de proiectare seismică','OMS 119/2014 + Ord. 994/2018 — Norme igienă și însorire','NP 051/2012 rev. — Normativ privind parcajele'],
     ce_primesti:[
       {ico:'🔢', txt:'Indicatori urbanistici PUG: POT/CUT/H/SV/Pk conf. RLU UTR — bilanț suprafețe'},
       {ico:'⚖️', txt:'3 variante tehnice comparate: S1 conservator / S2 recomandat / S3 maxim RLU'},
@@ -265,7 +265,7 @@ function _wCover(title, subtitle, meta, statusText, statusOk){
 function _wDisclaimer(){
   return `<div class="disclaimer">
     <strong>NOTĂ:</strong> Document ORIENTATIV generat automat de platforma UrbanX TSS·FG.
-    Nu înlocuiește documentațiile tehnice avizate conform Legii 50/1991 și Legii 350/2001.
+    Nu înlocuiește documentațiile tehnice avizate conform Legea 169/2026 (CATUC).
     Valorile sunt estimative — devizul și studiile detaliate obligatorii se elaborează de specialiști atestați.
     Generat: ${new Date().toLocaleDateString('ro-RO',{day:'2-digit',month:'long',year:'numeric'})}.
   </div>`;
@@ -567,8 +567,8 @@ async function generateFezabilitateDocx(userParams={}){
     html += _wH2('10.1. Baza legală');
     html += _wBullets([
       'HG nr. 907/2016 — Etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.',
-      'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții.',
-      'Legea nr. 350/2001 — Amenajarea teritoriului și urbanismul, republicată.',
+      'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții.',
+      'Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul, republicată.',
       'NP 074/2014 — Normativ privind cercetarea geotehnică.',
       'P100-1/2013 — Cod de proiectare seismică. Zona '+seismCfg.zona+' (ag='+seismCfg.ag+'g).',
       'NP 051/2012 rev. — Normativ privind parcajele și adaptarea la necesitățile PMR.',

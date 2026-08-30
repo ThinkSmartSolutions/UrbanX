@@ -40,7 +40,7 @@
   // Șabloane predefinite (seturi de planșe obligatorii)
   var BUILTIN = {
     DTAC_RO_STANDARD: {
-      name: 'DTAC România — Standard', desc: 'Cerințe minime Ordinul 839/2009',
+      name: 'DTAC România — Standard', desc: 'Cerințe minime Legea 169/2026 (CATUC), Anexa 2',
       sheets_required: ['PS', 'PI', 'P00', 'P01+', 'F_N', 'F_S', 'F_E', 'F_V', 'S_AA', 'S_BB', 'AC', 'CR']
     },
     PTH_RO_STANDARD: {

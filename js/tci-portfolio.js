@@ -45,7 +45,7 @@ G._Portfolio = {
         { sursa:'FEDR POR 2021-2027+', pct:15, ref:`Reg.UE 2021/1060 — ${Math.round(fedrRate*100)}% rată` },
       ],
       kpi:'Nr. unități/an · Grad ocupare · Prețuri piață · Acces tânăra generație',
-      legal:'Legea 50/1991 · Legea 350/2001 · HG 525/1996 RGU',
+      legal:'Legea 169/2026 (CATUC) · HG 525/1996 RGU',
     });
 
     projects.push({
@@ -124,7 +124,7 @@ G._Portfolio = {
         { sursa:'Sector privat (PPP)', pct:35, ref:'Legea 233/2016 PPP' },
       ],
       kpi:'Nr. locuri muncă create · Valoare adăugată brută · Ocupare teren brownfield %',
-      legal:'Legea 350/2001 PUZ · OUG 114/2007 · Legea 292/2018 (teren degradat)',
+      legal:'Legea 169/2026 (CATUC) PUZ · OUG 114/2007 · Legea 292/2018 (teren degradat)',
     });
 
     projects.push({

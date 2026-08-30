@@ -462,7 +462,7 @@ function _generateMemoriuPDF(P, b, floors, _jsPDF){
     { n:'P118-2/2013', desc:'Evacuare max 30m de la ușa apartamentului la casa scărilor', ok:true },
     { n:'NP 051/2012', desc:'Lift obligatoriu P+'+(b.niv-1)+'E '+( b.niv>=5?'✓ OBLIGATORIU':'(recomandat)'), ok:b.niv>=5 },
     { n:'SR 1907-1', desc:'Ventilație mecanică băi și WC-uri interioare (simbol M în plan)', ok:true },
-    { n:'Legea 50/1991', desc:'Autorizație de construire obligatorie — avize necesare mai jos', ok:true },
+    { n:'Legea 169/2026 (CATUC)', desc:'Autorizație de construire obligatorie — avize necesare mai jos', ok:true },
   ];
   if(b.niv >= 4){
     normative.push({ n:'NP-073/2002', desc:'Adăpost ALA obligatoriu (≥10 apartamente) — suprafață min '+ Math.ceil(nrApt_total*2.5*0.75)+'m²', ok:true });
@@ -516,7 +516,7 @@ function _generateMemoriuPDF(P, b, floors, _jsPDF){
   y += 4;
   section('8. MENȚIUNI IMPORTANTE', [100,116,139]);
   note('Acest document este un MEMORIU TEHNIC PRELIMINAR cu caracter orientativ, generat automat pe baza datelor din planul urbanistic și a parametrilor introduși în UrbanX. Nu înlocuiește proiectul tehnic elaborat de arhitect cu drept de semnătură (Ord. 11/2014). Suprafețele și dimensiunile sunt calculate algoritmic și necesită verificare cu măsurători reale și plan cadastral actualizat.', [100,116,139]);
-  note('Avizele indicate sunt orientative. Lista completă și condițiile specifice se stabilesc la certificatul de urbanism emis de autoritatea locală competentă (Legea 50/1991, art.6).', [99,102,241]);
+  note('Avizele indicate sunt orientative. Lista completă și condițiile specifice se stabilesc la certificatul de urbanism emis de autoritatea locală competentă (Legea 169/2026 (CATUC)).', [99,102,241]);
 
   // ── Footer ────────────────────────────────────────────────────────────────
   const totalPages = pdf.internal.getNumberOfPages();
@@ -560,8 +560,8 @@ function _tRow(pdf, tX, y, cols, values, i, isBold){
 // ── Helper: avize necesare ────────────────────────────────────────────────
 function _getAvize(P, b, _AC){
   const avize = [
-    {av:'Certificat Urbanism', motiv:'Obligatoriu pentru orice construcție (Legea 50/1991)', oblig:true},
-    {av:'Autorizație de Construire', motiv:'Legea 50/1991 — baza juridică construire', oblig:true},
+    {av:'Certificat Urbanism', motiv:'Obligatoriu pentru orice construcție (Legea 169/2026 (CATUC))', oblig:true},
+    {av:'Autorizație de Construire', motiv:'Legea 169/2026 (CATUC) — baza juridică construire', oblig:true},
     {av:'Aviz ISU', motiv:'PSI obligatoriu P+2E sau >200m² (P118/1, P118/2)', oblig: b.niv>=3},
     {av:'Aviz Utilități (apă, canal, gaz, el.)', motiv:'Branșamente noi sau modificări rețele', oblig:true},
     {av:'Studiu Geotehnic', motiv:'NP 074/2014 — obligatoriu orice construcție nouă', oblig:true},

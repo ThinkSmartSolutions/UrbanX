@@ -99,11 +99,11 @@
     transfront: { ac: [90, 90, 150], ico: '🛂',
       inf: { t: 'STUDIU DE AMPLASAMENT ÎN ZONĂ DE FRONTIERĂ', badge: 'PROFIL TRANSFRONTALIER · STUDIU DE AMPLASAMENT',
         ce: 'Diagnoză la nivel de UAT/amplasament de graniță: amenajarea zonei de frontieră, interoperabilitatea planurilor, punctele de trecere și coridoarele transfrontaliere.',
-        legal: 'Legea 350/2001 (amenajare/urbanism), Reg. (UE) Interreg, Acorduri bilaterale de cooperare, TEN-T transfrontalier',
+        legal: 'Legea 169/2026 (CATUC) (amenajare/urbanism), Reg. (UE) Interreg, Acorduri bilaterale de cooperare, TEN-T transfrontalier',
         surse: 'Programe Interreg, Eurostat (regiuni de graniță), TEN-T, OSM, agenții de dezvoltare regională' },
       sup: { t: 'STRATEGIE DE AMENAJARE ȘI COOPERARE TRANSFRONTALIERĂ', badge: 'PROFIL TRANSFRONTALIER · STUDIU TERITORIAL / STRATEGIC',
         ce: 'Strategie teritorială transfrontalieră: programe Interreg, interoperabilitatea planurilor de amenajare, coridoare TEN-T transfrontaliere și cooperare instituțională.',
-        legal: 'Reg. (UE) Interreg, Legea 350/2001, EGTC (Grupare Europeană de Cooperare Teritorială), TEN-T, EUSDR',
+        legal: 'Reg. (UE) Interreg, Legea 169/2026 (CATUC), EGTC (Grupare Europeană de Cooperare Teritorială), TEN-T, EUSDR',
         surse: 'Interreg, Eurostat, ESPON, TEN-T, EUSDR, ADR' } }
   };
 

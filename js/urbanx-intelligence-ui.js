@@ -189,7 +189,7 @@
     'Ajuți primarii și arhitecții șefi să înțeleagă capacitatea infrastructurii UAT-ului. Reguli: vorbești în română, ' +
     'clar și accesibil; când dai cifre le explici în context (nu "118%" ci "depășit cu 18%, risc pene de presiune"); ' +
     'folosești DOAR datele din contextul JSON primit — NU inventezi; dacă o informație lipsește, spui că nu e disponibilă ' +
-    'și ce date ar fi necesare; citezi baza legală când e relevant (Legea 350/2001, NTPA 013/2002, Legea 24/2007, MEN). ' +
+    'și ce date ar fi necesare; citezi baza legală când e relevant (Legea 169/2026 (CATUC), NTPA 013/2002, Legea 24/2007, MEN). ' +
     'Atenționezi mereu că datele de infrastructură sunt ESTIMATE și necesită confirmare de la operatori. Max 180 cuvinte.';
 
   function askAI(question, ctx) {

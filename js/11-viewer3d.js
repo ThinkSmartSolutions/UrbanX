@@ -290,7 +290,7 @@ async function _generateSolarStudyLegacy(){
   cy=bullet([
     'OMS nr. 119/2014 — Norme de igienă și sănătate publică privind mediul de viață al populației (Cap. II — Locuințe).',
     'Ordinul MS nr. 994/2018 pentru modificarea OMS 119/2014 — Actualizarea normelor de însorire.',
-    'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții (art. 7 — studii obligatorii).',
+    'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții (art. 7 — studii obligatorii).',
     'HG nr. 525/1996 — Regulamentul General de Urbanism (art. 17 — Amplasarea față de aliniament și vecinătăți).',
     'SR EN 17037:2019 — Iluminare naturală în clădiri (standard european, adoptat în România).',
     'PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism: H max '+( params.h||'—')+'m, POT max '+params.pot+'%, CUT max '+params.cut+'.',
@@ -306,7 +306,7 @@ async function _generateSolarStudyLegacy(){
     'Umbra proiectată la solstițiu de iarnă (12:00) are lungimea estimată de '+solarData.iarna.shadAt12+'m. La solstițiu de vară, umbra se reduce la '+solarData.vara.shadAt12+'m. Aceste valori trebuie coroborate cu distanțele față de proprietățile vecine (rf='+params.rf+'m, rl='+params.rl+'m, rs='+params.rs+'m conform PUG).',
     'Clădirea propusă cu H='+aedisH.toFixed(1)+'m și '+niv+' niveluri beneficiază de '+solarData.vara.oreSoare+' ore de însorire directă la solstițiu de vară și '+oreMinIarna+' ore/zi la solstițiu de iarnă (altitudine ≥15°).',
     'Se recomandă orientarea principală a ferestrelor camere de locuit spre Sud-Sud-Est (±30°) pentru maximizarea câștigului solar pasiv în sezonul rece și reducerea supraîncălzirii în sezonul cald.',
-    'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legii 50/1991.',
+    'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legea 169/2026 (CATUC).',
   ],cy);
 
   sign();

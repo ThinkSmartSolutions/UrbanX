@@ -163,7 +163,7 @@ async function _rvExportPlanseA3(){
     try{ if(window.UX_DRAW && window.UX_DRAW.paramsStrip){ pdf.setTextColor(70,90,120);pdf.setFont('helvetica','normal');pdf.setFontSize(4.6);
       pdf.text(S2(window.UX_DRAW.paramsStrip(_pA3ac())),W/2,H-4.2,{align:'center'}); } }catch(e){}
     pdf.setTextColor(110,125,145);pdf.setFont('helvetica','italic');pdf.setFontSize(4.5);
-    pdf.text(S2('Nr.cad. '+P.nrCad+' · UTR: '+P.utr+' · '+P.W+'m×'+P.D+'m · '+P.area+'m² · UrbanX TSS·FG · Document orientativ — nu inlocuieste proiectul tehnic Legea 50/1991'),W/2,H-1.5,{align:'center'});
+    pdf.text(S2('Nr.cad. '+P.nrCad+' · UTR: '+P.utr+' · '+P.W+'m×'+P.D+'m · '+P.area+'m² · UrbanX TSS·FG · Document orientativ — nu inlocuieste proiectul tehnic Legea 169/2026 (CATUC)'),W/2,H-1.5,{align:'center'});
   };
 
   // ── drawPlan (extras din _rvExportPDF, fond alb) ──────────────────────

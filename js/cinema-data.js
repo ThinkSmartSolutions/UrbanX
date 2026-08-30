@@ -1,5 +1,5 @@
 // cinema-data.js — UrbanX Date Reale Statice
-// Zonare seismica P100-1/2013, HG 525/1996, Ordin 839/2009
+// Zonare seismica P100-1/2013, HG 525/1996, Legea 169/2026 (CATUC)
 // Se actualizeaza manual cand se modifica legislatia
 // (c) ThinkSmart Solutions SRL 2026
 
@@ -169,7 +169,7 @@ window._RGU_ZONES = {
   },
 };
 
-// ── ORDIN 839/2009 — REGULI DE MODIFICARE PRIN PUZ ───────────────────────
+// ── LEGEA 169/2026 (CATUC) — REGULI DE MODIFICARE PRIN PUZ ───────────────
 window._PUZ_RULES = {
   // CUT: se poate majora prin PUZ cu max 20% fata de PUG
   CUT_majorare_max_pct: 0.20,
@@ -412,6 +412,6 @@ window._calcUrbanScore = function(pred, city) {
   };
 };
 
-console.log('[cinema-data.js] LOADED — seismic P100/2013, HG 525/1996, Ordin 839/2009, salarii INSE 2024, scoring UAT');
+console.log('[cinema-data.js] LOADED — seismic P100/2013, HG 525/1996, Legea 169/2026 (CATUC), salarii INSE 2024, scoring UAT');
 
 })();

@@ -2,7 +2,7 @@
  * UrbanX CAU — Comisia de Acorduri Unice (motor client-side, Faza 1 funcțională)
  * Determină automat avizele necesare pentru un Certificat de Urbanism, din:
  * parcela selectată + tipul lucrării + zona PUG + rețelele din jur (OSM).
- * Include: motor de reguli (9 reguli, Legea 50/1991), registru CU persistent,
+ * Include: motor de reguli (9 reguli, Legea 169/2026 (CATUC)), registru CU persistent,
  * calcul „aviz tacit favorabil" la 30 zile, fetch rețele OSM (best-effort).
  *
  * window.CAU.computeNotices(ctx) · fetchNetworks(centroid) · registry · tacitCheck
@@ -82,7 +82,7 @@
     spital: 'Spital', clinica: 'Clinică', cresa: 'Creșă', centru_social: 'Centru social', mixt: 'Mixt'
   };
 
-  // ── MOTORUL DE REGULI (9 reguli, Legea 50/1991) ───────────────────────────
+  // ── MOTORUL DE REGULI (9 reguli, Legea 169/2026 (CATUC)) ───────────────────────────
   function computeNotices(ctx) {
     var w = ctx.work || {}, pug = ctx.pug || {}, risks = ctx.risks || {};
     var nets = ctx.networks || [];
@@ -93,8 +93,8 @@
     // Regula 1 — proximitate rețele (din OSM)
     nets.forEach(function (n) {
       var p = PROTECTION[n.type]; if (!p) return;
-      if (n.distance_m <= p.prot) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, is_mandatory: true, legal_basis: 'Legea 50/1991 · zona de protecție ' + p.label + ' (' + p.prot + 'm)', data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (în zona de protecție)' });
-      else if (n.distance_m <= 50) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, recommended: true, legal_basis: 'Legea 50/1991 · racordare posibilă ' + p.label, data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (probabil necesar la racordare)' });
+      if (n.distance_m <= p.prot) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, is_mandatory: true, legal_basis: 'Legea 169/2026 (CATUC) · zona de protecție ' + p.label + ' (' + p.prot + 'm)', data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (în zona de protecție)' });
+      else if (n.distance_m <= 50) add({ notice_type: 'retea_' + n.type, holder_name: p.holder, recommended: true, legal_basis: 'Legea 169/2026 (CATUC) · racordare posibilă ' + p.label, data_quality_flag: n.data_quality, network_proximity_m: n.distance_m, label: 'Aviz ' + p.label + ' — rețea la ' + n.distance_m + 'm (probabil necesar la racordare)' });
     });
 
     // Regula 2 — ISU
@@ -141,7 +141,7 @@
     };
   }
 
-  // ── REGISTRU CU + aviz tacit favorabil (Legea 50/1991, Art. 7) ─────────────
+  // ── REGISTRU CU + aviz tacit favorabil (Legea 169/2026 (CATUC)) ─────────────
   var RKEY = 'cau_registry_v1';
   var DAY = 86400000;
   function regAll() { try { return JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) { return []; } }
@@ -153,7 +153,7 @@
     (cu.notices || []).forEach(function (n) {
       if (n.status === 'trimis' && n.deadline && now > n.deadline && !n.tacit) {
         n.status = 'favorabil_tacit'; n.tacit = true;
-        n.tacit_log = 'Aviz tacit favorabil conform Legii 50/1991, Art. 7, alin. (2): termenul de 30 zile a expirat fără răspuns';
+        n.tacit_log = 'Aviz tacit favorabil conform Legea 169/2026 (CATUC), alin. (2): termenul de 30 zile a expirat fără răspuns';
         changed = true;
       }
     });

@@ -119,7 +119,7 @@
     pdf.text('⚠ INSTRUMENT DE PRE-ANALIZĂ', W / 2, dy + 4.2, { align: 'center' });
     pdf.setTextColor(245, 225, 225); pdf.setFont(FONT, 'normal'); pdf.setFontSize(7);
     var disc = 'Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și nu substituie ' +
-      'studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. ' +
+      'studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legea 169/2026 (CATUC). ' +
       'Cifrele sunt orientative și necesită validare profesională și măsurători de teren.';
     pdf.text(pdf.splitTextToSize(disc, W - 30), W / 2, dy + 10, { align: 'center' });
 
@@ -153,7 +153,7 @@
     D.callout && D.callout('Concluzie', 'Impactul de trafic este ' + ((res.intersections || []).some(function (i) { return i.over_capacity; }) ? 'SEMNIFICATIV — cel puțin o intersecție depășește capacitatea și necesită măsuri de atenuare.' : 'gestionabil cu măsurile uzuale de organizare a circulației și de management al cererii.') + ' Detalierea și avizarea revin unui studiu de trafic elaborat de proiectant atestat.');
 
     D.chapter('2. Metodologie');
-    D.P('Studiul aplică metoda standard de evaluare a impactului de trafic (Traffic Impact Study): (1) estimarea generării de deplasări pe baza ratelor ITE Trip Generation pe tip de funcțiune și suprafață/unități; (2) repartiția modală (modal split) calibrată pe contextul local; (3) distribuția și asignarea deplasărilor auto pe rețeaua adiacentă; (4) analiza nivelului de serviciu (LOS) și a raportului volum/capacitate (v/c) la intersecții; (5) verificarea necesarului de parcare și a emisiilor induse. Cadrul normativ de referință: NP 068/2002, STAS 10144, GD 525/1996, Legea 350/2001.');
+    D.P('Studiul aplică metoda standard de evaluare a impactului de trafic (Traffic Impact Study): (1) estimarea generării de deplasări pe baza ratelor ITE Trip Generation pe tip de funcțiune și suprafață/unități; (2) repartiția modală (modal split) calibrată pe contextul local; (3) distribuția și asignarea deplasărilor auto pe rețeaua adiacentă; (4) analiza nivelului de serviciu (LOS) și a raportului volum/capacitate (v/c) la intersecții; (5) verificarea necesarului de parcare și a emisiilor induse. Cadrul normativ de referință: NP 068/2002, STAS 10144, GD 525/1996, Legea 169/2026 (CATUC).');
     D.P('Ratele de generare ITE reprezintă media observată pe un eșantion mare de dezvoltări similare; ele se adaptează la contextul românesc prin ajustarea repartiției modale (ponderea transportului public și a deplasărilor nemotorizate este, în orașele românești, diferită de cea din mediile suburbane americane pe care se bazează ratele originale). Rezultatele au caracter preliminar și se validează prin recensăminte de circulație de teren.');
 
     D.chapter('3. Funcțiuni propuse pe sit');
@@ -279,7 +279,7 @@
 
     try { if (window.UrbanXIVU && window.UrbanXIVU.renderSection) window.UrbanXIVU.renderSection(D); } catch (e) {}
     D.chapter('25. Limitări și disclaimer');
-    D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legii 350/2001. Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
+    D.P('Studiu generat algoritmic (UrbanX Flux) pe rate ITE adaptate RO. Are rol de PRE-ANALIZĂ și NU substituie studiul de trafic / PMUD elaborat de proiectant atestat și avizat conform NP 068/2002, STAS 10144 și Legea 169/2026 (CATUC). Cifrele sunt orientative și necesită validare profesională și măsurători de teren (recensăminte de circulație, matrice O-D reală).');
 
     D.chapter('26. Surse și standarde');
     D.P('ITE — Trip Generation Manual (ed. 10/11); NP 068/2002 — normativ proiectare străzi; STAS 10144 — caracteristici geometrice; GD 525/1996 — RGU (parcare); HG 874/2019; IPCC 2023 — factori de emisie. Glosar: LOS = Level of Service (nivel de serviciu, A–F); v/c = raport volum/capacitate; TDM = Transport Demand Management; TOD = Transit-Oriented Development; modal split = repartiția pe moduri de transport. Metodologie UrbanX · ThinkSmart Solutions.');

@@ -28,7 +28,7 @@
 //   Aceste documente sunt ORIENTATIVE și nu înlocuiesc:
 //   - Devizul general semnat de arhitect + verificator MDLPA (Legea 10/1995)
 //   - Proiectul tehnic elaborat de arhitect cu drept de semnătură OAR
-//   - Documentația pentru obținerea Autorizației de Construire (Legea 50/1991)
+//   - Documentația pentru obținerea Autorizației de Construire (Legea 169/2026 (CATUC))
 //
 // INSTALARE: adaugă în index.html după 15-relevee-dna-optimize.js
 //   <script src="js/15-relevee-deviz.js?v=20260609"></script>
@@ -162,7 +162,7 @@
 
       // Avertizare jos
       ctx.fillStyle = 'rgba(239,68,68,.8)'; ctx.font = 'bold 5px Arial'; ctx.textAlign = 'center';
-      ctx.fillText('⚠ DOCUMENT ORIENTATIV — Nu înlocuiește proiectul tehnic autorizat (Legea 50/1991)', cx + cW / 2, cy + cH - 2);
+      ctx.fillText('⚠ DOCUMENT ORIENTATIV — Nu înlocuiește proiectul tehnic autorizat (Legea 169/2026 (CATUC))', cx + cW / 2, cy + cH - 2);
 
       // Logo UrbanX mic
       ctx.fillStyle = 'rgba(212,175,55,.6)'; ctx.font = 'bold 5px Arial'; ctx.textAlign = 'left';
@@ -449,7 +449,7 @@
         'Variații de ±30% sunt normale în funcție de: calitatea finisajelor, specificații tehnice, zona geografică,',
         'accesibilitate șantier, piața materialelor de construcții, conjunctura economică.',
         'Devizul general obligatoriu se elaborează de arhitectul proiectant cu drept de semnătură OAR, pe baza proiectului tehnic',
-        'complet (PT), și se prezintă odată cu documentația pentru Autorizația de Construire (Legea 50/1991, Art.6).',
+        'complet (PT), și se prezintă odată cu documentația pentru Autorizația de Construire (Legea 169/2026 (CATUC)).',
         'Surse: INS România, MDLPA, publicații devize constructii.ro, RSP 2024.',
       ];
       note.forEach((ln, i) => pdf.text(S2(ln), 12, y + 5 + i * 3.2));
@@ -696,9 +696,9 @@
     // AVERTIZARE
     pdf.setFillColor(219, 234, 254); pdf.rect(10, y, PW - 20, 10, 'F');
     pdf.setFont('helvetica', 'bold'); pdf.setFontSize(6.5); pdf.setTextColor(30, 64, 175);
-    pdf.text('⚠ DOCUMENT ORIENTATIV — Memoriulu tehnic obligatoriu pentru PA se elaborează de arhitect autorizat OAR (Legea 50/1991)', 12, y + 4);
+    pdf.text('⚠ DOCUMENT ORIENTATIV — Memoriulu tehnic obligatoriu pentru PA se elaborează de arhitect autorizat OAR (Legea 169/2026 (CATUC))', 12, y + 4);
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6); pdf.setTextColor(60, 100, 180);
-    pdf.text('Conținut conform Ordinul 839/2009, Anexa 1, Pct. B — Piese scrise', 12, y + 8.5);
+    pdf.text('Conținut conform Legea 169/2026 (CATUC), Anexa 1, Pct. B — Piese scrise', 12, y + 8.5);
     y += 14;
 
     // 1. DATE GENERALE
@@ -749,8 +749,8 @@
     section('5. NORMATIVE DE PROIECTARE APLICABILE');
     const normsExtra = [
       'Legea 10/1995 — Calitatea în construcții',
-      'Legea 50/1991 — Autorizarea executării lucrărilor de construcții',
-      'Ordinul 839/2009 — Norme metodologice aplicare Lege 50/1991',
+      'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții',
+      'Legea 169/2026 (CATUC) — Norme metodologice aplicare Lege 50/1991',
       'P100-1/2013 — Cod de proiectare seismică',
       'C107/2010 — Normativ de calcul termotehnic',
       'GT 010/2019 — Cerințe de calitate energetică (NZEB)',
@@ -794,7 +794,7 @@
       avize.push({ emitent, desc, temei, obligatoriu });
 
     // Avize întotdeauna necesare
-    add('Primăria UAT', 'Certificat de Urbanism', 'Legea 50/1991, Art.6', true);
+    add('Primăria UAT', 'Certificat de Urbanism', 'Legea 169/2026 (CATUC)', true);
     add('ANIF / Ape Române', 'Aviz gospodărire ape (dacă în zona inundabilă)', 'Legea 107/1996', false);
     add('Distribuitor apă-canal local', 'Aviz alimentare cu apă + canalizare', 'Legea 241/2006', true);
     add('Distribuitor energie electrică', 'Aviz racord electric (putere instalată)', 'Legea 123/2012', true);

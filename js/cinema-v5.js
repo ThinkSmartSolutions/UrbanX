@@ -3203,7 +3203,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
       case 'b12s4': { // Sinteza Masterplan + QR
         var _comMP=SE._isComuna;
         if(_comMP) titlu('Directii de dezvoltare '+_S()+'\u2013'+_E(),name+' \u00b7 cadru orientativ la scara de comuna (nu substituie Strategia/PUG)');
-        else titlu('Sinteza Masterplan '+_S()+'\u2013'+_E(),name+' \u00b7 6 axe strategice \u00b7 conf. Legii 350/2001');
+        else titlu('Sinteza Masterplan '+_S()+'\u2013'+_E(),name+' \u00b7 6 axe strategice \u00b7 conf. Legea 169/2026 (CATUC)');
         linie();
         var axe=[
           {n:'01 Regenerare urbana',c:'#D4AF37'},
@@ -3228,7 +3228,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
         else cifra(N2(pred.invTotal||300)+' M\u20ac','Investitii mobilizate (FEDR+PNRR+PPP)');
         cifra2(_S()+'\u2013'+_E(),'Orizont strategic 30 ani');
         narativ(_comMP
-          ? 'La scara de comuna, UrbanX ofera un CADRU ORIENTATIV de dezvoltare (directii prioritare din date), NU un Masterplan in sensul Legii 350/2001. Strategia de dezvoltare locala si PUG-ul raman in sarcina proiectantului atestat si a Consiliului Local. Cifrele sunt estimari pentru pre-analiza.'
+          ? 'La scara de comuna, UrbanX ofera un CADRU ORIENTATIV de dezvoltare (directii prioritare din date), NU un Masterplan in sensul Legea 169/2026 (CATUC). Strategia de dezvoltare locala si PUG-ul raman in sarcina proiectantului atestat si a Consiliului Local. Cifrele sunt estimari pentru pre-analiza.'
           : 'Masterplanul integreaza toate analizele \u2014 demografie, economie, riscuri, mobilitate (PMUD), spatii verzi \u2014 in 6 axe strategice cu proiecte etapizate si surse de finantare. Documentul complet (100+ pagini) e disponibil in UrbanX Pro.');
         if(t>0.55){
           var aqr=Math.min(1,(t-0.55)/0.16)*sA;
@@ -3540,7 +3540,7 @@ function _film(map,SE,city,pred,cx,cy,name,siruta){
             ctx.globalAlpha=1;
           });
         }
-        narativ('Urbanismul bun nu se face „de sus in jos". UrbanX integreaza participarea publica (model Helsinki): cetatenii adauga comentarii geolocalizate pe harta si voteaza prioritatile, iar administratia vede in timp real unde sunt problemele. Consultarea e si cerinta legala pentru PMUD si PUG (Legea 350/2001). Deciziile fundamentate pe dialog au legitimitate mai mare si mai putine contestatii.');
+        narativ('Urbanismul bun nu se face „de sus in jos". UrbanX integreaza participarea publica (model Helsinki): cetatenii adauga comentarii geolocalizate pe harta si voteaza prioritatile, iar administratia vede in timp real unde sunt problemele. Consultarea e si cerinta legala pentru PMUD si PUG (Legea 169/2026 (CATUC)). Deciziile fundamentate pe dialog au legitimitate mai mare si mai putine contestatii.');
         concluzie('Transparenta + dialog cu cetatenii = planuri mai bune, implementare mai usoara, incredere — invitam la dialog');
         break;
       }
@@ -4718,7 +4718,7 @@ function _buildFallbackCorridors(city) {
     {id:'mix1',type:'MIXT',name:'Coridor Mixt — Densificare Est',
      geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx+0.018,cy+0.008],[cx+0.028,cy+0.012]]},
      functiuni:['Rezidential mixt','Servicii proximitate'],finantare:['FEDR POR','Privat'],
-     justificare:'HG 525/1996 + Ord.233/2016 — densificare controlata',prioritate:3},
+     justificare:'HG 525/1996 + Legea 169/2026 (CATUC) — densificare controlata',prioritate:3},
     {id:'mix2',type:'MIXT',name:'Coridor Mixt — Densificare Sud-Vest',
      geometry_line:{type:'LineString',coordinates:[[cx,cy],[cx-0.016,cy-0.020],[cx-0.022,cy-0.032]]},
      functiuni:['Rezidential','Servicii'],finantare:['FEDR POR','Privat'],

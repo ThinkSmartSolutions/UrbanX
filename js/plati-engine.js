@@ -5,17 +5,17 @@
  * window.Plati: calcFee · payments · checkout · receiptPDF · openPanel
  * ONEST: integrarea reală Netopia/Stripe + webhook HMAC + reconciliere fiscală =
  * Faza 2 (server + persoană juridică). Aici e simulare cu banner clar.
- * Surse: Legea 50/1991 art.30 (taxa AC = 0.5% valoare) · Legea 227/2015 (Cod Fiscal,
+ * Surse: Legea 169/2026 (CATUC) (taxa AC = 0.5% valoare) · Legea 227/2015 (Cod Fiscal,
  *  taxe locale + chitanță) · OUG 98/2017 (servicii online primării >50k loc).
  * ========================================================================== */
 (function (G) {
   'use strict';
   var FEES = {
     taxa_cu: { label: 'Certificat de urbanism (CU)', def: 50, min: 50, max: 500, legal: 'Legea 227/2015 (taxă locală, HCL)' },
-    taxa_ac: { label: 'Autorizație de construire (AC)', pct: 0.005, min: 50, max: 100000, legal: 'Legea 50/1991 art. 30 (0,5% din valoarea autorizată)' },
+    taxa_ac: { label: 'Autorizație de construire (AC)', pct: 0.005, min: 50, max: 100000, legal: 'Legea 169/2026 (CATUC) (0,5% din valoarea autorizată)' },
     taxa_puz: { label: 'Aviz/taxă PUZ', def: 1000, min: 100, max: 10000, legal: 'taxă locală configurabilă (HCL)' },
     taxa_copii: { label: 'Taxă copii documente', def: 30, min: 10, max: 200, legal: 'Legea 544/2001' },
-    taxa_prelungire: { label: 'Prelungire CU/AC', def: 30, min: 20, max: 250, legal: 'Legea 50/1991' }
+    taxa_prelungire: { label: 'Prelungire CU/AC', def: 30, min: 20, max: 250, legal: 'Legea 169/2026 (CATUC)' }
   };
   // taxa AC = valoare lucrări × 0.5%, plafonată; restul = fix/configurabil
   function calcFee(type, opts) {
@@ -104,7 +104,7 @@
     // istoric
     var hist = load();
     if (hist.length) { body.appendChild(el('div', { style: ST.label }, 'Plăți anterioare (' + hist.length + ')')); var hl = el('div'); body.appendChild(hl); hl.innerHTML = hist.slice(-6).reverse().map(function (p) { return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span>' + p.receipt_no + ' · ' + p.label + '</span><span style="font-weight:700;color:#34d399">' + p.amount.toLocaleString('ro-RO') + ' RON</span></div>'; }).join(''); }
-    body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px' }, '⚖ Taxa AC = 0,5% din valoarea autorizată (L.50/1991 art.30). Plata confirmată deblochează emiterea în CAU (concept). Procesator real + chitanță fiscală cu CIF/IBAN UAT = Faza 2.'));
+    body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px' }, '⚖ Taxa AC = 0,5% din valoarea autorizată (Legea 169/2026 (CATUC)). Plata confirmată deblochează emiterea în CAU (concept). Procesator real + chitanță fiscală cu CIF/IBAN UAT = Faza 2.'));
     ov.appendChild(m); document.body.appendChild(ov);
   }
 
@@ -123,7 +123,7 @@
       pdf.setFontSize(15); pdf.setTextColor(20); pdf.text('Suma: ' + p.amount.toLocaleString('ro-RO') + ' RON', x, y); y += 7;
       pdf.setFontSize(10); pdf.setTextColor(70); pdf.text('Adică: ' + n2w(p.amount) + ' lei', x, y); y += 12;
       pdf.setFontSize(8); pdf.setTextColor(150);
-      var lines = pdf.splitTextSize ? pdf.splitTextSize('Document demonstrativ generat de UrbanX. Chitanța fiscală oficială (cu CIF, IBAN UAT, serie/număr fiscal) se emite de primărie prin sistemul de încasări, la integrarea reală a procesatorului de plăți (Faza 2). Conform Legii 227/2015 (Codul Fiscal) și Legii 50/1991 art. 30.', 174) : [];
+      var lines = pdf.splitTextSize ? pdf.splitTextSize('Document demonstrativ generat de UrbanX. Chitanța fiscală oficială (cu CIF, IBAN UAT, serie/număr fiscal) se emite de primărie prin sistemul de încasări, la integrarea reală a procesatorului de plăți (Faza 2). Conform Legii 227/2015 (Codul Fiscal) și Legea 169/2026 (CATUC).', 174) : [];
       pdf.text(lines, x, 274);
       pdf.save(p.receipt_no + '.pdf');
     } catch (e) { console.warn('[Plati] PDF', e); alert('Eroare PDF: ' + e.message); }

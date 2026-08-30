@@ -208,7 +208,7 @@
     'UTR-AR': {
       id: 'UTR-AR', cod: 'AR',
       tip: 'Terenuri Agricole',
-      utilizari_admise: 'Construcții care servesc activității agricole (Legea 50/1991)',
+      utilizari_admise: 'Construcții care servesc activității agricole (Legea 169/2026 (CATUC))',
       utilizari_interzise: 'Garaje, locuințe, amenajări cu caracter permanent; construcții pe terenuri clasa I și II',
       sursa: 'RLU Vlădeni 2021 — Extravilan'
     },

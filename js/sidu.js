@@ -5,7 +5,7 @@
  * spațială). E nivelul cel mai înalt. Modul complet: registru de proiecte pe domenii
  * + dashboard investiții + ierarhia SIDU→PMUD→PUG + verificarea coerenței (blocaje).
  * window.SIDU: registry · projects · dashboard · check · openPanel · chapter
- * Surse: ghid SIDU (POR/MDLPA) · HG 874/2019 · Legea 350/2001. Ex.: SIDU Iași (331 proiecte).
+ * Surse: ghid SIDU (POR/MDLPA) · HG 874/2019 · Legea 169/2026 (CATUC). Ex.: SIDU Iași (331 proiecte).
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -171,7 +171,7 @@
       D.P('Documentul urmează logica standard a strategiilor integrate (ghidul POR/MDLPA, model ESTI/SIDU pentru municipii): ' +
         'analiză-diagnostic → analiză SWOT → viziune → obiective strategice și specifice → portofoliu de proiecte (listă lungă/scurtă/' +
         'metropolitan) → plan de acțiune și fazare → plan financiar → cadru de implementare și guvernanță → monitorizare și evaluare.');
-      D.sourceBadges(['Ghid SIDU — POR/MDLPA', 'Legea 350/2001', 'HG 874/2019', 'Cadru SDG 11 ONU', 'EU Green Deal', 'New European Bauhaus']);
+      D.sourceBadges(['Ghid SIDU — POR/MDLPA', 'Legea 169/2026 (CATUC)', 'HG 874/2019', 'Cadru SDG 11 ONU', 'EU Green Deal', 'New European Bauhaus']);
 
       // ═══ CAP. 2 — DIAGNOSTIC TERITORIAL ȘI SOCIO-ECONOMIC ═══
       D.chapter('Analiza-diagnostic teritorială și socio-economică');
@@ -342,7 +342,7 @@
         'Condiția de succes este transpunerea consecventă în PUG/RLU și monitorizarea continuă a indicatorilor. ' + city.name +
         ' dispune de premisele necesare (proiecte majore în derulare, dimensiune metropolitană, acces la fonduri UE) pentru o ' +
         'dezvoltare urbană durabilă pe orizontul 2025-2040.');
-      D.sourceBadges(['Ghid SIDU — POR/MDLPA', 'Legea 350/2001 (PUG/PUZ)', 'HG 874/2019 (mobilitate)', 'OUG 195/2005 (mediu)', 'Model ESTI București', 'INS Recensăminte 2011/2021', 'Eurostat Urban Audit', 'SDG 11 ONU']);
+      D.sourceBadges(['Ghid SIDU — POR/MDLPA', 'Legea 169/2026 (CATUC) (PUG/PUZ)', 'HG 874/2019 (mobilitate)', 'OUG 195/2005 (mediu)', 'Model ESTI București', 'INS Recensăminte 2011/2021', 'Eurostat Urban Audit', 'SDG 11 ONU']);
       D.callout('Notă', 'Document strategic ORIENTATIV generat de platforma UrbanX. Nu înlocuiește o SIDU avizată/aprobată de Consiliul Local ' +
         'conform ghidului POR/MDLPA. Datele marcate „—" necesită completare din surse oficiale locale. Generat: ' + dateStr + '.', [158, 100, 20]);
 
@@ -430,7 +430,7 @@
       // 6. Mediu & monitorizare
       b += H1('6. Considerații de mediu și monitorizare');
       b += P('Implementarea se monitorizează prin indicatori (mp spațiu verde/locuitor, transfer modal, reducere emisii, locuințe noi corelate cu infrastructura). Proiectele cu impact > 1 ha necesită evaluare de mediu (OUG 195/2005). Actualizare periodică a portofoliului.');
-      b += P('Surse & cadru: ghid SIDU (POR/MDLPA) · HG 874/2019 (mobilitate) · Legea 350/2001 (PUG/PUZ) · model ESTI București. Document strategic orientativ — se aprobă de Consiliul Local și se transpune în PUG.');
+      b += P('Surse & cadru: ghid SIDU (POR/MDLPA) · HG 874/2019 (mobilitate) · Legea 169/2026 (CATUC) (PUG/PUZ) · model ESTI București. Document strategic orientativ — se aprobă de Consiliul Local și se transpune în PUG.');
       b += '<p class="disc"><b>NOTĂ:</b> Document strategic ORIENTATIV generat de platforma UrbanX. Nu înlocuiește SIDU avizată/aprobată de Consiliul Local conform ghidului POR/MDLPA. Generat: ' + dateStr + '.</p>';
 
       var css = 'body{font-family:"Times New Roman",serif;font-size:12pt;color:#222;line-height:1.5}' +

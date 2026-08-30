@@ -254,7 +254,7 @@
       D.P('Valorile prezentate sunt estimări orientative, generate algoritmic pe baza datelor disponibile la momentul elaborării. Ele nu înlocuiesc studiile de specialitate avizate (microzonare seismică, studii hidrotehnice, studii de trafic calibrate, expertize tehnice individuale) și nici procedurile legale de avizare și aprobare. Indicatorii marcați „—" necesită completare din surse oficiale locale.');
       D.callout('Pași următori recomandați', 'Validarea datelor cu sursele locale (primărie, ADR, operatori); completarea studiilor de specialitate pentru zonele critice; transpunerea priorităților în PUG/RLU și în programarea bugetară multianuală; consultarea publică a variantei finale înainte de aprobarea în Consiliul Local.');
       D.P('Acest document constituie un instrument de fundamentare a deciziei urbanistice. Aplicat consecvent și actualizat periodic, el oferă administrației locale o bază solidă, transparentă și orientată spre rezultate pentru dezvoltarea sustenabilă a ' + uat + '.');
-      D.sourceBadges(['INS', 'Eurostat', 'INFP P100-1', 'ANAR PGRA', 'Copernicus', 'Legea 350/2001', 'Ghid MDLPA']);
+      D.sourceBadges(['INS', 'Eurostat', 'INFP P100-1', 'ANAR PGRA', 'Copernicus', 'Legea 169/2026 (CATUC)', 'Ghid MDLPA']);
     } catch (e) { console.warn('[DocMapCaptures] docClosing', e); }
   }
 

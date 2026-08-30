@@ -17,7 +17,7 @@
     D.P('Acest capitol prezintă bilanțul de capacitate cumulativă generat de modulul UrbanX ' +
       'Intelligence: gradul de utilizare a infrastructurii față de TOATE documentațiile aprobate ' +
       '(nu față de populația curentă). Scopul este să semnaleze depășirile cumulate înainte de noi ' +
-      'aprobări — conform Legii 350/2001, NTPA 013/2002, Legii 24/2007 și normelor MEN. ' +
+      'aprobări — conform Legea 169/2026 (CATUC), NTPA 013/2002, Legii 24/2007 și normelor MEN. ' +
       'Rol de PRE-ANALIZĂ; capacitățile de infrastructură sunt estimate și necesită confirmare de la operatori.');
 
     D.h2('Praguri și indicatori');
@@ -74,7 +74,7 @@
     D.callout('Instrument de pre-analiză',
       'Bilanțul este orientativ. Capacitățile de infrastructură estimate din populație trebuie confirmate ' +
       'cu date verificate de la operatori (apă-canal, ISJ, energie). Deciziile de aprobare/blocare rămân ' +
-      'în sarcina arhitectului șef și a Consiliului Local, conform Legii 350/2001.', [212, 130, 20]);
+      'în sarcina arhitectului șef și a Consiliului Local, conform Legea 169/2026 (CATUC).', [212, 130, 20]);
   }
 
   function patch(name) {

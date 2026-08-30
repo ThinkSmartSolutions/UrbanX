@@ -290,7 +290,7 @@ const RAPORT_INFO = {
     fn: 'window.Ansamblu&&window.Ansamblu.openWizard&&window.Ansamblu.openWizard()',
     ce: 'Ghidează proiectarea unui ansamblu (case + colective + comerț + grădiniță + biserică + parc) în ORDINEA corectă: 1) programul funcțional, 2) accesele (min 2, ISU), 3) ierarhia stradală pe 3 niveluri (colector → local → woonerf), 4) separarea fluxurilor incompatibile (grădiniță drop-off, comerț pe colector, biserică cu parcare temporară), 5) abia apoi loturile + edificabilul pe ce rămâne. Verifică aprobabilitatea (accese, verde, densitate, continuitate pietonală).',
     dece: 'Greșeala frecventă (și în versiunea veche de lotizare) e să pleci de la POT/CUT + retrageri și să tai loturi. Aprobabilitatea unui PUZ/PUD depinde de coerența circulațiilor și separarea fluxurilor — pietonalul se proiectează ÎNAINTEA mașinii ("poate un copil merge în siguranță din orice locuință la grădiniță/parc?"). UrbanX impune metodologia corectă, lucru pe care niciun tool din RO nu-l face.',
-    legal: 'Legea 350/2001 (PUZ/PUD) · NP 068/2002 (căi de circulație) · Legea 24/2007 (spații verzi 8 mp/loc) · GD 525/1996 (parcaje) · Legea 50/1991 (acces ISU)',
+    legal: 'Legea 169/2026 (CATUC) (PUZ/PUD) · NP 068/2002 (căi de circulație) · Legea 24/2007 (spații verzi 8 mp/loc) · GD 525/1996 (parcaje) · Legea 169/2026 (CATUC) (acces ISU)',
     output: [
       { ico: '📋', txt: 'Bilanț suprafețe: circulații ~22% + verde + echipamente ÎNAINTEA loturilor' },
       { ico: '🛣', txt: 'Ierarhie stradală 3 niveluri cu profile + rol' },
@@ -317,7 +317,7 @@ const RAPORT_INFO = {
     fn: 'window.SIDU&&window.SIDU.openPanel&&window.SIDU.openPanel()',
     ce: 'SIDU = cadrul strategic de nivel SUPERIOR (10-15 ani) care integrează toate domeniile (economie, mobilitate, regenerare/verde, educație, sănătate, locuire, turism, infrastructură) și conduce Masterplanul (cartier) și PMUD (mobilitate). Modulul ține un registru de proiecte strategice pe domenii (cu cost, finanțare POR/PNRR, status), un dashboard de investiții, și un verificator de coerență SIDU→PMUD→PUG care semnalează blocajele (ex. PMUD propune benzi dar PUG nu rezervă culoar → exproprieri).',
     dece: 'În România, decalajul SIDU/PMUD ↔ PUG e cauza majoră a blocajelor: proiecte strategice frumoase pe hârtie, neaplicabile pentru că nu sunt transpuse în regimul de construire. Niciun proiect din SIDU/PMUD nu prinde viață fără să fie desenat linie cu linie în PUG. UrbanX evidențiază aceste goluri.',
-    legal: 'HG 874/2019 (mobilitate urbană) · Legea 350/2001 (PUG/PUZ) · ghid SIDU (POR/MDLPA) · ghid PMUD/SUMP MDLPA. SIDU/PMUD nu emit autorizații — PUG-ul o face, deci corelarea e obligatorie.',
+    legal: 'HG 874/2019 (mobilitate urbană) · Legea 169/2026 (CATUC) (PUG/PUZ) · ghid SIDU (POR/MDLPA) · ghid PMUD/SUMP MDLPA. SIDU/PMUD nu emit autorizații — PUG-ul o face, deci corelarea e obligatorie.',
     output: [
       { ico: '📋', txt: 'Registru proiecte strategice pe 8 domenii (cost, finanțare, status) + dashboard investiții' },
       { ico: '🔗', txt: 'Câte proiecte conduc PMUD / Masterplan + ierarhia SIDU→PMUD→PUG' },
@@ -332,7 +332,7 @@ const RAPORT_INFO = {
     fn: "window.SIDU&&window.SIDU.generateDocument&&window.SIDU.generateDocument(window.TCI&&window.TCI.cityKey)",
     ce: 'Generează DOCUMENTUL SIDU complet (PDF) — strategia umbrelă de nivel superior pe 10-15 ani, structurată în cele 5 secțiuni oficiale: (1) Context și analiză a situației existente (demografie, economie, mobilitate, mediu, locuire, servicii); (2) Viziune și obiective strategice; (3) Portofoliul de proiecte pe domenii (cu cost, sursă de finanțare POR/PNRR, orizont termen scurt/mediu/lung, listă scurtă/lungă/metropolitană); (4) Plan de acțiune și implementare; (5) Monitorizare și evaluare (indicatori). Documentul integrează toate domeniile și CONDUCE Masterplanul și PMUD, cu capturi de hartă reale ale UAT-ului și secțiunea Nota UrbanX (IVU).',
     dece: 'SIDU e „constituția" de dezvoltare a orașului (ex. Iași: 331 proiecte) și condiție pentru accesarea fondurilor POR/PNRR. Spre deosebire de registrul interactiv (modulul „SIDU — registru & coerență"), acesta este livrabilul formal — documentul scris pe care îl depui și prezinți. Decalajul real în RO e că SIDU/PMUD nu sunt transpuse în PUG; documentul evidențiază portofoliul ce trebuie corelat.',
-    legal: 'Ghid SIDU (POR/MDLPA) · Legea 350/2001 (PUG/PUZ) · cadrul celor 5 secțiuni (Context→Viziune→Portofoliu→Plan acțiune→Monitorizare) aliniat la modelele oficiale (ex. estibucuresti.pmb.ro/sidu).',
+    legal: 'Ghid SIDU (POR/MDLPA) · Legea 169/2026 (CATUC) (PUG/PUZ) · cadrul celor 5 secțiuni (Context→Viziune→Portofoliu→Plan acțiune→Monitorizare) aliniat la modelele oficiale (ex. estibucuresti.pmb.ro/sidu).',
     output: [
       { ico: '📑', txt: 'Document PDF dezvoltat: copertă, cuprins, 5 secțiuni, capitole cu analiză și diagnoză' },
       { ico: '📋', txt: 'Portofoliu de proiecte pe domenii (cost, finanțare, termen scurt/mediu/lung)' },
@@ -347,7 +347,7 @@ const RAPORT_INFO = {
     fn: 'generateMasterplan()',
     ce: 'Generează Masterplanul Urban (PDF) — documentul de fundamentare a viziunii spațiale de dezvoltare a orașului/zonei: concept urbanistic, zonare funcțională propusă, structura mobilității și a spațiilor publice/verzi, etapizarea dezvoltării și indicatorii-țintă. Integrează capturi de hartă reale, capitole din modulele de decizie (regenerare/superbloc, climă, spații verzi) și cadrul strategic SIDU, cu secțiunea Nota UrbanX (IVU).',
     dece: 'Masterplanul traduce strategia (SIDU) în organizare spațială concretă — „cum arată orașul peste 10-20 de ani" — și fundamentează deciziile de PUG/PUZ. Fără un masterplan coerent, intervențiile sunt punctuale și necorelate; cu el, investițiile publice și private se ordonează după o viziune comună.',
-    legal: 'Legea 350/2001 (amenajarea teritoriului și urbanism) · masterplan ca instrument de fundamentare a documentațiilor de urbanism (PUG/PUZ) · ghid POR/MDLPA dezvoltare urbană.',
+    legal: 'Legea 169/2026 (CATUC) (amenajarea teritoriului și urbanism) · masterplan ca instrument de fundamentare a documentațiilor de urbanism (PUG/PUZ) · ghid POR/MDLPA dezvoltare urbană.',
     output: [
       { ico: '📑', txt: 'Document PDF dezvoltat: concept, zonare funcțională, mobilitate, spații publice' },
       { ico: '🗺', txt: 'Capturi de hartă reale ale UAT + modele urbane proiectate' },
@@ -440,8 +440,8 @@ const RAPORT_INFO = {
     ico: '🧪', label: 'SimLab — explorare pre-proiectare', badge: 'recomandat', badgeLabel: 'Hub · 6 simulatoare · L.350 art.5', color: '212,175,55',
     fn: 'window.SimLab&&window.SimLab.openDashboard&&window.SimLab.openDashboard()',
     ce: 'Dashboard de simulare care schimbă fluxul din „aprobi apoi descoperi problemele" în „explorezi întâi, decizi informat". 10 simulatoare: (1) UHI — profil termic urban cu presete (Parc minim / Standard european / Singapore); (2) Front de apă — secțiune mal + viitură Q100; (3) Impact capacitate — gauges live (apă/canalizare/școli/grădinițe/verde/impermeabilizare) cu factori Intelligence; (4) Oraș 15 minute — izocronă acces servicii; (5) TOD — densitate țintă în jurul unei stații + reducere auto; (6) Coridor mixt — locuințe + locuri de muncă + venit fiscal; (7) Sponge City — retenție apă + reducere inundații + răcire; (8) Parc 3D (→ LOISIR); (9) Fezabilitate (→ Pro-formă); (10) Superbloc (→ Barcelona). Scenariile se salvează, se compară side-by-side și se exportă ca „Studiu de oportunitate".',
-    dece: 'Fluxul clasic RO: idee → consultant → 18 luni → PUZ → se descoperă problemele. SimLab: idee → 30 minute de explorare → înțelegi implicațiile → ABIA APOI pornești procedura formală cu un brief clar. Ca un simulator de zbor înainte de avionul real. Bază legală: Legea 350/2001, Art. 5 (studii de oportunitate, pre-PUG/PUZ).',
-    legal: 'Legea 350/2001 Art. 5 (studii de oportunitate / strategii de dezvoltare, informale). Documentul exportat e informativ, fără valoare juridică în procedurile de autorizare. Formule: C40/Bowler 2010 (UHI), factori Intelligence (capacitate).',
+    dece: 'Fluxul clasic RO: idee → consultant → 18 luni → PUZ → se descoperă problemele. SimLab: idee → 30 minute de explorare → înțelegi implicațiile → ABIA APOI pornești procedura formală cu un brief clar. Ca un simulator de zbor înainte de avionul real. Bază legală: Legea 169/2026 (CATUC) (studii de oportunitate, pre-PUG/PUZ).',
+    legal: 'Legea 169/2026 (CATUC) (studii de oportunitate / strategii de dezvoltare, informale). Documentul exportat e informativ, fără valoare juridică în procedurile de autorizare. Formule: C40/Bowler 2010 (UHI), factori Intelligence (capacitate).',
     output: [
       { ico: '🌡', txt: 'UHI: profil termic + reducere °C + CO2 (sliders + presete)' },
       { ico: '🌊', txt: 'Front de apă: secțiune mal + viitură Q100 animată' },
@@ -468,7 +468,7 @@ const RAPORT_INFO = {
     fn: 'window.UXI&&window.UXI.openDashboard&&window.UXI.openDashboard()',
     ce: 'Calculează bilanțul cumulativ al infrastructurii unui UAT față de TOT ce e aprobat (nu față de populația curentă): apă, canalizare, locuri de școală/grădiniță, spații verzi, impermeabilizare. La depunerea unui PUZ nou dă un verdict (conformitate / în analiză / blocat) și menține un registru PUZ cu alerte.',
     dece: 'Problema reală: un UAT aprobă PUZ-uri individual, fiecare pare ok, dar nimeni nu vede agregatul (ex. Florești: 38 PUZ-uri = 47.000 locuitori pe infrastructură de 12.000). Acest modul arată adevărul cumulativ ÎNAINTE ca aprobarea să se dea — pentru arhitectul șef și primar.',
-    legal: 'Legea 350/2001 · NTPA 013/2002 (apă 150 l/loc/zi) · Legea 24/2007 (spații verzi 8 mp/loc) · norme MEN (1 loc școală / 4 locuințe) · praguri UE impermeabilizare',
+    legal: 'Legea 169/2026 (CATUC) · NTPA 013/2002 (apă 150 l/loc/zi) · Legea 24/2007 (spații verzi 8 mp/loc) · norme MEN (1 loc școală / 4 locuințe) · praguri UE impermeabilizare',
     output: [
       { ico: '📊', txt: 'Bilanț pe indicatori: % utilizare vs capacitate, status verde/galben/roșu' },
       { ico: '⚖️', txt: 'Verdict PUZ nou: conformitate preliminară / în analiză / BLOCAT' },
@@ -482,7 +482,7 @@ const RAPORT_INFO = {
     fn: 'window.CAU&&window.CAU.openPanel&&window.CAU.openPanel()',
     ce: 'Determină automat avizele necesare pentru Certificatul de Urbanism (9 reguli: proximitate rețele din OSM, ISU, Cultură, Apele Române, Drumuri, CFR, Mediu, DSP, ANRE) și gestionează fluxul: solicitantul depune cererea → primăria emite CU → solicitantul comandă obținerea avizelor (contra-cost) → primăria le obține de la avizatori în numele lui → aviz tacit la 30 zile → Acord Unic.',
     dece: 'Procesul de avizare e manual, lent (3-18 luni) și opac. Mecanismul Comisiei de Acorduri Unice (ghișeu unic) permite primăriei să obțină avizele în numele solicitantului. Modulul calculează lista corectă de avize (un aviz lipsă invalidează AC-ul) și urmărește termenele.',
-    legal: 'Legea 50/1991 (art. 5, art. 7 — aviz tacit) · Ordin 839/2009 · Ordin 233/2016 (conținut CU) · legi sectoriale avize (307/2006 ISU, 422/2001 Cultură, 107/1996 Ape, OG 43/1997 Drumuri, 292/2018 Mediu)',
+    legal: 'Legea 169/2026 (CATUC) (art. 5, art. 7 — aviz tacit) · Legea 169/2026 (CATUC) · Legea 169/2026 (CATUC) (conținut CU) · legi sectoriale avize (307/2006 ISU, 422/2001 Cultură, 107/1996 Ape, OG 43/1997 Drumuri, 292/2018 Mediu)',
     output: [
       { ico: '📋', txt: 'Lista avizelor obligatorii/recomandate + deținător + bază legală + tarif' },
       { ico: '💳', txt: 'Calcul taxe: CU + serviciu CAU + tarife avizatori' },
@@ -515,7 +515,7 @@ const RAPORT_INFO = {
     fn: 'window.Plati&&window.Plati.openPanel&&window.Plati.openPanel()',
     ce: 'Calculator de taxe urbanistice (Certificat de Urbanism, Autorizație de Construire = 0,5% din valoarea autorizată, taxă PUZ, copii, prelungiri) + flux de plată online + chitanță PDF cu suma în litere. Plata confirmată deblochează emiterea în CAU (concept de ghișeu unic digital).',
     dece: 'OUG 98/2017 obligă primăriile peste 50.000 locuitori să ofere servicii publice online. Calculul taxei AC (0,5% din valoarea lucrărilor) e o sursă frecventă de erori și dispute. UrbanX calculează corect taxa și simulează încasarea, pregătind integrarea reală cu un procesator.',
-    legal: 'Legea 50/1991 art. 30 (taxa AC = 0,5% din valoarea autorizată) · Legea 227/2015 (Codul Fiscal — taxe locale + chitanță) · OUG 98/2017 (servicii online primării) · Legea 458/2002 (plăți electronice).',
+    legal: 'Legea 169/2026 (CATUC) (taxa AC = 0,5% din valoarea autorizată) · Legea 227/2015 (Codul Fiscal — taxe locale + chitanță) · OUG 98/2017 (servicii online primării) · Legea 458/2002 (plăți electronice).',
     output: [
       { ico: '🧮', txt: 'Calcul taxă CU/AC/PUZ cu plafoane legale + temei' },
       { ico: '💳', txt: 'Flux de plată (simulat) + istoric plăți' },
@@ -541,7 +541,7 @@ const RAPORT_INFO = {
     fn: 'window.RegistruImobil&&window.RegistruImobil.openPanel&&window.RegistruImobil.openPanel()',
     ce: 'Registrul master al imobilelor dintr-un UAT: fiecare imobil cu identitate cadastrală, status pe ciclul de viață (teren → CU → autorizație → șantier → recepție → intabulat) și lanțul de documente. Statusul e derivat automat din CAU. Complementar Dosarului Digital (acela = fișa unei parcele; acesta = registrul întregului fond).',
     dece: 'Primăria nu are un registru unificat, permanent, al imobilelor cu istoricul lor — informația e împrăștiată pe dosare de autorizare. Registrul devine coloana vertebrală care leagă parcela de toate documentele ei fără a le duplica (le citește din CAU/Sesizări prin Dosar).',
-    legal: 'Legea 7/1996 (cadastru) · L.50/1991 (autorizare) · Regulamentul UE 2016/679 (GDPR) — date personale pseudonimizate, consimțământ / sarcină publică, retenție și drept la ștergere',
+    legal: 'Legea 7/1996 (cadastru) · Legea 169/2026 (CATUC) (autorizare) · Regulamentul UE 2016/679 (GDPR) — date personale pseudonimizate, consimțământ / sarcină publică, retenție și drept la ștergere',
     output: [
       { ico: '🪪', txt: 'Imobil: nr. cadastral, adresă, UTR, suprafață, status' },
       { ico: '🔗', txt: 'Lanț documente (CU/AC/sesizări) prin referințe, fără duplicare' },
@@ -606,7 +606,7 @@ const RAPORT_INFO = {
     fn: 'window.UXDoc&&window.UXDoc.openPanel&&window.UXDoc.openPanel()',
     ce: 'Modul de generare a documentațiilor tehnice complete (DTAC/PTh/DALI/SF): formular pe secțiuni cu câmpuri manuale, selectabile și calculate automat (POT/CUT/parcaje/spații verzi/seismic ag-Tc din județ/sk-Te/verificări PSI), validare de conformitate în timp real (POT/CUT/retrageri/parcaje/sprinklere/IDSI/desfumare/lift/compartiment cu temei legal), pre-umplere automată din volumul AEDIS, selectare avizatori și documente → generare ~80 documente DOCX+PDF autorizabile.',
     dece: 'Elaborarea unui dosar de autorizare (memorii pe specialități, deviz HG 907, scenariu PSI, referate, avize) este laborioasă și repetitivă. Engine-ul detectează funcțiunea, aplică normativele proprii fiecăreia și asamblează dosarul — reutilizând studiile deja generate în platformă (PSI din SSI, obiectul 3D din Hala/SKID, geotehnic, amplasament), fără duplicare.',
-    legal: 'Legea 50/1991 · HG 907/2016 (deviz) · HG 273/1994 (recepție) · P118 · P100-1/2013 · normative pe funcțiune',
+    legal: 'Legea 169/2026 (CATUC) · HG 907/2016 (deviz) · HG 273/1994 (recepție) · P118 · P100-1/2013 · normative pe funcțiune',
     output: [
       { ico: '📝', txt: 'Formular 15 secțiuni + validare conformitate în timp real' },
       { ico: '⚡', txt: 'Pre-umplere din volumul AEDIS + calcul automat indicatori' },
@@ -645,7 +645,7 @@ const RAPORT_INFO = {
     fn: 'window.Notificari&&window.Notificari.openPanel&&window.Notificari.openPanel()',
     ce: 'Latura PRIMĂRIEI (funcționează acum): la înregistrarea unui PUZ/AC, sistemul desenează zona de notificare (buffer 50-200m) și identifică imobilele afectate (din OSM/cadastru) — proprietarii de notificat. Latura cetățean (abonare + email automat) urmează mecanismul planningalerts și necesită server.',
     dece: 'Notificarea vecinilor azi = afiș fizic + anunț în ziar, pe care nimeni nu le citește (Convenția Aarhus cere participare reală). Mecanismul corect: autoritatea publică cererea → server face matching geospatial cu abonații → email. UrbanX livrează partea legal relevantă (cine e afectat); livrarea email = Faza 2.',
-    legal: 'Legea 50/1991 (art. 6 afișare la fața locului, art. 7¹ termen obiecție 10 zile) · Ordin 839/2009 · Convenția Aarhus',
+    legal: 'Legea 169/2026 (CATUC) (art. 6 afișare la fața locului, art. 7¹ termen obiecție 10 zile) · Legea 169/2026 (CATUC) · Convenția Aarhus',
     output: [
       { ico: '🏛', txt: 'Zona de notificare + imobile afectate pe hartă (latura primăriei)' },
       { ico: '📋', txt: 'Nr. proprietari de notificat + termen obiecție 10 zile' },
@@ -709,7 +709,7 @@ const RAPORT_INFO = {
     fn: 'window.LVC&&window.LVC.openPanel&&window.LVC.openPanel()',
     ce: 'Calculează cât valoare adaugă infrastructura publică / rezonarea terenului privat (plusvaloarea) și ce contribuție e corect de negociat cu dezvoltatorul, ca EUR/mp ADC. Model ZAC (Franța), CIL (UK), reparcelación (Spania).',
     dece: 'Când UATul face un drum sau extinde rețele, valoarea terenului privat crește 300-500%; publicul plătește infrastructura, proprietarul încasează plusvaloarea. UrbanX cuantifică ce e corect de recuperat pentru comunitate.',
-    legal: 'România NU are mecanism LVC direct în lege (2025) — contribuția e VOLUNTARĂ, negociată în acordul PUZ (Legea 350/2001 Art. 56)',
+    legal: 'România NU are mecanism LVC direct în lege (2025) — contribuția e VOLUNTARĂ, negociată în acordul PUZ (Legea 169/2026 (CATUC))',
     output: [
       { ico: '📈', txt: 'Plusvaloare teren (%) + totală' },
       { ico: '🤝', txt: 'Contribuție sugerată (EUR/mp ADC) + comparabile UK/Franța' },
@@ -764,7 +764,7 @@ const RAPORT_INFO = {
     fn: 'runExport()',
     ce: 'Sintetizează toți parametrii urbanistici ai parcelei selectate într-un document PDF complet: indicatori PUG, reglementări UTR, bilanț suprafețe, volumetrie propusă și contextul cadastral. Este documentul de referință pentru orice proiect de construire.',
     dece: 'Certificatul de Urbanism emis de Primărie face trimitere la indicatorii PUG. Acest raport îi documentează și îi interpretează în raport cu volumetria propusă, oferind arhitectului și beneficiarului o imagine clară înainte de a angaja cheltuieli de proiectare.',
-    legal: 'Legea 50/1991 · Legea 350/2001 · PUG în vigoare · Regulament Local de Urbanism',
+    legal: 'Legea 169/2026 (CATUC) · PUG în vigoare · Regulament Local de Urbanism',
     output: [
       { ico: '📐', txt: 'Fișă parcela: suprafață, UTR, coordonate GPS' },
       { ico: '📊', txt: 'Indicatori urbanistici: POT, CUT, H max, aliniamente' },
@@ -781,7 +781,7 @@ const RAPORT_INFO = {
     fn: '_lotExportPDF()',
     ce: 'Generează documentația PDF pentru parcelarea unui teren în loturi rezidențiale individuale. Include planul de situație cu loturi și circulații interioare, bilanțul suprafețelor, distribuția pe tipuri de locuință, analiza financiară preliminară (ROI estimat) și verificarea conformității cu PUG.',
     dece: 'Parcelarea unui teren necesită documentație tehnică pentru obținerea Autorizației de Construire și pentru dezlipirea cadastrală la ANCPI. Planul de lotizare este documentul de bază pe care îl prezinți Primăriei, topografului și notarului.',
-    legal: 'Legea 50/1991 (art. 3) · Legea 7/1996 (cadastru) · Legea 350/2001 · NP 051/2012 (parcaje)',
+    legal: 'Legea 169/2026 (CATUC) (art. 3) · Legea 7/1996 (cadastru) · Legea 169/2026 (CATUC) · NP 051/2012 (parcaje)',
     output: [
       { ico: '🗺', txt: 'Plan de situație 2D cu loturi și circulații interioare' },
       { ico: '📊', txt: 'Bilanț suprafețe: loturi, drumuri, spații verzi' },
@@ -799,7 +799,7 @@ const RAPORT_INFO = {
     fn: 'generateMemoriu()',
     ce: 'Redactează memoriul tehnic preliminar al proiectului de construire, care descrie în limbaj tehnico-juridic: amplasamentul, funcțiunea propusă, regimul de înălțime, soluția arhitecturală de principiu, conformitatea cu PUG și lista avizelor necesare.',
     dece: 'Memoriul tehnic este documentul obligatoriu din dosarul pentru Certificatul de Urbanism și Autorizația de Construire. Fără el, Primăria nu poate procesa solicitarea. Varianta preliminară accelerează consultările cu arhitectul și identifică din timp avizele de obținut.',
-    legal: 'Legea 50/1991 · HG 907/2016 (conținut-cadru proiecte) · Ordinul MDRAP 839/2009',
+    legal: 'Legea 169/2026 (CATUC) · HG 907/2016 (conținut-cadru proiecte) · Legea 169/2026 (CATUC)',
     output: [
       { ico: '📝', txt: 'Date de identificare amplasament și beneficiar' },
       { ico: '🏗', txt: 'Descriere soluție arhitecturală și volum propus' },
@@ -833,7 +833,7 @@ const RAPORT_INFO = {
     fn: 'generateShadowStudy()',
     ce: 'Calculează umbrele proiectate de volumul propus asupra parcelelor și clădirilor adiacente. Determină la ce ore și în ce perioade ale anului umbra construcției tale afectează vecinii, fereastra de însorire a acestora și spațiile publice din proximitate.',
     dece: 'Este documentul cel mai frecvent solicitat de vecini și de Primărie în cadrul contestațiilor la autorizație. Demonstrează că proiectul respectă dreptul vecinilor la însorire (min. 1,5 ore/zi) și că nu creează obstacole vizuale sau de ventilație în zona de protecție.',
-    legal: 'OMS 119/2014 · C 107/2005 · Legea 50/1991 art. 27 (drept de contestație vecini) · SR 6221',
+    legal: 'OMS 119/2014 · C 107/2005 · Legea 169/2026 (CATUC) (drept de contestație vecini) · SR 6221',
     output: [
       { ico: '🌑', txt: 'Harta umbrelor la ore critice: 9:00, 12:00, 15:00' },
       { ico: '📊', txt: 'Tabel impact per vecin: ore afectate, procentaj fațadă obstruată' },
@@ -878,7 +878,7 @@ const RAPORT_INFO = {
     fn: "window._HBU&&window._HBU.generatePDF(window.TCI&&window.TCI.cityKey,'T')",
     ce: 'Studiu TERITORIAL de reconversie urbană la nivelul întregului UAT: cadrul metodologic Highest & Best Use, profilul economic și de piață al orașului, ierarhia funcțiunilor de reconversie și politica de regenerare a siturilor subutilizate/industriale. Document amplu (100+ pagini), complementar celui de parcelă.',
     dece: 'Fundamentează strategia de regenerare urbană din SIDU/Masterplan: ce tipuri de reconversie sunt prioritare în oraș, în ce zone și cu ce instrumente (POR, PNRR, captare de plusvaloare).',
-    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR · Carta de la Leipzig',
+    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 169/2026 (CATUC) · POR Axa 5 · PNRR · Carta de la Leipzig',
     output: [
       { ico: '📊', txt: 'Ierarhia funcțiunilor de reconversie la nivel de oraș' },
       { ico: '🗺', txt: 'Hărți, diagrame și indici teritoriali' },
@@ -892,7 +892,7 @@ const RAPORT_INFO = {
     fn: "window._HBU&&window._HBU.openPanel(window.TCI&&window.TCI.cityKey)",
     ce: 'Studiu PUNCTUAL de reconversie pentru parcela selectată și ZONA (UTR/subzona) din care face parte: regimul urbanistic real al parcelei (POT/CUT/Hmax/retrageri), edificabilul teoretic, cele 4 teste HBU aplicate pe amplasament, vecinătatea imediată (dotări <500m), scor pentru 12 funcțiuni și pre-analiză financiară (GDV/CAPEX/profit/ROI). Min. 50+ pagini.',
     dece: 'Fundamentează decizia de reconversie/achiziție și negocierile cu administrația sau investitorii, eliminând incertitudinea prin metodologia IVS/ANEVAR și repere de piață. Sprijină regenerarea urbană și densificarea în locul expansiunii periferice.',
-    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 350/2001 · POR Axa 5 · PNRR',
+    legal: 'Metodologie HBU (IVS/ANEVAR) · Legea 169/2026 (CATUC) · POR Axa 5 · PNRR',
     output: [
       { ico: '📊', txt: 'Scor de compatibilitate pentru 12 funcțiuni de reconversie' },
       { ico: '💰', txt: 'Analiză financiară: GDV, CAPEX, profit, ROI și sensibilitate' },
@@ -1041,7 +1041,7 @@ const RAPORT_INFO = {
     fn: 'generateDensityStudy()',
     ce: 'Analizează densitatea construită a parcelei propuse în raport cu contextul urban imediat (200-500m). Calculează POT și CUT medii ale vecinilor, compară cu indicatorii propuși și evaluează dacă proiectul se încadrează coerent în țesutul urban existent.',
     dece: 'Consiliile locale și comisiile de avizare pot respinge proiecte care, deși respectă PUG, creează discontinuități vizuale sau densități excesive față de contextul construit existent. Studiul demonstrează coerența urbanistică a proiectului cu vecinătatea sa.',
-    legal: 'Legea 350/2001 · Ghid metodologic PUZ 2016 · Regulament Local Urbanism',
+    legal: 'Legea 169/2026 (CATUC) · Ghid metodologic PUZ 2016 · Regulament Local Urbanism',
     output: [
       { ico: '📊', txt: 'POT și CUT mediu al vecinilor în raza 200m și 500m' },
       { ico: '📐', txt: 'Comparație regim înălțime: propus vs. context (H mediu vecini)' },
@@ -1058,7 +1058,7 @@ const RAPORT_INFO = {
     fn: 'generateAACR()',
     ce: 'Verifică dacă înălțimea construcției propuse depășește suprafețele de limitare a obstacolelor definite de ICAO Anexa 14 și HG 930/2016 în raport cu cel mai apropiat aeroport. Calculează înălțimea maximă admisă și dacă este necesar avizul ROMATSA.',
     dece: 'Orice construcție situată în zona de protecție aeronautică a unui aeroport trebuie să obțină avizul AACR (Autoritatea Aeronautică Civilă Română) înainte de Autorizația de Construire. Construirea fără acest aviz atrage demolarea pe cheltuiala proprietarului.',
-    legal: 'HG 930/2016 · Legea 233/2016 (Codul Aerian) · ICAO Anexa 14 ed.8 · Legea 50/1991 art.7 · OMAI 14/2007',
+    legal: 'HG 930/2016 · Legea 233/2016 (Codul Aerian) · ICAO Anexa 14 ed.8 · Legea 169/2026 (CATUC) · OMAI 14/2007',
     output: [
       { ico: '✈', txt: 'Distanța față de pragul pistei și aeroportul ICAO identificat' },
       { ico: '📐', txt: 'Înălțime maximă admisă AACR calculată (formula ICAO)' },
@@ -1075,7 +1075,7 @@ const RAPORT_INFO = {
     fn: 'generateExistingBldStudy()',
     ce: 'Inventariază construcțiile existente pe parcelă identificate din surse OSM și satelitare, estimează suprafața construită existentă și propune scenarii de intervenție: demolare totală, extindere orizontală/verticală, mansardare, reconversie sau înglobare.',
     dece: 'Înainte de a proiecta, trebuie să știi ce există pe teren și ce se poate face cu clădirile existente. Demolarea necesită autorizație separată; extinderea implică verificarea structurii existente. Studiul clarifică scenariul optim economic și tehnic înainte de angajarea proiectantului.',
-    legal: 'Legea 50/1991 (demolare) · HG 907/2016 · Legea 422/2001 (monumente) · OUG 57/2020',
+    legal: 'Legea 169/2026 (CATUC) (demolare) · HG 907/2016 · Legea 422/2001 (monumente) · OUG 57/2020',
     output: [
       { ico: '🏚', txt: 'Inventar construcții existente: suprafață, regim înălțime estimat, funcțiune' },
       { ico: '📊', txt: 'Bilanț: suprafață ocupată vs. teren disponibil pentru construire' },
@@ -1126,7 +1126,7 @@ const RAPORT_INFO = {
     fn: 'generatePMUD()',
     ce: 'Generează un Plan de Mobilitate Urbană Durabilă (PMUD/SUMP) la nivel de UAT, structurat în cele 8 componente oficiale (ghid MDLPA + metodologia EU SUMP/ELTIS): analiza situației existente, modelul de transport, evaluarea impactului, viziune și ținte (KPI), direcții de acțiune și măsuri, evaluarea scenariilor, plan de acțiune și finanțare, monitorizare. Indicatori de mobilitate calculați din date (motorizare INS, rețea OSM, calitate aer OpenAQ live unde există), cu distribuție modală actual vs. țintă 2030 și analiză cost-beneficiu pe scenarii.',
     dece: 'PMUD aprobat este condiție de eligibilitate pentru majoritatea finanțărilor pe mobilitate urbană (POR, PNRR). Documentul fundamentează strategia de mobilitate a orașului, prioritizează proiectele și aliniază orașul la Pactul Verde European și Strategia Națională de Mobilitate.',
-    legal: 'Ghid MDLPA elaborare PMUD · Liniile directoare EU SUMP (ELTIS) · Legea 350/2001 · Directiva 2008/50/CE (calitate aer) · Pactul Verde European',
+    legal: 'Ghid MDLPA elaborare PMUD · Liniile directoare EU SUMP (ELTIS) · Legea 169/2026 (CATUC) · Directiva 2008/50/CE (calitate aer) · Pactul Verde European',
     output: [
       { ico: '🚗', txt: 'Distribuție modală actuală vs. țintă SUMP 2030 (auto/TP/activ)' },
       { ico: '🚌', txt: 'Indicatori: motorizare, acoperire TP, viteză comercială, piste' },
@@ -1160,7 +1160,7 @@ const RAPORT_INFO = {
     fn: 'generateIstoricStudy()',
     ce: 'Verifică dacă parcela sau vecinătățile sale se află în zone de protecție ale monumentelor istorice (LMI), în situri arheologice, în zone construite protejate (ZCP) sau în zone de interes etnografic. Identifică restricțiile de construire aplicabile și avizele obligatorii.',
     dece: 'Construirea în zona de protecție a unui monument istoric fără avizul DJCPN (Direcția Județeană pentru Cultură) este contravenție și poate atrage și demolarea. Verificarea prealabilă evită cheltuieli inutile dacă terenul se dovedește a fi în zonă protejată.',
-    legal: 'Legea 422/2001 (monumente istorice) · OG 43/2000 (situri arheologice) · Legea 350/2001 · HG 493/2004',
+    legal: 'Legea 422/2001 (monumente istorice) · OG 43/2000 (situri arheologice) · Legea 169/2026 (CATUC) · HG 493/2004',
     output: [
       { ico: '🏛', txt: 'Verificare LMI: monumente istorice în raza 200m cu cod și categorie' },
       { ico: '🗺', txt: 'Zone de protecție: ZCP, sit arheologic, rezervație arhitecturală' },
@@ -1196,7 +1196,7 @@ const RAPORT_INFO = {
     fn: 'generateStudiuAmplasament()',
     ce: 'Analizează amplasamentul în 12 domenii tehnice <b>teritoriale și urbanistice</b>: indicatori PUG/UTR, situație juridică, infrastructură edilitară, patrimoniu LMI, servituți, mobilitate, seismicitate, însorire, vânt, zgomot, geotehnică, impact mediu și estimare financiară. Constituie documentul fundament pe baza căruia se elaborează toate studiile de specialitate ulterioare.<br><br><b>⚠ Diferit de Memoriu Tehnic Preliminar:</b> acesta analizează <b>TERENUL și CONTEXTUL URBAN</b> (unde construiești, ce restricții există, ce avize trebuie), nu planurile arhitecturale.',
     dece: 'Studiul de Amplasament & Context Teritorial centralizează toate informațiile tehnice despre un teren înainte de cheltuieli de proiectare. Detectează automat conflicte urbanistice, determină lista studiilor obligatorii și avizelor necesare, economisind timp și evitând surprize în autorizare.<br><br>Nu confunda cu <b>Memoriu Tehnic Preliminar</b> care generează <b>planuri arhitecturale</b> (planuri etaje, secțiuni A-A, axonometrie, bilanț suprafețe).',
-    legal: 'Legea 350/2001 (urbanism) · HG 525/1996 (RGU) · P100-1/2013 (seismic) · CR 1-1-4/2012 (vânt) · OMS 119/2014 (însorire) · NP 074/2014 (geotehnică) · HG 930/2016 (aeronautic) · Legea 422/2001 (patrimoniu)',
+    legal: 'Legea 169/2026 (CATUC) (urbanism) · HG 525/1996 (RGU) · P100-1/2013 (seismic) · CR 1-1-4/2012 (vânt) · OMS 119/2014 (însorire) · NP 074/2014 (geotehnică) · HG 930/2016 (aeronautic) · Legea 422/2001 (patrimoniu)',
     output: [
       { ico: '📐', txt: 'Indicatori PUG complet: POT/CUT/H/SV/Pk/retrageri + bilanț suprafețe' },
       { ico: '⚡', txt: 'Conflict Detection Engine: verificare automată H max, AACR, ISU, LMI, SV' },
@@ -1222,7 +1222,7 @@ const RAPORT_INFO = {
     fn: 'generateSSI()',
     ce: 'Scenariul de securitate la incendiu conform Ordinului MAI nr. 129/2016 — documentul autoritar cu 7 capitole obligatorii (caracteristici+risc, risc de incendiu, nivel de performanță/rezistență la foc, echipare+dotare, căi de evacuare, alimentare cu apă, forțe de intervenție) + motor de verificare automată a conformității. Fundamentează avizul ISU. Importă prin referință proiectele Hală/SKID de pe parcelă (risc, volum compartiment, sprinklere, ATEX). Înlocuiește vechiul SSF.',
     dece: 'Orice clădire cu înălțime mai mare de 8m sau suprafață desfășurată mai mare de 600mp necesită Avizul de Securitate la Incendiu de la ISU Moldova înainte de emiterea Autorizației de Construire. Construirea fără acest aviz atrage oprirea lucrărilor și amenzi contravenționale.',
-    legal: 'P118-1/2015 (securitate incendiu construcții) · P118-2/2013 (instalații stingere) · Legea 307/2006 (apărare incendii) · Ordinul MAI 163/2007 · Legea 50/1991 art. 7',
+    legal: 'P118-1/2015 (securitate incendiu construcții) · P118-2/2013 (instalații stingere) · Legea 307/2006 (apărare incendii) · Ordinul MAI 163/2007 · Legea 169/2026 (CATUC)',
     output: [
       { ico: '🏗', txt: 'Clasificarea clădirii: categorie pericol incendiu (A-E) și grad rezistență foc (I-V)' },
       { ico: '🚒', txt: 'Căi de acces ISU: lățime min. 3.5m (1 vehicul) / 5.5m (2 vehicule), dist. max. 80m' },
@@ -1262,7 +1262,7 @@ const RAPORT_INFO = {
     fn: 'generateStudiuFezabilitate()',
     ce: 'Analizează viabilitatea economică a investiției imobiliare prin calcule financiare cu parametri personalizabili: preț construcție, preț teren, chirie de referință, preț vânzare și rată de ocupare. Compară 3 variante tehnice (conservatoare/recomandat/maxim), calculează ROI brut, payback-ul și profitul estimat la vânzare.',
     dece: 'Studiul de Fezabilitate / DALI este obligatoriu conform HG 907/2016 pentru proiectele cu finanțare publică. Pentru investițiile private, constituie instrumentul esențial de decizie înainte de cheltuielile de proiectare. Validează sau infirmă oportunitatea economică a investiției.',
-    legal: 'HG 907/2016 (documentații tehnico-economice) · Legea 50/1991 · Legea 350/2001 · NP 074/2014 · P100-1/2013 · OMS 119/2014 · NP 051/2012 (parcaje)',
+    legal: 'HG 907/2016 (documentații tehnico-economice) · Legea 169/2026 (CATUC) · NP 074/2014 · P100-1/2013 · OMS 119/2014 · NP 051/2012 (parcaje)',
     output: [
       { ico: '🔢', txt: 'Indicatori urbanistici PUG: POT/CUT/H/SV/Pk conf. RLU UTR — bilanț suprafețe' },
       { ico: '⚖️', txt: '3 variante tehnice comparate: S1 conservator / S2 recomandat / S3 maxim RLU' },
@@ -1304,15 +1304,15 @@ const RAPORT_INFO = {
     color: '100,130,220',
     fn: 'generateProiectieUrbanistica()',
     ce: 'Analizează evoluția demografică și urbanistică a amplasamentului pe orizonturi de 10, 20 și 30 ani. Integrează date INSE (populatie, rata natalitate, migratie), prognoze Eurostat, scenarii S1/S2/S3 de dezvoltare și proiectează indicatorii urbanistici (POT/CUT/H) la revizuirile viitoare de PUG.',
-    dece: 'Legea 350/2001 Art. 46 impune revizuirea PUG la 10 ani. Investitorii și băncile finanțatoare solicită tot mai frecvent studii de fezabilitate pe termen lung care includ evoluția demografică. Studiul demonstrează adaptabilitatea proiectului la schimbările urbanistice viitoare.',
-    legal: 'Legea 350/2001 (amenajarea teritoriului) · HG 525/1996 (RGU) · PATN — Planul de Amenajare a Teritoriului Național · INSE — date statistice oficiale · Eurostat Romania Demographic Outlook · Strategia Nationala pentru Locuire 2021-2030',
+    dece: 'Legea 169/2026 (CATUC) impune revizuirea PUG la 10 ani. Investitorii și băncile finanțatoare solicită tot mai frecvent studii de fezabilitate pe termen lung care includ evoluția demografică. Studiul demonstrează adaptabilitatea proiectului la schimbările urbanistice viitoare.',
+    legal: 'Legea 169/2026 (CATUC) (amenajarea teritoriului) · HG 525/1996 (RGU) · PATN — Planul de Amenajare a Teritoriului Național · INSE — date statistice oficiale · Eurostat Romania Demographic Outlook · Strategia Nationala pentru Locuire 2021-2030',
     output: [
       { ico: '📊', txt: 'Proiecție demografică 3 scenarii (S1 optimist/S2 moderat/S3 conservator) cu grafice 2025-2055' },
       { ico: '🏗', txt: 'Indicatori urbanistici proiectați: POT/CUT/H estimat la 2035/2045/2055' },
       { ico: '🏠', txt: 'Cerere locuinte estimată: nr. apartamente și SDA necesare pe decade' },
       { ico: '🌐', txt: 'ESG Rating proiectat: scor E/S/G acum vs 2035 cu potențial de îmbunătățire' },
       { ico: '📍', txt: 'Hartă amplasament cu context strategic regional (FIG.1-4 cu north arrow)' },
-      { ico: '⚖', txt: 'Baza legală completă: Legea 350/2001, INSE 2025, Eurostat, OCDE Urban Reviews' },
+      { ico: '⚖', txt: 'Baza legală completă: Legea 169/2026 (CATUC), INSE 2025, Eurostat, OCDE Urban Reviews' },
     ],
     nu: ['Nu înlocuiește studiul de piață imobiliară profesionist (evaluator ANEVAR)', 'Proiecțiile demografice sunt estimative — nu includ șocuri exogene (pandemii, crize)', 'Indicatorii urbanistici proiectați nu reprezintă angajamente ale administrației locale'],
   },
@@ -1413,7 +1413,7 @@ const RAPORT_INFO = {
     color: '212,175,55', fn: 'generateREPA()',
     ce: 'Sinteză preliminară care agregă verificările cheie înainte de demararea autorizării: încadrare urbanistică, indicatori, riscuri, avize necesare și gradul de pregătire al amplasamentului pentru obținerea Certificatului de Urbanism și a Autorizației de Construire.',
     dece: 'Oferă o imagine de ansamblu rapidă a fezabilității administrative a proiectului — ce avize lipsesc, ce riscuri există — înainte de a investi în documentația tehnică completă.',
-    legal: 'Legea 50/1991 (autorizare) · Legea 350/2001 (urbanism) · HG 907/2016',
+    legal: 'Legea 169/2026 (CATUC) · HG 907/2016',
     output: [{ico:'🗺',txt:'Încadrare urbanistică și indicatori PUG'},{ico:'⚠️',txt:'Riscuri și restricții identificate'},{ico:'📋',txt:'Lista avizelor necesare conform CU'},{ico:'✅',txt:'Grad de pregătire pentru autorizare'}],
     nu: ['Document orientativ de sinteză — nu înlocuiește Certificatul de Urbanism oficial', 'Lista de avize finală se stabilește prin CU emis de primărie'],
   },
@@ -1450,7 +1450,7 @@ const RAPORT_INFO = {
     fn: "window.UXSidebar&&UXSidebar.openModule('coridoare')",
     ce: 'Identifică și desenează pe hartă coridoarele de dezvoltare spațială ale UAT-ului — direcțiile preferențiale de creștere urbană de-a lungul axelor de infrastructură (drumuri majore, căi ferate, râuri), pe baza datelor de localizare a activității și a rețelei.',
     dece: 'Orașele nu cresc uniform, ci de-a lungul unor axe. Înțelegerea coridoarelor ajută la corelarea dezvoltării cu transportul public (TOD), la evitarea expansiunii haotice și la prioritizarea investițiilor în infrastructură acolo unde presiunea de creștere e reală.',
-    legal: 'Instrument analitic (orientativ). Concept: dezvoltare orientată spre transit (TOD) · axe de dezvoltare din planificarea teritorială (Legea 350/2001).',
+    legal: 'Instrument analitic (orientativ). Concept: dezvoltare orientată spre transit (TOD) · axe de dezvoltare din planificarea teritorială (Legea 169/2026 (CATUC)).',
     output: [
       { ico: '🗺', txt: 'Coridoare de creștere desenate pe hartă' },
       { ico: '🚆', txt: 'Corelare cu axele de infrastructură (drum/CF/râu)' },
@@ -1463,7 +1463,7 @@ const RAPORT_INFO = {
     fn: "window.UXSidebar&&UXSidebar.openModule('importPug')",
     ce: 'Permite încărcarea unui Plan Urbanistic General digital (fișier GeoJSON sau KML) în platformă, pentru a vizualiza zonarea funcțională și a o folosi în analize. Util când UAT-ul are PUG-ul digitalizat dar nu e încă integrat nativ în UrbanX.',
     dece: 'Multe primării au PUG-ul în format digital (de la proiectant) dar nu îl pot exploata interactiv. Importul aduce zonarea în platformă, unde se poate suprapune peste hartă, parcele și module — fără să aștepți integrarea oficială.',
-    legal: 'PUG aprobat conform Legii 350/2001. CRS recomandat: WGS84 (EPSG:4326). Fișierul rămâne local în sesiune.',
+    legal: 'PUG aprobat conform Legea 169/2026 (CATUC). CRS recomandat: WGS84 (EPSG:4326). Fișierul rămâne local în sesiune.',
     output: [
       { ico: '🗂', txt: 'Încărcare GeoJSON/KML cu zonarea PUG' },
       { ico: '🗺', txt: 'Afișare zonare funcțională peste hartă' },
@@ -1528,7 +1528,7 @@ const RAPORT_INFO = {
     fn: "window.UXSidebar&&UXSidebar.openModule('participare')",
     ce: 'Strat de participare publică în stil Helsinki/Decidim: comentarii ale cetățenilor geolocalizate pe hartă, pe categorii (mobilitate, spații verzi, siguranță etc.), cu voturi și invitație la dialog. Transformă consultarea dintr-o formalitate într-o hartă vie a nevoilor exprimate de comunitate.',
     dece: 'Consultarea publică e obligatorie legal, dar de multe ori e bifată formal. Un instrument geolocalizat aduce vocile cetățenilor exact acolo unde e problema și le face vizibile și prioritizabile — crescând legitimitatea deciziilor de urbanism.',
-    legal: 'Legea 350/2001 (informarea și consultarea publicului) · Convenția Aarhus (acces la decizie în probleme de mediu) · Ordinul MDRT 2701/2010 (consultare PUZ/PUG).',
+    legal: 'Legea 169/2026 (CATUC) (informarea și consultarea publicului) · Convenția Aarhus (acces la decizie în probleme de mediu) · Ordinul MDRT 2701/2010 (consultare PUZ/PUG).',
     output: [
       { ico: '🗺', txt: 'Comentarii cetățeni geolocalizate pe hartă, pe categorii' },
       { ico: '👍', txt: 'Voturi pe propuneri/sesizări + ierarhizare' },

@@ -1,6 +1,6 @@
 /* ============================================================================
  * UrbanX CAU — generator PDF „Certificat de Urbanism" (draft/pre-analiză).
- * window.CAU.generateCU(cu) — structura Ord. 233/2016 (7 secțiuni) + disclaimer.
+ * window.CAU.generateCU(cu) — structura Legea 169/2026 (CATUC) (7 secțiuni) + disclaimer.
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -66,7 +66,7 @@
     if (y > H - 70) { pdf.addPage(); y = 20; }
     h('5. Obligații la proiectare');
     pdf.setTextColor(60, 72, 94); pdf.setFont(F, 'normal'); pdf.setFontSize(8.5);
-    pdf.text(pdf.splitTextToSize('Documentația tehnică (DTAC) va respecta condițiile din avizele favorabile obținute și reglementările PUG. Toate avizele OBLIGATORII de mai sus sunt condiție pentru depunerea Autorizației de Construire (Legea 50/1991).', W - 28), 14, y); y += 16;
+    pdf.text(pdf.splitTextToSize('Documentația tehnică (DTAC) va respecta condițiile din avizele favorabile obținute și reglementările PUG. Toate avizele OBLIGATORII de mai sus sunt condiție pentru depunerea Autorizației de Construire (Legea 169/2026 (CATUC)).', W - 28), 14, y); y += 16;
     h('6. Valabilitate & 7. Taxă');
     kv('Termen valabilitate CU', '12 luni (stabilit de arhitectul șef)');
     var taxa = Math.round(((w.area_m2 || 0) * 1100 * 0.005));
@@ -78,7 +78,7 @@
     pdf.setFillColor(220, 80, 60); pdf.rect(12, dy, W - 24, 6, 'F'); pdf.setTextColor.apply(pdf, WHITE); pdf.setFont(F, 'bold'); pdf.setFontSize(8);
     pdf.text('⚠ DRAFT — INSTRUMENT DE PRE-ANALIZĂ', W / 2, dy + 4.2, { align: 'center' });
     pdf.setTextColor(245, 225, 225); pdf.setFont(F, 'normal'); pdf.setFontSize(7);
-    pdf.text(pdf.splitTextToSize('Acest document este generat algoritmic (UrbanX CAU) ca PRE-ANALIZĂ a avizelor necesare. NU este Certificatul de Urbanism oficial — acela se emite de primărie prin arhitectul șef (Legea 50/1991, Ord. 233/2016). Lista avizelor (mai ales cele din rețele OSM) necesită confirmare cu operatorii și autoritățile.', W - 30), W / 2, dy + 9.5, { align: 'center' });
+    pdf.text(pdf.splitTextToSize('Acest document este generat algoritmic (UrbanX CAU) ca PRE-ANALIZĂ a avizelor necesare. NU este Certificatul de Urbanism oficial — acela se emite de primărie prin arhitectul șef (Legea 169/2026 (CATUC), Legea 169/2026 (CATUC)). Lista avizelor (mai ales cele din rețele OSM) necesită confirmare cu operatorii și autoritățile.', W - 30), W / 2, dy + 9.5, { align: 'center' });
 
     var fn = ((opts.acord ? 'Acord_unic_' + (cu.acord_number || 'AU') : 'CU_draft_' + (cu.registration_number || 'nou')) + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
     pdf.save(fn); window.ss && ss('✅ ' + (opts.acord ? 'Acord Unic' : 'CU (draft)') + ' generat: ' + fn); return fn;

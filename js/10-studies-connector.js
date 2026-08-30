@@ -278,7 +278,7 @@ window._pdfSaveMobile = function(pdf, filename){
       pdf.setTextColor(170,185,210); pdf.setFontSize(6); pdf.setFont('helvetica','normal');
       const disc2='Document generat de UrbanX TSS·FG la '+S2(window._sCtx.dateStr)+' '+
         S2(window._sCtx.timeStr)+'. Toate valorile sunt orientative și trebuie verificate '+
-        'cu specialiști autorizați înainte de utilizare în documentații tehnice (Legea 50/1991, '+
+        'cu specialiști autorizați înainte de utilizare în documentații tehnice (Legea 169/2026 (CATUC), '+
         'Legea 10/1995). Operatorii de utilități, parametrii PUG și alte date specifice UAT '+
         'se verifică la Primăria localității și la operatorii locali. '+
         'Data elaborare se actualizează automat la fiecare generare a documentului.';

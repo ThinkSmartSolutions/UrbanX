@@ -529,7 +529,7 @@ window._FloodMapper = G._FloodMapper;
 // PROTECTED ZONES LAYER — Zone excluse din construire
 // OSM: cimitire, CF, militar, păduri, ape + CIMEC monumente
 // Vizual: strat ROȘU SEMI-TRANSPARENT distinct de cladirile galbene
-// Referinta legala: Legea 50/1991 · Legea 422/2001 · OG 43/1997 · Codul Silvic
+// Referinta legala: Legea 169/2026 (CATUC) · Legea 422/2001 · OG 43/1997 · Codul Silvic
 // ═══════════════════════════════════════════════════════════════════════════
 G._ProtectedZonesLayer = {
   _active: false,
@@ -563,7 +563,7 @@ G._ProtectedZonesLayer = {
                         regime:'AVIZ', note:'IMPORTANT: Monumentul poate fi reabilitat, extins sau reconvertit cu aviz Comisie Zonală/Națională a Monumentelor Istorice. Interdicția NU este absolută.' },
     protected_area:   { color:'#0369a1', label:'Zonă protejată — aviz Agenția de Mediu (Legea 5/2000)', opacity:0.35,
                         regime:'AVIZ', note:'Zonă de protecție. Construirea este posibilă cu aviz APM și studiu de impact.' },
-    heritage:         { color:'#92400e', label:'Zonă construită protejată — aviz DJC (Legea 350/2001 art.31)', opacity:0.35,
+    heritage:         { color:'#92400e', label:'Zonă construită protejată — aviz DJC (Legea 169/2026 (CATUC))', opacity:0.35,
                         regime:'AVIZ', note:'Intervenții posibile cu aviz Direcția Județeană de Cultură. Studiu urbanistic de detaliu obligatoriu.' },
 
     // ── Zone de protecție (buffer legal) ──
@@ -678,7 +678,7 @@ G._ProtectedZonesLayer = {
               <div style="color:#f87171;font-size:11px;line-height:1.5">${p.label}</div>
               <div style="color:rgba(148,163,184,.5);font-size:10px;margin-top:6px">
                 Sursa: OSM · Verificați cu Certificat Urbanism<br>
-                emis de Primărie (Legea 50/1991 art.6)
+                emis de Primărie (Legea 169/2026 (CATUC))
               </div>
             </div>`)
           .addTo(map);

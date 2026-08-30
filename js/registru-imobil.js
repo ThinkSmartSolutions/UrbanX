@@ -13,7 +13,7 @@
  * date cu caracter personal → stocate DOAR cu consimțământ explicit,
  * PSEUDONIMIZATE (afișare mascată + hash, fără CNP în clar), cu politică de
  * retenție și drept la ștergere (erase / eraseOwner / purgeExpired).
- * Temei legal: consimțământ (art.6(1)(a)) sau sarcină publică L.50/1991
+ * Temei legal: consimțământ (art.6(1)(a)) sau sarcină publică Legea 169/2026 (CATUC)
  * (art.6(1)(e)) când operează primăria. Stocare: localStorage (client-side,
  * onest) — Supabase cu RLS = Faza 2.
  *
@@ -25,7 +25,7 @@
   var RKEY = 'urbanx_registru_imobil_v1';
   var DAY = 86400000, RETENTION_YEARS = 10;   // retenție implicită date personale
 
-  // Ciclul de viață al imobilului (aliniat L.50/1991 + intabulare)
+  // Ciclul de viață al imobilului (aliniat Legea 169/2026 (CATUC) + intabulare)
   var STATUSES = [
     { k: 'teren', l: 'Teren (fără proiect)', c: '#64748b' },
     { k: 'cu_emis', l: 'Certificat de urbanism emis', c: '#3b82f6' },
@@ -192,7 +192,7 @@
         cy = tblRow([r.nrcad || '—', (r.address || '—') + (r.utr ? ' · ' + r.utr : ''), r.tip || '—', statusMeta(r.status).l.split(' (')[0], (r.refs.cu.length + ' / ' + r.refs.sesizari.length)], cy, false, [38, 58, 20, 42, 22]);
       });
       cy += 4;
-      cy = body('GDPR — temeiuri: consimțământ (art.6(1)(a)) sau sarcină publică L.50/1991 (art.6(1)(e)). Retenție implicită date personale: ' + RETENTION_YEARS + ' ani; dreptul la ștergere și anonimizare sunt disponibile în panou. Stocare locală în acest browser; versiunea server (Supabase cu RLS) = Faza 2.', 14, cy);
+      cy = body('GDPR — temeiuri: consimțământ (art.6(1)(a)) sau sarcină publică Legea 169/2026 (CATUC) (art.6(1)(e)). Retenție implicită date personale: ' + RETENTION_YEARS + ' ani; dreptul la ștergere și anonimizare sunt disponibile în panou. Stocare locală în acest browser; versiunea server (Supabase cu RLS) = Faza 2.', 14, cy);
       pdf.save('Registru_Imobile_' + (cityName() || 'UAT').replace(/\s+/g, '_') + '.pdf');
     } else {
       pdf = new G.jspdf.jsPDF(); pdf.text('REGISTRUL IMOBILELOR (' + recs.length + ')', 14, 20);

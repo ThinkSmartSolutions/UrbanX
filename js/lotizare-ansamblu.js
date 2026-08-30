@@ -6,7 +6,7 @@
  *   → 5. Loturi/edificabil pe ce rămâne + verificări de aprobabilitate PUZ/PUD.
  * window.Ansamblu.plan(input) · openWizard()
  * Surse: practică urbanistică PUZ/PUD · Legea 24/2007 (verde) · GD 525/1996 (parcaje)
- * · NP 068/2002 (circulații) · Legea 50/1991 (ISU acces). Orientativ — schemă de
+ * · NP 068/2002 (circulații) · Legea 169/2026 (CATUC) (ISU acces). Orientativ — schemă de
  * organizare + brief de proiectare; desenul final = proiectant atestat.
  * ========================================================================== */
 (function (G) {
@@ -68,7 +68,7 @@
 
     // ── verificări de aprobabilitate ──
     var checks = [];
-    checks.push({ item: 'Minim 2 accese auto (redundanță + ISU)', ok: accese >= 2, legal: 'Legea 50/1991 · ISU', detail: accese >= 2 ? accese + ' accese' : 'doar ' + accese + ' acces — risc de respingere/ISU' });
+    checks.push({ item: 'Minim 2 accese auto (redundanță + ISU)', ok: accese >= 2, legal: 'Legea 169/2026 (CATUC) · ISU', detail: accese >= 2 ? accese + ' accese' : 'doar ' + accese + ' acces — risc de respingere/ISU' });
     checks.push({ item: 'Separare flux public (grădiniță/comerț) vs rezidențial', ok: !(gradinita || comMp) || accese >= 2, detail: (gradinita || comMp) ? 'necesită acces/flux distinct pt funcțiunile publice' : 'fără funcțiuni publice generatoare' });
     checks.push({ item: 'Spații verzi ≥ 8 mp/locuitor', ok: greenMin >= pop * GREEN_PER_CAP, legal: 'Legea 24/2007', detail: greenMin.toLocaleString('ro-RO') + ' mp (necesar ' + (pop * GREEN_PER_CAP).toLocaleString('ro-RO') + ')' });
     checks.push({ item: 'Densitate în limita CUT', ok: fitsCUT, legal: 'RLU/PUG', detail: 'ADC cerută ' + adcCeruta.toLocaleString('ro-RO') + ' / max ' + adcMax.toLocaleString('ro-RO') + ' mp' });
@@ -191,7 +191,7 @@
     r.checks.forEach(function (c) { var ic = c.ok === true ? '[OK]' : c.ok === false ? '[!]' : '[i]'; ln(ic + ' ' + c.item + ' — ' + c.detail, c.ok === false ? [200, 60, 40] : [50, 60, 80]); });
     if (y > H - 30) { pdf.addPage(); y = 20; }
     pdf.setFillColor(40, 24, 60); pdf.rect(12, y, W - 24, 18, 'F'); pdf.setTextColor(216, 180, 254); pdf.setFont(F, 'normal'); pdf.setFontSize(7.5);
-    pdf.text(pdf.splitTextToSize('Schemă de organizare orientativă (metodologie: program → accese → ierarhie stradală → separare fluxuri → loturi). Pietonalul se proiectează înaintea mașinii. Desenul PUZ/PUD final (plan reglementări, loturi, profile transversale) se elaborează de proiectant atestat RUR, conform Legii 350/2001 și NP 068/2002.', W - 30), W / 2, y + 6, { align: 'center' });
+    pdf.text(pdf.splitTextToSize('Schemă de organizare orientativă (metodologie: program → accese → ierarhie stradală → separare fluxuri → loturi). Pietonalul se proiectează înaintea mașinii. Desenul PUZ/PUD final (plan reglementări, loturi, profile transversale) se elaborează de proiectant atestat RUR, conform Legea 169/2026 (CATUC) și NP 068/2002.', W - 30), W / 2, y + 6, { align: 'center' });
     pdf.save(('Masterplan_ansamblu_' + (meta.nrcad || 'parcela') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[^a-zA-Z0-9._-]/g, '_'));
     G.ss && ss('✅ Brief masterplan ansamblu generat');
   }

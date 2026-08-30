@@ -80,7 +80,7 @@ window._rvExportTabelSuprafete = function(){
   if(typeof ss==='function') ss('⏳ Generez Brevet de Suprafețe…');
 
   const d = _rvInitDoc('Brevet de Suprafete si Bilant Functional',
-    'Relevee instant · NP 057/2002 · Legea 350/2001', 4);
+    'Relevee instant · NP 057/2002 · Legea 169/2026 (CATUC)', 4);
   if(!d) return;
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,BLUE,LIGHT,LIGHT2,RED,GREEN,ORANGE,
     S2,dateStr,nrcad,utr,area,params,uat,judet,
@@ -369,7 +369,7 @@ window._rvExportMemoriu = async function(){
   if(typeof ss==='function') ss('⏳ Generez Memoriu Tehnic…');
 
   const d = _rvInitDoc('Memoriu Tehnic Preliminar — Documentatie DAC',
-    'DAC · Legea 50/1991 · HG 907/2016 · NP 057/2002 · P100-1/2013', 10);
+    'DAC · Legea 169/2026 (CATUC) · HG 907/2016 · NP 057/2002 · P100-1/2013', 10);
   if(!d) return;
   const {pdf,W,H,DARK,DARK2,NAVY,GOLD,GOLD2,BLUE,LIGHT,LIGHT2,RED,GREEN,ORANGE,PURPLE,
     S2,dateStr,nrcad,utr,area,params,uat,judet,
@@ -427,7 +427,7 @@ window._rvExportMemoriu = async function(){
   cy = sec('B.1. COMPOZIȚIE FUNCȚIONALĂ — NP 057/2002', cy); cy+=3;
   cy = body('Clădirea propusă este destinată funcțiunii "'+S2(fnLabel)+'", compusă din '+
     b.niv+' niveluri supraterane ('+( b.niv===1?'Parter':'Parter + '+(b.niv-1)+' etaje')+
-    '), cu înălțimea totală de '+hTotal.toFixed(1)+'m față de cota ±0.00 (conf. Legii 50/1991 art.4). '+
+    '), cu înălțimea totală de '+hTotal.toFixed(1)+'m față de cota ±0.00 (conf. Legea 169/2026 (CATUC)). '+
     'Suprafața construită este de '+Math.round(scArea)+'m², suprafața desfășurată de '+Math.round(sdaTotal)+
     'm², rezultând un CUT realizat de '+(sdaTotal/Math.max(1,P.area)).toFixed(2)+' față de maximul admis de '+(P.cut||2)+
     ' prin PUG/RLU UTR '+S2(utr)+'.', 14, cy); cy+=4;
@@ -529,7 +529,7 @@ window._rvExportMemoriu = async function(){
   cy = newPage('G. BAZE LEGALE COMPLETE', 8);
   cy = sec('G.1. CADRU LEGISLATIV ȘI NORMATIV', cy); cy+=3;
   cy=tblRow(['Act normativ','Titlu prescurtat','Aplicabilitate'],cy,true,[35,120,W-28-35-120]);
-  [['Legea 50/1991','Autorizarea executării lucrărilor de construcții','Cadru general AC'],
+  [['Legea 169/2026 (CATUC)','Autorizarea executării lucrărilor de construcții','Cadru general AC'],
    ['HG 907/2016','Conținut-cadru documentații tehnico-economice','DTAC + PT'],
    ['Legea 10/1995','Calitatea în construcții — cerințe esențiale','Toate clădirile'],
    ['NP 057/2002','Normativ locuire colectivă — suprafețe minime','Rezidențial'],
@@ -583,7 +583,7 @@ window._rvExportMemoriu = async function(){
   });
   pdf.setFillColor(180,30,30); pdf.rect(14,sy+84,W-28,6,'F');
   pdf.setTextColor(255,255,255); pdf.setFontSize(5.8); pdf.setFont('helvetica','bold');
-  pdf.text('DOCUMENT ORIENTATIV — Nu înlocuiește documentațiile tehnice avizate conf. Legii 50/1991 + Legii 10/1995. '+
+  pdf.text('DOCUMENT ORIENTATIV — Nu înlocuiește documentațiile tehnice avizate conf. Legea 169/2026 (CATUC) + Legii 10/1995. '+
     'Elaborat automat UrbanX TSS·FG · '+dateStr, W/2, sy+88, {align:'center'});
 
   _pdfSaveMobile(pdf,'memoriu_tehnic_'+S2(P.nrCad).replace(/[^a-zA-Z0-9]/g,'_')+'.pdf');

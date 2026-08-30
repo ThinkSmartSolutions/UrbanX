@@ -302,7 +302,7 @@
       temei: 'Legea nr. 169/2026 (CATUC), M.Of. 661/10.08.2026, în vigoare din 25.08.2026, art. 370',
       sursa: _anexa6Res ? ('Anexa nr. 6 la CATUC (metodologie obligatorie, art. 370 alin. 16): ' + _anexa6Res.motiv) : 'echivalență directă din categoria de importanță HG766 (art. 370 alin. 5) — funcțiune fără corespondent explicit în Anexa 6',
       corespondenta: 'Echivalența directă HG766↔CC (art. 370 alin. 5): CC1=D, CC2=C, CC3=B, CC4=A. ' + (_anexa6Res && _echivalentaHG766 !== _anexa6Res.cc ? 'ATENȚIE: rezultatul Anexei 6 (' + _anexa6Res.cc + ') diferă de echivalența directă din categoria HG766 (' + _echivalentaHG766 + ') — divergență legitimă (2 metodologii din 2 acte normative diferite, ambele valabile — HG766 rămâne în vigoare, art. 577 alin. 3 lit. c CATUC); Anexa 6 e cea obligatorie pt. proiecte noi.' : 'coincid pt. acest caz.'),
-      tranzitie: 'Art. 582 alin. 1: proiectele demarate înainte de 25.08.2026 rămân sub Legea 50/1991 + HG 766/1997 (fără reîncadrare CC).',
+      tranzitie: 'Art. 582 alin. 1: proiectele demarate înainte de 25.08.2026 rămân sub Legea 169/2026 (CATUC) + HG 766/1997 (fără reîncadrare CC).',
       atentionare_p118: 'Normativul P118 (securitate la incendiu) folosește încă, la data scrierii, terminologia "categorie de importanță" — nu există corelare oficială publicată cu CC1-4; platforma NU aplică o corespondență auto-inventată în calculele SSI/P118, doar la nivelul acestui indicator general.'
     };
     // Factor de comportare q (funcție de sistemul structural)

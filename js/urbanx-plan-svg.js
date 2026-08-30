@@ -69,7 +69,7 @@
     return res;
   }
 
-  // ── cartuș (title block) conform Legea 50/1991 Anexa 1 ───────────────────
+  // ── cartuș (title block) conform Legea 169/2026 (CATUC) Anexa 1 ───────────────────
   function cartus(meta, X, Y, W) {
     meta = meta || {}; var H = 78, x = X, y = Y;
     var s = '<g font-family="Arial" font-size="8" fill="#111">';

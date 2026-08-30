@@ -4209,7 +4209,7 @@ out geom qt;`;
   _buildZones(cx, cy, constraints) {
     const bufs = (constraints?.bufs || []);
     // ── Road buffers context-aware — logică urbanistică corectă ─────────
-    // Legea drumurilor + L350/2001 + RLU:
+    // Legea drumurilor + Legea 169/2026 (CATUC) + RLU:
     //
     // CONTEXT 1 — ZONĂ CONSTRUITĂ EXISTENTĂ (intravilan dens):
     //   Clădirile SE ALINIAZĂ la stradă — buffer = doar ampriza fizică

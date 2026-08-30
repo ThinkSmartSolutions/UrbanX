@@ -2199,8 +2199,8 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=body('Documentul de fata a fost elaborat cu respectarea urmatoarelor acte normative in vigoare (selectie relevanta pentru proiect):',14,cy);cy+=3;
   const _normGroups=[
     {title:'URBANISM SI AUTORIZARE',items:[
-      'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul — republicata si actualizata.',
-      'Legea nr. 50/1991 republicata — autorizarea executarii lucrarilor de constructii.',
+      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul — republicata si actualizata.',
+      'Legea 169/2026 (CATUC) — autorizarea executarii lucrarilor de constructii.',
       'HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.',
       'PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism (RLU).',
       'Legea nr. 10/1995 republicata — calitatea in constructii.',
@@ -2318,7 +2318,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   });
   cy+=4;
   cy=sec('9.1. MASURI DE REDUCERE IMPACT UMBRA CONFORM GT 043-2002',cy);cy+=2;
-  ['Retragerea cladirii fata de limita nordica cu minim '+shadowLen(aedisH,15).toFixed(0)+'m (formula: H/tan 15°).','Reducerea inaltimii etajelor superioare (setback architectural) — etajele 3+ retrase cu minim '+Math.round(aedisH*0.15)+'m.','Orientarea coamei acoperisului E-V pentru minimizarea umbrei spre nord.','Utilizarea materialelor translucide/semitransparente la nivelele superioare (impact umbra redus cu 30-40%).','Adoptarea unui regim de inaltime diferentiat: corp principal H='+aedisH.toFixed(1)+'m + corp posterior H='+(aedisH*0.6).toFixed(0)+'m.','Consultarea vecinilor din nord in faza de proiectare tehnica, conform prevederilor Legii 50/1991 art. 27.'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+  ['Retragerea cladirii fata de limita nordica cu minim '+shadowLen(aedisH,15).toFixed(0)+'m (formula: H/tan 15°).','Reducerea inaltimii etajelor superioare (setback architectural) — etajele 3+ retrase cu minim '+Math.round(aedisH*0.15)+'m.','Orientarea coamei acoperisului E-V pentru minimizarea umbrei spre nord.','Utilizarea materialelor translucide/semitransparente la nivelele superioare (impact umbra redus cu 30-40%).','Adoptarea unui regim de inaltime diferentiat: corp principal H='+aedisH.toFixed(1)+'m + corp posterior H='+(aedisH*0.6).toFixed(0)+'m.','Consultarea vecinilor din nord in faza de proiectare tehnica, conform prevederilor Legea 169/2026 (CATUC).'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
   cy+=3;
   cy=sec('9.2. CERINTE SPECIFICE UTR '+utr+' — PUG '+getUATLabel(),cy);cy+=2;
   cy=body('Regulamentul Local de Urbanism pentru UTR '+utr+' prevede retragerea fata de limita posterioara (nord) de '+params?.rs+'m si retragerea laterala de '+params?.rl+'m. Aceste retrageri sunt MINIME si pot fi insuficiente pentru respectarea normelor de insorire la inaltimea propusa de '+aedisH.toFixed(1)+'m. In cazul cladirilor cu H>'+Math.ceil(params?.rs*Math.tan(15*Math.PI/180))+'m, se recomanda depasirea retragerii minime RLU.',14,cy);
@@ -2338,7 +2338,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   ].forEach(r=>cy=tblRow(r,cy,false,[70,42,36,34]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA COMPLETA',cy);cy+=2;
-  ['Ordinul MS nr. 119/2014 actualizat cu Ord. 994/2018, art. 3 — min. 1h30min insorire directa/zi la solstitiu iarna.','STAS 6221-1981 Iluminatul natural in constructii — conditii tehnice generale de proiectare.','NP 016-97/NP 016/1-2003 Normativ pentru proiectarea cladirilor de locuinte — distante intre cladiri.','GT 043-2002 Ghid privind insorirea cladirilor — INCERC Bucuresti.','SR EN 17037:2019 — Iluminare naturala in cladiri (standard european).','HG 525/1996 Regulamentul General de Urbanism, art. 17 — Amplasarea constructiilor fata de aliniamente.','Legea 350/2001 privind amenajarea teritoriului — actualizata.','PUG '+getUATLabel()+' in vigoare, UTR '+utr+' — Regulamentul Local de Urbanism Iasi.','Legea 50/1991 republicata — autorizarea executarii lucrarilor de constructii, art. 27 (informarea vecinilor).'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['Ordinul MS nr. 119/2014 actualizat cu Ord. 994/2018, art. 3 — min. 1h30min insorire directa/zi la solstitiu iarna.','STAS 6221-1981 Iluminatul natural in constructii — conditii tehnice generale de proiectare.','NP 016-97/NP 016/1-2003 Normativ pentru proiectarea cladirilor de locuinte — distante intre cladiri.','GT 043-2002 Ghid privind insorirea cladirilor — INCERC Bucuresti.','SR EN 17037:2019 — Iluminare naturala in cladiri (standard european).','HG 525/1996 Regulamentul General de Urbanism, art. 17 — Amplasarea constructiilor fata de aliniamente.','Legea 169/2026 (CATUC) privind amenajarea teritoriului — actualizata.','PUG '+getUATLabel()+' in vigoare, UTR '+utr+' — Regulamentul Local de Urbanism Iasi.','Legea 169/2026 (CATUC) — autorizarea executarii lucrarilor de constructii, art. 27 (informarea vecinilor).'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   cy+=3;
   cy=body('NOTA: Prezentul studiu este ORIENTATIV si nu inlocuieste studiul de insorire elaborat de arhitect autorizat OAR, obligatoriu prin Ordin MS 119/2014 art. 3 alin. 2 pentru cladirile de locuinte cu mai mult de 2 apartamente sau cladirile de ingrijire a sanatatii.',14,cy);
 
@@ -2565,7 +2565,7 @@ async function generateNoiseStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[75,38,38,31]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA COMPLETA',cy);cy+=2;
-  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica si a tratamentelor acustice.','SR EN ISO 717-1:2013 Acustica — Evaluarea izolarii acustice in cladiri si a elementelor de constructii.','SR EN ISO 717-2:2013 — Evaluarea izolarii la zgomot de impact.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul, cu mod. ulterioare.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['SR 10009:2017 — Acustica in constructii. Limite admisibile ale nivelului de zgomot in mediul exterior.','HG nr. 321/2005 privind evaluarea si gestionarea zgomotului ambiant — transpune Directiva 2002/49/CE.','Normativul C 125-2013 privind proiectarea si executarea masurilor de izolare fonica si a tratamentelor acustice.','SR EN ISO 717-1:2013 Acustica — Evaluarea izolarii acustice in cladiri si a elementelor de constructii.','SR EN ISO 717-2:2013 — Evaluarea izolarii la zgomot de impact.','OMS nr. 119/2014 — Norme de igiena si sanatate publica privind mediul de viata al populatiei.','Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul, cu mod. ulterioare.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   // ── PAG 11: SPECIFICATII TEHNICE DETALIATE TAMPLARIE + IZOLARE ─────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('SPECIFICATII TEHNICE DETALIATE TAMPLARIE SI IZOLARE ACUSTICA');ftr();
@@ -2735,7 +2735,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=sec('5. CONCLUZII SI RECOMANDARI',cy);cy+=2;
   cy=body('Amplasamentul '+nrcad+' prezinta o expunere '+(aedisH>hMed*1.3?'RIDICATA':'MODERATA')+' la actiunea vantului, avand in vedere inaltimea propusa de '+aedisH.toFixed(1)+'m fata de contextul construit cu H medie '+hMed.toFixed(1)+'m. Directia dominanta a vantului la Iasi este NE (iarna, frecventa ~35%) si SV (vara, frecventa ~25%). Se recomanda elaborarea unui studiu CFD (Computational Fluid Dynamics) in faza DTAC/PAC pentru cladirile cu H>28m sau in zone cu densitate urbana ridicata.',14,cy);cy+=4;
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['STAS 10101/20-1990 — Actiunea vantului. Incarcari din vant.','SR EN 1991-1-4:2006 — Eurocod 1: Actiuni asupra structurilor. Actiuni ale vantului.','Ghidul privind confortul pietonal si actiunea vantului in mediul construit — INCERC 2008.','PUG '+getUATLabel()+' — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -3442,9 +3442,9 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   addImg(caps.imgLat,14+half+4,cy-44,half,44,'FIG. 9 — Vedere laterala · Context E-V');
   cy+=3;
   cy=sec('4. CONCLUZII SI NECESITATEA PUZ',cy);cy+=2;
-  cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legii 350/2001.')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
+  cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legea 169/2026 (CATUC).')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice de aplicare a Legii 350/2001.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) pentru aprobarea Normelor metodologice de aplicare a Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -3537,7 +3537,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   ].forEach(r=>cy=tblRow(r,cy,false,[70,38,38,36]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul, republicata 2022.','HG nr. 525/1996 Regulamentul General de Urbanism, cu modificarile ulterioare.','Ordinul MDRAP nr. 233/2016 Norme metodologice de aplicare a Legii 350/2001.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 50/1991 republicata privind autorizarea executarii lucrarilor de constructii.','SR EN 1990:2004 Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul, republicata 2022.','HG nr. 525/1996 Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) Norme metodologice de aplicare a Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.','SR EN 1990:2004 Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
@@ -3669,9 +3669,9 @@ async function generateMemoriu(){
   // PAG 7: Baza legala + concluzii
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI CONCLUZII',7);ftr();
   cy=28;cy=sec('7. CONCLUZII',cy);cy+=2;
-  cy=body('Prezentul memoriu tehnic urbanistic preliminar a fost generat automat de platforma UrbanX pentru parcela '+nrcad+' (UTR '+utr+', Municipiul Iasi). Propunerea volumetrica analizata prevede o constructie cu '+niv+' niveluri (H='+aedisH.toFixed(1)+'m, '+fnLabel+') ce se incadreaza in reglementarile PUG Iasi pentru UTR '+utr+' cu POT='+params?.pot+'%, CUT='+params?.cut+', H max='+( params?.h||'nespecificat')+'. Indicatorii urbanistici calculati respecta valorile maxime admise. Se recomanda consultarea unui arhitect autorizat OAR si elaborarea documentatiei complete conform Legii 50/1991.',14,cy);cy+=5;
+  cy=body('Prezentul memoriu tehnic urbanistic preliminar a fost generat automat de platforma UrbanX pentru parcela '+nrcad+' (UTR '+utr+', Municipiul Iasi). Propunerea volumetrica analizata prevede o constructie cu '+niv+' niveluri (H='+aedisH.toFixed(1)+'m, '+fnLabel+') ce se incadreaza in reglementarile PUG Iasi pentru UTR '+utr+' cu POT='+params?.pot+'%, CUT='+params?.cut+', H max='+( params?.h||'nespecificat')+'. Indicatorii urbanistici calculati respecta valorile maxime admise. Se recomanda consultarea unui arhitect autorizat OAR si elaborarea documentatiei complete conform Legea 169/2026 (CATUC).',14,cy);cy+=5;
   cy=sec('8. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Ordinul MDRAP nr. 233/2016 — Norme metodologice Legea 350/2001.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii.','Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Legea 169/2026 (CATUC) — Norme metodologice Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   cy+=4;cy=body('NOTA: Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale disponibile si a parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Nu inlocuieste documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
@@ -3719,7 +3719,7 @@ async function generateMemoriu(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CONCLUZII EXTINSE - ETAPE URMATOARE SI RECOMANDARI',10);ftr();
   cy=28;
   cy=sec('10. CONCLUZII SI ETAPE URMATOARE',cy);cy+=2;
-  cy=body('Prezentul Memoriu Tehnic Urbanistic Preliminar sintetizeaza datele de tema pentru amplasamentul cu nr. cadastral '+nrcad+', zona UTR '+utr+', Municipiul Iasi. Documentul este realizat in scop ORIENTATIV, in cadrul platformei digitale UrbanX, si nu inlocuieste documentatiile tehnice avizate conform Legii 50/1991.',14,cy);cy+=4;
+  cy=body('Prezentul Memoriu Tehnic Urbanistic Preliminar sintetizeaza datele de tema pentru amplasamentul cu nr. cadastral '+nrcad+', zona UTR '+utr+', Municipiul Iasi. Documentul este realizat in scop ORIENTATIV, in cadrul platformei digitale UrbanX, si nu inlocuieste documentatiile tehnice avizate conform Legea 169/2026 (CATUC).',14,cy);cy+=4;
   cy=tblRow(['Etapa','Documentatie necesara','Termen orientativ','Cine elaboreaza'],cy,true,[40,70,35,37]);
   [['1 — CU','Cerere Certificat Urbanism + plan cadastral + copie CF','10-30 zile','Beneficiar / arhitect'],
    ['2 — Studii','Studiu geotehnic + relevee + expertize (daca exist. construct.)','30-60 zile','Specialisti atestati'],
@@ -3988,13 +3988,13 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy+=4;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'\1'+S2(uat)+'\2');cy+=4;}
   cy=sec('5. PROCEDURA OBTINERE AVIZ AACR',cy);cy+=2;
-  ['ETAPA 1 — Documentație tehnică: Plan de situație cu cote absolute (Stereo 70 + cote AMSL), fișă tehnică clădire cu H maxim față de NMM.','ETAPA 2 — Solicitare aviz ROMATSA: Depunere documentație la ROMATSA București (str. Ion Ionescu de la Brad nr. 10). Timp: 30-45 zile.','ETAPA 3 — Aviz AACR positiv: Se anexează la dosarul pentru Autorizație de Construire (art. 7 din Legea 50/1991).','ETAPA 4 — Post-construcție: Obligația înregistrării obstacolului în baza de date ICAO/ROMATSA după finalizare.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
+  ['ETAPA 1 — Documentație tehnică: Plan de situație cu cote absolute (Stereo 70 + cote AMSL), fișă tehnică clădire cu H maxim față de NMM.','ETAPA 2 — Solicitare aviz ROMATSA: Depunere documentație la ROMATSA București (str. Ion Ionescu de la Brad nr. 10). Timp: 30-45 zile.','ETAPA 3 — Aviz AACR positiv: Se anexează la dosarul pentru Autorizație de Construire (art. 7 din Legea 169/2026 (CATUC)).','ETAPA 4 — Post-construcție: Obligația înregistrării obstacolului în baza de date ICAO/ROMATSA după finalizare.'].forEach(e=>{cy=body(e,16,cy);cy+=2;});
 
   // PAG 6: Baza legala
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('BAZA LEGALA SI REGLEMENTARI AACR',6);ftr();
   cy=28;cy=sec('6. BAZA LEGALA',cy);cy+=2;
   ['HG nr. 930/2016 privind stabilirea și aplicarea suprafețelor de limitare a înălțimilor obstacolelor.','Legea nr. 233/2016 — Codul Aerian al României.','OMAI nr. 14/2007 privind avizarea construcțiilor din zona aeroportuară.','ICAO Anexa 14 — Aerodromuri, ediția 8 (2018) — Suprafețe de limitare obstacole.','ICAO Doc 8168 PANS-OPS — Proceduri de zbor instrument.','AIP România — AD 2 LRIA — Date aeronautice aeroport Iași.',
-   'Legea nr. 50/1991 republicată — art. 7: Aviz AACR obligatoriu pentru construcțiile din zone aeroportuare.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+   'Legea 169/2026 (CATUC) — art. 7: Aviz AACR obligatoriu pentru construcțiile din zone aeroportuare.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   if(caps.imgCity){cy+=4;cy=addImg(caps.imgCity,14,cy,W-28,52,'\1'+S2(uat)+'\2');}
   sign();
 
@@ -4180,7 +4180,7 @@ async function generateExistingBldStudy(){
   cy=28;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Incadrare amplasament în contextul urban');cy+=4;}
   cy=sec('4. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții.','Legea nr. 10/1995 republicată — Calitatea în construcții (consolidare, expertiză).','Ordinul MDLPL nr. 839/2009 — Norme metodologice de aplicare a Legii 50/1991.','Legea nr. 422/2001 republicată — Protejarea monumentelor istorice (dacă e cazul).','HG nr. 525/1996 — Regulamentul General de Urbanism.','PUG Municipiul Iași în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții, conținut-cadru Anexa 2.','Legea nr. 10/1995 republicată (parțial abrogată de Legea 169/2026) — Calitatea în construcții (consolidare, expertiză).','Legea nr. 422/2001 republicată — Protejarea monumentelor istorice (dacă e cazul).','HG nr. 525/1996 — Regulamentul General de Urbanism.','PUG Municipiul Iași în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // PAG 6: Analiza structurala si stare tehnica
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('ANALIZA STRUCTURALA SI STARE TEHNICA CLADIRI EXISTENTE',6);ftr();
   cy=28;
@@ -4214,7 +4214,7 @@ async function generateExistingBldStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[20,60,35,35,32]));
   cy+=4;
   cy=sec('7.1. CERINTE DEMOLARE CONSTRUCTII EXISTENTE',cy);cy+=2;
-  ['Autorizatie de Demolare separata (AD) conform Legii 50/1991, art. 3, pct. b) — necesara inainte de inceperea demolarii.','Studiu geotehnic dupa demolare pentru verificarea terenului de fundare al constructiei noi.','Inventar materiale recuperabile inainte de demolare (caramida, lemn, structuri metalice).','Gestionarea deseurilor din constructii conform HG 1061/2008 — contracte cu firme autorizate.','Verificare retele subterane existente (apa, gaz, electricitate, canalizare) — aviz operatori.','Notificarea ITM si DSP pentru conditii de munca in santierul de demolare (azbest, materiale periculoase).'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
+  ['Autorizatie de Demolare separata (AD) conform Legea 169/2026 (CATUC), pct. b) — necesara inainte de inceperea demolarii.','Studiu geotehnic dupa demolare pentru verificarea terenului de fundare al constructiei noi.','Inventar materiale recuperabile inainte de demolare (caramida, lemn, structuri metalice).','Gestionarea deseurilor din constructii conform HG 1061/2008 — contracte cu firme autorizate.','Verificare retele subterane existente (apa, gaz, electricitate, canalizare) — aviz operatori.','Notificarea ITM si DSP pentru conditii de munca in santierul de demolare (azbest, materiale periculoase).'].forEach(r=>{cy=body('• '+r,16,cy);cy+=2;});
 
   // PAG 8: Costuri si deviz orientativ
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('DEVIZ ORIENTATIV INTERVENTII - ESTIMARE COSTURI',8);ftr();
@@ -4271,7 +4271,7 @@ async function generateExistingBldStudy(){
   ].forEach(r=>cy=tblRow(r,cy,false,[55,65,62]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii.','P 130/1999 — Normativ privind urmarirea comportarii in timp a constructiilor.','NP 131/2014 — Normativ privind expertizarea tehnica a constructiilor existente.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','HG 1061/2008 — Transportul deseurilor periculoase si nepericuloase.','OUG 92/2021 — Regimul deseurilor. Transpunere Directiva 2008/98/CE.','Legea 10/1995 republicata — Calitatea in constructii.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii.','P 130/1999 — Normativ privind urmarirea comportarii in timp a constructiilor.','NP 131/2014 — Normativ privind expertizarea tehnica a constructiilor existente.','P100-3/2019 — Cod de proiectare seismica. Evaluarea si proiectarea cladirilor existente.','HG 1061/2008 — Transportul deseurilor periculoase si nepericuloase.','OUG 92/2021 — Regimul deseurilor. Transpunere Directiva 2008/98/CE.','Legea 10/1995 republicata — Calitatea in constructii.','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   _pdfSaveMobile(pdf,'Studiu_Constructii_Existente_'+nrcad+'_'+((window._locSlug&&window._locSlug(uat))||new Date().getFullYear())+'.pdf');
   ss('OK Studiu Construcții Existente generat!');
@@ -5848,8 +5848,8 @@ async function generateEnvironmentalImpact(){
     'P100-1/2022 — Cod de proiectare seismică. Zona seismică '+seism.zona+', ag='+seism.ag+'g.',
     'HG nr. 188/2002 modificat prin HG nr. 352/2005 — Norme privind condițiile de descărcare a apelor uzate.',
     'STAS 12574-87 — Aer în zone protejate. Condiții de calitate.',
-    'Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul. PUG '+uat+' în vigoare.',
-    'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții. Art. 7 — studii obligatorii AC.',
+    'Legea 169/2026 (CATUC) republicată — Amenajarea teritoriului și urbanismul. PUG '+uat+' în vigoare.',
+    'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții. Art. 7 — studii obligatorii AC.',
   ],14,cy);cy+=3;
 
   cy=subsec('2.3 Directive europene de referinta',cy);
@@ -6331,13 +6331,13 @@ async function generateIstoricStudy(){
   cy=28;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Zone protejate si monumente istorice identificate');cy+=4;}
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MC nr. 2828/2015 (completat prin Ord. 5095/2021) — Lista Monumentelor Istorice.','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea nr. 350/2001 republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MC nr. 2828/2015 (completat prin Ord. 5095/2021) — Lista Monumentelor Istorice.','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea 169/2026 (CATUC) republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
   // PAG 7: Regim juridic zone protejate + avize
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('REGIMUL JURIDIC ZONE PROTEJATE - AVIZE OBLIGATORII DJCPN',7);ftr();
   cy=28;
   cy=sec('7. REGIMUL JURIDIC AL ZONELOR CONSTRUITE PROTEJATE - IASI',cy);cy+=2;
-  cy=body('In Municipiul Iasi, zonele construite protejate (ZCP) si monumentele istorice sunt reglementate prin Legea 422/2001, Ordinul MCID 2828/2015 si PUG Iasi 2023. Orice interventie in zona protejata sau in proximitatea unui monument (zona de protectie 50-200m) necesita obtinerea avizului Directiei Judetene pentru Cultura, Patrimoniu National si Arhive Iasi (DJCPN Iasi) si, dupa caz, al Comisiei Nationale a Monumentelor Istorice (CNMI). Neobtinerea acestor avize atrage nulitatea Autorizatiei de Construire conform Legii 50/1991 art. 7 alin. 1.',14,cy);cy+=4;
+  cy=body('In Municipiul Iasi, zonele construite protejate (ZCP) si monumentele istorice sunt reglementate prin Legea 422/2001, Ordinul MCID 2828/2015 si PUG Iasi 2023. Orice interventie in zona protejata sau in proximitatea unui monument (zona de protectie 50-200m) necesita obtinerea avizului Directiei Judetene pentru Cultura, Patrimoniu National si Arhive Iasi (DJCPN Iasi) si, dupa caz, al Comisiei Nationale a Monumentelor Istorice (CNMI). Neobtinerea acestor avize atrage nulitatea Autorizatiei de Construire conform Legea 169/2026 (CATUC) alin. 1.',14,cy);cy+=4;
   cy=tblRow(['Tip monument/zona','Clasa','Avize obligatorii','Termen emitere'],cy,true,[52,18,82,30]);
   [['Monument istoric — valoare nationala','A','CNMI + MCID + DJCPN Iasi','60-90 zile'],
    ['Monument istoric — valoare locala','B','DJCPN Iasi (+ CNMI la modif. semnif.)','30-60 zile'],
@@ -6385,7 +6385,7 @@ async function generateIstoricStudy(){
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('LISTA DOCUMENTE AC IN ZONE PROTEJATE - PROCEDURA COMPLETA',9);ftr();
   cy=28;
   cy=sec('9. LISTA COMPLETA DOCUMENTE NECESARE PENTRU AC IN ZONE PROTEJATE',cy);cy+=2;
-  cy=body('In cazul in care amplasamentul '+nrcad+' se afla in zona construita protejata sau in zona de protectie a unui monument inscris in LMI, lista documentelor pentru Autorizatia de Construire se extinde conform Legii 50/1991 art. 7, completata cu Legea 422/2001 si Ordinul MCID 2828/2015.',14,cy);cy+=4;
+  cy=body('In cazul in care amplasamentul '+nrcad+' se afla in zona construita protejata sau in zona de protectie a unui monument inscris in LMI, lista documentelor pentru Autorizatia de Construire se extinde conform Legea 169/2026 (CATUC), completata cu Legea 422/2001 si Ordinul MCID 2828/2015.',14,cy);cy+=4;
   cy=tblRow(['Nr.','Document necesar pentru AC in ZCP','Emitent','Termen'],cy,true,[10,105,45,22]);
   [['1','Certificat de Urbanism (cu mentionarea obligatorie avize patrimoniu)',('Primaria '+S2(uat)),'10-30 zile'],
    ['2','Aviz DJCPN Iasi (obligatoriu in ZCP sau zona de protectie monument)',(S2(getDJCPN())||'DJCPN '+S2(judet)),'30-60 zile'],
@@ -6671,7 +6671,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
   cy=bullet([
     'OMS nr. 119/2014 — Norme de igienă și sănătate publică privind mediul de viață al populației (Cap. II — Locuințe).',
     'Ordinul MS nr. 994/2018 pentru modificarea OMS 119/2014 — Actualizarea normelor de însorire.',
-    'Legea nr. 50/1991 republicată — Autorizarea executării lucrărilor de construcții (art. 7 — studii obligatorii).',
+    'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții (art. 7 — studii obligatorii).',
     'HG nr. 525/1996 — Regulamentul General de Urbanism (art. 17 — Amplasarea față de aliniament și vecinătăți).',
     'SR EN 17037:2019 — Iluminare naturală în clădiri (standard european, adoptat în România).',
     'PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism: H max '+( params.h||'—')+'m, POT max '+params.pot+'%, CUT max '+params.cut+'.',
@@ -6687,7 +6687,7 @@ const caps=await _captureStudyMapsSafe(ap,msg=>ss(msg));
     'Umbra proiectată la solstițiu de iarnă (12:00) are lungimea estimată de '+solarData.iarna.shadAt12+'m. La solstițiu de vară, umbra se reduce la '+solarData.vara.shadAt12+'m. Aceste valori trebuie coroborate cu distanțele față de proprietățile vecine (rf='+params.rf+'m, rl='+params.rl+'m, rs='+params.rs+'m conform PUG).',
     'Clădirea propusă cu H='+aedisH.toFixed(1)+'m și '+niv+' niveluri beneficiază de '+solarData.vara.oreSoare+' ore de însorire directă la solstițiu de vară și '+oreMinIarna+' ore/zi la solstițiu de iarnă (altitudine >=15°).',
     'Se recomandă orientarea principală a ferestrelor camere de locuit spre Sud-Sud-Est (±30°) pentru maximizarea câștigului solar pasiv în sezonul rece și reducerea supraîncălzirii în sezonul cald.',
-    'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legii 50/1991.',
+    'Înaintea obținerii Autorizației de Construire se impune elaborarea unui Studiu Detaliat de Însorire cu simulare 3D certificată, semnat de arhitect autorizat OAR, conform Legea 169/2026 (CATUC).',
   ],cy);
 
   // PAG 9: Bilant solar anual + performante energetice
@@ -7050,7 +7050,7 @@ async function generateStudiuFezabilitate(paramOverrides){
     {num:4,title:'Indicatori tehnico-economici (SDA, SU, SC, parcaje)',page:4},
     {num:5,title:'Deviz general HG 907/2016 (Cap.1-6, C+M, TVA, RON)',page:5},
     {num:6,title:'Scenarii S1/S2/S3 — ROI, payback, cash-flow',page:6},
-    {num:7,title:'Baza legala — HG 907/2016, Legea 50/1991',page:7},
+    {num:7,title:'Baza legala — HG 907/2016, Legea 169/2026 (CATUC)',page:7},
     {num:'ESG',title:'ESG Urban Sustainability Rating',page:'ult.'},
   ],'Studiu de Fezabilitate / DALI — HG 907/2016');
   // Fallback culori (unele nu sunt returnate de _initStudyPdf din engine)
@@ -7300,7 +7300,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   cy+=20;
   cy=sec('4.1. PROGRAMUL DE INVESTITIE RECOMANDAT (SCENARIUL S2)',cy);cy+=2;
   cy=body('Scenariul S2 (recomandat) propune valorificarea optimă a indicatorilor PUG pentru UTR '+utr+': SC='+sc2+'mp (POT='+params?.pot+'%), SDA='+sda2+'mp (CUT='+params?.cut+'), SU='+su2+'mp (~'+(_suRatio*100).toFixed(0)+'% din SDA). Regimul de înălțime: P+'+(niv-1)+'E (H='+aedisH.toFixed(1)+'m), sub H_max PUG ('+params?.h+'m). Costul execuției (exclusiv teren și TVA): '+Math.round(sda2*_pretConstr).toLocaleString('en-US')+' EUR la '+_pretConstr+' EUR/mp SDA. Analiza financiară: ROI estimat '+_roi(sda2,su2)+' din chirii la SU='+su2+'mp și rata ocupare '+Math.round(_rataOcup*100)+'%.',14,cy);cy+=3;
-  cy=body('Funcțiunile prevăzute: '+fnLabel+'. Distribuția spațiilor pe niveluri va fi stabilită la faza DTAC/PT, respectând PUG '+S2(uat)+', RLU UTR '+utr+' și legislația specifică (Legea 50/1991, Normativ I7-2011, NP 051/2012).',14,cy);
+  cy=body('Funcțiunile prevăzute: '+fnLabel+'. Distribuția spațiilor pe niveluri va fi stabilită la faza DTAC/PT, respectând PUG '+S2(uat)+', RLU UTR '+utr+' și legislația specifică (Legea 169/2026 (CATUC), Normativ I7-2011, NP 051/2012).',14,cy);
 
   // ── PAG 5: INDICATORI TEHNICO-ECONOMICI ──────────────────────────────────
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('INDICATORI TEHNICO-ECONOMICI - ESTIMARE ORIENTATIVA',5);ftr();
@@ -7897,7 +7897,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   ].forEach(r=>cy=tblRow(r,cy,false,[70,80,32]));
 
   cy=sec('12.1. BAZA LEGALA COMPLETA',cy);cy+=2;
-  ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   // Capitol statistici INSE (#27) — înainte de salvare
   let inseY = 14;
@@ -7948,8 +7948,8 @@ async function generateStudiuFezabilitate(paramOverrides){
   try{
     _pdfAppendix(pdf,W,H,[
       {title:'Normative de referinta', type:'normative', content:[
-        'HG 907/2016 — Metodologie deviz general','Legea 50/1991 republicata',
-        'Legea 350/2001 — Amenajarea teritoriului','P100-1/2022 — Cod seismic',
+        'HG 907/2016 — Metodologie deviz general','Legea 169/2026 (CATUC)',
+        'Legea 169/2026 (CATUC) — Amenajarea teritoriului','P100-1/2022 — Cod seismic',
         'NP 074/2014 — Geotehnica','C107/4-2022 — Termotehnica','NP 064/2002 — Parcaje',
       ]},
       {title:'Parametri proiect', type:'parameters', content:[
@@ -8672,7 +8672,7 @@ async function generateStudiuAmplasament(){
   ].forEach(r=>cy=tblRow(r,cy,false,[60,60,62]));
   cy+=4;
   cy=sec('11.1. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, republicată.','Legea nr. 50/1991 republicată — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul, republicată.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
   // Hartă conexiuni rapoarte (#26 audit) — înainte de semnături
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'amplasament',nrcad);
@@ -9063,8 +9063,8 @@ async function runExport(){
   cy=sec('7. BAZA LEGALA',cy);cy+=2;
   pdf.setTextColor(40,55,80);pdf.setFontSize(7.5);pdf.setFont('DejaVuRO','normal');
   const legalTexts=[
-    'Legea nr. 350/2001 — Amenajarea teritoriului si urbanismul (republicata 2022)',
-    'Legea nr. 50/1991 — Autorizarea executarii lucrarilor de constructii (republicata)',
+    'Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul (republicata 2022)',
+    'Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii (republicata)',
     'HG nr. 525/1996 — Regulamentul General de Urbanism · NP 051/2012 — Parcaje',
     'OMS nr. 119/2014 + Ord. 994/2018 — Norme igiena si conditii de insorire',
     'PUG '+S2(uat)+' in vigoare · RLU UTR '+utr+' · Legea nr. 10/1995 — Calitatea constructiilor',
@@ -9932,7 +9932,7 @@ async function generateHealthImpactStudy(){
   cy=body(`Orientarea clădirii cu frontul stradal spre ${solarDir} determină o însorire ${solarBonus} pentru camerele principale. OMS 119/2014 stabilește că spatiile locuite trebuie să beneficieze de minim 1.5h/zi de însorire directă la solstițiu de iarnă (21 dec.). Clădirile vecine cu H=${aedisH.toFixed(1)}m pot genera umbre semnificative — studiu de umbre detaliat obligatoriu la PAC.`,14,cy);
   cy+=6;
   cy=tblRow(['Parametru','Valoare minimă','Valoare recomandată','Normativ'],cy,true,[60,45,55,32]);
-  [['Însorire camere locuite','1.5h/zi (iarnă)','3h/zi (iarnă)','OMS 119/2014'],['Factor de lumină naturală (FLN)','min. 1.5%','2.5% (camere)','SR EN 17037'],['Distanță față de obstrucții','H/2 față de clădiri vecine','H față de clădiri opuse','OMS 119/2014 · P22-1977'],['Umbre proprii pe vecini','Maxim 1.5h/zi afectate','0h adăugate','Legea 50/1991 + CJ'],].forEach(r=>{cy=tblRow(r,cy,false,[60,45,55,32]);});
+  [['Însorire camere locuite','1.5h/zi (iarnă)','3h/zi (iarnă)','OMS 119/2014'],['Factor de lumină naturală (FLN)','min. 1.5%','2.5% (camere)','SR EN 17037'],['Distanță față de obstrucții','H/2 față de clădiri vecine','H față de clădiri opuse','OMS 119/2014 · P22-1977'],['Umbre proprii pe vecini','Maxim 1.5h/zi afectate','0h adăugate','Legea 169/2026 (CATUC) + CJ'],].forEach(r=>{cy=tblRow(r,cy,false,[60,45,55,32]);});
   cy+=4;
   cy=sec('C2. CONFORT TERMIC URBAN (EFECT DE INSULĂ DE CĂLDURĂ)',cy,RED);
   cy=body('Clădirile dense cresc temperatura urbană cu 1-4°C față de zonele verzi. Măsuri de atenuare: acoperișuri verzi (min. 30% acoperire), perdele de arbori pe fațada sudică, materiale cu albedo ridicat (culori deschise), ventilare naturală a curților interioare.',14,cy);
@@ -10680,7 +10680,7 @@ window.generateStabilitateTaluzuri = generateStabilitateTaluzuri;
 // ═══════════════════════════════════════════════════════════════════════════
 // #30 PROIECȚIE URBANISTICĂ — Studiu de Dezvoltare Urbană 10/20/30 ani
 // Cel mai complex studiu din platforma UrbanX
-// Surse: INSE (Institut National Statistica), ANCPI, Legea 350/2001
+// Surse: INSE (Institut National Statistica), ANCPI, Legea 169/2026 (CATUC)
 // Metode: proiectie demografica, model Lotka-Volterra simplificat,
 //         scenarii S1/S2/S3, indici urbanistici proiectati
 // ═══════════════════════════════════════════════════════════════════════════
@@ -10868,7 +10868,7 @@ async function generateProiectieUrbanistica() {
     {num:7, title:'Infrastructura si mobilitate — proiectii necesitate', page:7},
     {num:8, title:'Hartă amplasament + context strategic', page:8},
     {num:9, title:'Concluzii si recomandari urbanistice', page:9},
-    {num:10,title:'Baza legala — Legea 350/2001, PATN, INSE 2025', page:10},
+    {num:10,title:'Baza legala — Legea 169/2026 (CATUC), PATN, INSE 2025', page:10},
     {num:11,title:'ESG Urban Sustainability Rating proiectat', page:11},
     {num:12,title:'Limitari si disclaimer', page:12},
   ], 'Proiectie Urbanistica 10/20/30 ani — nr.cad. '+nrcad);
@@ -10887,7 +10887,7 @@ async function generateProiectieUrbanistica() {
   pdf.setTextColor(...GOLD); pdf.setFontSize(14);
   pdf.text('2025 → 2035 → 2045 → 2055', W/2, 92, {align:'center'});
   pdf.setFontSize(8); pdf.setFont('DejaVuRO','normal');
-  pdf.text('Legea 350/2001 · PATN · INSE 2025 · Scenarii S1/S2/S3', W/2, 102, {align:'center'});
+  pdf.text('Legea 169/2026 (CATUC) · PATN · INSE 2025 · Scenarii S1/S2/S3', W/2, 102, {align:'center'});
   
   // Data box
   pdf.setFillColor(14,32,70); pdf.rect(20,112,W-40,80,'F');
@@ -11122,7 +11122,7 @@ async function generateProiectieUrbanistica() {
   hdr('INDICATORI URBANISTICI PROIECTATI — POT/CUT/H', 5); ftr();
   cy=28;
   cy=sec('7. EVOLUTIA ESTIMATA A INDICATORILOR URBANISTICI — UTR '+utr, cy); cy+=2;
-  cy=body('Indicatorii urbanistici (POT, CUT, H) se modifica prin revizuiri PUG (obligatoriu la 10 ani conform Legii 350/2001). Proiectiile de mai jos estimeaza evolutia acestora in functie de presiunea demografica si tendintele de densificare urbana.', 14, cy); cy+=3;
+  cy=body('Indicatorii urbanistici (POT, CUT, H) se modifica prin revizuiri PUG (obligatoriu la 10 ani conform Legea 169/2026 (CATUC)). Proiectiile de mai jos estimeaza evolutia acestora in functie de presiunea demografica si tendintele de densificare urbana.', 14, cy); cy+=3;
   
   cy=tblRow(['Indicator','Actual ('+year+')','2030 (est.)','2035 (est.)','2045 (est.)','2055 (est.)','Tendinta'],cy,true,[32,20,20,20,20,20,50]);
   [
@@ -11211,7 +11211,7 @@ async function generateProiectieUrbanistica() {
   
   cy+=3;
   cy=_pdfNextAction(pdf,W,cy,[
-    {text:'Actualizare PUG (obligatoriu la 10 ani, Legea 350/2001 Art. 46): urmatoarea revizuire la '+( year+10), prio:'OBLIGATORIU'},
+    {text:'Actualizare PUG (obligatoriu la 10 ani, Legea 169/2026 (CATUC)): urmatoarea revizuire la '+( year+10), prio:'OBLIGATORIU'},
     {text:'Studiu de Capacitate Infrastructura (SCI) inainte de orice extindere majora', prio:'RECOMANDAT'},
     {text:'Plan de Mobilitate Urbana Durabila (PMUD) conform Reg. UE 2021/1119', prio:'RECOMANDAT'},
   ]);
@@ -11223,7 +11223,7 @@ async function generateProiectieUrbanistica() {
   cy=sec('11. BAZA LEGALA — PROIECTIE URBANISTICA', cy); cy+=2;
   const normProiectie=[
     {title:'PLANIFICARE SI AMENAJAREA TERITORIULUI',items:[
-      'Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul — republicata. Art. 46: PUG obligatoriu 10 ani.',
+      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul — republicata. Art. 46: PUG obligatoriu 10 ani.',
       'HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.',
       'Legea nr. 190/2009 — Strategia de Dezvoltare Teritoriala a Romaniei (SDTR).',
     ]},
@@ -11283,7 +11283,7 @@ async function generateProiectieUrbanistica() {
     {text:'CERERE: ~'+totalLoc.toLocaleString()+' locuinte noi necesare in 30 ani (S2) · Presiune moderata pe piata imobiliara', ok:totalLoc>0},
     {text:'INFRASTRUCTURA: Reteaua de utilitati va necesita extindere pana in 2035 (apa, canalizare, retele electrice)', ok:true},
     {text:'ESG: Amplasamentul are potential de imbunatatire a scorului prin spatii verzi si mobilitate sustenabila', ok:false},
-    {text:'LEGAL: Actualizare PUG obligatorie pana in '+( year+10)+' (Legea 350/2001 Art. 46)', ok:true},
+    {text:'LEGAL: Actualizare PUG obligatorie pana in '+( year+10)+' (Legea 169/2026 (CATUC))', ok:true},
   ],'CONCLUZII PROIECTIE URBANISTICA');
   cy+=3;
   

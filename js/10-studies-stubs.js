@@ -775,7 +775,7 @@ window.generateAACR = async function(){
    ['HG 930/2016','Transpunere ICAO Annex 14 în legislatia românā'],
    ['Legea 233/2016 (Codul Aerian)','Obligativitate aviz AACR pentru constructii in zonele OLS'],
    ['OM 1038/2016','Procedura de avizare AACR pentru constructii'],
-   ['Legea 50/1991 art.4','Avizul AACR este obligatoriu la CU si AC in zonele aeroportuare'],
+   ['Legea 169/2026 (CATUC)','Avizul AACR este obligatoriu la CU si AC in zonele aeroportuare'],
    ['OACI Doc 9137','Manual de proiectare aeroportuara — Partea 6 (inaltimi)'],
    ['AIP Romania','Datele oficiale piste — publicat de ROMATSA la romatsa.ro'],
   ].forEach(r => { cy = tblRow(r, cy, false, [60,W-28-60]); cy=checkY(cy,12,'NORME',6); });

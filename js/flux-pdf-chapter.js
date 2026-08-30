@@ -82,7 +82,7 @@
     D.callout('Instrument de pre-analiză',
       'Cifrele din acest capitol sunt orientative, generate algoritmic. Pentru avize și aprobări ' +
       'este necesar un studiu de trafic / PMUD elaborat de proiectant atestat, cu model calibrat și ' +
-      'măsurători de teren, conform NP 068/2002, STAS 10144 și Legii 350/2001.', [212, 130, 20]);
+      'măsurători de teren, conform NP 068/2002, STAS 10144 și Legea 169/2026 (CATUC).', [212, 130, 20]);
   }
 
   function patch(name) {

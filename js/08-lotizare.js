@@ -3017,7 +3017,7 @@ async function _lotExportPDF(){
   ].forEach(r=>{cy=tblRow(r,cy,false,[60,35,65,22]);});cy+=6;
 
   cy=sec('5. VERIFICARE CONFORMITATE CU PUG '+uat.toUpperCase()+' + NORMATIVE TEHNICE',cy);
-  cy=body('Verificarile de mai jos sunt automate si orientative. Ele nu substituie avizul arhitectului sau al autoritatii competente (DAU / Primaria '+uat+'). Conformitatea finala se stabileste prin Certificat de Urbanism emis de autoritatea locala conform Legii 350/2001.',14,cy);cy+=3;
+  cy=body('Verificarile de mai jos sunt automate si orientative. Ele nu substituie avizul arhitectului sau al autoritatii competente (DAU / Primaria '+uat+'). Conformitatea finala se stabileste prin Certificat de Urbanism emis de autoritatea locala conform Legea 169/2026 (CATUC).',14,cy);cy+=3;
   tblRow(['Criteriu verificat','Valoare','Normativ','Status'],cy,true,[75,30,55,22]);cy+=8;
   b.verificari.forEach(v=>{
     const statusColor=v.ok?[0,150,0]:[200,100,0];
@@ -3043,7 +3043,7 @@ async function _lotExportPDF(){
   cy=30;
 
   cy=sec('6. CADRUL METODOLOGIC AL ANALIZEI FINANCIARE',cy);
-  cy=body('Analiza financiara preliminara a fost elaborata pe baza datelor de piata disponibile pentru zona UTR '+utr+' din '+uat+' si a parametrilor tehnici ai proiectului de lotizare. Valorile prezentate sunt estimative si nu constituie un studiu de fezabilitate complet conform Legii 350/2001. Se recomanda confirmarea cu un evaluator autorizat ANEVAR si cu un expert tehnic atestat.',14,cy);cy+=4;
+  cy=body('Analiza financiara preliminara a fost elaborata pe baza datelor de piata disponibile pentru zona UTR '+utr+' din '+uat+' si a parametrilor tehnici ai proiectului de lotizare. Valorile prezentate sunt estimative si nu constituie un studiu de fezabilitate complet conform Legea 169/2026 (CATUC). Se recomanda confirmarea cu un evaluator autorizat ANEVAR si cu un expert tehnic atestat.',14,cy);cy+=4;
 
   cy=sec('7. REZUMAT FINANCIAR GENERAL',cy);
   tblRow(['Indicator financiar','Valoare estimata','Baza de calcul'],cy,true,[75,40,67]);cy+=8;
@@ -3126,8 +3126,8 @@ async function _lotExportPDF(){
 
   cy=sec('10. CADRUL LEGAL SI NORMATIV APLICABIL',cy);
   cy=bullet([
-    'Legea nr. 50/1991 republicata — Autorizarea executarii lucrarilor de constructii. Lotizarea si parcelarea terenului necesita Autorizatie de Construire emisa de Primaria '+uat+'.',
-    'Legea nr. 350/2001 republicata — Amenajarea teritoriului si urbanismul. PUG '+uat+' in vigoare — UTR '+utr+': POT max '+( params.pot||'—')+'%, CUT max '+(params.cut||'—')+', H max '+(params.h||'—')+'m.',
+    'Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii. Lotizarea si parcelarea terenului necesita Autorizatie de Construire emisa de Primaria '+uat+'.',
+    'Legea 169/2026 (CATUC) republicata — Amenajarea teritoriului si urbanismul. PUG '+uat+' in vigoare — UTR '+utr+': POT max '+( params.pot||'—')+'%, CUT max '+(params.cut||'—')+', H max '+(params.h||'—')+'m.',
     'Legea nr. 7/1996 republicata — Cadastrul si publicitatea imobiliara. Dezmembramantul parcelei necesita documentatie tehnica cadastrala intocmita de topograf autorizat ANCPI.',
     'OUG nr. 57/2020 — Codul Administrativ. Compartimentul Urbanism al Primariei '+uat+' emite Certificatul de Urbanism si Autorizatia de Construire.',
     'HG nr. 525/1996 — Regulamentul General de Urbanism (RGU). Prevederile RGU se aplica complementar Regulamentului Local de Urbanism (RLU) al PUG '+uat+'.',
@@ -3163,7 +3163,7 @@ async function _lotExportPDF(){
     'Analiza financiara preliminara indica un ROI de '+b.roi+'% la valorile de piata curente pentru zona UTR '+utr+', '+uat+'. '+(b.roi>15?'Proiectul prezinta viabilitate financiara buna.':b.roi>5?'Proiectul este marginal financiar — se recomanda optimizarea mixului functional sau renegocierea pretului de achizitie a terenului.':'ROI-ul negativ indica fie pret de achizitie ridicat, fie parametri de densitate insuficienti. Se recomanda reconfigurarea proiectului.')+' Valorile nu includ taxele notariale, bransamentele si amenajarea infrastructurii (~5-8% suplimentar).',
     'Parcelarea propusa necesita intocmirea documentatiei tehnice cadastrale de catre un topograf autorizat ANCPI pentru dezlipirea in loturi individuale. Fiecare lot va primi numar cadastral distinct si va fi inscris in Cartea Funciara.',
     'Inainte de demararea proiectului se recomanda obtinerea Certificatului de Urbanism de la Primaria '+uat+' pentru verificarea compatibilitatii cu PUG in vigoare si identificarea eventualelor restrictii sau conditii suplimentare de avizare.',
-    'Prezentul document are caracter ORIENTATIV si PRELIMINARY. Nu substituie documentatia tehnica de specialitate (Plan Urbanistic Zonal, Studiu de fezabilitate, proiect tehnic) intocmita de profesionisti atestati conform Legii 350/2001 si Legii 50/1991.',
+    'Prezentul document are caracter ORIENTATIV si PRELIMINARY. Nu substituie documentatia tehnica de specialitate (Plan Urbanistic Zonal, Studiu de fezabilitate, proiect tehnic) intocmita de profesionisti atestati conform Legea 169/2026 (CATUC).',
     'UrbanX TSS·FG · '+dateStr+' · Sistem de analiza urbanistica asistata · Valori orientative pentru faza de prefezabilitate · Confirmare obligatorie cu arhitect si topograf autorizati.',
   ],cy);
 
@@ -3319,9 +3319,9 @@ function _lotVerificaNormativeLot(lot, lotIdx) {
     area,
     frontStradal: frontStradal.toFixed(1),
     checks: [
-      { label:'Suprafață min.',  ref:'Legea 350/2001', val:`${Math.round(area)}m²`, norm:`min ${minArea}m²`, ok: area >= minArea },
+      { label:'Suprafață min.',  ref:'Legea 169/2026 (CATUC)', val:`${Math.round(area)}m²`, norm:`min ${minArea}m²`, ok: area >= minArea },
       { label:'Front stradal',   ref:'RLU/HG 525',     val:`${frontStradal.toFixed(1)}m`, norm:`min ${minFront}m`,  ok: frontStradal >= minFront },
-      { label:'Acces drum pub.', ref:'Legea 350/2001', val: hasAccess?'✓ Asigurat':'✗ Lipsă', norm:'Obligatoriu', ok: hasAccess },
+      { label:'Acces drum pub.', ref:'Legea 169/2026 (CATUC)', val: hasAccess?'✓ Asigurat':'✗ Lipsă', norm:'Obligatoriu', ok: hasAccess },
       { label:'H total clădire', ref:'RLU UTR',         val:`${hTotal.toFixed(1)}m`, norm:`max ${t.hMax||15}m`, ok: hTotal <= (t.hMax||15) },
       { label:'SC max estimat',  ref:'POT='+t.sc+'%',  val:`${Math.round(scMax)}m²`, norm:`din ${Math.round(area)}m²`, ok: true },
       { label:'Spații verzi',    ref:'Legea 24/2007',  val:`min ${Math.max(0,100-(t.sc||40))}%`, norm:'conform tip', ok: true },

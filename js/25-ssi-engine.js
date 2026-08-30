@@ -48,7 +48,7 @@
       tip_lucrare: tip, label: t.label, regim: t.regim, drepturi_castigate: t.drepturi_castigate, nota: t.nota || null,
       // regim_tabele: cheia folosita mai jos de M5/M6/M6b/M9 pt a alege intre T-nou si T-existent
       regim_tabele: (t.regim === 'existent') ? 'EXISTENTA_NEMODIFICATA' : 'CONSTRUCTIE_NOUA',
-      temei_legal: 'P118-1/2025 (tabele diferentiate nou/existent, Anexa A.10 pt existent) + Legea 50/1991 (categorii lucrari)'
+      temei_legal: 'P118-1/2025 (tabele diferentiate nou/existent, Anexa A.10 pt existent) + Legea 169/2026 (CATUC) (categorii lucrari)'
     };
   }
 

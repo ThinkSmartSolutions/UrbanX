@@ -2,7 +2,7 @@
 // urbanx-riskmaps.js — HARTI DE RISC VECTORIALE in PDF (Masterplan/PMUD)
 // Deseneaza direct in jsPDF mini-harti din geometria PUG reala (fara capturi
 // fragile de ecran): risc seismic, inundatii, monumente & zone de protectie.
-// Surse: P100-1/2013 (INFP), ANAR PGRA 2021-2027, CIMEC/LMI, Legea 350/2001.
+// Surse: P100-1/2013 (INFP), ANAR PGRA 2021-2027, CIMEC/LMI, Legea 169/2026 (CATUC).
 // 17 iunie 2026 | ThinkSmart Solutions SRL
 // ═══════════════════════════════════════════════════════════════════════════
 (function(G){
@@ -125,7 +125,7 @@ G._RiskMaps = {
       ['Zona de protectie', 'perimetru in jurul monumentului cu restrictii de regim, volumetrie si functiuni.'],
       ['Sit urban protejat', 'ansambluri cu valoare culturala — reglementari de conservare integrata.'],
     ]);
-    D.sourceBadges(['INFP P100','ANAR PGRA','MMAP','INP / LMI','Legea 350/2001','Dir. 2007/60/CE']);
+    D.sourceBadges(['INFP P100','ANAR PGRA','MMAP','INP / LMI','Legea 169/2026 (CATUC)','Dir. 2007/60/CE']);
   }
 };
 console.log('[RiskMaps] ✅ modul harti de risc vectoriale incarcat');

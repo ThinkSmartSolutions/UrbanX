@@ -86,12 +86,12 @@
   // nota: revizuiri cunoscute / atenționări
   var NORME = [
     // — LEGISLAȚIE PRIMARĂ —
-    { cod: 'Legea 50/1991', titlu: 'Autorizarea executării lucrărilor de construcții', dom: 'Autorizare', an: '1991 (r. 2004, mod. ulterioare)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Republicată + modificări frecvente — verifică forma consolidată.' },
+    { cod: 'Legea 169/2026 (CATUC)', titlu: 'Autorizarea executării lucrărilor de construcții', dom: 'Autorizare', an: '1991 (r. 2004, mod. ulterioare)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Republicată + modificări frecvente — verifică forma consolidată.' },
     { cod: 'Legea 10/1995', titlu: 'Calitatea în construcții', dom: 'Autorizare', an: '1995 (r. 2016)', stare: 'in_vigoare', verificat: '2026-07', nota: '6+1 cerințe fundamentale.' },
     { cod: 'HG 907/2016', titlu: 'Etape + conținut-cadru documentații tehnico-economice', dom: 'Autorizare', an: '2016', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'HG 766/1997', titlu: 'Regulamente calitate — categorii de importanță', dom: 'Autorizare', an: '1997', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'HG 925/1995', titlu: 'Verificarea și expertizarea tehnică a proiectelor', dom: 'Autorizare', an: '1995', stare: 'in_vigoare', verificat: '2026-07' },
-    { cod: 'Legea 350/2001', titlu: 'Amenajarea teritoriului și urbanismul', dom: 'Urbanism', an: '2001 (mod.)', stare: 'in_vigoare', verificat: '2026-07' },
+    { cod: 'Legea 169/2026 (CATUC)', titlu: 'Amenajarea teritoriului și urbanismul', dom: 'Urbanism', an: '2001 (mod.)', stare: 'in_vigoare', verificat: '2026-07' },
     { cod: 'HG 525/1996', titlu: 'Regulament General de Urbanism (RGU)', dom: 'Urbanism', an: '1996 (r.)', stare: 'in_vigoare', verificat: '2026-07', nota: 'Anexa 5 — necesar parcaje.' },
     { cod: 'Legea 372/2005', titlu: 'Performanța energetică a clădirilor (nZEB + EV)', dom: 'Energie', an: '2005 (r. + transpunere EPBD)', stare: 'de_verificat', verificat: '2026-07', nota: 'EPBD reformată (Dir. 2024/1275) — transpunere în curs; verifică cerințele nZEB/EV actualizate.' },
     { cod: 'Legea 114/1996', titlu: 'Legea locuinței (Anexa 1 — suprafețe minime)', dom: 'Rezidențial', an: '1996 (r.)', stare: 'in_vigoare', verificat: '2026-07' },

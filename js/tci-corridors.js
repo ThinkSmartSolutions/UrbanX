@@ -134,7 +134,7 @@ G._CorridorsLayer = {
         rh_propus: z.rh_propus || 'P+3—P+5',
         functiuni: ['Rezidențial mixt', 'Servicii proximitate'],
         finantare: ['FEDR POR', 'Sector privat'],
-        justificare: 'HG 525/1996 RGU + Ord. 233/2016 — densificare controlată',
+        justificare: 'HG 525/1996 RGU + Legea 169/2026 (CATUC) — densificare controlată',
         prioritate: 3,
       });
     });

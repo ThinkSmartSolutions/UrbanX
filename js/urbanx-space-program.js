@@ -557,7 +557,7 @@
       }
     },
     'infrastructura-drum': {
-      label: 'Infrastructură rutieră / drum', norma: 'AND 584 + STAS 863 + Legea 50/1991',
+      label: 'Infrastructură rutieră / drum', norma: 'AND 584 + STAS 863 + Legea 169/2026 (CATUC)',
       params: [{ key: 'lungime_m', label: 'Lungime (m)', type: 'number', def: 1000 }, { key: 'benzi', label: 'Nr. benzi', type: 'number', def: 2 }],
       baza: function () { return [{ id: 'casa_bilete', mp: 12 }]; }
     },

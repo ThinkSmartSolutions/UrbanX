@@ -6,7 +6,7 @@
  *
  * window.LVC.compute(input) · openPanel() · generatePDF()
  * ONEST: România NU are mecanism LVC în lege (2025). Contribuția = VOLUNTARĂ,
- * negociată în acordul PUZ (Legea 350/2001 Art. 56). Valori manuale (ANCPI = Faza 2).
+ * negociată în acordul PUZ (Legea 169/2026 (CATUC)). Valori manuale (ANCPI = Faza 2).
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -95,7 +95,7 @@
         card('+' + r.uplift_pct + '%', 'plusvaloare teren', '#34d399') + card(N(r.total_uplift_eur) + ' €', 'plusvaloare totală') + '</div>' +
         '<div style="display:flex;gap:8px">' + card(N(r.total_contribution_eur) + ' €', 'contribuție (' + r.recovery_rate_pct + '%)', '#fbbf24') + card(N(r.contribution_per_built_m2) + ' €/mp', 'per mp ADC', '#fbbf24') + '</div>' +
         '<div style="font-size:11px;color:#94a3b8;margin-top:8px">Comparabile: UK CIL ~100-400 €/mp · Franța ZAC variabil. </div>' +
-        '<div style="font-size:10px;color:#64748b;margin-top:6px">⚠ România NU are mecanism LVC în lege. Contribuția e VOLUNTARĂ, negociată în acordul PUZ (L.350/2001 Art.56). Orientativ.</div>';
+        '<div style="font-size:10px;color:#64748b;margin-top:6px">⚠ România NU are mecanism LVC în lege. Contribuția e VOLUNTARĂ, negociată în acordul PUZ (Legea 169/2026 (CATUC)). Orientativ.</div>';
       pdfBtn.style.display = '';
     };
     pdfBtn.onclick = function () { if (last) generatePDF(last, { site_name: pre && pre.nrcad ? 'CF ' + pre.nrcad : 'Sit', city: cityName() }); };
@@ -149,7 +149,7 @@
       D.P('Contribuția de ' + N(r.contribution_per_built_m2) + ' EUR/mp ADC reprezintă un cost suplimentar pentru dezvoltator, ce se compară cu marja sa de dezvoltare: dacă rămâne sub plusvaloarea netă obținută din rezonare, dezvoltatorul rămâne avantajat de decizia publică, iar comunitatea își recuperează partea echitabilă.');
 
       D.chapter('5. Cadrul legal românesc');
-      D.P('România NU dispune, la nivelul anului 2025, de un mecanism legal direct și obligatoriu de captare a plusvalorii (de tipul CIL britanic sau ZAC francez). Singurul temei utilizabil este Legea nr. 350/2001 privind amenajarea teritoriului și urbanismul, art. 56, care permite negocierea unor contribuții ale dezvoltatorului în cadrul acordului la aprobarea documentațiilor de urbanism (PUZ). Contribuția are astfel caracter VOLUNTAR și negociat, nu de taxă impusă.');
+      D.P('România NU dispune, la nivelul anului 2025, de un mecanism legal direct și obligatoriu de captare a plusvalorii (de tipul CIL britanic sau ZAC francez). Singurul temei utilizabil este Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul, art. 56, care permite negocierea unor contribuții ale dezvoltatorului în cadrul acordului la aprobarea documentațiilor de urbanism (PUZ). Contribuția are astfel caracter VOLUNTAR și negociat, nu de taxă impusă.');
       D.P('În practică, unele municipii au utilizat acorduri de acest tip pentru obținerea de terenuri pentru infrastructură, spații verzi sau dotări, în schimbul aprobării unor parametri urbanistici superiori. Generalizarea necesită însă un cadru legal clar, predictibil și transparent — recomandat de organisme precum Banca Mondială și OCDE ca pârghie esențială de finanțare a urbanizării. Prezentul studiu oferă baza cuantificată pentru o astfel de negociere.');
 
       D.chapter('6. Instrumente de captare a plusvalorii');
@@ -186,11 +186,11 @@
       D.P('Credibilitatea LVC depinde de guvernanță: reguli publicate dinainte (nu negociate caz cu caz în mod opac), o metodologie transparentă de evaluare, un fond dedicat cu raportare anuală a încasărilor și cheltuielilor, și un mecanism de contestare. Implicarea publicului și a actorilor economici în definirea regulilor crește acceptabilitatea. Digitalizarea (o platformă publică de evidență a contribuțiilor și a destinației lor) este o bună practică emergentă.');
 
       D.chapter('13. Aplicabilitate la nivel local');
-      D.P('Pentru o administrație locală din România, pașii practici sunt: (1) adoptarea unei politici/regulament local privind contribuțiile la dezvoltare (în limita L350/2001); (2) stabilirea unei metodologii transparente de calcul al plusvalorii; (3) definirea ratei de recuperare și a destinației fondurilor; (4) aplicarea consecventă la documentațiile de urbanism cu majorare de parametri. Studiul de față poate constitui anexa tehnică de fundamentare a unei astfel de politici sau a unei negocieri individuale.');
+      D.P('Pentru o administrație locală din România, pașii practici sunt: (1) adoptarea unei politici/regulament local privind contribuțiile la dezvoltare (în limita Legea 169/2026 (CATUC)); (2) stabilirea unei metodologii transparente de calcul al plusvalorii; (3) definirea ratei de recuperare și a destinației fondurilor; (4) aplicarea consecventă la documentațiile de urbanism cu majorare de parametri. Studiul de față poate constitui anexa tehnică de fundamentare a unei astfel de politici sau a unei negocieri individuale.');
 
       D.chapter('14. Concluzii și recomandări');
       D.P('Pentru situl analizat, plusvaloarea de ' + N(r.total_uplift_eur) + ' EUR (+' + r.uplift_pct + '%) generată de decizia de planificare justifică o contribuție de ' + N(r.total_contribution_eur) + ' EUR (' + r.recovery_rate_pct + '% recuperare), echivalentă cu ' + N(r.contribution_per_built_m2) + ' EUR/mp ADC. Această contribuție este echitabilă, sustenabilă pentru proiect și aliniată practicii internaționale.');
-      D.P('Recomandări: (1) utilizarea acestui studiu ca bază obiectivă de negociere în cadrul L350/2001; (2) constituirea unui fond local dedicat, cu raportare publică; (3) pe termen lung, susținerea unui cadru legislativ național de LVC, predictibil și transparent; (4) validarea valorilor prin evaluare ANEVAR independentă înainte de finalizarea acordului.');
+      D.P('Recomandări: (1) utilizarea acestui studiu ca bază obiectivă de negociere în cadrul Legea 169/2026 (CATUC); (2) constituirea unui fond local dedicat, cu raportare publică; (3) pe termen lung, susținerea unui cadru legislativ național de LVC, predictibil și transparent; (4) validarea valorilor prin evaluare ANEVAR independentă înainte de finalizarea acordului.');
 
       D.chapter('15. Surse de plusvaloare: infrastructură vs reglementare');
       D.P('Plusvaloarea funciară are două surse majore, care justifică captarea în moduri ușor diferite. Prima este INVESTIȚIA PUBLICĂ în infrastructură: o nouă linie de metrou, un drum, un parc cresc valoarea terenurilor deservite — uneori spectaculos (studiile arată creșteri de 20–50% pentru terenurile din proximitatea noilor stații de transport public de mare capacitate). A doua este DECIZIA DE REGLEMENTARE: rezonarea sau majorarea coeficienților urbanistici (CUT/POT) crește potențialul edificabil și, implicit, valoarea terenului, fără nicio investiție fizică.');
@@ -218,12 +218,12 @@
 
       D.chapter('21. Foaie de parcurs pentru implementare locală');
       D.P('Trecerea de la o contribuție negociată ad-hoc la o politică locală coerentă de captare a plusvalorii poate parcurge etape graduale, în limita cadrului legal actual. Etapa 1 — pilotare: aplicarea metodologiei (ca în acest studiu) la câteva documentații de urbanism cu majorare de parametri, pentru calibrarea ratei și a procesului. Etapa 2 — instituționalizare: adoptarea unui regulament local care să stabilească transparent metoda de calcul, rata de recuperare și destinația fondurilor. Etapa 3 — operaționalizare: constituirea fondului dedicat, a registrului public și a procedurii standard de negociere.');
-      D.P('Pe termen lung, etapa 4 presupune susținerea unui cadru legislativ național dedicat (dincolo de art. 56 al L350/2001), care să confere predictibilitate și forță juridică mecanismului — aliniat recomandărilor OCDE și Băncii Mondiale. Această evoluție graduală permite administrației să acumuleze experiență și legitimitate înainte de a generaliza instrumentul, reducând rezistența și riscul juridic.');
+      D.P('Pe termen lung, etapa 4 presupune susținerea unui cadru legislativ național dedicat (dincolo de art. 56 al Legea 169/2026 (CATUC)), care să confere predictibilitate și forță juridică mecanismului — aliniat recomandărilor OCDE și Băncii Mondiale. Această evoluție graduală permite administrației să acumuleze experiență și legitimitate înainte de a generaliza instrumentul, reducând rezistența și riscul juridic.');
 
       D.chapter('22. Tabel comparativ al instrumentelor LVC');
       D.P('Sinteza comparativă de mai jos pune față în față principalele instrumente de captare a plusvalorii utilizate internațional, cu mecanismul, exemplul reprezentativ și gradul de aplicabilitate în contextul legal românesc actual:');
       D.table && D.table(['Instrument', 'Mecanism', 'Exemplu', 'Aplicabilitate RO'], [
-        ['Acord negociat (planning gain)', 'Contribuție la aprobarea PUZ', 'UK — Section 106', 'Da (L350/2001 art.56)'],
+        ['Acord negociat (planning gain)', 'Contribuție la aprobarea PUZ', 'UK — Section 106', 'Da (Legea 169/2026 (CATUC))'],
         ['Taxă de infrastructură (levy)', 'Cotă fixă pe mp construit', 'UK — CIL', 'Necesită cadru legal nou'],
         ['Vânzarea drepturilor de a construi', 'Licitarea CUT suplimentar', 'Brazilia — CEPAC', 'Necesită cadru legal nou'],
         ['Reajustare funciară', 'Pooling + restituire parcele servite', 'Japonia, Coreea', 'Necesită cadru legal nou'],
@@ -235,10 +235,10 @@
 
       try { if (window.UrbanXIVU && window.UrbanXIVU.renderSection) window.UrbanXIVU.renderSection(D); } catch (e) {}
       D.chapter('23. Limitări și disclaimer');
-      D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (L350/2001 art.56). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
+      D.P('Studiul este ORIENTATIV și de fundamentare. Valorile de teren sunt estimative; recomandăm evaluare ANEVAR și consultanță juridică înainte de orice acord. România nu are, la nivel 2025, un mecanism legal direct de LVC — contribuția este voluntară și negociată (Legea 169/2026 (CATUC)). Rezultatele depind critic de acuratețea valorilor de bază și „după"; o eroare în acestea se propagă proporțional în contribuție.');
 
       D.chapter('24. Surse, bibliografie și glosar');
-      D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea nr. 350/2001 (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
+      D.P('George H. (1879) „Progress and Poverty"; Banca Mondială — „Land Value Capture" (Urban Development Series); OCDE — „Global Compendium of Land Value Capture Policies" (2022); Lincoln Institute of Land Policy; Legea 169/2026 (CATUC) (art. 56); exemple internaționale CIL (UK), ZAC (FR), CEPAC (BR), TIF (US). Glosar: plusvaloare/uplift = creșterea valorii terenului din decizia de planificare; rată de recuperare = procentul din plusvaloare captat pentru comunitate; betterment = surplusul de valoare creat de acțiunea publică; unearned increment = câștig nemeritat. Metodologie UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Studiu_LVC_' + (meta.site_name || 'sit') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       window._buildStratTOC && window._buildStratTOC(D, 1);

@@ -19,7 +19,7 @@ window._pdfDisclaimer = function(pdf, opts){
     pdf.setFont('helvetica','bold'); pdf.setFontSize(7); pdf.setTextColor(150,120,40);
     pdf.text('NOTA / DISCLAIMER', ML, y+5);
     pdf.setFont('helvetica','normal'); pdf.setFontSize(6.4); pdf.setTextColor(90,100,118);
-    var txt = opts.text || 'Document orientativ si preliminar, generat automat de platforma UrbanX (TSS-FG) pe baza datelor publice disponibile. NU inlocuieste documentatiile tehnice de specialitate avizate conform Legii 50/1991 si Legii 350/2001. Valorile necesita verificare de catre un proiectant atestat / expert autorizat.';
+    var txt = opts.text || 'Document orientativ si preliminar, generat automat de platforma UrbanX (TSS-FG) pe baza datelor publice disponibile. NU inlocuieste documentatiile tehnice de specialitate avizate conform Legea 169/2026 (CATUC). Valorile necesita verificare de catre un proiectant atestat / expert autorizat.';
     var lines = pdf.splitTextToSize(txt, W - 2*ML);
     pdf.text(lines, ML, y+9);
   }catch(e){}

@@ -3979,11 +3979,11 @@ async function runExport(){
     pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');
     hdr('TEMEI LEGAL SI NOTE METODOLOGICE',8);cy=30;
     cy=sec('16. BAZA LEGALA',cy);cy+=3;
-    ['Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)',
-     'Legea nr. 50/1991 privind autorizarea executarii lucrarilor de constructii (republicata)',
+    ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)',
+     'Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii (republicata)',
      'Legea nr. 10/1995 privind calitatea in constructii (republicata)',
      'HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism (RGU)',
-     'Ordinul MDRAP nr. 233/2016 pentru aprobarea Normelor metodologice PUZ/PUD',
+     'Legea 169/2026 (CATUC) pentru aprobarea Normelor metodologice PUZ/PUD',
      'PUG Municipiul Iasi — in vigoare (aprobat prin HCL Iasi)',
      'RLU — Regulamentul Local de Urbanism aferent PUG Iasi',
      'Legea nr. 7/1996 a cadastrului si publicitatii imobiliare (republicata)',
@@ -4054,7 +4054,7 @@ async function runExport(){
     let sy=sigY+16;
     // Text legal
     pdf.setTextColor(200,215,235);pdf.setFontSize(7.5);pdf.setFont('helvetica','normal');
-    const legalText='Subsemnatul/Subsemnata, elaborator al prezentului document, declar pe proprie raspundere ca informatiile, calculele si recomandarile cuprinse in prezentul pre-studiu/raport urbanistic au fost intocmite cu buna-credinta, pe baza datelor disponibile la data elaborarii, in conformitate cu legislatia urbanistica in vigoare (Legea nr. 350/2001, HG nr. 525/1996, PUG '+S2(utrCity)+' in vigoare). Imi asum raspunderea profesionala pentru continutul tehnic al documentului, in limita competentelor conferite de calificarea profesionala detinuta, conform art. 36 din Legea nr. 350/2001. Documentul a fost generat cu sprijinul platformei UrbanX AEDIS, cu caracter orientativ si informativ, si nu inlocuieste documentatia tehnica avizata conform legii.';
+    const legalText='Subsemnatul/Subsemnata, elaborator al prezentului document, declar pe proprie raspundere ca informatiile, calculele si recomandarile cuprinse in prezentul pre-studiu/raport urbanistic au fost intocmite cu buna-credinta, pe baza datelor disponibile la data elaborarii, in conformitate cu legislatia urbanistica in vigoare (Legea 169/2026 (CATUC), HG nr. 525/1996, PUG '+S2(utrCity)+' in vigoare). Imi asum raspunderea profesionala pentru continutul tehnic al documentului, in limita competentelor conferite de calificarea profesionala detinuta, conform art. 36 din Legea 169/2026 (CATUC). Documentul a fost generat cu sprijinul platformei UrbanX AEDIS, cu caracter orientativ si informativ, si nu inlocuieste documentatia tehnica avizata conform legii.';
     const legalLines=pdf.splitTextToSize(legalText,W-48);
     pdf.text(legalLines,24,sy);sy+=legalLines.length*4.5+8;
 
@@ -4092,7 +4092,7 @@ async function runExport(){
     pdf.setTextColor(...GOLD);pdf.setFontSize(7);pdf.setFont('helvetica','bold');
     pdf.text('UrbanX · Pre-studiu urbanistic nr. '+nrcad+'/'+new Date().getFullYear()+' · Data elaborarii: '+S2(dateStr),W/2,sy+6,{align:'center'});
     pdf.setTextColor(100,120,150);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
-    pdf.text('Documentul are caracter ORIENTATIV. Valorile sunt estimative si nu au valoare juridica deplina conform Legii nr. 50/1991 si Legii nr. 350/2001.',W/2,sy+12,{align:'center'});
+    pdf.text('Documentul are caracter ORIENTATIV. Valorile sunt estimative si nu au valoare juridica deplina conform Legea 169/2026 (CATUC).',W/2,sy+12,{align:'center'});
     ftr();
 
 

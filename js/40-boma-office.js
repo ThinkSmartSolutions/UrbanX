@@ -342,7 +342,7 @@
       ['Eficiență %', 'UA/GIA×100%. Cls A: >70%. Cls B: 58–68%. Sub 55% = clădire ineficientă.'],
       ['IPMS 3 Component A', 'International Property Measurement Standards: spațiu exclusiv. Echivalent UA BOMA. Standard global RICS/IVSC.'],
       ['RICS NIA', 'RICS CoMP 2023: UA minus stâlpi + praguri + nișe <0.25m². Standard UK și evaluări internaționale.'],
-      ['ANCPI SU', 'Suprafață Utilă cf. norme cadastrale România. Fără grosimea pereților interiori. Pentru CF + autorizare L50/1991.'],
+      ['ANCPI SU', 'Suprafață Utilă cf. norme cadastrale România. Fără grosimea pereților interiori. Pentru CF + autorizare Legea 169/2026 (CATUC).'],
     ];
 
     const gW = (W - pad * 2 - 8) / 2;

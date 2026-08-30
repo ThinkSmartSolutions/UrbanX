@@ -80,7 +80,7 @@
       var gLab = el('label', { style: 'display:flex;gap:7px;align-items:flex-start;font-size:10px;color:#94a3b8;margin-top:8px;cursor:pointer;line-height:1.4' });
       var gCb = el('input', { type: 'checkbox', style: 'margin-top:2px;flex-shrink:0' });
       gLab.appendChild(gCb);
-      gLab.appendChild(el('span', null, 'Am temei legal (consimțământ / sarcină publică L.50/1991) pentru a stoca datele proprietarului. Numele va fi mascat și pseudonimizat, CNP-ul NU se stochează în clar. Retenție ' + G.RegistruImobil.RETENTION_YEARS + ' ani; ștergerea e disponibilă oricând. (GDPR, Reg. UE 2016/679)'));
+      gLab.appendChild(el('span', null, 'Am temei legal (consimțământ / sarcină publică Legea 169/2026 (CATUC)) pentru a stoca datele proprietarului. Numele va fi mascat și pseudonimizat, CNP-ul NU se stochează în clar. Retenție ' + G.RegistruImobil.RETENTION_YEARS + ' ani; ștergerea e disponibilă oricând. (GDPR, Reg. UE 2016/679)'));
       box.appendChild(gLab);
       var out = el('div', { style: 'font-size:11.5px;margin-top:7px' }); box.appendChild(out);
       var save = el('button', { style: ST.btn + ';margin-top:8px' }, 'Salvează în registru');

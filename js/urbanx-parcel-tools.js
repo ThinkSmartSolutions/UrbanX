@@ -46,7 +46,7 @@ G._ParcelFisa = {
     pdf.setTextColor(212,175,55); pdf.setFont(_F,'bold'); pdf.setFontSize(11);
     pdf.text('FIȘĂ DE URBANISM', W/2, 7, {align:'center'});
     pdf.setTextColor(148,163,184); pdf.setFont(_F,'normal'); pdf.setFontSize(8);
-    pdf.text('Conf. Legii 350/2001 · HG 525/1996 RGU · Ord. 233/2016  ·  Document orientativ', W/2, 13.5, {align:'center'});
+    pdf.text('Conf. Legea 169/2026 (CATUC) · HG 525/1996 RGU · Legea 169/2026 (CATUC)  ·  Document orientativ', W/2, 13.5, {align:'center'});
 
     let y = 23;
 
@@ -122,7 +122,7 @@ G._ParcelFisa = {
     pdf.text('DOCUMENT ORIENTATIV — NU ÎNLOCUIEȘTE CERTIFICATUL DE URBANISM', W/2, y+6, {align:'center'});
     pdf.setTextColor(200,170,170); pdf.setFont(_F,'normal'); pdf.setFontSize(7);
     pdf.text(S2('Datele sunt estimative. Reglementările exacte se găsesc în PUG-ul local și în CU emis de Primărie.'), 18, y+12);
-    pdf.text(S2('Obligatoriu: verificare urbanist atestat RUR · Legea 350/2001 + Legea 184/2001'), 18, y+18);
+    pdf.text(S2('Obligatoriu: verificare urbanist atestat RUR · Legea 169/2026 (CATUC) + Legea 184/2001'), 18, y+18);
     y += 26;
 
     pdf.setFillColor(6,12,38); pdf.roundedRect(14,y,W-28,14,2,2,'F');
@@ -152,7 +152,7 @@ G._ParcelFisa = {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 2. MATRICE AVIZE — generată automat din datele parcelei
-// Ref: Legea 50/1991 + Ord. 839/2009 + HG 525/1996
+// Ref: Legea 169/2026 (CATUC) + Legea 169/2026 (CATUC) + HG 525/1996
 // ═══════════════════════════════════════════════════════════════════════════
 G._AvizoMatrix = {
 
@@ -162,10 +162,10 @@ G._AvizoMatrix = {
     const add = (emitent, motiv, termen, obligatoriu=true) =>
       avize.push({ emitent, motiv, termen, obligatoriu });
 
-    // ── AVIZE OBLIGATORII ÎNTOTDEAUNA (Legea 50/1991) ──────────────────
+    // ── AVIZE OBLIGATORII ÎNTOTDEAUNA (Legea 169/2026 (CATUC)) ──────────────────
     add('Primăria ' + S2(city.name||'localității'),
         'Certificat de Urbanism (CU) — obligatoriu pentru orice construcție',
-        'Etapa 1, înainte de orice altceva · art.6 Legea 50/1991');
+        'Etapa 1, înainte de orice altceva · art.6 Legea 169/2026 (CATUC)');
     add('Utilități: distribuitorul local apă/canal',
         'Aviz branșament · certificat existență rețele',
         '30 zile · Legea 241/2006');
@@ -496,7 +496,7 @@ G._PPTXExporter = {
     const kpis4 = [
       ['LOCUINTE NOI', N(locuinteNoi), 'unități 2025-2055', GOLD],
       ['POT MAX centru', '80%', 'HG 525/1996 RGU', BLUE],
-      ['CUT MAX centru', '4.0', 'Ord. 233/2016', '22c55e'],
+      ['CUT MAX centru', '4.0', 'Legea 169/2026 (CATUC)', '22c55e'],
       ['RH MAX centru', 'P+8—P+12', 'conf. PUG', 'f59e0b'],
     ];
     kpis4.forEach(([l,v,u,c],i) => {
@@ -563,7 +563,7 @@ G._PPTXExporter = {
     // ── Slide 8: ZONE PROPUSE ─────────────────────────────────────────
     const s8 = addSlide();
     s8.addText('ZONE PROPUSE — INDICATORI URBANISTICI', {x:0.5,y:0.3,w:12,h:0.6,fontSize:22,bold:true,color:GOLD,fontFace:'Courier New'});
-    s8.addText('Conf. HG 525/1996 RGU · Ord. 233/2016 · Zone identificate OSM + model gravitational UrbanX', {x:0.5,y:0.95,w:12,h:0.3,fontSize:10,color:'64748b',fontFace:'Courier New'});
+    s8.addText('Conf. HG 525/1996 RGU · Legea 169/2026 (CATUC) · Zone identificate OSM + model gravitational UrbanX', {x:0.5,y:0.95,w:12,h:0.3,fontSize:10,color:'64748b',fontFace:'Courier New'});
     const zoneRows = [
       ['Centrul civic','DENSIFICARE','80%','4.0','P+8—P+12','Mixt: Comercial+Rezidential'],
       ['Coridoare TOD','DENSIF. MODERATA','65%','2.5','P+5—P+8','Rezidential+Servicii'],
@@ -723,7 +723,7 @@ window.showAvize = function() {
         </table>
       </div>
       <div style="padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="color:#64748b;font-size:10.5px">Orientativ — confirmați la emitenți conform Legii 50/1991 și CU.</span>
+        <span style="color:#64748b;font-size:10.5px">Orientativ — confirmați la emitenți conform Legea 169/2026 (CATUC) și CU.</span>
         <div style="display:flex;gap:8px">
           ${typeof window.generateREPA==='function' ? `<button onclick="window.generateREPA&&window.generateREPA()" style="background:rgba(129,140,248,.14);border:1px solid rgba(129,140,248,.35);color:#a5b4fc;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">📄 Raport REPA (PDF)</button>`:''}
           <button onclick="document.getElementById('avize-modal').remove()" style="background:rgba(212,175,55,.16);border:1px solid rgba(212,175,55,.35);color:#e9d08a;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700">Închide</button>

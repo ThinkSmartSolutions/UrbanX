@@ -657,11 +657,11 @@ G._MasterplanVisualPatch = {
       const _dl = _isCom
         ? ['Document generat ALGORITMIC din date publice — CADRU ORIENTATIV de pre-analiza la scara de COMUNA.',
            'NU constituie si NU substituie un Masterplan / PUG / Strategie de Dezvoltare Locala elaborate de',
-           'proiectant atestat RUR si aprobate de Consiliul Local (Legea 350/2001). Cifre estimate — necesita',
+           'proiectant atestat RUR si aprobate de Consiliul Local (Legea 169/2026 (CATUC)). Cifre estimate — necesita',
            'validare profesionala, anchete de teren si avize de specialitate.']
         : ['Document generat ALGORITMIC din date publice — instrument de PRE-ANALIZA si comunicare.',
            'NU constituie si NU substituie un Masterplan / PUG / PUZ / PUD elaborat de proiectant atestat RUR',
-           'si aprobat conform Legii 350/2001. Cifrele sunt orientative si necesita validare profesionala,',
+           'si aprobat conform Legea 169/2026 (CATUC). Cifrele sunt orientative si necesita validare profesionala,',
            'studii de specialitate si anchete de teren.'];
       pdf.setTextColor(245, 225, 225); pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8);
       _dl.forEach((ln, i) => { pdf.text(s(ln), W / 2, 226 + i * 4.4, { align: 'center', maxWidth: W - 34 }); });

@@ -17,7 +17,7 @@ G._PUGImport = {
   _data: null,
   _active: false,
 
-  // Categorii UTR standard conform HG 525/1996 + Ord. 233/2016
+  // Categorii UTR standard conform HG 525/1996 + Legea 169/2026 (CATUC)
   UTR_CATEGORIES: {
     // Rezidential
     'L1':'Locuire de mică densitate (P-P+2)',
@@ -164,7 +164,7 @@ G._PUGImport = {
         <!-- Exemple UTR -->
         <div>
           <div style="color:#94a3b8;font-size:11px;font-weight:700;margin-bottom:6px">
-            CATEGORII UTR SUPORTATE (HG 525/1996 + Ord. 233/2016)
+            CATEGORII UTR SUPORTATE (HG 525/1996 + Legea 169/2026 (CATUC))
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:4px">
             ${Object.entries(this.UTR_CATEGORIES).map(([cod,desc])=>`
@@ -500,5 +500,5 @@ G._PUGImport = {
 window._PUGImport = G._PUGImport;
 window.openPUGImport = () => window._PUGImport.showImportDialog();
 
-console.log('[UrbanX] PUG Import v1.0: GeoJSON · KML · Comparare UrbanX · Legea 350/2001');
+console.log('[UrbanX] PUG Import v1.0: GeoJSON · KML · Comparare UrbanX · Legea 169/2026 (CATUC)');
 })(window);

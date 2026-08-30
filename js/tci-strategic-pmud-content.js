@@ -125,7 +125,7 @@
       ]);
       D.h2('Cadrul metodologic — ciclul SUMP');
       D.P('Elaborarea urmează metodologia europeană SUMP (ELTIS), structurata în patru faze și douăsprezece etape: (1) pregătire și analiză, (2) dezvoltarea strategiei, (3) planificarea masurilor, (4) implementare și monitorizare. Procesul este iterativ, participativ și bazat pe dovezi, cu revizuire la fiecare ciclu.');
-      D.sourceBadges(['Ghid SUMP/ELTIS 2019', 'MDLPA — ghid PMUD', 'Legea 350/2001', 'Regulament UE TEN-T']);
+      D.sourceBadges(['Ghid SUMP/ELTIS 2019', 'MDLPA — ghid PMUD', 'Legea 169/2026 (CATUC)', 'Regulament UE TEN-T']);
 
       // ── 2. ANALIZA SITUATIEI EXISTENTE ───────────────────────────────────
       D.chapter('Analiză situației existente');
@@ -796,7 +796,7 @@
       D.callout('Concluzie SEA (orientativa)', 'Implementarea PMUD are un efect global pozitiv asupra mediului și sănătății, prin reducerea emisiilor, a zgomotului și a accidentelor. Efectele negative temporare (fază de construcție) se gestioneaza prin măsuri standard de mediu. SEA finală se elaboreaza de expert atestat.');
 
       D.chapter('Participare publică și consultare');
-      D.P('Planificarea participativa este o cerință esențială a metodologiei SUMP și o condiție legală (Legea 52/2003, Legea 350/2001). Implicarea cetățenilor, a mediului de afaceri și a societății civile în toate fazele crește calitatea, legitimitatea și acceptabilitatea planului.');
+      D.P('Planificarea participativa este o cerință esențială a metodologiei SUMP și o condiție legală (Legea 52/2003, Legea 169/2026 (CATUC)). Implicarea cetățenilor, a mediului de afaceri și a societății civile în toate fazele crește calitatea, legitimitatea și acceptabilitatea planului.');
       D.h2('Instrumente de participare');
       D.bullets([
         'Anchete de mobilitate și sondaje de opinie privind nevoile de deplasare.',
@@ -828,7 +828,7 @@
       D.h2('Cadru metodologic și legal');
       D.table(['Domeniu', 'Referințe'], [
         ['Metodologie', 'Liniile directoare SUMP (ELTIS, 2019) · ghid MDLPA de elaborare PMUD'],
-        ['Cadru legal național', 'Legea 350/2001 · OG 43/1997 (drumuri) · Strategia Națională de Mobilitate'],
+        ['Cadru legal național', 'Legea 169/2026 (CATUC) · OG 43/1997 (drumuri) · Strategia Națională de Mobilitate'],
         ['Cadru european', 'Pactul Verde European · Strategia UE mobilitate sustenabila și inteligentă · Regulament TEN-T · Directivă 2008/50/CE (aer)'],
         ['Model de transport', 'Model în 4 etape (generare, distribuție gravitațională, alegere modala logit, afectare echilibru Wardrop/BPR)'],
         ['Evaluare', 'Analiză cost-beneficiu (VAN, BCR) · analiză izocrone de accesibilitate · analiză multicriteriala'],

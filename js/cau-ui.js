@@ -141,7 +141,7 @@
         card.appendChild(ca);
         paneReg.appendChild(card);
       });
-      paneReg.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:6px;line-height:1.5' }, '<b>Fluxul real (Legea 50/1991, Ord. 839/2009):</b> solicitantul depune cererea → primăria emite CU → solicitantul COMANDĂ obținerea avizelor (plătește) → PRIMĂRIA le obține de la avizatori ÎN NUMELE lui → la 30 zile fără răspuns = aviz tacit favorabil → primăria emite Acordul Unic. ⚠ Dispecerizarea reală (email/API către avizatori) + portalul avizatorilor + plata online = Faza 2 (server).'));
+      paneReg.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:6px;line-height:1.5' }, '<b>Fluxul real (Legea 169/2026 (CATUC), Legea 169/2026 (CATUC)):</b> solicitantul depune cererea → primăria emite CU → solicitantul COMANDĂ obținerea avizelor (plătește) → PRIMĂRIA le obține de la avizatori ÎN NUMELE lui → la 30 zile fără răspuns = aviz tacit favorabil → primăria emite Acordul Unic. ⚠ Dispecerizarea reală (email/API către avizatori) + portalul avizatorilor + plata online = Faza 2 (server).'));
     }
 
     if (tab === 'reg') tReg.onclick();
@@ -164,7 +164,7 @@
       '<span style="font-size:12px"><b style="color:#f87171">' + res.mandatory_count + ' obligatorii</b> · ' + res.recommended_count + ' recomandate</span></div>' +
       rows +
       (res.has_no_data ? '<div style="font-size:11px;color:#f87171;margin-top:8px">⚠ Unele verificări (patrimoniu/ape) necesită confirmare manuală — date indisponibile în zonă.</div>' : '') +
-      '<div style="font-size:10px;color:#64748b;margin-top:6px">Pre-analiză orientativă (Legea 50/1991). Lista finală se confirmă de arhitectul șef.</div></div>';
+      '<div style="font-size:10px;color:#64748b;margin-top:6px">Pre-analiză orientativă (Legea 169/2026 (CATUC)). Lista finală se confirmă de arhitectul șef.</div></div>';
   }
 
   G.CAU = G.CAU || {}; G.CAU.openPanel = openPanel;

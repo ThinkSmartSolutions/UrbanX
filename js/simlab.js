@@ -1,7 +1,7 @@
 /* ============================================================================
  * UrbanX SimLab — dashboard de simulare & explorare PRE-PROIECTARE.
  * Schimbă fluxul „aprobi apoi descoperi problemele" în „explorezi întâi, decizi
- * informat". Bază legală: Legea 350/2001 Art. 5 (studii de oportunitate, informale,
+ * informat". Bază legală: Legea 169/2026 (CATUC) (studii de oportunitate, informale,
  * pre-PUG/PUZ). Scenariul ales devine baza documentată pentru inițierea procedurilor.
  *
  * 6 simulatoare — fără duplicare: 3 NOI client-side aici + 3 rutate spre module existente:
@@ -163,7 +163,7 @@
   };
 
   var DISCLAIMER = 'Acest document este un instrument informativ de explorare pre-proiectare, elaborat în conformitate cu ' +
-    'prevederile Legii 350/2001, Art. 5, privind studiile de oportunitate urbanistică. Nu constituie documentație de urbanism ' +
+    'prevederile Legea 169/2026 (CATUC), privind studiile de oportunitate urbanistică. Nu constituie documentație de urbanism ' +
     'și nu are valoare juridică în procedurile de autorizare.';
 
   // sims care au reprezentare pe harta prin framework-ul de indici (amprenta reala)
@@ -216,7 +216,7 @@
         pdf.setTextColor(255, 255, 255); pdf.setFontSize(17); pdf.text(D.S2('Studiu de oportunitate'), ML, 30);
         pdf.setFontSize(11); pdf.setTextColor(140, 210, 195); pdf.text(D.S2(simT + '  ·  ' + uat), ML, 40);
         D.setSuppress(false); D.setY(56);
-        D.P('Prezentul studiu de oportunitate analizeaza modelul/indicele "' + simT + '" pentru ' + uat + ', generat in laboratorul de simulare UrbanX SimLab. Documentul fundamenteaza decizia de oportunitate (Legea 350/2001, art. 5), pe baza parametrilor de intrare si a rezultatelor calculate, ca instrument de pre-analiza pentru deciziile de planificare urbana.');
+        D.P('Prezentul studiu de oportunitate analizeaza modelul/indicele "' + simT + '" pentru ' + uat + ', generat in laboratorul de simulare UrbanX SimLab. Documentul fundamenteaza decizia de oportunitate (Legea 169/2026 (CATUC)), pe baza parametrilor de intrare si a rezultatelor calculate, ca instrument de pre-analiza pentru deciziile de planificare urbana.');
         var rk = Object.keys(scn.results || {});
         if (rk.length) { D.kpis(rk.slice(0, 4).map(function (k) { return { val: String(scn.results[k]), label: k, sub: '' }; })); }
         // ── captura harta DOAR daca indicele/simularea e efectiv desenat pe harta ──
@@ -246,7 +246,7 @@
         var pk = Object.keys(scn.params || {});
         if (pk.length) { D.P('Parametri de intrare', { bold: true, fs: 11, gap: 1 }); D.table(['Parametru', 'Valoare'], pk.map(function (k) { return [k, String(scn.params[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
         if (rk.length) { D.P('Rezultate ale modelului', { bold: true, fs: 11, gap: 1 }); D.table(['Indicator', 'Valoare'], rk.map(function (k) { return [k, String(scn.results[k])]; }), [Math.round(CW * 0.62), CW - Math.round(CW * 0.62)], { fs: 8, boldFirst: true }); }
-        D.callout('Statut juridic', 'Studiu de oportunitate ORIENTATIV generat de UrbanX SimLab (Legea 350/2001, art. 5). Valorile sunt estimari calibrate pe parametrii introdusi; deciziile finale necesita documentatii de specialitate avizate de proiectant atestat.');
+        D.callout('Statut juridic', 'Studiu de oportunitate ORIENTATIV generat de UrbanX SimLab (Legea 169/2026 (CATUC)). Valorile sunt estimari calibrate pe parametrii introdusi; deciziile finale necesita documentatii de specialitate avizate de proiectant atestat.');
         // patrimoniu / avize LMI (restrictii legale de construire) + Nota IVU (brand UrbanX)
         D.callout('Patrimoniu si avize de construire', 'Daca amplasamentul este monument istoric (LMI) sau in zona sa de protectie, sunt necesare avize de patrimoniu — Directia Judeteana pentru Cultura (grupa B, interes local) sau Ministerul Culturii / Comisia Nationala a Monumentelor Istorice (grupa A, interes national), conform Legii 422/2001. Verificarea punctuala se face in Studiul de Restrictii de parcela.');
         try {
@@ -323,7 +323,7 @@
   }
 
   function openDashboard() {
-    var body = shell('<div style="font-weight:800;font-size:16px">🧪 UrbanX SimLab — Explorare & Simulare Pre-Proiectare</div><div style="font-size:11px;color:#94a3b8">Manipulează datele, vizualizează live, decide informat · Legea 350/2001 Art. 5</div>');
+    var body = shell('<div style="font-weight:800;font-size:16px">🧪 UrbanX SimLab — Explorare & Simulare Pre-Proiectare</div><div style="font-size:11px;color:#94a3b8">Manipulează datele, vizualizează live, decide informat · Legea 169/2026 (CATUC)</div>');
     // Raport unificat pe TOTI indicatorii (PDF: definitie+formula+sursa+metrici+harta)
     var rep = el('button', { style: 'width:100%;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.4);color:#e9d08a;border-radius:10px;padding:11px;cursor:pointer;font-size:12.5px;font-weight:700;margin-bottom:10px' }, '📄 Raport complet — toți indicatorii (PDF: definiție · formulă · sursă · hartă)');
     rep.onclick = function () { if (G.UrbanIndicesReport && G.UrbanIndicesReport.generate) G.UrbanIndicesReport.generate(); else G.ss && G.ss('Raportul de indici se inițializează…'); };
@@ -360,7 +360,7 @@
       });
     }
     refresh();
-    body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px' }, 'SimLab rulează client-side (canvas/SVG/math). Scenariile se salvează local în browser; stocarea pe server + share-link = Faza 2. Export = „Studiu de oportunitate" (L.350/2001 art.5) — informativ, fără valoare juridică.'));
+    body.appendChild(el('div', { style: 'font-size:10px;color:#64748b;margin-top:12px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px' }, 'SimLab rulează client-side (canvas/SVG/math). Scenariile se salvează local în browser; stocarea pe server + share-link = Faza 2. Export = „Studiu de oportunitate" (Legea 169/2026 (CATUC)) — informativ, fără valoare juridică.'));
   }
 
   function simHeaderBack(body) { var b = el('button', { style: 'background:rgba(212,175,55,.16);color:#e9d08a;border:1px solid rgba(212,175,55,.4);border-radius:8px;padding:8px 13px;cursor:pointer;font-size:12px;font-weight:700;margin-bottom:10px' }, '← Înapoi la SimLab (toate simulatoarele)'); b.onclick = openDashboard; body.appendChild(b); }

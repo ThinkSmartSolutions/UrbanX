@@ -232,9 +232,9 @@ function _registerStudii(){
     window.generateStudiuAmplasament = _studiuInDev(
       'Studiu de Amplasament & Context Teritorial',
       'ANALIZĂ TERITORIALĂ · DOCUMENT FUNDAMENT',
-      ['Legea 350/2001 — Lege privind amenajarea teritoriului',
+      ['Legea 169/2026 (CATUC) — Lege privind amenajarea teritoriului',
        'HG 525/1996 — Regulament general de urbanism',
-       'Legea 50/1991 — Autorizarea executării lucrărilor'],
+       'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor'],
       'Studiu care analizează amplasamentul din perspectivă teritorială și urbanistică: '+
       'UTR și reglementări PUG, context construit 3D, monumente LMI, utilități, '+
       'accese, restricții legale și riscuri naturale. '+
@@ -279,10 +279,10 @@ function _registerStudii(){
   if(typeof window.generateREPA !== 'function'){
     window.generateREPA = _studiuInDev(
       'Raport Pre-Autorizare (REPA)',
-      'CHECKLIST AC · Legea 50/1991 · HG 907/2016',
-      ['Legea 50/1991 — Autorizarea executării lucrărilor de construcții',
+      'CHECKLIST AC · Legea 169/2026 (CATUC) · HG 907/2016',
+      ['Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții',
        'HG 907/2016 — Conținut cadru documentații tehnice',
-       'Ord. 839/2009 — Norme metodologice Legea 50/1991'],
+       'Legea 169/2026 (CATUC) — Norme metodologice Legea 169/2026 (CATUC)'],
       'Checklist pre-autorizare: verificare POT/CUT/H față de PUG, '+
       'avize necesare determinate automat (AACR, utilități, ISU, mediu), '+
       'calendar Gantt autorizare, costuri estimative. '+

@@ -62,7 +62,7 @@ G._PublicParticipation = {
     if(!D || !D.pdf) return;
     var s = this.snapshot();
     D.chapter('Participare publică și transparență decizională');
-    D.P('Urbanismul modern nu se face „de sus în jos": planurile sunt cu atât mai bune și mai ușor de implementat cu cât comunitatea este consultată din timp. UrbanX integrează un strat de participare publică (model Helsinki) — cetățenii adaugă comentarii geolocalizate pe hartă, votează prioritățile, iar administrația vede în timp real unde sunt problemele. Consultarea publică este și o cerință legală pentru PMUD și PUG (Legea 350/2001).');
+    D.P('Urbanismul modern nu se face „de sus în jos": planurile sunt cu atât mai bune și mai ușor de implementat cu cât comunitatea este consultată din timp. UrbanX integrează un strat de participare publică (model Helsinki) — cetățenii adaugă comentarii geolocalizate pe hartă, votează prioritățile, iar administrația vede în timp real unde sunt problemele. Consultarea publică este și o cerință legală pentru PMUD și PUG (Legea 169/2026 (CATUC)).');
     if(D.kpis) D.kpis([
       {val:String(s.n), label:'Comentarii cetățeni', sub:(s.live?'date live':'demo')},
       {val:String(s.votes), label:'Voturi exprimate', sub:'priorități'},
@@ -76,7 +76,7 @@ G._PublicParticipation = {
       ['Transparență', 'deciziile fundamentate pe consultare au legitimitate mai mare și contestații mai puține.'],
       ['Invitație la dialog', 'platforma este deschisă: orice cetățean poate contribui — „Adaugă comentariu pe hartă".'],
     ]);
-    if(D.sourceBadges) D.sourceBadges(['Model Helsinki (participatory budgeting)','Legea 350/2001','Aarhus Convention','UrbanX live (Supabase)']);
+    if(D.sourceBadges) D.sourceBadges(['Model Helsinki (participatory budgeting)','Legea 169/2026 (CATUC)','Aarhus Convention','UrbanX live (Supabase)']);
   },
 
   // ── Inițializare ─────────────────────────────────────────────────────

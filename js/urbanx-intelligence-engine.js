@@ -9,7 +9,7 @@
  * window.UXI.fiscal(newPuz, opts) — ROI fiscal pt UAT
  *
  * Determinist (formule normative). Surse: NTPA 013/2002, MEN, Legea 24/2007,
- * Legea 350/2001, INS 2021. Rol de PRE-ANALIZĂ — vezi disclaimerul din raport.
+ * Legea 169/2026 (CATUC), INS 2021. Rol de PRE-ANALIZĂ — vezi disclaimerul din raport.
  * ========================================================================== */
 (function (G) {
   'use strict';

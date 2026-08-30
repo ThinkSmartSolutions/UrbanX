@@ -37,10 +37,10 @@
       D.P('Masterplanul nu înlocuiește documentațiile de urbanism cu caracter normativ (PUG, PUZ, PUD), ci le precede și le fundamentează, asigurând coerența între viziunea strategică, analiză cantitativă a teritoriului și reglementarea urbanistică. Documentul integrează date statistice oficiale, modele de proiecție și analize geospațiale, într-o abordare bazată pe dovezi (evidence-based planning).');
       D.h2('Cadrul legal și instituțional');
       D.table(['Act normativ', 'Relevantă pentru Masterplan'], [
-        ['Legea 350/2001', 'Amenajarea teritoriului și urbanismul — cadrul general al documentatiilor'],
+        ['Legea 169/2026 (CATUC)', 'Amenajarea teritoriului și urbanismul — cadrul general al documentatiilor'],
         ['HG 525/1996 (RGU)', 'Regulamentul General de Urbanism — indicatori și reguli de bază'],
-        ['Legea 50/1991', 'Autorizarea executarii lucrărilor de construcții'],
-        ['Ordin 233/2016', 'Norme de aplicare a Legii 350/2001 — conținutul documentatiilor'],
+        ['Legea 169/2026 (CATUC)', 'Autorizarea executarii lucrărilor de construcții'],
+        ['Legea 169/2026 (CATUC)', 'Norme de aplicare a Legea 169/2026 (CATUC) — conținutul documentatiilor'],
         ['Legea 151/2019; OUG 57/2019 (Cod administrativ)', 'Competentele autorităților locale în planificare'],
         ['Carta de la Leipzig (2007/2020)', 'Principiile orașului european durabil și integrat'],
         ['Agendă Urbană a UE; New Urban Agendă (ONU-Habitat)', 'Cadru strategic european și global'],
@@ -900,7 +900,7 @@
       // CAP 27 — PARTICIPARE
       // ─────────────────────────────────────────────────────────────────────
       D.chapter('Participare publică și transparentă');
-      D.P('Planificarea participativa asigură legitimitatea și calitatea deciziilor. Procesul include consultari publice, dezbateri, ateliere cu părțile interesate (cetățeni, mediu de afaceri, societate civilă, instituții) și transparentă deciziilor, conform Legii 52/2003 și Legii 350/2001.');
+      D.P('Planificarea participativa asigură legitimitatea și calitatea deciziilor. Procesul include consultari publice, dezbateri, ateliere cu părțile interesate (cetățeni, mediu de afaceri, societate civilă, instituții) și transparentă deciziilor, conform Legii 52/2003 și Legea 169/2026 (CATUC).');
 
       // ─────────────────────────────────────────────────────────────────────
       // CAP 28 — CONCLUZII

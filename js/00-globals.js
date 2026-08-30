@@ -1313,7 +1313,7 @@ var REGULI={
   ua:"Locuire individuală, servicii, agrement, agricol",
   uc:"Orice funcțiune cu PUZ aprobat. POT max 40%, CUT max 4",
   ui:"Industrie grea, activități poluante fără PUZ",
-  obs:"Parametri orientativi conform Legea 350/2001 art.32. CUT se poate modifica doar în jos față de max. Verificați PUG al UAT-ului."
+  obs:"Parametri orientativi conform Legea 169/2026 (CATUC). CUT se poate modifica doar în jos față de max. Verificați PUG al UAT-ului."
 },
 "EXT_COM":{
   d:"Extravilan localitate rurală",
@@ -1323,7 +1323,7 @@ var REGULI={
   ua:"Locuire individuală, activități agricole, agrement",
   uc:"Funcțiuni rurale compatibile cu PUG-ul localității",
   ui:"Industrie, depozitare, activități incompatibile cu zona rurală",
-  obs:"Parametri orientativi conform Legea 350/2001. Verificați cu primăria localității."
+  obs:"Parametri orientativi conform Legea 169/2026 (CATUC). Verificați cu primăria localității."
 },
 // Zonă fără regulament cartografiat în platformă — NU se inventează indicatori.
 // Folosit pentru parcele din intravilan urban care cad în afara zonelor UTR încărcate.

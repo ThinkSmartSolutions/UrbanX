@@ -1194,7 +1194,7 @@
     pdf.setTextColor(allOk ? 15 : 140, allOk ? 120 : 80, allOk ? 40 : 10);
     pdf.text(allOk ? '✅ PROPUNEREA RESPECTĂ INDICATORII URBANISTICI' : '⚠ NECESITĂ VERIFICĂRI SUPLIMENTARE', PW / 2, y + 8, { align: 'center' });
     pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(60, 80, 100);
-    pdf.text(S2('Documentație completă: PT+DTAC obligatoriu. Certificat de Urbanism oficial se eliberează de Primărie (Legea 50/1991 Art.6).'), PW / 2, y + 15, { align: 'center' });
+    pdf.text(S2('Documentație completă: PT+DTAC obligatoriu. Certificat de Urbanism oficial se eliberează de Primărie (Legea 169/2026 (CATUC)).'), PW / 2, y + 15, { align: 'center' });
     y += 26;
 
     pdf.setFont('helvetica', 'italic'); pdf.setFontSize(5.5); pdf.setTextColor(160, 170, 185);

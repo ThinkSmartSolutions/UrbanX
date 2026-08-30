@@ -291,7 +291,7 @@ window.generatePrestudiuBransamente = async function(){
    ['P118/2-2013','Normativ instalații de stingere incendii','ISU'],
    ['P118/3-2015','Normativ instalații de detecție incendiu','ISU'],
    ['Ord. ANRE 11/2023','Racordare prosumatori la rețea','Fotovoltaic'],
-   ['Legea 50/1991','Autorizarea executării lucrărilor de construcții','Avize AC'],
+   ['Legea 169/2026 (CATUC)','Autorizarea executării lucrărilor de construcții','Avize AC'],
    ['HG 907/2016','Conținut cadru docum. tehnico-economice','Proiectare'],
   ].forEach(r => { cy = tblRow(r, cy, false, [35,120,W-28-35-120]); cy=checkY(cy,10,'NORME',11); });
 
@@ -1144,8 +1144,8 @@ window.generateBilantEdificabil = async function(){
   cy = sec('3.1. CALCUL ZONA EDIFICABILĂ NETĂ', cy); cy+=3;
   cy = tblRow(['Element','Dimensiune','Suprafață redusă','Baza legală'], cy, true, [65,28,35,W-28-65-28-35]);
   [['Retragere față stradă','≥'+rf+'m','—','PUG/RLU + RGU art.23'],
-   ['Retragere laterală dreaptă','≥'+rl+'m',Math.round(rl*Math.sqrt(areaNum)*1.2)+' m²','PUG/RLU + L50/1991'],
-   ['Retragere laterală stângă','≥'+rl+'m',Math.round(rl*Math.sqrt(areaNum)*1.2)+' m²','PUG/RLU + L50/1991'],
+   ['Retragere laterală dreaptă','≥'+rl+'m',Math.round(rl*Math.sqrt(areaNum)*1.2)+' m²','PUG/RLU + Legea 169/2026 (CATUC)'],
+   ['Retragere laterală stângă','≥'+rl+'m',Math.round(rl*Math.sqrt(areaNum)*1.2)+' m²','PUG/RLU + Legea 169/2026 (CATUC)'],
    ['Retragere spate','≥'+rs+'m',Math.round(rs*frontW)+' m²','PUG/RLU'],
    ['Zona edificabilă netă (estimat)',arie_edif.toFixed(0)+' m²','—','—'],
    ['Coeficient utilizare teren',eficP+'%','—','Arie edificabilă/Arie totală'],
@@ -1155,7 +1155,7 @@ window.generateBilantEdificabil = async function(){
   cy = tblRow(['Cerință','Suprafată minimă','% din parcelă','Normativ'], cy, true, [65,35,22,W-28-65-35-22]);
   [['Spații verzi naturale',Math.round(areaNum*0.2)+' m²','20%','L 24/2007 + PUG'],
    ['Suprafata permeabila',Math.round(areaNum*0.25)+' m²','25%','HG 930/2005'],
-   ['Arii de joacă (dacă >10 apt.)',niv*4>=10?Math.round(areaNum*0.05)+' m²':'N/A',niv*4>=10?'5%':'N/A','L 350/2001 art. 32'],
+   ['Arii de joacă (dacă >10 apt.)',niv*4>=10?Math.round(areaNum*0.05)+' m²':'N/A',niv*4>=10?'5%':'N/A','Legea 169/2026 (CATUC)'],
    ['Perdea verde stradală','1 arbore/50ml front','Cf. raza coronament','L 24/2007 art. 8'],
   ].forEach(r => { cy = tblRow(r, cy, false, [65,35,22,W-28-65-35-22]); });
 
@@ -1188,7 +1188,7 @@ window.generateBilantEdificabil = async function(){
   [
     ['RGU art. 23','Retragere față ≥'+rf+'m',parseFloat(rf)>=0?'✓ OK':'⚠ Verif.','Conf. UTR'],
     ['RGU art. 33','Spații verzi ≥20%','✓ OK','Obligatoriu'],
-    ['L 50/1991','Autorizație de construire necesară','OBLIGATORIU','AC în față'],
+    ['Legea 169/2026 (CATUC)','Autorizație de construire necesară','OBLIGATORIU','AC în față'],
     ['NP 057/2002','Parcaje: 1 loc/apt. rez.',niv*4>0?'DE CALCULAT':'✓','Conform AEDIS'],
     ['P118/1999','ISU — H≤'+H_max+'m',H_prop<=H_max?'✓ OK':'⚠ Verif.','Dacă >P+3E'],
     ['OMS 119/2014','Însorire min. 1.5h/21 dec.','A SE VERIFICA','Studiu separat'],

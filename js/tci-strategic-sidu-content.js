@@ -470,7 +470,7 @@
       // Surse
       pdf.setTextColor(120, 140, 165); pdf.setFont('DejaVuRO', 'bold'); pdf.setFontSize(6.5);
       pdf.text('SURSE OFICIALE INTEGRATE', W / 2, 201, { align: 'center' });
-      const srcs = ['INS TEMPO', 'Eurostat', 'INFP', 'ANAR', 'ANM', 'Ghid SIDU POR/MDLPA', 'Legea 350/2001'];
+      const srcs = ['INS TEMPO', 'Eurostat', 'INFP', 'ANAR', 'ANM', 'Ghid SIDU POR/MDLPA', 'Legea 169/2026 (CATUC)'];
       let bx = 0;
       const widths = srcs.map(s => pdf.getTextWidth(S2(s)) + 8);
       const totalW = widths.reduce((a, b) => a + b + 3, 0);
@@ -3155,7 +3155,7 @@ D.table(
 D.h2('6. Concluzie operationala')
 D.P('SIDU, PMUD si Masterplanul definesc directia; PUG o face obligatorie. Fara pasul de transpunere, ' + uat + ' risca sa adopte o strategie coerenta pe hartie, dar sa autorizeze in continuare o dezvoltare care o contrazice, pierzand definitiv culoare de transport ieftine si coridoare verzi nereconstituibile. Recomandarea centrala a acestui capitol este declansarea actualizarii PUG imediat dupa adoptarea SIDU, cu o fisa de corelare pentru fiecare element strategic spatial si cu prioritizarea elementelor aflate sub presiune imobiliara.')
 D.P('Transpunerea trebuie tratata ca indicator de guvernanta urbana, raportat anual consiliului local: procentul elementelor strategice care au regim de PUG corespunzator masoara, mai bine decat orice declaratie, masura in care strategia adoptata este efectiv pusa in aplicare. Pentru un portofoliu de ' + N(s.invTot) + ' mil. EUR, fiecare punct procentual de transpunere realizat la timp inseamna economii directe la capitolul exproprieri si despagubiri si protectia ireversibila a resurselor verzi ale orasului.')
-D.sourceBadges(['SIDU','PMUD','PUG / RLU','Legea 350/2001','UrbanX'])
+D.sourceBadges(['SIDU','PMUD','PUG / RLU','Legea 169/2026 (CATUC)','UrbanX'])
       }
       // --- sectiune ord 85 (chapter) ---
       {
@@ -3693,9 +3693,9 @@ D.P('Abordarea metodologica a integrat patru instrumente complementare de consul
 
 D.P('Transparenta procesului a fost asigurata prin publicarea anticipata a anunturilor de consultare, prin punerea la dispozitie a materialelor suport in format accesibil si prin documentarea integrala a contributiilor primite. Toate etapele au fost consemnate in procese-verbale, liste de prezenta si rapoarte de sinteza, anexate prezentei strategii, ceea ce permite trasabilitatea modului in care opiniile exprimate s-au reflectat in obiectivele si masurile propuse.')
 
-D.callout('Cadru legal', 'Procesul participativ respecta Legea nr. 52/2003 privind transparenta decizionala, Legea nr. 350/2001 privind amenajarea teritoriului si urbanismul, precum si Codul administrativ (OUG nr. 57/2019) in ceea ce priveste consultarea cetatenilor. Termenele minime de anunt prealabil (30 de zile pentru proiecte de acte normative) au fost respectate integral.')
+D.callout('Cadru legal', 'Procesul participativ respecta Legea nr. 52/2003 privind transparenta decizionala, Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul, precum si Codul administrativ (OUG nr. 57/2019) in ceea ce priveste consultarea cetatenilor. Termenele minime de anunt prealabil (30 de zile pentru proiecte de acte normative) au fost respectate integral.')
 
-D.sourceBadges(['Legea 52/2003', 'Legea 350/2001', 'OUG 57/2019', 'INS 2021'])
+D.sourceBadges(['Legea 52/2003', 'Legea 169/2026 (CATUC)', 'OUG 57/2019', 'INS 2021'])
 
 D.h2('1. Principiile procesului participativ')
 

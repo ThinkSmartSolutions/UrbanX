@@ -23,7 +23,7 @@
 //    Poligoane zone protecție I/II per monument
 //    Alertă automată dacă parcela selectată e în zonă protejată
 //    Restricții construire afișate în panou
-//    Sursa: CIMEC + Legea 422/2001 + Legea 350/2001
+//    Sursa: CIMEC + Legea 422/2001 + Legea 169/2026 (CATUC)
 //
 // ④ LAND USE + FUNCȚIUNEA CLĂDIRILOR
 //    Fetch OSM landuse și building tags în timp real

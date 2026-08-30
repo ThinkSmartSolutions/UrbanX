@@ -2,10 +2,10 @@
  * UrbanX Notificări Vecini — alertă când se depune ceva lângă tine (Modul 07).
  * Inspirat planningalerts.org.au. Client-side: te abonezi la o zonă; sistemul
  * agregă „evenimentele de planificare" (CU din CAU + sesizări) și-ți arată în-app
- * ce apare în raza ta + termenul de obiecție (10 zile, Legea 50/1991 Art. 7^1).
+ * ce apare în raza ta + termenul de obiecție (10 zile, Legea 169/2026 (CATUC)).
  *
  * window.Notificari: subs (localStorage) · subscribe · events · feed · objections
- * ONEST: notificarea digitală SUPLIMENTEAZĂ afișajul fizic (L.50/1991 Art.6), nu-l
+ * ONEST: notificarea digitală SUPLIMENTEAZĂ afișajul fizic (Legea 169/2026 (CATUC)), nu-l
  * înlocuiește. Email real + confirmare = Faza 2 (server). Aici abonarea e in-app.
  * ========================================================================== */
 (function (G) {

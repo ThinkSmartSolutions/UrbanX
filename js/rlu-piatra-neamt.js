@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // RLU Municipiul Piatra Neamț — Regulament Local de Urbanism
 // Sursa: U.A.U.I.M. – C.C.P.E.C. 2018, PUG Piatra Neamț revizie 2019
-//        HCL aprobare + Legea 350/2001
+//        HCL aprobare + Legea 169/2026 (CATUC)
 // UrbanX TSS·FG | v1.0 | 2026-06-04
 // ═══════════════════════════════════════════════════════════════════════════
 

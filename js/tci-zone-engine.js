@@ -75,7 +75,7 @@ G._ZoneEngine = {
     const metro = this._findMetropolitanZones(city);
 
     // Pas 4b: Zone EXCLUSE din construire (OSM: cimitire, CF, militar, păduri)
-    // Referință: Legea 50/1991 · Legea 422/2001 · OG 43/1997
+    // Referință: Legea 169/2026 (CATUC) · Legea 422/2001 · OG 43/1997
     let excludedZones = [];
     try {
       const _exclRadius = (city.pop2021||100000) > 200000 ? 8000 : 5000;
@@ -413,7 +413,7 @@ G._ZoneEngine = {
                                      'CONSOLIDARE';
 
         // ── Regim înălțime propus (RH) ─────────────────────────────────
-        // Ref: RGU HG 525/1996 + Ord. 233/2016
+        // Ref: RGU HG 525/1996 + Legea 169/2026 (CATUC)
         const gravS = grav?.gravityScore || 0.5;
         const rh_propus =
           z._type === 'centru'     ? (gravS > 0.7 ? 'P+8—P+12' : 'P+5—P+8') :
@@ -519,7 +519,7 @@ G._ZoneEngine = {
 
   // ── Zone EXCLUSE din construire ────────────────────────────────────────────
   // Surse: OSM (cimitire, CF, militar, aeroport, paduri) + CIMEC (monumente)
-  // Referință: Legea 50/1991, Legea 422/2001, OG 43/1997 (drumuri),
+  // Referință: Legea 169/2026 (CATUC), Legea 422/2001, OG 43/1997 (drumuri),
   //            Legea 24/2007 (spatii verzi), Legea 7/1996 (cadastru)
   _EXCLUDED_OSM_TYPES: [
     // Cimitire - NICIODATA nu se construieste
@@ -570,7 +570,7 @@ G._ZoneEngine = {
 
   _getLegalBasis(tags) {
     if(tags?.landuse === 'cemetery' || tags?.amenity === 'grave_yard')
-      return 'Interzis construire — Legea 50/1991 art.11 + Legea cimitirelor';
+      return 'Interzis construire — Legea 169/2026 (CATUC) + Legea cimitirelor';
     if(tags?.landuse === 'military' || tags?.military)
       return 'Zonă militară — acces și construire interzise';
     if(tags?.landuse === 'railway' || tags?.railway)

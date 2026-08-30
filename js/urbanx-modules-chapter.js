@@ -60,7 +60,7 @@
         D.h2('Autorizare — Comisia de Acorduri Unice (CAU)');
         if (cus.length) {
           var byStatus = {}; cus.forEach(function (c) { byStatus[c.status] = (byStatus[c.status] || 0) + 1; });
-          D.P('În registrul CAU: ' + cus.length + ' dosare CU (' + Object.keys(byStatus).map(function (s) { return s.replace(/_/g, ' ') + ': ' + byStatus[s]; }).join(', ') + '). Fluxul: cererea solicitantului → primăria emite CU → obține avizele în numele lui → Acord Unic, cu aviz tacit favorabil la 30 zile (Legea 50/1991).');
+          D.P('În registrul CAU: ' + cus.length + ' dosare CU (' + Object.keys(byStatus).map(function (s) { return s.replace(/_/g, ' ') + ': ' + byStatus[s]; }).join(', ') + '). Fluxul: cererea solicitantului → primăria emite CU → obține avizele în numele lui → Acord Unic, cu aviz tacit favorabil la 30 zile (Legea 169/2026 (CATUC)).');
         } else D.P('Modulul CAU determină automat avizele necesare pentru orice Certificat de Urbanism (9 reguli: rețele, ISU, Cultură, Ape, Drumuri, CFR, Mediu, DSP, ANRE) și gestionează obținerea lor de către primărie în numele solicitantului.');
       }
     } catch (e) {}

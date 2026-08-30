@@ -96,7 +96,7 @@
       ['Randament locativ brut (yield)', '(chirie_lunară×12)/preț × 100', 'piață chirii · IVS'],
       ['Hartă valori (rentă urbană)', 'V(d) = V_baza × radial(d) × m_zonă', 'von Thünen/Alonso · UrbanX'],
       ['Indice accesibilitate locuire (PIR)', 'preț_locuință / venit_anual_gospodărie', 'Eurostat · INS'],
-      ['Plusvaloare urbanistică (LVC)', 'Δvaloare din modificare CUT/POT', 'L350/2001 art.56 · model LVC'],
+      ['Plusvaloare urbanistică (LVC)', 'Δvaloare din modificare CUT/POT', 'Legea 169/2026 (CATUC) · model LVC'],
     ]},
   ];
 
@@ -148,7 +148,7 @@
       D.callout && D.callout('Acoperire', 'Platforma monitorizează ' + total + ' indicatori, organizați în 8 domenii. Indicatorii dinamici se calculează per-UAT în modulele și rapoartele dedicate (Flux, Market, Hartă valori, indici spațiali); registrul descrie ce se măsoară, cum și din ce sursă.');
 
       D.chapter('2. Cadrul de referință și standardele');
-      D.P('Sistemul de indicatori este aliniat cadrelor internaționale și naționale recunoscute: ISO 37120/37122 (indicatori pentru orașe sustenabile și inteligente), obiectivele de dezvoltare durabilă ale ONU (SDG 11 — orașe durabile, UN-Habitat), Agenda Urbană a UE și Pactul Verde European (EEA, Green Deal), recomandările OMS (spații verzi, calitatea aerului, orașe prietenoase cu vârstnicii) și OECD Better Life. La nivel național, indicatorii respectă cadrul INS TEMPO, codul seismic P100-1/2022 (INFP), normativele de trafic (STAS 10144, GD 525/1996) și legislația urbanistică (Legea 350/2001).');
+      D.P('Sistemul de indicatori este aliniat cadrelor internaționale și naționale recunoscute: ISO 37120/37122 (indicatori pentru orașe sustenabile și inteligente), obiectivele de dezvoltare durabilă ale ONU (SDG 11 — orașe durabile, UN-Habitat), Agenda Urbană a UE și Pactul Verde European (EEA, Green Deal), recomandările OMS (spații verzi, calitatea aerului, orașe prietenoase cu vârstnicii) și OECD Better Life. La nivel național, indicatorii respectă cadrul INS TEMPO, codul seismic P100-1/2022 (INFP), normativele de trafic (STAS 10144, GD 525/1996) și legislația urbanistică (Legea 169/2026 (CATUC)).');
       D.P('Această aliniere asigură comparabilitatea cu alte orașe și credibilitatea în fața autorităților și a finanțatorilor. Fiecare indicator indică explicit standardul sau sursa pe care se sprijină, evitând valorile „de autor" nefundamentate.');
 
       D.chapter('3. Principii metodologice');
@@ -212,10 +212,10 @@
       try { if (G.UrbanXIVU && G.UrbanXIVU.renderSection) G.UrbanXIVU.renderSection(D, cityKey); } catch (e) {}
 
       D.chapter(chapN + '. Limitări și disclaimer'); chapN++;
-      D.P('Registrul documentează metodologia și sursele; valorile per-UAT se calculează în modulele dedicate și au, după caz, caracter orientativ (în special indicatorii compoziți și proxy, marcați ca atare). Datele live (aer, trafic, POI) depind de disponibilitatea și acoperirea surselor deschise (OpenAQ, OSM), care variază teritorial. Indicatorii nu substituie studiile de specialitate avizate de proiectanți atestați; au rol de pre-analiză și de tablou de bord pentru decizie. Validarea oficială revine documentațiilor de urbanism și studiilor de fundamentare elaborate conform Legii 350/2001.');
+      D.P('Registrul documentează metodologia și sursele; valorile per-UAT se calculează în modulele dedicate și au, după caz, caracter orientativ (în special indicatorii compoziți și proxy, marcați ca atare). Datele live (aer, trafic, POI) depind de disponibilitatea și acoperirea surselor deschise (OpenAQ, OSM), care variază teritorial. Indicatorii nu substituie studiile de specialitate avizate de proiectanți atestați; au rol de pre-analiză și de tablou de bord pentru decizie. Validarea oficială revine documentațiilor de urbanism și studiilor de fundamentare elaborate conform Legea 169/2026 (CATUC).');
 
       D.chapter(chapN + '. Surse și standarde');
-      D.P('ISO 37120/37122 · UN-Habitat SDG 11 · EEA / EU Green Deal · OECD Better Life · OMS (aer, verde, age-friendly) · INS TEMPO · Eurostat · ANCPI (L7/1996) · INFP / P100-1/2022 · ANAR · Copernicus / Landsat-Sentinel · OpenAQ · OpenSky · OSM Overpass · CNAIR · ITE Trip Generation · STAS 10144 · GD 525/1996 · Legea 350/2001. Metodologie UrbanX · ThinkSmart Solutions.');
+      D.P('ISO 37120/37122 · UN-Habitat SDG 11 · EEA / EU Green Deal · OECD Better Life · OMS (aer, verde, age-friendly) · INS TEMPO · Eurostat · ANCPI (L7/1996) · INFP / P100-1/2022 · ANAR · Copernicus / Landsat-Sentinel · OpenAQ · OpenSky · OSM Overpass · CNAIR · ITE Trip Generation · STAS 10144 · GD 525/1996 · Legea 169/2026 (CATUC). Metodologie UrbanX · ThinkSmart Solutions.');
 
       var fn = ('Registru_indicatori_' + uat.replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^\w]+/g,'_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf').replace(/[ăĂâÂîÎșȘşŞțȚţŢ]/g,function(c){return {'ă':'a','Ă':'A','â':'a','Â':'A','î':'i','Î':'I','ș':'s','Ș':'S','ş':'s','Ş':'S','ț':'t','Ț':'T','ţ':'t','Ţ':'T'}[c]||c;}).replace(/[^a-zA-Z0-9._-]/g,'_');
       G._buildStratTOC && G._buildStratTOC(D, 1);

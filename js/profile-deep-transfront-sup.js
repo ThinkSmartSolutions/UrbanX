@@ -5,7 +5,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Strategia de amenajare și cooperare transfrontalieră definește o viziune teritorială comună pentru regiunea de graniță, articulată în jurul integrării spațiale a celor două state membre sub umbrela Reg. (UE) Interreg și a Legii 350/2001 privind amenajarea teritoriului. Viziunea 2050 proiectează un teritoriu de frontieră coeziv, în care efectul de barieră al graniței este redus progresiv prin coridoare de mobilitate, servicii publice partajate și o guvernanță multinivel funcțională. Documentul stabilește orizonturi intermediare 2030 și 2040, fiecare cu obiective de integrare măsurabile. Indicatorul-cheie este indicele de integrare transfrontalieră, calculat ca medie ponderată a fluxurilor de persoane, bunuri și servicii raportate la potențialul teoretic al zonei de graniță."
+    "text": "Strategia de amenajare și cooperare transfrontalieră definește o viziune teritorială comună pentru regiunea de graniță, articulată în jurul integrării spațiale a celor două state membre sub umbrela Reg. (UE) Interreg și a Legea 169/2026 (CATUC) privind amenajarea teritoriului. Viziunea 2050 proiectează un teritoriu de frontieră coeziv, în care efectul de barieră al graniței este redus progresiv prin coridoare de mobilitate, servicii publice partajate și o guvernanță multinivel funcțională. Documentul stabilește orizonturi intermediare 2030 și 2040, fiecare cu obiective de integrare măsurabile. Indicatorul-cheie este indicele de integrare transfrontalieră, calculat ca medie ponderată a fluxurilor de persoane, bunuri și servicii raportate la potențialul teoretic al zonei de graniță."
    },
    {
     "type": "p",
@@ -121,7 +121,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Cooperarea transfrontalieră se desfășoară într-un cadru juridic stratificat, în vârful căruia se află Reg. (UE) privind Interreg (obiectivul de Cooperare Teritorială Europeană) și Reg. (UE) 1302/2013 privind Gruparea Europeană de Cooperare Teritorială. La nivel național, Legea 350/2001 privind amenajarea teritoriului și urbanismul stabilește competențele de planificare ale României, iar acordurile bilaterale cu statul vecin reglementează regimul frontierei și al punctelor de trecere. Strategia operează ca document de coordonare ce armonizează aceste niveluri, fără a se substitui vreunuia dintre ele, respectând principiul subsidiarității și ierarhia documentelor de amenajare."
+    "text": "Cooperarea transfrontalieră se desfășoară într-un cadru juridic stratificat, în vârful căruia se află Reg. (UE) privind Interreg (obiectivul de Cooperare Teritorială Europeană) și Reg. (UE) 1302/2013 privind Gruparea Europeană de Cooperare Teritorială. La nivel național, Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul stabilește competențele de planificare ale României, iar acordurile bilaterale cu statul vecin reglementează regimul frontierei și al punctelor de trecere. Strategia operează ca document de coordonare ce armonizează aceste niveluri, fără a se substitui vreunuia dintre ele, respectând principiul subsidiarității și ierarhia documentelor de amenajare."
    },
    {
     "type": "p",
@@ -154,7 +154,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
      ],
      [
       "Național",
-      "Legea 350/2001",
+      "Legea 169/2026 (CATUC)",
       "Amenajare teritoriu",
       "47"
      ]
@@ -203,7 +203,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Integrarea teritorială presupune compatibilizarea instrumentelor de amenajare ale celor două state, care diferă ca scară, terminologie și forță juridică. În România, ierarhia documentelor merge de la PATN și PATJ la PUG și PUZ, conform Legii 350/2001, în timp ce statul vecin utilizează un sistem propriu de planuri spațiale. Strategia propune un strat de interoperabilitate — un cadru comun de referință care nu înlocuiește planurile naționale, ci stabilește corespondențe între categoriile de zonificare, astfel încât o zonă funcțională de pe un mal să aibă un echivalent recunoscut pe celălalt mal pentru proiectele transfrontaliere."
+    "text": "Integrarea teritorială presupune compatibilizarea instrumentelor de amenajare ale celor două state, care diferă ca scară, terminologie și forță juridică. În România, ierarhia documentelor merge de la PATN și PATJ la PUG și PUZ, conform Legea 169/2026 (CATUC), în timp ce statul vecin utilizează un sistem propriu de planuri spațiale. Strategia propune un strat de interoperabilitate — un cadru comun de referință care nu înlocuiește planurile naționale, ci stabilește corespondențe între categoriile de zonificare, astfel încât o zonă funcțională de pe un mal să aibă un echivalent recunoscut pe celălalt mal pentru proiectele transfrontaliere."
    },
    {
     "type": "p",
@@ -1221,7 +1221,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Indicele de integrare transfrontalieră, ponderarea fluxurilor de persoane, bunuri și servicii constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Indicele de integrare transfrontalieră, ponderarea fluxurilor de persoane, bunuri și servicii constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1273,7 +1273,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Efectul de barieră ca fricțiune adițională a frontierei față de o distanță echivalentă internă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Efectul de barieră ca fricțiune adițională a frontierei față de o distanță echivalentă internă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1307,7 +1307,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Intensitatea fluxurilor estimată printr-un model gravitațional adaptat contextului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Intensitatea fluxurilor estimată printr-un model gravitațional adaptat contextului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1343,7 +1343,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Multiplicatorul cooperării ca raport între valoarea adăugată a proiectelor comune și a celor naționale echivalente constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Multiplicatorul cooperării ca raport între valoarea adăugată a proiectelor comune și a celor naționale echivalente constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1377,7 +1377,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Accesibilitatea transfrontalieră măsurată prin izocrone de timp de la nodurile majore constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Accesibilitatea transfrontalieră măsurată prin izocrone de timp de la nodurile majore constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1423,7 +1423,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Structura demografică a arealului de frontieră și tendințele de îmbătrânire și depopulare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Structura demografică a arealului de frontieră și tendințele de îmbătrânire și depopulare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1457,7 +1457,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Disparitatea PIB pe cap de locuitor între cele două maluri ale frontierei constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Disparitatea PIB pe cap de locuitor între cele două maluri ale frontierei constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1491,7 +1491,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Fluxurile logistice transfrontaliere și rolul platformelor intermodale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Fluxurile logistice transfrontaliere și rolul platformelor intermodale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1537,7 +1537,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Servicii de transport public care traversează frontiera și integrarea tarifară constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Servicii de transport public care traversează frontiera și integrarea tarifară constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1571,7 +1571,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Ecosistemul de inovare transfrontalier și parteneriatele între universități și firme constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Ecosistemul de inovare transfrontalier și parteneriatele între universități și firme constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1605,7 +1605,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Accesul IMM-urilor la piața de pe celălalt mal și sprijinul pentru internaționalizare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Accesul IMM-urilor la piața de pe celălalt mal și sprijinul pentru internaționalizare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1639,7 +1639,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dinamica pieței imobiliare în zona de frontieră și efectele asupra locuirii constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dinamica pieței imobiliare în zona de frontieră și efectele asupra locuirii constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1671,7 +1671,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Construirea încrederii reciproce între comunitățile de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Construirea încrederii reciproce între comunitățile de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1705,7 +1705,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Bariera lingvistică ca obstacol persistent al integrării constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Bariera lingvistică ca obstacol persistent al integrării constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1751,7 +1751,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Implicarea tinerilor în cooperarea transfrontalieră prin schimburi și voluntariat constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Implicarea tinerilor în cooperarea transfrontalieră prin schimburi și voluntariat constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1785,7 +1785,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Rolul organizațiilor neguvernamentale în cooperarea transfrontalieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Rolul organizațiilor neguvernamentale în cooperarea transfrontalieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1819,7 +1819,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Asistența reciprocă în situații de urgență prin mecanismul european de protecție civilă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Asistența reciprocă în situații de urgență prin mecanismul european de protecție civilă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1853,7 +1853,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Cooperarea în gestionarea deșeurilor și dezvoltarea economiei circulare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Cooperarea în gestionarea deșeurilor și dezvoltarea economiei circulare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1887,7 +1887,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Impactul schimbărilor climatice asupra regiunii de frontieră și adaptarea coordonată constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Impactul schimbărilor climatice asupra regiunii de frontieră și adaptarea coordonată constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1919,7 +1919,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Accesul echilibrat la servicii de proximitate de pe ambele maluri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Accesul echilibrat la servicii de proximitate de pe ambele maluri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -1971,7 +1971,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Construirea unui brand teritorial comun pentru regiunea transfrontalieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Construirea unui brand teritorial comun pentru regiunea transfrontalieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2005,7 +2005,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Evenimente sportive comune și infrastructură recreativă partajată constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Evenimente sportive comune și infrastructură recreativă partajată constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2039,7 +2039,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Integrarea perspectivei de gen și a incluziunii în proiectele transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Integrarea perspectivei de gen și a incluziunii în proiectele transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2073,7 +2073,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Cadrul de monitorizare și evaluare aliniat indicatorilor europeni constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Cadrul de monitorizare și evaluare aliniat indicatorilor europeni constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2125,7 +2125,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Alinierea strategiei la Strategia UE pentru regiunea Dunării (EUSDR) și ariile prioritare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Alinierea strategiei la Strategia UE pentru regiunea Dunării (EUSDR) și ariile prioritare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2159,7 +2159,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Integrarea regiunii în coridorul TEN-T Rhin-Dunăre și implicațiile strategice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Integrarea regiunii în coridorul TEN-T Rhin-Dunăre și implicațiile strategice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2193,7 +2193,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Valorificarea navigației pe Dunăre ca mod de transport sustenabil constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Valorificarea navigației pe Dunăre ca mod de transport sustenabil constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2239,7 +2239,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea comună a resurselor piscicole din apele de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea comună a resurselor piscicole din apele de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2271,7 +2271,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Supravegherea epidemiologică comună și răspunsul la amenințările sanitare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Supravegherea epidemiologică comună și răspunsul la amenințările sanitare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2305,7 +2305,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Combaterea criminalității transfrontaliere prin cooperare polițienească și judiciară constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Combaterea criminalității transfrontaliere prin cooperare polițienească și judiciară constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2351,7 +2351,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Robustețea lanțurilor de aprovizionare care traversează frontiera constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Robustețea lanțurilor de aprovizionare care traversează frontiera constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2385,7 +2385,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Strategiile de specializare inteligentă ale celor două regiuni și complementaritățile constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Strategiile de specializare inteligentă ale celor două regiuni și complementaritățile constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2421,7 +2421,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Accesul actorilor regionali la finanțare și instrumentele financiare dedicate constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Accesul actorilor regionali la finanțare și instrumentele financiare dedicate constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2455,7 +2455,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Consolidarea capacității administrative a actorilor pentru pregătirea proiectelor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Consolidarea capacității administrative a actorilor pentru pregătirea proiectelor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2507,7 +2507,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Armonizarea datelor geospațiale conform Directivei INSPIRE constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Armonizarea datelor geospațiale conform Directivei INSPIRE constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2541,7 +2541,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea peisajului ca resursă comună conform Convenției europene a peisajului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea peisajului ca resursă comună conform Convenției europene a peisajului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2575,7 +2575,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Proiecte comune de energie regenerabilă și comunități energetice transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Proiecte comune de energie regenerabilă și comunități energetice transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2611,7 +2611,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea coordonată a infrastructurii de încărcare pentru vehicule electrice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea coordonată a infrastructurii de încărcare pentru vehicule electrice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2643,7 +2643,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Promovarea agriculturii ecologice și a produselor cu indicație geografică comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Promovarea agriculturii ecologice și a produselor cu indicație geografică comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2695,7 +2695,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea comună a acviferelor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea comună a acviferelor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2727,7 +2727,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea coridoarelor verzi-albastre pentru conectivitate ecologică constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea coridoarelor verzi-albastre pentru conectivitate ecologică constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2761,7 +2761,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Parteneriate universitare și programe de cercetare aplicată transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Parteneriate universitare și programe de cercetare aplicată transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2795,7 +2795,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea sectoarelor culturale și creative ca motor economic constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea sectoarelor culturale și creative ca motor economic constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2831,7 +2831,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Valorificarea spațiului rural pentru turism și agroturism constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Valorificarea spațiului rural pentru turism și agroturism constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2865,7 +2865,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Evaluarea coordonată a riscului seismic și geotehnic în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Evaluarea coordonată a riscului seismic și geotehnic în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2911,7 +2911,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Prevenirea și combaterea coordonată a incendiilor de vegetație constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Prevenirea și combaterea coordonată a incendiilor de vegetație constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2945,7 +2945,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Alinierea la indicatorii de coeziune teritorială ai politicii de coeziune europene constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Alinierea la indicatorii de coeziune teritorială ai politicii de coeziune europene constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -2977,7 +2977,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea formării profesionale duale adaptate pieței muncii transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea formării profesionale duale adaptate pieței muncii transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3011,7 +3011,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea integrată a zonelor de contact cu apa constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea integrată a zonelor de contact cu apa constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3045,7 +3045,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Sprijinirea antreprenoriatului tânăr în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Sprijinirea antreprenoriatului tânăr în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3079,7 +3079,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Extinderea conectivității de bandă largă în zonele rurale de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Extinderea conectivității de bandă largă în zonele rurale de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3111,7 +3111,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea durabilă a pădurilor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea durabilă a pădurilor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3143,7 +3143,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea migrației și integrarea în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea migrației și integrarea în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3189,7 +3189,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Cuantificarea ușurinței cu care fluxurile traversează frontiera constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Cuantificarea ușurinței cu care fluxurile traversează frontiera constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3223,7 +3223,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Armonizarea standardelor tehnice și recunoașterea reciprocă a documentațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Armonizarea standardelor tehnice și recunoașterea reciprocă a documentațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3269,7 +3269,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Organizarea în comun a evenimentelor sportive de anvergură constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Organizarea în comun a evenimentelor sportive de anvergură constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3303,7 +3303,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Contracararea depopulării prin politici de retenție și atragere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Contracararea depopulării prin politici de retenție și atragere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3337,7 +3337,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Investiții coordonate în infrastructura de apărare împotriva inundațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Investiții coordonate în infrastructura de apărare împotriva inundațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3371,7 +3371,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea coordonată a siturilor Natura 2000 transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea coordonată a siturilor Natura 2000 transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3417,7 +3417,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Măsurarea simetriei fluxurilor între cele două maluri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Măsurarea simetriei fluxurilor între cele două maluri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3451,7 +3451,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea turismului de croazieră pe Dunăre constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea turismului de croazieră pe Dunăre constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3485,7 +3485,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Adoptarea agriculturii de precizie și digitalizarea exploatațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Adoptarea agriculturii de precizie și digitalizarea exploatațiilor constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3519,7 +3519,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Managementul coordonat al poluării luminoase și fonice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Managementul coordonat al poluării luminoase și fonice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3551,7 +3551,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Supravegherea și controlul bolilor animalelor în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Supravegherea și controlul bolilor animalelor în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3597,7 +3597,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Evaluarea profesionalizării și stabilității structurilor de cooperare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Evaluarea profesionalizării și stabilității structurilor de cooperare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3631,7 +3631,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Asigurarea accesibilității infrastructurii și serviciilor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Asigurarea accesibilității infrastructurii și serviciilor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3665,7 +3665,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Tratarea coordonată a apelor uzate care afectează cursurile transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Tratarea coordonată a apelor uzate care afectează cursurile transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3697,7 +3697,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Promovarea comună a exporturilor regiunii pe piețele terțe constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Promovarea comună a exporturilor regiunii pe piețele terțe constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3731,7 +3731,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Programe comune de educație ecologică și conștientizare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Programe comune de educație ecologică și conștientizare constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3765,7 +3765,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea transportului feroviar de marfă transfrontalier sustenabil constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea transportului feroviar de marfă transfrontalier sustenabil constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3797,7 +3797,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Măsurarea capacității regiunii de a rezista și a se adapta la șocuri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Măsurarea capacității regiunii de a rezista și a se adapta la șocuri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3831,7 +3831,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Interoperabilitatea serviciilor administrative electronice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Interoperabilitatea serviciilor administrative electronice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3865,7 +3865,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea coordonată a deșeurilor periculoase și industriale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea coordonată a deșeurilor periculoase și industriale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3911,7 +3911,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea turismului balnear și valorificarea resurselor termale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea turismului balnear și valorificarea resurselor termale constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3945,7 +3945,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Armonizarea protecției consumatorilor în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Armonizarea protecției consumatorilor în context transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -3979,7 +3979,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Mecanisme comune de asigurare și transfer al riscului pentru dezastre constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Mecanisme comune de asigurare și transfer al riscului pentru dezastre constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4013,7 +4013,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Cercetarea atitudinilor și a dinamicilor sociale transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Cercetarea atitudinilor și a dinamicilor sociale transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4047,7 +4047,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Protecția speciilor acvatice și a ecosistemelor fluviale comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Protecția speciilor acvatice și a ecosistemelor fluviale comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4093,7 +4093,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Estimarea efectelor economice indirecte ale turismului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Estimarea efectelor economice indirecte ale turismului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4129,7 +4129,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Promovarea construcțiilor durabile și a eficienței energetice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Promovarea construcțiilor durabile și a eficienței energetice constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4163,7 +4163,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea fluidă a traficului la punctele de trecere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea fluidă a traficului la punctele de trecere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4197,7 +4197,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea soluțiilor de inovare socială pentru provocările comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea soluțiilor de inovare socială pentru provocările comune constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4231,7 +4231,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Gestionarea durabilă a resurselor minerale din zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Gestionarea durabilă a resurselor minerale din zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4277,7 +4277,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Prevenirea degradării solului și a eroziunii în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Prevenirea degradării solului și a eroziunii în zona de frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4311,7 +4311,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Măsurarea integrării comerciale a piețelor de bunuri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Măsurarea integrării comerciale a piețelor de bunuri constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4345,7 +4345,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Amenajarea coordonată a zonelor inundabile pentru reducerea riscului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Amenajarea coordonată a zonelor inundabile pentru reducerea riscului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4391,7 +4391,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Promovarea mersului pe jos și a ciclismului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Promovarea mersului pe jos și a ciclismului transfrontalier constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4425,7 +4425,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Schimburi în domeniul teatrului, muzicii și dansului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Schimburi în domeniul teatrului, muzicii și dansului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4459,7 +4459,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Asigurarea coordonată a alimentării cu apă potabilă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Asigurarea coordonată a alimentării cu apă potabilă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4493,7 +4493,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Măsurarea intensității navetismului raportat la populația activă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Măsurarea intensității navetismului raportat la populația activă constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4527,7 +4527,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Controlul coordonat al siguranței alimentare la frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Controlul coordonat al siguranței alimentare la frontieră constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4561,7 +4561,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Dezvoltarea economiei sociale și a cooperativelor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Dezvoltarea economiei sociale și a cooperativelor transfrontaliere constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",
@@ -4595,7 +4595,7 @@ window._PROFILE_DEEP['transfront_sup'] = [
   "blocks": [
    {
     "type": "p",
-    "text": "Monitorizarea coordonată a schimbărilor de utilizare a terenului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 350/2001 privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
+    "text": "Monitorizarea coordonată a schimbărilor de utilizare a terenului constituie un element esențial al strategiei de amenajare și cooperare transfrontalieră, abordat la scară regională în acord cu cadrul Reg. (UE) Interreg și cu Legea 169/2026 (CATUC) privind amenajarea teritoriului. Analiza pornește de la datele Eurostat pentru regiunile de graniță și de la metodologia ESPON, fundamentând diagnoza pe surse comparabile de pe ambele maluri ale frontierei. Această dimensiune se integrează în viziunea comună 2050, contribuind la reducerea efectului de barieră și la consolidarea coeziunii teritoriale. Spre deosebire de abordarea punctuală a unui singur amplasament, perspectiva strategică privește ansamblul arealului și interdependențele dintre componentele sale teritoriale."
    },
    {
     "type": "p",

@@ -294,7 +294,7 @@ function _initStudyPdf(studyName, studySubtitle, totalPages, opts){
     }
     pdf.setFillColor(...RED);pdf.rect(14,sy+59,W-28,5,'F');
     pdf.setTextColor(255,255,255);pdf.setFontSize(5.8);pdf.setFont(_roFont||'helvetica','bold');
-    pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conf. Legii 50/1991 si Legii 350/2001. UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
+    pdf.text('Document orientativ si preliminar. Nu inlocuieste documentatiile tehnice avizate conf. Legea 169/2026 (CATUC). UrbanX TSS-FG',W/2,sy+62.5,{align:'center'});
   };
 
   // Coperta premium

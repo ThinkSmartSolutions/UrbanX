@@ -6,7 +6,7 @@
  * vecinilor afectați dintr-o zonă de notificare (buffer). Abonarea + emailul către
  * cetățeni = marcate clar ca Faza 2 (server + primăria publică cererile în platformă).
  * window.Notificari.openPanel() · drawZone()
- * Legal: Legea 50/1991 art. 6 (afișare) + art. 7¹ (10 zile obiecție) · Aarhus.
+ * Legal: Legea 169/2026 (CATUC) (afișare) + art. 7¹ (10 zile obiecție) · Aarhus.
  * ========================================================================== */
 (function (G) {
   'use strict';
@@ -25,7 +25,7 @@
   function openPanel() {
     var ov = el('div', { style: ST.overlay }); ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
     var m = el('div', { style: ST.modal });
-    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">🔔 Notificarea vecinilor afectați</div><div style="font-size:11px;color:#94a3b8">Latura primăriei: identifică afectații dintr-o zonă (PostGIS) · Legea 50/1991 art. 6</div>'));
+    var head = el('div', { style: ST.head }); head.appendChild(el('div', null, '<div style="font-weight:800;font-size:16px">🔔 Notificarea vecinilor afectați</div><div style="font-size:11px;color:#94a3b8">Latura primăriei: identifică afectații dintr-o zonă (PostGIS) · Legea 169/2026 (CATUC)</div>'));
     var x = el('button', { style: ST.ghost }, '✕'); x.onclick = function () { ov.remove(); }; head.appendChild(x); m.appendChild(head);
     var body = el('div', { style: ST.body }); m.appendChild(body);
 
@@ -55,7 +55,7 @@
           '<div style="display:flex;gap:8px"><div style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:#5eead4">' + r.buildings + '</div><div style="font-size:10px;color:#94a3b8">imobile în zonă</div></div>' +
           '<div style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:#34d399">' + r.residential + '</div><div style="font-size:10px;color:#94a3b8">rezidențiale (est.)</div></div>' +
           '<div style="flex:1;text-align:center"><div style="font-size:22px;font-weight:800;color:#60a5fa">' + rad.value + 'm</div><div style="font-size:10px;color:#94a3b8">rază notificare</div></div></div>' +
-          '<div style="font-size:11px;color:#94a3b8;margin-top:8px">Zona + imobilele afectate sunt desenate pe hartă. Acestea sunt proprietarii de notificat. Termen de obiecție: 10 zile (L.50/1991 art. 7¹).</div></div>' +
+          '<div style="font-size:11px;color:#94a3b8;margin-top:8px">Zona + imobilele afectate sunt desenate pe hartă. Acestea sunt proprietarii de notificat. Termen de obiecție: 10 zile (Legea 169/2026 (CATUC)¹).</div></div>' +
           '<div style="font-size:10px;color:#64748b;margin-top:8px">⚠ Imobile estimate din OpenStreetMap (best-effort). Pentru lista exactă de proprietari (nume/CF) = date cadastrale ANCPI. Notificarea digitală SUPLIMENTEAZĂ afișajul fizic la fața locului (art. 6), nu-l înlocuiește.</div>';
       }).catch(function () { drawZone(c, +rad.value, []); out.innerHTML = '<div style="font-size:12px;color:#fbbf24">Zona de notificare desenată pe hartă. Numărul de imobile (OSM) n-a putut fi citit — verificare manuală.</div>'; });
     };
@@ -112,7 +112,7 @@
       var btn = el('button', { style: 'margin-top:9px;background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.4);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:system-ui' }, '⟳ Verifică acum');
       btn.onclick = function () { btn.disabled = true; btn.textContent = '⏳ Preiau din surse oficiale...'; NO.poll().then(function () { renderOficial(); }).catch(function () { btn.disabled = false; btn.textContent = '⟳ Verifică acum'; }); };
       ofBox.appendChild(btn);
-      ofBox.appendChild(el('div', { style: 'font-size:9.5px;color:#64748b;margin-top:7px;line-height:1.4' }, 'ONEST: nu există un API național unic pentru „ce s-a depus lângă tine". Preluăm ce e machine-readable (date.gov.ro) și verificăm periodic portalurile oficiale (MOL/ANCPI) cu link direct — fără date fabricate. Notificarea digitală suplimentează afișajul fizic (L.50/1991), nu-l înlocuiește.'));
+      ofBox.appendChild(el('div', { style: 'font-size:9.5px;color:#64748b;margin-top:7px;line-height:1.4' }, 'ONEST: nu există un API național unic pentru „ce s-a depus lângă tine". Preluăm ce e machine-readable (date.gov.ro) și verificăm periodic portalurile oficiale (MOL/ANCPI) cu link direct — fără date fabricate. Notificarea digitală suplimentează afișajul fizic (Legea 169/2026 (CATUC)), nu-l înlocuiește.'));
     }
     renderOficial();
     p2.appendChild(ofBox);
