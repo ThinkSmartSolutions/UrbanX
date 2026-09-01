@@ -3127,7 +3127,7 @@ async function _lotExportPDF(){
   cy=sec('10. CADRUL LEGAL SI NORMATIV APLICABIL',cy);
   cy=bullet([
     'Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii. Lotizarea si parcelarea terenului necesita Autorizatie de Construire emisa de Primaria '+uat+'.',
-    'Legea 169/2026 (CATUC) republicata — Amenajarea teritoriului si urbanismul. PUG '+uat+' in vigoare — UTR '+utr+': POT max '+( params.pot||'—')+'%, CUT max '+(params.cut||'—')+', H max '+(params.h||'—')+'m.',
+    'Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul. PUG '+uat+' in vigoare — UTR '+utr+': POT max '+( params.pot||'—')+'%, CUT max '+(params.cut||'—')+', H max '+(params.h||'—')+'m.',
     'Legea nr. 7/1996 republicata — Cadastrul si publicitatea imobiliara. Dezmembramantul parcelei necesita documentatie tehnica cadastrala intocmita de topograf autorizat ANCPI.',
     'OUG nr. 57/2020 — Codul Administrativ. Compartimentul Urbanism al Primariei '+uat+' emite Certificatul de Urbanism si Autorizatia de Construire.',
     'HG nr. 525/1996 — Regulamentul General de Urbanism (RGU). Prevederile RGU se aplica complementar Regulamentului Local de Urbanism (RLU) al PUG '+uat+'.',

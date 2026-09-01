@@ -282,7 +282,7 @@ function _registerStudii(){
       'CHECKLIST AC · Legea 169/2026 (CATUC) · HG 907/2016',
       ['Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții',
        'HG 907/2016 — Conținut cadru documentații tehnice',
-       'Legea 169/2026 (CATUC) — Norme metodologice Legea 169/2026 (CATUC)'],
+       'Legea 169/2026 (CATUC) — Anexa 2 (conținut-cadru DTAC)'],
       'Checklist pre-autorizare: verificare POT/CUT/H față de PUG, '+
       'avize necesare determinate automat (AACR, utilități, ISU, mediu), '+
       'calendar Gantt autorizare, costuri estimative. '+

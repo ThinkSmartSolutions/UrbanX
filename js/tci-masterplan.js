@@ -1931,12 +1931,12 @@ G._TCIMasterplanPDF = {
 
     y=this._section(pdf,W,y,'19.1 Legislație Urbanistică Aplicabilă');
     const laws=[
-      ['Legea 169/2026 (CATUC)','Legea amenajării teritoriului și urbanismului (republicată) — baza PUG/PUZ/PUD'],
+      ['Legea 169/2026 (CATUC)','Amenajarea teritoriului și urbanismul — baza PUG/PUZ/PUD'],
       ['PATJ','Planul de Amenajare a Teritoriului Județean — cadrul spatial judetean, obligatoriu pentru PUG'],
       ['PATN','Planul de Amenajare a Teritoriului National — 6 sectiuni (apa, riscuri, zone protejate, reteaua de localitati, transporturi, turism)'],
       ['Legea 169/2026 (CATUC)','Autorizarea construcțiilor — procedura AC, documentații, sancțiuni'],
       ['HG 525/1996','Regulamentul General de Urbanism (RGU) — parametri urbanistici de bază'],
-      ['Legea 169/2026 (CATUC)','Norme metodologice de aplicare a Legea 169/2026 (CATUC) — conținut documentații'],
+      ['Legea 169/2026 (CATUC)','Anexele 2-5 — conținutul-cadru al documentațiilor'],
       ['HG 907/2016','Etapele și conținutul documentațiilor SF, DALI, PT'],
       ['Legea 372/2005','Performanță energetică a clădirilor — NZEB obligatoriu clădiri noi 2021'],
       ['Legea 260/2008','Asigurarea obligatorie a locuințelor — PAD — zone de risc seismic'],

@@ -40,7 +40,7 @@
         ['Legea 169/2026 (CATUC)', 'Amenajarea teritoriului și urbanismul — cadrul general al documentatiilor'],
         ['HG 525/1996 (RGU)', 'Regulamentul General de Urbanism — indicatori și reguli de bază'],
         ['Legea 169/2026 (CATUC)', 'Autorizarea executarii lucrărilor de construcții'],
-        ['Legea 169/2026 (CATUC)', 'Norme de aplicare a Legea 169/2026 (CATUC) — conținutul documentatiilor'],
+        ['Legea 169/2026 (CATUC)', 'Anexele 2-5 la CATUC — conținutul-cadru al documentatiilor'],
         ['Legea 151/2019; OUG 57/2019 (Cod administrativ)', 'Competentele autorităților locale în planificare'],
         ['Carta de la Leipzig (2007/2020)', 'Principiile orașului european durabil și integrat'],
         ['Agendă Urbană a UE; New Urban Agendă (ONU-Habitat)', 'Cadru strategic european și global'],

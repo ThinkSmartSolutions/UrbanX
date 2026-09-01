@@ -190,10 +190,10 @@
       "culoare": "#FFA07A",
       "nota_pot_cut": "LA1: ansambluri recent realizate P+10-P+4 — POT/CUT/H conform PUZ aprobat anterior",
       "pot_nota": "Conform PUZ aprobat (ansambluri existente POT variabil)",
-      "cut_nota": "CUT max prin PUZ = 4.0 (plafon legal Legea 350/2001 art.46 alin.7)",
+      "cut_nota": "CUT max prin PUZ = 4.0 (plafon legal Legea 169/2026 CATUC — fost Legea 350/2001 art.46 alin.7)",
       "spatii_verzi_sursa": "HG 525/1996 art.15 — RLU nu specifică procent propriu",
       "pot_sursa": "POT/CUT conf. HG 525/1996 art.23 — RLU: conform PUZ",
-      "cut_sursa": "Legea 350/2001 art.46 alin.7 — RLU: conform PUZ",
+      "cut_sursa": "Legea 169/2026 CATUC (fost Legea 350/2001 art.46 alin.7) — RLU: conform PUZ",
       "hmax_nota": "LA1: P+10-P+4 (ansambluri existente). Conform PUZ.",
       "h_nivel": 3.0,
       "rf": 4.0,
@@ -374,7 +374,7 @@
       "rl": 6.0,
       "rs": 6.0,
       "parcaje_min": "1 loc/5 angajati",
-      "cut_sursa": "Legea 350/2001 art.46 alin.7 — RLU: conform PUZ",
+      "cut_sursa": "Legea 169/2026 CATUC (fost Legea 350/2001 art.46 alin.7) — RLU: conform PUZ",
       "cut_nota": "CUT max prin PUZ = 4.0"
     },
     "AI1": {
@@ -561,7 +561,7 @@
       "rl": 5.0,
       "rs": 5.0,
       "parcaje_min": "Conform normative specifice",
-      "cut_sursa": "Legea 350/2001 art.46 alin.7 — RLU: conform PUZ",
+      "cut_sursa": "Legea 169/2026 CATUC (fost Legea 350/2001 art.46 alin.7) — RLU: conform PUZ",
       "cut_nota": "CUT max prin PUZ = 4.0"
     },
     "G2": {

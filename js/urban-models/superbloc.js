@@ -44,7 +44,7 @@
         justification: 'Iașul are 3,3 mp spațiu verde/locuitor față de standardul OMS de 9 mp. Cartierele socialiste (Nicolina, Dacia, Canta) au rată ridicată de impermeabilizare și caracter monofuncțional. Superbloc-ul demonstrează transformarea fără demolare sau exproprieri.',
         costEstimate: (Math.round(eliberat * 150 / 1000000 * 10) / 10) + ' M€ – ' + (Math.round(eliberat * 250 / 1000000 * 10) / 10) + ' M€ (150–250 €/mp, finanțare POR 2021–2027)',
         timeline: 'Termen scurt (2026–2028): studiu trafic + PUZ; Termen mediu (2028–2030): execuție',
-        legalBasis: 'Legea 350/2001 Art. 5; HG 874/2019 — PMUD; Regulamentul UE 2021/1060',
+        legalBasis: 'Legea 169/2026 (CATUC) Art. 5; HG 874/2019 — PMUD; Regulamentul UE 2021/1060',
         indicators: [
           'mp spațiu verde/locuitor în zonă: 3,3 → ' + (3.3 + verde / (pop * 10)).toFixed(1) + ' mp/loc',
           'Transfer modal pietonal/ciclistic: ~28% → 36% în zona superbloc',

@@ -2199,7 +2199,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=body('Documentul de fata a fost elaborat cu respectarea urmatoarelor acte normative in vigoare (selectie relevanta pentru proiect):',14,cy);cy+=3;
   const _normGroups=[
     {title:'URBANISM SI AUTORIZARE',items:[
-      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul — republicata si actualizata.',
+      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul.',
       'Legea 169/2026 (CATUC) — autorizarea executarii lucrarilor de constructii.',
       'HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.',
       'PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism (RLU).',
@@ -3444,7 +3444,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   cy=sec('4. CONCLUZII SI NECESITATEA PUZ',cy);cy+=2;
   cy=body('Analiza de densitate pentru parcela '+nrcad+' (UTR '+utr+', '+area+' mp) indica ca parametrii propusi — POT '+potProp+'%, CUT '+cutProp+', H='+aedisH.toFixed(1)+'m, '+fnLabel+' — '+(potProp<=parseFloat(params?.pot||50)&&cutProp<=parseFloat(params?.cut||3)?'se incadreaza in limitele PUG, nu necesita PUZ.':'depasesc parametrii PUG, necesita elaborarea unui PUZ sau PUD conform Legea 169/2026 (CATUC).')+' Functiunea propusa este '+(fnSorted[0]&&(fnSorted[0][0]==='yes'||fnSorted[0][0]==='residential'||fnSorted[0][0]==='apartments')?'compatibila':'partial compatibila')+' cu caracterul predominant al zonei.',14,cy);cy+=4;
   cy=sec('5. BAZA LEGALA',cy);cy+=2;
-  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul (republicata 2022).','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) pentru aprobarea Normelor metodologice de aplicare a Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) — continutul-cadru al documentatiilor (Anexele 2-5).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
     cy+=3;
@@ -3537,7 +3537,7 @@ const caps = await _captureStudyMapsSafe(ap, msg=>ss(msg));
   ].forEach(r=>cy=tblRow(r,cy,false,[70,38,38,36]));
   cy+=4;
   cy=sec('10.1. BAZA LEGALA',cy);cy+=2;
-  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul, republicata 2022.','HG nr. 525/1996 Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) Norme metodologice de aplicare a Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.','SR EN 1990:2004 Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul.','HG nr. 525/1996 Regulamentul General de Urbanism, cu modificarile ulterioare.','Legea 169/2026 (CATUC) — continutul-cadru al documentatiilor (Anexele 2-5).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii.','SR EN 1990:2004 Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
 
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('CASETA TEHNICA SI SEMNATURA',10);ftr();
   cy=28;sign();
@@ -3671,7 +3671,7 @@ async function generateMemoriu(){
   cy=28;cy=sec('7. CONCLUZII',cy);cy+=2;
   cy=body('Prezentul memoriu tehnic urbanistic preliminar a fost generat automat de platforma UrbanX pentru parcela '+nrcad+' (UTR '+utr+', Municipiul Iasi). Propunerea volumetrica analizata prevede o constructie cu '+niv+' niveluri (H='+aedisH.toFixed(1)+'m, '+fnLabel+') ce se incadreaza in reglementarile PUG Iasi pentru UTR '+utr+' cu POT='+params?.pot+'%, CUT='+params?.cut+', H max='+( params?.h||'nespecificat')+'. Indicatorii urbanistici calculati respecta valorile maxime admise. Se recomanda consultarea unui arhitect autorizat OAR si elaborarea documentatiei complete conform Legea 169/2026 (CATUC).',14,cy);cy+=5;
   cy=sec('8. BAZA LEGALA',cy);cy+=2;
-  ['Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii.','Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul (republicata).','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Legea 169/2026 (CATUC) — Norme metodologice Legea 169/2026 (CATUC).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii.','Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul.','HG nr. 525/1996 — Regulamentul General de Urbanism.','Ordinul MLPAT nr. 91/1991 n — Formular si continut documentatii pentru autorizatii.','Legea 169/2026 (CATUC) — Anexele 2-5 (continutul-cadru al documentatiilor).','PUG '+getUATLabel()+' in vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.','Legea nr. 10/1995 republicata — Calitatea in constructii.','SR EN 1990:2004 — Eurocod 0: Baze de proiectare a structurilor.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   cy+=4;cy=body('NOTA: Prezentul memoriu tehnic preliminar a fost generat automat de platforma UrbanX pe baza datelor cadastrale disponibile si a parametrilor introdusi de utilizator. Documentul are caracter strict ORIENTATIV si INFORMATIV. Nu inlocuieste documentatia tehnica avizata conform legii si nu constituie un Certificat de Urbanism, aviz sau autorizatie de constructie.',14,cy);
   // Harta orasului inainte de concluzii
   if(caps.imgCity&&caps.imgCity.length>500){
@@ -5848,7 +5848,7 @@ async function generateEnvironmentalImpact(){
     'P100-1/2022 — Cod de proiectare seismică. Zona seismică '+seism.zona+', ag='+seism.ag+'g.',
     'HG nr. 188/2002 modificat prin HG nr. 352/2005 — Norme privind condițiile de descărcare a apelor uzate.',
     'STAS 12574-87 — Aer în zone protejate. Condiții de calitate.',
-    'Legea 169/2026 (CATUC) republicată — Amenajarea teritoriului și urbanismul. PUG '+uat+' în vigoare.',
+    'Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul. PUG '+uat+' în vigoare.',
     'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții. Art. 7 — studii obligatorii AC.',
   ],14,cy);cy+=3;
 
@@ -6331,7 +6331,7 @@ async function generateIstoricStudy(){
   cy=28;
   if(caps.imgCity){cy=addImg(caps.imgCity,14,cy,W-28,50,'FIG. N — Harta '+S2(uat)+' · Zone protejate si monumente istorice identificate');cy+=4;}
   cy=sec('6. BAZA LEGALA',cy);cy+=2;
-  ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MC nr. 2828/2015 (completat prin Ord. 5095/2021) — Lista Monumentelor Istorice.','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea 169/2026 (CATUC) republicată — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea nr. 422/2001 republicată — Protejarea monumentelor istorice.','Ordinul MC nr. 2828/2015 (completat prin Ord. 5095/2021) — Lista Monumentelor Istorice.','Ordinul MCID nr. 2682/2003 — Metodologia de elaborare a documentatiilor de avizare.','HG nr. 593/2011 — Regulamentul de organizare și funcționare a Comisiei Naționale a Monumentelor.','Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul (PUZ zone protejate).','Carta de la Veneția (1964) + Carta de la Cracovia (2000) — Principii internaționale restaurare.','PUG Municipiul Iași — Regulament UTR '+utr+' — Restricții zone de protecție monumente.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
 
   // PAG 7: Regim juridic zone protejate + avize
   pdf.addPage();pdf.setFillColor(...LIGHT);pdf.rect(0,0,W,H,'F');hdr('REGIMUL JURIDIC ZONE PROTEJATE - AVIZE OBLIGATORII DJCPN',7);ftr();
@@ -7897,7 +7897,7 @@ async function generateStudiuFezabilitate(paramOverrides){
   ].forEach(r=>cy=tblRow(r,cy,false,[70,80,32]));
 
   cy=sec('12.1. BAZA LEGALA COMPLETA',cy);cy+=2;
-  ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul, republicată.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
+  ['HG nr. 907/2016 privind etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.','Legea nr. 500/2002 privind finanțele publice — Capitolul privind investițiile publice.','Legea nr. 98/2016 privind achizițiile publice — art. 22 (studii de fezabilitate).','OUG nr. 114/2011 privind atribuirea anumitor contracte de achiziții publice în domeniile apărare și securitate.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul.','NP 074/2014 — Normativ privind principiile, exigențele și metodele cercetării geotehnice.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri (zona '+getSeismConfig().zona+').','Legea nr. 10/1995 republicată — Calitatea în construcții.','PUG '+uat+' în vigoare — UTR '+utr+' — Regulamentul Local de Urbanism.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=2;});
   sign();
   // Capitol statistici INSE (#27) — înainte de salvare
   let inseY = 14;
@@ -8672,7 +8672,7 @@ async function generateStudiuAmplasament(){
   ].forEach(r=>cy=tblRow(r,cy,false,[60,60,62]));
   cy+=4;
   cy=sec('11.1. BAZA LEGALA',cy);cy+=2;
-  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul, republicată.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
+  ['Legea 169/2026 (CATUC) privind amenajarea teritoriului și urbanismul.','Legea 169/2026 (CATUC) — autorizarea executării lucrărilor de construcții.','HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificările ulterioare.','Legea nr. 422/2001 privind protejarea monumentelor istorice, republicată.','P100-1/2022 — Cod de proiectare seismică. Prevederi pentru clădiri.','CR 1-1-4/2012 — Cod de proiectare. Acțiunea vântului.','OMS nr. 119/2014 + Ord. 994/2018 — Norme igienă și însorire.','NP 074/2014 — Normativ privind cercetarea geotehnică.','HG 930/2016 — Avizare construcții în zone aeronautice.','PUG '+uat+' în vigoare — UTR '+utr+' — RLU.'].forEach(l=>{cy=body('• '+l,16,cy);cy+=1;});
   sign();
   // Hartă conexiuni rapoarte (#26 audit) — înainte de semnături
   await _addHartaConexiuniPage(pdf,W,H,S2,hdr,ftr,'amplasament',nrcad);
@@ -9063,8 +9063,8 @@ async function runExport(){
   cy=sec('7. BAZA LEGALA',cy);cy+=2;
   pdf.setTextColor(40,55,80);pdf.setFontSize(7.5);pdf.setFont('DejaVuRO','normal');
   const legalTexts=[
-    'Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul (republicata 2022)',
-    'Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii (republicata)',
+    'Legea 169/2026 (CATUC) — Amenajarea teritoriului si urbanismul',
+    'Legea 169/2026 (CATUC) — Autorizarea executarii lucrarilor de constructii',
     'HG nr. 525/1996 — Regulamentul General de Urbanism · NP 051/2012 — Parcaje',
     'OMS nr. 119/2014 + Ord. 994/2018 — Norme igiena si conditii de insorire',
     'PUG '+S2(uat)+' in vigoare · RLU UTR '+utr+' · Legea nr. 10/1995 — Calitatea constructiilor',
@@ -11223,7 +11223,7 @@ async function generateProiectieUrbanistica() {
   cy=sec('11. BAZA LEGALA — PROIECTIE URBANISTICA', cy); cy+=2;
   const normProiectie=[
     {title:'PLANIFICARE SI AMENAJAREA TERITORIULUI',items:[
-      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul — republicata. Art. 46: PUG obligatoriu 10 ani.',
+      'Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul. Art. 46: PUG obligatoriu 10 ani.',
       'HG nr. 525/1996 — Regulamentul General de Urbanism, cu modificarile ulterioare.',
       'Legea nr. 190/2009 — Strategia de Dezvoltare Teritoriala a Romaniei (SDTR).',
     ]},

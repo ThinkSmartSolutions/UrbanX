@@ -568,7 +568,7 @@ async function generateREPA(){
   cy=tblRow(['Act normativ','Titlu prescurtat','Rol'],cy,true,[35,120,W-28-35-120]);
   [['Legea 169/2026 (CATUC)','Autorizarea executării lucrărilor de construcții','Cadru general AC'],
    ['HG 907/2016','Conținut-cadru documentații tehnico-economice','DTAC + PT'],
-   ['Legea 169/2026 (CATUC)','Instrucțiuni tehnice de aplicare Legea 169/2026 (CATUC)','Procedura avize'],
+   ['Legea 169/2026 (CATUC)','Anexele 2-5 — conținutul-cadru al documentațiilor și procedura de avizare','Procedura avize'],
    ['Legea 184/2001','Exercitarea profesiei de arhitect','Drept de semnătură'],
    ['Legea 10/1995','Calitatea în construcții','Cerințe + recepție'],
    ['HG 273/1994','Regulament recepție lucrări','Recepție + punere în funcțiune'],

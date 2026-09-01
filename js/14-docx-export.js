@@ -568,7 +568,7 @@ async function generateFezabilitateDocx(userParams={}){
     html += _wBullets([
       'HG nr. 907/2016 — Etapele de elaborare și conținutul-cadru al documentațiilor tehnico-economice.',
       'Legea 169/2026 (CATUC) — Autorizarea executării lucrărilor de construcții.',
-      'Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul, republicată.',
+      'Legea 169/2026 (CATUC) — Amenajarea teritoriului și urbanismul.',
       'NP 074/2014 — Normativ privind cercetarea geotehnică.',
       'P100-1/2013 — Cod de proiectare seismică. Zona '+seismCfg.zona+' (ag='+seismCfg.ag+'g).',
       'NP 051/2012 rev. — Normativ privind parcajele și adaptarea la necesitățile PMR.',

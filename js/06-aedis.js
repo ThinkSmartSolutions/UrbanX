@@ -3980,10 +3980,10 @@ async function runExport(){
     hdr('TEMEI LEGAL SI NOTE METODOLOGICE',8);cy=30;
     cy=sec('16. BAZA LEGALA',cy);cy+=3;
     ['Legea 169/2026 (CATUC) privind amenajarea teritoriului si urbanismul (cu modificarile ulterioare)',
-     'Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii (republicata)',
+     'Legea 169/2026 (CATUC) privind autorizarea executarii lucrarilor de constructii',
      'Legea nr. 10/1995 privind calitatea in constructii (republicata)',
      'HG nr. 525/1996 pentru aprobarea Regulamentului General de Urbanism (RGU)',
-     'Legea 169/2026 (CATUC) pentru aprobarea Normelor metodologice PUZ/PUD',
+     'Legea 169/2026 (CATUC) — continutul-cadru al documentatiilor (Anexele 2-5)',
      'PUG Municipiul Iasi — in vigoare (aprobat prin HCL Iasi)',
      'RLU — Regulamentul Local de Urbanism aferent PUG Iasi',
      'Legea nr. 7/1996 a cadastrului si publicitatii imobiliare (republicata)',

@@ -37,7 +37,7 @@
         justification: 'Cartierele monofuncționale (dormitor) generează navetă internă excesivă și izolare. Proximitatea serviciilor crește echitatea (acces pentru vârstnici, copii, persoane fără mașină) și vitalitatea economică locală.',
         costEstimate: (Math.round(servicii_lipsa * 0.4 * 10) / 10) + ' M€ – ' + (Math.round(servicii_lipsa * 0.8 * 10) / 10) + ' M€ (dotări de cartier + amenajări pietonale, POR 2021–2027)',
         timeline: 'Termen scurt (2026–2028): cartare deficit + activare parteruri; mediu (2028–2031): dotări publice noi',
-        legalBasis: 'Legea 350/2001; HG 525/1996 (dotări urbanistice); HG 874/2019 — PMUD',
+        legalBasis: 'Legea 169/2026 (CATUC); HG 525/1996 (dotări urbanistice); HG 874/2019 — PMUD',
         indicators: ['Acces 15 min la 6 funcțiuni: baseline → ' + acoperire + '%', 'Deplasări auto < 3 km: −' + auto_redus + '%', 'Servicii de proximitate noi: ' + servicii_lipsa, 'Emisii evitate: ' + co2 + ' t CO₂/an']
       },
       masterplanSection: {
@@ -83,7 +83,7 @@
         justification: 'Dezvoltarea imobiliară necorelată cu transportul generează dependență de automobil și congestie. Concentrarea densității lângă stații valorifică investiția publică în transport și reduce costul infrastructurii pe locuință.',
         costEstimate: 'investiție privată majoritară; componenta publică (spațiu public + stație) ' + (Math.round(arie_ha * 0.15 * 10) / 10) + ' M€ – ' + (Math.round(arie_ha * 0.3 * 10) / 10) + ' M€',
         timeline: 'Termen mediu (2027–2032): PUZ de densificare + execuție etapizată corelată cu darea în folosință a stației',
-        legalBasis: 'Legea 350/2001 (PUZ); HG 874/2019 — PMUD; politica de coeziune UE 2021/1060',
+        legalBasis: 'Legea 169/2026 (CATUC) (PUZ); HG 874/2019 — PMUD; politica de coeziune UE 2021/1060',
         indicators: ['Locuințe în 800 m de stație: ' + roN(locuinte), 'Transfer modal spre transport public: ' + transfer + '%', 'Necesar parcări: −' + parcari_redus + '%', 'Emisii evitate: ' + co2 + ' t CO₂/an']
       },
       masterplanSection: {
@@ -129,7 +129,7 @@
         justification: 'Bulevardele tratate exclusiv ca artere de tranzit „rup" orașul și sufocă comerțul stradal. Reconfigurarea ca stradă mixtă crește valoarea imobiliară, ocuparea parterurilor și siguranța rutieră.',
         costEstimate: (Math.round(arie_mp * 120 / 1000000 * 10) / 10) + ' M€ – ' + (Math.round(arie_mp * 200 / 1000000 * 10) / 10) + ' M€ (reamenajare profil stradal, 120–200 €/mp)',
         timeline: 'Termen mediu (2027–2031): PUZ coridor + execuție pe tronsoane',
-        legalBasis: 'Legea 350/2001; HG 874/2019 — PMUD; norme tehnice profil stradal',
+        legalBasis: 'Legea 169/2026 (CATUC); HG 874/2019 — PMUD; norme tehnice profil stradal',
         indicators: ['Front comercial activ: ' + roN(fronturi) + ' m (' + fronturi_active_pct + '%)', 'Spații comerciale/servicii: ' + spatii, 'Locuri de muncă locale: ' + roN(locuri_munca), 'Reducere viteză tranzit: −' + trafic_redus + '%']
       },
       masterplanSection: {
@@ -175,7 +175,7 @@
         justification: 'Impermeabilizarea excesivă a orașelor produce inundații pluviale la ploi torențiale (tot mai frecvente) și insule de căldură. Soluțiile bazate pe natură sunt mai ieftine și mai reziliente decât extinderea canalizării.',
         costEstimate: (Math.round(permeabil_nou * 60 / 1000000 * 10) / 10) + ' M€ – ' + (Math.round(permeabil_nou * 120 / 1000000 * 10) / 10) + ' M€ (infrastructură verde-albastră, 60–120 €/mp)',
         timeline: 'Termen mediu (2027–2032): proiectare + execuție etapizată pe bazine de risc',
-        legalBasis: 'OUG 195/2005 (mediu); Legea 350/2001; HG privind gospodărirea apelor; Directiva UE 2007/60 inundații',
+        legalBasis: 'OUG 195/2005 (mediu); Legea 169/2026 (CATUC); HG privind gospodărirea apelor; Directiva UE 2007/60 inundații',
         indicators: ['Permeabilitate: ' + (100 - impermeabil_actual_pct) + '% → ' + tinta_permeabil_pct + '%', 'Apă reținută: ~' + roN(apa_retinuta) + ' mc/eveniment', 'Reducere risc inundație pluvială: −' + risc_redus + '%', 'Verde nou: ' + roN(verde) + ' mp; răcire −' + racire.toFixed(1) + '°C']
       },
       masterplanSection: {
@@ -271,7 +271,7 @@
         justification: 'Spațiul public accesibil tuturor este un determinant al sănătății, coeziunii și democrației urbane (UN-Habitat). Indicatorul SDG 11.7.1 este măsurabil din date OSM + populație și permite monitorizarea echității.',
         costEstimate: (Math.round((deficit_oms * pop_zona / 10000) * 80 / 1000 * 10) / 10) + ' M€ – ' + (Math.round((deficit_oms * pop_zona / 10000) * 150 / 1000 * 10) / 10) + ' M€ (amenajare spații publice, 80–150 €/mp)',
         timeline: 'Termen scurt-mediu (2026–2031): deschidere + amenajare spații publice pe zone deficitare',
-        legalBasis: 'Agenda 2030 ONU (SDG 11.7); Legea 350/2001; Legea 24/2007; Noua Cartă de la Leipzig',
+        legalBasis: 'Agenda 2030 ONU (SDG 11.7); Legea 169/2026 (CATUC); Legea 24/2007; Noua Cartă de la Leipzig',
         indicators: ['Spațiu public / construit: ' + share + '%', 'Spațiu public/loc: ' + mp_loc + ' mp', 'Acces < 400m: ' + acces_400m_pct + '%', 'Locuitori fără acces: ' + roN(pop_fara_acces)]
       },
       masterplanSection: {
@@ -320,7 +320,7 @@
         justification: 'Pietonabilitatea ridicată corelează cu sănătate publică mai bună, comerț local mai viu, valori imobiliare mai mari și emisii mai reduse. Walk Score este comparabil între orașe și ușor de monitorizat din date OSM.',
         costEstimate: 'variabil (amenajări pietonale + activare parteruri); componenta publică modestă, impact ridicat',
         timeline: 'Termen scurt (2026–2028): trasee pietonale + activare servicii de proximitate',
-        legalBasis: 'Legea 350/2001; HG 874/2019 — PMUD; norme accesibilitate pietonală',
+        legalBasis: 'Legea 169/2026 (CATUC); HG 874/2019 — PMUD; norme accesibilitate pietonală',
         indicators: ['Walk Score: ' + scor + '/100 (' + categorie + ')', 'Amenități pe jos: ' + amenitati, 'Densitate intersecții: ' + intersectii_km2 + '/km²', 'Reducere auto: −' + auto_redus + '%']
       },
       masterplanSection: {
@@ -368,7 +368,7 @@
         justification: 'Verdele perceput la nivelul străzii influențează direct sănătatea mintală, confortul și mersul pe jos (studii GVI globale). Este măsurabil din street-view și permite prioritizarea plantărilor pe coridoarele cele mai „goale".',
         costEstimate: (Math.round(arbori_de_plantat * 0.0006 * 10) / 10) + ' M€ – ' + (Math.round(arbori_de_plantat * 0.0012 * 10) / 10) + ' M€ (aliniamente + verde vertical)',
         timeline: 'Termen scurt-mediu (2026–2031): plantări pe coridoarele cu GVI scăzut',
-        legalBasis: 'Legea 24/2007 (spații verzi); Legea 350/2001; OUG 195/2005',
+        legalBasis: 'Legea 24/2007 (spații verzi); Legea 169/2026 (CATUC); OUG 195/2005',
         indicators: ['GVI: ' + gvi_actual_pct + '% → țintă 25%', 'Arbori de aliniament: +' + roN(arbori_de_plantat), 'Străzi tratate: ' + strazi_km + ' km', 'Răcire: −' + racire.toFixed(1) + '°C']
       },
       masterplanSection: {
@@ -416,7 +416,7 @@
         justification: 'Configurarea rețelei (nu doar densitatea) determină unde apare mișcarea pietonală și viața urbană. Space Syntax oferă o bază obiectivă pentru a localiza centrele de activitate și a evita „insulele" izolate.',
         costEstimate: 'analitic (studiu de rețea); intervențiile de conectare variază — pasaje, deschideri de stradă',
         timeline: 'Termen mediu: studiu axial + intervenții de conectare pe etape',
-        legalBasis: 'Legea 350/2001 (PUG/PUZ); norme tehnice rețea stradală',
+        legalBasis: 'Legea 169/2026 (CATUC) (PUG/PUZ); norme tehnice rețea stradală',
         indicators: ['Integrare normalizată: ' + integrare100 + '/100', 'Nucleu de integrare: ' + core_pct + '%', 'Potențial mișcare: ' + miscare + '/100', 'Conectivitate medie: ' + conectivitate_medie]
       },
       masterplanSection: {
@@ -560,7 +560,7 @@
         justification: 'Zonarea monofuncțională (dormitor / pol de birouri) generează navetă, congestie și spații moarte la anumite ore. Mixul funcțional este un predictor robust al mersului pe jos și al vitalității urbane.',
         costEstimate: 'reglementar + stimulente (conversie funcțiuni, parteruri active) — cost public redus',
         timeline: 'Termen mediu: reglementare funcțiuni mixte + conversii pilot',
-        legalBasis: 'Legea 350/2001 (PUG/PUZ — funcțiuni admise); ghiduri de zonificare mixtă',
+        legalBasis: 'Legea 169/2026 (CATUC) (PUG/PUZ — funcțiuni admise); ghiduri de zonificare mixtă',
         indicators: ['Indice mix (entropie): ' + entropie + '/100 (' + calitate + ')', 'Funcțiuni prezente: ' + prezente + '/4', 'Rezidențial/comerț/muncă/public: ' + rezid_pct + '/' + comert_pct + '/' + munca_pct + '/' + public_pct + '%']
       },
       masterplanSection: {

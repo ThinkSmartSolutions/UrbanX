@@ -404,7 +404,7 @@
     if (cb) _autoCbs.push(cb);
     if (_autoLoading) return; _autoLoading = true;
     try {
-      var s = document.createElement('script'); s.src = 'js/i18n-auto.js?v=20260628prof';
+      var s = document.createElement('script'); s.src = 'js/i18n-auto.js?v=20260901catuc';
       s.onload = function () { _autoLoaded = true; _autoLoading = false; var c = _autoCbs.slice(); _autoCbs = []; c.forEach(function (f) { try { f(); } catch (e) {} }); };
       s.onerror = function () { _autoLoading = false; var c = _autoCbs.slice(); _autoCbs = []; c.forEach(function (f) { try { f(); } catch (e) {} }); };
       document.head.appendChild(s);
