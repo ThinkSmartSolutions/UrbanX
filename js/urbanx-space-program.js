@@ -352,6 +352,9 @@
     platforma_gunoi: { label: 'Platformă gunoi acoperită (impermeabilă)', cat: 'Agrozootehnic', mp_min: 100, mp_rec: 600, dim: 'param', normativ: 'Cod bune practici agricole (Nitrați)' },
     bazin_dejectii: { label: 'Bazin dejecții etanș (4-6 luni)', cat: 'Agrozootehnic', mp_min: 100, mp_rec: 500, dim: 'param', normativ: 'Directiva 91/676 Nitrați' },
     filtru_sanitar_vet: { label: 'Filtru sanitar-veterinar (vestiar-duș-vestiar)', cat: 'Agrozootehnic', mp_min: 20, mp_rec: 40, normativ: 'ANSVSA biosecuritate' },
+    sera_productie: { label: 'Seră de producție (structură + tehnologie)', cat: 'Agrozootehnic', mp_min: 200, mp_rec: 5000, dim: 'param', normativ: 'SR EN 13031-1 (structuri sere comerciale)', genereaza: ['camera_tehnica_sera', 'depozit_ingrasaminte_sera'], inst: ['incalzire_sera', 'irigare_picurare', 'ventilatie_sera'] },
+    camera_tehnica_sera: { label: 'Cameră tehnică seră (cazan/schimbător căldură)', cat: 'Tehnic', mp_min: 12, mp_rec: 30, normativ: 'I13' },
+    depozit_ingrasaminte_sera: { label: 'Depozit îngrășăminte / substrat / ambalare', cat: 'Agrozootehnic', mp_min: 15, mp_rec: 50, normativ: 'Cod bune practici agricole' },
     // --- mezanin / subpantă (hală) ---
     mezanin_birouri: { label: 'Mezanin/subpantă birouri + vestiare', cat: 'Birouri', mp_min: 40, mp_rec: 200, dim: 'param', normativ: 'P118 (a 2-a cale evacuare) + Legea 319/2006' }
   };
@@ -514,25 +517,55 @@
     },
     'sport': {
       label: 'Sală sport / stadion / bazin', norma: 'NP 010 + NP 065-2002 + Ord. MTS',
-      params: [{ key: 'mp_sala', label: 'Suprafață sală joc (mp)', type: 'number', def: 1056 }, { key: 'spectatori', label: 'Nr. spectatori', type: 'number', def: 1500 }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 1 }],
+      params: [
+        { key: 'subtip', label: 'Tip instalație sportivă', type: 'select', def: 'sala', options: [['sala', 'Sală de sport (indoor)'], ['stadion', 'Stadion / arenă cu tribune'], ['bazin', 'Bazin de înot']] },
+        { key: 'mp_sala', label: 'Suprafață sală joc / bazin (mp)', type: 'number', def: 1056 },
+        { key: 'spectatori', label: 'Nr. spectatori', type: 'number', def: 1500 },
+        { key: 'niveluri', label: 'Niveluri', type: 'number', def: 1 }
+      ],
       baza: function (p) {
-        return [{ id: 'sala_sport', mp: p.mp_sala || 1056 }, { id: 'vestiar_sportivi', qty: 4 }, { id: 'vestiar_arbitri', qty: 2 }, { id: 'camera_materiale_sport' }, { id: 'gs_public', mp: Math.max(20, (p.spectatori || 1500) * 0.02) }, { id: 'punct_prim_ajutor' }, { id: 'centrala_termica' }];
+        var st = p.subtip || 'sala';
+        var s = [{ id: 'vestiar_sportivi', qty: 4 }, { id: 'vestiar_arbitri', qty: 2 }, { id: 'camera_materiale_sport' }, { id: 'gs_public', mp: Math.max(20, (p.spectatori || 1500) * 0.02) }, { id: 'punct_prim_ajutor' }, { id: 'centrala_termica' }];
+        if (st === 'bazin') s.unshift({ id: 'bazin_inot', mp: p.mp_sala || 1056 });
+        else s.unshift({ id: 'sala_sport', mp: p.mp_sala || 1056 });
+        return s;
       }
     },
     'agricol': {
-      label: 'Fermă / seră / siloz agricol', norma: 'Directiva 98/58/CE + ANSVSA + Nitrați 91/676',
-      params: [{ key: 'mp_adapost', label: 'Suprafață adăpost (mp)', type: 'number', def: 1500 }, { key: 'siloz', label: 'Cu siloz', type: 'bool', def: true }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 1 }],
+      label: 'Fermă / seră / siloz agricol', norma: 'Directiva 98/58/CE + ANSVSA + Nitrați 91/676 + SR EN 13031-1 (sere)',
+      params: [
+        { key: 'subtip', label: 'Tip exploatație agricolă', type: 'select', def: 'zootehnic', options: [['zootehnic', 'Fermă zootehnică'], ['sera', 'Seră legume/flori'], ['siloz', 'Depozitare cereale (siloz)']] },
+        { key: 'mp_adapost', label: 'Suprafață adăpost/seră (mp)', type: 'number', def: 1500 },
+        { key: 'siloz', label: 'Cu siloz suplimentar', type: 'bool', def: true },
+        { key: 'niveluri', label: 'Niveluri', type: 'number', def: 1 }
+      ],
       baza: function (p) {
-        var s = [{ id: 'hala_adapost', mp: p.mp_adapost || 1500 }, { id: 'filtru_sanitar_vet' }, { id: 'platforma_gunoi', mp: Math.max(100, (p.mp_adapost || 1500) * 0.2) }, { id: 'bazin_dejectii', mp: Math.max(100, (p.mp_adapost || 1500) * 0.15) }];
-        if (p.siloz) s.push({ id: 'siloz_celula', qty: 2 });
+        var st = p.subtip || 'zootehnic';
+        var s = [];
+        if (st === 'sera') s.push({ id: 'sera_productie', mp: p.mp_adapost || 1500 });
+        else if (st === 'siloz') s.push({ id: 'siloz_celula', qty: Math.max(2, Math.round((p.mp_adapost || 1500) / 300)) });
+        else s.push({ id: 'hala_adapost', mp: p.mp_adapost || 1500 }, { id: 'filtru_sanitar_vet' }, { id: 'platforma_gunoi', mp: Math.max(100, (p.mp_adapost || 1500) * 0.2) }, { id: 'bazin_dejectii', mp: Math.max(100, (p.mp_adapost || 1500) * 0.15) });
+        if (p.siloz && st !== 'siloz') s.push({ id: 'siloz_celula', qty: 2 });
         return s;
       }
     },
     'cladire-mixta': {
-      label: 'Clădire mixtă (comercial + rezidențial)', norma: 'P118 (separări) + Legea 114/1996',
-      params: [{ key: 'mp_comercial', label: 'Comercial parter (mp)', type: 'number', def: 600 }, { key: 'apartamente', label: 'Nr. apartamente', type: 'number', def: 29 }, { key: 'niveluri', label: 'Niveluri', type: 'number', def: 6 }],
+      label: 'Clădire mixtă (comercial + rezidențial / birouri)', norma: 'P118 (separări) + Legea 114/1996 + HG 1091/2006',
+      params: [
+        { key: 'subtip', label: 'Tip mix funcțional', type: 'select', def: 'comercial_rezidential', options: [['comercial_rezidential', 'Comercial (parter) + Rezidențial'], ['comercial_birouri', 'Comercial (parter) + Birouri'], ['birouri_rezidential', 'Birouri (parter) + Rezidențial']] },
+        { key: 'mp_comercial', label: 'Comercial/birouri parter (mp)', type: 'number', def: 600 },
+        { key: 'apartamente', label: 'Nr. apartamente', type: 'number', def: 29 },
+        { key: 'angajati', label: 'Nr. angajați (dacă are birouri)', type: 'number', def: 40 },
+        { key: 'niveluri', label: 'Niveluri', type: 'number', def: 6 }
+      ],
       baza: function (p) {
-        return [{ id: 'spatiu_vanzare', mp: p.mp_comercial || 600, niv: 'P' }, { id: 'apartament_2cam', qty: Math.round((p.apartamente || 29) * 0.5), niv: '1' }, { id: 'apartament_3cam', qty: Math.round((p.apartamente || 29) * 0.5), niv: '1' }, { id: 'casa_scarii' }, { id: 'centrala_termica' }, { id: 'nivel_parcare', mp: 600, niv: 'S' }, { id: 'gs_public', niv: 'P' }];
+        var st = p.subtip || 'comercial_rezidential';
+        var s = [{ id: 'casa_scarii' }, { id: 'centrala_termica' }, { id: 'nivel_parcare', mp: 600, niv: 'S' }, { id: 'gs_public', niv: 'P' }];
+        if (st === 'birouri_rezidential') s.push({ id: 'open_space_birou', mp: Math.max(60, (p.mp_comercial || 600)), niv: 'P' }, { id: 'sala_sedinte', niv: 'P' });
+        else s.push({ id: 'spatiu_vanzare', mp: p.mp_comercial || 600, niv: 'P' });
+        if (st === 'comercial_birouri') s.push({ id: 'open_space_birou', mp: Math.max(60, (p.angajati || 40) * 8), niv: '1' }, { id: 'sala_sedinte', niv: '1' });
+        else { s.push({ id: 'apartament_2cam', qty: Math.round((p.apartamente || 29) * 0.5), niv: '1' }, { id: 'apartament_3cam', qty: Math.round((p.apartamente || 29) * 0.5), niv: '1' }); }
+        return s;
       }
     },
     'parc-fotovoltaic': {
